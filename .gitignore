@@ -3,7 +3,8 @@ build/m7c/
 core.*
 *.o
 jnengine
-web/
+web/*
+!web/shell.html
 demo.omtc
 demo.omtc.tex
 camera.cam
