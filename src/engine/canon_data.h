@@ -18,7 +18,9 @@
 #define CANON_LIGHT_DIFF_B 1.000000f
 
 #define CANON_GROUND_TEXTURE "assets/png/mud.png"  /* canon ground asset null/synthetic -> fallback */
-#define CANON_GROUND_Y_SPAN 68118.319000f
+#define CANON_GROUND_Y_SPAN 68118.319000f      /* raw, outlier-inflated */
+#define CANON_GROUND_Y_SPAN_ROBUST 24208.660000f  /* 1.5*IQR core span */
+#define CANON_GROUND_TILE_YEXT 5786.111000f        /* median tile y-extent */
 #define CANON_GROUND_FOOTPRINT_X 33143.210000f
 #define CANON_GROUND_FOOTPRINT_Z 25003.090000f
 

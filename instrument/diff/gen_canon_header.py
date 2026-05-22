@@ -49,6 +49,33 @@ def main():
     lights = c.get("lights") or []
     ground_y_span = float(c.get("ground_y_span") or 0.0)
     fp = c.get("ground_footprint") or [0.0, 0.0]
+
+    # Robust topography amplitude: the span of ground-tile *center* heights with
+    # statistical outliers (1.5*IQR) removed. The raw ground_y_span is inflated
+    # by a few elevated pieces (rooftops/mesa) the flat-in-Y classify_ground
+    # heuristic counts as ground; the demo carries those as placement meshes,
+    # not as ground topography. Median per-tile y_extent is the ground's own
+    # local slope budget. Both are measured -- no hand-tuned constants.
+    tiles = c.get("ground_tiles") or []
+    centers = sorted(d["center"][1] for d in tiles) if tiles else []
+    yexts = sorted(d.get("y_extent", 0.0) for d in tiles) if tiles else []
+
+    def _pct(xs, p):
+        if not xs:
+            return 0.0
+        k = (len(xs) - 1) * p
+        f = int(k)
+        return xs[f] + (xs[min(f + 1, len(xs) - 1)] - xs[f]) * (k - f)
+
+    if centers:
+        q1, q3 = _pct(centers, 0.25), _pct(centers, 0.75)
+        iqr = q3 - q1
+        lo, hi = q1 - 1.5 * iqr, q3 + 1.5 * iqr
+        core = [y for y in centers if lo <= y <= hi]
+        robust_span = (core[-1] - core[0]) if core else 0.0
+    else:
+        robust_span = 0.0
+    tile_yext = _pct(yexts, 0.5) if yexts else 0.0
     g_name = c.get("ground_texture_asset")
     g_path, g_fallback = asset_path(g_name, GROUND_FALLBACK)
     w_name = c.get("water_texture_asset")
@@ -103,7 +130,9 @@ def main():
     A("")
     cmt = f"  /* canon ground asset null/synthetic -> fallback */" if g_fallback else ""
     A(f'#define CANON_GROUND_TEXTURE "{g_path}"{cmt}')
-    A(f"#define CANON_GROUND_Y_SPAN {ground_y_span:.6f}f")
+    A(f"#define CANON_GROUND_Y_SPAN {ground_y_span:.6f}f      /* raw, outlier-inflated */")
+    A(f"#define CANON_GROUND_Y_SPAN_ROBUST {robust_span:.6f}f  /* 1.5*IQR core span */")
+    A(f"#define CANON_GROUND_TILE_YEXT {tile_yext:.6f}f        /* median tile y-extent */")
     A(f"#define CANON_GROUND_FOOTPRINT_X {float(fp[0]):.6f}f")
     A(f"#define CANON_GROUND_FOOTPRINT_Z {float(fp[1]):.6f}f")
     A("")
