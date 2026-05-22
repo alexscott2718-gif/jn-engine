@@ -31,7 +31,9 @@ $(TARGET): $(OBJ)
 
 clean:
 	rm -f $(OBJ) $(TARGET)
-	rm -rf web
+	# Remove web build outputs only -- keep web/shell.html (tracked source),
+	# otherwise `make capture` (which runs clean) wipes the WASM shell.
+	rm -f web/jnengine.html web/jnengine.js web/jnengine.wasm web/jnengine.data
 
 # --- M6 instrumentation build ----------------------------------------------
 # `make capture` builds jnengine with the demo-side render-stream capture
