@@ -1,0 +1,41 @@
+; Export list for the omtc proxy ddraw.dll.
+;
+; This MUST mirror the real ddraw.dll's export table EXACTLY -- all 22 symbols
+; at their original ordinals (verified against Windows XP ddraw.dll, ordinal
+; base 1). d3dim700.dll and other DirectX runtime DLLs import ddraw internals
+; by name AND by ordinal; a missing export or a shifted ordinal makes those
+; DLLs fail to load and crashes the game.
+;
+; Ordinals 11 (DirectDrawCreateEx) and 12 (DirectDrawEnumerateA) are
+; implemented in ddraw_proxy.c -- listed plainly so the linker emits them
+; UNDECORATED. The other 20 are forwarders straight to ddraw_orig.dll (the
+; renamed real ddraw shipped alongside this proxy).
+;
+; NOTE: zig/lld prepends a stray "_" to forwarder targets on i386; build.sh
+; runs fix_forwarders.py afterwards to rewrite "_ddraw_orig" -> "ddraw_orig".
+
+LIBRARY ddraw.dll
+
+EXPORTS
+    AcquireDDThreadLock         = ddraw_orig.AcquireDDThreadLock         @1
+    CheckFullscreen             = ddraw_orig.CheckFullscreen             @2
+    CompleteCreateSysmemSurface = ddraw_orig.CompleteCreateSysmemSurface @3
+    D3DParseUnknownCommand      = ddraw_orig.D3DParseUnknownCommand      @4
+    DDGetAttachedSurfaceLcl     = ddraw_orig.DDGetAttachedSurfaceLcl     @5
+    DDInternalLock              = ddraw_orig.DDInternalLock              @6
+    DDInternalUnlock            = ddraw_orig.DDInternalUnlock            @7
+    DSoundHelp                  = ddraw_orig.DSoundHelp                  @8
+    DirectDrawCreate            = ddraw_orig.DirectDrawCreate            @9
+    DirectDrawCreateClipper     = ddraw_orig.DirectDrawCreateClipper     @10
+    DirectDrawCreateEx                                                  @11
+    DirectDrawEnumerateA                                                @12
+    DirectDrawEnumerateExA      = ddraw_orig.DirectDrawEnumerateExA      @13
+    DirectDrawEnumerateExW      = ddraw_orig.DirectDrawEnumerateExW      @14
+    DirectDrawEnumerateW        = ddraw_orig.DirectDrawEnumerateW        @15
+    DllCanUnloadNow             = ddraw_orig.DllCanUnloadNow             @16
+    DllGetClassObject           = ddraw_orig.DllGetClassObject           @17
+    GetDDSurfaceLocal           = ddraw_orig.GetDDSurfaceLocal           @18
+    GetOLEThunkData             = ddraw_orig.GetOLEThunkData             @19
+    GetSurfaceFromDC            = ddraw_orig.GetSurfaceFromDC            @20
+    RegisterSpecialCase         = ddraw_orig.RegisterSpecialCase         @21
+    ReleaseDDThreadLock         = ddraw_orig.ReleaseDDThreadLock         @22

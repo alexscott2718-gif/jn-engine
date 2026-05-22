@@ -1,0 +1,4 @@
+# OMT mesh placements emitted by tools/omt_mesh_export.py
+# format: <name>\t<ase_path>\t<center_x>\t<center_y>\t<center_z>
+# runtime translation = (center_x, 0, center_z); height is baked into the mesh
+lawnmower	assets/ase/omt/lawnmower.ASE	2.8521	24.5888	95.0115

@@ -1,0 +1,17 @@
+# OMT mesh placements emitted by tools/omt_mesh_export.py
+# format: <name>\t<ase_path>\t<center_x>\t<center_y>\t<center_z>
+# runtime translation = (center_x, 0, center_z); height is baked into the mesh
+moon	assets/ase/omt/moon.ASE	512.6582	14015.7646	72279.2344
+Plane07	assets/ase/omt/Plane07.ASE	4753.3369	12665.5645	6381.6982
+1	assets/ase/omt/1.ASE	-2986.8877	12972.5488	8684.7393
+2	assets/ase/omt/2.ASE	3939.8167	11875.3008	14796.8965
+3	assets/ase/omt/3.ASE	-2207.9023	11204.2559	22106.5996
+4	assets/ase/omt/4.ASE	4868.7490	12195.6758	29615.4668
+5	assets/ase/omt/5.ASE	4529.5020	12068.9619	58204.7188
+6	assets/ase/omt/6.ASE	-1869.7747	12038.8320	64331.2109
+7	assets/ase/omt/7.ASE	159.7140	13709.5488	-294.4374
+Object01	assets/ase/omt/Object01.ASE	3807.6995	15554.3535	37802.9688
+satelite	assets/ase/omt/satelite.ASE	655.9742	10567.6191	13689.0859
+Cylinder01	assets/ase/omt/Cylinder01.ASE	-2492.6311	12038.8320	50120.2734
+cast01	assets/ase/omt/cast01.ASE	4950.3364	12038.8320	43596.0391
+cast02	assets/ase/omt/cast02.ASE	-1936.1008	12038.8320	36430.5156

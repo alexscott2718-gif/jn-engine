@@ -1,0 +1,8 @@
+# OMT mesh placements emitted by tools/omt_mesh_export.py
+# format: <name>\t<ase_path>\t<center_x>\t<center_y>\t<center_z>
+# runtime translation = (center_x, 0, center_z); height is baked into the mesh
+BLOCK_HOODFAR	assets/ase/omt/BLOCK_HOODFAR.ASE	23.4929	-3504.0840	-1418.3550
+bridge	assets/ase/omt/bridge.ASE	-121.4504	2820.3467	-75.2991
+Box01	assets/ase/omt/Box01.ASE	-1169.6257	-3700.6526	-486.5654
+Plane01	assets/ase/omt/Plane01.ASE	1241.6973	-3700.6526	-486.5654
+Plane02	assets/ase/omt/Plane02.ASE	1.1713	260.8404	0.0668

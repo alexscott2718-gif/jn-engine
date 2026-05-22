@@ -1,0 +1,115 @@
+[texnames] Pillow not installed -- synthetic names only
+[serve] listening on 0.0.0.0:7070 -- waiting for proxy ...
+[serve] proxy connected from <XP_HOST>:1071
+[header] PID=3664, screen=640x480
+
+=== FRAME 0 ===
+Begin: seq=0, t_ms=32791750
+End:   seq=0, draws=6, dropped=0
+Transforms: 2 set
+  WORLD:
+    [1.0000, 0.0000, 0.0000, 0.0000]
+    [0.0000, 1.0000, 0.0000, 0.0000]
+    [0.0000, 0.0000, 1.0000, 0.0000]
+    [-320.5000, -240.5000, 0.0000, 1.0000]
+  PROJ:
+    [0.0031, 0.0000, 0.0000, 0.0000]
+    [0.0000, 0.0042, 0.0000, 0.0000]
+    [0.0000, 0.0000, 0.0003, 0.0000]
+    [-0.0000, -0.0000, -0.0000, 1.0000]
+RenderStates: 6
+    7: 0
+    9: 1
+   14: 0
+   22: 1
+   23: 2
+  139: 4281545523
+Textures (global): 6
+  0019c9c0: 256x256 fmt=32 tex_7dde3622_256x256
+  0019c9e0: 256x256 fmt=32 tex_0ed92c7f_256x256
+  03c804f0: 256x256 fmt=32 tex_3b48b574_256x256
+  03cc0008: 128x256 fmt=32 tex_26bf229a_128x256
+  03d001e8: 256x256 fmt=32 tex_d5cd26de_256x256
+  03dc0008: 128x256 fmt=32 tex_d73c1c06_128x256
+Texture bindings: {0: 0}
+Draw calls: 6
+  [0] prim_type=6, fvf=00000152, verts=4
+      v[0]: pos=(0.0000, 480.0000, 0.0000), normal=(0.0000, 0.0000, -1.0000), diffuse=ffffffff, uv=(0.0000, 0.0000)
+  [1] prim_type=6, fvf=00000152, verts=4
+      v[0]: pos=(256.0000, 480.0000, 0.0000), normal=(0.0000, 0.0000, -1.0000), diffuse=ffffffff, uv=(0.0000, 0.0000)
+  [2] prim_type=6, fvf=00000152, verts=4
+      v[0]: pos=(512.0000, 480.0000, 0.0000), normal=(0.0000, 0.0000, -1.0000), diffuse=ffffffff, uv=(0.0000, 0.0000)
+
+[frame 1] seq=0 draws=6 dropped=0 textures=6
+[frame 2] seq=1 draws=6 dropped=0 textures=6
+[frame 3] seq=2 draws=6 dropped=0 textures=6
+[frame 4] seq=3 draws=6 dropped=0 textures=6
+[frame 5] seq=4 draws=6 dropped=0 textures=6
+[frame 100] seq=99 draws=6 dropped=0 textures=6
+[frame 200] seq=199 draws=6 dropped=0 textures=6
+[frame 300] seq=299 draws=6 dropped=0 textures=6
+[frame 400] seq=399 draws=6 dropped=0 textures=6
+[frame 500] seq=499 draws=6 dropped=0 textures=6
+[frame 600] seq=599 draws=6 dropped=0 textures=6
+[frame 700] seq=699 draws=6 dropped=0 textures=6
+[frame 800] seq=799 draws=6 dropped=0 textures=6
+[frame 900] seq=899 draws=6 dropped=0 textures=6
+[frame 1000] seq=999 draws=6 dropped=0 textures=6
+[frame 1100] seq=1099 draws=6 dropped=0 textures=6
+[frame 1200] seq=1199 draws=6 dropped=0 textures=6
+[frame 1300] seq=1299 draws=6 dropped=0 textures=6
+[frame 1400] seq=1399 draws=6 dropped=0 textures=6
+[frame 1500] seq=1499 draws=6 dropped=0 textures=6
+[frame 1600] seq=1599 draws=6 dropped=0 textures=6
+[frame 1700] seq=1699 draws=6 dropped=0 textures=6
+[frame 1800] seq=1799 draws=6 dropped=0 textures=6
+[frame 1900] seq=1899 draws=6 dropped=0 textures=6
+[frame 2000] seq=1999 draws=6 dropped=0 textures=6
+[frame 2100] seq=2099 draws=6 dropped=0 textures=6
+[frame 2200] seq=2199 draws=6 dropped=0 textures=6
+[frame 2300] seq=2299 draws=6 dropped=0 textures=6
+[frame 2400] seq=2399 draws=6 dropped=0 textures=6
+[frame 2500] seq=2499 draws=6 dropped=0 textures=6
+[frame 2600] seq=2599 draws=6 dropped=0 textures=6
+[frame 2700] seq=2699 draws=6 dropped=0 textures=12
+[frame 2800] seq=2799 draws=6 dropped=0 textures=12
+[frame 2900] seq=2899 draws=6 dropped=0 textures=12
+[frame 3000] seq=2999 draws=6 dropped=0 textures=12
+[frame 3100] seq=3099 draws=6 dropped=0 textures=12
+[frame 3200] seq=3199 draws=6 dropped=0 textures=12
+[frame 3300] seq=3299 draws=6 dropped=0 textures=12
+[frame 3400] seq=3399 draws=6 dropped=0 textures=12
+[frame 3500] seq=3499 draws=6 dropped=0 textures=12
+[frame 3600] seq=3599 draws=6 dropped=0 textures=12
+[frame 3700] seq=3699 draws=6 dropped=0 textures=12
+[frame 3800] seq=3799 draws=6 dropped=0 textures=12
+[frame 3900] seq=3899 draws=6 dropped=0 textures=12
+[frame 4000] seq=3999 draws=6 dropped=0 textures=12
+[frame 4100] seq=4099 draws=6 dropped=0 textures=12
+[frame 4200] seq=4199 draws=6 dropped=0 textures=12
+[frame 4300] seq=4299 draws=6 dropped=0 textures=12
+[frame 4400] seq=4399 draws=6 dropped=0 textures=12
+[frame 4500] seq=4499 draws=6 dropped=0 textures=12
+[frame 4600] seq=4599 draws=6 dropped=0 textures=12
+[frame 4700] seq=4699 draws=6 dropped=0 textures=12
+[frame 4800] seq=4799 draws=6 dropped=0 textures=12
+[frame 4900] seq=4899 draws=6 dropped=0 textures=12
+[frame 5000] seq=4999 draws=6 dropped=0 textures=12
+[frame 5100] seq=5099 draws=6 dropped=0 textures=12
+[frame 5200] seq=5199 draws=6 dropped=0 textures=12
+[frame 5300] seq=5299 draws=6 dropped=0 textures=12
+[frame 5400] seq=5399 draws=6 dropped=0 textures=12
+[frame 5500] seq=5499 draws=6 dropped=0 textures=15
+[frame 5600] seq=5647 draws=3505 dropped=48 textures=38
+[frame 5700] seq=6005 draws=2563 dropped=306 textures=159
+[frame 5800] seq=6948 draws=3287 dropped=1149 textures=173
+[frame 5900] seq=9719 draws=3114 dropped=3820 textures=195
+[frame 6000] seq=9819 draws=2289 dropped=3820 textures=195
+[frame 6100] seq=11446 draws=3544 dropped=5347 textures=252
+[frame 6200] seq=13025 draws=4136 dropped=6826 textures=256
+[frame 6300] seq=15718 draws=3809 dropped=9419 textures=256
+[frame 6400] seq=17373 draws=4007 dropped=10974 textures=256
+[frame 6500] seq=18219 draws=3390 dropped=11720 textures=256
+[frame 6600] seq=21027 draws=1683 dropped=14428 textures=256
+[frame 6700] seq=21881 draws=2797 dropped=15182 textures=256
+[frame 6800] seq=24634 draws=4924 dropped=17835 textures=256

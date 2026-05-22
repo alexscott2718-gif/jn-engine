@@ -1,0 +1,33 @@
+# OMT mesh placements emitted by tools/omt_mesh_export.py
+# format: <name>\t<ase_path>\t<center_x>\t<center_y>\t<center_z>
+# runtime translation = (center_x, 0, center_z); height is baked into the mesh
+map01	assets/ase/omt/map01.ASE	4785.0840	1159.9846	-2305.8589
+Cylinder04	assets/ase/omt/Cylinder04.ASE	5130.6094	486.8716	-3302.5889
+Cylinder06	assets/ase/omt/Cylinder06.ASE	4835.1758	486.8716	-3302.5889
+Cylinder07	assets/ase/omt/Cylinder07.ASE	10366.3018	269.6381	-7405.6392
+TRAIN02	assets/ase/omt/TRAIN02.ASE	10685.3789	271.9214	-5796.1953
+Train	assets/ase/omt/Train.ASE	9678.4570	805.2452	2278.1436
+EXIT	assets/ase/omt/EXIT.ASE	9849.7256	271.9214	-8981.4756
+Train01	assets/ase/omt/Train01.ASE	4765.0176	-110.2905	-2253.0420
+Cylinder08	assets/ase/omt/Cylinder08.ASE	5196.5713	-627.7871	-2253.0420
+Cylinder09	assets/ase/omt/Cylinder09.ASE	9300.3203	304.6346	2152.8633
+vending m	assets/ase/omt/vending m.ASE	9181.0059	715.3778	739.1802
+Plane01	assets/ase/omt/Plane01.ASE	8286.7500	1643.7871	-4672.0835
+Box01	assets/ase/omt/Box01.ASE	4782.3618	1268.3894	-2276.7197
+Plane02	assets/ase/omt/Plane02.ASE	6067.7217	-1050.1700	-2268.8660
+Plane03	assets/ase/omt/Plane03.ASE	6105.6299	23.2747	-3443.9407
+Plane04	assets/ase/omt/Plane04.ASE	4066.6816	-15.3319	-2851.5554
+Box02	assets/ase/omt/Box02.ASE	10353.5391	1096.7383	1259.2277
+station	assets/ase/omt/station.ASE	9422.3242	31.0352	-2934.5630
+sewersentrance	assets/ase/omt/sewersentrance.ASE	9972.6953	457.4928	-3767.6655
+Object01	assets/ase/omt/Object01.ASE	9835.0820	107.8689	-1032.7676
+Box03	assets/ase/omt/Box03.ASE	10184.9082	424.9640	-2079.5659
+Cylinder01	assets/ase/omt/Cylinder01.ASE	10045.8652	304.6346	2152.8633
+flurpmachine	assets/ase/omt/flurpmachine.ASE	9986.3691	355.8121	-1122.4331
+Box04	assets/ase/omt/Box04.ASE	10026.1631	393.2344	-3741.6016
+Box05	assets/ase/omt/Box05.ASE	10584.5156	1007.4159	-2252.1084
+Box08	assets/ase/omt/Box08.ASE	10858.0273	169.5202	2430.0129
+barrier	assets/ase/omt/barrier.ASE	7630.6445	499.0368	-12880.6934
+Plane05	assets/ase/omt/Plane05.ASE	6354.7808	2.3457	-14169.0957
+Object02	assets/ase/omt/Object02.ASE	7426.3594	716.9736	-13068.0020
+Cylinder10	assets/ase/omt/Cylinder10.ASE	11531.3008	400.3246	-894.9809

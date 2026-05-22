@@ -1,0 +1,18 @@
+{
+  "omt": "assets/omt/jeep.omt",
+  "mesh_count": 1,
+  "mat_count": 1,
+  "meshes": [
+    {
+      "name": "lawnmower",
+      "id": 2,
+      "verts": 127,
+      "faces": 214,
+      "bitmap": "",
+      "file": "assets/ase/omt/lawnmower.ASE",
+      "world_x": 2.852100372314453,
+      "world_y": 24.588848114013672,
+      "world_z": 95.01150512695312
+    }
+  ]
+}

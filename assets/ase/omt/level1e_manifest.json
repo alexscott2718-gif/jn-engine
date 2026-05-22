@@ -1,0 +1,62 @@
+{
+  "omt": "assets/omt/level1e.omt",
+  "mesh_count": 5,
+  "mat_count": 16,
+  "meshes": [
+    {
+      "name": "BLOCK_HOODFAR",
+      "id": 1,
+      "verts": 206,
+      "faces": 319,
+      "bitmap": "",
+      "file": "assets/ase/omt/BLOCK_HOODFAR.ASE",
+      "world_x": 23.492919921875,
+      "world_y": -3504.083984375,
+      "world_z": -1418.35498046875
+    },
+    {
+      "name": "bridge",
+      "id": 2,
+      "verts": 13,
+      "faces": 22,
+      "bitmap": "",
+      "file": "assets/ase/omt/bridge.ASE",
+      "world_x": -121.45039367675781,
+      "world_y": 2820.3466796875,
+      "world_z": -75.29913330078125
+    },
+    {
+      "name": "Box01",
+      "id": 3,
+      "verts": 4,
+      "faces": 2,
+      "bitmap": "",
+      "file": "assets/ase/omt/Box01.ASE",
+      "world_x": -1169.625732421875,
+      "world_y": -3700.652587890625,
+      "world_z": -486.5653991699219
+    },
+    {
+      "name": "Plane01",
+      "id": 4,
+      "verts": 4,
+      "faces": 2,
+      "bitmap": "",
+      "file": "assets/ase/omt/Plane01.ASE",
+      "world_x": 1241.697265625,
+      "world_y": -3700.652587890625,
+      "world_z": -486.5653991699219
+    },
+    {
+      "name": "Plane02",
+      "id": 5,
+      "verts": 12,
+      "faces": 14,
+      "bitmap": "",
+      "file": "assets/ase/omt/Plane02.ASE",
+      "world_x": 1.171295166015625,
+      "world_y": 260.84039306640625,
+      "world_z": 0.0668497085571289
+    }
+  ]
+}

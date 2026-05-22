@@ -1,0 +1,40 @@
+{
+  "omt": "assets/omt/doors.omt",
+  "mesh_count": 3,
+  "mat_count": 4,
+  "meshes": [
+    {
+      "name": "DoorPP1",
+      "id": 3,
+      "verts": 16,
+      "faces": 24,
+      "bitmap": "assets/parsed/doors/doors_images/0003_128x128d16.png",
+      "file": "assets/ase/omt/DoorPP1.ASE",
+      "world_x": -1.0303001403808594,
+      "world_y": 409.4296569824219,
+      "world_z": -2.873992919921875
+    },
+    {
+      "name": "DoorGrill",
+      "id": 0,
+      "verts": 6,
+      "faces": 6,
+      "bitmap": "assets/parsed/doors/doors_images/0002_128x128d16.png",
+      "file": "assets/ase/omt/DoorGrill.ASE",
+      "world_x": 0.84814453125,
+      "world_y": 299.6949768066406,
+      "world_z": 0.06679999828338623
+    },
+    {
+      "name": "door",
+      "id": 1,
+      "verts": 6,
+      "faces": 8,
+      "bitmap": "assets/parsed/doors/doors_images/0003_128x128d16.png",
+      "file": "assets/ase/omt/door.ASE",
+      "world_x": 0.0098419189453125,
+      "world_y": 119.18374633789062,
+      "world_z": 0.5906500220298767
+    }
+  ]
+}

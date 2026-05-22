@@ -1,0 +1,6 @@
+# OMT mesh placements emitted by tools/omt_mesh_export.py
+# format: <name>\t<ase_path>\t<center_x>\t<center_y>\t<center_z>
+# runtime translation = (center_x, 0, center_z); height is baked into the mesh
+DoorPP1	assets/ase/omt/DoorPP1.ASE	-1.0303	409.4297	-2.8740
+DoorGrill	assets/ase/omt/DoorGrill.ASE	0.8481	299.6950	0.0668
+door	assets/ase/omt/door.ASE	0.0098	119.1837	0.5907

@@ -1,0 +1,33 @@
+# OMT mesh placements emitted by tools/omt_mesh_export.py
+# format: <name>\t<ase_path>\t<center_x>\t<center_y>\t<center_z>
+# runtime translation = (center_x, 0, center_z); height is baked into the mesh
+phone	assets/ase/omt/phone.ASE	-2.9675	376.4081	-2.2541
+gate1	assets/ase/omt/gate1.ASE	0.1917	6.3224	-0.1039
+yokianpart	assets/ase/omt/yokianpart.ASE	-0.2334	24.9792	-2.7188
+Box03	assets/ase/omt/Box03.ASE	-3.4467	8.0956	-1.2297
+trash02	assets/ase/omt/trash02.ASE	-0.1754	24.6633	0.0000
+bottlerocket	assets/ase/omt/bottlerocket.ASE	0.2948	-0.7837	39.9576
+Sphere01	assets/ase/omt/Sphere01.ASE	0.1495	150.5276	-0.0598
+fan	assets/ase/omt/fan.ASE	-0.6394	120.7011	2.7258
+firedoors	assets/ase/omt/firedoors.ASE	7.6655	204.0983	-0.5696
+Refrig	assets/ase/omt/Refrig.ASE	1.1742	204.0982	17.9441
+RefigDoor	assets/ase/omt/RefigDoor.ASE	0.0869	122.6394	-1.0484
+Diningchair	assets/ase/omt/Diningchair.ASE	0.0869	122.6394	-1.0484
+chair	assets/ase/omt/chair.ASE	0.2176	56.5881	1.9606
+SailBoat	assets/ase/omt/SailBoat.ASE	0.0883	55.1028	0.0027
+Rocket	assets/ase/omt/Rocket.ASE	0.8093	97.1717	1.1007
+RideSpin	assets/ase/omt/RideSpin.ASE	-2.3082	-346.6622	0.2843
+Swing	assets/ase/omt/Swing.ASE	0.1408	90.1682	-0.0106
+RocketPad	assets/ase/omt/RocketPad.ASE	7.9757	92.3079	67.3610
+bench04	assets/ase/omt/bench04.ASE	1.1808	1.5858	2.2046
+block	assets/ase/omt/block.ASE	1.7591	73.0005	4.4968
+hamburger	assets/ase/omt/hamburger.ASE	-0.1521	2.3605	0.0540
+egg	assets/ase/omt/egg.ASE	-0.3118	348.9458	61.5157
+candysign	assets/ase/omt/candysign.ASE	3.6828	155.4067	-754.4330
+sun01	assets/ase/omt/sun01.ASE	-2.2858	192.3654	9.4687
+sun	assets/ase/omt/sun.ASE	-1.8767	192.4339	758.6155
+shootoing	assets/ase/omt/shootoing.ASE	2.7519	95.7985	-55.4859
+rocketship	assets/ase/omt/rocketship.ASE	9.2407	103.9121	24.0861
+dino	assets/ase/omt/dino.ASE	-3.4631	62.0076	53.0253
+plant	assets/ase/omt/plant.ASE	1.7621	24.6927	565.2595
+ray01	assets/ase/omt/ray01.ASE	-88.5255	90.2501	-7.8487

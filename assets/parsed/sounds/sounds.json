@@ -1,0 +1,36 @@
+{
+  "file": "assets/omt/sounds.omt",
+  "total_size": 777658,
+  "has_images": false,
+  "has_audio": true,
+  "audio": [
+    {
+      "index": 0,
+      "name": "Windows Logon Sound",
+      "offset": 14,
+      "size": 486188,
+      "file": "assets/parsed/sounds/sounds_audio/0000_Windows_Logon_Sound.wav"
+    },
+    {
+      "index": 1,
+      "name": "save",
+      "offset": 486238,
+      "size": 57164,
+      "file": "assets/parsed/sounds/sounds_audio/0001_save.wav"
+    },
+    {
+      "index": 2,
+      "name": "bark1",
+      "offset": 543402,
+      "size": 155322,
+      "file": "assets/parsed/sounds/sounds_audio/0002_bark1.wav"
+    },
+    {
+      "index": 3,
+      "name": "detect",
+      "offset": 698724,
+      "size": 78880,
+      "file": "assets/parsed/sounds/sounds_audio/0003_detect.wav"
+    }
+  ]
+}

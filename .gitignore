@@ -1,0 +1,10 @@
+build/*.omtc
+build/m7c/
+core.*
+*.o
+jnengine
+web/
+demo.omtc
+demo.omtc.tex
+camera.cam
+*.omtc
