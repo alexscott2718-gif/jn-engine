@@ -47,3 +47,30 @@ Registration: identity 24/194 inliers vs X-flipped 5/194 → **NO mirroring**.
   (synthetic). canon.json `water_draws` is expected empty → see findings before
   inventing a position (no magic constants).
 - **WI-5 mirroring:** IDENTITY confirmed; no engine change.
+
+---
+
+## canon.json (Checkpoint B) — extract_canon.py @ frame 16565
+
+`build/canon.json` produced; `gen_canon_header.py` → `src/engine/canon_data.h`.
+
+- `lighting_enabled=false`, `lights=0`, `ambient_rgb=[0.2,0.2,0.2]`,
+  material diffuse `(0,0,0)` → **flat full-bright** is canonical.
+- `ground_y_span=68118.3`, `ground_footprint=[33143,25003]`.
+- **M5 caveat confirmed:** all `bound_named_textures` are synthetic
+  `tex_<sha1>` (no original SHA-1 matched an asset PNG). So
+  `ground_texture_asset` is synthetic and `water_texture_asset=null`,
+  `water_draws=[]`. Engine falls back to `assets/png/mud.png` (ground) and
+  treats water as absent (`CANON_WATER_PRESENT=0`). Both fallback PNGs exist.
+- Ground-tile center-Y is **bimodal**: ~90% within −15363..+6277 (core span
+  ≈21600); a few elevated pieces at ~48000 push the total to 68118. The literal
+  68118 is therefore inflated by elevated non-terrain structures the
+  flat-in-Y `classify_ground` heuristic counts as ground. WI-3 target is set
+  accordingly (move the demo span up substantially; full 68118 = grotesque).
+
+Checkpoint B: PASS (canon.json built; fallback assets exist; caveat noted).
+
+---
+
+## Progress log (per-WI diff numbers)
+
