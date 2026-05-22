@@ -328,33 +328,18 @@ int main(void) {
     cam->fov    = 1.0472f;
     cam->far_z  = 80000.0f;
 
-    /* Ground terrain (Phase 12 WI-2/WI-3): a tiled heightfield driven by the
-       measured capture (build/canon.json -> canon_data.h). Footprint matches
-       the original ground footprint; vertical amplitude is the robust
-       (outlier-excluded) ground-tile center-Y span -- the raw span is inflated
-       by elevated city structures the demo carries as placement meshes. The
-       texture is canon's ground asset (synthetic in this capture -> mud.png
-       fallback). Empty scenes (no city) keep a smaller flat-ish floor. */
-    unsigned int ground_tex = tex_cache_get(CANON_GROUND_TEXTURE);
-    float ground_half_x, ground_half_z, ground_amp, ground_rep;
-    if (world.placement_count > 0) {
-        ground_half_x = CANON_GROUND_FOOTPRINT_X * 0.5f;
-        ground_half_z = CANON_GROUND_FOOTPRINT_Z * 0.5f;
-        /* WI-3 "push harder": terraced terrain spanning the full measured
-           ground Y-span (matches the original's classify_ground span). This is
-           dramatic/stepped and the plateaus clip the city buildings (placements
-           at y=0) -- accepted per the QA directive to move §5 toward 68118. */
-        ground_amp    = CANON_GROUND_Y_SPAN;
-        /* texel density: ~one tile per 4000 world units across the footprint */
-        ground_rep    = CANON_GROUND_FOOTPRINT_X / 4000.0f;
-    } else {
-        ground_half_x = ground_half_z = 20000.0f;
-        ground_amp    = 0.0f;
-        ground_rep    = 80.0f;
+    /* Ground: a real level (placements present) supplies its own ground/street/
+       terrain and water meshes (GROUND.ASE, ncwater*, etc.) at their authored
+       world positions -- the faithful representation. We do NOT lay a synthetic
+       ground over them (an earlier heightfield was a stand-in that buried the
+       real geometry, including the stream). The synthetic flat floor is kept
+       ONLY for empty test scenes with no level geometry. */
+    if (world.placement_count == 0) {
+        unsigned int ground_tex = tex_cache_get(CANON_GROUND_TEXTURE);
+        ground_init(ground_tex, 20000.0f, 20000.0f,
+                    jim ? jim->x : 0.0f, jim ? jim->z : 0.0f,
+                    80.0f, 0.0f);
     }
-    ground_init(ground_tex, ground_half_x, ground_half_z,
-                jim ? jim->x : 0.0f, jim ? jim->z : 0.0f,
-                ground_rep, ground_amp);
 
     FollowCam fcam;
     follow_cam_init(&fcam);
