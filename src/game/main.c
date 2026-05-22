@@ -25,6 +25,17 @@
 #include <zlib.h>
 #include <SDL.h>
 
+/* True if the model resolves at least one real texture (model-level or any
+   material). Used to skip untextured meshes for faithfulness: the original
+   game renders no untextured geometry (audit D1/D2). */
+static int model_has_texture(const AseModel *m) {
+    if (!m) return 0;
+    if (m->texture_id) return 1;
+    for (int i = 0; i < m->material_count; i++)
+        if (m->materials[i].texture_id) return 1;
+    return 0;
+}
+
 /* Save current GL framebuffer as a PNG using only stdlib + zlib */
 static void save_screenshot(const char *path, int w, int h) {
     unsigned char *pixels = malloc((size_t)w * h * 3);
@@ -574,6 +585,13 @@ int main(void) {
             const WorldPlacement *pl = &world.placements[pi];
             AseModel *pm = model_cache_get(pl->ase_path);
             if (!pm) continue;
+            /* Faithfulness (audit D1/D2): the original game renders ZERO
+               untextured geometry. A placement whose OMT material resolved no
+               texture is either collision/blocking (BLOCKING_*, GROUND base
+               slab) or a mesh whose canvas couldn't be resolved -- neither
+               appears as a visible surface in the game. Skip them rather than
+               draw dark filler slabs. */
+            if (!model_has_texture(pm)) continue;
             renderer_draw_model(pm, 0, pl->x, 0.0f, pl->z, 0.0f, 1.0f);
         }
 
