@@ -1,5 +1,6 @@
 #include "renderer.h"
 #include "capture.h"
+#include "canon_data.h"   /* Phase 12: measured lighting from build/canon.json */
 #include "glad.h"
 #include <stdio.h>
 #include <string.h>
@@ -153,10 +154,22 @@ static const char *LIT_FRAG_SRC =
     "uniform vec3 uLightDir;\n"
     "uniform vec3 uTint;\n"          /* per-material diffuse multiplier */
     "uniform int  uHasTex;\n"        /* 0 = ignore uTex, use uTint only */
+    "uniform int  uLightingOn;\n"    /* Phase 12: D3D LIGHTING render-state */
+    "uniform vec3 uAmbient;\n"       /* measured D3DRS_AMBIENT (0..1) */
+    "uniform vec3 uLightDiffuse;\n"  /* measured DIR-light diffuse */
     "void main() {\n"
     "    vec3 n = normalize(vNorm);\n"
-    "    float diff = max(dot(n, uLightDir), 0.0);\n"
-    "    float light = 0.3 + 0.7 * diff;\n"
+    "    /* Match the original's measured lighting. With LIGHTING OFF (Phase 12\n"
+    "       canon for Level 1) the scene is flat, full-bright texture-lit -- no\n"
+    "       diffuse term -- which fixes the demo's over-dark directional shading.\n"
+    "       When enabled, ambient floor + measured directional diffuse. */\n"
+    "    vec3 lightTerm;\n"
+    "    if (uLightingOn == 0) {\n"
+    "        lightTerm = vec3(1.0);\n"
+    "    } else {\n"
+    "        float diff = max(dot(n, uLightDir), 0.0);\n"
+    "        lightTerm = uAmbient + uLightDiffuse * diff;\n"
+    "    }\n"
     "    vec3 base = uTint;\n"
     "    float alpha = 1.0;\n"
     "    if (uHasTex != 0) {\n"
@@ -164,7 +177,7 @@ static const char *LIT_FRAG_SRC =
     "        base *= c.rgb;\n"
     "        alpha = c.a;\n"
     "    }\n"
-    "    FragColor = vec4(base * light, alpha);\n"
+    "    FragColor = vec4(base * lightTerm, alpha);\n"
     "}\n";
 
 static unsigned int compile_shader(GLenum type, const char *src) {
@@ -187,6 +200,7 @@ static unsigned int g_lit_prog = 0;
 static int g_lit_loc_mvp = -1, g_lit_loc_model = -1;
 static int g_lit_loc_tex = -1, g_lit_loc_light = -1;
 static int g_lit_loc_tint = -1, g_lit_loc_hastex = -1;
+static int g_lit_loc_lighton = -1, g_lit_loc_ambient = -1, g_lit_loc_ldiff = -1;
 
 static unsigned int g_sky_prog = 0, g_sky_vao = 0, g_sky_vbo = 0;
 static int g_sky_loc_top = -1, g_sky_loc_bot = -1;
@@ -249,6 +263,9 @@ int renderer_init(int w, int h) {
     g_lit_loc_light  = glGetUniformLocation(g_lit_prog, "uLightDir");
     g_lit_loc_tint   = glGetUniformLocation(g_lit_prog, "uTint");
     g_lit_loc_hastex = glGetUniformLocation(g_lit_prog, "uHasTex");
+    g_lit_loc_lighton = glGetUniformLocation(g_lit_prog, "uLightingOn");
+    g_lit_loc_ambient = glGetUniformLocation(g_lit_prog, "uAmbient");
+    g_lit_loc_ldiff   = glGetUniformLocation(g_lit_prog, "uLightDiffuse");
 
     /* Sky-gradient program + fullscreen quad. Each vertex carries an NDC
        position and a t value (1 at top, 0 at bottom) used to lerp top/bot. */
@@ -463,7 +480,12 @@ void renderer_draw_model(const AseModel *m, unsigned int texture_id_override,
     glUniformMatrix4fv(g_lit_loc_mvp,   1, GL_FALSE, mvp);
     glUniformMatrix4fv(g_lit_loc_model, 1, GL_FALSE, model);
     glUniform1i(g_lit_loc_tex, 0);
-    glUniform3f(g_lit_loc_light, 0.577f, 0.577f, 0.577f);
+    /* Phase 12: lighting driven by measured canon (build/canon.json). For
+       Level 1 the original ran LIGHTING OFF, so uLightingOn=0 -> flat. */
+    glUniform1i(g_lit_loc_lighton, CANON_LIGHTING_ENABLED);
+    glUniform3f(g_lit_loc_light, CANON_LIGHT_DIR_X, CANON_LIGHT_DIR_Y, CANON_LIGHT_DIR_Z);
+    glUniform3f(g_lit_loc_ambient, CANON_AMBIENT_R, CANON_AMBIENT_G, CANON_AMBIENT_B);
+    glUniform3f(g_lit_loc_ldiff, CANON_LIGHT_DIFF_R, CANON_LIGHT_DIFF_G, CANON_LIGHT_DIFF_B);
     glActiveTexture(GL_TEXTURE0);
 
     int groups = m->material_count > 0 ? m->material_count : 1;
