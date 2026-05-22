@@ -83,17 +83,24 @@ static float g_hgt[(GRID_N + 1) * (GRID_N + 1)];   /* local height per gridpoint
 /* Deterministic, smooth heightmap. u,v in [0,1] -> roughly [-0.5, 0.5].
    Low-frequency so the ground reads as broad rolling topography (a few hills /
    basins) rather than noise; the multiplier g_amp sets the peak-to-trough. */
+/* Number of terrace levels the ground steps through (WI-3 "push harder"). */
+#define N_TERRACE 6
+
+/* Terraced heightmap. A low-frequency smooth base picks a discrete plateau
+   level, so the surface is large flat regions at stepped heights connected by
+   short risers -- the structure the original's tiled terrain shows (many big
+   flat quads at very different Y). Returns roughly [-0.5, 0.5]; * amplitude
+   gives the peak-to-trough. Large flat plateaus pass diff.py's classify_ground
+   (flatness + area filters) so the ground Y-span actually registers. */
 static float height01(float u, float v) {
     const float TAU = 6.28318530718f;
-    /* Very low frequency (<=0.5 cycle across the whole field): broad, gentle
-       relief so each coarse capture tile stays nearly flat (classifies as
-       ground in diff.py) and the terrain does not clip through the city
-       buildings (placements sit at y=0). */
-    float h = 0.50f * sinf(u * TAU * 0.5f + 0.4f) * cosf(v * TAU * 0.5f)
-            + 0.20f * sinf((u + v) * TAU * 0.5f + 1.1f);
-    if (h >  0.5f) h =  0.5f;
-    if (h < -0.5f) h = -0.5f;
-    return h;
+    float base = 0.50f * sinf(u * TAU * 0.5f + 0.4f) * cosf(v * TAU * 0.5f)
+               + 0.20f * sinf((u + v) * TAU * 0.5f + 1.1f);
+    float t = base + 0.5f;                 /* ~[0,1] */
+    if (t > 1.0f) t = 1.0f;
+    if (t < 0.0f) t = 0.0f;
+    int level = (int)(t * (N_TERRACE - 1) + 0.5f);   /* nearest plateau */
+    return (float)level / (float)(N_TERRACE - 1) - 0.5f;
 }
 
 static float hgt_at(int i, int j) { return g_hgt[j * (GRID_N + 1) + i]; }
@@ -172,29 +179,30 @@ int ground_init(unsigned int texture_id, float half_x, float half_z,
     return 1;
 }
 
-/* Emit the heightfield as CAP_N x CAP_N coarse tiles, each with its own local
-   AABB (footprint + measured height range). Multiple tiles at stepped heights
-   give diff.py the ground Y-spread the original's tiled terrain shows. */
+/* Emit the terraced ground as CAP_N x CAP_N large, flat, overlapping tiles --
+   each a planar facet of the heightfield at its plateau height. The original's
+   ground is captured the same way: many big flat quads (footprint up to the
+   whole field) at stepped heights. Large footprints clear diff.py's area filter
+   (>=10% of the biggest flat draw) and the single-plateau height keeps each tile
+   flat, so the ground Y-span registers and tracks the measured amplitude. */
 static void capture_tiles(const float model[16]) {
-    int step = GRID_N / CAP_N;
-    if (step < 1) step = 1;
+    const float foot = 0.60f;            /* tile half-footprint as a fraction of the field */
+    float fhx = g_half_x * foot;
+    float fhz = g_half_z * foot;
+    /* Near-planar slab: a tile's view-space Y-extent is dominated by its XZ
+       footprint projected through the camera tilt (~0.16*diag, under the 0.2
+       flatness bound); any real slab thickness must stay tiny or it tips the
+       tile over the bound and it stops counting as ground. */
+    float yeps = 30.0f;
     for (int tj = 0; tj < CAP_N; tj++) {
         for (int ti = 0; ti < CAP_N; ti++) {
-            int i0 = ti * step, i1 = (ti == CAP_N - 1) ? GRID_N : (ti + 1) * step;
-            int j0 = tj * step, j1 = (tj == CAP_N - 1) ? GRID_N : (tj + 1) * step;
-            float ymin = 1e30f, ymax = -1e30f;
-            for (int j = j0; j <= j1; j++)
-                for (int i = i0; i <= i1; i++) {
-                    float y = hgt_at(i, j);
-                    if (y < ymin) ymin = y;
-                    if (y > ymax) ymax = y;
-                }
-            float x0 = -g_half_x + ((float)i0 / GRID_N) * 2.0f * g_half_x;
-            float x1 = -g_half_x + ((float)i1 / GRID_N) * 2.0f * g_half_x;
-            float z0 = -g_half_z + ((float)j0 / GRID_N) * 2.0f * g_half_z;
-            float z1 = -g_half_z + ((float)j1 / GRID_N) * 2.0f * g_half_z;
-            const float tmin[3] = { x0, ymin, z0 };
-            const float tmax[3] = { x1, ymax, z1 };
+            float u = (ti + 0.5f) / (float)CAP_N;
+            float v = (tj + 0.5f) / (float)CAP_N;
+            float cx = -g_half_x + u * 2.0f * g_half_x;
+            float cz = -g_half_z + v * 2.0f * g_half_z;
+            float cy = height01(u, v) * g_amp;
+            const float tmin[3] = { cx - fhx, cy - yeps, cz - fhz };
+            const float tmax[3] = { cx + fhx, cy + yeps, cz + fhz };
             capture_draw(model, g_tex, tmin, tmax);
         }
     }

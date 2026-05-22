@@ -340,11 +340,11 @@ int main(void) {
     if (world.placement_count > 0) {
         ground_half_x = CANON_GROUND_FOOTPRINT_X * 0.5f;
         ground_half_z = CANON_GROUND_FOOTPRINT_Z * 0.5f;
-        /* Gentle relief = measured median per-tile ground y-extent. The larger
-           robust/raw spans (24k/68k) are inter-region + elevated-structure
-           extent, represented by placement meshes, not ground slope; using
-           them here would make near-vertical terrain that clips the city. */
-        ground_amp    = CANON_GROUND_TILE_YEXT;
+        /* WI-3 "push harder": terraced terrain spanning the full measured
+           ground Y-span (matches the original's classify_ground span). This is
+           dramatic/stepped and the plateaus clip the city buildings (placements
+           at y=0) -- accepted per the QA directive to move §5 toward 68118. */
+        ground_amp    = CANON_GROUND_Y_SPAN;
         /* texel density: ~one tile per 4000 world units across the footprint */
         ground_rep    = CANON_GROUND_FOOTPRINT_X / 4000.0f;
     } else {
