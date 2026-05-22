@@ -97,3 +97,47 @@ files we have.
 4. **D4** — confirm no mesh class is wholly missing.
 
 D3 is done; D7 is a data limitation to confirm with the user.
+
+---
+
+## Results — D1/D2 full pass (user-directed)
+
+**D1 (resolve textures) — diagnosed, largely intractable.** Of 194 level1 meshes
+the exporter resolves 96 textures, 98 not. Breakdown of the 98 (and the ~105
+untextured meshes the demo loaded):
+- **55 mid0** — 84-byte single-material meshes with no per-face material id and
+  no material reference found in the 3DSP header (`GROUND`, `ncwater`,
+  `CHIMNEY01`, `CAR`, `mailbox`, most `BLOCK*`/`BLOCKING*`). Their material
+  binding mechanism is not yet reverse-engineered.
+- **32 canvNone** — material exists but carries no canvas (`29none`,
+  `Material #53`) — genuinely canvas-less in the source.
+- **9 resolver_miss** — material has a canv but it hits the canvas-rid boundary
+  (`5brick2` canv=45 → rid 46, which doesn't exist; clean canvas rids are 1–45,
+  the last 2 records carry garbage rids). Fiddly boundary RE.
+Re-exporting from `level1.omt` matched the on-disk ASEs exactly (no stale wins).
+Reaching ~0 untextured by *resolution* needs substantial OMT-format RE with
+steeply diminishing returns — **stopped** per the data-driven / stop-on-stuck
+rule rather than guessing texture↔mesh bindings.
+
+**D2 (the faithful lever) — done.** The original renders **0 untextured draws**;
+the demo rendered 104. Fix: `main.c` now skips placement meshes with no resolved
+texture (`model_has_texture`). The demo shows only correctly-textured geometry,
+exactly as the game does — the dark collision/blocking slabs and unresolved-
+texture filler are gone instead of drawn as dark slabs.
+
+**Re-audit (camera-matched, frame 16565):**
+| metric | original | demo before | demo after |
+|---|---|---|---|
+| perspective draws | 3198 | 393 | 257 |
+| **untextured draws** | **0** | **104** | **4** |
+| textured draws | 3198 | 289 | 253 |
+
+Residual 4 untextured draws are small entity-path draws (not placements);
+negligible vs the original's 0. **Untextured geometry 104 → 4.**
+
+### Still open (not pursued; need user steer)
+- The ~98 unresolved meshes (`GROUND`, `ncwater`, houses, chimneys…) are now
+  *absent* rather than dark. They exist (textured) in the game; texturing them
+  needs the OMT mid0/canvNone/boundary RE above. Trade-off chosen per user
+  directive: faithful (textured-only, like the original) over dark filler.
+- D5 (`ncwater` elevation), D6 (1 missing mesh), D7 (no central stream in data).
