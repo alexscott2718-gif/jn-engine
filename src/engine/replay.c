@@ -23,6 +23,7 @@
 
 #include "replay.h"
 #include "glad.h"
+#include "assets/tex_loader.h"   /* tex_load() — stb_image-backed PNG loader */
 #include <SDL.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -99,6 +100,41 @@ static ReplayTex    g_tex[MAX_TEXTURES];
 static int          g_tex_count;
 static unsigned int g_white_tex;        /* 1x1 white fallback */
 
+/* Optional sidecar: tex_id (hex) -> PNG path. Loaded if JN_REPLAY_TEX_MAP is
+   set. Built by instrument/diff/build_replay_texmap.py (heuristic dim-based
+   pairing -- partial fidelity until the proxy carries pixel payloads). */
+#define MAX_TEXMAP_ENTRIES 512
+typedef struct { unsigned int tex_id; char path[256]; } TexMapEntry;
+static TexMapEntry g_texmap[MAX_TEXMAP_ENTRIES];
+static int         g_texmap_count;
+
+static const char *texmap_lookup(unsigned int tex_id) {
+    for (int i = 0; i < g_texmap_count; i++)
+        if (g_texmap[i].tex_id == tex_id) return g_texmap[i].path;
+    return NULL;
+}
+
+static void load_texmap(const char *path) {
+    FILE *f = fopen(path, "r");
+    if (!f) {
+        fprintf(stderr, "[replay] tex-map %s not found -- white fallbacks only\n", path);
+        return;
+    }
+    char line[512];
+    while (fgets(line, sizeof(line), f)) {
+        unsigned int tid;
+        char p[256];
+        /* Format: <hex>\t<path>\n */
+        if (sscanf(line, "%x\t%255[^\n]", &tid, p) != 2) continue;
+        if (g_texmap_count >= MAX_TEXMAP_ENTRIES) break;
+        g_texmap[g_texmap_count].tex_id = tid;
+        snprintf(g_texmap[g_texmap_count].path, sizeof(g_texmap[0].path), "%s", p);
+        g_texmap_count++;
+    }
+    fclose(f);
+    fprintf(stderr, "[replay] loaded %d entries from %s\n", g_texmap_count, path);
+}
+
 static unsigned int g_prog;
 static int          g_loc_mvp, g_loc_tex, g_loc_has_tex;
 static unsigned int g_vao, g_vbo;
@@ -170,8 +206,17 @@ static void register_texture(unsigned int tex_id, int w, int h) {
     if (g_tex_count >= MAX_TEXTURES) return;
     ReplayTex *t = &g_tex[g_tex_count++];
     t->tex_id = tex_id;
-    t->gl_tex = g_white_tex;            /* v0: pixels not yet in stream */
     t->w = w; t->h = h;
+    /* If the sidecar maps this tex_id to a local PNG, load real pixels via
+       the engine's stb_image-backed tex_load(); otherwise fall back to
+       white. Failures (bad path / decode error) also fall back. */
+    const char *png = texmap_lookup(tex_id);
+    if (png) {
+        unsigned int gl = tex_load(png);
+        t->gl_tex = gl ? gl : g_white_tex;
+    } else {
+        t->gl_tex = g_white_tex;
+    }
 }
 
 /* Matrices on the wire are COLUMN-major (column-vector style: clip = M*pos),
@@ -258,6 +303,13 @@ int replay_init(int viewport_w, int viewport_h) {
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
     /* (Z remap handled in vertex shader; no glClipControl dependency.) */
+
+    /* Optional texture sidecar (JN_REPLAY_TEX_MAP=<path.txt>) maps captured
+       tex_ids to local PNGs so replay renders with real textures instead of
+       white silhouettes. Heuristic dim-based pairing; partial fidelity until
+       the proxy carries pixel payloads. */
+    const char *tm = getenv("JN_REPLAY_TEX_MAP");
+    if (tm && tm[0]) load_texmap(tm);
     g_active = 1;
     fprintf(stderr, "[replay] loaded %s (%zu B); ready to render frame.\n",
             path, g_buf_len);

@@ -18,7 +18,43 @@ structural rather than tuned. Test on Level-1 frame 16565 (the marked frame).
 - Verified end-to-end: **3235 GL draws issued, 256 textures registered** per
   frame, GL pipeline runs, screenshot saves.
 
-## v0.1 update — the "matrix problem" was a red herring; replay WORKS
+## v0.2 update — textured Retroville renders from the captured stream
+
+`instrument/diff/build_replay_texmap.py` walks the .omtc TEXTURE_DEFs and
+pairs each captured (w,h,sha) to a local asset PNG via priority-ordered
+dim-based heuristic (level1_images → assets/png → sprites → objects).
+**196/256** captured textures paired (60 unresolved have exotic dims like
+128×256/256×16 with no local PNG of those dims — the true fix is the proxy
+carrying pixel payloads).
+
+`replay.c` loads the sidecar (`JN_REPLAY_TEX_MAP=<path.txt>`) and uses
+`tex_load()` (the engine's existing stb_image-backed loader) to upload real
+PNG pixels per captured `tex_id` instead of the 1×1 white fallback.
+
+**Result: Retroville renders, textured.** Jimmy at center, an NPC to the
+left, textured streets/buildings, a HUD element bottom-left, a Jimmy-face
+icon at top. Textures aren't pixel-perfect (heuristic pairing — each PNG is a
+*plausible* asset of the right dimensions, not necessarily the *exact* one
+the original used), but the **architecture is end-to-end validated**:
+geometry, transforms, render states, lighting, AND texturing all flowing
+from the captured D3D7 command stream with **zero parameter tuning, no scene
+model, no game logic, no per-mesh material RE.**
+
+This concretely proves the rethink's central claim: feed the engine the
+original's render decisions and fidelity is structural, not tuned.
+
+### Remaining for pixel-exact replay
+- **Proxy pixel payload.** Extend `instrument/proxy/capture.c` to emit
+  TEXTURE_PIXELS records on first sighting (already locks + hashes surfaces;
+  add `omtc_emit(TEXTURE_PIXELS, bits, row_bytes*h)`). One-shot per texture,
+  bandwidth-cheap. Then re-capture Level 1 once. Replay will then render
+  pixel-exact.
+- **Render-state coverage.** A few more D3DRS (alpha test, fog mode, texture
+  filtering) for full parity. Currently honoring LIGHTING/Z/ZWRITE/BLEND.
+- **Camera handedness sanity.** Visual is correct; want to confirm no subtle
+  axis flip vs the original.
+
+### Lessons (updated)
 
 Tracked down end-to-end. Sequence of discoveries:
 
