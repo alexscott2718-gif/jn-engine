@@ -8,6 +8,7 @@
 #include "../engine/ground.h"
 #include "../engine/canon_data.h"   /* Phase 12: measured ground footprint/topography */
 #include "../engine/capture.h"
+#include "../engine/replay.h"
 #include "../engine/assets/gam_loader.h"
 #include "../engine/assets/ase_loader.h"
 #include "../engine/assets/tex_loader.h"
@@ -200,6 +201,43 @@ int main(void) {
         renderer_destroy();
         window_destroy(&w);
         return 1;
+    }
+
+    /* Faithful .omtc replay path: when JN_REPLAY=<path> is set, skip game
+       setup entirely and render the captured D3D7 command stream. Phase-12
+       pivot proof (docs/faithful_engine_rethink.md). */
+    if (replay_active()) {
+        if (!replay_init(w.width, w.height)) {
+            input_destroy(); audio_destroy(); renderer_destroy();
+            window_destroy(&w); return 1;
+        }
+        int screenshot_mode = getenv("JN_SCREENSHOT") != NULL;
+        int screenshot_taken = 0;
+        while (!w.should_quit) {
+            SDL_Event ev;
+            while (SDL_PollEvent(&ev)) {
+                if (ev.type == SDL_QUIT) w.should_quit = 1;
+                if (ev.type == SDL_KEYDOWN && ev.key.keysym.sym == SDLK_ESCAPE)
+                    w.should_quit = 1;
+                if (ev.type == SDL_WINDOWEVENT &&
+                    ev.window.event == SDL_WINDOWEVENT_RESIZED) {
+                    w.width = ev.window.data1; w.height = ev.window.data2;
+                }
+            }
+            replay_render_frame();
+            window_swap(&w);
+            if (screenshot_mode && !screenshot_taken) {
+                glFinish();
+                save_screenshot("screenshot.png", w.width, w.height);
+                screenshot_taken = 1;
+                w.should_quit = 1;
+            }
+            SDL_Delay(16);
+        }
+        replay_destroy();
+        input_destroy(); audio_destroy(); renderer_destroy();
+        window_destroy(&w);
+        return 0;
     }
 
     World world;
