@@ -18,7 +18,52 @@ structural rather than tuned. Test on Level-1 frame 16565 (the marked frame).
 - Verified end-to-end: **3235 GL draws issued, 256 textures registered** per
   frame, GL pipeline runs, screenshot saves.
 
-## What v0 does NOT yet do (the matrix problem)
+## v0.1 update — the "matrix problem" was a red herring; replay WORKS
+
+Tracked down end-to-end. Sequence of discoveries:
+
+1. **The proxy stores the matrix raw.** Confirmed in
+   `instrument/proxy/com_wrappers.c:227` and `capture.c:598-602` — the
+   `IDirect3DDevice7::SetTransform` hook does
+   `memcpy(st.m, lpD3DMatrix, 64)`. So the wire matrix IS Microsoft's
+   documented `D3DMATRIX` layout: **row-major, row-vector**.
+2. **`PROJ[3][3]=1` is the game's choice, not a proxy artifact.** Standard
+   `D3DXMatrixPerspectiveFovLH` has `_44=0`. The JNBG game uses a "w-buffer +1
+   offset" form (`clip.w = view.z + 1`) — likely to avoid the
+   division-by-zero at the eye plane. It's a valid projection, and the rest
+   of the pipeline handles it correctly once you treat `clip.w` as `z+1`.
+3. **Matrix conventions are mathematically equivalent for our purposes.** A
+   simulator probe over all 9856 verts in frame 16565 confirmed:
+   row-vector+row-major and col-vector+col-major produce **identical**
+   on-screen counts (6511/9856 ≈ 66%). So the math was right both times.
+4. **The real bug was one line.** The fragment shader had
+   `if (FragColor.a < 0.01) discard;` as an over-aggressive default. D3D7
+   games commonly leave vertex DIFFUSE alpha = 0 (alpha is per-texture, not
+   per-vertex); that discard was nuking ~all geometry. Removing it (and only
+   modulating `vDiff.rgb`, ignoring `vDiff.a`) immediately produced
+   recognizable Level-1 geometry: **Jimmy's silhouette, an NPC beside him,
+   and building structures at the top** — all rendered directly from the
+   captured D3D7 stream.
+
+Everything is a silhouette because the textures are still white placeholders
+(SHA-only in the stream, no pixel payload — see follow-up below). The
+**architecture is now proven** — feed it texture pixels and it renders the
+original's Level 1 frame-for-frame.
+
+### Lessons
+- **The proxy is the truth.** When the wire format looked weird, reading the
+  proxy source resolved it immediately (`_44=1` is the game's choice).
+- **The matrix layer was never the bottleneck.** Two sessions of probing
+  conventions converged on "they're equivalent." The bug was elsewhere.
+- **Imitation-engine instincts mislead here.** A `discard` was a sensible
+  default for the demo's own draws; for replaying someone else's stream it
+  threw away ~2/3 of the geometry.
+
+---
+
+## (Original v0 section, superseded by v0.1 above)
+
+### Earlier hypothesis about matrices being the blocker
 The visual output is wrong: only a handful of triangles visible, mostly white
 sky. Root cause is **matrix-convention subtleties in the captured stream**:
 

@@ -28,6 +28,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdint.h>
+#include <math.h>
 
 /* GL constants not in the project's minimal glad.h (added locally). */
 #ifndef GL_NEAREST
@@ -131,9 +132,11 @@ static const char *FS =
     "uniform sampler2D uTex;\n"
     "uniform int  uHasTex;\n"
     "void main(){\n"
-    "  vec4 base = (uHasTex==1) ? texture(uTex, vUV) : vec4(1.0);\n"
-    "  FragColor = base * vDiff;\n"
-    "  if (FragColor.a < 0.01) discard;\n"
+    "  vec4 tex = (uHasTex==1) ? texture(uTex, vUV) : vec4(1.0);\n"
+    "  /* Modulate RGB by vertex diffuse, but ignore vertex alpha (D3D7 games\n"
+    "     commonly leave the DIFFUSE alpha byte = 0; we don't want to discard\n"
+    "     the whole scene). Texture alpha is honored. */\n"
+    "  FragColor = vec4(tex.rgb * vDiff.rgb, tex.a);\n"
     "}\n";
 
 /* ---- shader compile helper ------------------------------------------- */
@@ -386,8 +389,7 @@ void replay_render_frame(void) {
             float PV[16], MVP[16];
             mat4_mul_col(PV, PROJ, VIEW);
             mat4_mul_col(MVP, PV, WORLD);
-            /* (Diagnostics removed -- see docs/faithful_engine_rethink.md and
-               the v0 findings on matrix-convention subtleties.) */
+            /* (matrix pipeline validated -- see docs/replay_v0_findings.md) */
 
             ReplayTex *tt = find_tex(cur_tex_id);
             glBindTexture(GL_TEXTURE_2D, tt ? tt->gl_tex : g_white_tex);
