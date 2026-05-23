@@ -32,6 +32,10 @@ from protocol import (  # noqa: E402
     RECORD_FRAME_MARK,
 )
 
+# v3 record type (not always imported above — keep extractor compatible with
+# both v2 and v3 streams).
+RECORD_TEXTURE_PIXELS = 14
+
 
 def main():
     args = sys.argv[1:]
@@ -59,6 +63,7 @@ def main():
     lights = {}            # index (u8) -> payload
     material = None        # payload
     texture_defs = {}      # tex_id -> payload (latest)
+    texture_pixels = {}    # tex_id -> payload (v3 only; absent in v1/v2)
     cur_tex = {}           # stage -> payload (latest SET_TEXTURE)
 
     frame_idx = -1
@@ -117,6 +122,9 @@ def main():
                 elif rt == RECORD_TEXTURE_DEF:
                     tex_id = struct.unpack_from('<I', payload, 0)[0]
                     texture_defs[tex_id] = bytes(payload)
+                elif rt == RECORD_TEXTURE_PIXELS:
+                    tex_id = struct.unpack_from('<I', payload, 0)[0]
+                    texture_pixels[tex_id] = bytes(payload)
                 elif rt == RECORD_SET_RENDERSTATE:
                     state = struct.unpack_from('<I', payload, 0)[0]
                     render_states[state] = bytes(payload)
@@ -151,6 +159,10 @@ def main():
         # transforms (WORLD/VIEW/PROJ), then current SET_TEXTURE per stage.
         for tex_id in sorted(texture_defs):
             g.write(pack_record(RECORD_TEXTURE_DEF, texture_defs[tex_id]))
+            # v3: emit the pixel payload right after the def, if we have it.
+            if tex_id in texture_pixels:
+                g.write(pack_record(RECORD_TEXTURE_PIXELS,
+                                    texture_pixels[tex_id]))
         if viewport is not None:
             g.write(pack_record(RECORD_VIEWPORT, viewport))
         for state in sorted(render_states):
@@ -170,7 +182,9 @@ def main():
             g.write(pack_record(rt, payload))
     sz = os.path.getsize(out)
     print(f"[extract] wrote {out} ({sz} B); "
-          f"prelude: {len(texture_defs)} tex, {len(render_states)} rs, "
+          f"prelude: {len(texture_defs)} tex_def, "
+          f"{len(texture_pixels)} tex_pixels (v3), "
+          f"{len(render_states)} rs, "
           f"{len(lights)} lights, mat={material is not None}, "
           f"transforms={list(transforms)}, "
           f"viewport={viewport is not None}; frame records: {len(frame_buf)}",

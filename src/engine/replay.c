@@ -50,6 +50,12 @@
 #ifndef GL_TRIANGLE_FAN
 #define GL_TRIANGLE_FAN     0x0006
 #endif
+#ifndef GL_BGRA
+#define GL_BGRA             0x80E1
+#endif
+#ifndef GL_BGR
+#define GL_BGR              0x80E0
+#endif
 
 /* ---- protocol record types (must match instrument/proxy/protocol.h) ---- */
 #define REC_FRAME_BEGIN          1
@@ -65,6 +71,7 @@
 #define REC_DRAW_PRIMITIVE      11
 #define REC_DRAW_INDEXED        12
 #define REC_FRAME_MARK          13
+#define REC_TEXTURE_PIXELS      14   /* v3: raw locked-surface bytes */
 
 #define XF_WORLD                 0
 #define XF_VIEW                  1
@@ -380,6 +387,49 @@ void replay_render_frame(void) {
             int w = r_u16(p + 4);
             int h = r_u16(p + 6);
             register_texture(tid, w, h);
+            break;
+        }
+        case REC_TEXTURE_PIXELS: {
+            /* v3 payload: tex_id u32, w u16, h u16, bpp u32, pixel_bytes u32,
+               then `pixel_bytes` of packed raw surface bytes (no padding).
+               Upload as a GL texture, overriding whatever register_texture
+               assigned (white fallback / sidecar PNG). */
+            if (plen < 16) break;
+            unsigned int tid  = r_u32(p);
+            int          w    = r_u16(p + 4);
+            int          h    = r_u16(p + 6);
+            unsigned int bpp  = r_u32(p + 8);
+            unsigned int nbytes = r_u32(p + 12);
+            if (16 + nbytes > plen || w <= 0 || h <= 0) break;
+            const unsigned char *pix = p + 16;
+            ReplayTex *tt = find_tex(tid);
+            if (!tt) { register_texture(tid, w, h); tt = find_tex(tid); }
+            if (!tt) break;
+            /* Free any prior GL texture we attached (white or sidecar PNG). */
+            if (tt->gl_tex && tt->gl_tex != g_white_tex) {
+                glDeleteTextures(1, &tt->gl_tex);
+            }
+            GLuint gl;
+            glGenTextures(1, &gl);
+            glBindTexture(GL_TEXTURE_2D, gl);
+            /* D3D A8R8G8B8 in memory = byte order BGRA (LE). For 24bpp it's
+               BGR. 16bpp formats need conversion -- skip for now (rare). */
+            if (bpp == 32) {
+                glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0,
+                             GL_BGRA, GL_UNSIGNED_BYTE, pix);
+            } else if (bpp == 24) {
+                glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, w, h, 0,
+                             GL_BGR, GL_UNSIGNED_BYTE, pix);
+            } else {
+                /* Unknown bpp -- bind white fallback. */
+                glDeleteTextures(1, &gl);
+                tt->gl_tex = g_white_tex;
+                break;
+            }
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+            tt->gl_tex = gl;
+            tt->w = w; tt->h = h;
             break;
         }
         case REC_SET_TEXTURE: {

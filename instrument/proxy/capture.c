@@ -719,4 +719,33 @@ void omtc_register_texture(uint32_t tex_id, uint16_t w, uint16_t h,
     td.d3dfmt = d3dfmt;
     memcpy(td.sha1, sha1, OMTC_SHA1_LEN);
     omtc_emit(OMTC_RECORD_TYPE_TEXTURE_DEF, &td, sizeof(td));
+
+    /* v3: also emit a TEXTURE_PIXELS record carrying the raw locked-surface
+     * pixel bytes (packed, no pitch padding). One-shot per texture, so the
+     * .omtc replayer can render with exact original pixels rather than
+     * heuristically-paired PNGs. Limited to <= 1 MB per texture to keep a
+     * runaway 4K-mip-chain surface from torching the capture buffer. */
+    if (surface_bits && row_bytes && w > 0 && h > 0) {
+        uint32_t pixel_bytes = (uint32_t)row_bytes * (uint32_t)h;
+        if (pixel_bytes <= (1u << 20)) {
+            /* Header + packed payload, stack-buffer-bounded to 1 MB total. */
+            static uint8_t buf[(1u << 20) + sizeof(struct omtc_texture_pixels)];
+            struct omtc_texture_pixels *tp = (struct omtc_texture_pixels *)buf;
+            tp->tex_id = tex_id;
+            tp->w = w;
+            tp->h = h;
+            tp->bpp = d3dfmt;          /* same source as TEXTURE_DEF */
+            tp->pixel_bytes = pixel_bytes;
+            uint8_t *dst = buf + sizeof(*tp);
+            const uint8_t *row = (const uint8_t *)surface_bits;
+            for (uint16_t y = 0; y < h; y++) {
+                /* Pack each row (skip pitch padding the surface may carry). */
+                for (uint32_t i = 0; i < row_bytes; i++) dst[i] = row[i];
+                dst += row_bytes;
+                row += pitch;
+            }
+            omtc_emit(OMTC_RECORD_TYPE_TEXTURE_PIXELS, buf,
+                      sizeof(*tp) + pixel_bytes);
+        }
+    }
 }

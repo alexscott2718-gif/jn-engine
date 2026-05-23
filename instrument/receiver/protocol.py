@@ -8,8 +8,10 @@ import struct
 from typing import NamedTuple, List, Optional
 
 OMTC_MAGIC = 0x434d544f  # "OMTC" little-endian
-OMTC_VERSION = 2
+OMTC_VERSION = 3
 OMTC_VERSION_MIN = 1  # receiver/diff accept [MIN, VERSION] inclusive
+                      # v3 adds TEXTURE_PIXELS (raw locked-surface bytes per
+                      # texture, one-shot) for pixel-faithful .omtc replay.
 
 # Record types (proxy -> receiver)
 RECORD_FRAME_BEGIN = 1
@@ -25,6 +27,7 @@ RECORD_SET_MATERIAL = 10
 RECORD_DRAW_PRIMITIVE = 11
 RECORD_DRAW_INDEXED = 12
 RECORD_FRAME_MARK = 13  # v2: tagged frame (receiver-driven)
+RECORD_TEXTURE_PIXELS = 14  # v3: raw locked-surface bytes (one-shot per tex)
 
 # Command records (receiver -> proxy, same framing, disjoint type space)
 CMD_CAMERA_DELTA = 0x80
@@ -156,6 +159,22 @@ class TextureDef(NamedTuple):
     @staticmethod
     def size():
         return 12 + SHA1_LEN
+
+
+class TexturePixels(NamedTuple):
+    """v3 TEXTURE_PIXELS: packed raw locked-surface bytes following the
+    header. `pixels` is exactly `pixel_bytes` long (w * h * (bpp+7)/8)."""
+    tex_id: int
+    width: int
+    height: int
+    bpp: int
+    pixel_bytes: int
+    pixels: bytes
+
+    @staticmethod
+    def unpack(data):
+        tex_id, w, h, bpp, n = struct.unpack('<IHHII', data[:16])
+        return TexturePixels(tex_id, w, h, bpp, n, bytes(data[16:16 + n]))
 
 
 class SetRenderState(NamedTuple):

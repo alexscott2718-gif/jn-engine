@@ -10,10 +10,13 @@
 #include <stdint.h>
 
 #define OMTC_MAGIC       0x434d544f /* "OMTC" little-endian */
-#define OMTC_VERSION     2
+#define OMTC_VERSION     3
 #define OMTC_VERSION_MIN 1          /* Receiver/diff accept [MIN, VERSION].
                                      * v1 is the 621 MB m5_session.omtc;
-                                     * v2 adds FRAME_MARK + commands (M7b). */
+                                     * v2 adds FRAME_MARK + commands (M7b);
+                                     * v3 adds TEXTURE_PIXELS for replay
+                                     * fidelity (one-shot pixel payload per
+                                     * texture; pre-v3 streams omit it). */
 
 #pragma pack(push, 1)
 
@@ -46,6 +49,11 @@ struct omtc_record_header {
 #define OMTC_RECORD_TYPE_DRAW_PRIMITIVE    11
 #define OMTC_RECORD_TYPE_DRAW_INDEXED      12
 #define OMTC_RECORD_TYPE_FRAME_MARK        13  /* v2: tagged frame from receiver */
+#define OMTC_RECORD_TYPE_TEXTURE_PIXELS    14  /* v3: raw locked-surface pixel
+                                                * bytes, one-shot per texture,
+                                                * so the .omtc replayer can
+                                                * render with exact original
+                                                * textures (no PNG matching). */
 
 /* --- M7b command records (receiver -> proxy on the same TCP socket) -------
  * Type space is disjoint from proxy->receiver records so a misdirected byte
@@ -99,6 +107,21 @@ struct omtc_texture_def {
     uint16_t w, h;
     uint32_t d3dfmt;
     uint8_t  sha1[OMTC_SHA1_LEN];
+};
+
+/* TEXTURE_PIXELS (v3): tex_id u32, w u16, h u16, bpp u32, pixel_bytes u32,
+ * then `pixel_bytes` of raw locked-surface bytes (no pitch padding -- packed
+ * w*bpp/8 bytes per row, h rows). Emitted one-shot per (tex_id, sha1) on first
+ * sighting alongside TEXTURE_DEF; the replayer maps tex_id -> these pixels and
+ * uploads as a GL texture. The proxy already has these bytes locked while
+ * computing the SHA-1; emitting them is bandwidth-cheap (<= ~64 MB for a full
+ * Level-1 texture set) and yields pixel-exact replay. */
+struct omtc_texture_pixels {
+    uint32_t tex_id;
+    uint16_t w, h;
+    uint32_t bpp;          /* bits per pixel of the captured surface */
+    uint32_t pixel_bytes;  /* w * h * (bpp+7)/8 -- length of payload below */
+    /* Followed by pixel_bytes of raw RGB(A)/BGR(A) data. */
 };
 
 /* SET_RENDERSTATE: state u32, value u32 */
