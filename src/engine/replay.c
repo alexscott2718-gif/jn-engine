@@ -176,10 +176,10 @@ static const char *FS =
     "uniform int  uHasTex;\n"
     "void main(){\n"
     "  vec4 tex = (uHasTex==1) ? texture(uTex, vUV) : vec4(1.0);\n"
-    "  /* Modulate RGB by vertex diffuse, but ignore vertex alpha (D3D7 games\n"
-    "     commonly leave the DIFFUSE alpha byte = 0; we don't want to discard\n"
-    "     the whole scene). Texture alpha is honored. */\n"
-    "  FragColor = vec4(tex.rgb * vDiff.rgb, tex.a);\n"
+    "  /* Force opaque output: D3D7 textures + vertex DIFFUSE both commonly\n"
+    "     carry alpha=0 in this game's stream. Honoring tex.a makes the GL\n"
+    "     window render transparent on compositing X servers. */\n"
+    "  FragColor = vec4(tex.rgb * vDiff.rgb, 1.0);\n"
     "}\n";
 
 /* ---- shader compile helper ------------------------------------------- */
