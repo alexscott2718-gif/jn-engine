@@ -35,6 +35,15 @@
 #ifndef GL_NEAREST
 #define GL_NEAREST          0x2600
 #endif
+#ifndef GL_NEAREST_MIPMAP_NEAREST
+#define GL_NEAREST_MIPMAP_NEAREST 0x2700
+#endif
+#ifndef GL_LINEAR_MIPMAP_NEAREST
+#define GL_LINEAR_MIPMAP_NEAREST  0x2701
+#endif
+#ifndef GL_NEAREST_MIPMAP_LINEAR
+#define GL_NEAREST_MIPMAP_LINEAR  0x2702
+#endif
 #ifndef GL_STREAM_DRAW
 #define GL_STREAM_DRAW      0x88E0
 #endif
@@ -55,6 +64,21 @@
 #endif
 #ifndef GL_BGR
 #define GL_BGR              0x80E0
+#endif
+#ifndef GL_TEXTURE_WRAP_S
+#define GL_TEXTURE_WRAP_S   0x2802
+#endif
+#ifndef GL_TEXTURE_WRAP_T
+#define GL_TEXTURE_WRAP_T   0x2803
+#endif
+#ifndef GL_REPEAT
+#define GL_REPEAT           0x2901
+#endif
+#ifndef GL_CLAMP_TO_EDGE
+#define GL_CLAMP_TO_EDGE    0x812F
+#endif
+#ifndef GL_MIRRORED_REPEAT
+#define GL_MIRRORED_REPEAT  0x8370
 #endif
 
 /* ---- protocol record types (must match instrument/proxy/protocol.h) ---- */
@@ -87,6 +111,27 @@
 #define D3DRS_LIGHTING         137
 #define D3DRS_AMBIENT          139
 
+#define D3DTSS_ADDRESS          12
+#define D3DTSS_ADDRESSU         13
+#define D3DTSS_ADDRESSV         14
+#define D3DTSS_MAGFILTER        16
+#define D3DTSS_MINFILTER        17
+#define D3DTSS_MIPFILTER        18
+
+#define D3DTADDRESS_WRAP         1
+#define D3DTADDRESS_MIRROR       2
+#define D3DTADDRESS_CLAMP        3
+#define D3DTADDRESS_BORDER       4
+#define D3DTADDRESS_MIRRORONCE   5
+
+#define D3DTFG_POINT             1
+#define D3DTFG_LINEAR            2
+#define D3DTFN_POINT             1
+#define D3DTFN_LINEAR            2
+#define D3DTFP_NONE              1
+#define D3DTFP_POINT             2
+#define D3DTFP_LINEAR            3
+
 #define OMTC_MAGIC          0x434d544fu
 #define MAX_TEXTURES        1024
 
@@ -96,6 +141,14 @@ typedef struct {
     unsigned int gl_tex;     /* GL texture (white 1x1 in v0) */
     int          w, h;
 } ReplayTex;
+
+typedef struct {
+    unsigned int address_u;
+    unsigned int address_v;
+    unsigned int mag_filter;
+    unsigned int min_filter;
+    unsigned int mip_filter;
+} ReplayTexStage;
 
 static int          g_active;
 static char         g_path[512];
@@ -226,6 +279,58 @@ static void register_texture(unsigned int tex_id, int w, int h) {
     }
 }
 
+static void texstage_init(ReplayTexStage *ts) {
+    ts->address_u = D3DTADDRESS_WRAP;
+    ts->address_v = D3DTADDRESS_WRAP;
+    ts->mag_filter = D3DTFG_LINEAR;
+    ts->min_filter = D3DTFN_LINEAR;
+    ts->mip_filter = D3DTFP_NONE;
+}
+
+static GLenum d3d_address_to_gl(unsigned int value) {
+    switch (value) {
+    case D3DTADDRESS_WRAP:   return GL_REPEAT;
+    case D3DTADDRESS_MIRROR: return GL_MIRRORED_REPEAT;
+    case D3DTADDRESS_CLAMP:  return GL_CLAMP_TO_EDGE;
+    case D3DTADDRESS_BORDER: return GL_CLAMP_TO_EDGE;
+    case D3DTADDRESS_MIRRORONCE:
+        return GL_CLAMP_TO_EDGE;
+    default: return GL_REPEAT;
+    }
+}
+
+static GLenum d3d_mag_filter_to_gl(unsigned int value) {
+    switch (value) {
+    case D3DTFG_POINT:  return GL_NEAREST;
+    case D3DTFG_LINEAR: return GL_LINEAR;
+    default: return GL_LINEAR;
+    }
+}
+
+static GLenum d3d_min_filter_to_gl(const ReplayTexStage *ts) {
+    int linear_min = (ts->min_filter == D3DTFN_LINEAR);
+    switch (ts->mip_filter) {
+    case D3DTFP_POINT:
+        return linear_min ? GL_LINEAR_MIPMAP_NEAREST : GL_NEAREST_MIPMAP_NEAREST;
+    case D3DTFP_LINEAR:
+        return linear_min ? GL_LINEAR_MIPMAP_LINEAR : GL_NEAREST_MIPMAP_LINEAR;
+    default:
+        return linear_min ? GL_LINEAR : GL_NEAREST;
+    }
+}
+
+static void apply_texstage(const ReplayTexStage *ts, unsigned int gl_tex) {
+    glBindTexture(GL_TEXTURE_2D, gl_tex);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S,
+                    d3d_address_to_gl(ts->address_u));
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T,
+                    d3d_address_to_gl(ts->address_v));
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER,
+                    d3d_mag_filter_to_gl(ts->mag_filter));
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,
+                    d3d_min_filter_to_gl(ts));
+}
+
 /* Matrices on the wire are COLUMN-major (column-vector style: clip = M*pos),
    confirmed against diff.py's xform_point. Multiplication and upload follow
    that. (A*B)_flat[c*4+r] = sum_k A_flat[k*4+r] * B_flat[c*4+k]. */
@@ -306,6 +411,7 @@ int replay_init(int viewport_w, int viewport_h) {
     glBindTexture(GL_TEXTURE_2D, g_white_tex);
     unsigned int white = 0xffffffffu;
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 1, 1, 0, GL_RGBA, GL_UNSIGNED_BYTE, &white);
+    glGenerateMipmap(GL_TEXTURE_2D);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
@@ -333,6 +439,8 @@ void replay_render_frame(void) {
     mat4_identity(WORLD); mat4_identity(VIEW); mat4_identity(PROJ);
     int lighting_on = 0;
     unsigned int cur_tex_id = 0;
+    ReplayTexStage texstage;
+    texstage_init(&texstage);
 
     glViewport(0, 0, g_viewport_w, g_viewport_h);
     glClearColor(0.45f, 0.70f, 0.95f, 1.0f);
@@ -363,7 +471,6 @@ void replay_render_frame(void) {
         case REC_FRAME_END:
         case REC_FRAME_MARK:
         case REC_VIEWPORT:
-        case REC_SET_TEXSTAGESTATE:
         case REC_SET_LIGHT:
         case REC_SET_MATERIAL:
         case REC_DRAW_INDEXED:
@@ -428,6 +535,7 @@ void replay_render_frame(void) {
             }
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+            glGenerateMipmap(GL_TEXTURE_2D);
             tt->gl_tex = gl;
             tt->w = w; tt->h = h;
             break;
@@ -437,6 +545,37 @@ void replay_render_frame(void) {
             unsigned int stage = p[0];
             if (stage != 0) break;
             cur_tex_id = r_u32(p + 1);
+            break;
+        }
+        case REC_SET_TEXSTAGESTATE: {
+            if (plen < 9) break;
+            unsigned int stage = p[0];
+            unsigned int state = r_u32(p + 1);
+            unsigned int value = r_u32(p + 5);
+            if (stage != 0) break;
+            switch (state) {
+            case D3DTSS_ADDRESS:
+                texstage.address_u = value;
+                texstage.address_v = value;
+                break;
+            case D3DTSS_ADDRESSU:
+                texstage.address_u = value;
+                break;
+            case D3DTSS_ADDRESSV:
+                texstage.address_v = value;
+                break;
+            case D3DTSS_MAGFILTER:
+                texstage.mag_filter = value;
+                break;
+            case D3DTSS_MINFILTER:
+                texstage.min_filter = value;
+                break;
+            case D3DTSS_MIPFILTER:
+                texstage.mip_filter = value;
+                break;
+            default:
+                break;
+            }
             break;
         }
         case REC_SET_RENDERSTATE: {
@@ -494,7 +633,7 @@ void replay_render_frame(void) {
             /* (matrix pipeline validated -- see docs/replay_v0_findings.md) */
 
             ReplayTex *tt = find_tex(cur_tex_id);
-            glBindTexture(GL_TEXTURE_2D, tt ? tt->gl_tex : g_white_tex);
+            apply_texstage(&texstage, tt ? tt->gl_tex : g_white_tex);
             glUniform1i(g_loc_has_tex, 1);
             glUniformMatrix4fv(g_loc_mvp, 1, GL_FALSE, MVP);
 
