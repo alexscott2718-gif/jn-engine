@@ -10,6 +10,7 @@ PFNGLCLEARPROC                   glClear;
 PFNGLENABLEPROC                  glEnable;
 PFNGLDISABLEPROC                 glDisable;
 PFNGLBLENDFUNCPROC               glBlendFunc;
+PFNGLBLENDFUNCSEPARATEPROC       glBlendFuncSeparate;
 PFNGLVIEWPORTPROC                glViewport;
 PFNGLGENBUFFERSPROC              glGenBuffers;
 PFNGLBINDBUFFERPROC              glBindBuffer;
@@ -64,6 +65,7 @@ int glad_load_gl(void) {
     LOAD(glEnable)
     LOAD(glDisable)
     LOAD(glBlendFunc)
+    LOAD(glBlendFuncSeparate)
     LOAD(glViewport)
     LOAD(glGenBuffers)
     LOAD(glBindBuffer)

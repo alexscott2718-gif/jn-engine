@@ -54,14 +54,21 @@ void *omtc_camera_rewrite(uint32_t which, void *m);
  *                      Surfaces first seen in a frame that is later dropped
  *                      are rolled back, so their TEXTURE_DEF re-emits in a
  *                      subsequent committed frame.
- * omtc_register_texture: SHA-1 the locked pixels and emit one TEXTURE_DEF.
+ * omtc_register_texture: SHA-1 the locked pixels and emit texture metadata.
  *                      Hashes h rows of row_bytes each, stepping pitch
  *                      between rows -- pitch padding is excluded so the
  *                      digest is layout-independent. */
 uint32_t omtc_texture_id(void *surface);
 int      omtc_texture_is_new(void *surface, uint32_t tex_id);
 void     omtc_register_texture(uint32_t tex_id, uint16_t w, uint16_t h,
-                               uint32_t d3dfmt, const void *surface_bits,
-                               int32_t pitch, uint32_t row_bytes);
+                               uint32_t d3dfmt,
+                               uint32_t pf_flags, uint32_t pf_rgb_bit_count,
+                               uint32_t pf_r_mask, uint32_t pf_g_mask,
+                               uint32_t pf_b_mask, uint32_t pf_a_mask,
+                               const void *surface_bits, int32_t pitch,
+                               uint32_t row_bytes);
+void     omtc_note_surface_colorkey(void *surface, uint32_t flags,
+                                    uint32_t low, uint32_t high,
+                                    int active, int emit_now);
 
 #endif  /* OMTC_CAPTURE_H */

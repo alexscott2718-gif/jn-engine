@@ -29,12 +29,9 @@ from protocol import (  # noqa: E402
     RECORD_VIEWPORT, RECORD_SET_TEXTURE, RECORD_TEXTURE_DEF,
     RECORD_SET_RENDERSTATE, RECORD_SET_TEXSTAGESTATE, RECORD_SET_LIGHT,
     RECORD_SET_MATERIAL, RECORD_DRAW_PRIMITIVE, RECORD_DRAW_INDEXED,
-    RECORD_FRAME_MARK,
+    RECORD_FRAME_MARK, RECORD_TEXTURE_PIXELS, RECORD_TEXTURE_FORMAT,
+    RECORD_TEXTURE_COLORKEY,
 )
-
-# v3 record type (not always imported above — keep extractor compatible with
-# both v2 and v3 streams).
-RECORD_TEXTURE_PIXELS = 14
 
 
 def main():
@@ -64,6 +61,8 @@ def main():
     material = None        # payload
     texture_defs = {}      # tex_id -> payload (latest)
     texture_pixels = {}    # tex_id -> payload (v3 only; absent in v1/v2)
+    texture_formats = {}   # tex_id -> payload (v4 only)
+    texture_colorkeys = {} # (tex_id, flags) -> payload (v4 only)
     cur_tex = {}           # stage -> payload (latest SET_TEXTURE)
 
     frame_idx = -1
@@ -125,6 +124,12 @@ def main():
                 elif rt == RECORD_TEXTURE_PIXELS:
                     tex_id = struct.unpack_from('<I', payload, 0)[0]
                     texture_pixels[tex_id] = bytes(payload)
+                elif rt == RECORD_TEXTURE_FORMAT:
+                    tex_id = struct.unpack_from('<I', payload, 0)[0]
+                    texture_formats[tex_id] = bytes(payload)
+                elif rt == RECORD_TEXTURE_COLORKEY:
+                    tex_id, flags = struct.unpack_from('<II', payload, 0)
+                    texture_colorkeys[(tex_id, flags)] = bytes(payload)
                 elif rt == RECORD_SET_RENDERSTATE:
                     state = struct.unpack_from('<I', payload, 0)[0]
                     render_states[state] = bytes(payload)
@@ -159,6 +164,12 @@ def main():
         # transforms (WORLD/VIEW/PROJ), then current SET_TEXTURE per stage.
         for tex_id in sorted(texture_defs):
             g.write(pack_record(RECORD_TEXTURE_DEF, texture_defs[tex_id]))
+            if tex_id in texture_formats:
+                g.write(pack_record(RECORD_TEXTURE_FORMAT,
+                                    texture_formats[tex_id]))
+            for key in sorted(k for k in texture_colorkeys if k[0] == tex_id):
+                g.write(pack_record(RECORD_TEXTURE_COLORKEY,
+                                    texture_colorkeys[key]))
             # v3: emit the pixel payload right after the def, if we have it.
             if tex_id in texture_pixels:
                 g.write(pack_record(RECORD_TEXTURE_PIXELS,
@@ -184,6 +195,8 @@ def main():
     print(f"[extract] wrote {out} ({sz} B); "
           f"prelude: {len(texture_defs)} tex_def, "
           f"{len(texture_pixels)} tex_pixels (v3), "
+          f"{len(texture_formats)} tex_fmt (v4), "
+          f"{len(texture_colorkeys)} tex_ck (v4), "
           f"{len(render_states)} rs, "
           f"{len(lights)} lights, mat={material is not None}, "
           f"transforms={list(transforms)}, "

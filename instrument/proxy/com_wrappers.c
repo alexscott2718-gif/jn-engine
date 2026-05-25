@@ -188,7 +188,12 @@ static void omtc_note_createdevice(void)
 #define DDSD2_OFF_WIDTH       0x0C
 #define DDSD2_OFF_PITCH       0x10
 #define DDSD2_OFF_LPSURFACE   0x24
+#define DDSD2_OFF_PF_FLAGS    0x4C   /* ddpfPixelFormat(@0x48) + dwFlags(@0x4) */
 #define DDSD2_OFF_RGBBITCOUNT 0x54   /* ddpfPixelFormat(@0x48) + dwRGBBitCount(@0xC) */
+#define DDSD2_OFF_RBITMASK    0x58
+#define DDSD2_OFF_GBITMASK    0x5C
+#define DDSD2_OFF_BBITMASK    0x60
+#define DDSD2_OFF_ABITMASK    0x64
 
 /* M4: frame markers. Bracket each frame on the file sink, alongside the
  * M3 text-log frame summary (kept -- it confirms the path stays live). */
@@ -227,6 +232,26 @@ static void omtc_capture_set_transform(D3DTRANSFORMSTATETYPE xformType,
         omtc_set_transform(which, (const float *)lpD3DMatrix);
 }
 
+static void omtc_cache_colorkey_if_present(IDirectDrawSurface7 *s,
+                                           void *real, DWORD flags)
+{
+    DDCOLORKEY ck;
+    HRESULT hr = s->lpVtbl->GetColorKey(s, flags, &ck);
+    if (SUCCEEDED(hr))
+        omtc_note_surface_colorkey(real, flags, ck.dwColorSpaceLowValue,
+                                   ck.dwColorSpaceHighValue, 1, 0);
+    else
+        omtc_note_surface_colorkey(real, flags, 0, 0, 0, 0);
+}
+
+static void omtc_cache_surface_colorkeys(IDirectDrawSurface7 *s, void *real)
+{
+    omtc_cache_colorkey_if_present(s, real, DDCKEY_SRCBLT);
+    omtc_cache_colorkey_if_present(s, real, DDCKEY_DESTBLT);
+    omtc_cache_colorkey_if_present(s, real, DDCKEY_SRCOVERLAY);
+    omtc_cache_colorkey_if_present(s, real, DDCKEY_DESTOVERLAY);
+}
+
 /* On first sighting of a texture surface, lock it read-only, hash the pixels
  * and emit one TEXTURE_DEF. The game hands us a wrapper -> unwrap to the real
  * surface before locking and before deriving the id. */
@@ -248,14 +273,46 @@ static void omtc_capture_set_texture(DWORD dwStage, LPDIRECTDRAWSURFACE7 lpTextu
             LONG   pitch = *(LONG  *)(desc + DDSD2_OFF_PITCH);
             void  *bits  = *(void **)(desc + DDSD2_OFF_LPSURFACE);
             DWORD  bpp   = *(DWORD *)(desc + DDSD2_OFF_RGBBITCOUNT);
+            DWORD  pf_flags = *(DWORD *)(desc + DDSD2_OFF_PF_FLAGS);
+            DWORD  r_mask = *(DWORD *)(desc + DDSD2_OFF_RBITMASK);
+            DWORD  g_mask = *(DWORD *)(desc + DDSD2_OFF_GBITMASK);
+            DWORD  b_mask = *(DWORD *)(desc + DDSD2_OFF_BBITMASK);
+            DWORD  a_mask = *(DWORD *)(desc + DDSD2_OFF_ABITMASK);
             uint32_t row_bytes = (uint32_t)w * ((bpp + 7) / 8);
+            omtc_cache_surface_colorkeys(s, real);
             omtc_register_texture(tid, (uint16_t)w, (uint16_t)h, bpp,
-                                  bits, (int32_t)pitch, row_bytes);
+                                  pf_flags, bpp, r_mask, g_mask, b_mask,
+                                  a_mask, bits, (int32_t)pitch, row_bytes);
             s->lpVtbl->Unlock(s, NULL);
         }
         /* Lock failure (R3): entry stays marked seen; TEXTURE_DEF omitted. */
     }
     omtc_set_texture((uint8_t)dwStage, real);
+}
+
+static void omtc_capture_set_colorkey_result(IDirectDrawSurface7 *This,
+                                             HRESULT hr, DWORD flags,
+                                             LPDDCOLORKEY ck)
+{
+    if (FAILED(hr))
+        return;
+    void *real = unwrap((void *)This);
+    if (ck)
+        omtc_note_surface_colorkey(real, flags, ck->dwColorSpaceLowValue,
+                                   ck->dwColorSpaceHighValue, 1, 1);
+    else
+        omtc_note_surface_colorkey(real, flags, 0, 0, 0, 1);
+}
+
+static void omtc_capture_get_colorkey_result(IDirectDrawSurface7 *This,
+                                             HRESULT hr, DWORD flags,
+                                             LPDDCOLORKEY ck)
+{
+    if (FAILED(hr) || !ck)
+        return;
+    void *real = unwrap((void *)This);
+    omtc_note_surface_colorkey(real, flags, ck->dwColorSpaceLowValue,
+                               ck->dwColorSpaceHighValue, 1, 1);
 }
 
 static void omtc_capture_set_renderstate(D3DRENDERSTATETYPE dwRenderStateType,

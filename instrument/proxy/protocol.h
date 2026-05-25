@@ -10,13 +10,15 @@
 #include <stdint.h>
 
 #define OMTC_MAGIC       0x434d544f /* "OMTC" little-endian */
-#define OMTC_VERSION     3
+#define OMTC_VERSION     4
 #define OMTC_VERSION_MIN 1          /* Receiver/diff accept [MIN, VERSION].
                                      * v1 is the 621 MB m5_session.omtc;
                                      * v2 adds FRAME_MARK + commands (M7b);
                                      * v3 adds TEXTURE_PIXELS for replay
                                      * fidelity (one-shot pixel payload per
-                                     * texture; pre-v3 streams omit it). */
+                                     * texture; pre-v3 streams omit it);
+                                     * v4 adds DirectDraw pixel-format masks
+                                     * and texture color-key metadata. */
 
 #pragma pack(push, 1)
 
@@ -54,6 +56,8 @@ struct omtc_record_header {
                                                 * so the .omtc replayer can
                                                 * render with exact original
                                                 * textures (no PNG matching). */
+#define OMTC_RECORD_TYPE_TEXTURE_FORMAT    15  /* v4: DDPIXELFORMAT masks */
+#define OMTC_RECORD_TYPE_TEXTURE_COLORKEY  16  /* v4: DirectDraw color key */
 
 /* --- M7b command records (receiver -> proxy on the same TCP socket) -------
  * Type space is disjoint from proxy->receiver records so a misdirected byte
@@ -122,6 +126,29 @@ struct omtc_texture_pixels {
     uint32_t bpp;          /* bits per pixel of the captured surface */
     uint32_t pixel_bytes;  /* w * h * (bpp+7)/8 -- length of payload below */
     /* Followed by pixel_bytes of raw RGB(A)/BGR(A) data. */
+};
+
+/* TEXTURE_FORMAT (v4): tex_id u32 and DDPIXELFORMAT fields needed to decode
+ * packed surface bits faithfully. Emitted before TEXTURE_PIXELS whenever the
+ * proxy has a locked DDSURFACEDESC2. */
+struct omtc_texture_format {
+    uint32_t tex_id;
+    uint32_t flags;              /* DDPIXELFORMAT.dwFlags */
+    uint32_t rgb_bit_count;      /* DDPIXELFORMAT.dwRGBBitCount */
+    uint32_t r_bit_mask;
+    uint32_t g_bit_mask;
+    uint32_t b_bit_mask;
+    uint32_t alpha_bit_mask;
+};
+
+/* TEXTURE_COLORKEY (v4): DirectDraw surface color key state. `active=0`
+ * means this key slot is explicitly disabled/cleared. */
+struct omtc_texture_colorkey {
+    uint32_t tex_id;
+    uint32_t flags;              /* DDCKEY_* selector passed to DD */
+    uint32_t low;
+    uint32_t high;
+    uint32_t active;
 };
 
 /* SET_RENDERSTATE: state u32, value u32 */

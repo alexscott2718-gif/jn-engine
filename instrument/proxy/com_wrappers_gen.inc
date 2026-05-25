@@ -744,7 +744,9 @@ static HRESULT STDMETHODCALLTYPE w_IDirectDrawSurface7_GetClipper(IDirectDrawSur
 static HRESULT STDMETHODCALLTYPE w_IDirectDrawSurface7_GetColorKey(IDirectDrawSurface7 *This, DWORD a0, LPDDCOLORKEY a1)
 {
     IDirectDrawSurface7 *r = REAL(IDirectDrawSurface7, This);
-    return r->lpVtbl->GetColorKey(r, a0, a1);
+    HRESULT hr = r->lpVtbl->GetColorKey(r, a0, a1);
+    omtc_capture_get_colorkey_result(This, hr, a0, a1);
+    return hr;
 }
 
 static HRESULT STDMETHODCALLTYPE w_IDirectDrawSurface7_GetDC(IDirectDrawSurface7 *This, HDC * a0)
@@ -822,7 +824,9 @@ static HRESULT STDMETHODCALLTYPE w_IDirectDrawSurface7_SetClipper(IDirectDrawSur
 static HRESULT STDMETHODCALLTYPE w_IDirectDrawSurface7_SetColorKey(IDirectDrawSurface7 *This, DWORD a0, LPDDCOLORKEY a1)
 {
     IDirectDrawSurface7 *r = REAL(IDirectDrawSurface7, This);
-    return r->lpVtbl->SetColorKey(r, a0, a1);
+    HRESULT hr = r->lpVtbl->SetColorKey(r, a0, a1);
+    omtc_capture_set_colorkey_result(This, hr, a0, a1);
+    return hr;
 }
 
 static HRESULT STDMETHODCALLTYPE w_IDirectDrawSurface7_SetOverlayPosition(IDirectDrawSurface7 *This, LONG a0, LONG a1)

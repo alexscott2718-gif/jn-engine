@@ -91,7 +91,8 @@ class TextureNamer:
 # --------------------------------------------------------------------------
 
 def _new_frame(begin=None):
-    return Frame(begin, None, {}, None, {}, {}, {}, {}, [], {}, None, None)
+    return Frame(begin, None, {}, None, {}, {}, {}, {}, [], {}, None, {}, {},
+                 None)
 
 
 class Session:
@@ -106,6 +107,8 @@ class Session:
         self.keep_frames = keep_frames
         self.frames = []            # populated only when keep_frames=True
         self.textures = {}          # tex_id -> TextureDef  (global)
+        self.texture_formats = {}   # tex_id -> TextureFormat (global)
+        self.texture_colorkeys = {} # (tex_id, flags) -> TextureColorKey
         self.namer = namer
         self.current = _new_frame()
         self.frame_count = 0
@@ -152,6 +155,15 @@ class Session:
             td = TextureDef.unpack(payload)
             self.textures[td.tex_id] = td
             cur.textures[td.tex_id] = td
+        elif rec_type == RECORD_TEXTURE_FORMAT:
+            tf = TextureFormat.unpack(payload)
+            self.texture_formats[tf.tex_id] = tf
+            cur.texture_formats[tf.tex_id] = tf
+        elif rec_type == RECORD_TEXTURE_COLORKEY:
+            ck = TextureColorKey.unpack(payload)
+            key = (ck.tex_id, ck.flags)
+            self.texture_colorkeys[key] = ck
+            cur.texture_colorkeys[key] = ck
         elif rec_type == RECORD_SET_RENDERSTATE:
             rs = SetRenderState.unpack(payload)
             cur.render_states[rs.state] = rs.value

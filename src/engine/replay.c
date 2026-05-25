@@ -80,6 +80,33 @@
 #ifndef GL_MIRRORED_REPEAT
 #define GL_MIRRORED_REPEAT  0x8370
 #endif
+#ifndef GL_ZERO
+#define GL_ZERO             0
+#endif
+#ifndef GL_ONE
+#define GL_ONE              1
+#endif
+#ifndef GL_SRC_COLOR
+#define GL_SRC_COLOR        0x0300
+#endif
+#ifndef GL_ONE_MINUS_SRC_COLOR
+#define GL_ONE_MINUS_SRC_COLOR 0x0301
+#endif
+#ifndef GL_DST_ALPHA
+#define GL_DST_ALPHA        0x0304
+#endif
+#ifndef GL_ONE_MINUS_DST_ALPHA
+#define GL_ONE_MINUS_DST_ALPHA 0x0305
+#endif
+#ifndef GL_DST_COLOR
+#define GL_DST_COLOR        0x0306
+#endif
+#ifndef GL_ONE_MINUS_DST_COLOR
+#define GL_ONE_MINUS_DST_COLOR 0x0307
+#endif
+#ifndef GL_SRC_ALPHA_SATURATE
+#define GL_SRC_ALPHA_SATURATE 0x0308
+#endif
 
 /* ---- protocol record types (must match instrument/proxy/protocol.h) ---- */
 #define REC_FRAME_BEGIN          1
@@ -96,6 +123,8 @@
 #define REC_DRAW_INDEXED        12
 #define REC_FRAME_MARK          13
 #define REC_TEXTURE_PIXELS      14   /* v3: raw locked-surface bytes */
+#define REC_TEXTURE_FORMAT      15   /* v4: DDPIXELFORMAT masks */
+#define REC_TEXTURE_COLORKEY    16   /* v4: DirectDraw color key */
 
 #define XF_WORLD                 0
 #define XF_VIEW                  1
@@ -105,11 +134,25 @@
 #define D3DRS_ZENABLE            7
 #define D3DRS_ZWRITEENABLE      14
 #define D3DRS_ALPHATESTENABLE   15
+#define D3DRS_SRCBLEND          19
+#define D3DRS_DESTBLEND         20
 #define D3DRS_FOGENABLE         28
 #define D3DRS_FOGCOLOR          34
 #define D3DRS_ALPHABLENDENABLE  27
 #define D3DRS_LIGHTING         137
 #define D3DRS_AMBIENT          139
+
+#define D3DBLEND_ZERO            1
+#define D3DBLEND_ONE             2
+#define D3DBLEND_SRCCOLOR        3
+#define D3DBLEND_INVSRCCOLOR     4
+#define D3DBLEND_SRCALPHA        5
+#define D3DBLEND_INVSRCALPHA     6
+#define D3DBLEND_DESTALPHA       7
+#define D3DBLEND_INVDESTALPHA    8
+#define D3DBLEND_DESTCOLOR       9
+#define D3DBLEND_INVDESTCOLOR   10
+#define D3DBLEND_SRCALPHASAT    11
 
 #define D3DTSS_ADDRESS          12
 #define D3DTSS_ADDRESSU         13
@@ -132,14 +175,40 @@
 #define D3DTFP_POINT             2
 #define D3DTFP_LINEAR            3
 
+#define DDPF_ALPHAPIXELS         0x00000001u
+#define DDCKEY_SRCBLT            0x00000008u
+#define DDCKEY_SRCOVERLAY        0x00000010u
+
 #define OMTC_MAGIC          0x434d544fu
 #define MAX_TEXTURES        1024
 
 /* ---- captured-stream cache ------------------------------------------- */
 typedef struct {
+    int          valid;
+    unsigned int flags;
+    unsigned int rgb_bit_count;
+    unsigned int r_mask;
+    unsigned int g_mask;
+    unsigned int b_mask;
+    unsigned int a_mask;
+} ReplayPixelFormat;
+
+typedef struct {
+    int          known;
+    int          active;
+    unsigned int flags;
+    unsigned int low;
+    unsigned int high;
+} ReplayColorKey;
+
+#define MAX_COLORKEYS_PER_TEX 4
+
+typedef struct {
     unsigned int tex_id;     /* D3D-side id from the capture */
     unsigned int gl_tex;     /* GL texture (white 1x1 in v0) */
     int          w, h;
+    ReplayPixelFormat fmt;
+    ReplayColorKey colorkey[MAX_COLORKEYS_PER_TEX];
 } ReplayTex;
 
 typedef struct {
@@ -196,7 +265,7 @@ static void load_texmap(const char *path) {
 }
 
 static unsigned int g_prog;
-static int          g_loc_mvp, g_loc_tex, g_loc_has_tex;
+static int          g_loc_mvp, g_loc_tex, g_loc_has_tex, g_loc_use_alpha;
 static unsigned int g_vao, g_vbo;
 static int          g_viewport_w, g_viewport_h;
 
@@ -227,12 +296,11 @@ static const char *FS =
     "out vec4 FragColor;\n"
     "uniform sampler2D uTex;\n"
     "uniform int  uHasTex;\n"
+    "uniform int  uUseAlpha;\n"
     "void main(){\n"
     "  vec4 tex = (uHasTex==1) ? texture(uTex, vUV) : vec4(1.0);\n"
-    "  /* Force opaque output: D3D7 textures + vertex DIFFUSE both commonly\n"
-    "     carry alpha=0 in this game's stream. Honoring tex.a makes the GL\n"
-    "     window render transparent on compositing X servers. */\n"
-    "  FragColor = vec4(tex.rgb * vDiff.rgb, 1.0);\n"
+    "  vec4 color = tex * vDiff;\n"
+    "  FragColor = vec4(color.rgb, (uUseAlpha==1) ? color.a : 1.0);\n"
     "}\n";
 
 /* ---- shader compile helper ------------------------------------------- */
@@ -265,6 +333,7 @@ static void register_texture(unsigned int tex_id, int w, int h) {
     if (find_tex(tex_id)) return;
     if (g_tex_count >= MAX_TEXTURES) return;
     ReplayTex *t = &g_tex[g_tex_count++];
+    memset(t, 0, sizeof(*t));
     t->tex_id = tex_id;
     t->w = w; t->h = h;
     /* If the sidecar maps this tex_id to a local PNG, load real pixels via
@@ -277,6 +346,106 @@ static void register_texture(unsigned int tex_id, int w, int h) {
     } else {
         t->gl_tex = g_white_tex;
     }
+}
+
+static ReplayColorKey *find_or_add_colorkey(ReplayTex *t, unsigned int flags) {
+    for (int i = 0; i < MAX_COLORKEYS_PER_TEX; i++)
+        if (t->colorkey[i].known && t->colorkey[i].flags == flags)
+            return &t->colorkey[i];
+    for (int i = 0; i < MAX_COLORKEYS_PER_TEX; i++)
+        if (!t->colorkey[i].known) {
+            t->colorkey[i].known = 1;
+            t->colorkey[i].flags = flags;
+            return &t->colorkey[i];
+        }
+    return NULL;
+}
+
+static int mask_shift(unsigned int mask) {
+    int s = 0;
+    if (!mask) return 0;
+    while ((mask & 1u) == 0u) {
+        mask >>= 1;
+        s++;
+    }
+    return s;
+}
+
+static int mask_bits(unsigned int mask) {
+    int n = 0;
+    if (!mask) return 0;
+    mask >>= mask_shift(mask);
+    while (mask & 1u) {
+        n++;
+        mask >>= 1;
+    }
+    return n;
+}
+
+static unsigned char expand_masked_8(unsigned int value, unsigned int mask) {
+    int bits = mask_bits(mask);
+    if (bits <= 0) return 0;
+    unsigned int raw = (value & mask) >> mask_shift(mask);
+    unsigned int maxv = (1u << bits) - 1u;
+    return (unsigned char)((raw * 255u + maxv / 2u) / maxv);
+}
+
+static unsigned int read_packed_pixel(const unsigned char *p, int bytes) {
+    unsigned int v = 0;
+    for (int i = 0; i < bytes && i < 4; i++)
+        v |= ((unsigned int)p[i]) << (i * 8);
+    return v;
+}
+
+static int colorkey_applies(const ReplayColorKey *ck) {
+    if (!ck->known || !ck->active)
+        return 0;
+    return ((ck->flags & (DDCKEY_SRCBLT | DDCKEY_SRCOVERLAY)) != 0u) ||
+           ck->flags == 0u;
+}
+
+static int texel_is_keyed(const ReplayTex *t, unsigned int encoded) {
+    unsigned int rgb_mask = t->fmt.r_mask | t->fmt.g_mask | t->fmt.b_mask;
+    unsigned int value = rgb_mask ? (encoded & rgb_mask) : encoded;
+    for (int i = 0; i < MAX_COLORKEYS_PER_TEX; i++) {
+        const ReplayColorKey *ck = &t->colorkey[i];
+        unsigned int low = rgb_mask ? (ck->low & rgb_mask) : ck->low;
+        unsigned int high = rgb_mask ? (ck->high & rgb_mask) : ck->high;
+        if (colorkey_applies(ck) && value >= low && value <= high)
+            return 1;
+    }
+    return 0;
+}
+
+static unsigned char *convert_masked_pixels(const ReplayTex *t,
+                                            const unsigned char *pix,
+                                            int w, int h,
+                                            unsigned int bpp,
+                                            unsigned int nbytes) {
+    if (!t->fmt.valid)
+        return NULL;
+    int bytes = (int)((bpp + 7u) / 8u);
+    if (bytes <= 0 || bytes > 4)
+        return NULL;
+    unsigned int need = (unsigned int)(w * h * bytes);
+    if (need > nbytes)
+        return NULL;
+
+    unsigned char *rgba = (unsigned char *)malloc((size_t)w * (size_t)h * 4u);
+    if (!rgba)
+        return NULL;
+    int has_alpha = (t->fmt.flags & DDPF_ALPHAPIXELS) && t->fmt.a_mask;
+    for (int i = 0; i < w * h; i++) {
+        unsigned int encoded = read_packed_pixel(pix + i * bytes, bytes);
+        rgba[i*4+0] = expand_masked_8(encoded, t->fmt.r_mask);
+        rgba[i*4+1] = expand_masked_8(encoded, t->fmt.g_mask);
+        rgba[i*4+2] = expand_masked_8(encoded, t->fmt.b_mask);
+        rgba[i*4+3] = has_alpha ?
+            expand_masked_8(encoded, t->fmt.a_mask) : 255u;
+        if (texel_is_keyed(t, encoded))
+            rgba[i*4+3] = 0;
+    }
+    return rgba;
 }
 
 static void texstage_init(ReplayTexStage *ts) {
@@ -329,6 +498,33 @@ static void apply_texstage(const ReplayTexStage *ts, unsigned int gl_tex) {
                     d3d_mag_filter_to_gl(ts->mag_filter));
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,
                     d3d_min_filter_to_gl(ts));
+}
+
+static GLenum d3d_blend_to_gl(unsigned int value) {
+    switch (value) {
+    case D3DBLEND_ZERO:         return GL_ZERO;
+    case D3DBLEND_ONE:          return GL_ONE;
+    case D3DBLEND_SRCCOLOR:     return GL_SRC_COLOR;
+    case D3DBLEND_INVSRCCOLOR:  return GL_ONE_MINUS_SRC_COLOR;
+    case D3DBLEND_SRCALPHA:     return GL_SRC_ALPHA;
+    case D3DBLEND_INVSRCALPHA:  return GL_ONE_MINUS_SRC_ALPHA;
+    case D3DBLEND_DESTALPHA:    return GL_DST_ALPHA;
+    case D3DBLEND_INVDESTALPHA: return GL_ONE_MINUS_DST_ALPHA;
+    case D3DBLEND_DESTCOLOR:    return GL_DST_COLOR;
+    case D3DBLEND_INVDESTCOLOR: return GL_ONE_MINUS_DST_COLOR;
+    case D3DBLEND_SRCALPHASAT:  return GL_SRC_ALPHA_SATURATE;
+    default:                    return GL_ONE;
+    }
+}
+
+static void apply_blend_state(int alpha_blend, unsigned int src, unsigned int dst) {
+    if (!alpha_blend) {
+        glDisable(GL_BLEND);
+        return;
+    }
+    glEnable(GL_BLEND);
+    glBlendFuncSeparate(d3d_blend_to_gl(src), d3d_blend_to_gl(dst),
+                        GL_ZERO, GL_ONE);
 }
 
 /* Matrices on the wire are COLUMN-major (column-vector style: clip = M*pos),
@@ -390,6 +586,7 @@ int replay_init(int viewport_w, int viewport_h) {
     g_loc_mvp     = glGetUniformLocation(g_prog, "uMVP");
     g_loc_tex     = glGetUniformLocation(g_prog, "uTex");
     g_loc_has_tex = glGetUniformLocation(g_prog, "uHasTex");
+    g_loc_use_alpha = glGetUniformLocation(g_prog, "uUseAlpha");
 
     glGenVertexArrays(1, &g_vao);
     glGenBuffers(1, &g_vbo);
@@ -439,6 +636,9 @@ void replay_render_frame(void) {
     mat4_identity(WORLD); mat4_identity(VIEW); mat4_identity(PROJ);
     int lighting_on = 0;
     unsigned int cur_tex_id = 0;
+    int alpha_blend = 0;
+    unsigned int src_blend = D3DBLEND_ONE;
+    unsigned int dst_blend = D3DBLEND_ZERO;
     ReplayTexStage texstage;
     texstage_init(&texstage);
 
@@ -447,8 +647,7 @@ void replay_render_frame(void) {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glEnable(GL_DEPTH_TEST);
     glDisable(GL_CULL_FACE);
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    apply_blend_state(alpha_blend, src_blend, dst_blend);
 
     glUseProgram(g_prog);
     glUniform1i(g_loc_tex, 0);
@@ -496,6 +695,34 @@ void replay_render_frame(void) {
             register_texture(tid, w, h);
             break;
         }
+        case REC_TEXTURE_FORMAT: {
+            if (plen < 28) break;
+            unsigned int tid = r_u32(p);
+            ReplayTex *tt = find_tex(tid);
+            if (!tt) { register_texture(tid, 0, 0); tt = find_tex(tid); }
+            if (!tt) break;
+            tt->fmt.valid = 1;
+            tt->fmt.flags = r_u32(p + 4);
+            tt->fmt.rgb_bit_count = r_u32(p + 8);
+            tt->fmt.r_mask = r_u32(p + 12);
+            tt->fmt.g_mask = r_u32(p + 16);
+            tt->fmt.b_mask = r_u32(p + 20);
+            tt->fmt.a_mask = r_u32(p + 24);
+            break;
+        }
+        case REC_TEXTURE_COLORKEY: {
+            if (plen < 20) break;
+            unsigned int tid = r_u32(p);
+            ReplayTex *tt = find_tex(tid);
+            if (!tt) { register_texture(tid, 0, 0); tt = find_tex(tid); }
+            if (!tt) break;
+            ReplayColorKey *ck = find_or_add_colorkey(tt, r_u32(p + 4));
+            if (!ck) break;
+            ck->low = r_u32(p + 8);
+            ck->high = r_u32(p + 12);
+            ck->active = r_u32(p + 16) ? 1 : 0;
+            break;
+        }
         case REC_TEXTURE_PIXELS: {
             /* v3 payload: tex_id u32, w u16, h u16, bpp u32, pixel_bytes u32,
                then `pixel_bytes` of packed raw surface bytes (no padding).
@@ -519,9 +746,15 @@ void replay_render_frame(void) {
             GLuint gl;
             glGenTextures(1, &gl);
             glBindTexture(GL_TEXTURE_2D, gl);
-            /* D3D A8R8G8B8 in memory = byte order BGRA (LE). For 24bpp it's
-               BGR. 16bpp formats need conversion -- skip for now (rare). */
-            if (bpp == 32) {
+            unsigned char *rgba = convert_masked_pixels(tt, pix, w, h, bpp,
+                                                        nbytes);
+            if (rgba) {
+                glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0,
+                             GL_RGBA, GL_UNSIGNED_BYTE, rgba);
+                free(rgba);
+            } else if (bpp == 32) {
+                /* v1-v3 compatibility: old captures lack DDPIXELFORMAT, so
+                   retain the known A8R8G8B8 little-endian BGRA assumption. */
                 glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0,
                              GL_BGRA, GL_UNSIGNED_BYTE, pix);
             } else if (bpp == 24) {
@@ -588,8 +821,14 @@ void replay_render_frame(void) {
                                        else       glDisable(GL_DEPTH_TEST);
                                        break;
             case D3DRS_ZWRITEENABLE:   glDepthMask(value ? GL_TRUE : GL_FALSE); break;
-            case D3DRS_ALPHABLENDENABLE: if (value) glEnable(GL_BLEND);
-                                         else       glDisable(GL_BLEND);
+            case D3DRS_ALPHABLENDENABLE: alpha_blend = value ? 1 : 0;
+                                         apply_blend_state(alpha_blend, src_blend, dst_blend);
+                                         break;
+            case D3DRS_SRCBLEND:         src_blend = value;
+                                         apply_blend_state(alpha_blend, src_blend, dst_blend);
+                                         break;
+            case D3DRS_DESTBLEND:        dst_blend = value;
+                                         apply_blend_state(alpha_blend, src_blend, dst_blend);
                                          break;
             default: break;       /* others tracked-only in v0 */
             }
@@ -635,6 +874,7 @@ void replay_render_frame(void) {
             ReplayTex *tt = find_tex(cur_tex_id);
             apply_texstage(&texstage, tt ? tt->gl_tex : g_white_tex);
             glUniform1i(g_loc_has_tex, 1);
+            glUniform1i(g_loc_use_alpha, alpha_blend ? 1 : 0);
             glUniformMatrix4fv(g_loc_mvp, 1, GL_FALSE, MVP);
 
             glBindVertexArray(g_vao);

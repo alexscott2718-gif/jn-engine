@@ -47,6 +47,10 @@ IFACE_ORDER = ["IDirectDrawSurface7", "IDirect3DDevice7",
 # pre-forward. Dict spec keys (all optional):
 #   "hook": name of a side-effect hook called pre-forward with "args" indices.
 #   "args": list of arg indices to pass to the hook (default: none).
+#   "post_hook": name of a side-effect hook called after forward as
+#              fn(This, hr, selected args...). Used for HRESULT methods whose
+#              output/state is only trustworthy after the real call succeeds.
+#   "post_args": list of arg indices passed after This and hr.
 #   "rewrite": list of (arg_index, fn_name, [hook_arg_indices]) tuples; each
 #              emits aN = (TYPE)fn(args...); after r = REAL(...) but BEFORE
 #              the side-effect hook + forward call -- so both capture and the
@@ -96,6 +100,14 @@ HOOKS = {
         "args": [0]  # lpMaterial
     },
     ("IDirect3D7",       "CreateDevice"):         "omtc_note_createdevice",
+    ("IDirectDrawSurface7", "SetColorKey"):       {
+        "post_hook": "omtc_capture_set_colorkey_result",
+        "post_args": [0, 1]  # dwFlags, lpDDColorKey
+    },
+    ("IDirectDrawSurface7", "GetColorKey"):       {
+        "post_hook": "omtc_capture_get_colorkey_result",
+        "post_args": [0, 1]  # dwFlags, lpDDColorKey
+    },
 }
 
 
@@ -213,9 +225,17 @@ def gen_thunk(iface, ret, name, args):
             # Backward-compat: void(void) hook
             lines.append("    %s();" % hook)
     call = "r->lpVtbl->%s(%s)" % (name, ", ".join(fwd_args))
-    if post:
+    post_hook = hook if isinstance(hook, dict) and "post_hook" in hook else None
+    if post or post_hook:
         lines.append("    %s hr = %s;" % (ret, call))
         lines.extend(post)
+        if post_hook:
+            hook_args = ["This", "hr"]
+            for arg_idx in post_hook.get("post_args", []):
+                if arg_idx < len(args):
+                    hook_args.append("a%d" % arg_idx)
+            lines.append("    %s(%s);" % (
+                post_hook["post_hook"], ", ".join(hook_args)))
         lines.append("    return hr;")
     else:
         lines.append("    return %s;" % call)

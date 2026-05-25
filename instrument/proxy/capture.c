@@ -21,6 +21,7 @@
 #include <stdint.h>
 #include <string.h>
 #include "protocol.h"
+#include "capture.h"
 
 /* --- receiver endpoint (proxy connects OUT to the Debian box) --- */
 #define OMTC_RECEIVER_IP    "<DEBIAN_HOST>"
@@ -95,6 +96,23 @@ struct omtc_tex_entry {
 };
 static struct omtc_tex_entry g_tex_table[OMTC_TEX_TABLE_SIZE];
 static int g_tex_count = 0;
+
+#define OMTC_COLORKEY_SLOTS 4
+#define OMTC_SURFACE_META_SIZE 512
+struct omtc_colorkey_state {
+    uint32_t flags;
+    uint32_t low;
+    uint32_t high;
+    int active;
+    int known;
+};
+struct omtc_surface_meta {
+    void *surface;
+    uint32_t tex_id;
+    struct omtc_colorkey_state colorkey[OMTC_COLORKEY_SLOTS];
+};
+static struct omtc_surface_meta g_surface_meta[OMTC_SURFACE_META_SIZE];
+static int g_surface_meta_count;
 
 /* --- SHA-1 (minimal inline implementation) ---
  * Self-contained, no external deps. Copied from public domain sources. */
@@ -632,6 +650,69 @@ void omtc_set_texstagestate(uint8_t stage, uint32_t state, uint32_t value) {
     omtc_emit(OMTC_RECORD_TYPE_SET_TEXSTAGESTATE, &ts, sizeof(ts));
 }
 
+static struct omtc_surface_meta *omtc_surface_meta_for(void *surface,
+                                                       uint32_t tex_id,
+                                                       int create) {
+    if (!surface)
+        return 0;
+    for (int i = 0; i < g_surface_meta_count; i++)
+        if (g_surface_meta[i].surface == surface)
+            return &g_surface_meta[i];
+    if (!create || g_surface_meta_count >= OMTC_SURFACE_META_SIZE)
+        return 0;
+    struct omtc_surface_meta *m = &g_surface_meta[g_surface_meta_count++];
+    memset(m, 0, sizeof(*m));
+    m->surface = surface;
+    m->tex_id = tex_id;
+    return m;
+}
+
+static void omtc_emit_texture_colorkey(uint32_t tex_id,
+                                       const struct omtc_colorkey_state *ck) {
+    if (!ck || !ck->known)
+        return;
+    struct omtc_texture_colorkey rec;
+    rec.tex_id = tex_id;
+    rec.flags = ck->flags;
+    rec.low = ck->low;
+    rec.high = ck->high;
+    rec.active = ck->active ? 1u : 0u;
+    omtc_emit(OMTC_RECORD_TYPE_TEXTURE_COLORKEY, &rec, sizeof(rec));
+}
+
+void omtc_note_surface_colorkey(void *surface, uint32_t flags,
+                                uint32_t low, uint32_t high,
+                                int active, int emit_now) {
+    uint32_t tex_id = omtc_texture_id(surface);
+    struct omtc_surface_meta *m = omtc_surface_meta_for(surface, tex_id, 1);
+    if (!m)
+        return;
+    int slot = -1;
+    for (int i = 0; i < OMTC_COLORKEY_SLOTS; i++)
+        if (m->colorkey[i].known && m->colorkey[i].flags == flags) {
+            slot = i;
+            break;
+        }
+    if (slot < 0) {
+        for (int i = 0; i < OMTC_COLORKEY_SLOTS; i++)
+            if (!m->colorkey[i].known) {
+                slot = i;
+                break;
+            }
+    }
+    if (slot < 0)
+        return;
+
+    struct omtc_colorkey_state *ck = &m->colorkey[slot];
+    ck->flags = flags;
+    ck->low = low;
+    ck->high = high;
+    ck->active = active ? 1 : 0;
+    ck->known = 1;
+    if (emit_now)
+        omtc_emit_texture_colorkey(tex_id, ck);
+}
+
 /* SET_LIGHT: index u8, then the raw D3DLIGHT7 struct (104 bytes on DX7). */
 void omtc_set_light(uint8_t index, const void *d3dlight7, uint32_t blob_len) {
     if (!g_frame_capturing || g_frame_overflow)
@@ -691,8 +772,12 @@ int omtc_texture_is_new(void *surface, uint32_t tex_id) {
 }
 
 void omtc_register_texture(uint32_t tex_id, uint16_t w, uint16_t h,
-                           uint32_t d3dfmt, const void *surface_bits,
-                           int32_t pitch, uint32_t row_bytes) {
+                           uint32_t d3dfmt,
+                           uint32_t pf_flags, uint32_t pf_rgb_bit_count,
+                           uint32_t pf_r_mask, uint32_t pf_g_mask,
+                           uint32_t pf_b_mask, uint32_t pf_a_mask,
+                           const void *surface_bits, int32_t pitch,
+                           uint32_t row_bytes) {
     uint8_t sha1[OMTC_SHA1_LEN];
     SHA1_CTX ctx;
     sha1_init(&ctx);
@@ -719,6 +804,28 @@ void omtc_register_texture(uint32_t tex_id, uint16_t w, uint16_t h,
     td.d3dfmt = d3dfmt;
     memcpy(td.sha1, sha1, OMTC_SHA1_LEN);
     omtc_emit(OMTC_RECORD_TYPE_TEXTURE_DEF, &td, sizeof(td));
+
+    /* v4: carry the DDPIXELFORMAT masks needed to interpret raw pixels. */
+    struct omtc_texture_format tf;
+    tf.tex_id = tex_id;
+    tf.flags = pf_flags;
+    tf.rgb_bit_count = pf_rgb_bit_count;
+    tf.r_bit_mask = pf_r_mask;
+    tf.g_bit_mask = pf_g_mask;
+    tf.b_bit_mask = pf_b_mask;
+    tf.alpha_bit_mask = pf_a_mask;
+    omtc_emit(OMTC_RECORD_TYPE_TEXTURE_FORMAT, &tf, sizeof(tf));
+
+    struct omtc_surface_meta *m = 0;
+    for (int i = 0; i < g_surface_meta_count; i++)
+        if (g_surface_meta[i].tex_id == tex_id) {
+            m = &g_surface_meta[i];
+            break;
+        }
+    if (m) {
+        for (int i = 0; i < OMTC_COLORKEY_SLOTS; i++)
+            omtc_emit_texture_colorkey(tex_id, &m->colorkey[i]);
+    }
 
     /* v3: also emit a TEXTURE_PIXELS record carrying the raw locked-surface
      * pixel bytes (packed, no pitch padding). One-shot per texture, so the

@@ -8,10 +8,11 @@ import struct
 from typing import NamedTuple, List, Optional
 
 OMTC_MAGIC = 0x434d544f  # "OMTC" little-endian
-OMTC_VERSION = 3
+OMTC_VERSION = 4
 OMTC_VERSION_MIN = 1  # receiver/diff accept [MIN, VERSION] inclusive
                       # v3 adds TEXTURE_PIXELS (raw locked-surface bytes per
                       # texture, one-shot) for pixel-faithful .omtc replay.
+                      # v4 adds DDPIXELFORMAT masks and color-key metadata.
 
 # Record types (proxy -> receiver)
 RECORD_FRAME_BEGIN = 1
@@ -28,6 +29,8 @@ RECORD_DRAW_PRIMITIVE = 11
 RECORD_DRAW_INDEXED = 12
 RECORD_FRAME_MARK = 13  # v2: tagged frame (receiver-driven)
 RECORD_TEXTURE_PIXELS = 14  # v3: raw locked-surface bytes (one-shot per tex)
+RECORD_TEXTURE_FORMAT = 15  # v4: DDPIXELFORMAT masks
+RECORD_TEXTURE_COLORKEY = 16  # v4: DirectDraw color key state
 
 # Command records (receiver -> proxy, same framing, disjoint type space)
 CMD_CAMERA_DELTA = 0x80
@@ -177,6 +180,34 @@ class TexturePixels(NamedTuple):
         return TexturePixels(tex_id, w, h, bpp, n, bytes(data[16:16 + n]))
 
 
+class TextureFormat(NamedTuple):
+    """v4 TEXTURE_FORMAT: DDPIXELFORMAT fields needed to decode pixels."""
+    tex_id: int
+    flags: int
+    rgb_bit_count: int
+    r_bit_mask: int
+    g_bit_mask: int
+    b_bit_mask: int
+    alpha_bit_mask: int
+
+    @staticmethod
+    def unpack(data):
+        return TextureFormat(*struct.unpack('<IIIIIII', data[:28]))
+
+
+class TextureColorKey(NamedTuple):
+    """v4 TEXTURE_COLORKEY: DirectDraw color-key state for a texture surface."""
+    tex_id: int
+    flags: int
+    low: int
+    high: int
+    active: int
+
+    @staticmethod
+    def unpack(data):
+        return TextureColorKey(*struct.unpack('<IIIII', data[:20]))
+
+
 class SetRenderState(NamedTuple):
     state: int
     value: int
@@ -312,6 +343,8 @@ class Frame(NamedTuple):
     draw_calls: List[DrawPrimitive]
     lights: dict  # index -> SetLight
     material: Optional[SetMaterial]
+    texture_formats: dict  # tex_id -> TextureFormat
+    texture_colorkeys: dict  # (tex_id, flags) -> TextureColorKey
     mark: Optional[int] = None  # v2: FRAME_MARK tag, when present
 
 
