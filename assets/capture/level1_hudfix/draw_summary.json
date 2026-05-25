@@ -1,5 +1,27 @@
 {
   "draw_count": 3523,
+  "group_counts": {
+    "hud": 37,
+    "player_jimmy": 814,
+    "static_world": 2672
+  },
+  "group_draw_ranges": {
+    "hud": {
+      "first": 3487,
+      "last": 3523,
+      "count": 37
+    },
+    "player_jimmy": {
+      "first": 820,
+      "last": 1633,
+      "count": 814
+    },
+    "static_world": {
+      "first": 1,
+      "last": 3486,
+      "count": 2672
+    }
+  },
   "tag_counts": {
     "alpha-blend": 266,
     "ground": 426,

@@ -373,26 +373,8 @@ void renderer_set_sky(float tr, float tg, float tb,
     g_sky_bot[0] = br; g_sky_bot[1] = bg; g_sky_bot[2] = bb;
 }
 
-void renderer_begin_frame(int w, int h) {
+static void renderer_prepare_camera(int w, int h) {
     glViewport(0, 0, w, h);
-    glClearColor(g_sky_bot[0], g_sky_bot[1], g_sky_bot[2], 1.0f);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-    /* Sky gradient — covers the screen behind everything. Depth writes off so
-       subsequent depth-tested geometry always wins. */
-    if (g_sky_prog && g_sky_vao) {
-        glDisable(GL_DEPTH_TEST);
-        glDepthMask(GL_FALSE);
-        glUseProgram(g_sky_prog);
-        glUniform3f(g_sky_loc_top, g_sky_top[0], g_sky_top[1], g_sky_top[2]);
-        glUniform3f(g_sky_loc_bot, g_sky_bot[0], g_sky_bot[1], g_sky_bot[2]);
-        glBindVertexArray(g_sky_vao);
-        glDrawArrays(GL_TRIANGLES, 0, 6);
-        glBindVertexArray(0);
-        glDepthMask(GL_TRUE);
-        glEnable(GL_DEPTH_TEST);
-    }
-
     if (g_cam_override) {
         /* Matched-camera capture: use the supplied matrices verbatim. */
         memcpy(g_proj, g_override_proj, 64);
@@ -419,6 +401,33 @@ void renderer_begin_frame(int w, int h) {
     g_cam_up[0] = 0.0f; g_cam_up[1] = 1.0f; g_cam_up[2] = 0.0f;
 
     capture_set_camera(g_view, g_proj);
+}
+
+void renderer_begin_frame(int w, int h) {
+    glViewport(0, 0, w, h);
+    glClearColor(g_sky_bot[0], g_sky_bot[1], g_sky_bot[2], 1.0f);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    /* Sky gradient — covers the screen behind everything. Depth writes off so
+       subsequent depth-tested geometry always wins. */
+    if (g_sky_prog && g_sky_vao) {
+        glDisable(GL_DEPTH_TEST);
+        glDepthMask(GL_FALSE);
+        glUseProgram(g_sky_prog);
+        glUniform3f(g_sky_loc_top, g_sky_top[0], g_sky_top[1], g_sky_top[2]);
+        glUniform3f(g_sky_loc_bot, g_sky_bot[0], g_sky_bot[1], g_sky_bot[2]);
+        glBindVertexArray(g_sky_vao);
+        glDrawArrays(GL_TRIANGLES, 0, 6);
+        glBindVertexArray(0);
+        glDepthMask(GL_TRUE);
+        glEnable(GL_DEPTH_TEST);
+    }
+
+    renderer_prepare_camera(w, h);
+}
+
+void renderer_begin_overlay(int w, int h) {
+    renderer_prepare_camera(w, h);
 }
 
 void renderer_draw_billboard(unsigned int tex,
@@ -453,15 +462,9 @@ void renderer_get_view_proj(float out[16]) {
     memcpy(out, g_view_proj, 64);
 }
 
-void renderer_draw_model(const AseModel *m, unsigned int texture_id_override,
-                         float tx, float ty, float tz, float yaw, float scale) {
-    Mat4 model, mvp, vp;
-    /* Y-axis rotation by yaw, with uniform scale, then translation. Column-major. */
-    float c = cosf(yaw) * scale, s = sinf(yaw) * scale;
-    model[0]= c;  model[1]=0;     model[2]=-s;     model[3]=0;
-    model[4]= 0;  model[5]=scale; model[6]= 0;     model[7]=0;
-    model[8]= s;  model[9]=0;     model[10]=c;     model[11]=0;
-    model[12]=tx; model[13]=ty;   model[14]=tz;    model[15]=1;
+void renderer_draw_model_matrix(const AseModel *m, unsigned int texture_id_override,
+                                const float model[16]) {
+    Mat4 mvp, vp;
     mat4_mul(vp, g_proj, g_view);
     mat4_mul(mvp, vp, model);
 
@@ -544,6 +547,18 @@ void renderer_draw_model(const AseModel *m, unsigned int texture_id_override,
 
     glBindVertexArray(0);
     glBindTexture(GL_TEXTURE_2D, 0);
+}
+
+void renderer_draw_model(const AseModel *m, unsigned int texture_id_override,
+                         float tx, float ty, float tz, float yaw, float scale) {
+    Mat4 model;
+    /* Y-axis rotation by yaw, with uniform scale, then translation. Column-major. */
+    float c = cosf(yaw) * scale, s = sinf(yaw) * scale;
+    model[0]= c;  model[1]=0;     model[2]=-s;     model[3]=0;
+    model[4]= 0;  model[5]=scale; model[6]= 0;     model[7]=0;
+    model[8]= s;  model[9]=0;     model[10]=c;     model[11]=0;
+    model[12]=tx; model[13]=ty;   model[14]=tz;    model[15]=1;
+    renderer_draw_model_matrix(m, texture_id_override, model);
 }
 
 void renderer_draw_box(unsigned int vao, int index_count,

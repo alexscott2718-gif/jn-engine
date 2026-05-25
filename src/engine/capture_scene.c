@@ -86,6 +86,7 @@ typedef struct {
     uint8_t z_enable;
     uint8_t z_write;
     uint8_t alpha_discard;
+    uint8_t group;
     uint32_t src_blend;
     uint32_t dst_blend;
 } CaptureSceneDraw;
@@ -105,6 +106,7 @@ static CaptureSceneVertex *g_vertices;
 static uint32_t g_vertex_count;
 static uint32_t g_prog, g_vao, g_vbo;
 static int g_loc_tex, g_loc_alpha_discard;
+static uint32_t g_group_mask = 0xFFFFFFFFu;
 
 static const char *VS =
     GLSL_VS
@@ -270,7 +272,7 @@ int capture_scene_init(const char *path) {
         d->z_enable = read_u8(f);
         d->z_write = read_u8(f);
         d->alpha_discard = read_u8(f);
-        (void)read_u8(f);
+        d->group = read_u8(f);
         d->src_blend = read_u32(f);
         d->dst_blend = read_u32(f);
     }
@@ -293,6 +295,14 @@ int capture_scene_active(void) {
     return g_active;
 }
 
+void capture_scene_set_group_visible(int group, int visible) {
+    if (group < 0 || group >= 32) return;
+    if (visible)
+        g_group_mask |= (1u << group);
+    else
+        g_group_mask &= ~(1u << group);
+}
+
 void capture_scene_render(int viewport_w, int viewport_h) {
     if (!g_active) return;
     glViewport(0, 0, viewport_w, viewport_h);
@@ -305,6 +315,8 @@ void capture_scene_render(int viewport_w, int viewport_h) {
     glBindVertexArray(g_vao);
     for (uint32_t i = 0; i < g_draw_count; i++) {
         const CaptureSceneDraw *d = &g_draws[i];
+        if (d->group < 32 && ((g_group_mask & (1u << d->group)) == 0))
+            continue;
         uint32_t tex = lookup_texture(d->tex_id);
         if (!tex) continue;
         if (d->z_enable) glEnable(GL_DEPTH_TEST);
@@ -342,5 +354,6 @@ void capture_scene_destroy(void) {
     free(g_draws); g_draws = NULL;
     free(g_vertices); g_vertices = NULL;
     g_texture_count = g_draw_count = g_vertex_count = 0;
+    g_group_mask = 0xFFFFFFFFu;
     g_active = 0;
 }

@@ -32,6 +32,29 @@ static int env_enabled(const char *name) {
     return (s && s[0] && strcmp(s, "0") != 0) ? 1 : 0;
 }
 
+static const float CAPTURE_LEVEL1_VIEW_IDENTITY[16] = {
+    1.0f, 0.0f, 0.0f, 0.0f,
+    0.0f, 1.0f, 0.0f, 0.0f,
+    0.0f, 0.0f, 1.0f, 0.0f,
+    0.0f, 0.0f, 0.0f, 1.0f,
+};
+
+/* D3D capture projection from frame_v4_hudfix with the capture_scene z fix
+   baked into row 2, so native model depth matches the pre-transformed scene. */
+static const float CAPTURE_LEVEL1_PROJ_GL[16] = {
+    1.29942167f, 0.0f,       0.0f,        0.0f,
+    0.0f,       1.73256218f, 0.0f,        0.0f,
+    0.0f,       0.0f,        1.00142956f, 1.0f,
+    0.0f,       0.0f,      -41.0285912f,  1.0f,
+};
+
+static const float CAPTURE_LEVEL1_JIMMY_MODEL[16] = {
+    1.0f,          7.4505806e-09f,  2.98023224e-08f, 0.0f,
+    0.0f,          0.974252999f,   -0.225457549f,    0.0f,
+    0.0f,          0.225457549f,    0.974253058f,    0.0f,
+   -0.009765625f, -96.4539566f,   381.575134f,      1.0f,
+};
+
 /* True if the model resolves at least one real texture (model-level or any
    material). Used to skip untextured meshes for faithfulness: the original
    game renders no untextured geometry (audit D1/D2). */
@@ -172,12 +195,43 @@ static void entity_color(const char *type, float *r, float *g, float *b) {
     else                                { *r=0.5f; *g=0.5f; *b=0.5f; }  /* grey   = other  */
 }
 
+static void render_capture_live_jimmy(Entity *jim, int jim_model_ok,
+                                      const float spawn[3],
+                                      int viewport_w, int viewport_h) {
+    if (!jim || !jim_model_ok) return;
+    const AseModel *pose = player_anim_model((PlayerAnim)jim->user_flag);
+    if (!pose) return;
+
+    float model[16];
+    memcpy(model, CAPTURE_LEVEL1_JIMMY_MODEL, sizeof(model));
+    /* The native ASE faces opposite the captured Jimmy mesh in this camera. */
+    for (int i = 0; i < 4; i++) {
+        model[i] = -model[i];
+        model[8 + i] = -model[8 + i];
+    }
+    model[12] += jim->x - spawn[0];
+    model[13] += jim->y - spawn[1];
+    model[14] += jim->z - spawn[2];
+
+    renderer_set_camera_override(CAPTURE_LEVEL1_VIEW_IDENTITY,
+                                 CAPTURE_LEVEL1_PROJ_GL);
+    renderer_begin_overlay(viewport_w, viewport_h);
+    glEnable(GL_DEPTH_TEST);
+    glDepthMask(GL_TRUE);
+    glDisable(GL_BLEND);
+    renderer_draw_model_matrix(pose, 0, model);
+    renderer_end_frame();
+    renderer_set_camera_override(NULL, NULL);
+}
+
 int main(void) {
     Window w;
     if (!window_init(&w, "JN Engine - Step 4: Textured Scene", 1280, 720))
         return 1;
 
     int capture_backed_level1 = env_enabled("JN_CAPTURE_BACKED_LEVEL1");
+    int capture_live_jimmy = capture_backed_level1 &&
+        env_enabled("JN_CAPTURE_BACKED_LIVE_JIMMY");
     if (capture_backed_level1) {
         SDL_SetWindowSize(w.sdl_win, 1280, 720);
         w.width = 1280;
@@ -222,6 +276,10 @@ int main(void) {
             capture_scene_init("assets/capture/level1_hudfix/scene.bin");
         if (!capture_scene_ready)
             fprintf(stderr, "[capture_level1] capture scene unavailable; using old renderer\n");
+        if (capture_scene_ready && capture_live_jimmy) {
+            capture_scene_set_group_visible(CAPTURE_SCENE_GROUP_PLAYER_JIMMY, 0);
+            fprintf(stderr, "[capture_level1] live Jimmy overlay enabled; captured Jimmy group hidden\n");
+        }
     }
 
     /* Faithful .omtc replay path: when JN_REPLAY=<path> is set, skip game
@@ -393,9 +451,13 @@ int main(void) {
     /* Find JIM and frame the camera on him. JIM's spawn Y becomes the ground plane. */
     Camera *cam = renderer_camera();
     Entity *jim  = world_find_type(&world, "3JIM");
+    float capture_live_spawn[3] = {0.0f, 0.0f, 0.0f};
     if (jim) {
         world.ground_y = jim->y - jim->half_extents[1];
         gamestate_set_spawn(jim->x, jim->y, jim->z);
+        capture_live_spawn[0] = jim->x;
+        capture_live_spawn[1] = jim->y;
+        capture_live_spawn[2] = jim->z;
         printf("Player at (%.1f, %.1f, %.1f), ground_y=%.1f\n",
                jim->x, jim->y, jim->z, world.ground_y);
     }
@@ -531,6 +593,9 @@ int main(void) {
                         if (jim) {
                             world.ground_y = jim->y - jim->half_extents[1];
                             gamestate_set_spawn(jim->x, jim->y, jim->z);
+                            capture_live_spawn[0] = jim->x;
+                            capture_live_spawn[1] = jim->y;
+                            capture_live_spawn[2] = jim->z;
                         }
                         follow_cam_snap(&fcam, cam, jim);
                     } else {
@@ -594,6 +659,9 @@ int main(void) {
         capture_begin_frame(cap_seq, SDL_GetTicks());
         if (capture_scene_ready) {
             capture_scene_render(w.width, w.height);
+            if (capture_live_jimmy)
+                render_capture_live_jimmy(jim, jim_model_ok, capture_live_spawn,
+                                          w.width, w.height);
         } else {
         renderer_begin_frame(w.width, w.height);
 

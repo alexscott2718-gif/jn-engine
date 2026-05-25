@@ -45,35 +45,59 @@ D3DRS_LIGHTING = 137
 D3DBLEND_ONE = 2
 D3DBLEND_ZERO = 1
 
+GROUP_STATIC_WORLD = 0
+GROUP_HUD = 1
+GROUP_PLAYER_JIMMY = 2
+
+GROUP_NAMES = {
+    GROUP_STATIC_WORLD: "static_world",
+    GROUP_HUD: "hud",
+    GROUP_PLAYER_JIMMY: "player_jimmy",
+}
+
+JIMMY_TEXTURE_ID = 97849000
+HUD_FIRST_DRAW_INDEX = 3487
+
+
+def draw_group(draw_index: int, tex0: int, state: dict) -> int:
+    if tex0 == JIMMY_TEXTURE_ID:
+        return GROUP_PLAYER_JIMMY
+    if draw_index >= HUD_FIRST_DRAW_INDEX and state.get("z") == 0:
+        return GROUP_HUD
+    return GROUP_STATIC_WORLD
+
 
 def compact_draw(draw: dict) -> dict:
     tex0 = int(draw.get("textures", {}).get("0", 0))
     states = draw.get("render_states", {})
     texstage = draw.get("texstage_states", {})
+    state = {
+        "z": states.get("ZENABLE"),
+        "zwrite": states.get("ZWRITEENABLE"),
+        "alpha_blend": states.get("ALPHABLENDENABLE"),
+        "src_blend": states.get("SRCBLEND"),
+        "dst_blend": states.get("DESTBLEND"),
+        "lighting": states.get("LIGHTING"),
+        "address": texstage.get("0:ADDRESS"),
+        "address_u": texstage.get("0:ADDRESSU"),
+        "address_v": texstage.get("0:ADDRESSV"),
+        "mag_filter": texstage.get("0:MAGFILTER"),
+        "min_filter": texstage.get("0:MINFILTER"),
+        "mip_filter": texstage.get("0:MIPFILTER"),
+    }
+    group = draw_group(int(draw["draw_index"]), tex0, state)
     return {
         "draw_index": draw["draw_index"],
         "prim_type": draw["prim_type"],
         "fvf": draw["fvf"],
         "vtx_count": draw["vtx_count"],
         "tex0": tex0,
+        "group": GROUP_NAMES[group],
         "tags": draw.get("tags", []),
         "bounds": draw.get("bounds", {}),
         "uv_bounds": draw.get("uv_bounds", {}),
         "diffuse": draw.get("diffuse", {}),
-        "state": {
-            "z": states.get("ZENABLE"),
-            "zwrite": states.get("ZWRITEENABLE"),
-            "alpha_blend": states.get("ALPHABLENDENABLE"),
-            "src_blend": states.get("SRCBLEND"),
-            "dst_blend": states.get("DESTBLEND"),
-            "lighting": states.get("LIGHTING"),
-            "address": texstage.get("0:ADDRESS"),
-            "address_u": texstage.get("0:ADDRESSU"),
-            "address_v": texstage.get("0:ADDRESSV"),
-            "mag_filter": texstage.get("0:MAGFILTER"),
-            "min_filter": texstage.get("0:MINFILTER"),
-            "mip_filter": texstage.get("0:MIPFILTER"),
-        },
+        "state": state,
     }
 
 
@@ -114,14 +138,22 @@ def build_draws() -> tuple[list[dict], dict]:
     compact = [compact_draw(row) for row in rows]
 
     tag_counts = Counter(tag for row in compact for tag in row["tags"])
+    group_counts = Counter(row["group"] for row in compact)
     tex_counts = Counter(row["tex0"] for row in compact)
     tag_ranges: dict[str, list[int]] = defaultdict(list)
+    group_ranges: dict[str, list[int]] = defaultdict(list)
     for row in compact:
+        group_ranges[row["group"]].append(row["draw_index"])
         for tag in row["tags"]:
             tag_ranges[tag].append(row["draw_index"])
 
     summary = {
         "draw_count": len(compact),
+        "group_counts": dict(sorted(group_counts.items())),
+        "group_draw_ranges": {
+            group: {"first": values[0], "last": values[-1], "count": len(values)}
+            for group, values in sorted(group_ranges.items())
+        },
         "tag_counts": dict(sorted(tag_counts.items())),
         "top_textures": [
             {"tex_id": tex_id, "draw_count": count}
@@ -186,6 +218,7 @@ def build_scene_bin(textures: list[dict]) -> None:
     used_textures = set()
     draws = []
     vertices = []
+    draw_index = 0
 
     while off < len(raw):
         rec = try_parse_record(raw, off)
@@ -223,6 +256,7 @@ def build_scene_bin(textures: list[dict]) -> None:
             fvf, vtx_count = struct.unpack_from("<II", payload, 1)
             if fvf != FVF_XYZ_NORMAL_DIFFUSE_TEX1 or vtx_count == 0:
                 continue
+            draw_index += 1
             end = 9 + vtx_count * VERTEX_SIZE
             if end > len(payload):
                 continue
@@ -254,6 +288,14 @@ def build_scene_bin(textures: list[dict]) -> None:
                 "first": first,
                 "count": vtx_count,
                 "prim_type": prim_type,
+                "group": draw_group(draw_index, cur_tex, {
+                    "z": z_enable,
+                    "zwrite": z_write,
+                    "alpha_blend": alpha_blend,
+                    "src_blend": src_blend,
+                    "dst_blend": dst_blend,
+                    "lighting": lighting,
+                }),
                 "alpha_blend": alpha_blend,
                 "z_enable": z_enable,
                 "z_write": z_write,
@@ -291,7 +333,7 @@ def build_scene_bin(textures: list[dict]) -> None:
                 int(draw["z_enable"]),
                 int(draw["z_write"]),
                 int(draw["alpha_discard"]),
-                0,
+                int(draw["group"]),
                 int(draw["src_blend"]),
                 int(draw["dst_blend"]),
             ))

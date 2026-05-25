@@ -76,15 +76,26 @@ Current first slice:
   `assets/capture/level1_hudfix/scene.bin` through `src/engine/capture_scene.c`.
   This path does not replay the `.omtc` file at runtime and does not use the
   old OMT/GAM/ASE visual guesses for the frame.
+- The compact fixture now tags draw groups for first live-layer work:
+  `static_world=2672`, `player_jimmy=814`, `hud=37`. The spare byte in each
+  `scene.bin` draw stores that group id, and `draws.json`/`draw_summary.json`
+  expose the same grouping.
+- `JN_CAPTURE_BACKED_LEVEL1=1 JN_CAPTURE_BACKED_LIVE_JIMMY=1` hides the
+  captured Jimmy group and composites the current native Jimmy animation over
+  the capture-backed world/HUD using the accepted capture camera.
 
 Current validation result:
 
 - `build/capture_backed_scene_validation_1280.png` visually matches the
   accepted original-game frame closely enough to treat the capture-backed scene
   renderer as the new Level 1 visual baseline.
-- The capture-backed render is still a static capture-space scene: gameplay
-  simulation continues to tick, but the rendered Jimmy/HUD/camera are the
-  captured frame state until live-state compositing is implemented.
+- `build/capture_backed_live_jimmy_validation.png` proves the live overlay path
+  works, but it is worse than the static proof for visual parity because the
+  current native ASE Jimmy differs from the captured original Jimmy.
+- User QA finding: the live overlay is not functionally playable yet. The
+  capture-backed scene/camera stay static during movement, and live Jimmy
+  disappears/leaves the view once movement carries him out of the fixed accepted
+  camera frame.
 
 ### 2. Build a replay fixture runner for native and WASM
 
@@ -127,8 +138,11 @@ Prioritize visible mismatches against `build/frame_v4_hudfix.png`:
    houses, hedge, signs, and distant scenery.
 4. HUD: render the accepted capture-backed glyph/icon set first, then wire it to
    live demo state.
-5. Jimmy: keep playable animation, but align scale, lighting, and placement to
-   the capture.
+5. Jimmy: keep playable animation, but align scale, lighting, placement, mesh,
+   and material to the capture.
+6. Playability: make movement affect the visual layer coherently. Either bound
+   the first fixed-camera QA mode so Jimmy remains in frame, or reconstruct a
+   capture-relative camera/world view so movement can be free.
 
 ### 4. Create a visual regression loop
 
@@ -153,11 +167,15 @@ visual pieces that are now superseded by capture data:
 
 ## Immediate next session checklist
 
-1. Generate compact fixture metadata from `build/frame_v4_hudfix.omtc`.
-2. Add a native fixture command for replaying the accepted frame.
-3. Decide the WASM fixture packaging format.
-4. Implement a capture-backed Level 1 visual layer behind a runtime flag.
-5. Validate the playable demo against `build/frame_v4_hudfix.png`.
+1. Fix `JN_CAPTURE_BACKED_LIVE_JIMMY=1` so movement stays visible and coherent
+   instead of Jimmy disappearing from the fixed capture view.
+2. Decide whether the next step is bounded fixed-camera QA or
+   capture-relative camera/world reconstruction.
+3. Align live Jimmy visuals against the captured original Jimmy mesh/materials.
+4. Keep `make replay-hudfix` passing and compare screenshots against
+   `build/frame_v4_hudfix.png`.
+5. Decide the WASM fixture packaging format once the native visual layer is
+   functionally playable.
 
 ## Known risk
 
