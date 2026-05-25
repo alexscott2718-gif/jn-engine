@@ -99,7 +99,17 @@ HOOKS = {
         "hook": "omtc_capture_set_material",
         "args": [0]  # lpMaterial
     },
+    ("IDirect3DDevice7", "Load"):                 {
+        "post_hook": "omtc_capture_load_result",
+        "post_args": [0]  # lpDestTex
+    },
     ("IDirect3D7",       "CreateDevice"):         "omtc_note_createdevice",
+    ("IDirectDrawSurface7", "Blt"):               {
+        "post_hook": "omtc_capture_surface_mutation_result",
+    },
+    ("IDirectDrawSurface7", "BltFast"):           {
+        "post_hook": "omtc_capture_surface_mutation_result",
+    },
     ("IDirectDrawSurface7", "SetColorKey"):       {
         "post_hook": "omtc_capture_set_colorkey_result",
         "post_args": [0, 1]  # dwFlags, lpDDColorKey
@@ -107,6 +117,9 @@ HOOKS = {
     ("IDirectDrawSurface7", "GetColorKey"):       {
         "post_hook": "omtc_capture_get_colorkey_result",
         "post_args": [0, 1]  # dwFlags, lpDDColorKey
+    },
+    ("IDirectDrawSurface7", "Unlock"):            {
+        "post_hook": "omtc_capture_surface_mutation_result",
     },
 }
 

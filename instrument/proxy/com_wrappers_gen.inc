@@ -559,7 +559,9 @@ static HRESULT STDMETHODCALLTYPE w_IDirect3DDevice7_CreateStateBlock(IDirect3DDe
 static HRESULT STDMETHODCALLTYPE w_IDirect3DDevice7_Load(IDirect3DDevice7 *This, IDirectDrawSurface7 * a0, POINT * a1, IDirectDrawSurface7 * a2, RECT * a3, DWORD a4)
 {
     IDirect3DDevice7 *r = REAL(IDirect3DDevice7, This);
-    return r->lpVtbl->Load(r, (IDirectDrawSurface7 *)unwrap((void*)a0), a1, (IDirectDrawSurface7 *)unwrap((void*)a2), a3, a4);
+    HRESULT hr = r->lpVtbl->Load(r, (IDirectDrawSurface7 *)unwrap((void*)a0), a1, (IDirectDrawSurface7 *)unwrap((void*)a2), a3, a4);
+    omtc_capture_load_result(This, hr, a0);
+    return hr;
 }
 
 static HRESULT STDMETHODCALLTYPE w_IDirect3DDevice7_LightEnable(IDirect3DDevice7 *This, DWORD a0, WINBOOL a1)
@@ -676,7 +678,9 @@ static HRESULT STDMETHODCALLTYPE w_IDirectDrawSurface7_AddOverlayDirtyRect(IDire
 static HRESULT STDMETHODCALLTYPE w_IDirectDrawSurface7_Blt(IDirectDrawSurface7 *This, LPRECT a0, LPDIRECTDRAWSURFACE7 a1, LPRECT a2, DWORD a3, LPDDBLTFX a4)
 {
     IDirectDrawSurface7 *r = REAL(IDirectDrawSurface7, This);
-    return r->lpVtbl->Blt(r, a0, (LPDIRECTDRAWSURFACE7)unwrap((void*)a1), a2, a3, a4);
+    HRESULT hr = r->lpVtbl->Blt(r, a0, (LPDIRECTDRAWSURFACE7)unwrap((void*)a1), a2, a3, a4);
+    omtc_capture_surface_mutation_result(This, hr);
+    return hr;
 }
 
 static HRESULT STDMETHODCALLTYPE w_IDirectDrawSurface7_BltBatch(IDirectDrawSurface7 *This, LPDDBLTBATCH a0, DWORD a1, DWORD a2)
@@ -688,7 +692,9 @@ static HRESULT STDMETHODCALLTYPE w_IDirectDrawSurface7_BltBatch(IDirectDrawSurfa
 static HRESULT STDMETHODCALLTYPE w_IDirectDrawSurface7_BltFast(IDirectDrawSurface7 *This, DWORD a0, DWORD a1, LPDIRECTDRAWSURFACE7 a2, LPRECT a3, DWORD a4)
 {
     IDirectDrawSurface7 *r = REAL(IDirectDrawSurface7, This);
-    return r->lpVtbl->BltFast(r, a0, a1, (LPDIRECTDRAWSURFACE7)unwrap((void*)a2), a3, a4);
+    HRESULT hr = r->lpVtbl->BltFast(r, a0, a1, (LPDIRECTDRAWSURFACE7)unwrap((void*)a2), a3, a4);
+    omtc_capture_surface_mutation_result(This, hr);
+    return hr;
 }
 
 static HRESULT STDMETHODCALLTYPE w_IDirectDrawSurface7_DeleteAttachedSurface(IDirectDrawSurface7 *This, DWORD a0, LPDIRECTDRAWSURFACE7 a1)
@@ -844,7 +850,9 @@ static HRESULT STDMETHODCALLTYPE w_IDirectDrawSurface7_SetPalette(IDirectDrawSur
 static HRESULT STDMETHODCALLTYPE w_IDirectDrawSurface7_Unlock(IDirectDrawSurface7 *This, LPRECT a0)
 {
     IDirectDrawSurface7 *r = REAL(IDirectDrawSurface7, This);
-    return r->lpVtbl->Unlock(r, a0);
+    HRESULT hr = r->lpVtbl->Unlock(r, a0);
+    omtc_capture_surface_mutation_result(This, hr);
+    return hr;
 }
 
 static HRESULT STDMETHODCALLTYPE w_IDirectDrawSurface7_UpdateOverlay(IDirectDrawSurface7 *This, LPRECT a0, LPDIRECTDRAWSURFACE7 a1, LPRECT a2, DWORD a3, LPDDOVERLAYFX a4)

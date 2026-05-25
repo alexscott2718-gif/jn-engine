@@ -252,6 +252,40 @@ static void omtc_cache_surface_colorkeys(IDirectDrawSurface7 *s, void *real)
     omtc_cache_colorkey_if_present(s, real, DDCKEY_DESTOVERLAY);
 }
 
+static void omtc_dump_surface_texture(void *real, int known_only)
+{
+    if (!real)
+        return;
+    if (known_only && !omtc_texture_is_known(real))
+        return;
+
+    IDirectDrawSurface7 *s = (IDirectDrawSurface7 *)real;
+    uint32_t tid = omtc_texture_id(real);
+    unsigned char desc[DDSD2_SIZE];
+    for (int i = 0; i < DDSD2_SIZE; i++) desc[i] = 0;
+    *(DWORD *)desc = DDSD2_SIZE;  /* dwSize */
+    HRESULT hr = s->lpVtbl->Lock(s, NULL, (LPDDSURFACEDESC2)desc,
+                                 DDLOCK_READONLY | DDLOCK_WAIT, NULL);
+    if (SUCCEEDED(hr)) {
+        DWORD  w     = *(DWORD *)(desc + DDSD2_OFF_WIDTH);
+        DWORD  h     = *(DWORD *)(desc + DDSD2_OFF_HEIGHT);
+        LONG   pitch = *(LONG  *)(desc + DDSD2_OFF_PITCH);
+        void  *bits  = *(void **)(desc + DDSD2_OFF_LPSURFACE);
+        DWORD  bpp   = *(DWORD *)(desc + DDSD2_OFF_RGBBITCOUNT);
+        DWORD  pf_flags = *(DWORD *)(desc + DDSD2_OFF_PF_FLAGS);
+        DWORD  r_mask = *(DWORD *)(desc + DDSD2_OFF_RBITMASK);
+        DWORD  g_mask = *(DWORD *)(desc + DDSD2_OFF_GBITMASK);
+        DWORD  b_mask = *(DWORD *)(desc + DDSD2_OFF_BBITMASK);
+        DWORD  a_mask = *(DWORD *)(desc + DDSD2_OFF_ABITMASK);
+        uint32_t row_bytes = (uint32_t)w * ((bpp + 7) / 8);
+        omtc_cache_surface_colorkeys(s, real);
+        omtc_register_texture(tid, (uint16_t)w, (uint16_t)h, bpp,
+                              pf_flags, bpp, r_mask, g_mask, b_mask,
+                              a_mask, bits, (int32_t)pitch, row_bytes);
+        s->lpVtbl->Unlock(s, NULL);
+    }
+}
+
 /* On first sighting of a texture surface, lock it read-only, hash the pixels
  * and emit one TEXTURE_DEF. The game hands us a wrapper -> unwrap to the real
  * surface before locking and before deriving the id. */
@@ -261,33 +295,27 @@ static void omtc_capture_set_texture(DWORD dwStage, LPDIRECTDRAWSURFACE7 lpTextu
     uint32_t tid = omtc_texture_id(real);
 
     if (real && omtc_texture_is_new(real, tid)) {
-        IDirectDrawSurface7 *s = (IDirectDrawSurface7 *)real;
-        unsigned char desc[DDSD2_SIZE];
-        for (int i = 0; i < DDSD2_SIZE; i++) desc[i] = 0;
-        *(DWORD *)desc = DDSD2_SIZE;  /* dwSize */
-        HRESULT hr = s->lpVtbl->Lock(s, NULL, (LPDDSURFACEDESC2)desc,
-                                     DDLOCK_READONLY | DDLOCK_WAIT, NULL);
-        if (SUCCEEDED(hr)) {
-            DWORD  w     = *(DWORD *)(desc + DDSD2_OFF_WIDTH);
-            DWORD  h     = *(DWORD *)(desc + DDSD2_OFF_HEIGHT);
-            LONG   pitch = *(LONG  *)(desc + DDSD2_OFF_PITCH);
-            void  *bits  = *(void **)(desc + DDSD2_OFF_LPSURFACE);
-            DWORD  bpp   = *(DWORD *)(desc + DDSD2_OFF_RGBBITCOUNT);
-            DWORD  pf_flags = *(DWORD *)(desc + DDSD2_OFF_PF_FLAGS);
-            DWORD  r_mask = *(DWORD *)(desc + DDSD2_OFF_RBITMASK);
-            DWORD  g_mask = *(DWORD *)(desc + DDSD2_OFF_GBITMASK);
-            DWORD  b_mask = *(DWORD *)(desc + DDSD2_OFF_BBITMASK);
-            DWORD  a_mask = *(DWORD *)(desc + DDSD2_OFF_ABITMASK);
-            uint32_t row_bytes = (uint32_t)w * ((bpp + 7) / 8);
-            omtc_cache_surface_colorkeys(s, real);
-            omtc_register_texture(tid, (uint16_t)w, (uint16_t)h, bpp,
-                                  pf_flags, bpp, r_mask, g_mask, b_mask,
-                                  a_mask, bits, (int32_t)pitch, row_bytes);
-            s->lpVtbl->Unlock(s, NULL);
-        }
+        omtc_dump_surface_texture(real, 0);
         /* Lock failure (R3): entry stays marked seen; TEXTURE_DEF omitted. */
     }
     omtc_set_texture((uint8_t)dwStage, real);
+}
+
+static void omtc_capture_load_result(IDirect3DDevice7 *This, HRESULT hr,
+                                     IDirectDrawSurface7 *dst)
+{
+    (void)This;
+    if (FAILED(hr))
+        return;
+    omtc_dump_surface_texture(unwrap((void *)dst), 1);
+}
+
+static void omtc_capture_surface_mutation_result(IDirectDrawSurface7 *This,
+                                                 HRESULT hr)
+{
+    if (FAILED(hr))
+        return;
+    omtc_dump_surface_texture(unwrap((void *)This), 1);
 }
 
 static void omtc_capture_set_colorkey_result(IDirectDrawSurface7 *This,

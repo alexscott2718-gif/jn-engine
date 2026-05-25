@@ -59,6 +59,7 @@ void *omtc_camera_rewrite(uint32_t which, void *m);
  *                      between rows -- pitch padding is excluded so the
  *                      digest is layout-independent. */
 uint32_t omtc_texture_id(void *surface);
+int      omtc_texture_is_known(void *surface);
 int      omtc_texture_is_new(void *surface, uint32_t tex_id);
 void     omtc_register_texture(uint32_t tex_id, uint16_t w, uint16_t h,
                                uint32_t d3dfmt,

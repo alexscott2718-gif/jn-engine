@@ -9,6 +9,7 @@ Fresh-session plan written after the first successful Level 1 v4 recapture.
 - Mark location: frame `20741`, seq `71264`
 - Extracted replay frame: `build/frame_v4.omtc`
 - Current replay screenshot: `build/frame_v4.png`
+- Follow-up recapture handoff: `docs/replay_v4_recapture_next_session.md`
 
 The v4 capture is a major improvement over the v3 replay. The white rectangle
 seen in the screenshot is expected building geometry, not an alpha/keying
@@ -17,10 +18,38 @@ present in the extracted frame.
 
 Known remaining visual issues:
 
-- Skybox is wrong or missing.
-- Ground textures are wrong, especially the blue/black striping.
-- Stream water is missing.
-- Tree trunks have the wrong color.
+- Skybox texture content is wrong: some day skybox is visible, but space skybox
+  content also appears.
+- Ground texture content is wrong, especially the out-of-bounds blue/black
+  striping.
+- Stream water remains wrong or incomplete.
+- Some object textures are stale or replaced, for example hedges showing
+  neutron gauge counter digits.
+- Tree trunks may still need texture/material verification.
+
+## Follow-up Status From 2026-05-25
+
+Material handling was a real replay-side bug. The captured lit passes had
+`LIGHTING=1`, black vertex diffuse, and white material emissive. Replay now
+uses captured material color for lighting-enabled draws instead of multiplying
+those passes by black vertex diffuse. This made ground and sky content visible.
+
+Replay also gained zero-alpha discard for captured alpha textures, which removed
+magenta halos around giant number textures and improved cutout artifacts.
+
+The remaining ground, skybox, water, and hedge-number artifacts appear to be
+stale texture pixel capture rather than purely replay material state. The proxy
+previously captured texture pixels only on first `SetTexture`; it did not
+re-dump already-known texture surfaces after content mutations. The proxy now
+refreshes already-known texture surfaces after:
+
+- `IDirect3DDevice7::Load`
+- `IDirectDrawSurface7::Blt`
+- `IDirectDrawSurface7::BltFast`
+- `IDirectDrawSurface7::Unlock`
+
+A new recapture is required because `build/frame_v4.omtc` already contains the
+old stale first-sighting texture pixels.
 
 ## Verification Already Completed
 
@@ -66,7 +95,7 @@ new replays; save new outputs with descriptive names.
 
 ### 2. Classify Problem Draws
 
-Write a small frame inspection tool for `build/frame_v4.omtc` that dumps, per
+Completed with `instrument/diff/inspect_replay_v4.py`. The tool dumps, per
 draw:
 
 - draw index
@@ -87,8 +116,9 @@ Use geometry and state to group likely draws:
 
 ### 3. Extract Texture Contact Sheets
 
-Dump all 256 captured textures from `frame_v4.omtc` as PNGs using the v4 masks.
-Generate a contact sheet or HTML page with:
+Completed with `instrument/diff/inspect_replay_v4.py`. It dumps captured
+textures from a replay frame as PNGs using the v4 masks and generates metadata
+plus a contact sheet with:
 
 - texture ID
 - dimensions
@@ -99,6 +129,8 @@ Generate a contact sheet or HTML page with:
 - color-key records
 
 Use this to identify likely sky, ground, bark, and water textures.
+
+Current v4 inspection output lives under `build/replay_v4_inspect_fast2`.
 
 ### 4. Debug Ground Textures
 
@@ -183,14 +215,14 @@ Check whether the wrong color comes from:
 
 ### 8. Add Temporary Replay Debug Toggles
 
-Add temporary environment-gated diagnostics only for investigation:
+Completed in `src/engine/replay.c`. Temporary environment-gated diagnostics:
 
-- render only one texture ID
-- render only a draw-index range
-- highlight draws using a specific texture ID
-- disable lighting
-- disable blending
-- flat-color draw groups
+- `JN_REPLAY_ONLY_TEX`
+- `JN_REPLAY_DRAW_START`
+- `JN_REPLAY_DRAW_END`
+- `JN_REPLAY_HIGHLIGHT_TEX`
+- `JN_REPLAY_DISABLE_BLEND`
+- `JN_REPLAY_FLAT_GROUPS`
 
 Do not turn these into broad replay heuristics. The final replay path should
 remain faithful to captured D3D/DDraw state.

@@ -207,6 +207,7 @@ typedef struct {
     unsigned int tex_id;     /* D3D-side id from the capture */
     unsigned int gl_tex;     /* GL texture (white 1x1 in v0) */
     int          w, h;
+    int          has_zero_alpha;
     ReplayPixelFormat fmt;
     ReplayColorKey colorkey[MAX_COLORKEYS_PER_TEX];
 } ReplayTex;
@@ -218,6 +219,14 @@ typedef struct {
     unsigned int min_filter;
     unsigned int mip_filter;
 } ReplayTexStage;
+
+typedef struct {
+    float diffuse[4];
+    float ambient[4];
+    float specular[4];
+    float emissive[4];
+    float power;
+} ReplayMaterial;
 
 static int          g_active;
 static char         g_path[512];
@@ -266,8 +275,18 @@ static void load_texmap(const char *path) {
 
 static unsigned int g_prog;
 static int          g_loc_mvp, g_loc_tex, g_loc_has_tex, g_loc_use_alpha;
+static int          g_loc_alpha_discard, g_loc_debug_mode, g_loc_debug_color;
+static int          g_loc_lighting, g_loc_lit_color;
 static unsigned int g_vao, g_vbo;
 static int          g_viewport_w, g_viewport_h;
+static int          g_dbg_draw_start = 1;
+static int          g_dbg_draw_end = 0x7fffffff;
+static int          g_dbg_only_tex_enabled;
+static unsigned int g_dbg_only_tex;
+static int          g_dbg_highlight_tex_enabled;
+static unsigned int g_dbg_highlight_tex;
+static int          g_dbg_disable_blend;
+static int          g_dbg_flat_groups;
 
 /* ---- GL shader: D3D7 fixed-function emulation (v0: textured + diffuse) - */
 static const char *VS =
@@ -297,9 +316,17 @@ static const char *FS =
     "uniform sampler2D uTex;\n"
     "uniform int  uHasTex;\n"
     "uniform int  uUseAlpha;\n"
+    "uniform int  uAlphaDiscard;\n"
+    "uniform int  uLighting;\n"
+    "uniform vec4 uLitColor;\n"
+    "uniform int  uDebugMode;\n"
+    "uniform vec4 uDebugColor;\n"
     "void main(){\n"
+    "  if (uDebugMode==1) { FragColor = uDebugColor; return; }\n"
     "  vec4 tex = (uHasTex==1) ? texture(uTex, vUV) : vec4(1.0);\n"
-    "  vec4 color = tex * vDiff;\n"
+    "  if (uAlphaDiscard==1 && tex.a <= 0.001) discard;\n"
+    "  vec4 factor = (uLighting==1) ? uLitColor : vDiff;\n"
+    "  vec4 color = tex * factor;\n"
     "  FragColor = vec4(color.rgb, (uUseAlpha==1) ? color.a : 1.0);\n"
     "}\n";
 
@@ -421,7 +448,8 @@ static unsigned char *convert_masked_pixels(const ReplayTex *t,
                                             const unsigned char *pix,
                                             int w, int h,
                                             unsigned int bpp,
-                                            unsigned int nbytes) {
+                                            unsigned int nbytes,
+                                            int *has_zero_alpha) {
     if (!t->fmt.valid)
         return NULL;
     int bytes = (int)((bpp + 7u) / 8u);
@@ -435,6 +463,8 @@ static unsigned char *convert_masked_pixels(const ReplayTex *t,
     if (!rgba)
         return NULL;
     int has_alpha = (t->fmt.flags & DDPF_ALPHAPIXELS) && t->fmt.a_mask;
+    if (has_zero_alpha)
+        *has_zero_alpha = 0;
     for (int i = 0; i < w * h; i++) {
         unsigned int encoded = read_packed_pixel(pix + i * bytes, bytes);
         rgba[i*4+0] = expand_masked_8(encoded, t->fmt.r_mask);
@@ -442,8 +472,13 @@ static unsigned char *convert_masked_pixels(const ReplayTex *t,
         rgba[i*4+2] = expand_masked_8(encoded, t->fmt.b_mask);
         rgba[i*4+3] = has_alpha ?
             expand_masked_8(encoded, t->fmt.a_mask) : 255u;
-        if (texel_is_keyed(t, encoded))
+        if (has_zero_alpha && rgba[i*4+3] == 0)
+            *has_zero_alpha = 1;
+        if (texel_is_keyed(t, encoded)) {
             rgba[i*4+3] = 0;
+            if (has_zero_alpha)
+                *has_zero_alpha = 1;
+        }
     }
     return rgba;
 }
@@ -544,6 +579,58 @@ static void mat4_identity(float m[16]) {
     m[0]=m[5]=m[10]=m[15]=1.0f;
 }
 
+static void material_default(ReplayMaterial *m) {
+    memset(m, 0, sizeof(*m));
+    m->diffuse[0] = m->diffuse[1] = m->diffuse[2] = m->diffuse[3] = 1.0f;
+}
+
+static void material_read(ReplayMaterial *m, const unsigned char *p) {
+    for (int i = 0; i < 4; i++) m->diffuse[i] = r_f32(p + i*4);
+    for (int i = 0; i < 4; i++) m->ambient[i] = r_f32(p + 16 + i*4);
+    for (int i = 0; i < 4; i++) m->specular[i] = r_f32(p + 32 + i*4);
+    for (int i = 0; i < 4; i++) m->emissive[i] = r_f32(p + 48 + i*4);
+    m->power = r_f32(p + 64);
+}
+
+static int parse_u32_env(const char *name, unsigned int *out) {
+    const char *s = getenv(name);
+    if (!s || !s[0]) return 0;
+    char *end = NULL;
+    unsigned long v = strtoul(s, &end, 0);
+    if (end == s) return 0;
+    *out = (unsigned int)v;
+    return 1;
+}
+
+static int parse_i32_env(const char *name, int fallback) {
+    const char *s = getenv(name);
+    if (!s || !s[0]) return fallback;
+    char *end = NULL;
+    long v = strtol(s, &end, 0);
+    if (end == s) return fallback;
+    if (v < 1) v = 1;
+    if (v > 0x7fffffffL) v = 0x7fffffffL;
+    return (int)v;
+}
+
+static int env_enabled(const char *name) {
+    const char *s = getenv(name);
+    return (s && s[0] && strcmp(s, "0") != 0) ? 1 : 0;
+}
+
+static void debug_color_for_tex(unsigned int tex_id, float out[4]) {
+    unsigned int x = tex_id ? tex_id : 0x9e3779b9u;
+    x ^= x >> 16;
+    x *= 0x7feb352du;
+    x ^= x >> 15;
+    x *= 0x846ca68bu;
+    x ^= x >> 16;
+    out[0] = 0.25f + ((x >>  0) & 0xff) / 340.0f;
+    out[1] = 0.25f + ((x >>  8) & 0xff) / 340.0f;
+    out[2] = 0.25f + ((x >> 16) & 0xff) / 340.0f;
+    out[3] = 1.0f;
+}
+
 /* ---- public api ------------------------------------------------------ */
 int replay_active(void) {
     const char *p = getenv("JN_REPLAY");
@@ -587,6 +674,11 @@ int replay_init(int viewport_w, int viewport_h) {
     g_loc_tex     = glGetUniformLocation(g_prog, "uTex");
     g_loc_has_tex = glGetUniformLocation(g_prog, "uHasTex");
     g_loc_use_alpha = glGetUniformLocation(g_prog, "uUseAlpha");
+    g_loc_alpha_discard = glGetUniformLocation(g_prog, "uAlphaDiscard");
+    g_loc_debug_mode = glGetUniformLocation(g_prog, "uDebugMode");
+    g_loc_debug_color = glGetUniformLocation(g_prog, "uDebugColor");
+    g_loc_lighting = glGetUniformLocation(g_prog, "uLighting");
+    g_loc_lit_color = glGetUniformLocation(g_prog, "uLitColor");
 
     glGenVertexArrays(1, &g_vao);
     glGenBuffers(1, &g_vbo);
@@ -620,6 +712,20 @@ int replay_init(int viewport_w, int viewport_h) {
        the proxy carries pixel payloads. */
     const char *tm = getenv("JN_REPLAY_TEX_MAP");
     if (tm && tm[0]) load_texmap(tm);
+
+    g_dbg_draw_start = parse_i32_env("JN_REPLAY_DRAW_START", 1);
+    g_dbg_draw_end = parse_i32_env("JN_REPLAY_DRAW_END", 0x7fffffff);
+    g_dbg_only_tex_enabled =
+        parse_u32_env("JN_REPLAY_ONLY_TEX", &g_dbg_only_tex);
+    g_dbg_highlight_tex_enabled =
+        parse_u32_env("JN_REPLAY_HIGHLIGHT_TEX", &g_dbg_highlight_tex);
+    g_dbg_disable_blend = env_enabled("JN_REPLAY_DISABLE_BLEND");
+    g_dbg_flat_groups = env_enabled("JN_REPLAY_FLAT_GROUPS");
+    if (g_dbg_draw_start > g_dbg_draw_end) {
+        int tmp = g_dbg_draw_start;
+        g_dbg_draw_start = g_dbg_draw_end;
+        g_dbg_draw_end = tmp;
+    }
     g_active = 1;
     fprintf(stderr, "[replay] loaded %s (%zu B); ready to render frame.\n",
             path, g_buf_len);
@@ -640,21 +746,27 @@ void replay_render_frame(void) {
     unsigned int src_blend = D3DBLEND_ONE;
     unsigned int dst_blend = D3DBLEND_ZERO;
     ReplayTexStage texstage;
+    ReplayMaterial material;
     texstage_init(&texstage);
+    material_default(&material);
 
     glViewport(0, 0, g_viewport_w, g_viewport_h);
     glClearColor(0.45f, 0.70f, 0.95f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glEnable(GL_DEPTH_TEST);
     glDisable(GL_CULL_FACE);
-    apply_blend_state(alpha_blend, src_blend, dst_blend);
+    apply_blend_state(g_dbg_disable_blend ? 0 : alpha_blend,
+                      src_blend, dst_blend);
 
     glUseProgram(g_prog);
     glUniform1i(g_loc_tex, 0);
+    glUniform1i(g_loc_debug_mode, 0);
+    glUniform1i(g_loc_lighting, 0);
     glActiveTexture(GL_TEXTURE0);
 
     size_t off = g_record_start;
     int    draws = 0;
+    int    issued_draws = 0;
     while (off + 4 <= g_buf_len) {
         unsigned int type   = r_u8 (g_buf + off);
         unsigned int len_hi = r_u8 (g_buf + off + 1);
@@ -671,7 +783,6 @@ void replay_render_frame(void) {
         case REC_FRAME_MARK:
         case REC_VIEWPORT:
         case REC_SET_LIGHT:
-        case REC_SET_MATERIAL:
         case REC_DRAW_INDEXED:
             /* v0: ignored. Frame markers don't gate (single-frame capture). */
             break;
@@ -746,12 +857,15 @@ void replay_render_frame(void) {
             GLuint gl;
             glGenTextures(1, &gl);
             glBindTexture(GL_TEXTURE_2D, gl);
+            int has_zero_alpha = 0;
             unsigned char *rgba = convert_masked_pixels(tt, pix, w, h, bpp,
-                                                        nbytes);
+                                                        nbytes,
+                                                        &has_zero_alpha);
             if (rgba) {
                 glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0,
                              GL_RGBA, GL_UNSIGNED_BYTE, rgba);
                 free(rgba);
+                tt->has_zero_alpha = has_zero_alpha;
             } else if (bpp == 32) {
                 /* v1-v3 compatibility: old captures lack DDPIXELFORMAT, so
                    retain the known A8R8G8B8 little-endian BGRA assumption. */
@@ -811,6 +925,11 @@ void replay_render_frame(void) {
             }
             break;
         }
+        case REC_SET_MATERIAL: {
+            if (plen >= 68)
+                material_read(&material, p);
+            break;
+        }
         case REC_SET_RENDERSTATE: {
             if (plen < 8) break;
             unsigned int state = r_u32(p);
@@ -822,13 +941,16 @@ void replay_render_frame(void) {
                                        break;
             case D3DRS_ZWRITEENABLE:   glDepthMask(value ? GL_TRUE : GL_FALSE); break;
             case D3DRS_ALPHABLENDENABLE: alpha_blend = value ? 1 : 0;
-                                         apply_blend_state(alpha_blend, src_blend, dst_blend);
+                                         apply_blend_state(g_dbg_disable_blend ? 0 : alpha_blend,
+                                                           src_blend, dst_blend);
                                          break;
             case D3DRS_SRCBLEND:         src_blend = value;
-                                         apply_blend_state(alpha_blend, src_blend, dst_blend);
+                                         apply_blend_state(g_dbg_disable_blend ? 0 : alpha_blend,
+                                                           src_blend, dst_blend);
                                          break;
             case D3DRS_DESTBLEND:        dst_blend = value;
-                                         apply_blend_state(alpha_blend, src_blend, dst_blend);
+                                         apply_blend_state(g_dbg_disable_blend ? 0 : alpha_blend,
+                                                           src_blend, dst_blend);
                                          break;
             default: break;       /* others tracked-only in v0 */
             }
@@ -844,6 +966,12 @@ void replay_render_frame(void) {
             if (vtx_count == 0) break;
             const unsigned char *v = p + 9;
             if (9 + vtx_count * 36 > plen) break;
+            int draw_index = draws + 1;
+            draws++;
+            if (draw_index < g_dbg_draw_start || draw_index > g_dbg_draw_end)
+                break;
+            if (g_dbg_only_tex_enabled && cur_tex_id != g_dbg_only_tex)
+                break;
 
             /* Transcode FVF 0x152 -> compact 9-float vertex layout. */
             float *verts = (float *)malloc(vtx_count * 9 * sizeof(float));
@@ -874,7 +1002,38 @@ void replay_render_frame(void) {
             ReplayTex *tt = find_tex(cur_tex_id);
             apply_texstage(&texstage, tt ? tt->gl_tex : g_white_tex);
             glUniform1i(g_loc_has_tex, 1);
-            glUniform1i(g_loc_use_alpha, alpha_blend ? 1 : 0);
+            glUniform1i(g_loc_use_alpha,
+                        (alpha_blend && !g_dbg_disable_blend) ? 1 : 0);
+            glUniform1i(g_loc_alpha_discard,
+                        (tt && tt->has_zero_alpha) ? 1 : 0);
+            if (lighting_on) {
+                float lr = material.emissive[0] + material.diffuse[0];
+                float lg = material.emissive[1] + material.diffuse[1];
+                float lb = material.emissive[2] + material.diffuse[2];
+                float la = material.emissive[3] > 0.0f ?
+                           material.emissive[3] : material.diffuse[3];
+                if (lr > 1.0f) lr = 1.0f;
+                if (lg > 1.0f) lg = 1.0f;
+                if (lb > 1.0f) lb = 1.0f;
+                if (la > 1.0f) la = 1.0f;
+                glUniform1i(g_loc_lighting, 1);
+                glUniform4f(g_loc_lit_color, lr, lg, lb, la);
+            } else {
+                glUniform1i(g_loc_lighting, 0);
+            }
+            if (g_dbg_highlight_tex_enabled &&
+                cur_tex_id == g_dbg_highlight_tex) {
+                glUniform1i(g_loc_debug_mode, 1);
+                glUniform4f(g_loc_debug_color, 1.0f, 0.0f, 1.0f, 1.0f);
+            } else if (g_dbg_flat_groups) {
+                float color[4];
+                debug_color_for_tex(cur_tex_id, color);
+                glUniform1i(g_loc_debug_mode, 1);
+                glUniform4f(g_loc_debug_color, color[0], color[1],
+                            color[2], color[3]);
+            } else {
+                glUniform1i(g_loc_debug_mode, 0);
+            }
             glUniformMatrix4fv(g_loc_mvp, 1, GL_FALSE, MVP);
 
             glBindVertexArray(g_vao);
@@ -892,9 +1051,10 @@ void replay_render_frame(void) {
             case 6: mode = GL_TRIANGLE_FAN; break;
             }
             glDrawArrays(mode, 0, (GLsizei)vtx_count);
+            issued_draws++;
             glBindVertexArray(0);
+            glUniform1i(g_loc_debug_mode, 0);
             free(verts);
-            draws++;
             (void)lighting_on;       /* v0: unused; flat textured */
             break;
         }
@@ -904,7 +1064,7 @@ void replay_render_frame(void) {
     static int reported = 0;
     if (!reported) {
         fprintf(stderr, "[replay] frame: issued %d GL draws, "
-                "registered %d textures\n", draws, g_tex_count);
+                "registered %d textures\n", issued_draws, g_tex_count);
         reported = 1;
     }
 }

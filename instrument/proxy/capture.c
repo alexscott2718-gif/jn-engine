@@ -756,6 +756,15 @@ uint32_t omtc_texture_id(void *surface) {
     return surface ? (uint32_t)(uintptr_t)surface : 0;
 }
 
+int omtc_texture_is_known(void *surface) {
+    if (!surface)
+        return 0;
+    for (int i = 0; i < g_tex_count; i++)
+        if (g_tex_table[i].surface == surface)
+            return 1;
+    return 0;
+}
+
 int omtc_texture_is_new(void *surface, uint32_t tex_id) {
     if (!surface || !g_frame_capturing)
         return 0;
