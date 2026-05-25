@@ -184,6 +184,7 @@ static void omtc_note_createdevice(void)
  * named-or-anonymous unions whose member spelling depends on header macros;
  * reading by fixed offset (the layout is fixed by the DX7 ABI) sidesteps that. */
 #define DDSD2_SIZE            0x7C
+#define DDSD2_OFF_FLAGS       0x04
 #define DDSD2_OFF_HEIGHT      0x08
 #define DDSD2_OFF_WIDTH       0x0C
 #define DDSD2_OFF_PITCH       0x10
@@ -194,6 +195,7 @@ static void omtc_note_createdevice(void)
 #define DDSD2_OFF_GBITMASK    0x5C
 #define DDSD2_OFF_BBITMASK    0x60
 #define DDSD2_OFF_ABITMASK    0x64
+#define DDSD2_OFF_CAPS        0x68   /* ddsCaps.dwCaps */
 
 /* M4: frame markers. Bracket each frame on the file sink, alongside the
  * M3 text-log frame summary (kept -- it confirms the path stays live). */
@@ -252,12 +254,43 @@ static void omtc_cache_surface_colorkeys(IDirectDrawSurface7 *s, void *real)
     omtc_cache_colorkey_if_present(s, real, DDCKEY_DESTOVERLAY);
 }
 
-static void omtc_dump_surface_texture(void *real, int known_only)
+static int omtc_texture_debug_enabled(void)
+{
+    static int initialized;
+    static int enabled;
+    char buf[8];
+    if (!initialized) {
+        enabled = GetEnvironmentVariableA("OMTC_TEXTURE_DEBUG", buf,
+                                          sizeof(buf)) > 0;
+        initialized = 1;
+    }
+    return enabled;
+}
+
+static void omtc_texture_debug_log(uint32_t tid, HRESULT hr, DWORD w, DWORD h,
+                                   DWORD caps, DWORD desc_flags, DWORD pf_flags,
+                                   DWORD bpp, int was_known, int emitted)
+{
+    if (!omtc_texture_debug_enabled())
+        return;
+    char msg[256];
+    wsprintfA(msg,
+              "texdump tid=%08lx hr=%08lx wh=%lux%lu caps=%08lx desc=%08lx "
+              "pf=%08lx bpp=%lu known=%d emitted=%d",
+              (unsigned long)tid, (unsigned long)hr,
+              (unsigned long)w, (unsigned long)h, (unsigned long)caps,
+              (unsigned long)desc_flags, (unsigned long)pf_flags,
+              (unsigned long)bpp, was_known, emitted);
+    omtc_log(msg);
+}
+
+static int omtc_dump_surface_texture(void *real, int known_only)
 {
     if (!real)
-        return;
-    if (known_only && !omtc_texture_is_known(real))
-        return;
+        return 0;
+    int was_known = omtc_texture_is_known(real);
+    if (known_only && !was_known)
+        return 0;
 
     IDirectDrawSurface7 *s = (IDirectDrawSurface7 *)real;
     uint32_t tid = omtc_texture_id(real);
@@ -266,9 +299,12 @@ static void omtc_dump_surface_texture(void *real, int known_only)
     *(DWORD *)desc = DDSD2_SIZE;  /* dwSize */
     HRESULT hr = s->lpVtbl->Lock(s, NULL, (LPDDSURFACEDESC2)desc,
                                  DDLOCK_READONLY | DDLOCK_WAIT, NULL);
+    int emitted = 0;
     if (SUCCEEDED(hr)) {
         DWORD  w     = *(DWORD *)(desc + DDSD2_OFF_WIDTH);
         DWORD  h     = *(DWORD *)(desc + DDSD2_OFF_HEIGHT);
+        DWORD  flags = *(DWORD *)(desc + DDSD2_OFF_FLAGS);
+        DWORD  caps  = *(DWORD *)(desc + DDSD2_OFF_CAPS);
         LONG   pitch = *(LONG  *)(desc + DDSD2_OFF_PITCH);
         void  *bits  = *(void **)(desc + DDSD2_OFF_LPSURFACE);
         DWORD  bpp   = *(DWORD *)(desc + DDSD2_OFF_RGBBITCOUNT);
@@ -279,11 +315,17 @@ static void omtc_dump_surface_texture(void *real, int known_only)
         DWORD  a_mask = *(DWORD *)(desc + DDSD2_OFF_ABITMASK);
         uint32_t row_bytes = (uint32_t)w * ((bpp + 7) / 8);
         omtc_cache_surface_colorkeys(s, real);
-        omtc_register_texture(tid, (uint16_t)w, (uint16_t)h, bpp,
-                              pf_flags, bpp, r_mask, g_mask, b_mask,
-                              a_mask, bits, (int32_t)pitch, row_bytes);
+        emitted = omtc_register_texture(tid, (uint16_t)w, (uint16_t)h, bpp,
+                                        pf_flags, bpp, r_mask, g_mask, b_mask,
+                                        a_mask, bits, (int32_t)pitch,
+                                        row_bytes);
+        omtc_texture_debug_log(tid, hr, w, h, caps, flags, pf_flags, bpp,
+                               was_known, emitted);
         s->lpVtbl->Unlock(s, NULL);
+    } else {
+        omtc_texture_debug_log(tid, hr, 0, 0, 0, 0, 0, 0, was_known, 0);
     }
+    return emitted;
 }
 
 /* On first sighting of a texture surface, lock it read-only, hash the pixels
@@ -294,9 +336,10 @@ static void omtc_capture_set_texture(DWORD dwStage, LPDIRECTDRAWSURFACE7 lpTextu
     void *real = unwrap((void *)lpTexture);
     uint32_t tid = omtc_texture_id(real);
 
-    if (real && omtc_texture_is_new(real, tid)) {
+    if (real && !omtc_texture_is_known(real)) {
         omtc_dump_surface_texture(real, 0);
-        /* Lock failure (R3): entry stays marked seen; TEXTURE_DEF omitted. */
+        /* Lock failure stays retryable: the surface is not marked known until
+         * omtc_register_texture emits DEF + FORMAT + PIXELS. */
     }
     omtc_set_texture((uint8_t)dwStage, real);
 }

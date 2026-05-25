@@ -87,7 +87,7 @@ static uint32_t g_cmd_tail;   /* render-thread consumer (release)      */
  * Maps Direct3D surface pointers to a tex_id and remembers which have had
  * a TEXTURE_DEF emitted. Surfaces first seen in a dropped frame are rolled
  * back (g_tex_count rewinds) so the def re-emits in a later committed frame. */
-#define OMTC_TEX_TABLE_SIZE 256
+#define OMTC_TEX_TABLE_SIZE 1024
 struct omtc_tex_entry {
     void *surface;                  /* IDirectDrawSurface7* */
     uint32_t tex_id;                /* surface pointer as id */
@@ -766,45 +766,63 @@ int omtc_texture_is_known(void *surface) {
 }
 
 int omtc_texture_is_new(void *surface, uint32_t tex_id) {
+    (void)tex_id;
     if (!surface || !g_frame_capturing)
         return 0;
     for (int i = 0; i < g_tex_count; i++)
         if (g_tex_table[i].surface == surface)
             return 0;
     if (g_tex_count >= OMTC_TEX_TABLE_SIZE)
-        return 0;  /* table full -- treat as seen, skip TEXTURE_DEF */
+        return 0;
+    return 1;
+}
+
+static struct omtc_tex_entry *omtc_texture_entry_for(uint32_t tex_id,
+                                                     int create) {
+    void *surface = (void *)(uintptr_t)tex_id;
+    for (int i = 0; i < g_tex_count; i++)
+        if (g_tex_table[i].tex_id == tex_id)
+            return &g_tex_table[i];
+    if (!create || !surface || g_tex_count >= OMTC_TEX_TABLE_SIZE)
+        return 0;
     struct omtc_tex_entry *e = &g_tex_table[g_tex_count++];
     e->surface = surface;
     e->tex_id = tex_id;
     e->sha1_valid = 0;
-    return 1;
+    return e;
 }
 
-void omtc_register_texture(uint32_t tex_id, uint16_t w, uint16_t h,
-                           uint32_t d3dfmt,
-                           uint32_t pf_flags, uint32_t pf_rgb_bit_count,
-                           uint32_t pf_r_mask, uint32_t pf_g_mask,
-                           uint32_t pf_b_mask, uint32_t pf_a_mask,
-                           const void *surface_bits, int32_t pitch,
-                           uint32_t row_bytes) {
+int omtc_register_texture(uint32_t tex_id, uint16_t w, uint16_t h,
+                          uint32_t d3dfmt,
+                          uint32_t pf_flags, uint32_t pf_rgb_bit_count,
+                          uint32_t pf_r_mask, uint32_t pf_g_mask,
+                          uint32_t pf_b_mask, uint32_t pf_a_mask,
+                          const void *surface_bits, int32_t pitch,
+                          uint32_t row_bytes) {
+    if (!surface_bits || !row_bytes || w == 0 || h == 0)
+        return 0;
+
+    uint32_t pixel_bytes = (uint32_t)row_bytes * (uint32_t)h;
+    if (pixel_bytes > (1u << 20))
+        return 0;
+
     uint8_t sha1[OMTC_SHA1_LEN];
     SHA1_CTX ctx;
     sha1_init(&ctx);
-    if (surface_bits && row_bytes) {
-        const uint8_t *row = (const uint8_t *)surface_bits;
-        for (uint16_t y = 0; y < h; y++) {
-            sha1_update(&ctx, row, row_bytes);
-            row += pitch;
-        }
+    const uint8_t *row = (const uint8_t *)surface_bits;
+    for (uint16_t y = 0; y < h; y++) {
+        sha1_update(&ctx, row, row_bytes);
+        row += pitch;
     }
     sha1_final(&ctx, sha1);
 
-    for (int i = 0; i < g_tex_count; i++)
-        if (g_tex_table[i].tex_id == tex_id) {
-            memcpy(g_tex_table[i].sha1, sha1, OMTC_SHA1_LEN);
-            g_tex_table[i].sha1_valid = 1;
-            break;
-        }
+    struct omtc_tex_entry *e = omtc_texture_entry_for(tex_id, 1);
+    if (!e)
+        return 0;
+    if (e->sha1_valid && memcmp(e->sha1, sha1, OMTC_SHA1_LEN) == 0)
+        return 0;
+    memcpy(e->sha1, sha1, OMTC_SHA1_LEN);
+    e->sha1_valid = 1;
 
     struct omtc_texture_def td;
     td.tex_id = tex_id;
@@ -841,27 +859,23 @@ void omtc_register_texture(uint32_t tex_id, uint16_t w, uint16_t h,
      * .omtc replayer can render with exact original pixels rather than
      * heuristically-paired PNGs. Limited to <= 1 MB per texture to keep a
      * runaway 4K-mip-chain surface from torching the capture buffer. */
-    if (surface_bits && row_bytes && w > 0 && h > 0) {
-        uint32_t pixel_bytes = (uint32_t)row_bytes * (uint32_t)h;
-        if (pixel_bytes <= (1u << 20)) {
-            /* Header + packed payload, stack-buffer-bounded to 1 MB total. */
-            static uint8_t buf[(1u << 20) + sizeof(struct omtc_texture_pixels)];
-            struct omtc_texture_pixels *tp = (struct omtc_texture_pixels *)buf;
-            tp->tex_id = tex_id;
-            tp->w = w;
-            tp->h = h;
-            tp->bpp = d3dfmt;          /* same source as TEXTURE_DEF */
-            tp->pixel_bytes = pixel_bytes;
-            uint8_t *dst = buf + sizeof(*tp);
-            const uint8_t *row = (const uint8_t *)surface_bits;
-            for (uint16_t y = 0; y < h; y++) {
-                /* Pack each row (skip pitch padding the surface may carry). */
-                for (uint32_t i = 0; i < row_bytes; i++) dst[i] = row[i];
-                dst += row_bytes;
-                row += pitch;
-            }
-            omtc_emit(OMTC_RECORD_TYPE_TEXTURE_PIXELS, buf,
-                      sizeof(*tp) + pixel_bytes);
-        }
+    /* Header + packed payload, stack-buffer-bounded to 1 MB total. */
+    static uint8_t buf[(1u << 20) + sizeof(struct omtc_texture_pixels)];
+    struct omtc_texture_pixels *tp = (struct omtc_texture_pixels *)buf;
+    tp->tex_id = tex_id;
+    tp->w = w;
+    tp->h = h;
+    tp->bpp = d3dfmt;          /* same source as TEXTURE_DEF */
+    tp->pixel_bytes = pixel_bytes;
+    uint8_t *dst = buf + sizeof(*tp);
+    row = (const uint8_t *)surface_bits;
+    for (uint16_t y = 0; y < h; y++) {
+        /* Pack each row (skip pitch padding the surface may carry). */
+        for (uint32_t i = 0; i < row_bytes; i++) dst[i] = row[i];
+        dst += row_bytes;
+        row += pitch;
     }
+    omtc_emit(OMTC_RECORD_TYPE_TEXTURE_PIXELS, buf,
+              sizeof(*tp) + pixel_bytes);
+    return 1;
 }

@@ -48,20 +48,20 @@ void *omtc_camera_rewrite(uint32_t which, void *m);
 
 /* --- texture identity ----------------------------------------------------
  * omtc_texture_id:    stable id for a (real) surface pointer.
- * omtc_texture_is_new: 1 the first time a surface is seen, 0 afterwards.
- *                      The first call records the surface so later calls
- *                      return 0 -- call it exactly once per SetTexture.
- *                      Surfaces first seen in a frame that is later dropped
- *                      are rolled back, so their TEXTURE_DEF re-emits in a
- *                      subsequent committed frame.
+ * omtc_texture_is_known: true only after a surface has successfully emitted
+ *                      TEXTURE_DEF + TEXTURE_FORMAT + TEXTURE_PIXELS.
+ * omtc_texture_is_new: compatibility predicate for "not known yet"; it no
+ *                      longer marks the surface seen. Failed locks therefore
+ *                      stay retryable on later SetTexture calls.
  * omtc_register_texture: SHA-1 the locked pixels and emit texture metadata.
  *                      Hashes h rows of row_bytes each, stepping pitch
  *                      between rows -- pitch padding is excluded so the
- *                      digest is layout-independent. */
+ *                      digest is layout-independent. Returns 1 when a texture
+ *                      payload was emitted, 0 when unchanged or skipped. */
 uint32_t omtc_texture_id(void *surface);
 int      omtc_texture_is_known(void *surface);
 int      omtc_texture_is_new(void *surface, uint32_t tex_id);
-void     omtc_register_texture(uint32_t tex_id, uint16_t w, uint16_t h,
+int      omtc_register_texture(uint32_t tex_id, uint16_t w, uint16_t h,
                                uint32_t d3dfmt,
                                uint32_t pf_flags, uint32_t pf_rgb_bit_count,
                                uint32_t pf_r_mask, uint32_t pf_g_mask,
