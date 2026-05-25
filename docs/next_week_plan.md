@@ -3,7 +3,7 @@
 Self-contained handoff. State of the pivot, what's blocking, what to do, in
 priority order. Read this first if you're picking up cold.
 
-## Where we left off (2026-05-22 / 2026-05-23 sessions)
+## Where we left off (2026-05-22 / 2026-05-24 sessions)
 
 **The faithful-engine pivot is proven end-to-end.** A `.omtc` replay engine
 inside `jnengine` consumes the original game's captured D3D7 command stream
@@ -33,11 +33,30 @@ Key facts:
   texture pixels not in stream → uses sidecar PNG path).
 - **`build/frame16565_v3.omtc`** = 19.6 MB; same frame with `TEXTURE_PIXELS`
   records hand-injected from local PNGs (validates v3 plumbing).
+- **`build/level1_v3_retry.omtc`** = 702 MB real XP v3 recapture, saved
+  2026-05-24 with all 256 `TEXTURE_PIXELS` records in-stream.
+- **`build/frame6533_v3_retry.omtc`** = 21 MB self-contained real v3 replay
+  frame extracted from that capture; replay output
+  **`build/frame6533_v3_retry.png`** renders Retroville/Jimmy using only
+  in-stream texture pixels (no PNG sidecar).
 - **`build/replay_texmap.{json,txt}`** = heuristic dim-based pairing
   `tex_id → PNG path`, 196/256 mapped.
-- **The proxy is v3-ready** but the deployed XP DLL is still v2.
+- **The proxy is v3-ready and deployed on XP** as of 2026-05-24. Stock
+  `ddraw_orig.dll` remains in the game directory for rollback.
 
-### Run the replay (textured, no XP needed)
+### Run the replay (real v3 capture, no XP needed)
+```bash
+cd ~/jn-engine
+export LD_LIBRARY_PATH="$HOME/toolchain/usr/lib/x86_64-linux-gnu:$HOME/sdl2/lib"
+unset JN_CAPTURE JN_CAPTURE_CAMERA JN_REPLAY_TEX_MAP
+export JN_REPLAY=build/frame6533_v3_retry.omtc JN_SCREENSHOT=1
+xvfb-run -a -s "-screen 0 1280x720x24" ./jnengine
+```
+
+Expected: `screenshot.png` renders Retroville with Jimmy centered, 3557 GL
+draws, 256 textures registered from in-stream `TEXTURE_PIXELS`.
+
+### Run the older sidecar replay (textured, no XP needed)
 ```bash
 cd ~/jn-engine
 export LD_LIBRARY_PATH="$HOME/toolchain/usr/lib/x86_64-linux-gnu:$HOME/sdl2/lib"
@@ -58,16 +77,9 @@ narrative.
 ## Active gotchas (don't relearn these)
 
 1. **Live-window-on-X compositor reads alpha → looks like silhouettes.**
-   `glReadPixels(GL_RGB)` ignores alpha so the screenshot mode looks
-   correct, but the SDL_GL_SwapWindow → X compositor uses alpha and many
-   draws output `tex.a = 0` → the GL window goes mostly transparent and the
-   desktop shows through. **Fix when you next pick up:** in `replay.c`'s
-   fragment shader (line ~180), change
-   `FragColor = vec4(tex.rgb * vDiff.rgb, tex.a);`
-   to
-   `FragColor = vec4(tex.rgb * vDiff.rgb, 1.0);`
-   (Forcing opaque output. Reverted this session per "no commit" QA test;
-   ship it next time.)
+   Fixed in commit `a99a574`: replay shader now forces
+   `FragColor.a = 1.0`. Do not reintroduce texture/vertex alpha as framebuffer
+   alpha unless the SDL/X compositor path is handled separately.
 2. **D3D7 vertex DIFFUSE alpha is often 0.** Don't `discard` on it — that
    killed ~2/3 of geometry in the silhouette-debug session. Already fixed in
    the committed shader.
@@ -83,12 +95,18 @@ narrative.
 5. **SHA-1 texture matching against local PNGs is impossible** (M5 caveat,
    re-confirmed by `instrument/diff/sha_hunt.py`: 0/256 across 9 byte
    orderings). The proxy's locked-surface bytes aren't byte-equivalent to
-   decoded PNGs. The proper path is v3 pixel payloads.
+   decoded PNGs. The proper path is v3 pixel payloads; the 2026-05-24 retry
+   capture proves all 256 payloads can be captured and replayed.
 6. **`make capture` clean rule USED to nuke `web/`.** Already fixed
    (commit aeeb818) to remove only build outputs, keeping `web/shell.html`.
    If `make web` fails with "shell-file not found" again, that fix regressed.
 7. **`pkill -f "jnengine"` kills your shell** because the bash cmdline
    contains "jnengine". Use `pkill -x jnengine` (exact name match).
+8. **Receiver marks require an interactive receiver stdin.** Starting
+   `receive.py serve` through a non-TTY exec leaves stdin at `/dev/null`, so
+   typing `mark 0xface1` later is impossible and direct `/proc/.../fd`
+   injection fails. Start it with a real TTY/stdin if the next capture needs a
+   `FRAME_MARK`.
 
 ---
 
@@ -104,26 +122,25 @@ git push -u origin master
 ```
 Otherwise the work is local-only.
 
-### P1 — Apply the alpha=1 shader fix and commit
-One-line edit; closes the live-display silhouette bug. Verify by launching
-the replay on `:0.0` and confirming it doesn't go transparent. Commit.
+### P1 — Alpha=1 shader fix
+Done in commit `a99a574`. Headless replay still renders textured Retroville,
+and the live-window compositor transparency bug is closed.
 
-### P2 — The one thing that needs XP — pixel-exact replay
-When XP is on, redeploy + recapture and the replay becomes pixel-exact
-(textures sourced from the original surface bytes, not heuristic PNG
-pairing). Procedure is in **`docs/replay_v3_deploy.md`** verbatim:
+### P2 — Real XP v3 capture / pixel-payload replay
+Done enough to validate the path. `instrument/proxy/ddraw.dll` was deployed
+to XP, `build/level1_v3_retry.omtc` captured a real v3 session, and
+`build/frame6533_v3_retry.omtc` replays with all 256 in-stream texture
+payloads:
 ```bash
-python3 instrument/deploy_xp.py                              # push new v3 ddraw.dll
-python3 instrument/receiver/receive.py serve --out build/level1_v3.omtc
-# launch game, walk into Level 1, mark a frame (0xface1), exit
-python3 instrument/diff/scan_mark.py build/level1_v3.omtc 0xface1
-python3 instrument/diff/extract_frame_capture.py build/level1_v3.omtc \
-        --frame F --out build/frame16565_v3_real.omtc
-JN_REPLAY=build/frame16565_v3_real.omtc JN_SCREENSHOT=1 \
+JN_REPLAY=build/frame6533_v3_retry.omtc JN_SCREENSHOT=1 \
   xvfb-run -a -s "-screen 0 1280x720x24" ./jnengine
 ```
-Built proxy at `instrument/proxy/ddraw.dll` is **v3, verified XP-safe**
-(no UCRT, 22 exports, 20 forwarders intact).
+
+The intended `FRAME_MARK` did not land in the retry stream even though the
+receiver accepted `mark 0xface1`; frame 6533 was chosen by byte-offset timing
+near when the mark command was sent. For a future canonical capture, start the
+receiver interactively and confirm `scan_mark.py` finds the tag before
+discarding the XP session.
 
 ### P3 — Multi-frame streaming replay (doesn't need XP)
 Today's replay is one frame, re-rendered each tick. Walk many/all frames in
@@ -140,14 +157,12 @@ Steps:
 - Pure Linux, validates time-series fidelity.
 
 ### P4 — Render-state coverage polish
-`replay.c` honors `LIGHTING / ZENABLE / ZWRITEENABLE / ALPHABLENDENABLE`.
-For full parity, add: `D3DRS_ALPHATESTENABLE`/`_ALPHAREF`/`_ALPHAFUNC`,
-`D3DRS_FOGENABLE`/`_FOGCOLOR`/`_FOGTABLEMODE`/`_FOGSTART`/`_FOGEND`,
-`D3DRS_CULLMODE`, texture filtering via SET_TEXSTAGESTATE
-(`D3DTSS_MINFILTER`/`MAGFILTER`/`MIPFILTER`). Mostly mechanical; each one
-adds one `glEnable`/`glDisable`/`glTexParameteri` mapping. Likely fixes
-remaining minor visual deltas (e.g., the dark structures at top of the
-current Retroville render).
+`replay.c` honors `LIGHTING / ZENABLE / ZWRITEENABLE / ALPHABLENDENABLE`,
+and commit `3dc2f59` added stage-0 texture address/filter coverage for
+`SET_TEXSTAGESTATE` (`ADDRESS`, `ADDRESSU/V`, `MINFILTER`, `MAGFILTER`,
+`MIPFILTER`). Remaining render-state parity work: alpha test, fog, cull mode,
+blend factors, and any texture-stage combine states that prove visible in
+real captures.
 
 ### P5 — Simulation layer plan (the other half of "faithful")
 The faithful architecture is `simulation → D3D7 commands → renderer`.
@@ -191,13 +206,12 @@ upload — may need a CPU swap to RGBA in the v3 path for WebGL2.)
 | `docs/phase12_canon_baseline.md` | Pre-pivot Phase-12 measurements (still valid context) |
 
 ## What to do if XP is on and you only have 30 minutes
-Run P2 (the deploy + recapture). The DLL is built and verified XP-safe.
-You don't need to touch any code. The procedure is in
-`docs/replay_v3_deploy.md` and reproduced above. The proof closes when
-`JN_REPLAY=build/frame16565_v3_real.omtc ./jnengine` produces a screenshot
-that's visually indistinguishable from the original capture's frame.
+If the goal is a cleaner canonical capture, run the v3 receiver interactively,
+launch from the visible XP desktop, enter Level 1, issue `mark 0xface1`, quit,
+and immediately verify with `scan_mark.py`. The DLL is already deployed; only
+redeploy if `instrument/proxy/ddraw.dll` changes.
 
 ## What to do if XP is off
-P1 (commit the alpha fix) then P3 (multi-frame streaming) is the highest-
-value purely-Linux work. Or jump to P5 / P6 if the architecture-level
-planning energy is there.
+P3 (multi-frame streaming) is now the highest-value pure-Linux work, using
+`build/level1_v3_retry.omtc` or a sliced range around frame 6533 as the test
+input. Or jump to P5 / P6 if the architecture-level planning energy is there.

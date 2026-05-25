@@ -21,6 +21,35 @@ the deploy + recapture procedure (requires XP coordination).
   a GL texture (D3D A8R8G8B8 → `GL_BGRA / GL_UNSIGNED_BYTE`, R8G8B8 → BGR),
   overriding the sidecar PNG fallback when pixels are present.
 
+## 2026-05-24 capture result
+
+The XP v3 path has been exercised with a real capture:
+
+- `instrument/proxy/ddraw.dll` deployed successfully to the XP game directory.
+- `build/level1_v3_retry.omtc` is a 702 MB v3 stream from XP.
+- The retry stream has all 256 `TEXTURE_PIXELS` payloads in-stream.
+- `build/frame6533_v3_retry.omtc` is a 21 MB self-contained replay extracted
+  from the retry capture.
+- `build/frame6533_v3_retry.png` is the replay screenshot: Retroville with
+  Jimmy centered, rendered from in-stream pixels only.
+
+Replay command:
+
+```bash
+cd ~/jn-engine
+export LD_LIBRARY_PATH="$HOME/toolchain/usr/lib/x86_64-linux-gnu:$HOME/sdl2/lib"
+unset JN_REPLAY_TEX_MAP
+JN_REPLAY=build/frame6533_v3_retry.omtc JN_SCREENSHOT=1 \
+  xvfb-run -a -s "-screen 0 1280x720x24" ./jnengine
+```
+
+The replay reported 3557 GL draws and 256 registered textures.
+
+Important caveat: the attempted `mark 0xface1` command did not appear as a
+`FRAME_MARK` record in the retry stream. Frame 6533 was chosen by byte-offset
+timing near when the mark command was sent. For a future canonical recapture,
+verify `scan_mark.py` before discarding the XP session.
+
 ## Deploy + recapture (when convenient)
 
 Requires the XP machine + receiver up.
@@ -30,14 +59,17 @@ Requires the XP machine + receiver up.
 cd ~/jn-engine
 python3 instrument/deploy_xp.py                 # copies proxy/ddraw.dll across
 
-# 2. Start a fresh receiver (Debian).
+# 2. Start a fresh receiver (Debian). Use an interactive terminal/TTY if you
+#    intend to type control commands like `mark 0xface1`.
 python3 instrument/receiver/receive.py serve --out build/level1_v3.omtc
 
-# 3. Launch the game (use --launch on deploy_xp.py or via VNC). Walk into
-#    Level 1 enough that the texture set the replay will use has all been
+# 3. Launch the game from the visible XP desktop/VNC. `deploy_xp.py --launch`
+#    can start Neutron.exe headless/non-interactively, so prefer manual launch
+#    when validating visuals. Walk into Level 1 enough that the texture set
+#    the replay will use has all been
 #    bound (a few seconds in-level is enough; TEXTURE_PIXELS is one-shot
 #    per texture, lazy). Optionally mark a frame to pin a target:
-#       python3 instrument/receiver/receive.py mark 0xface1   # in a second terminal
+#       mark 0xface1   # type into the live receiver's control prompt
 #    then exit.
 
 # 4. Pin the marked frame index F, then extract a self-contained replay:
@@ -59,6 +91,10 @@ capture renders entirely from in-stream pixels.
 `screenshot.png` will be the original Level-1 frame rendered with the
 original's exact textures — pixel-faithful, no parameter tuning, no PNG
 matching, no per-mesh material RE. That validates the rethink end to end.
+
+If `scan_mark.py` finds no mark, use a lightweight frame/offset scan to pick a
+candidate Level-1 frame after all 256 `TEXTURE_PIXELS` records have arrived,
+then extract that frame with `extract_frame_capture.py`.
 
 ## Rollback
 
