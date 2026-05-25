@@ -44,6 +44,16 @@ capture: CFLAGS += -DJN_CAPTURE
 capture: clean $(TARGET)
 	@echo "built jnengine with -DJN_CAPTURE -- run with JN_CAPTURE=<out.omtc>"
 
+# Validate the accepted Level 1 v4 HUD-fix replay fixture. The large .omtc and
+# generated inspect output live under build/; only the manifest is tracked.
+REPLAY_HUDFIX_MANIFEST = assets/capture/level1_hudfix/frame_meta.json
+
+replay-hudfix: $(TARGET)
+	python3 tools/validate_replay_fixture.py $(REPLAY_HUDFIX_MANIFEST)
+
+capture-fixture:
+	python3 tools/build_level1_hudfix_fixture.py
+
 # --- WebAssembly (Emscripten) build ---------------------------------------
 # Run `source ~/emsdk/emsdk_env.sh` once per shell before `make web`.
 EMCC        = emcc
@@ -65,4 +75,4 @@ web:
 	mkdir -p $(WEB_OUT_DIR)
 	$(EMCC) $(WEB_CFLAGS) $(WEB_SRC) $(WEB_LDFLAGS) -o $(WEB_TARGET)
 
-.PHONY: all clean web capture
+.PHONY: all clean web capture replay-hudfix capture-fixture

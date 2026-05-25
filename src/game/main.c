@@ -9,6 +9,7 @@
 #include "../engine/canon_data.h"   /* Phase 12: measured ground footprint/topography */
 #include "../engine/capture.h"
 #include "../engine/replay.h"
+#include "../engine/capture_scene.h"
 #include "../engine/assets/gam_loader.h"
 #include "../engine/assets/ase_loader.h"
 #include "../engine/assets/tex_loader.h"
@@ -25,6 +26,11 @@
 #include <string.h>
 #include <zlib.h>
 #include <SDL.h>
+
+static int env_enabled(const char *name) {
+    const char *s = getenv(name);
+    return (s && s[0] && strcmp(s, "0") != 0) ? 1 : 0;
+}
 
 /* True if the model resolves at least one real texture (model-level or any
    material). Used to skip untextured meshes for faithfulness: the original
@@ -171,6 +177,13 @@ int main(void) {
     if (!window_init(&w, "JN Engine - Step 4: Textured Scene", 1280, 720))
         return 1;
 
+    int capture_backed_level1 = env_enabled("JN_CAPTURE_BACKED_LEVEL1");
+    if (capture_backed_level1) {
+        SDL_SetWindowSize(w.sdl_win, 1280, 720);
+        w.width = 1280;
+        w.height = 720;
+    }
+
     if (!renderer_init(w.width, w.height)) {
         window_destroy(&w);
         return 1;
@@ -203,6 +216,14 @@ int main(void) {
         return 1;
     }
 
+    int capture_scene_ready = 0;
+    if (capture_backed_level1) {
+        capture_scene_ready =
+            capture_scene_init("assets/capture/level1_hudfix/scene.bin");
+        if (!capture_scene_ready)
+            fprintf(stderr, "[capture_level1] capture scene unavailable; using old renderer\n");
+    }
+
     /* Faithful .omtc replay path: when JN_REPLAY=<path> is set, skip game
        setup entirely and render the captured D3D7 command stream. Phase-12
        pivot proof (docs/faithful_engine_rethink.md). */
@@ -212,6 +233,9 @@ int main(void) {
             window_destroy(&w); return 1;
         }
         int screenshot_mode = getenv("JN_SCREENSHOT") != NULL;
+        const char *screenshot_path = getenv("JN_SCREENSHOT_PATH");
+        if (!screenshot_path || !screenshot_path[0])
+            screenshot_path = "screenshot.png";
         int screenshot_taken = 0;
         while (!w.should_quit) {
             SDL_Event ev;
@@ -228,13 +252,14 @@ int main(void) {
             window_swap(&w);
             if (screenshot_mode && !screenshot_taken) {
                 glFinish();
-                save_screenshot("screenshot.png", w.width, w.height);
+                save_screenshot(screenshot_path, w.width, w.height);
                 screenshot_taken = 1;
                 w.should_quit = 1;
             }
             SDL_Delay(16);
         }
         replay_destroy();
+        capture_scene_destroy();
         input_destroy(); audio_destroy(); renderer_destroy();
         window_destroy(&w);
         return 0;
@@ -375,7 +400,14 @@ int main(void) {
                jim->x, jim->y, jim->z, world.ground_y);
     }
     cam->fov    = 1.0472f;
+    cam->near_z = 1.0f;
     cam->far_z  = 80000.0f;
+    if (capture_backed_level1) {
+        cam->fov = 1.047215f;
+        cam->near_z = 20.0f;
+        cam->far_z = 28000.0f;
+        printf("[capture_level1] capture-scene viewport=1280x720 fov_y=60.001 near=20 far=28000\n");
+    }
 
     /* Ground: a real level (placements present) supplies its own ground/street/
        terrain and water meshes (GROUND.ASE, ncwater*, etc.) at their authored
@@ -400,6 +432,9 @@ int main(void) {
     printf("Entities: %d   Items: %d\n", world.count, gamestate_get()->items_total);
     int screenshot_taken = 0;
     int screenshot_mode  = getenv("JN_SCREENSHOT") != NULL;
+    const char *screenshot_path = getenv("JN_SCREENSHOT_PATH");
+    if (!screenshot_path || !screenshot_path[0])
+        screenshot_path = "screenshot.png";
     /* In screenshot mode let a few physics ticks fire first so pending state
        (level swaps, animation transitions) actually flushes before capture. */
     int screenshot_warmup_ticks = 0;
@@ -557,6 +592,9 @@ int main(void) {
 
         /* Render phase: uncapped */
         capture_begin_frame(cap_seq, SDL_GetTicks());
+        if (capture_scene_ready) {
+            capture_scene_render(w.width, w.height);
+        } else {
         renderer_begin_frame(w.width, w.height);
 
         ground_draw(world.ground_y);
@@ -634,6 +672,7 @@ int main(void) {
         }
 
         renderer_end_frame();
+        }
         capture_end_frame();
         cap_seq++;
 
@@ -644,7 +683,7 @@ int main(void) {
         if (screenshot_mode && !screenshot_taken) {
             if (screenshot_warmup_ticks >= SCREENSHOT_WARMUP_GOAL) {
                 glFinish();
-                save_screenshot("screenshot.png", w.width, w.height);
+                save_screenshot(screenshot_path, w.width, w.height);
                 screenshot_taken = 1;
                 w.should_quit = 1;
             } else {
@@ -677,6 +716,7 @@ int main(void) {
     }
 
     capture_shutdown();
+    capture_scene_destroy();
     player_anim_destroy();
     world_box_destroy();
     ground_destroy();

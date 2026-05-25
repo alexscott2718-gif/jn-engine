@@ -1,0 +1,49 @@
+{
+  "name": "level1_hudfix",
+  "description": "Accepted Level 1 v4 HUD-fix replay frame used as playable demo visual ground truth.",
+  "captured_on": "2026-05-25",
+  "source": {
+    "full_capture": "build/level1_v4_hudfix.omtc",
+    "frame_capture": "build/frame_v4_hudfix.omtc",
+    "reference_screenshot": "build/frame_v4_hudfix.png",
+    "inspect_dir": "build/replay_v4_hudfix_inspect",
+    "recovered_frame_index": 8881
+  },
+  "screen": {
+    "width": 640,
+    "height": 480,
+    "aspect": 1.3333333333
+  },
+  "projection": {
+    "world_fov_y_degrees": 60.001,
+    "world_near_z": 20.0,
+    "world_far_z": 28000.0
+  },
+  "expected_replay": {
+    "gl_draws": 3523,
+    "registered_textures": 342,
+    "skipped_missing_texture_draws": 0
+  },
+  "expected_records": {
+    "texture_def": 342,
+    "texture_format": 342,
+    "texture_pixels": 342,
+    "texture_colorkey": 1368
+  },
+  "derived_fixture": {
+    "draws": "assets/capture/level1_hudfix/draws.json",
+    "draw_summary": "assets/capture/level1_hudfix/draw_summary.json",
+    "scene": "assets/capture/level1_hudfix/scene.bin",
+    "textures": "assets/capture/level1_hudfix/textures.json",
+    "texture_dir": "assets/capture/level1_hudfix/textures",
+    "generator": "tools/build_level1_hudfix_fixture.py"
+  },
+  "wasm_packaging": {
+    "decision": "preload this compact manifest with the normal assets package; fetch or artifact-host the frame capture/texture atlas separately when browser replay mode is added",
+    "do_not_preload": [
+      "build/frame_v4_hudfix.omtc",
+      "build/level1_v4_hudfix.omtc",
+      "build/replay_v4_hudfix_inspect"
+    ]
+  }
+}

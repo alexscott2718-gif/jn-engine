@@ -62,6 +62,30 @@ First derived files to create:
 - a compact texture atlas or copied PNG set for textures actually used by the
   accepted frame
 
+Current first slice:
+
+- `assets/capture/level1_hudfix/frame_meta.json` tracks the accepted frame
+  paths, replay pass counters, viewport, and projection facts.
+- `make replay-hudfix` runs the local frame capture through the native replay
+  path and fails unless the expected draw/texture counters match, including
+  `0 skipped missing-texture draws`.
+- `make capture-fixture` derives the compact source-controlled fixture from
+  `build/replay_v4_hudfix_inspect/`, including decoded texture PNGs,
+  `draws.json`, `draw_summary.json`, and `scene.bin`.
+- `JN_CAPTURE_BACKED_LEVEL1=1` now runs the native demo loop while rendering
+  `assets/capture/level1_hudfix/scene.bin` through `src/engine/capture_scene.c`.
+  This path does not replay the `.omtc` file at runtime and does not use the
+  old OMT/GAM/ASE visual guesses for the frame.
+
+Current validation result:
+
+- `build/capture_backed_scene_validation_1280.png` visually matches the
+  accepted original-game frame closely enough to treat the capture-backed scene
+  renderer as the new Level 1 visual baseline.
+- The capture-backed render is still a static capture-space scene: gameplay
+  simulation continues to tick, but the rendered Jimmy/HUD/camera are the
+  captured frame state until live-state compositing is implemented.
+
 ### 2. Build a replay fixture runner for native and WASM
 
 Native:
@@ -78,6 +102,18 @@ WASM:
 - Confirm WebGL2 texture upload paths for captured formats, especially BGRA and
   alpha/color-key cases.
 - Keep the browser first screen as the running demo, not a diagnostic page.
+
+Packaging decision for this pass: the source-controlled manifest is preloaded
+with normal assets; the `.omtc` frame and generated inspect directory stay
+local build artifacts. Browser replay should fetch a compact frame fixture or
+texture atlas derived from `build/frame_v4_hudfix.omtc` when that mode is added,
+not preload the full capture.
+
+Updated packaging direction: for WASM, preload
+`assets/capture/level1_hudfix/scene.bin` and its compact texture directory with
+normal assets. Do not package `build/frame_v4_hudfix.omtc` or the inspect
+directory. The browser demo should use the same `capture_scene` path before any
+larger capture replay mode is considered.
 
 ### 3. Replace visual guesses in the playable demo
 

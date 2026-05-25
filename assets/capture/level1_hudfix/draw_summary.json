@@ -1,0 +1,173 @@
+{
+  "draw_count": 3523,
+  "tag_counts": {
+    "alpha-blend": 266,
+    "ground": 426,
+    "skybox-like": 1817,
+    "tiled-uv": 3331,
+    "trunk-like": 69,
+    "water-like": 10
+  },
+  "top_textures": [
+    {
+      "tex_id": 97849000,
+      "draw_count": 814
+    },
+    {
+      "tex_id": 2283776,
+      "draw_count": 411
+    },
+    {
+      "tex_id": 96800216,
+      "draw_count": 214
+    },
+    {
+      "tex_id": 65916840,
+      "draw_count": 195
+    },
+    {
+      "tex_id": 88067040,
+      "draw_count": 169
+    },
+    {
+      "tex_id": 65539072,
+      "draw_count": 158
+    },
+    {
+      "tex_id": 1818600,
+      "draw_count": 149
+    },
+    {
+      "tex_id": 97432752,
+      "draw_count": 136
+    },
+    {
+      "tex_id": 98635112,
+      "draw_count": 133
+    },
+    {
+      "tex_id": 97569512,
+      "draw_count": 108
+    },
+    {
+      "tex_id": 98512680,
+      "draw_count": 86
+    },
+    {
+      "tex_id": 2028376,
+      "draw_count": 68
+    },
+    {
+      "tex_id": 98770816,
+      "draw_count": 68
+    },
+    {
+      "tex_id": 97843888,
+      "draw_count": 51
+    },
+    {
+      "tex_id": 98874248,
+      "draw_count": 51
+    },
+    {
+      "tex_id": 97848168,
+      "draw_count": 48
+    },
+    {
+      "tex_id": 86929552,
+      "draw_count": 47
+    },
+    {
+      "tex_id": 82807480,
+      "draw_count": 46
+    },
+    {
+      "tex_id": 1654992,
+      "draw_count": 40
+    },
+    {
+      "tex_id": 82805640,
+      "draw_count": 40
+    },
+    {
+      "tex_id": 97845136,
+      "draw_count": 40
+    },
+    {
+      "tex_id": 88105672,
+      "draw_count": 40
+    },
+    {
+      "tex_id": 88194280,
+      "draw_count": 39
+    },
+    {
+      "tex_id": 88065264,
+      "draw_count": 34
+    },
+    {
+      "tex_id": 88193392,
+      "draw_count": 32
+    },
+    {
+      "tex_id": 65216424,
+      "draw_count": 20
+    },
+    {
+      "tex_id": 64667624,
+      "draw_count": 18
+    },
+    {
+      "tex_id": 96797608,
+      "draw_count": 16
+    },
+    {
+      "tex_id": 97435448,
+      "draw_count": 16
+    },
+    {
+      "tex_id": 1693176,
+      "draw_count": 16
+    },
+    {
+      "tex_id": 97432648,
+      "draw_count": 14
+    },
+    {
+      "tex_id": 1817944,
+      "draw_count": 14
+    }
+  ],
+  "tag_draw_ranges": {
+    "alpha-blend": {
+      "first": 2745,
+      "last": 3523,
+      "count": 266
+    },
+    "ground": {
+      "first": 1,
+      "last": 3469,
+      "count": 426
+    },
+    "skybox-like": {
+      "first": 1,
+      "last": 3469,
+      "count": 1817
+    },
+    "tiled-uv": {
+      "first": 1,
+      "last": 3469,
+      "count": 3331
+    },
+    "trunk-like": {
+      "first": 288,
+      "last": 3500,
+      "count": 69
+    },
+    "water-like": {
+      "first": 3453,
+      "last": 3469,
+      "count": 10
+    }
+  }
+}
