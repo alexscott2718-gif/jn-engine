@@ -410,3 +410,48 @@ env LD_LIBRARY_PATH=/home/scotty/sdl2/lib \
   xvfb-run -a -s "-screen 0 1280x720x24" ./jnengine
 cp screenshot.png build/frame_v4_hudfix.png
 ```
+
+## Execution update - 2026-05-25 XP capture
+
+Fresh XP capture completed:
+
+- Receiver output: `build/level1_v4_hudfix.omtc`
+- Final size: `1,845,202,950` bytes
+- Stream totals from targeted scan: `1,521,340 SET_TEXTURE`, `499 TEXTURE_DEF`,
+  `499 TEXTURE_FORMAT`, `499 TEXTURE_PIXELS`, `1,996 TEXTURE_COLORKEY`,
+  `0 FRAME_MARK`
+
+The live receiver accepted the typed commands `redump`, `mark 0xbeef`, and
+`stop`, but the saved stream contains no `FRAME_MARK` records. Treat this as a
+control-path validation gap; the frame was recovered by byte-offset timing
+instead of an in-stream mark.
+
+The receiver was at approximately `1216 MB` when the mark command was sent.
+Frame-offset mapping placed that moment at frames `8881` through `8884`.
+Frame `8881` was extracted and promoted as the current HUD-fix frame:
+
+- Candidate frame: `build/frame_v4_hudfix_candidate_8881.omtc`
+- Promoted frame: `build/frame_v4_hudfix.omtc`
+- Screenshot: `build/frame_v4_hudfix.png`
+- Inspect output: `build/replay_v4_hudfix_inspect/`
+
+Replay validation for frame `8881`:
+
+- `3523 GL draws`
+- `342 registered textures`
+- `0 skipped missing-texture draws`
+- Inspect record counts: `342 TEXTURE_DEF`, `342 TEXTURE_FORMAT`,
+  `342 TEXTURE_PIXELS`, `1368 TEXTURE_COLORKEY`
+
+Visual check: the extracted frame is the intended Level 1 comparison view with
+HUD digits/icons rendered and no missing-texture skip gaps. World texture fixes
+remain intact.
+
+User visual acceptance: upon manual inspection, this frame from the original
+game is considered perfect for Level 1 replay fidelity. Treat
+`build/frame_v4_hudfix.omtc` and `build/frame_v4_hudfix.png` as the current
+ground-truth visual target for refining the native and WASM playable demos.
+
+Next technical follow-up: diagnose why receiver control commands did not produce
+`FRAME_MARK` records in the stream. Until that is fixed, future captures should
+either use byte-offset frame recovery or a separately verified command path.

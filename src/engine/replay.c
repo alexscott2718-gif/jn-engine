@@ -287,6 +287,7 @@ static int          g_dbg_highlight_tex_enabled;
 static unsigned int g_dbg_highlight_tex;
 static int          g_dbg_disable_blend;
 static int          g_dbg_flat_groups;
+static int          g_dbg_show_missing_tex;
 
 /* ---- GL shader: D3D7 fixed-function emulation (v0: textured + diffuse) - */
 static const char *VS =
@@ -721,6 +722,7 @@ int replay_init(int viewport_w, int viewport_h) {
         parse_u32_env("JN_REPLAY_HIGHLIGHT_TEX", &g_dbg_highlight_tex);
     g_dbg_disable_blend = env_enabled("JN_REPLAY_DISABLE_BLEND");
     g_dbg_flat_groups = env_enabled("JN_REPLAY_FLAT_GROUPS");
+    g_dbg_show_missing_tex = env_enabled("JN_REPLAY_SHOW_MISSING_TEX");
     if (g_dbg_draw_start > g_dbg_draw_end) {
         int tmp = g_dbg_draw_start;
         g_dbg_draw_start = g_dbg_draw_end;
@@ -767,6 +769,7 @@ void replay_render_frame(void) {
     size_t off = g_record_start;
     int    draws = 0;
     int    issued_draws = 0;
+    int    skipped_missing_textures = 0;
     while (off + 4 <= g_buf_len) {
         unsigned int type   = r_u8 (g_buf + off);
         unsigned int len_hi = r_u8 (g_buf + off + 1);
@@ -1000,6 +1003,11 @@ void replay_render_frame(void) {
             /* (matrix pipeline validated -- see docs/replay_v0_findings.md) */
 
             ReplayTex *tt = find_tex(cur_tex_id);
+            if (cur_tex_id != 0 && !tt && !g_dbg_show_missing_tex) {
+                skipped_missing_textures++;
+                free(verts);
+                break;
+            }
             apply_texstage(&texstage, tt ? tt->gl_tex : g_white_tex);
             glUniform1i(g_loc_has_tex, 1);
             glUniform1i(g_loc_use_alpha,
@@ -1064,7 +1072,8 @@ void replay_render_frame(void) {
     static int reported = 0;
     if (!reported) {
         fprintf(stderr, "[replay] frame: issued %d GL draws, "
-                "registered %d textures\n", issued_draws, g_tex_count);
+                "registered %d textures, skipped %d missing-texture draws\n",
+                issued_draws, g_tex_count, skipped_missing_textures);
         reported = 1;
     }
 }
