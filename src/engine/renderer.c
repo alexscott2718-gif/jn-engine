@@ -164,6 +164,7 @@ static const char *LIT_FRAG_SRC =
     "uniform int  uLightingOn;\n"    /* Phase 12: D3D LIGHTING render-state */
     "uniform vec3 uAmbient;\n"       /* measured D3DRS_AMBIENT (0..1) */
     "uniform vec3 uLightDiffuse;\n"  /* measured DIR-light diffuse */
+    "uniform vec3 uSceneTint;\n"     /* Phase 1: per-channel ambient/scene multiplier */
     "void main() {\n"
     "    vec3 n = normalize(vNorm);\n"
     "    /* Match the original's measured lighting. With LIGHTING OFF (Phase 12\n"
@@ -184,7 +185,9 @@ static const char *LIT_FRAG_SRC =
     "        base *= c.rgb;\n"
     "        alpha = c.a;\n"
     "    }\n"
-    "    FragColor = vec4(base * lightTerm, alpha);\n"
+    "    /* Phase 1: scene-wide tint applied AFTER the lighting term so it acts\n"
+    "       as a measured ambient/sky cast on both lit and unlit paths. */\n"
+    "    FragColor = vec4(base * lightTerm * uSceneTint, alpha);\n"
     "}\n";
 
 static unsigned int compile_shader(GLenum type, const char *src) {
@@ -208,6 +211,8 @@ static int g_lit_loc_mvp = -1, g_lit_loc_model = -1;
 static int g_lit_loc_tex = -1, g_lit_loc_light = -1;
 static int g_lit_loc_tint = -1, g_lit_loc_hastex = -1;
 static int g_lit_loc_lighton = -1, g_lit_loc_ambient = -1, g_lit_loc_ldiff = -1;
+static int g_lit_loc_scene_tint = -1;
+static float g_scene_tint[3] = { 1.0f, 1.0f, 1.0f };
 
 static unsigned int g_sky_prog = 0, g_sky_vao = 0, g_sky_vbo = 0;
 static int g_sky_loc_top = -1, g_sky_loc_bot = -1;
@@ -276,6 +281,7 @@ int renderer_init(int w, int h) {
     g_lit_loc_lighton = glGetUniformLocation(g_lit_prog, "uLightingOn");
     g_lit_loc_ambient = glGetUniformLocation(g_lit_prog, "uAmbient");
     g_lit_loc_ldiff   = glGetUniformLocation(g_lit_prog, "uLightDiffuse");
+    g_lit_loc_scene_tint = glGetUniformLocation(g_lit_prog, "uSceneTint");
 
     /* Sky-gradient program + fullscreen quad. Each vertex carries an NDC
        position and a t value (1 at top, 0 at bottom) used to lerp top/bot. */
@@ -404,6 +410,12 @@ void renderer_set_sky(float tr, float tg, float tb,
                       float br, float bg, float bb) {
     g_sky_top[0] = tr; g_sky_top[1] = tg; g_sky_top[2] = tb;
     g_sky_bot[0] = br; g_sky_bot[1] = bg; g_sky_bot[2] = bb;
+}
+
+void renderer_set_scene_tint(float r, float g, float b) {
+    g_scene_tint[0] = r;
+    g_scene_tint[1] = g;
+    g_scene_tint[2] = b;
 }
 
 static void renderer_prepare_camera(int w, int h) {
@@ -559,6 +571,7 @@ void renderer_draw_model_matrix(const AseModel *m, unsigned int texture_id_overr
     glUniform3f(g_lit_loc_light, CANON_LIGHT_DIR_X, CANON_LIGHT_DIR_Y, CANON_LIGHT_DIR_Z);
     glUniform3f(g_lit_loc_ambient, CANON_AMBIENT_R, CANON_AMBIENT_G, CANON_AMBIENT_B);
     glUniform3f(g_lit_loc_ldiff, CANON_LIGHT_DIFF_R, CANON_LIGHT_DIFF_G, CANON_LIGHT_DIFF_B);
+    glUniform3f(g_lit_loc_scene_tint, g_scene_tint[0], g_scene_tint[1], g_scene_tint[2]);
     glActiveTexture(GL_TEXTURE0);
 
     int groups = m->material_count > 0 ? m->material_count : 1;

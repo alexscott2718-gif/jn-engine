@@ -1,0 +1,77 @@
+{
+  "schema": "jn-phase1-sky-tint/v1",
+  "source": {
+    "capture_png": "build/frame_v4_hudfix_candidate_8881.png",
+    "capture_omtc": "build/frame_v4_hudfix_candidate_8881.omtc",
+    "native_png": "build/native_level1_keyframe_8881.png",
+    "keyframe": "8881"
+  },
+  "samples": {
+    "capture_top10_rgb": [
+      83.9385959201389,
+      130.21879340277778,
+      95.11344401041667
+    ],
+    "capture_top33_rgb": [
+      82.06055338541667,
+      108.264482421875,
+      77.177412109375
+    ],
+    "capture_mid33_rgb": [
+      88.04390625,
+      110.23246744791666,
+      56.28153971354167
+    ],
+    "capture_bot33_rgb": [
+      90.11815104166666,
+      120.50198893229167,
+      48.788125
+    ],
+    "native_top33_rgb": [
+      227.90380533854167,
+      231.15839192708333,
+      224.346220703125
+    ],
+    "native_mid33_rgb": [
+      227.0363671875,
+      229.40551432291667,
+      223.808251953125
+    ],
+    "native_bot33_rgb": [
+      96.91517578125,
+      97.15291015625,
+      85.76034830729166
+    ]
+  },
+  "captured_render_state": {
+    "d3drs_lighting": 0,
+    "d3drs_ambient_argb": 4281545523,
+    "d3drs_ambient_rgb_0_1": [
+      0.2,
+      0.2,
+      0.2
+    ]
+  },
+  "outputs": {
+    "sky_top_rgb_0_1": [
+      0.32917096439270155,
+      0.510661934912854,
+      0.3729938980800654
+    ],
+    "sky_bot_rgb_0_1": [
+      0.32180609170751634,
+      0.42456659773284317,
+      0.3026565180759804
+    ],
+    "scene_tint_rgb_0_1": [
+      0.38779648979006154,
+      0.48051359084921913,
+      0.2514721384148491
+    ]
+  },
+  "rationale": {
+    "sky_top": "mean of top 10% of capture (cleanest sky pixels)",
+    "sky_bot": "mean of top 33% (gradient toward horizon band)",
+    "scene_tint": "per-channel multiplier sized so native middle-third RGB matches capture middle-third RGB; falls back to D3DRS_AMBIENT when no native render exists yet"
+  }
+}

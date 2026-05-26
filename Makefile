@@ -69,6 +69,9 @@ hybrid-level1: $(TARGET)
 hybrid-level1-manifest:
 	python3 tools/build_hybrid_level1_manifest.py
 
+phase1-sky-tint:
+	python3 tools/sample_phase1_sky_tint.py
+
 native-level1-map:
 	python3 tools/build_native_level1_map.py
 	python3 tools/build_native_keyframe_cameras.py
@@ -131,4 +134,4 @@ web:
 	mkdir -p $(WEB_OUT_DIR)
 	$(EMCC) $(WEB_CFLAGS) $(WEB_SRC) $(WEB_LDFLAGS) -o $(WEB_TARGET)
 
-.PHONY: all clean web capture replay-hudfix capture-static capture-live-jimmy capture-live-hud capture-multiframe hybrid-level1 hybrid-level1-manifest native-level1-map native-level1 native-level1-keyframes diff-native-capture native-vs-capture-8881-review capture-fixture capture-world-fixture solve-keyframe-views
+.PHONY: all clean web capture replay-hudfix capture-static capture-live-jimmy capture-live-hud capture-multiframe hybrid-level1 hybrid-level1-manifest native-level1-map native-level1 native-level1-keyframes diff-native-capture native-vs-capture-8881-review phase1-sky-tint capture-fixture capture-world-fixture solve-keyframe-views

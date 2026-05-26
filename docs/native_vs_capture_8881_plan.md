@@ -153,7 +153,15 @@ first visual-review queue before making material changes. The same ordered list
 is also available in JSON at
 `summary.suggested_non_school_review_order` and in the text summary.
 
-### Phase 1 — sky + clear-color + ambient
+### Phase 1 — sky + clear-color + ambient   *(DONE 2026-05-26)*
+
+Landed via `tools/sample_phase1_sky_tint.py` → `src/engine/phase1_sky_tint.h`
+→ existing `renderer_set_sky` + new `renderer_set_scene_tint`.
+Middle-third gate hits within ~0.5% per channel. Top R/G also within 10%;
+top B is dragged down by tinted geometry (no fog yet — Phase 4) and the
+bottom band is the wrong ground texture (Phase 2). Phase 0 diff regression
+check: still 30/58 matched, gate PASS. See
+`docs/native_vs_capture_8881_phase1_report.md` for the full numbers.
 
 Easy wins that close the biggest visual gap without touching meshes:
 

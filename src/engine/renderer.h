@@ -44,6 +44,11 @@ void renderer_end_frame(void);
 void renderer_set_sky(float top_r, float top_g, float top_b,
                       float bot_r, float bot_g, float bot_b);
 
+/* Phase 1: per-channel ambient/scene tint multiplied onto every textured/flat
+ * draw in the lit shader. Default (1,1,1) is no-op. Lift from
+ * src/engine/phase1_sky_tint.h for native Level 1. */
+void renderer_set_scene_tint(float r, float g, float b);
+
 Camera *renderer_camera(void);
 
 /* Copy the current projection*view matrix (computed at begin_frame) into out. */

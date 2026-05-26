@@ -7,6 +7,7 @@
 #include "../engine/physics.h"
 #include "../engine/ground.h"
 #include "../engine/canon_data.h"   /* Phase 12: measured ground footprint/topography */
+#include "../engine/phase1_sky_tint.h"  /* Phase 1: measured keyframe-8881 sky + scene tint */
 #include "../engine/capture.h"
 #include "../engine/replay.h"
 #include "../engine/capture_scene.h"
@@ -485,6 +486,23 @@ int main(void) {
     if (!renderer_init(w.width, w.height)) {
         window_destroy(&w);
         return 1;
+    }
+
+    if (native_level1) {
+        /* Phase 1 of docs/native_vs_capture_8881_plan.md: lift sky gradient
+           + scene tint from the captured keyframe-8881 reference so the
+           overall colour cast matches the original.  Header is regenerated
+           by `make phase1-sky-tint`. */
+        renderer_set_sky(PHASE1_SKY_TOP_R, PHASE1_SKY_TOP_G, PHASE1_SKY_TOP_B,
+                         PHASE1_SKY_BOT_R, PHASE1_SKY_BOT_G, PHASE1_SKY_BOT_B);
+        renderer_set_scene_tint(PHASE1_SCENE_TINT_R,
+                                PHASE1_SCENE_TINT_G,
+                                PHASE1_SCENE_TINT_B);
+        fprintf(stderr,
+                "[native_level1] phase 1 sky/tint applied: sky_top=(%.3f,%.3f,%.3f) "
+                "scene_tint=(%.3f,%.3f,%.3f)\n",
+                PHASE1_SKY_TOP_R, PHASE1_SKY_TOP_G, PHASE1_SKY_TOP_B,
+                PHASE1_SCENE_TINT_R, PHASE1_SCENE_TINT_G, PHASE1_SCENE_TINT_B);
     }
 
     if (!audio_init()) {
