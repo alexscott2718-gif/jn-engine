@@ -23,11 +23,11 @@ Matching heuristic (drawcall -> native mesh):
   drawcall has an OMT/world-space translation. That maps directly to the
   native coverage manifest's `placement` field.
 
-  Pass 1: exact-or-near match (x,z within tol, y within larger tol since
-          native bakes y into vertices and capture keeps it on the matrix).
-  Pass 2: SHA-1 of native model-space vertex bag vs capture vertex bag
+  Pass 1: SHA-1 of native model-space vertex bag vs capture vertex bag
           (after the same Max->GL coord swap the ASE loader applies). This
-          is informational only; vertex order can differ between exporters.
+          is order-independent and rounded to absorb fp round-trip noise.
+  Pass 2: exact-or-near match (x,z within tol, y within larger tol since
+          native bakes y into vertices and capture keeps it on the matrix).
   Pass 3: ambiguous -- multiple capture drawcalls land within tol; surface
           the candidates in `notes`.
 
@@ -64,8 +64,6 @@ from protocol import (  # noqa: E402
 )
 
 TRANSFORM_WORLD = 0
-TRANSFORM_VIEW = 1
-TRANSFORM_PROJ = 2
 
 # Tolerances (world units). The capture solver residual at this keyframe is
 # ~57; placements are tens to thousands of units apart. We use a base XZ
@@ -510,7 +508,7 @@ def build_diff(args):
 
     # The single-frame .omtc has only one frame (idx 0). For multi-frame
     # sources the caller can override with --frame-index.
-    drawcalls, tex_defs = parse_capture_drawcalls(
+    drawcalls, _tex_defs = parse_capture_drawcalls(
         str(omtc_path),
         target_frame_idx=args.frame_index,
         view_inv16=view_inv16,
@@ -533,7 +531,6 @@ def build_diff(args):
     rows = []
     used_drawcall_indices = set()
     sha1_cache = {}  # mesh name -> sha1
-    radius_cache = {}  # mesh name -> bounding radius slack
 
     def get_native_sha1(mesh_record):
         nm = mesh_record["name"]
@@ -549,8 +546,6 @@ def build_diff(args):
         in_frustum,
         key=lambda r: (-mesh_face_count.get(r["mesh"], 0), r["mesh"]),
     )
-    align_lookup = {r["mesh"]: r for r in in_frustum}
-
     for in_f in in_frustum_sorted:
         name = in_f["mesh"]
         mesh_record = mesh_records.get(name)
