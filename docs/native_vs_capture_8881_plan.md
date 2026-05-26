@@ -149,7 +149,9 @@ paths.
 The generated Markdown also includes a "Suggested Non-SCHOOL Review Order"
 table. It filters to `native_missing_texture` and `texture_mismatch` rows,
 excludes SCHOOL, and sorts by match quality before face count. Treat it as the
-first visual-review queue before making material changes.
+first visual-review queue before making material changes. The same ordered list
+is also available in JSON at
+`summary.suggested_non_school_review_order` and in the text summary.
 
 ### Phase 1 — sky + clear-color + ambient
 

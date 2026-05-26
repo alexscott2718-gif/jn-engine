@@ -739,6 +739,51 @@ def build_diff(args):
     return out
 
 
+QUALITY_RANK = {
+    "sha1": 0,
+    "near_unambiguous": 1,
+    "near_ambiguous": 2,
+    "mid_unambiguous": 3,
+    "mid_ambiguous": 4,
+    "far_unambiguous": 5,
+    "far_ambiguous": 6,
+    "none": 7,
+}
+
+
+def suggested_review_rows(rows):
+    actionable = [
+        r for r in rows
+        if r["mesh"] not in SCHOOL_NAMES
+        and r["match"] in ("native_missing_texture", "texture_mismatch")
+    ]
+    actionable.sort(
+        key=lambda r: (
+            QUALITY_RANK.get(r["capture_match_quality"], 99),
+            -r["face_count"],
+            r["mesh"],
+        )
+    )
+    return actionable
+
+
+def suggested_review_summary(rows):
+    return [
+        {
+            "mesh": r["mesh"],
+            "face_count": r["face_count"],
+            "match": r["match"],
+            "capture_match_quality": r["capture_match_quality"],
+            "capture_match_distance_xz": r.get("capture_match_distance_xz"),
+            "capture_ambiguous_candidate_count": (
+                r.get("capture_ambiguous_candidate_count", 0)
+            ),
+            "capture_texture_paths": r["capture_texture_paths"],
+        }
+        for r in suggested_review_rows(rows)
+    ]
+
+
 def summarise(rows, capture_only, all_drawcalls):
     total = len(rows)
     matched = sum(1 for r in rows if r["capture_drew"])
@@ -783,6 +828,7 @@ def summarise(rows, capture_only, all_drawcalls):
         "ambiguous_rows": ambiguous_rows,
         "unresolved_capture_texture_rows": unresolved_capture_texture_rows,
         "capture_match_distance_xz": distance_stats,
+        "suggested_non_school_review_order": suggested_review_summary(rows),
     }
 
 
@@ -827,6 +873,23 @@ def summary_text(out, top_n=10):
             f"mean={dist['mean']:.1f} median={dist['median']:.1f} "
             f"max={dist['max']:.1f}"
         )
+    review_order = s.get("suggested_non_school_review_order", [])
+    if review_order:
+        lines.append(
+            f"suggested non-SCHOOL review order (top {top_n}):"
+        )
+        for r in review_order[:top_n]:
+            cap = "; ".join(r["capture_texture_paths"]) or "-"
+            dist_xz = r.get("capture_match_distance_xz")
+            dist_text = f"{dist_xz:.1f}" if dist_xz is not None else "-"
+            lines.append(
+                f"  {r['mesh']:24s} faces={r['face_count']:5d} "
+                f"match={r['match']:24s} "
+                f"quality={r['capture_match_quality']:16s} "
+                f"xz={dist_text:>7s} "
+                f"ambig={r.get('capture_ambiguous_candidate_count', 0)}"
+            )
+            lines.append(f"      capture: {cap}")
     lines.append(f"top {top_n} highest-face-count divergences (excluding 'ok'):")
     diverged = [r for r in out["rows"] if r["match"] != "ok"]
     diverged.sort(key=lambda r: -r["face_count"])
@@ -860,18 +923,6 @@ def compact_paths(paths):
         return "none"
     return ", ".join(f"`{os.path.basename(p)}`" if p else "`<unresolved>`"
                      for p in paths)
-
-
-QUALITY_RANK = {
-    "sha1": 0,
-    "near_unambiguous": 1,
-    "near_ambiguous": 2,
-    "mid_unambiguous": 3,
-    "mid_ambiguous": 4,
-    "far_unambiguous": 5,
-    "far_ambiguous": 6,
-    "none": 7,
-}
 
 
 def markdown_report(out, top_n=12):
@@ -919,18 +970,7 @@ def markdown_report(out, top_n=12):
             "",
         ])
 
-    actionable = [
-        r for r in out["rows"]
-        if r["mesh"] not in SCHOOL_NAMES
-        and r["match"] in ("native_missing_texture", "texture_mismatch")
-    ]
-    actionable.sort(
-        key=lambda r: (
-            QUALITY_RANK.get(r["capture_match_quality"], 99),
-            -r["face_count"],
-            r["mesh"],
-        )
-    )
+    actionable = suggested_review_rows(out["rows"])
     lines.extend([
         "## Suggested Non-SCHOOL Review Order",
         "",
@@ -1156,6 +1196,25 @@ def validate_output(out):
     for key in ("mean", "median", "max"):
         assert key in dist, f"summary.capture_match_distance_xz missing {key}"
     summary = out.get("summary") or {}
+    review_order = summary.get("suggested_non_school_review_order")
+    assert isinstance(review_order, list), (
+        "summary.suggested_non_school_review_order missing or not a list"
+    )
+    expected_review_meshes = [r["mesh"] for r in suggested_review_rows(out["rows"])]
+    actual_review_meshes = [r.get("mesh") for r in review_order]
+    assert actual_review_meshes == expected_review_meshes, (
+        "summary.suggested_non_school_review_order is not in expected order"
+    )
+    for r in review_order:
+        for key in (
+            "mesh", "face_count", "match", "capture_match_quality",
+            "capture_match_distance_xz", "capture_ambiguous_candidate_count",
+            "capture_texture_paths",
+        ):
+            assert key in r, (
+                "summary.suggested_non_school_review_order row missing "
+                f"{key}: {r}"
+            )
     solver_inliers = summary.get("solver_inliers")
     if solver_inliers is not None:
         assert summary.get("matched", 0) >= solver_inliers, (
