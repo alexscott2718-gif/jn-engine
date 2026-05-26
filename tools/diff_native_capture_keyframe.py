@@ -862,6 +862,18 @@ def compact_paths(paths):
                      for p in paths)
 
 
+QUALITY_RANK = {
+    "sha1": 0,
+    "near_unambiguous": 1,
+    "near_ambiguous": 2,
+    "mid_unambiguous": 3,
+    "mid_ambiguous": 4,
+    "far_unambiguous": 5,
+    "far_ambiguous": 6,
+    "none": 7,
+}
+
+
 def markdown_report(out, top_n=12):
     s = out["summary"]
     lines = [
@@ -906,6 +918,41 @@ def markdown_report(out, top_n=12):
             "so no `GROUND` row is expected in this generated report.",
             "",
         ])
+
+    actionable = [
+        r for r in out["rows"]
+        if r["mesh"] not in SCHOOL_NAMES
+        and r["match"] in ("native_missing_texture", "texture_mismatch")
+    ]
+    actionable.sort(
+        key=lambda r: (
+            QUALITY_RANK.get(r["capture_match_quality"], 99),
+            -r["face_count"],
+            r["mesh"],
+        )
+    )
+    lines.extend([
+        "## Suggested Non-SCHOOL Review Order",
+        "",
+        "| Mesh | Faces | Match | Quality | XZ dist | Ambig | Capture texture(s) |",
+        "|---|---:|---|---|---:|---:|---|",
+    ])
+    for r in actionable[:top_n]:
+        dist_xz = r.get("capture_match_distance_xz")
+        lines.append(
+            "| "
+            + " | ".join([
+                md_cell(r["mesh"]),
+                str(r["face_count"]),
+                md_cell(r["match"]),
+                md_cell(r["capture_match_quality"]),
+                f"{dist_xz:.1f}" if dist_xz is not None else "-",
+                str(r.get("capture_ambiguous_candidate_count", 0)),
+                compact_paths(r["capture_texture_paths"]),
+            ])
+            + " |"
+        )
+    lines.append("")
 
     diverged = [r for r in out["rows"] if r["match"] != "ok"]
     diverged.sort(key=lambda r: -r["face_count"])

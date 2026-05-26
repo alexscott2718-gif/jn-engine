@@ -146,10 +146,10 @@ in `build/diff_native_capture_8881.json` before acting on a texture assignment.
 It records the competing capture clusters, distances, drawcall ids, and texture
 paths.
 
-Top current rows by face count are SCHOOL (expected cross-level gap),
-BLOCKcarhood, grill, house01, and Blocks_In. Treat SCHOOL as non-actionable
-for `level1.omt`; start material recovery with non-SCHOOL rows, especially
-`Blocks_In` and the other `native_missing_texture` entries.
+The generated Markdown also includes a "Suggested Non-SCHOOL Review Order"
+table. It filters to `native_missing_texture` and `texture_mismatch` rows,
+excludes SCHOOL, and sorts by match quality before face count. Treat it as the
+first visual-review queue before making material changes.
 
 ### Phase 1 — sky + clear-color + ambient
 

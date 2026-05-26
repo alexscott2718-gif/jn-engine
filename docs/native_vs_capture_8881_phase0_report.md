@@ -77,6 +77,12 @@ distance, and ambiguity: `near_*` means <=100 units, `mid_*` means <=600 units,
 and `far_*` means >600 units. The suffix records whether other capture clusters
 were also inside tolerance.
 
+`build/diff_native_capture_8881.md` includes a "Suggested Non-SCHOOL Review
+Order" table. It filters out the known SCHOOL cross-level gap, keeps
+`native_missing_texture` and `texture_mismatch` rows, and sorts by match quality
+before face count so the next manual review starts with the strongest
+capture/native correspondences.
+
 ## Highest-Leverage Rows
 
 | Mesh | Faces | State | Match | Native texture(s) | Capture texture(s) |
@@ -99,8 +105,8 @@ trying to recover its missing Level 1 slots from `level1.omt` alone.
 
 Before changing runtime rendering, inspect the side-by-side PNG and the
 generated Markdown ledger (`build/diff_native_capture_8881.md`). If material
-recovery is approved, start with non-SCHOOL `native_missing_texture` rows whose
-translation match is comparatively tight:
+recovery is approved, start with the generated "Suggested Non-SCHOOL Review
+Order" table. Current high-confidence candidates include:
 
 1. `Blocks_In` -> capture `tex_00181da8_64x64.png` (XZ distance ~40, but
    ambiguous).
