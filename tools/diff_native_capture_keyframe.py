@@ -446,6 +446,15 @@ def match_mesh_to_clusters(mesh, ase_sha1, clusters, drawcalls,
 # ---------------------------------------------------------------------------
 
 SCHEMA_NAME = "jn-diff-native-capture-keyframe/v1"
+MATCH_CLASSES = {
+    "ok",
+    "native_missing_texture",
+    "texture_mismatch",
+    "capture_only",
+    "native_only",
+    "ambiguous",
+    "expected_gap_school",
+}
 
 
 def classify_match(mesh_name, mesh_record, ase_sha1, matched,
@@ -745,6 +754,14 @@ def validate_output(out):
     """Light sanity check; raises if the diff would mislead callers."""
     assert out.get("schema") == SCHEMA_NAME, "schema mismatch"
     assert isinstance(out["rows"], list)
+    assert len(out["rows"]) == out["summary"]["in_frustum_meshes"], (
+        "row count does not match summary.in_frustum_meshes"
+    )
+    by_match_total = sum(out["summary"]["by_match_class"].values())
+    assert by_match_total == len(out["rows"]), (
+        "summary.by_match_class does not sum to row count"
+    )
+    actual_classes = defaultdict(int)
     for r in out["rows"]:
         for k in (
             "mesh", "native_render_state", "render_state", "native_textures",
@@ -753,12 +770,34 @@ def validate_output(out):
             "capture_texture_paths", "match", "notes",
         ):
             assert k in r, f"row missing key {k}: {r}"
+        assert r["match"] in MATCH_CLASSES, f"unknown match class: {r['match']}"
+        actual_classes[r["match"]] += 1
+        assert len(r["capture_texture_ids"]) == len(r["capture_texture_paths"]), (
+            f"capture texture id/path length mismatch for {r['mesh']}"
+        )
+        if r["capture_drew"]:
+            assert r["capture_match_method"] != "none", (
+                f"{r['mesh']} capture_drew=true with no match method"
+            )
+            assert r["capture_world_translation"] is not None, (
+                f"{r['mesh']} capture_drew=true without capture translation"
+            )
+        else:
+            assert r["capture_match_method"] == "none", (
+                f"{r['mesh']} capture_drew=false but method is "
+                f"{r['capture_match_method']}"
+            )
+    assert dict(sorted(actual_classes.items())) == out["summary"]["by_match_class"], (
+        "summary.by_match_class disagrees with rows"
+    )
     summary = out.get("summary") or {}
     solver_inliers = summary.get("solver_inliers")
     if solver_inliers is not None:
         assert summary.get("matched", 0) >= solver_inliers, (
             f"matched {summary.get('matched', 0)} < solver_inliers {solver_inliers}"
         )
+    if summary.get("ground_in_alignment"):
+        assert summary.get("ground_in_diff"), "GROUND in alignment but missing diff row"
 
 
 def main():
