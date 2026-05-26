@@ -689,14 +689,25 @@ def summarise(rows, capture_only, all_drawcalls):
     total = len(rows)
     matched = sum(1 for r in rows if r["capture_drew"])
     classes = defaultdict(int)
+    methods = defaultdict(int)
+    ambiguous_rows = 0
+    unresolved_capture_texture_rows = 0
     for r in rows:
         classes[r["match"]] += 1
+        methods[r["capture_match_method"]] += 1
+        if "ambiguous" in (r.get("capture_match_method") or ""):
+            ambiguous_rows += 1
+        if r["capture_drew"] and any(not p for p in r["capture_texture_paths"]):
+            unresolved_capture_texture_rows += 1
     return {
         "in_frustum_meshes": total,
         "capture_drawcalls_total": len(all_drawcalls),
         "capture_only_drawcalls": len(capture_only),
         "matched": matched,
         "by_match_class": dict(sorted(classes.items())),
+        "by_match_method": dict(sorted(methods.items())),
+        "ambiguous_rows": ambiguous_rows,
+        "unresolved_capture_texture_rows": unresolved_capture_texture_rows,
     }
 
 
@@ -723,6 +734,14 @@ def summary_text(out, top_n=10):
     lines.append("match-class breakdown:")
     for k, v in s["by_match_class"].items():
         lines.append(f"  {k:30s} {v}")
+    lines.append("match-method breakdown:")
+    for k, v in s["by_match_method"].items():
+        lines.append(f"  {k:30s} {v}")
+    lines.append(f"ambiguous rows: {s['ambiguous_rows']}")
+    lines.append(
+        f"rows with unresolved capture texture path: "
+        f"{s['unresolved_capture_texture_rows']}"
+    )
     lines.append(f"top {top_n} highest-face-count divergences (excluding 'ok'):")
     diverged = [r for r in out["rows"] if r["match"] != "ok"]
     diverged.sort(key=lambda r: -r["face_count"])
@@ -779,6 +798,13 @@ def markdown_report(out, top_n=12):
         lines.append(f"solver inliers                 {s['solver_inliers']}  ({gate})")
     for key, val in s["by_match_class"].items():
         lines.append(f"{key:30s} {val}")
+    for key, val in s["by_match_method"].items():
+        lines.append(f"{key:30s} {val}")
+    lines.append(f"ambiguous rows                 {s['ambiguous_rows']}")
+    lines.append(
+        "unresolved capture texture rows "
+        f"{s['unresolved_capture_texture_rows']}"
+    )
     lines.extend(["```", ""])
     if s.get("ground_in_alignment") is False:
         lines.extend([
@@ -874,7 +900,14 @@ def validate_output(out):
     assert by_match_total == len(out["rows"]), (
         "summary.by_match_class does not sum to row count"
     )
+    by_method_total = sum(out["summary"]["by_match_method"].values())
+    assert by_method_total == len(out["rows"]), (
+        "summary.by_match_method does not sum to row count"
+    )
     actual_classes = defaultdict(int)
+    actual_methods = defaultdict(int)
+    actual_ambiguous = 0
+    actual_unresolved_capture = 0
     for r in out["rows"]:
         for k in (
             "mesh", "native_render_state", "render_state", "native_textures",
@@ -885,6 +918,11 @@ def validate_output(out):
             assert k in r, f"row missing key {k}: {r}"
         assert r["match"] in MATCH_CLASSES, f"unknown match class: {r['match']}"
         actual_classes[r["match"]] += 1
+        actual_methods[r["capture_match_method"]] += 1
+        if "ambiguous" in (r.get("capture_match_method") or ""):
+            actual_ambiguous += 1
+        if r["capture_drew"] and any(not p for p in r["capture_texture_paths"]):
+            actual_unresolved_capture += 1
         assert len(r["capture_texture_ids"]) == len(r["capture_texture_paths"]), (
             f"capture texture id/path length mismatch for {r['mesh']}"
         )
@@ -903,6 +941,16 @@ def validate_output(out):
     assert dict(sorted(actual_classes.items())) == out["summary"]["by_match_class"], (
         "summary.by_match_class disagrees with rows"
     )
+    assert dict(sorted(actual_methods.items())) == out["summary"]["by_match_method"], (
+        "summary.by_match_method disagrees with rows"
+    )
+    assert actual_ambiguous == out["summary"]["ambiguous_rows"], (
+        "summary.ambiguous_rows disagrees with rows"
+    )
+    assert (
+        actual_unresolved_capture
+        == out["summary"]["unresolved_capture_texture_rows"]
+    ), "summary.unresolved_capture_texture_rows disagrees with rows"
     summary = out.get("summary") or {}
     solver_inliers = summary.get("solver_inliers")
     if solver_inliers is not None:

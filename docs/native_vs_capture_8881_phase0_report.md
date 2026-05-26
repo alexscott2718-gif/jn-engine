@@ -44,6 +44,12 @@ expected_gap_school             1
 native_missing_texture         15
 native_only                    28
 texture_mismatch               14
+
+none                           28
+translation                    13
+translation_ambiguous          17
+ambiguous rows                 17
+unresolved capture texture rows 0
 ```
 
 `GROUND` is not in `build/native_keyframe_alignment_8881.json` today, so the
