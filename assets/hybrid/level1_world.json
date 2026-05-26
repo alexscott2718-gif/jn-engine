@@ -1,0 +1,119 @@
+{
+  "schema": "jn-hybrid-level1-world/v1",
+  "level": "Level1",
+  "runtime_authority": {
+    "simulation": "assets/gam/Level1.gam",
+    "static_world": "assets/ase/omt/level1_placements.txt",
+    "camera": "native follow camera",
+    "projection": "native renderer projection",
+    "movement_reveal": "native world-space render, not capture reprojection"
+  },
+  "gameplay_entities": {
+    "source": "assets/gam/Level1.gam",
+    "count": 322,
+    "type_histogram_top": {
+      "3PAT": 67,
+      "3TRE": 47,
+      "3PIC": 26,
+      "3NEU": 23,
+      "3MCA": 19,
+      "3AIT": 17,
+      "3SOU": 15,
+      "3CAM": 14,
+      "LOAD": 13,
+      "3LEA": 13,
+      "STRT": 10,
+      "3ARR": 8,
+      "3RED": 5,
+      "3FIS": 4,
+      "3GIR": 4,
+      "3HUM": 4,
+      "3SUV": 3,
+      "3AIO": 3,
+      "3PHO": 2,
+      "3DAI": 2,
+      "3HYD": 2,
+      "3RCK": 2,
+      "3BUT": 2,
+      "3SPH": 2
+    },
+    "position_bounds": {
+      "x": [
+        -4267.612793,
+        17486.509766
+      ],
+      "y": [
+        -582.846741,
+        12158.473633
+      ],
+      "z": [
+        -14390.112305,
+        13671.541992
+      ]
+    }
+  },
+  "static_placements": {
+    "source": "assets/ase/omt/level1_placements.txt",
+    "count": 194,
+    "position_bounds": {
+      "x": [
+        -6062.7139,
+        22343.9219
+      ],
+      "y": [
+        -298.4093,
+        15540.5215
+      ],
+      "z": [
+        -15987.9492,
+        19813.8828
+      ]
+    }
+  },
+  "capture_evidence": {
+    "role": "reference and reconstruction evidence only",
+    "scene_world_summary": "assets/capture/level1_hudfix/scene_world_summary.json",
+    "keyframe_views": "assets/capture/level1_hudfix/keyframe_views.json",
+    "accepted_keyframes": [
+      7580,
+      7633,
+      7636,
+      7865,
+      7932,
+      8141,
+      8881
+    ],
+    "dropped_keyframes": [
+      {
+        "frame": 6988,
+        "reason": "inliers=7"
+      },
+      {
+        "frame": 7568,
+        "reason": "inliers=7"
+      },
+      {
+        "frame": 7640,
+        "reason": "inliers=7"
+      }
+    ],
+    "solved_eye_bounds": {
+      "x": [
+        4716.5772830319365,
+        7458.819772710472
+      ],
+      "y": [
+        -448.5989761352539,
+        178.39536257605778
+      ],
+      "z": [
+        1134.7763497766953,
+        9461.246295715784
+      ]
+    }
+  },
+  "validation": {
+    "smoke_target": "make hybrid-level1",
+    "screenshot": "build/hybrid_level1_validation.png"
+  }
+}

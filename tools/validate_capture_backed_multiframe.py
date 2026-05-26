@@ -131,11 +131,12 @@ def main() -> int:
         default="900,0,500",
         help="visual-only x,y,z delta used to drive the multi-frame camera follow",
     )
-    parser.add_argument("--max-spawn-mae", default=50.0, type=float,
-                        help="multi-frame spawn differs from the anchor because"
-                             " the current fixture unions eye-space draws from"
-                             " several keyframes; this threshold is intentionally"
-                             " loose until per-frame VIEW recovery lands")
+    parser.add_argument("--max-spawn-mae", default=20.0, type=float,
+                        help="multi-frame spawn should closely match the anchor"
+                             " reference. Per-frame VIEW recovery (2026-05-26)"
+                             " brought this from ~44 down to ~11; the threshold"
+                             " leaves headroom for follow-up tightening "
+                             "(per-draw dedup, sharper keyframe selection).")
     parser.add_argument("--min-far-vs-spawn-mae", default=4.0, type=float,
                         help="far must materially differ from spawn (proof that"
                              " multi-frame geometry contributes new pixels)")

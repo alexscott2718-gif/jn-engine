@@ -458,7 +458,8 @@ def export_omt_meshes(omt_path: str, parsed_root: str, out_dir: str,
             'file': out_path,
             # World-space placement (OMT 3DSP AABB-center field).
             # Exporter localizes vertex X/Z to the center but bakes Y height
-            # into the mesh. Runtime translation is therefore (cx, 0, cz).
+            # into the mesh. Native GL runtime translation is (cx, 0, -cz);
+            # legacy validation paths may still consume the raw center.
             'world_x': cx,
             'world_y': cy,   # informational; engine uses 0 for ty
             'world_z': cz,
@@ -472,13 +473,14 @@ def export_omt_meshes(omt_path: str, parsed_root: str, out_dir: str,
 
     # Sidecar text file for the runtime placement loader.
     # Format: one record per line, tab-separated: NAME\tASE_PATH\tCX\tCY\tCZ
-    # CX/CZ are the per-mesh runtime translation (CY is informational; the
-    # engine translates by (CX, 0, CZ) since height is baked into the mesh).
+    # CX/CY/CZ are original OMT centers. Native GL runtime translates by
+    # (CX, 0, -CZ) since ase_load maps Max Y to GL -Z; CY is informational
+    # because OMT height is baked into the mesh vertices.
     placements_path = os.path.join(out_dir, omt_base + '_placements.txt')
     with open(placements_path, 'w') as f:
         f.write('# OMT mesh placements emitted by tools/omt_mesh_export.py\n')
         f.write('# format: <name>\\t<ase_path>\\t<center_x>\\t<center_y>\\t<center_z>\n')
-        f.write('# runtime translation = (center_x, 0, center_z); height is baked into the mesh\n')
+        f.write('# native GL translation = (center_x, 0, -center_z); height is baked into the mesh\n')
         f.write('\n'.join(placement_lines) + '\n')
 
     return written, skipped, manifest_path

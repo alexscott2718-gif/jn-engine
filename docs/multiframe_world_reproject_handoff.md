@@ -21,6 +21,13 @@ that one camera. The plan agreed at the start of session:
 
 ## Status (end of session)
 
+**Pivot update 2026-05-26:** the multi-frame far-move render is not a
+development target to polish. It demonstrated the limit of pure capture
+reprojection: free movement needs a native runtime world, camera, projection,
+and visibility model. Keep this path for reference/debug evidence, but pursue
+`JN_HYBRID_LEVEL1=1` as the Level 1 backbone. See
+`docs/hybrid_level1_pivot.md`.
+
 **Plumbing: COMPLETE.** Build still passes, all three pre-existing validators
 still pass at the exact documented MAE/RMS:
 
@@ -38,14 +45,66 @@ use world mode" for the older single-frame pan path. Multi-frame mode now
 restores `capture_scene_set_group_use_world(..., 1)` after clearing the
 offset.
 
-Current multi-frame validator metrics:
+**Per-frame VIEW recovery: LANDED 2026-05-26.** Each keyframe's baked
+vertices are now reprojected into the anchor frame's eye-space via
+`VIEW_kf^-1 . VIEW_anchor` before being written to `scene_world.bin`. The
+runtime is unchanged -- `CAPTURE_LEVEL1_PROJ_GL` already expects anchor
+eye-space, so the existing translate-only follow camera still works.
+
+Current multi-frame validator metrics (was loose `50.0` threshold; now tightened
+to `20.0`):
 ```text
-spawn screenshot   MAE 44.229  RMS 58.170
-far screenshot     MAE 41.789  RMS 52.850
-far-vs-spawn diff  MAE 33.507  RMS 45.705
+spawn screenshot   MAE 11.118  RMS 29.712      (was 44.229 / 58.170)
+far screenshot     MAE 43.252  RMS 55.183      (was 41.789 / 52.850)
+far-vs-spawn diff  MAE 40.292  RMS 53.023      (was 33.507 / 45.705)
 ```
-The spawn MAE threshold is intentionally loose (`50.0`) until per-frame
-VIEW recovery lands.
+Spawn dropped 75% as predicted; far-vs-spawn went UP (more new geometry
+revealed by movement). Visual QA: spawn matches the anchor reference
+closely; far view shows coherent Retroville buildings/roads stretching
+outward with some warping at the edges from residual registration error.
+
+### Per-frame VIEW recovery -- implementation notes
+
+- `instrument/diff/extract_camera.py` gained module-level reusable helpers
+  (CLI unchanged):
+  - `extract_frames_batch(path, want_frames)` -- single linear pass over the
+    capture, returns `{frame_idx: (persp_proj, [WORLDs])}`. Important because
+    the existing `extract_frame()` re-scans the whole file per call; for 10
+    keyframes scattered across a 4 GB capture that was 10x too slow.
+  - `solve_view(persp_proj, worlds, placements, eps, steps, force_flip=None)`
+    -- wraps `recover_mid_row` + `solve_for_flip` + `camera_basis` into one
+    call. Returns a dict with R/tv plus 16-float row-major `view16` and
+    `view_inv16` (D3D row-vector convention).
+  - `view16_from_R_tv`, `view_inv16_from_R_tv`, `mat4_mul_row` -- matrix
+    utilities. Round-trip verified to machine precision in a smoke test.
+
+- New tool `tools/solve_keyframe_views.py` runs the solver on every frame in
+  `keyframes.json`, locks `force_flip=False` (Phase 12 confirmed
+  mirroring=IDENTITY), and emits
+  `assets/capture/level1_hudfix/keyframe_views.json` with per-frame R, tv,
+  eye, view16, view_inv16, and the composed `to_anchor16 = view_inv16(kf) .
+  view16(anchor)`. Runtime: extraction ~62s (single pass), then ~17s per
+  fine-sweep solve. Total ~3.5min for the current 10 keyframes.
+
+- 3 of 10 keyframes registered weakly (7 inliers out of 194 placements each):
+  `6988`, `7568`, `7640`. Other 7 keyframes got 25-29 inliers and solved-eye
+  positions cluster within ~1500 world units of each other -- the expected
+  signature of a coherent solution. The fixture builder now drops any
+  keyframe below `--min-inliers` (default 15). Today that drops the 3 weak
+  ones, leaving 7 accepted keyframes -- enough to hit MAE 11 and reveal new
+  geometry on movement.
+
+- `tools/build_multiframe_world_fixture.py` reads `keyframe_views.json` when
+  present (falls back loudly to legacy identity-transform behavior when
+  absent). For each draw, it composes the WORLD multiply (baked-position)
+  with the per-frame `to_anchor` (4x4 row-major) so the stored vertex is in
+  anchor eye-space. Anchor draws short-circuit to skip the multiply.
+
+- Makefile: `capture-world-fixture` now chains `extract_world_keyframes ->
+  solve_keyframe_views -> build_multiframe_world_fixture`. New
+  `solve-keyframe-views` target for re-solving without re-picking.
+
+- Validator threshold tightened: `--max-spawn-mae` 50.0 -> 20.0.
 
 ## Files added / changed
 
@@ -217,17 +276,36 @@ narrower than initially planned.
 
 ## Recommended next-session task list
 
-1. **Per-frame VIEW recovery** (the deeper concern). Refactor
-   `extract_camera.py` so the fixture builder can call it. Apply the
-   inverse to land all keyframe draws in a shared world frame. Validate
-   that geometry from non-anchor frames appears in the correct world
-   position when the live camera moves to where that frame was.
-2. **Tighten keyframe selection** once true world space is available.
-   The fingerprint heuristic is approximate; with real VIEW recovery,
-   keyframe selection can use camera positions directly and visit
-   distinct parts of the level instead of a tight time window.
-3. **Per-draw dedup**, once true world space is available — identical
-   geometry submitted by every frame should not be re-stored 10×.
+0. **Hybrid pivot** -- ACTIVE 2026-05-26. Do not spend the next session trying
+   to make the multi-frame far screenshot presentable. Use the solver,
+   keyframe summaries, and screenshots as reconstruction evidence while moving
+   runtime work to the native hybrid path documented in
+   `docs/hybrid_level1_pivot.md`.
+1. **Per-frame VIEW recovery** -- DONE 2026-05-26. See "Status (end of
+   session)" above.
+2. **Tighten keyframe selection.** With real camera positions now solved,
+   `keyframes.json` selection can use camera eye coordinates instead of
+   the fingerprint heuristic. The current 10 picks include 3 weak-
+   registration frames (6988, 7568, 7640) that the builder drops;
+   replacing them with frames whose solved eye position sits in
+   unexplored parts of the level (use
+   `keyframe_views.json["frames"][...]["eye"]` for clustering) will widen
+   the visible-from-spawn radius. The selector also needs a registration
+   precheck so it doesn't pick frames the solver can't crack.
+3. **Per-draw dedup.** With shared world space, identical static geometry
+   submitted by every keyframe is stored once per keyframe in
+   `scene_world.bin` (current 16131 draws, 49507 vertices for 7 accepted
+   keyframes). Dedup by `(tex_id, vertex hash)` should cut the fixture
+   roughly Nx for static draws and probably also reduce the residual
+   far-view warping by averaging per-frame positional jitter.
+4. **Address far-view warping.** Visible at edges of
+   `build/capture_backed_multiframe_far_move.png`. Likely sources:
+   (a) the weakly-registered frames we dropped were precisely the ones
+   covering the periphery -- replacing them (item 2) might help;
+   (b) `extract_camera.py` eye_y is documented as weakly-constrained, so
+   per-frame eye_y biases bend the relative transform vertically. If
+   item 2 doesn't close it, consider locking eye_y across all keyframes
+   to the anchor's value before composing to_anchor.
 
 ## Repro commands
 

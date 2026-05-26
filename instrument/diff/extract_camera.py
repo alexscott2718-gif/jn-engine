@@ -397,6 +397,191 @@ def solve_for_flip(cap_pts, placements, m1, eps, steps, flip):
 
 
 # ===========================================================================
+# Batch frame extraction -- single pass for many requested frames.
+# Useful when solving VIEW for a small set of keyframes scattered across a
+# multi-GB capture (calling extract_frame() N times re-scans the file N times).
+# ===========================================================================
+def extract_frames_batch(path, want_frames):
+    """Decode the requested frame indices in one linear pass.
+
+    Returns {frame_idx: (persp_proj, [WORLD matrix, ...])}.  Frames that were
+    requested but never appeared in the capture map to (None, []).  persp_proj
+    is the PROJ live at that frame's FIRST perspective draw (PROJ is sticky and
+    the game flips it for the HUD at frame end -- the first draw's PROJ is the
+    one used for the world view).
+    """
+    want = set(int(f) for f in want_frames)
+    result = {f: (None, []) for f in want}
+    proj = None
+    world = None
+    idx = -1
+    capturing = False
+    cur_frame_persp_proj = None
+    cur_worlds = None
+    max_wanted = max(want) if want else -1
+    for item in iter_records(path):
+        if item[0] == "header":
+            continue
+        rt, payload = item[1], item[2]
+        if rt == RECORD_FRAME_BEGIN:
+            idx += 1
+            capturing = idx in want
+            if capturing:
+                cur_frame_persp_proj = None
+                cur_worlds = []
+            else:
+                cur_frame_persp_proj = None
+                cur_worlds = None
+            if idx > max_wanted:
+                break
+            continue
+        if rt == RECORD_SET_TRANSFORM:
+            st = SetTransform.unpack(payload)
+            if st.which == TRANSFORM_WORLD:
+                world = st.matrix
+            elif st.which == TRANSFORM_PROJ:
+                proj = st.matrix
+        elif rt == RECORD_DRAW_PRIMITIVE and capturing:
+            if not is_perspective(proj):
+                continue
+            if cur_frame_persp_proj is None:
+                cur_frame_persp_proj = proj
+            if world is not None:
+                cur_worlds.append(world)
+        elif rt == RECORD_FRAME_END and capturing:
+            result[idx] = (cur_frame_persp_proj, cur_worlds or [])
+            capturing = False
+            cur_worlds = None
+    return result
+
+
+# ===========================================================================
+# Row-major flat-16 matrix utilities (D3D row-vector convention)
+# ===========================================================================
+def mat4_mul_row(A, B):
+    """Row-major flat-16 multiply: C[i,j] = sum_k A[i,k] * B[k,j].
+
+    In D3D row-vector convention v . A . B applies A first then B, so the
+    combined matrix is mat4_mul_row(A, B)."""
+    C = [0.0] * 16
+    for i in range(4):
+        ai0 = A[i * 4 + 0]; ai1 = A[i * 4 + 1]
+        ai2 = A[i * 4 + 2]; ai3 = A[i * 4 + 3]
+        for j in range(4):
+            C[i * 4 + j] = (ai0 * B[0 * 4 + j] +
+                            ai1 * B[1 * 4 + j] +
+                            ai2 * B[2 * 4 + j] +
+                            ai3 * B[3 * 4 + j])
+    return C
+
+
+def view16_from_R_tv(R, tv):
+    """Build the row-major flat-16 D3D VIEW matrix from the 9-float row-major
+    rotation R and 3-float translation row tv.  Layout:
+        [ R[0,0] R[0,1] R[0,2] 0 ]
+        [ R[1,0] R[1,1] R[1,2] 0 ]
+        [ R[2,0] R[2,1] R[2,2] 0 ]
+        [ tv[0]  tv[1]  tv[2]  1 ]
+    """
+    return [R[0], R[1], R[2], 0.0,
+            R[3], R[4], R[5], 0.0,
+            R[6], R[7], R[8], 0.0,
+            tv[0], tv[1], tv[2], 1.0]
+
+
+def view_inv16_from_R_tv(R, tv):
+    """Inverse of the rigid VIEW = [R 0; tv 1] (row-major row-vector):
+        VIEW^-1 = [R^T 0; eye 1]   with   eye = -tv . R^T .
+    """
+    # eye = -tv . R^T  ;  (tv . R^T)[j] = sum_i tv[i] * R[j,i]
+    eye0 = -(tv[0] * R[0] + tv[1] * R[1] + tv[2] * R[2])
+    eye1 = -(tv[0] * R[3] + tv[1] * R[4] + tv[2] * R[5])
+    eye2 = -(tv[0] * R[6] + tv[1] * R[7] + tv[2] * R[8])
+    return [R[0], R[3], R[6], 0.0,
+            R[1], R[4], R[7], 0.0,
+            R[2], R[5], R[8], 0.0,
+            eye0, eye1, eye2, 1.0]
+
+
+# ===========================================================================
+# Per-frame VIEW solve -- callable wrapper around the recovery pipeline.
+# Returns the solved (R, tv, ...) along with a 16-float VIEW and VIEW^-1 so
+# downstream tooling can compose cross-frame transforms without re-deriving
+# them.  force_flip=False locks identity-mirroring (Phase 12 finding); pass
+# None to let registration pick.
+# ===========================================================================
+def solve_view(persp_proj, worlds, placements, eps=150.0, steps=360,
+               force_flip=None):
+    """Solve VIEW for one frame's perspective draws + WORLD matrices.
+
+    Returns a dict on success; None on failure.  Keys:
+        m1          -- recovered middle row of R (3-tuple)
+        m1_support  -- consensus support fraction
+        R           -- 9-flat row-major rotation
+        tv          -- 3-tuple translation row
+        flip        -- True if X-flip won registration
+        inliers     -- number of placements registered within eps
+        residual    -- mean per-inlier residual (world units)
+        yaw         -- recovered camera yaw (radians)
+        fov, near, far, aspect  -- from decompose_proj()
+        eye, right, up, fwd     -- camera basis vectors
+        view16, view_inv16      -- row-major flat-16 D3D-convention matrices
+    """
+    if persp_proj is None or not worlds:
+        return None
+    m1, support = recover_mid_row(worlds)
+    if m1 is None:
+        return None
+    # Distinct WORLD translation rows: yaw-invariant samples of origin.R + tv.
+    cap_pts = []
+    seen = set()
+    for m in worlds:
+        t = (m[12], m[13], m[14])
+        key = tuple(round(c, 1) for c in t)
+        if key in seen:
+            continue
+        seen.add(key)
+        cap_pts.append(t)
+    if not cap_pts:
+        return None
+    if force_flip is True or force_flip is False:
+        sol = solve_for_flip(cap_pts, placements, m1, eps, steps, force_flip)
+        if sol is None:
+            return None
+    else:
+        sol_id = solve_for_flip(cap_pts, placements, m1, eps, steps, False)
+        sol_fx = solve_for_flip(cap_pts, placements, m1, eps, steps, True)
+        in_id = sol_id["inliers"] if sol_id else -1
+        in_fx = sol_fx["inliers"] if sol_fx else -1
+        if in_id < 0 and in_fx < 0:
+            return None
+        sol = sol_fx if in_fx > in_id else sol_id
+    R, tv = sol["R"], sol["tv"]
+    fov, aspect, near, far = decompose_proj(persp_proj)
+    eye, right, up, fwd = camera_basis(R, tv)
+    return {
+        "m1": tuple(m1),
+        "m1_support": support,
+        "R": list(R),
+        "tv": tuple(tv),
+        "flip": sol["flip"],
+        "inliers": sol["inliers"],
+        "residual": sol["residual"],
+        "yaw": sol["yaw"],
+        "fov": fov,
+        "aspect": aspect,
+        "near": near,
+        "far": far,
+        "eye": eye,
+        "right": right,
+        "up": up,
+        "fwd": fwd,
+        "view16": view16_from_R_tv(R, tv),
+        "view_inv16": view_inv16_from_R_tv(R, tv),
+    }
+
+
+# ===========================================================================
 # Camera basis -> GL matrices
 # ===========================================================================
 def camera_basis(R, tv):

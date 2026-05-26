@@ -38,6 +38,51 @@ static int env_enabled_default(const char *name, int default_value) {
     return strcmp(s, "0") != 0;
 }
 
+static int load_camera_descriptor_file(const char *path, int *screen_w, int *screen_h) {
+    FILE *f = fopen(path, "r");
+    if (!f) {
+        fprintf(stderr, "[native_camera] cannot open %s\n", path);
+        return 0;
+    }
+    float view[16], proj[16];
+    int have_view = 0;
+    int have_proj = 0;
+    int sw = 1280;
+    int sh = 720;
+    char line[1024];
+    while (fgets(line, sizeof(line), f)) {
+        char *p = line;
+        while (*p == ' ' || *p == '\t') p++;
+        if (*p == '#' || *p == '\n' || *p == '\r' || *p == '\0') continue;
+        if (strncmp(p, "screen", 6) == 0) {
+            sscanf(p + 6, "%d %d", &sw, &sh);
+        } else if (strncmp(p, "view", 4) == 0) {
+            float *m = view;
+            have_view = (sscanf(p + 4,
+                "%f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f",
+                &m[0],&m[1],&m[2],&m[3],&m[4],&m[5],&m[6],&m[7],
+                &m[8],&m[9],&m[10],&m[11],&m[12],&m[13],&m[14],&m[15]) == 16);
+        } else if (strncmp(p, "proj", 4) == 0) {
+            float *m = proj;
+            have_proj = (sscanf(p + 4,
+                "%f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f",
+                &m[0],&m[1],&m[2],&m[3],&m[4],&m[5],&m[6],&m[7],
+                &m[8],&m[9],&m[10],&m[11],&m[12],&m[13],&m[14],&m[15]) == 16);
+        }
+    }
+    fclose(f);
+    if (!have_view || !have_proj) {
+        fprintf(stderr, "[native_camera] %s missing view/proj\n", path);
+        return 0;
+    }
+    renderer_set_camera_override(view, proj);
+    if (screen_w) *screen_w = sw;
+    if (screen_h) *screen_h = sh;
+    fprintf(stderr, "[native_camera] keyframe camera override from %s (%dx%d)\n",
+            path, sw, sh);
+    return 1;
+}
+
 static const float CAPTURE_LEVEL1_VIEW_IDENTITY[16] = {
     1.0f, 0.0f, 0.0f, 0.0f,
     0.0f, 1.0f, 0.0f, 0.0f,
@@ -375,7 +420,19 @@ int main(void) {
     if (!window_init(&w, "JN Engine - Step 4: Textured Scene", 1280, 720))
         return 1;
 
+    int native_level1 = env_enabled("JN_NATIVE_LEVEL1");
+    int hybrid_level1 = env_enabled("JN_HYBRID_LEVEL1");
     int capture_backed_level1 = env_enabled("JN_CAPTURE_BACKED_LEVEL1");
+    if (native_level1 && (hybrid_level1 || capture_backed_level1)) {
+        fprintf(stderr,
+                "[native_level1] clean native map runtime supersedes hybrid/capture-backed modes\n");
+        hybrid_level1 = 0;
+        capture_backed_level1 = 0;
+    } else if (hybrid_level1 && capture_backed_level1) {
+        fprintf(stderr,
+                "[hybrid_level1] native hybrid mode supersedes JN_CAPTURE_BACKED_LEVEL1\n");
+        capture_backed_level1 = 0;
+    }
     int capture_live_jimmy = capture_backed_level1 &&
         env_enabled("JN_CAPTURE_BACKED_LIVE_JIMMY");
     int capture_live_jimmy_bounded = capture_live_jimmy &&
@@ -392,10 +449,37 @@ int main(void) {
            runtime view*proj. */
         capture_live_world_pan = 0;
     }
-    if (capture_backed_level1) {
+    if (capture_backed_level1 || hybrid_level1 || native_level1) {
         SDL_SetWindowSize(w.sdl_win, 1280, 720);
         w.width = 1280;
         w.height = 720;
+    }
+    if (native_level1) {
+        fprintf(stderr,
+                "[native_level1] clean native map runtime enabled: full OMT geometry + native camera\n");
+    } else if (hybrid_level1) {
+        fprintf(stderr,
+                "[hybrid_level1] native runtime enabled: GAM simulation + OMT placements + native camera\n");
+    }
+
+    if (native_level1) {
+        const char *cam_path = getenv("JN_NATIVE_LEVEL1_CAMERA");
+        char keyframe_path[192];
+        const char *keyframe = getenv("JN_NATIVE_LEVEL1_KEYFRAME");
+        if ((!cam_path || !cam_path[0]) && keyframe && keyframe[0]) {
+            snprintf(keyframe_path, sizeof(keyframe_path),
+                     "assets/native/keyframe_cameras/%s.txt", keyframe);
+            cam_path = keyframe_path;
+        }
+        if (cam_path && cam_path[0]) {
+            int cam_sw = w.width;
+            int cam_sh = w.height;
+            if (load_camera_descriptor_file(cam_path, &cam_sw, &cam_sh)) {
+                SDL_SetWindowSize(w.sdl_win, cam_sw, cam_sh);
+                w.width = cam_sw;
+                w.height = cam_sh;
+            }
+        }
     }
 
     if (!renderer_init(w.width, w.height)) {
@@ -563,7 +647,7 @@ int main(void) {
        spawn so the Phase 4 pickup/win loop is exercisable. */
     {
         Entity *jim_pre = world_find_type(&world, "3JIM");
-        if (jim_pre) {
+        if (jim_pre && !native_level1) {
             const int N = 5;
             const float R = 600.0f;
             for (int i = 0; i < N; i++) {
@@ -670,11 +754,16 @@ int main(void) {
     cam->fov    = 1.0472f;
     cam->near_z = 1.0f;
     cam->far_z  = 80000.0f;
-    if (capture_backed_level1) {
+    if (capture_backed_level1 || hybrid_level1 || native_level1) {
         cam->fov = 1.047215f;
         cam->near_z = 20.0f;
         cam->far_z = 28000.0f;
-        printf("[capture_level1] capture-scene viewport=1280x720 fov_y=60.001 near=20 far=28000\n");
+        if (capture_backed_level1)
+            printf("[capture_level1] capture-scene viewport=1280x720 fov_y=60.001 near=20 far=28000\n");
+        else if (native_level1)
+            printf("[native_level1] viewport=1280x720 fov_y=60.001 near=20 far=28000\n");
+        else
+            printf("[hybrid_level1] viewport=1280x720 fov_y=60.001 near=20 far=28000\n");
     }
 
     /* Ground: a real level (placements present) supplies its own ground/street/
@@ -734,6 +823,7 @@ int main(void) {
     int frame_count = 0;
     unsigned int cap_seq = 0;
     Uint32 fps_time = last_time;
+    int native_unresolved_notice = 0;
 
     while (!w.should_quit) {
         Uint32 now = SDL_GetTicks();
@@ -979,8 +1069,11 @@ int main(void) {
             renderer_draw_box(box_vao, box_idx, e->x, e->y, e->z, scale, r, g, b);
         }
 
-        /* Static world geometry from level1.omt (Phase 8). Translation uses
-           (x, 0, z) because the exporter bakes height into vertices. */
+        /* Static world geometry from level1.omt (Phase 8). OMT-exported ASEs
+           localize X/Z around the chunk center; ase_load maps Max Y to GL -Z.
+           Native Level 1 therefore draws at (center_x, 0, -center_z) so the
+           map shares the same basis as solved keyframe cameras. Keep the old
+           +Z placement for legacy/hybrid validation paths. */
         for (int pi = 0; pi < world.placement_count; pi++) {
             const WorldPlacement *pl = &world.placements[pi];
             AseModel *pm = model_cache_get(pl->ase_path);
@@ -991,8 +1084,13 @@ int main(void) {
                slab) or a mesh whose canvas couldn't be resolved -- neither
                appears as a visible surface in the game. Skip them rather than
                draw dark filler slabs. */
-            if (!model_has_texture(pm)) continue;
-            renderer_draw_model(pm, 0, pl->x, 0.0f, pl->z, 0.0f, 1.0f);
+            if (!native_level1 && !model_has_texture(pm)) continue;
+            if (native_level1 && !model_has_texture(pm) && !native_unresolved_notice) {
+                printf("[native_level1] native map coverage: rendering unresolved OMT materials as flat diffuse\n");
+                native_unresolved_notice = 1;
+            }
+            float draw_z = native_level1 ? -pl->z : pl->z;
+            renderer_draw_model(pm, 0, pl->x, 0.0f, draw_z, 0.0f, 1.0f);
         }
 
         renderer_end_frame();

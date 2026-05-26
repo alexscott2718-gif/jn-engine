@@ -3,9 +3,20 @@
 
 Reads `assets/capture/level1_hudfix/keyframes.json`, streams
 `build/level1_v4_hudfix.omtc` once, and collects each picked frame's
-static-world draws in world-space coordinates. All draws are concatenated
-into a single `assets/capture/level1_hudfix/scene_world.bin` whose static
-world geometry is meant to be rendered through a runtime view*proj matrix.
+static-world draws. All draws are concatenated into a single
+`assets/capture/level1_hudfix/scene_world.bin` rendered through a runtime
+view*proj matrix.
+
+If `keyframe_views.json` (from tools/solve_keyframe_views.py) is present,
+each draw's vertices are reprojected into the ANCHOR FRAME'S EYE-SPACE via
+`VIEW_kf^-1 . VIEW_anchor`. JNBG bakes the camera into every WORLD matrix
+(WORLD_baked = MODEL_true . VIEW), so without this step every non-anchor
+keyframe's baked vertices live in a different eye-space and rendering them
+through one projection projects them as if from the wrong camera. The
+anchor's vertices stay put (its to_anchor is identity); other frames'
+vertices land in the same eye-space the captured projection expects, so
+`CAPTURE_LEVEL1_PROJ_GL` still works unchanged at runtime. Weakly-registered
+keyframes (below `--min-inliers`) are dropped entirely.
 
 The HUD group is intentionally NOT included here -- the runtime keeps HUD
 in the accepted clip-space scene (`scene.bin`) to preserve current proven
@@ -91,10 +102,37 @@ def mat4_xform_col(m: tuple, x: float, y: float, z: float):
     )
 
 
+def mat4_xform_row(M, x, y, z, w=1.0):
+    """Row-major flat-16, row-vector convention: out = [x y z w] . M."""
+    return (
+        x * M[0] + y * M[4] + z * M[8] + w * M[12],
+        x * M[1] + y * M[5] + z * M[9] + w * M[13],
+        x * M[2] + y * M[6] + z * M[10] + w * M[14],
+        x * M[3] + y * M[7] + z * M[11] + w * M[15],
+    )
+
+
+IDENTITY16 = (1.0, 0.0, 0.0, 0.0,
+              0.0, 1.0, 0.0, 0.0,
+              0.0, 0.0, 1.0, 0.0,
+              0.0, 0.0, 0.0, 1.0)
+
+
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--source", default=str(ROOT / "build/level1_v4_hudfix.omtc"))
     ap.add_argument("--keyframes", default=str(ROOT / "assets/capture/level1_hudfix/keyframes.json"))
+    ap.add_argument("--views",
+                    default=str(ROOT / "assets/capture/level1_hudfix/keyframe_views.json"),
+                    help="per-frame VIEW solve from solve_keyframe_views.py; if "
+                         "present, each draw's vertices are reprojected into the "
+                         "anchor frame's eye-space via the per-frame to_anchor "
+                         "matrix. Weakly-registered frames (below --min-inliers) "
+                         "are dropped.")
+    ap.add_argument("--min-inliers", type=int, default=15,
+                    help="minimum placement-registration inliers required to "
+                         "trust a keyframe's VIEW solve; weaker frames are "
+                         "skipped entirely")
     ap.add_argument("--textures",
                     default=str(ROOT / "assets/capture/level1_hudfix/textures.json"),
                     help="reuse the accepted-frame texture set")
@@ -109,11 +147,65 @@ def main() -> int:
         raise SystemExit(f"source capture not found: {src}")
 
     keyframes_meta = json.loads(Path(args.keyframes).read_text())
-    picked = sorted({kf["frame"] for kf in keyframes_meta["keyframes"]})
-    picked_set = set(picked)
-    if not picked:
+    picked_raw = sorted({kf["frame"] for kf in keyframes_meta["keyframes"]})
+    anchor_frame = int(keyframes_meta.get("anchor", picked_raw[0]))
+    if not picked_raw:
         raise SystemExit("no keyframes in keyframes.json")
-    print(f"[build] {len(picked)} picked frames: {picked}", file=sys.stderr)
+
+    # Load per-frame VIEW solves if available; fall back to identity (legacy
+    # behavior) with a loud warning when missing.
+    views_path = Path(args.views)
+    to_anchor: dict[int, tuple] = {}
+    view_solve_meta: dict[int, dict] = {}
+    if views_path.exists():
+        views_obj = json.loads(views_path.read_text())
+        if int(views_obj.get("anchor", anchor_frame)) != anchor_frame:
+            print(f"[build] WARNING: anchor mismatch between keyframes.json "
+                  f"({anchor_frame}) and {views_path.name} ({views_obj.get('anchor')})",
+                  file=sys.stderr)
+        for f_str, entry in views_obj["frames"].items():
+            idx = int(f_str)
+            if entry is None:
+                continue
+            to_anchor[idx] = tuple(entry["to_anchor16"])
+            view_solve_meta[idx] = {
+                "inliers": entry["inliers"],
+                "residual": entry["residual"],
+            }
+        print(f"[build] loaded per-frame VIEW solves from {views_path.name}",
+              file=sys.stderr)
+    else:
+        print(f"[build] WARNING: {views_path.name} not present -- vertices will"
+              " stay in each keyframe's eye-space (legacy behavior, high MAE).",
+              file=sys.stderr)
+
+    # Filter keyframes: drop ones whose VIEW solve registered too few placements
+    # to be trusted. The anchor is always kept (its to_anchor is identity by
+    # construction; if it solved at all, the world fixture is meaningful).
+    picked = []
+    dropped_for_inliers = []
+    for f in picked_raw:
+        if not to_anchor:                       # no view solve: keep everything
+            picked.append(f)
+            continue
+        if f == anchor_frame:
+            picked.append(f)
+            continue
+        meta = view_solve_meta.get(f)
+        if meta is None:
+            dropped_for_inliers.append((f, "no-solve"))
+            continue
+        if meta["inliers"] < args.min_inliers:
+            dropped_for_inliers.append((f, f"inliers={meta['inliers']}"))
+            continue
+        picked.append(f)
+    picked_set = set(picked)
+    if dropped_for_inliers:
+        print(f"[build] dropped {len(dropped_for_inliers)} weak keyframe(s) "
+              f"(threshold {args.min_inliers} inliers): {dropped_for_inliers}",
+              file=sys.stderr)
+    print(f"[build] {len(picked)} accepted frames: {picked} (anchor={anchor_frame})",
+          file=sys.stderr)
 
     # Texture set (reused from the accepted single-frame fixture).
     tex_rows = json.loads(Path(args.textures).read_text())
@@ -254,6 +346,14 @@ def main() -> int:
                     if vtx_count * VERTEX_SIZE + 9 > payload_len:
                         off = end
                         continue
+                    # Per-frame to_anchor: lands this keyframe's baked vertices
+                    # in the anchor frame's eye-space (where CAPTURE_LEVEL1_PROJ_GL
+                    # already projects correctly). For the anchor itself this is
+                    # the identity; for legacy mode (no view solves) we fall back
+                    # to identity so behavior matches the previous fixture.
+                    M_to_anchor = to_anchor.get(frame_idx, IDENTITY16) if to_anchor else IDENTITY16
+                    is_identity_to_anchor = (M_to_anchor is IDENTITY16) or (
+                        frame_idx == anchor_frame and to_anchor)
                     first = len(out_vertices)
                     for i in range(vtx_count):
                         voff = pstart + 9 + i * VERTEX_SIZE
@@ -261,6 +361,10 @@ def main() -> int:
                         wx, wy, wz, ww = mat4_xform_col(world, x, y, z)
                         if ww != 0.0 and ww != 1.0:
                             wx /= ww; wy /= ww; wz /= ww
+                        if not is_identity_to_anchor:
+                            wx, wy, wz, ww = mat4_xform_row(M_to_anchor, wx, wy, wz, 1.0)
+                            if ww != 0.0 and ww != 1.0:
+                                wx /= ww; wy /= ww; wz /= ww
                         if lighting:
                             md = material["diffuse"]
                             me = material["emissive"]
@@ -360,7 +464,13 @@ def main() -> int:
     summary = {
         "magic": "JNW1",
         "source": str(src),
-        "keyframes": picked,
+        "anchor_frame": anchor_frame,
+        "keyframes_accepted": picked,
+        "keyframes_dropped": [
+            {"frame": f, "reason": reason} for (f, reason) in dropped_for_inliers
+        ],
+        "view_reproject": bool(to_anchor),
+        "min_inliers_threshold": args.min_inliers,
         "draw_count": len(out_draws),
         "vertex_count": len(out_vertices),
         "texture_count": len(used_tex_rows),

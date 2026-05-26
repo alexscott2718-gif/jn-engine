@@ -38,9 +38,10 @@ typedef struct Entity {
 } Entity;
 
 /* Static-geometry placement extracted from an OMT (e.g. level1.omt).
-   Each entry refers to a localized ASE on disk plus the world-space center
-   at which that mesh should be drawn each frame. Y is informational; runtime
-   translation uses (x, 0, z) because the exporter bakes height into verts. */
+   Each entry refers to a localized ASE on disk plus the original OMT center.
+   Native Level 1 draws OMT ASEs at (x, 0, -z) because ase_load maps Max Y to
+   GL -Z; legacy validation paths still use the historical +Z placement. Y is
+   informational because the exporter bakes height into vertices. */
 typedef struct WorldPlacement {
     char  name[64];              /* mesh name (e.g. "labshak") — for debug */
     char  ase_path[160];         /* path to the localized ASE on disk */

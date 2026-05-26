@@ -1,6 +1,6 @@
 # OMT mesh placements emitted by tools/omt_mesh_export.py
 # format: <name>\t<ase_path>\t<center_x>\t<center_y>\t<center_z>
-# runtime translation = (center_x, 0, center_z); height is baked into the mesh
+# native GL translation = (center_x, 0, -center_z); height is baked into the mesh
 labshak	assets/ase/omt/labshak.ASE	2927.0491	67.0909	5654.2900
 bench05	assets/ase/omt/bench05.ASE	8842.8242	67.0909	8116.8867
 bench06	assets/ase/omt/bench06.ASE	9599.1172	67.0909	8134.0957
