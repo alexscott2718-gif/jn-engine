@@ -63,6 +63,30 @@ capture-live-hud: $(TARGET)
 capture-multiframe: $(TARGET)
 	python3 tools/validate_capture_backed_multiframe.py
 
+hybrid-level1: $(TARGET)
+	python3 tools/validate_hybrid_level1.py
+
+hybrid-level1-manifest:
+	python3 tools/build_hybrid_level1_manifest.py
+
+native-level1-map:
+	python3 tools/build_native_level1_map.py
+	python3 tools/build_native_keyframe_cameras.py
+
+native-level1: $(TARGET) native-level1-map
+	python3 tools/validate_native_level1_map.py
+	python3 tools/validate_native_keyframe_alignment.py --keyframe 8881 --write-report
+
+# Sweep alignment check across every solved keyframe descriptor. Useful when
+# adjusting the native basis or keyframe camera generator — any descriptor
+# whose camera now points at empty space will fail.
+native-level1-keyframes:
+	@for f in assets/native/keyframe_cameras/*.txt; do \
+		kf=$$(basename $$f .txt); \
+		echo "=== keyframe $$kf ==="; \
+		python3 tools/validate_native_keyframe_alignment.py --keyframe $$kf || exit 1; \
+	done
+
 capture-fixture:
 	python3 tools/build_level1_hudfix_fixture.py
 
@@ -71,7 +95,13 @@ capture-fixture:
 # scene_world.bin. Source captures live in build/ and are not committed.
 capture-world-fixture:
 	python3 tools/extract_world_keyframes.py
+	python3 tools/solve_keyframe_views.py
 	python3 tools/build_multiframe_world_fixture.py
+
+# Just resolve VIEW per keyframe (slow: re-reads the full capture). Useful
+# when keyframes.json changed but extract_world_keyframes.py output is current.
+solve-keyframe-views:
+	python3 tools/solve_keyframe_views.py
 
 # --- WebAssembly (Emscripten) build ---------------------------------------
 # Run `source ~/emsdk/emsdk_env.sh` once per shell before `make web`.
@@ -94,4 +124,4 @@ web:
 	mkdir -p $(WEB_OUT_DIR)
 	$(EMCC) $(WEB_CFLAGS) $(WEB_SRC) $(WEB_LDFLAGS) -o $(WEB_TARGET)
 
-.PHONY: all clean web capture replay-hudfix capture-static capture-live-jimmy capture-live-hud capture-multiframe capture-fixture capture-world-fixture
+.PHONY: all clean web capture replay-hudfix capture-static capture-live-jimmy capture-live-hud capture-multiframe hybrid-level1 hybrid-level1-manifest native-level1-map native-level1 native-level1-keyframes capture-fixture capture-world-fixture solve-keyframe-views

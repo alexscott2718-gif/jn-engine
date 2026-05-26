@@ -1,0 +1,18 @@
+# native Level 1 keyframe camera descriptor
+# GL right-handed, column-major; generated from keyframe_views.json
+# view = gl_lookat(eye_native, fwd_native, up=(0,1,0))
+# tilted = false  # |capture_fwd.y|=0.160, threshold=0.3
+frame 7932
+inliers 29
+residual 94.359551
+yaw_deg 155.200000
+tilted 0
+screen 1280 720
+fovy 59.985353
+near 20.000000
+far 28000.000000
+eye 7069.813501 313.456837 -5010.886363
+capture_eye 7069.813501 -313.456837 5010.886363
+capture_fwd -0.896139121 -0.159615354 0.414074406
+view 0.419452082 0.144895223 0.896139121 0 0 0.987179284 -0.159615354 0 -0.907777479 0.0669509924 0.414074406 0 -7514.21778 -998.336486 -4210.62414 1
+proj 0.974566229 0 0 0 0 1.73256218 0 0 0 0 -1.00142959 -1 0 0 -40.0285919 0
