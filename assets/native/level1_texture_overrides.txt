@@ -1,0 +1,5 @@
+# Phase 2 ground/water texture overrides for native Level 1.
+# Format: <mesh_name> <TAB> <material_slot> <TAB> <texture_path>
+# Source of truth + provenance: level1_texture_overrides.json
+# Runtime loader: src/engine/assets/texture_overrides.c
+GROUND	0	assets/native/level1_capture_overrides/GROUND_mat0_grass.png

@@ -176,7 +176,27 @@ Done when: native render's overall colour histogram (top third = sky,
 middle = buildings, bottom = ground) matches the capture's within ~10
 percent per channel.
 
-### Phase 2 — ground + water (high-impact, single-mesh fixes)
+### Phase 2 — ground + water (high-impact, single-mesh fixes)   *(DONE 2026-05-26)*
+
+Landed via:
+
+- `assets/native/level1_capture_overrides/GROUND_mat0_grass.png` (verbatim
+  copy of capture `tex_05e10d68_128x128.png`)
+- `assets/native/level1_texture_overrides.{json,txt}` sidecar
+- `src/engine/assets/texture_overrides.{h,c}` loader
+- `main.c` ground_init branch for `JN_NATIVE_LEVEL1=1`
+
+Bottom-third went from 0.42x of capture → 0.51x. Native ground tile now
+uses the same PNG the capture binds. The remaining bottom gap is dark
+debug_flat geometry (BLOCKING_*, CHIMNEY, etc.) -- the Phase 3 work
+queue -- not a Phase 2 miss. Phase 0 diff regression check: still
+30/58 matched, gate PASS. See
+`docs/native_vs_capture_8881_phase2_report.md` for the full numbers.
+
+ncwater* meshes were deliberately not overridden; none are in keyframe
+8881's `in_frustum` set, so there is no measured capture cluster to pair
+them with. Add them when a future keyframe puts them on screen.
+
 
 Both are single OMT meshes (`GROUND`, `ncwater*` etc.) whose currently
 assigned texture (or lack thereof) accounts for a huge fraction of screen

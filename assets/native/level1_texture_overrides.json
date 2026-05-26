@@ -1,0 +1,18 @@
+{
+  "schema": "jn-native-level1-texture-overrides/v1",
+  "source": "build/diff_native_capture_8881.json (keyframe 8881)",
+  "rationale": "Phase 2 of docs/native_vs_capture_8881_plan.md. Each entry assigns a mesh+slot to a capture-derived PNG because the OMT canvas chain in level1.omt does not resolve the slot (e.g. the material record has no Canv field). Every override must come from a measured drawcall in the capture stream -- not from heuristic dimension matching or PNG SHA-1 guessing.",
+  "overrides": [
+    {
+      "mesh": "GROUND",
+      "slot": 0,
+      "texture": "assets/native/level1_capture_overrides/GROUND_mat0_grass.png",
+      "capture_tex_id": "05e10d68",
+      "capture_draw_count_at_8881": 133,
+      "capture_world_translation": [15.0, -545.0, -26.0],
+      "capture_texture_mean_rgb": [87.8, 123.9, 45.4],
+      "capture_bottom_third_mean_rgb": [90.1, 120.5, 48.8],
+      "notes": "GROUND material mid 0 has no Canv field in level1.omt so resolve_bitmap returns ''. The capture binds tex_05e10d68_128x128.png 133 times from a single WORLD matrix near the origin (one source mesh, many sub-triangles). The texture's mean colour matches the capture's bottom-third within ~3% per channel, confirming it is the ground tile.\n\nSCHOOL-style multi-level meshes are NOT eligible for this override file -- see [[jn-school-multilevel]]."
+    }
+  ]
+}

@@ -16,6 +16,7 @@
 #include "../engine/assets/tex_loader.h"
 #include "../engine/assets/asset_cache.h"
 #include "../engine/assets/placement_loader.h"
+#include "../engine/assets/texture_overrides.h"
 #include "entities.h"
 #include "entity_visual.h"
 #include "camera.h"
@@ -503,6 +504,15 @@ int main(void) {
                 "scene_tint=(%.3f,%.3f,%.3f)\n",
                 PHASE1_SKY_TOP_R, PHASE1_SKY_TOP_G, PHASE1_SKY_TOP_B,
                 PHASE1_SCENE_TINT_R, PHASE1_SCENE_TINT_G, PHASE1_SCENE_TINT_B);
+
+        /* Phase 2: ground/water texture overrides for slots whose
+           level1.omt canvas chain resolves to nothing. Provenance and
+           per-entry rationale live in
+           assets/native/level1_texture_overrides.json. */
+        texture_overrides_load("assets/native/level1_texture_overrides.txt");
+        fprintf(stderr,
+                "[native_level1] phase 2 texture overrides loaded: %d\n",
+                texture_overrides_count());
     }
 
     if (!audio_init()) {
@@ -793,6 +803,18 @@ int main(void) {
     if (world.placement_count == 0 && !capture_scene_ready) {
         unsigned int ground_tex = tex_cache_get(CANON_GROUND_TEXTURE);
         ground_init(ground_tex, 20000.0f, 20000.0f,
+                    jim ? jim->x : 0.0f, jim ? jim->z : 0.0f,
+                    80.0f, 0.0f);
+    } else if (native_level1) {
+        /* Phase 2 of docs/native_vs_capture_8881_plan.md: the capture's
+           dominant ground texture (tex_05e10d68, 133 draws at world
+           translation (15,-545,-26)) corresponds to a large terrain mesh
+           that has no single counterpart in level1.omt placements. Use the
+           ground.c flat tile (y_amplitude=0) so the bottom of every native
+           Level 1 view matches the captured grass tint. */
+        unsigned int grass_tex = tex_cache_get(
+            "assets/native/level1_capture_overrides/GROUND_mat0_grass.png");
+        ground_init(grass_tex, 20000.0f, 20000.0f,
                     jim ? jim->x : 0.0f, jim ? jim->z : 0.0f,
                     80.0f, 0.0f);
     }
@@ -1096,6 +1118,12 @@ int main(void) {
             const WorldPlacement *pl = &world.placements[pi];
             AseModel *pm = model_cache_get(pl->ase_path);
             if (!pm) continue;
+            if (native_level1) {
+                /* Phase 2: apply capture-derived texture overrides for
+                   meshes whose OMT canvas chain didn't resolve. No-op for
+                   meshes without an override entry. */
+                texture_overrides_apply(pm, pl->name);
+            }
             /* Faithfulness (audit D1/D2): the original game renders ZERO
                untextured geometry. A placement whose OMT material resolved no
                texture is either collision/blocking (BLOCKING_*, GROUND base
