@@ -87,6 +87,10 @@ native-level1-keyframes:
 		python3 tools/validate_native_keyframe_alignment.py --keyframe $$kf || exit 1; \
 	done
 
+diff-native-capture:
+	@test -f build/native_keyframe_alignment_8881.json || $(MAKE) native-level1
+	python3 tools/diff_native_capture_keyframe.py
+
 capture-fixture:
 	python3 tools/build_level1_hudfix_fixture.py
 
@@ -124,4 +128,4 @@ web:
 	mkdir -p $(WEB_OUT_DIR)
 	$(EMCC) $(WEB_CFLAGS) $(WEB_SRC) $(WEB_LDFLAGS) -o $(WEB_TARGET)
 
-.PHONY: all clean web capture replay-hudfix capture-static capture-live-jimmy capture-live-hud capture-multiframe hybrid-level1 hybrid-level1-manifest native-level1-map native-level1 native-level1-keyframes capture-fixture capture-world-fixture solve-keyframe-views
+.PHONY: all clean web capture replay-hudfix capture-static capture-live-jimmy capture-live-hud capture-multiframe hybrid-level1 hybrid-level1-manifest native-level1-map native-level1 native-level1-keyframes diff-native-capture capture-fixture capture-world-fixture solve-keyframe-views

@@ -90,6 +90,43 @@ just chips at the rows it surfaces.
 Done when: every in-frustum mesh has a row, every row has a clear "match" or
 "diverge: <reason>" status, no manual intervention needed to regenerate.
 
+Current command:
+
+```sh
+make diff-native-capture
+```
+
+That target re-runs `make native-level1` only when
+`build/native_keyframe_alignment_8881.json` is missing, then writes:
+
+```text
+build/diff_native_capture_8881.json
+build/diff_native_capture_8881.json.summary.txt
+```
+
+Current Phase 0 snapshot:
+
+```text
+schema                         jn-diff-native-capture-keyframe/v1
+in-frustum rows                58
+capture-matched rows           30
+solver inliers                 25  (solver gate PASS)
+match classes                  expected_gap_school=1
+                               native_missing_texture=15
+                               native_only=28
+                               texture_mismatch=14
+```
+
+`GROUND` is not currently in the 8881 alignment report's `in_frustum_meshes`
+set, so it is not emitted as a row by the Phase 0 diff. The tool records
+`summary.ground_in_alignment=false` / `ground_in_diff=false` explicitly rather
+than inventing a match.
+
+Top current rows by face count are SCHOOL (expected cross-level gap),
+BLOCKcarhood, grill, house01, and Blocks_In. Treat SCHOOL as non-actionable
+for `level1.omt`; start material recovery with non-SCHOOL rows, especially
+`Blocks_In` and the other `native_missing_texture` entries.
+
 ### Phase 1 — sky + clear-color + ambient
 
 Easy wins that close the biggest visual gap without touching meshes:
