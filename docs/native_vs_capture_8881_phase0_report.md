@@ -9,8 +9,7 @@ mappings, runtime rendering, XP state, or capture data.
 Regenerate the native baseline and the keyframe-8881 diff:
 
 ```sh
-make native-level1
-make diff-native-capture
+make native-vs-capture-8881-review
 ```
 
 Outputs:
@@ -23,25 +22,11 @@ build/diff_native_capture_8881.json
 build/diff_native_capture_8881.json.summary.txt
 ```
 
-The side-by-side image was generated with Pillow from the existing capture and
-native screenshots:
+For a faster diff-only refresh when the native screenshot is already current:
 
 ```sh
-python3 - <<'PY'
-from PIL import Image, ImageDraw
-from pathlib import Path
-left = Image.open('build/frame_v4_hudfix_candidate_8881.png').convert('RGB')
-right = Image.open('build/native_level1_keyframe_8881.png').convert('RGB')
-w = max(left.width, right.width)
-h = max(left.height, right.height)
-canvas = Image.new('RGB', (w * 2, h + 32), (32, 32, 32))
-canvas.paste(left, (0, 32))
-canvas.paste(right, (w, 32))
-d = ImageDraw.Draw(canvas)
-d.text((12, 9), 'capture frame 8881', fill=(255, 255, 255))
-d.text((w + 12, 9), 'native JN_NATIVE_LEVEL1 keyframe 8881', fill=(255, 255, 255))
-canvas.save('build/native_vs_capture_8881_side_by_side.png')
-PY
+make diff-native-capture
+python3 tools/build_native_capture_side_by_side.py
 ```
 
 ## Summary
