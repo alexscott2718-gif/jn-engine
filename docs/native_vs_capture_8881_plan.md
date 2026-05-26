@@ -80,9 +80,9 @@ per-mesh report of:
   - which texture native used (path from coverage manifest)
   - mismatch flag
 
-Owner: new tool `tools/diff_native_capture_keyframe.py`. Reads the .omtc
-frame, the coverage manifest, and the alignment report. Writes
-`build/diff_native_capture_8881.json` plus a printed summary.
+Owner: `tools/diff_native_capture_keyframe.py`. Reads the .omtc frame, the
+coverage manifest, and the alignment report. Writes JSON, text, and Markdown
+reports under `build/`.
 
 This is the missing ledger for the rest of the work -- every later phase
 just chips at the rows it surfaces.
@@ -93,14 +93,21 @@ Done when: every in-frustum mesh has a row, every row has a clear "match" or
 Current command:
 
 ```sh
-make diff-native-capture
+make native-vs-capture-8881-review
 ```
 
-That target re-runs `make native-level1` only when
-`build/native_keyframe_alignment_8881.json` is missing, then writes:
+That target regenerates the native keyframe screenshot, refreshes the diff, and
+builds the side-by-side review PNG. For a faster diff-only refresh when the
+native screenshot is already current, use `make diff-native-capture`.
+
+Outputs:
 
 ```text
+build/native_level1_keyframe_8881.png
+build/frame_v4_hudfix_candidate_8881.png
+build/native_vs_capture_8881_side_by_side.png
 build/diff_native_capture_8881.json
+build/diff_native_capture_8881.md
 build/diff_native_capture_8881.json.summary.txt
 ```
 
