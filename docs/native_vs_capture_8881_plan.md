@@ -125,6 +125,13 @@ match classes                  expected_gap_school=1
 match methods                  none=28
                                translation=13
                                translation_ambiguous=17
+match quality                  far_ambiguous=6
+                               far_unambiguous=8
+                               mid_ambiguous=4
+                               mid_unambiguous=2
+                               near_ambiguous=7
+                               near_unambiguous=3
+                               none=28
 unresolved capture texture rows 0
 capture match XZ distance      mean=602.2 median=556.7 max=1541.7
 ```

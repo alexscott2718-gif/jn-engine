@@ -477,6 +477,21 @@ def classify_match(mesh_name, mesh_record, ase_sha1, matched,
     return "ok"
 
 
+def match_quality(method, distance_xz, ambiguous_count):
+    if method == "none" or distance_xz is None:
+        return "none"
+    if method == "sha1":
+        return "sha1"
+    if distance_xz <= 100.0:
+        band = "near"
+    elif distance_xz <= 600.0:
+        band = "mid"
+    else:
+        band = "far"
+    suffix = "ambiguous" if ambiguous_count else "unambiguous"
+    return f"{band}_{suffix}"
+
+
 def build_diff(args):
     omtc_path = Path(args.omtc)
     alignment_path = Path(args.alignment)
@@ -563,6 +578,7 @@ def build_diff(args):
                 "capture_match_distance_y": None,
                 "capture_ambiguous_candidate_count": 0,
                 "capture_alternative_candidates": [],
+                "capture_match_quality": "none",
                 "capture_texture_ids": [],
                 "capture_texture_paths": [],
                 "match": "native_only",
@@ -650,6 +666,7 @@ def build_diff(args):
             notes_parts.append(
                 "native classification is collision/blocking; "
                 "absence in capture is expected for invisible volumes")
+        quality = match_quality(method, match_distance_xz, len(ambiguous))
 
         rows.append({
             "mesh": name,
@@ -672,6 +689,7 @@ def build_diff(args):
             "capture_match_distance_y": match_distance_y,
             "capture_ambiguous_candidate_count": len(ambiguous),
             "capture_alternative_candidates": alternative_candidates,
+            "capture_match_quality": quality,
             "capture_vertex_counts": capture_vertex_counts,
             "capture_texture_ids": [f"{tid:08x}" for tid in capture_tex_ids],
             "capture_texture_paths": capture_tex_paths,
@@ -726,12 +744,14 @@ def summarise(rows, capture_only, all_drawcalls):
     matched = sum(1 for r in rows if r["capture_drew"])
     classes = defaultdict(int)
     methods = defaultdict(int)
+    qualities = defaultdict(int)
     ambiguous_rows = 0
     unresolved_capture_texture_rows = 0
     xz_distances = []
     for r in rows:
         classes[r["match"]] += 1
         methods[r["capture_match_method"]] += 1
+        qualities[r["capture_match_quality"]] += 1
         if "ambiguous" in (r.get("capture_match_method") or ""):
             ambiguous_rows += 1
         if r["capture_drew"] and any(not p for p in r["capture_texture_paths"]):
@@ -759,6 +779,7 @@ def summarise(rows, capture_only, all_drawcalls):
         "matched": matched,
         "by_match_class": dict(sorted(classes.items())),
         "by_match_method": dict(sorted(methods.items())),
+        "by_match_quality": dict(sorted(qualities.items())),
         "ambiguous_rows": ambiguous_rows,
         "unresolved_capture_texture_rows": unresolved_capture_texture_rows,
         "capture_match_distance_xz": distance_stats,
@@ -790,6 +811,9 @@ def summary_text(out, top_n=10):
         lines.append(f"  {k:30s} {v}")
     lines.append("match-method breakdown:")
     for k, v in s["by_match_method"].items():
+        lines.append(f"  {k:30s} {v}")
+    lines.append("match-quality breakdown:")
+    for k, v in s["by_match_quality"].items():
         lines.append(f"  {k:30s} {v}")
     lines.append(f"ambiguous rows: {s['ambiguous_rows']}")
     lines.append(
@@ -861,6 +885,8 @@ def markdown_report(out, top_n=12):
         lines.append(f"{key:30s} {val}")
     for key, val in s["by_match_method"].items():
         lines.append(f"{key:30s} {val}")
+    for key, val in s["by_match_quality"].items():
+        lines.append(f"{key:30s} {val}")
     lines.append(f"ambiguous rows                 {s['ambiguous_rows']}")
     lines.append(
         "unresolved capture texture rows "
@@ -886,8 +912,8 @@ def markdown_report(out, top_n=12):
     lines.extend([
         "## Top Divergences",
         "",
-        "| Mesh | Faces | State | Match | XZ dist | Ambig | Native texture(s) | Capture texture(s) | Notes |",
-        "|---|---:|---|---|---:|---:|---|---|---|",
+        "| Mesh | Faces | State | Match | Quality | XZ dist | Ambig | Native texture(s) | Capture texture(s) | Notes |",
+        "|---|---:|---|---|---|---:|---:|---|---|---|",
     ])
     for r in diverged[:top_n]:
         dist_xz = r.get("capture_match_distance_xz")
@@ -898,6 +924,7 @@ def markdown_report(out, top_n=12):
                 str(r["face_count"]),
                 md_cell(r["render_state"]),
                 md_cell(r["match"]),
+                md_cell(r["capture_match_quality"]),
                 f"{dist_xz:.1f}" if dist_xz is not None else "-",
                 str(r.get("capture_ambiguous_candidate_count", 0)),
                 compact_paths(r["native_textures"]),
@@ -916,8 +943,8 @@ def markdown_report(out, top_n=12):
         "",
         "## Non-SCHOOL Native Missing Texture Rows",
         "",
-        "| Mesh | Faces | Classification | XZ dist | Ambig | Capture texture(s) | Notes |",
-        "|---|---:|---|---:|---:|---|---|",
+        "| Mesh | Faces | Classification | Quality | XZ dist | Ambig | Capture texture(s) | Notes |",
+        "|---|---:|---|---|---:|---:|---|---|",
     ])
     for r in missing[:top_n]:
         dist_xz = r.get("capture_match_distance_xz")
@@ -927,6 +954,7 @@ def markdown_report(out, top_n=12):
                 md_cell(r["mesh"]),
                 str(r["face_count"]),
                 md_cell(r["classification"]),
+                md_cell(r["capture_match_quality"]),
                 f"{dist_xz:.1f}" if dist_xz is not None else "-",
                 str(r.get("capture_ambiguous_candidate_count", 0)),
                 compact_paths(r["capture_texture_paths"]),
@@ -944,8 +972,8 @@ def markdown_report(out, top_n=12):
         "",
         "## Non-SCHOOL Texture Mismatch Rows",
         "",
-        "| Mesh | Faces | XZ dist | Ambig | Native texture(s) | Capture texture(s) | Notes |",
-        "|---|---:|---:|---:|---|---|---|",
+        "| Mesh | Faces | Quality | XZ dist | Ambig | Native texture(s) | Capture texture(s) | Notes |",
+        "|---|---:|---|---:|---:|---|---|---|",
     ])
     for r in mismatches[:top_n]:
         dist_xz = r.get("capture_match_distance_xz")
@@ -954,6 +982,7 @@ def markdown_report(out, top_n=12):
             + " | ".join([
                 md_cell(r["mesh"]),
                 str(r["face_count"]),
+                md_cell(r["capture_match_quality"]),
                 f"{dist_xz:.1f}" if dist_xz is not None else "-",
                 str(r.get("capture_ambiguous_candidate_count", 0)),
                 compact_paths(r["native_textures"]),
@@ -981,8 +1010,13 @@ def validate_output(out):
     assert by_method_total == len(out["rows"]), (
         "summary.by_match_method does not sum to row count"
     )
+    by_quality_total = sum(out["summary"]["by_match_quality"].values())
+    assert by_quality_total == len(out["rows"]), (
+        "summary.by_match_quality does not sum to row count"
+    )
     actual_classes = defaultdict(int)
     actual_methods = defaultdict(int)
+    actual_qualities = defaultdict(int)
     actual_ambiguous = 0
     actual_unresolved_capture = 0
     for r in out["rows"]:
@@ -992,12 +1026,14 @@ def validate_output(out):
             "capture_match_method", "capture_texture_ids",
             "capture_texture_paths", "capture_match_distance_xz",
             "capture_match_distance_y", "capture_ambiguous_candidate_count",
-            "capture_alternative_candidates", "match", "notes",
+            "capture_alternative_candidates", "capture_match_quality", "match",
+            "notes",
         ):
             assert k in r, f"row missing key {k}: {r}"
         assert r["match"] in MATCH_CLASSES, f"unknown match class: {r['match']}"
         actual_classes[r["match"]] += 1
         actual_methods[r["capture_match_method"]] += 1
+        actual_qualities[r["capture_match_quality"]] += 1
         if "ambiguous" in (r.get("capture_match_method") or ""):
             actual_ambiguous += 1
             assert len(r["capture_alternative_candidates"]) > 0, (
@@ -1058,6 +1094,10 @@ def validate_output(out):
     assert dict(sorted(actual_methods.items())) == out["summary"]["by_match_method"], (
         "summary.by_match_method disagrees with rows"
     )
+    assert (
+        dict(sorted(actual_qualities.items()))
+        == out["summary"]["by_match_quality"]
+    ), "summary.by_match_quality disagrees with rows"
     assert actual_ambiguous == out["summary"]["ambiguous_rows"], (
         "summary.ambiguous_rows disagrees with rows"
     )

@@ -48,6 +48,12 @@ texture_mismatch               14
 none                           28
 translation                    13
 translation_ambiguous          17
+far_ambiguous                   6
+far_unambiguous                 8
+mid_ambiguous                   4
+mid_unambiguous                 2
+near_ambiguous                  7
+near_unambiguous                3
 ambiguous rows                 17
 unresolved capture texture rows 0
 capture match XZ distance      mean=602.2 median=556.7 max=1541.7
@@ -65,6 +71,11 @@ Ambiguous rows also carry `capture_alternative_candidates[]`, including each
 alternative cluster's translation, XZ/Y distance, drawcall indices, texture ids,
 and resolved texture paths. Use that field before trusting any broad-tolerance
 texture assignment.
+
+`capture_match_quality` is an objective bucket derived from method, XZ
+distance, and ambiguity: `near_*` means <=100 units, `mid_*` means <=600 units,
+and `far_*` means >600 units. The suffix records whether other capture clusters
+were also inside tolerance.
 
 ## Highest-Leverage Rows
 
