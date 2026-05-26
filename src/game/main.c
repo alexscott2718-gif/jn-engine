@@ -384,6 +384,14 @@ int main(void) {
         env_enabled("JN_CAPTURE_BACKED_WORLD_PAN");
     int capture_live_hud = capture_backed_level1 &&
         env_enabled("JN_CAPTURE_BACKED_LIVE_HUD");
+    int capture_multiframe = capture_backed_level1 &&
+        env_enabled("JN_CAPTURE_BACKED_MULTIFRAME");
+    if (capture_multiframe) {
+        /* Multi-frame world reproject supersedes the single-frame world pan
+           because both want to drive the static world group through a
+           runtime view*proj. */
+        capture_live_world_pan = 0;
+    }
     if (capture_backed_level1) {
         SDL_SetWindowSize(w.sdl_win, 1280, 720);
         w.width = 1280;
@@ -424,11 +432,22 @@ int main(void) {
 
     int capture_scene_ready = 0;
     if (capture_backed_level1) {
-        const char *scene_path = capture_live_world_pan ?
-            "assets/capture/level1_hudfix/scene_reproject.bin" :
-            "assets/capture/level1_hudfix/scene.bin";
+        const char *scene_path;
+        if (capture_multiframe)
+            scene_path = "assets/capture/level1_hudfix/scene_world.bin";
+        else if (capture_live_world_pan)
+            scene_path = "assets/capture/level1_hudfix/scene_reproject.bin";
+        else
+            scene_path = "assets/capture/level1_hudfix/scene.bin";
         capture_scene_ready =
             capture_scene_init(scene_path);
+        if (!capture_scene_ready && capture_multiframe) {
+            fprintf(stderr,
+                    "[capture_level1] multi-frame world fixture unavailable; falling back to single-frame scene\n");
+            capture_multiframe = 0;
+            capture_scene_ready =
+                capture_scene_init("assets/capture/level1_hudfix/scene.bin");
+        }
         if (!capture_scene_ready && capture_live_world_pan) {
             fprintf(stderr,
                     "[capture_level1] reproject scene unavailable; retrying stable capture scene\n");
@@ -438,6 +457,13 @@ int main(void) {
         }
         if (!capture_scene_ready)
             fprintf(stderr, "[capture_level1] capture scene unavailable; using old renderer\n");
+        if (capture_scene_ready && capture_multiframe) {
+            /* In multi-frame mode the static_world group is always world-space
+               and driven by the runtime view*proj uniform. */
+            capture_scene_set_group_use_world(CAPTURE_SCENE_GROUP_STATIC_WORLD, 1);
+            fprintf(stderr,
+                    "[capture_level1] multi-frame world reproject enabled\n");
+        }
         if (capture_scene_ready && capture_live_jimmy) {
             capture_scene_set_group_visible(CAPTURE_SCENE_GROUP_PLAYER_JIMMY, 0);
             fprintf(stderr,
@@ -841,12 +867,39 @@ int main(void) {
         /* Render phase: uncapped */
         capture_begin_frame(cap_seq, SDL_GetTicks());
         if (capture_scene_ready) {
-            capture_scene_set_world_view_proj(CAPTURE_LEVEL1_VIEW_IDENTITY,
-                                              CAPTURE_LEVEL1_PROJ_GL);
+            float view[16] = {
+                1.0f, 0.0f, 0.0f, 0.0f,
+                0.0f, 1.0f, 0.0f, 0.0f,
+                0.0f, 0.0f, 1.0f, 0.0f,
+                0.0f, 0.0f, 0.0f, 1.0f,
+            };
+            if (capture_multiframe && jim) {
+                /* Camera-follow Jimmy by translating the captured view origin
+                   by -visual_delta. The captured projection has the anchor
+                   frame's camera baked in; this adds a per-frame offset on
+                   top so movement reveals geometry contributed by other
+                   keyframes in scene_world.bin. */
+                float visual_delta[3];
+                capture_live_visual_delta(jim, capture_live_spawn,
+                                          capture_live_jimmy_bounded,
+                                          visual_delta);
+                view[12] = -visual_delta[0];
+                view[13] = -visual_delta[1];
+                view[14] = -visual_delta[2];
+            }
+            capture_scene_set_world_view_proj(view, CAPTURE_LEVEL1_PROJ_GL);
             capture_scene_set_group_ndc_offset(CAPTURE_SCENE_GROUP_STATIC_WORLD,
                                                0.0f, 0.0f);
             capture_scene_set_group_world_offset(CAPTURE_SCENE_GROUP_STATIC_WORLD,
                                                  0.0f, 0.0f, 0.0f);
+            if (capture_multiframe) {
+                /* The multi-frame fixture uses a zero group offset at spawn,
+                   but still needs the static-world group rendered through the
+                   runtime view*proj. capture_scene_set_group_world_offset()
+                   disables world mode for zero offsets for the older pan path,
+                   so restore the explicit world-mode flag here. */
+                capture_scene_set_group_use_world(CAPTURE_SCENE_GROUP_STATIC_WORLD, 1);
+            }
             if (capture_live_world_pan && jim) {
                 float visual_delta[3];
                 capture_live_visual_delta(jim, capture_live_spawn,

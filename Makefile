@@ -60,8 +60,18 @@ capture-live-jimmy: $(TARGET)
 capture-live-hud: $(TARGET)
 	python3 tools/validate_capture_backed_live_hud.py
 
+capture-multiframe: $(TARGET)
+	python3 tools/validate_capture_backed_multiframe.py
+
 capture-fixture:
 	python3 tools/build_level1_hudfix_fixture.py
+
+# Build the multi-frame world fixture from the full Level 1 capture. Picks
+# keyframes by camera-spread, then unions their static-world draws into
+# scene_world.bin. Source captures live in build/ and are not committed.
+capture-world-fixture:
+	python3 tools/extract_world_keyframes.py
+	python3 tools/build_multiframe_world_fixture.py
 
 # --- WebAssembly (Emscripten) build ---------------------------------------
 # Run `source ~/emsdk/emsdk_env.sh` once per shell before `make web`.
@@ -84,4 +94,4 @@ web:
 	mkdir -p $(WEB_OUT_DIR)
 	$(EMCC) $(WEB_CFLAGS) $(WEB_SRC) $(WEB_LDFLAGS) -o $(WEB_TARGET)
 
-.PHONY: all clean web capture replay-hudfix capture-static capture-live-jimmy capture-live-hud capture-fixture
+.PHONY: all clean web capture replay-hudfix capture-static capture-live-jimmy capture-live-hud capture-multiframe capture-fixture capture-world-fixture

@@ -11,6 +11,8 @@ in `build/frame_v4_hudfix.omtc` and inspect output in
 
 ## Read First
 
+- `docs/claude_multiframe_passoff.md`
+- `docs/multiframe_world_reproject_handoff.md`
 - `docs/playable_demo_capture_backed_next_session.md`
 - `docs/codex_project_updates.md`
 - `docs/playable_demo_ground_truth_overhaul_plan.md`
@@ -38,6 +40,11 @@ in `build/frame_v4_hudfix.omtc` and inspect output in
 - `JN_CAPTURE_BACKED_WORLD_PAN=1`
   Loads `scene_reproject.bin` and offsets the static world group opposite the
   bounded live-Jimmy delta. Falls back to `scene.bin` if reproject load fails.
+- `JN_CAPTURE_BACKED_MULTIFRAME=1`
+  Loads `scene_world.bin`, a multi-keyframe static-world fixture. This now
+  renders and passes `make capture-multiframe`; the next real task is
+  per-frame VIEW recovery so all keyframe draws land in a coherent shared
+  world.
 - `JN_CAPTURE_BACKED_LIVE_HUD=1`
   Hides captured HUD draws and renders a simple state-driven item counter.
 
@@ -52,6 +59,7 @@ PYTHONDONTWRITEBYTECODE=1 make replay-hudfix
 PYTHONDONTWRITEBYTECODE=1 make capture-static
 PYTHONDONTWRITEBYTECODE=1 make capture-live-jimmy
 PYTHONDONTWRITEBYTECODE=1 make capture-live-hud
+PYTHONDONTWRITEBYTECODE=1 make capture-multiframe
 git diff --check
 ```
 
@@ -70,6 +78,10 @@ Expected notes:
 - `make capture-live-hud` should report:
   - full-frame MAE `2.331`, RMS `14.491`,
   - HUD-region MAE `27.279`, RMS `57.803`.
+- `make capture-multiframe` should pass with current loose smoke-test metrics:
+  - spawn MAE `44.229`, RMS `58.170`,
+  - far MAE `41.789`, RMS `52.850`,
+  - far-vs-spawn MAE `33.507`, RMS `45.705`.
 
 ## Important Dirty/Generated Files
 
@@ -77,6 +89,9 @@ Do not commit `.omtc` captures or generated `build/` screenshots unless a task
 explicitly asks for them. The useful source-controlled fixture addition is:
 
 - `assets/capture/level1_hudfix/scene_reproject.bin`
+- `assets/capture/level1_hudfix/scene_world.bin`
+- `assets/capture/level1_hudfix/keyframes.json`
+- `assets/capture/level1_hudfix/scene_world_summary.json`
 
 The working tree may also contain generated galleries, pycache files, and build
 proof screenshots from previous sessions. Treat them as incidental unless the
@@ -84,15 +99,18 @@ current task explicitly targets them.
 
 ## Next Best Work
 
-1. Replace the placeholder live HUD rectangle digits with recovered original
+1. Continue multi-frame world reconstruction by adding per-frame VIEW recovery.
+   Start from `docs/claude_multiframe_passoff.md`; do not re-debug the fixed
+   zero-offset world-mode bug.
+2. Replace the placeholder live HUD rectangle digits with recovered original
    glyph/icon texture-page draws.
-2. Improve the reproject path using multiple captured frames or recovered
+3. Improve the reproject path using multiple captured frames or recovered
    renderable level geometry so movement can reveal coherent new world areas.
-3. Derive or retarget a captured-original Jimmy mesh/material/pose path.
-4. Continue reducing capture-backed startup visual asset loads while preserving
+4. Derive or retarget a captured-original Jimmy mesh/material/pose path.
+5. Continue reducing capture-backed startup visual asset loads while preserving
    gameplay state.
-5. Package `assets/capture/level1_hudfix/scene.bin`, `scene_reproject.bin`, and
-   textures for WASM and verify the browser path.
+6. Package `assets/capture/level1_hudfix/scene.bin`, `scene_reproject.bin`,
+   `scene_world.bin`, and textures for WASM and verify the browser path.
 
 ## Constraints
 

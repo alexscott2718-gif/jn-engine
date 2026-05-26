@@ -64,6 +64,7 @@
 
 #define JNC1_MAGIC 0x31434E4Au
 #define JNR1_MAGIC 0x31524E4Au
+#define JNW1_MAGIC 0x31574E4Au
 #define D3DBLEND_ZERO          1
 #define D3DBLEND_ONE           2
 #define D3DBLEND_SRCCOLOR      3
@@ -126,6 +127,7 @@ static float g_world_view_proj[16] = {
     0.0f, 0.0f, 0.0f, 1.0f,
 };
 static int g_reproject;
+static int g_world_mode;  /* JNW1: all draws are world-space, runtime view*proj. */
 
 static const float IDENTITY_MAT4[16] = {
     1.0f, 0.0f, 0.0f, 0.0f,
@@ -339,12 +341,13 @@ int capture_scene_init(const char *path) {
         fclose(f);
         return 0;
     }
-    if (magic != JNC1_MAGIC && magic != JNR1_MAGIC) {
+    if (magic != JNC1_MAGIC && magic != JNR1_MAGIC && magic != JNW1_MAGIC) {
         fprintf(stderr, "[capture_scene] bad scene magic in %s\n", path);
         fclose(f);
         return 0;
     }
     g_reproject = magic == JNR1_MAGIC;
+    g_world_mode = magic == JNW1_MAGIC;
     g_texture_count = read_u32(f, &ok);
     g_draw_count = read_u32(f, &ok);
     g_vertex_count = read_u32(f, &ok);
@@ -417,7 +420,7 @@ int capture_scene_init(const char *path) {
         }
     }
     for (uint32_t i = 0; i < g_vertex_count; i++) {
-        if (g_reproject) {
+        if (g_reproject || g_world_mode) {
             if (!read_exact(f, &g_vertices[i], sizeof(*g_vertices))) {
                 fclose(f);
                 capture_scene_destroy();
@@ -456,14 +459,19 @@ int capture_scene_init(const char *path) {
     reset_group_state();
     reset_world_view_proj();
     g_active = 1;
-    fprintf(stderr, "[capture_scene] loaded %s: %u textures, %u draws, %u vertices%s\n",
+    fprintf(stderr, "[capture_scene] loaded %s: %u textures, %u draws, %u vertices%s%s\n",
             path, g_texture_count, g_draw_count, g_vertex_count,
-            g_reproject ? ", reproject" : "");
+            g_reproject ? ", reproject" : "",
+            g_world_mode ? ", world-mode" : "");
     return 1;
 }
 
 int capture_scene_active(void) {
     return g_active;
+}
+
+int capture_scene_is_world_mode(void) {
+    return g_world_mode;
 }
 
 void capture_scene_set_group_visible(int group, int visible) {
@@ -487,6 +495,11 @@ void capture_scene_set_group_world_offset(int group, float x, float y, float z) 
     g_group_world_offset[group][2] = z;
     g_group_use_world[group] =
         (x * x + y * y + z * z) > 0.000001f ? 1 : 0;
+}
+
+void capture_scene_set_group_use_world(int group, int use) {
+    if (group < 0 || group >= 32) return;
+    g_group_use_world[group] = use ? 1 : 0;
 }
 
 static void mat4_mul_local(float out[16], const float a[16], const float b[16]) {
@@ -541,7 +554,9 @@ void capture_scene_render(int viewport_w, int viewport_h) {
                         g_group_ndc_offset[d->group][1]);
         else
             glUniform2f(g_loc_ndc_offset, 0.0f, 0.0f);
-        if (g_reproject && d->group < 32 && g_group_use_world[d->group]) {
+        int draw_use_world = (g_reproject || g_world_mode) && d->group < 32 &&
+                             g_group_use_world[d->group];
+        if (draw_use_world) {
             glUniform1i(g_loc_use_world, 1);
             glUniform3f(g_loc_world_offset,
                         g_group_world_offset[d->group][0],
@@ -579,5 +594,6 @@ void capture_scene_destroy(void) {
     reset_group_state();
     reset_world_view_proj();
     g_reproject = 0;
+    g_world_mode = 0;
     g_active = 0;
 }
