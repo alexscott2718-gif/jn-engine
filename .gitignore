@@ -9,3 +9,22 @@ demo.omtc
 demo.omtc.tex
 camera.cam
 *.omtc
+
+# Build outputs (screenshots, JSON reports, validator artifacts). The build/
+# dir is a scratch space; check anything genuinely shippable into assets/.
+build/*.png
+build/*.json
+build/*.txt
+build/replay_*/
+build/*_inspect/
+build/*_inspect_*/
+screenshot.png
+
+# Python caches
+__pycache__/
+*.pyc
+
+# Auto-generated browseable asset / texture galleries (regen via
+# tools/gen_asset_galleries.py and tools/gen_texture_gallery.py)
+docs/gallery-*.html
+docs/texture-gallery.html
