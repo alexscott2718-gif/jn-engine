@@ -19,6 +19,7 @@ build/native_level1_keyframe_8881.png
 build/frame_v4_hudfix_candidate_8881.png
 build/native_vs_capture_8881_side_by_side.png
 build/diff_native_capture_8881.json
+build/diff_native_capture_8881.md
 build/diff_native_capture_8881.json.summary.txt
 ```
 
