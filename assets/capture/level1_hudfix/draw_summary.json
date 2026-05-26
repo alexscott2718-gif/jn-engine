@@ -5,6 +5,9 @@
     "player_jimmy": 814,
     "static_world": 2672
   },
+  "primitive_counts": {
+    "6": 3523
+  },
   "group_draw_ranges": {
     "hud": {
       "first": 3487,

@@ -34,6 +34,10 @@ void renderer_draw_billboard(unsigned int tex,
                              float tx, float ty, float tz,
                              float width, float height,
                              float tint_r, float tint_g, float tint_b, float tint_a);
+/* Screen-space solid rectangle, coordinates in pixels from the top-left. */
+void renderer_draw_screen_rect(int viewport_w, int viewport_h,
+                               float x, float y, float width, float height,
+                               float r, float g, float b, float a);
 void renderer_end_frame(void);
 
 /* Set the sky gradient (top and bottom RGB). Drawn before depth-tested geometry. */

@@ -51,6 +51,15 @@ REPLAY_HUDFIX_MANIFEST = assets/capture/level1_hudfix/frame_meta.json
 replay-hudfix: $(TARGET)
 	python3 tools/validate_replay_fixture.py $(REPLAY_HUDFIX_MANIFEST)
 
+capture-static: $(TARGET)
+	python3 tools/validate_capture_backed_static.py
+
+capture-live-jimmy: $(TARGET)
+	python3 tools/validate_capture_backed_live_jimmy.py
+
+capture-live-hud: $(TARGET)
+	python3 tools/validate_capture_backed_live_hud.py
+
 capture-fixture:
 	python3 tools/build_level1_hudfix_fixture.py
 
@@ -75,4 +84,4 @@ web:
 	mkdir -p $(WEB_OUT_DIR)
 	$(EMCC) $(WEB_CFLAGS) $(WEB_SRC) $(WEB_LDFLAGS) -o $(WEB_TARGET)
 
-.PHONY: all clean web capture replay-hudfix capture-fixture
+.PHONY: all clean web capture replay-hudfix capture-static capture-live-jimmy capture-live-hud capture-fixture

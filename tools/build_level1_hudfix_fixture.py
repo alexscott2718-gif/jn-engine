@@ -29,6 +29,7 @@ OUT = ROOT / "assets/capture/level1_hudfix"
 OMTC = ROOT / "build/frame_v4_hudfix.omtc"
 
 MAGIC = 0x31434E4A  # "JNC1"
+MAGIC_REPROJECT = 0x31524E4A  # "JNR1"
 FVF_XYZ_NORMAL_DIFFUSE_TEX1 = 0x152
 VERTEX_SIZE = 36
 XF_WORLD = 0
@@ -139,6 +140,7 @@ def build_draws() -> tuple[list[dict], dict]:
 
     tag_counts = Counter(tag for row in compact for tag in row["tags"])
     group_counts = Counter(row["group"] for row in compact)
+    prim_counts = Counter(str(row["prim_type"]) for row in compact)
     tex_counts = Counter(row["tex0"] for row in compact)
     tag_ranges: dict[str, list[int]] = defaultdict(list)
     group_ranges: dict[str, list[int]] = defaultdict(list)
@@ -150,6 +152,7 @@ def build_draws() -> tuple[list[dict], dict]:
     summary = {
         "draw_count": len(compact),
         "group_counts": dict(sorted(group_counts.items())),
+        "primitive_counts": dict(sorted(prim_counts.items())),
         "group_draw_ranges": {
             group: {"first": values[0], "last": values[-1], "count": len(values)}
             for group, values in sorted(group_ranges.items())
@@ -218,6 +221,7 @@ def build_scene_bin(textures: list[dict]) -> None:
     used_textures = set()
     draws = []
     vertices = []
+    reproject_vertices = []
     draw_index = 0
 
     while off < len(raw):
@@ -268,6 +272,7 @@ def build_scene_bin(textures: list[dict]) -> None:
                 x, y, z = struct.unpack_from("<3f", payload, voff)
                 diffuse = struct.unpack_from("<I", payload, voff + 24)[0]
                 uu, vv = struct.unpack_from("<2f", payload, voff + 28)
+                wx, wy, wz, ww = mat4_xform_col(transforms[XF_WORLD], x, y, z)
                 cx, cy, cz, cw = mat4_xform_col(mvp, x, y, z)
                 if lighting:
                     md = material["diffuse"]
@@ -283,6 +288,9 @@ def build_scene_bin(textures: list[dict]) -> None:
                     b = (diffuse & 0xFF) / 255.0
                     a = ((diffuse >> 24) & 0xFF) / 255.0
                 vertices.append((cx, cy, cz, cw, uu, vv, r, g, b, a))
+                reproject_vertices.append((cx, cy, cz, cw,
+                                           wx / ww, wy / ww, wz / ww,
+                                           uu, vv, r, g, b, a))
             draws.append({
                 "tex_id": cur_tex,
                 "first": first,
@@ -340,6 +348,38 @@ def build_scene_bin(textures: list[dict]) -> None:
         for v in vertices:
             f.write(struct.pack("<10f", *v))
     print(f"wrote {OUT / 'scene.bin'} ({len(draws)} draws, {len(vertices)} vertices)")
+
+    with (OUT / "scene_reproject.bin").open("wb") as f:
+        f.write(struct.pack("<IIII", MAGIC_REPROJECT, len(scene_textures), len(draws), len(reproject_vertices)))
+        for tex in scene_textures:
+            path = tex["png"].encode("utf-8")
+            f.write(struct.pack(
+                "<IHHBB",
+                int(tex["tex_id"]),
+                int(tex["width"]),
+                int(tex["height"]),
+                1 if tex.get("alpha_min") == 0 else 0,
+                len(path),
+            ))
+            f.write(path)
+        for draw in draws:
+            f.write(struct.pack(
+                "<IIHBBBBBBII",
+                int(draw["tex_id"]),
+                int(draw["first"]),
+                int(draw["count"]),
+                int(draw["prim_type"]),
+                int(draw["alpha_blend"]),
+                int(draw["z_enable"]),
+                int(draw["z_write"]),
+                int(draw["alpha_discard"]),
+                int(draw["group"]),
+                int(draw["src_blend"]),
+                int(draw["dst_blend"]),
+            ))
+        for v in reproject_vertices:
+            f.write(struct.pack("<13f", *v))
+    print(f"wrote {OUT / 'scene_reproject.bin'} ({len(draws)} draws, {len(reproject_vertices)} vertices)")
 
 
 def main() -> int:

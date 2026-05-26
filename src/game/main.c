@@ -32,6 +32,12 @@ static int env_enabled(const char *name) {
     return (s && s[0] && strcmp(s, "0") != 0) ? 1 : 0;
 }
 
+static int env_enabled_default(const char *name, int default_value) {
+    const char *s = getenv(name);
+    if (!s || !s[0]) return default_value;
+    return strcmp(s, "0") != 0;
+}
+
 static const float CAPTURE_LEVEL1_VIEW_IDENTITY[16] = {
     1.0f, 0.0f, 0.0f, 0.0f,
     0.0f, 1.0f, 0.0f, 0.0f,
@@ -54,6 +60,56 @@ static const float CAPTURE_LEVEL1_JIMMY_MODEL[16] = {
     0.0f,          0.225457549f,    0.974253058f,    0.0f,
    -0.009765625f, -96.4539566f,   381.575134f,      1.0f,
 };
+
+#define CAPTURE_LIVE_MIN_Z_DELTA  (-90.0f)
+#define CAPTURE_LIVE_MAX_Z_DELTA  (240.0f)
+#define CAPTURE_LIVE_MIN_Y_DELTA  (-50.0f)
+#define CAPTURE_LIVE_MAX_Y_DELTA  (220.0f)
+#define CAPTURE_LIVE_NEAR_X_LIMIT (140.0f)
+#define CAPTURE_LIVE_FAR_X_LIMIT  (220.0f)
+
+static float clampf_local(float v, float lo, float hi) {
+    if (v < lo) return lo;
+    if (v > hi) return hi;
+    return v;
+}
+
+static void capture_live_visual_delta(const Entity *jim, const float spawn[3],
+                                      int bounded, float out_delta[3]) {
+    out_delta[0] = jim->x - spawn[0];
+    out_delta[1] = jim->y - spawn[1];
+    out_delta[2] = jim->z - spawn[2];
+
+    /* Headless QA helper: add a visual-only movement delta without mutating
+       gameplay state. Format: x,y,z in native Level 1 units. */
+    const char *test_delta = getenv("JN_CAPTURE_BACKED_TEST_JIMMY_DELTA");
+    if (test_delta && test_delta[0]) {
+        float tx = 0.0f, ty = 0.0f, tz = 0.0f;
+        if (sscanf(test_delta, "%f,%f,%f", &tx, &ty, &tz) == 3) {
+            out_delta[0] += tx;
+            out_delta[1] += ty;
+            out_delta[2] += tz;
+        }
+    }
+
+    if (bounded) {
+        /* Fixed-camera bounded QA: keep the accepted captured world/camera
+           static and only bound the live actor's visual delta so normal
+           movement remains visible. The simulation position, collision,
+           triggers, and camera state remain untouched. */
+        out_delta[2] = clampf_local(out_delta[2],
+                                    CAPTURE_LIVE_MIN_Z_DELTA,
+                                    CAPTURE_LIVE_MAX_Z_DELTA);
+        float z_t = (out_delta[2] - CAPTURE_LIVE_MIN_Z_DELTA) /
+            (CAPTURE_LIVE_MAX_Z_DELTA - CAPTURE_LIVE_MIN_Z_DELTA);
+        float x_limit = CAPTURE_LIVE_NEAR_X_LIMIT +
+            (CAPTURE_LIVE_FAR_X_LIMIT - CAPTURE_LIVE_NEAR_X_LIMIT) * z_t;
+        out_delta[0] = clampf_local(out_delta[0], -x_limit, x_limit);
+        out_delta[1] = clampf_local(out_delta[1],
+                                    CAPTURE_LIVE_MIN_Y_DELTA,
+                                    CAPTURE_LIVE_MAX_Y_DELTA);
+    }
+}
 
 /* True if the model resolves at least one real texture (model-level or any
    material). Used to skip untextured meshes for faithfulness: the original
@@ -196,7 +252,8 @@ static void entity_color(const char *type, float *r, float *g, float *b) {
 }
 
 static void render_capture_live_jimmy(Entity *jim, int jim_model_ok,
-                                      const float spawn[3],
+                                      const float spawn[3], int bounded,
+                                      int camera_pan,
                                       int viewport_w, int viewport_h) {
     if (!jim || !jim_model_ok) return;
     const AseModel *pose = player_anim_model((PlayerAnim)jim->user_flag);
@@ -209,9 +266,17 @@ static void render_capture_live_jimmy(Entity *jim, int jim_model_ok,
         model[i] = -model[i];
         model[8 + i] = -model[8 + i];
     }
-    model[12] += jim->x - spawn[0];
-    model[13] += jim->y - spawn[1];
-    model[14] += jim->z - spawn[2];
+    float visual_delta[3];
+    if (camera_pan) {
+        visual_delta[0] = 0.0f;
+        visual_delta[1] = 0.0f;
+        visual_delta[2] = 0.0f;
+    } else {
+        capture_live_visual_delta(jim, spawn, bounded, visual_delta);
+    }
+    model[12] += visual_delta[0];
+    model[13] += visual_delta[1];
+    model[14] += visual_delta[2];
 
     renderer_set_camera_override(CAPTURE_LEVEL1_VIEW_IDENTITY,
                                  CAPTURE_LEVEL1_PROJ_GL);
@@ -224,6 +289,87 @@ static void render_capture_live_jimmy(Entity *jim, int jim_model_ok,
     renderer_set_camera_override(NULL, NULL);
 }
 
+static void draw_hud_segment(int viewport_w, int viewport_h,
+                             float x, float y, float scale,
+                             int horizontal) {
+    float w = horizontal ? 18.0f : 4.0f;
+    float h = horizontal ? 4.0f : 18.0f;
+    renderer_draw_screen_rect(viewport_w, viewport_h, x, y, w * scale, h * scale,
+                              1.0f, 0.96f, 0.70f, 1.0f);
+}
+
+static void draw_hud_digit(int viewport_w, int viewport_h,
+                           int digit, float x, float y, float scale) {
+    static const unsigned char SEGMENTS[10] = {
+        0x3F, 0x06, 0x5B, 0x4F, 0x66,
+        0x6D, 0x7D, 0x07, 0x7F, 0x6F,
+    };
+    if (digit < 0 || digit > 9) return;
+    unsigned char bits = SEGMENTS[digit];
+    if (bits & 0x01) draw_hud_segment(viewport_w, viewport_h, x + 4.0f * scale,  y,                 scale, 1);
+    if (bits & 0x02) draw_hud_segment(viewport_w, viewport_h, x + 22.0f * scale, y + 4.0f * scale,  scale, 0);
+    if (bits & 0x04) draw_hud_segment(viewport_w, viewport_h, x + 22.0f * scale, y + 26.0f * scale, scale, 0);
+    if (bits & 0x08) draw_hud_segment(viewport_w, viewport_h, x + 4.0f * scale,  y + 44.0f * scale, scale, 1);
+    if (bits & 0x10) draw_hud_segment(viewport_w, viewport_h, x,                y + 26.0f * scale, scale, 0);
+    if (bits & 0x20) draw_hud_segment(viewport_w, viewport_h, x,                y + 4.0f * scale,  scale, 0);
+    if (bits & 0x40) draw_hud_segment(viewport_w, viewport_h, x + 4.0f * scale,  y + 22.0f * scale, scale, 1);
+}
+
+static void draw_hud_slash(int viewport_w, int viewport_h,
+                           float x, float y, float scale) {
+    for (int i = 0; i < 7; i++) {
+        renderer_draw_screen_rect(viewport_w, viewport_h,
+                                  x + (float)(6 - i) * 3.0f * scale,
+                                  y + (float)i * 7.0f * scale,
+                                  4.0f * scale, 6.0f * scale,
+                                  1.0f, 0.96f, 0.70f, 1.0f);
+    }
+}
+
+static void render_capture_live_hud(int viewport_w, int viewport_h) {
+    const GameState *gs = gamestate_get();
+    int collected = gs->items_collected;
+    int total = gs->items_total;
+    if (collected < 0) collected = 0;
+    if (total < 0) total = 0;
+    if (collected > 99) collected = 99;
+    if (total > 99) total = 99;
+
+    float scale = (float)viewport_h / 720.0f;
+    if (scale < 0.5f) scale = 0.5f;
+    float x = 22.0f * scale;
+    float y = 16.0f * scale;
+
+    renderer_draw_screen_rect(viewport_w, viewport_h,
+                              x, y, 48.0f * scale, 48.0f * scale,
+                              0.06f, 0.09f, 0.12f, 0.72f);
+    renderer_draw_screen_rect(viewport_w, viewport_h,
+                              x + 10.0f * scale, y + 10.0f * scale,
+                              28.0f * scale, 28.0f * scale,
+                              0.95f, 0.78f, 0.24f, 1.0f);
+    renderer_draw_screen_rect(viewport_w, viewport_h,
+                              x + 17.0f * scale, y + 17.0f * scale,
+                              14.0f * scale, 14.0f * scale,
+                              0.18f, 0.22f, 0.28f, 1.0f);
+
+    float tx = x + 64.0f * scale;
+    int col_tens = collected / 10;
+    int col_ones = collected % 10;
+    if (col_tens > 0) {
+        draw_hud_digit(viewport_w, viewport_h, col_tens, tx, y + 2.0f * scale, scale);
+        tx += 34.0f * scale;
+    }
+    draw_hud_digit(viewport_w, viewport_h, col_ones, tx, y + 2.0f * scale, scale);
+    tx += 34.0f * scale;
+    draw_hud_slash(viewport_w, viewport_h, tx, y + 1.0f * scale, scale);
+    tx += 28.0f * scale;
+    if (total >= 10) {
+        draw_hud_digit(viewport_w, viewport_h, total / 10, tx, y + 2.0f * scale, scale);
+        tx += 34.0f * scale;
+    }
+    draw_hud_digit(viewport_w, viewport_h, total % 10, tx, y + 2.0f * scale, scale);
+}
+
 int main(void) {
     Window w;
     if (!window_init(&w, "JN Engine - Step 4: Textured Scene", 1280, 720))
@@ -232,6 +378,12 @@ int main(void) {
     int capture_backed_level1 = env_enabled("JN_CAPTURE_BACKED_LEVEL1");
     int capture_live_jimmy = capture_backed_level1 &&
         env_enabled("JN_CAPTURE_BACKED_LIVE_JIMMY");
+    int capture_live_jimmy_bounded = capture_live_jimmy &&
+        env_enabled_default("JN_CAPTURE_BACKED_LIVE_JIMMY_BOUNDS", 1);
+    int capture_live_world_pan = capture_live_jimmy &&
+        env_enabled("JN_CAPTURE_BACKED_WORLD_PAN");
+    int capture_live_hud = capture_backed_level1 &&
+        env_enabled("JN_CAPTURE_BACKED_LIVE_HUD");
     if (capture_backed_level1) {
         SDL_SetWindowSize(w.sdl_win, 1280, 720);
         w.width = 1280;
@@ -272,13 +424,31 @@ int main(void) {
 
     int capture_scene_ready = 0;
     if (capture_backed_level1) {
+        const char *scene_path = capture_live_world_pan ?
+            "assets/capture/level1_hudfix/scene_reproject.bin" :
+            "assets/capture/level1_hudfix/scene.bin";
         capture_scene_ready =
-            capture_scene_init("assets/capture/level1_hudfix/scene.bin");
+            capture_scene_init(scene_path);
+        if (!capture_scene_ready && capture_live_world_pan) {
+            fprintf(stderr,
+                    "[capture_level1] reproject scene unavailable; retrying stable capture scene\n");
+            capture_live_world_pan = 0;
+            capture_scene_ready =
+                capture_scene_init("assets/capture/level1_hudfix/scene.bin");
+        }
         if (!capture_scene_ready)
             fprintf(stderr, "[capture_level1] capture scene unavailable; using old renderer\n");
         if (capture_scene_ready && capture_live_jimmy) {
             capture_scene_set_group_visible(CAPTURE_SCENE_GROUP_PLAYER_JIMMY, 0);
-            fprintf(stderr, "[capture_level1] live Jimmy overlay enabled; captured Jimmy group hidden\n");
+            fprintf(stderr,
+                    "[capture_level1] %s live Jimmy overlay enabled%s; captured Jimmy group hidden\n",
+                    capture_live_jimmy_bounded ? "bounded" : "unbounded",
+                    capture_live_world_pan ? " with static-world pan" : "");
+        }
+        if (capture_scene_ready && capture_live_hud) {
+            capture_scene_set_group_visible(CAPTURE_SCENE_GROUP_HUD, 0);
+            fprintf(stderr,
+                    "[capture_level1] live HUD overlay enabled; captured HUD group hidden\n");
         }
     }
 
@@ -332,8 +502,14 @@ int main(void) {
        reference jimmylast.bmp (which doesn't exist); jimycarl.png is the
        atlas that matches the model UVs (red shirt, atom emblem, backpack). */
     asset_cache_begin_level();
-    unsigned int jim_tex = tex_cache_get("assets/png/jimycarl.png");
-    int jim_poses_loaded = player_anim_init(jim_tex);
+    int need_native_jim_visual = !capture_scene_ready || capture_live_jimmy;
+    int jim_poses_loaded = 0;
+    if (need_native_jim_visual) {
+        unsigned int jim_tex = tex_cache_get("assets/png/jimycarl.png");
+        jim_poses_loaded = player_anim_init(jim_tex);
+    } else {
+        printf("[capture_level1] skipping native Jimmy visual assets\n");
+    }
     int jim_model_ok = (jim_poses_loaded > 0);
 
     int n = gam_load(&world, "assets/gam/Level1.gam");
@@ -344,13 +520,17 @@ int main(void) {
         window_destroy(&w);
         return 1;
     }
-    /* Static city geometry: OMT chunk centers from level1.omt → world placements. */
-    placements_load(&world, "assets/ase/omt/level1_placements.txt");
-    {
-        int missing = 0;
-        for (int i = 0; i < world.placement_count; i++)
-            if (!model_cache_get(world.placements[i].ase_path)) missing++;
-        printf("placements_loaded=%d, missing_mesh=%d\n", world.placement_count, missing);
+    if (!capture_scene_ready) {
+        /* Static city geometry: OMT chunk centers from level1.omt → world placements. */
+        placements_load(&world, "assets/ase/omt/level1_placements.txt");
+        {
+            int missing = 0;
+            for (int i = 0; i < world.placement_count; i++)
+                if (!model_cache_get(world.placements[i].ase_path)) missing++;
+            printf("placements_loaded=%d, missing_mesh=%d\n", world.placement_count, missing);
+        }
+    } else {
+        printf("[capture_level1] skipping old visual-only OMT placements\n");
     }
 
     /* Level1 has no ITEM entities; synthesize a small ring around the player
@@ -477,7 +657,7 @@ int main(void) {
        ground over them (an earlier heightfield was a stand-in that buried the
        real geometry, including the stream). The synthetic flat floor is kept
        ONLY for empty test scenes with no level geometry. */
-    if (world.placement_count == 0) {
+    if (world.placement_count == 0 && !capture_scene_ready) {
         unsigned int ground_tex = tex_cache_get(CANON_GROUND_TEXTURE);
         ground_init(ground_tex, 20000.0f, 20000.0f,
                     jim ? jim->x : 0.0f, jim ? jim->z : 0.0f,
@@ -577,15 +757,18 @@ int main(void) {
                            (Level1*.gam shares level1.omt geometry). Other levels
                            will get their own *_placements.txt once those OMTs are
                            processed. */
-                        if (strncasecmp(level_buf, "level1", 6) == 0)
+                        if (strncasecmp(level_buf, "level1", 6) == 0 &&
+                            !capture_scene_ready)
                             placements_load(&world,
                                             "assets/ase/omt/level1_placements.txt");
                         entity_bind_vtables(&world);
                         /* Player textures + models + ground stay live across levels. */
-                        tex_cache_get("assets/png/jimycarl.png");
-                        tex_cache_get("assets/png/mud.png");
-                        for (int pa = 0; pa < PA_COUNT; pa++)
-                            (void)player_anim_model((PlayerAnim)pa);
+                        if (need_native_jim_visual) {
+                            tex_cache_get("assets/png/jimycarl.png");
+                            tex_cache_get("assets/png/mud.png");
+                            for (int pa = 0; pa < PA_COUNT; pa++)
+                                (void)player_anim_model((PlayerAnim)pa);
+                        }
                         asset_cache_purge_stale();
                         printf("[SWAP] post-purge cache: %d tex, %d models\n",
                                asset_cache_tex_count(), asset_cache_model_count());
@@ -658,10 +841,30 @@ int main(void) {
         /* Render phase: uncapped */
         capture_begin_frame(cap_seq, SDL_GetTicks());
         if (capture_scene_ready) {
+            capture_scene_set_world_view_proj(CAPTURE_LEVEL1_VIEW_IDENTITY,
+                                              CAPTURE_LEVEL1_PROJ_GL);
+            capture_scene_set_group_ndc_offset(CAPTURE_SCENE_GROUP_STATIC_WORLD,
+                                               0.0f, 0.0f);
+            capture_scene_set_group_world_offset(CAPTURE_SCENE_GROUP_STATIC_WORLD,
+                                                 0.0f, 0.0f, 0.0f);
+            if (capture_live_world_pan && jim) {
+                float visual_delta[3];
+                capture_live_visual_delta(jim, capture_live_spawn,
+                                          capture_live_jimmy_bounded,
+                                          visual_delta);
+                capture_scene_set_group_world_offset(CAPTURE_SCENE_GROUP_STATIC_WORLD,
+                                                     -visual_delta[0],
+                                                     -visual_delta[1],
+                                                     -visual_delta[2]);
+            }
             capture_scene_render(w.width, w.height);
             if (capture_live_jimmy)
                 render_capture_live_jimmy(jim, jim_model_ok, capture_live_spawn,
+                                          capture_live_jimmy_bounded,
+                                          capture_live_world_pan,
                                           w.width, w.height);
+            if (capture_live_hud)
+                render_capture_live_hud(w.width, w.height);
         } else {
         renderer_begin_frame(w.width, w.height);
 

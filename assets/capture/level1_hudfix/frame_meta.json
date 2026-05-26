@@ -34,6 +34,7 @@
     "draws": "assets/capture/level1_hudfix/draws.json",
     "draw_summary": "assets/capture/level1_hudfix/draw_summary.json",
     "scene": "assets/capture/level1_hudfix/scene.bin",
+    "scene_reproject": "assets/capture/level1_hudfix/scene_reproject.bin",
     "textures": "assets/capture/level1_hudfix/textures.json",
     "texture_dir": "assets/capture/level1_hudfix/textures",
     "generator": "tools/build_level1_hudfix_fixture.py"
