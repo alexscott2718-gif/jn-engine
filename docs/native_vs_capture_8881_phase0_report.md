@@ -61,6 +61,11 @@ summary.ground_in_alignment = false
 summary.ground_in_diff      = false
 ```
 
+Ambiguous rows also carry `capture_alternative_candidates[]`, including each
+alternative cluster's translation, XZ/Y distance, drawcall indices, texture ids,
+and resolved texture paths. Use that field before trusting any broad-tolerance
+texture assignment.
+
 ## Highest-Leverage Rows
 
 | Mesh | Faces | State | Match | Native texture(s) | Capture texture(s) |

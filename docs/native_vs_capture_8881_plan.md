@@ -134,6 +134,11 @@ set, so it is not emitted as a row by the Phase 0 diff. The tool records
 `summary.ground_in_alignment=false` / `ground_in_diff=false` explicitly rather
 than inventing a match.
 
+For `translation_ambiguous` rows, inspect `capture_alternative_candidates[]`
+in `build/diff_native_capture_8881.json` before acting on a texture assignment.
+It records the competing capture clusters, distances, drawcall ids, and texture
+paths.
+
 Top current rows by face count are SCHOOL (expected cross-level gap),
 BLOCKcarhood, grill, house01, and Blocks_In. Treat SCHOOL as non-actionable
 for `level1.omt`; start material recovery with non-SCHOOL rows, especially

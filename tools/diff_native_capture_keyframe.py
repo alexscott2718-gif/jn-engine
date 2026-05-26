@@ -562,6 +562,7 @@ def build_diff(args):
                 "capture_match_distance_xz": None,
                 "capture_match_distance_y": None,
                 "capture_ambiguous_candidate_count": 0,
+                "capture_alternative_candidates": [],
                 "capture_texture_ids": [],
                 "capture_texture_paths": [],
                 "match": "native_only",
@@ -583,6 +584,7 @@ def build_diff(args):
         capture_world_t = None
         capture_drawcall_indices = []
         capture_vertex_counts = []
+        alternative_candidates = []
         notes_parts = []
         if matched:
             primary_cluster = clusters[matched[0]]
@@ -602,6 +604,22 @@ def build_diff(args):
                 [round(c, 1) for c in clusters[ci]["translation"]]
                 for ci in ambiguous[:4]
             ]
+            px, py, pz = mesh_record["placement"]
+            for ci in ambiguous[:8]:
+                cl = clusters[ci]
+                tx, ty, tz = cl["translation"]
+                tids = cl["tex_ids"]
+                alternative_candidates.append({
+                    "cluster_index": ci,
+                    "translation": list(cl["translation"]),
+                    "distance_xz": math.hypot(tx - px, tz - pz),
+                    "distance_y": abs(ty - py),
+                    "drawcall_indices": [
+                        drawcalls[i]["draw_idx"] for i in cl["drawcall_indices"]
+                    ],
+                    "texture_ids": [f"{tid:08x}" for tid in tids],
+                    "texture_paths": [tex_id_to_path.get(tid, "") for tid in tids],
+                })
             notes_parts.append(
                 f"{len(ambiguous)} other cluster(s) within tol "
                 f"(translations: {cand_translations})")
@@ -653,6 +671,7 @@ def build_diff(args):
             "capture_match_distance_xz": match_distance_xz,
             "capture_match_distance_y": match_distance_y,
             "capture_ambiguous_candidate_count": len(ambiguous),
+            "capture_alternative_candidates": alternative_candidates,
             "capture_vertex_counts": capture_vertex_counts,
             "capture_texture_ids": [f"{tid:08x}" for tid in capture_tex_ids],
             "capture_texture_paths": capture_tex_paths,
@@ -973,7 +992,7 @@ def validate_output(out):
             "capture_match_method", "capture_texture_ids",
             "capture_texture_paths", "capture_match_distance_xz",
             "capture_match_distance_y", "capture_ambiguous_candidate_count",
-            "match", "notes",
+            "capture_alternative_candidates", "match", "notes",
         ):
             assert k in r, f"row missing key {k}: {r}"
         assert r["match"] in MATCH_CLASSES, f"unknown match class: {r['match']}"
@@ -981,6 +1000,9 @@ def validate_output(out):
         actual_methods[r["capture_match_method"]] += 1
         if "ambiguous" in (r.get("capture_match_method") or ""):
             actual_ambiguous += 1
+            assert len(r["capture_alternative_candidates"]) > 0, (
+                f"{r['mesh']} ambiguous but has no alternative candidates"
+            )
         if r["capture_drew"] and any(not p for p in r["capture_texture_paths"]):
             actual_unresolved_capture += 1
         assert len(r["capture_texture_ids"]) == len(r["capture_texture_paths"]), (
@@ -1015,6 +1037,20 @@ def validate_output(out):
             )
             assert r["capture_match_distance_y"] is None, (
                 f"{r['mesh']} capture_drew=false but has Y match distance"
+            )
+            assert not r["capture_alternative_candidates"], (
+                f"{r['mesh']} capture_drew=false but has alternatives"
+            )
+        for cand in r["capture_alternative_candidates"]:
+            for key in (
+                "cluster_index", "translation", "distance_xz", "distance_y",
+                "drawcall_indices", "texture_ids", "texture_paths",
+            ):
+                assert key in cand, (
+                    f"{r['mesh']} alternative candidate missing {key}"
+                )
+            assert len(cand["texture_ids"]) == len(cand["texture_paths"]), (
+                f"{r['mesh']} alternative texture id/path length mismatch"
             )
     assert dict(sorted(actual_classes.items())) == out["summary"]["by_match_class"], (
         "summary.by_match_class disagrees with rows"
