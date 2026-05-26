@@ -45,6 +45,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import math
 import os
 import struct
 import sys
@@ -558,6 +559,9 @@ def build_diff(args):
                 "capture_drew": False,
                 "capture_match_method": "none",
                 "capture_world_translation": None,
+                "capture_match_distance_xz": None,
+                "capture_match_distance_y": None,
+                "capture_ambiguous_candidate_count": 0,
                 "capture_texture_ids": [],
                 "capture_texture_paths": [],
                 "match": "native_only",
@@ -602,6 +606,16 @@ def build_diff(args):
                 f"{len(ambiguous)} other cluster(s) within tol "
                 f"(translations: {cand_translations})")
 
+        match_distance_xz = None
+        match_distance_y = None
+        if capture_world_t is not None:
+            px, py, pz = mesh_record["placement"]
+            dx = capture_world_t[0] - px
+            dy = capture_world_t[1] - py
+            dz = capture_world_t[2] - pz
+            match_distance_xz = math.hypot(dx, dz)
+            match_distance_y = abs(dy)
+
         native_textures = native_textures_for_mesh(mesh_record)
         match_class = classify_match(
             name, mesh_record, ase_sha1,
@@ -636,6 +650,9 @@ def build_diff(args):
             "capture_match_method": method,
             "capture_drawcall_indices": capture_drawcall_indices,
             "capture_world_translation": capture_world_t,
+            "capture_match_distance_xz": match_distance_xz,
+            "capture_match_distance_y": match_distance_y,
+            "capture_ambiguous_candidate_count": len(ambiguous),
             "capture_vertex_counts": capture_vertex_counts,
             "capture_texture_ids": [f"{tid:08x}" for tid in capture_tex_ids],
             "capture_texture_paths": capture_tex_paths,
@@ -692,6 +709,7 @@ def summarise(rows, capture_only, all_drawcalls):
     methods = defaultdict(int)
     ambiguous_rows = 0
     unresolved_capture_texture_rows = 0
+    xz_distances = []
     for r in rows:
         classes[r["match"]] += 1
         methods[r["capture_match_method"]] += 1
@@ -699,6 +717,22 @@ def summarise(rows, capture_only, all_drawcalls):
             ambiguous_rows += 1
         if r["capture_drew"] and any(not p for p in r["capture_texture_paths"]):
             unresolved_capture_texture_rows += 1
+        if r.get("capture_match_distance_xz") is not None:
+            xz_distances.append(float(r["capture_match_distance_xz"]))
+    xz_distances.sort()
+    if xz_distances:
+        mid = len(xz_distances) // 2
+        if len(xz_distances) % 2:
+            median_xz = xz_distances[mid]
+        else:
+            median_xz = (xz_distances[mid - 1] + xz_distances[mid]) * 0.5
+        distance_stats = {
+            "mean": sum(xz_distances) / len(xz_distances),
+            "median": median_xz,
+            "max": xz_distances[-1],
+        }
+    else:
+        distance_stats = {"mean": None, "median": None, "max": None}
     return {
         "in_frustum_meshes": total,
         "capture_drawcalls_total": len(all_drawcalls),
@@ -708,6 +742,7 @@ def summarise(rows, capture_only, all_drawcalls):
         "by_match_method": dict(sorted(methods.items())),
         "ambiguous_rows": ambiguous_rows,
         "unresolved_capture_texture_rows": unresolved_capture_texture_rows,
+        "capture_match_distance_xz": distance_stats,
     }
 
 
@@ -742,6 +777,13 @@ def summary_text(out, top_n=10):
         f"rows with unresolved capture texture path: "
         f"{s['unresolved_capture_texture_rows']}"
     )
+    dist = s["capture_match_distance_xz"]
+    if dist["mean"] is not None:
+        lines.append(
+            "capture match XZ distance: "
+            f"mean={dist['mean']:.1f} median={dist['median']:.1f} "
+            f"max={dist['max']:.1f}"
+        )
     lines.append(f"top {top_n} highest-face-count divergences (excluding 'ok'):")
     diverged = [r for r in out["rows"] if r["match"] != "ok"]
     diverged.sort(key=lambda r: -r["face_count"])
@@ -805,6 +847,13 @@ def markdown_report(out, top_n=12):
         "unresolved capture texture rows "
         f"{s['unresolved_capture_texture_rows']}"
     )
+    dist = s["capture_match_distance_xz"]
+    if dist["mean"] is not None:
+        lines.append(
+            "capture match XZ distance    "
+            f"mean={dist['mean']:.1f} median={dist['median']:.1f} "
+            f"max={dist['max']:.1f}"
+        )
     lines.extend(["```", ""])
     if s.get("ground_in_alignment") is False:
         lines.extend([
@@ -818,10 +867,11 @@ def markdown_report(out, top_n=12):
     lines.extend([
         "## Top Divergences",
         "",
-        "| Mesh | Faces | State | Match | Native texture(s) | Capture texture(s) | Notes |",
-        "|---|---:|---|---|---|---|---|",
+        "| Mesh | Faces | State | Match | XZ dist | Ambig | Native texture(s) | Capture texture(s) | Notes |",
+        "|---|---:|---|---|---:|---:|---|---|---|",
     ])
     for r in diverged[:top_n]:
+        dist_xz = r.get("capture_match_distance_xz")
         lines.append(
             "| "
             + " | ".join([
@@ -829,6 +879,8 @@ def markdown_report(out, top_n=12):
                 str(r["face_count"]),
                 md_cell(r["render_state"]),
                 md_cell(r["match"]),
+                f"{dist_xz:.1f}" if dist_xz is not None else "-",
+                str(r.get("capture_ambiguous_candidate_count", 0)),
                 compact_paths(r["native_textures"]),
                 compact_paths(r["capture_texture_paths"]),
                 md_cell(r["notes"]),
@@ -845,16 +897,19 @@ def markdown_report(out, top_n=12):
         "",
         "## Non-SCHOOL Native Missing Texture Rows",
         "",
-        "| Mesh | Faces | Classification | Capture texture(s) | Notes |",
-        "|---|---:|---|---|---|",
+        "| Mesh | Faces | Classification | XZ dist | Ambig | Capture texture(s) | Notes |",
+        "|---|---:|---|---:|---:|---|---|",
     ])
     for r in missing[:top_n]:
+        dist_xz = r.get("capture_match_distance_xz")
         lines.append(
             "| "
             + " | ".join([
                 md_cell(r["mesh"]),
                 str(r["face_count"]),
                 md_cell(r["classification"]),
+                f"{dist_xz:.1f}" if dist_xz is not None else "-",
+                str(r.get("capture_ambiguous_candidate_count", 0)),
                 compact_paths(r["capture_texture_paths"]),
                 md_cell(r["notes"]),
             ])
@@ -870,15 +925,18 @@ def markdown_report(out, top_n=12):
         "",
         "## Non-SCHOOL Texture Mismatch Rows",
         "",
-        "| Mesh | Faces | Native texture(s) | Capture texture(s) | Notes |",
-        "|---|---:|---|---|---|",
+        "| Mesh | Faces | XZ dist | Ambig | Native texture(s) | Capture texture(s) | Notes |",
+        "|---|---:|---:|---:|---|---|---|",
     ])
     for r in mismatches[:top_n]:
+        dist_xz = r.get("capture_match_distance_xz")
         lines.append(
             "| "
             + " | ".join([
                 md_cell(r["mesh"]),
                 str(r["face_count"]),
+                f"{dist_xz:.1f}" if dist_xz is not None else "-",
+                str(r.get("capture_ambiguous_candidate_count", 0)),
                 compact_paths(r["native_textures"]),
                 compact_paths(r["capture_texture_paths"]),
                 md_cell(r["notes"]),
@@ -913,7 +971,9 @@ def validate_output(out):
             "mesh", "native_render_state", "render_state", "native_textures",
             "capture_drew",
             "capture_match_method", "capture_texture_ids",
-            "capture_texture_paths", "match", "notes",
+            "capture_texture_paths", "capture_match_distance_xz",
+            "capture_match_distance_y", "capture_ambiguous_candidate_count",
+            "match", "notes",
         ):
             assert k in r, f"row missing key {k}: {r}"
         assert r["match"] in MATCH_CLASSES, f"unknown match class: {r['match']}"
@@ -933,10 +993,28 @@ def validate_output(out):
             assert r["capture_world_translation"] is not None, (
                 f"{r['mesh']} capture_drew=true without capture translation"
             )
+            assert r["capture_match_distance_xz"] is not None, (
+                f"{r['mesh']} capture_drew=true without XZ match distance"
+            )
+            assert r["capture_match_distance_y"] is not None, (
+                f"{r['mesh']} capture_drew=true without Y match distance"
+            )
+            assert r["capture_match_distance_xz"] >= 0.0, (
+                f"{r['mesh']} has negative XZ match distance"
+            )
+            assert r["capture_match_distance_y"] >= 0.0, (
+                f"{r['mesh']} has negative Y match distance"
+            )
         else:
             assert r["capture_match_method"] == "none", (
                 f"{r['mesh']} capture_drew=false but method is "
                 f"{r['capture_match_method']}"
+            )
+            assert r["capture_match_distance_xz"] is None, (
+                f"{r['mesh']} capture_drew=false but has XZ match distance"
+            )
+            assert r["capture_match_distance_y"] is None, (
+                f"{r['mesh']} capture_drew=false but has Y match distance"
             )
     assert dict(sorted(actual_classes.items())) == out["summary"]["by_match_class"], (
         "summary.by_match_class disagrees with rows"
@@ -951,6 +1029,9 @@ def validate_output(out):
         actual_unresolved_capture
         == out["summary"]["unresolved_capture_texture_rows"]
     ), "summary.unresolved_capture_texture_rows disagrees with rows"
+    dist = out["summary"].get("capture_match_distance_xz") or {}
+    for key in ("mean", "median", "max"):
+        assert key in dist, f"summary.capture_match_distance_xz missing {key}"
     summary = out.get("summary") or {}
     solver_inliers = summary.get("solver_inliers")
     if solver_inliers is not None:

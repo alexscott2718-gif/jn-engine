@@ -126,6 +126,7 @@ match methods                  none=28
                                translation=13
                                translation_ambiguous=17
 unresolved capture texture rows 0
+capture match XZ distance      mean=602.2 median=556.7 max=1541.7
 ```
 
 `GROUND` is not currently in the 8881 alignment report's `in_frustum_meshes`

@@ -50,6 +50,7 @@ translation                    13
 translation_ambiguous          17
 ambiguous rows                 17
 unresolved capture texture rows 0
+capture match XZ distance      mean=602.2 median=556.7 max=1541.7
 ```
 
 `GROUND` is not in `build/native_keyframe_alignment_8881.json` today, so the
@@ -80,14 +81,19 @@ trying to recover its missing Level 1 slots from `level1.omt` alone.
 
 ## Recommended Next Step
 
-Before changing runtime rendering, inspect the side-by-side PNG and the JSON
-rows above. If material recovery is approved, start with non-SCHOOL
-`native_missing_texture` rows:
+Before changing runtime rendering, inspect the side-by-side PNG and the
+generated Markdown ledger (`build/diff_native_capture_8881.md`). If material
+recovery is approved, start with non-SCHOOL `native_missing_texture` rows whose
+translation match is comparatively tight:
 
-1. `Blocks_In` -> capture `tex_00181da8_64x64.png`
-2. `BLOCKCR01`, `BLOCKCR05`, `BLOCKCR06`, `CHIMNEY05`, `CHIMNEY06` -> capture
-   `tex_052e7090_128x128.png`
-3. `BLOCKpicnic03`, `BLOCKfence` -> capture `tex_00181da8_64x64.png`
+1. `Blocks_In` -> capture `tex_00181da8_64x64.png` (XZ distance ~40, but
+   ambiguous).
+2. `BLOCKfence` -> capture `tex_00181da8_64x64.png` (XZ distance ~336).
+3. `BLOCKCR08` -> capture `tex_03dcd780_64x64.png` (XZ distance ~557,
+   ambiguous).
+4. Treat high-distance rows like `BLOCKCR01` / `BLOCKCR05` / `BLOCKCR06` /
+   `CHIMNEY05` / `CHIMNEY06` as lower confidence until their placement match is
+   independently confirmed.
 
 For each candidate, verify whether the assignment can be derived from a measured
 `level1.omt` material/canvas record. If not, record an explicit sidecar override
