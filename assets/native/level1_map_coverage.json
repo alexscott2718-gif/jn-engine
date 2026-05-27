@@ -23,11 +23,11 @@
     "faces": 5338,
     "verts": 4495,
     "material_slots": 258,
-    "textured_material_slots": 135,
-    "untextured_material_slots": 123,
-    "textured_face_total": 2936,
-    "untextured_face_total": 2402,
-    "unique_textures": 38,
+    "textured_material_slots": 144,
+    "untextured_material_slots": 114,
+    "textured_face_total": 3104,
+    "untextured_face_total": 2234,
+    "unique_textures": 45,
     "missing_bitmap_files": [],
     "classification_counts": {
       "textured_visual": 49,
@@ -37,8 +37,8 @@
       "terrain_or_surface": 4
     },
     "render_state_counts": {
-      "textured": 102,
-      "debug_flat": 91,
+      "textured": 111,
+      "debug_flat": 82,
       "non_loadable": 1
     },
     "placement_bounds": {
@@ -216,17 +216,6 @@
         ]
       },
       {
-        "mesh": "BLOCKCR01",
-        "slot_index": 0,
-        "omt_mid": 0,
-        "face_count": 34,
-        "diffuse": [
-          1.0,
-          1.0,
-          1.0
-        ]
-      },
-      {
         "mesh": "BLOCKCR05",
         "slot_index": 0,
         "omt_mid": 0,
@@ -346,6 +335,17 @@
           1.0,
           1.0
         ]
+      },
+      {
+        "mesh": "CHIMNEY02",
+        "slot_index": 0,
+        "omt_mid": 5,
+        "face_count": 28,
+        "diffuse": [
+          1.0,
+          1.0,
+          1.0
+        ]
       }
     ],
     "top_untextured_meshes": [
@@ -425,19 +425,6 @@
           877.73681640625,
           488.7520446777344,
           720.5841674804688
-        ]
-      },
-      {
-        "mesh": "BLOCKCR01",
-        "id": 162,
-        "faces": 34,
-        "verts": 68,
-        "slot_count": 1,
-        "classification": "unresolved_visual",
-        "placement": [
-          7054.0185546875,
-          247.360595703125,
-          2901.298828125
         ]
       },
       {
@@ -571,32 +558,6 @@
         ]
       },
       {
-        "mesh": "CHIMNEY05",
-        "id": 135,
-        "faces": 28,
-        "verts": 16,
-        "slot_count": 1,
-        "classification": "unresolved_visual",
-        "placement": [
-          13963.111328125,
-          602.2985229492188,
-          -376.8385925292969
-        ]
-      },
-      {
-        "mesh": "CHIMNEY06",
-        "id": 136,
-        "faces": 28,
-        "verts": 16,
-        "slot_count": 1,
-        "classification": "unresolved_visual",
-        "placement": [
-          13861.7578125,
-          602.2985229492188,
-          1261.3994140625
-        ]
-      },
-      {
         "mesh": "CHIMNEY07",
         "id": 137,
         "faces": 28,
@@ -636,19 +597,6 @@
         ]
       },
       {
-        "mesh": "BLOCKING_04",
-        "id": 71,
-        "faces": 24,
-        "verts": 14,
-        "slot_count": 1,
-        "classification": "collision_or_blocking",
-        "placement": [
-          6440.21875,
-          7042.13671875,
-          -11225.703125
-        ]
-      },
-      {
         "mesh": "BLOCKING_PHONE",
         "id": 118,
         "faces": 24,
@@ -672,6 +620,58 @@
           6759.8154296875,
           255.25650024414062,
           2014.5181884765625
+        ]
+      },
+      {
+        "mesh": "BLOCKtunnel1",
+        "id": 185,
+        "faces": 24,
+        "verts": 14,
+        "slot_count": 1,
+        "classification": "unresolved_visual",
+        "placement": [
+          3484.75732421875,
+          25.80084991455078,
+          7965.01171875
+        ]
+      },
+      {
+        "mesh": "ncwater2",
+        "id": 175,
+        "faces": 24,
+        "verts": 16,
+        "slot_count": 1,
+        "classification": "terrain_or_surface",
+        "placement": [
+          3752.6796875,
+          255.25650024414062,
+          -2301.40185546875
+        ]
+      },
+      {
+        "mesh": "BLOCKING16",
+        "id": 149,
+        "faces": 20,
+        "verts": 12,
+        "slot_count": 1,
+        "classification": "collision_or_blocking",
+        "placement": [
+          15268.7236328125,
+          7874.015625,
+          -3773.427734375
+        ]
+      },
+      {
+        "mesh": "BLOCKING17",
+        "id": 150,
+        "faces": 20,
+        "verts": 12,
+        "slot_count": 1,
+        "classification": "collision_or_blocking",
+        "placement": [
+          -2159.8134765625,
+          7874.015625,
+          8093.35546875
         ]
       }
     ],
@@ -727,7 +727,7 @@
       {
         "mesh": "BLOCKCR01",
         "id": 162,
-        "render_state": "debug_flat",
+        "render_state": "textured",
         "faces": 34,
         "verts": 68,
         "slot_count": 1
@@ -807,7 +807,7 @@
       {
         "mesh": "CHIMNEY05",
         "id": 135,
-        "render_state": "debug_flat",
+        "render_state": "textured",
         "faces": 28,
         "verts": 16,
         "slot_count": 1
@@ -815,7 +815,7 @@
       {
         "mesh": "CHIMNEY06",
         "id": 136,
-        "render_state": "debug_flat",
+        "render_state": "textured",
         "faces": 28,
         "verts": 16,
         "slot_count": 1
@@ -863,7 +863,7 @@
       {
         "mesh": "BLOCKpost02",
         "id": 177,
-        "render_state": "debug_flat",
+        "render_state": "textured",
         "faces": 24,
         "verts": 16,
         "slot_count": 1
@@ -1103,7 +1103,7 @@
       {
         "mesh": "RampsNEW02",
         "id": 144,
-        "render_state": "debug_flat",
+        "render_state": "textured",
         "faces": 8,
         "verts": 6,
         "slot_count": 1
@@ -1151,7 +1151,7 @@
       {
         "mesh": "Box01",
         "id": 152,
-        "render_state": "debug_flat",
+        "render_state": "textured",
         "faces": 2,
         "verts": 4,
         "slot_count": 1
@@ -1332,10 +1332,17 @@
     "assets/native/level1_capture_overrides/GROUND_mat0_grass.png": 1,
     "assets/native/level1_capture_overrides/tex_00181da8_64x64.png": 4,
     "assets/native/level1_capture_overrides/tex_03dcd780_64x64.png": 2,
+    "assets/native/level1_capture_overrides/tex_03e80c00_128x128.png": 1,
     "assets/native/level1_capture_overrides/tex_03ebbbc8_64x64.png": 1,
+    "assets/native/level1_capture_overrides/tex_03edcfa8_256x256.png": 1,
+    "assets/native/level1_capture_overrides/tex_0408fda8_128x128.png": 1,
     "assets/native/level1_capture_overrides/tex_052e7090_128x128.png": 11,
+    "assets/native/level1_capture_overrides/tex_053fcbe0_128x128.png": 3,
+    "assets/native/level1_capture_overrides/tex_054062c8_64x64.png": 1,
     "assets/native/level1_capture_overrides/tex_0540ab70_64x64.png": 1,
+    "assets/native/level1_capture_overrides/tex_0541bce8_256x256.png": 1,
     "assets/native/level1_capture_overrides/tex_0541bf80_64x64.png": 1,
+    "assets/native/level1_capture_overrides/tex_05e4b388_128x128.png": 1,
     "assets/parsed/level1/level1_images/0000_128x128d16.png": 6,
     "assets/parsed/level1/level1_images/0001_128x128d16.png": 2,
     "assets/parsed/level1/level1_images/0002_128x128d16.png": 1,
@@ -4831,26 +4838,27 @@
         8244.0595703125
       ],
       "classification": "foliage",
-      "render_state": "debug_flat",
+      "render_state": "textured",
       "material_summary": {
         "slot_count": 1,
-        "textured_slots": 0,
-        "flat_diffuse_slots": 1
+        "textured_slots": 1,
+        "flat_diffuse_slots": 0
       },
       "materials": [
         {
           "index": 0,
           "name": "2D_Trees03_mat0_mid29",
           "omt_mid": 29,
-          "bitmap": "",
-          "bitmap_exists": false,
+          "bitmap": "assets/native/level1_capture_overrides/tex_05e4b388_128x128.png",
+          "bitmap_exists": true,
           "diffuse": [
             0.5,
             0.5,
             0.5
           ],
+          "override_source": "level1_texture_overrides.txt",
           "face_count": 10,
-          "render_state": "flat_diffuse"
+          "render_state": "textured"
         }
       ]
     },
@@ -5772,26 +5780,27 @@
         11225.703125
       ],
       "classification": "collision_or_blocking",
-      "render_state": "debug_flat",
+      "render_state": "textured",
       "material_summary": {
         "slot_count": 1,
-        "textured_slots": 0,
-        "flat_diffuse_slots": 1
+        "textured_slots": 1,
+        "flat_diffuse_slots": 0
       },
       "materials": [
         {
           "index": 0,
           "name": "BLOCKING_04_mat0_mid0",
           "omt_mid": 0,
-          "bitmap": "",
-          "bitmap_exists": false,
+          "bitmap": "assets/native/level1_capture_overrides/tex_03e80c00_128x128.png",
+          "bitmap_exists": true,
           "diffuse": [
             1.0,
             1.0,
             1.0
           ],
+          "override_source": "level1_texture_overrides.txt",
           "face_count": 24,
-          "render_state": "flat_diffuse"
+          "render_state": "textured"
         }
       ]
     },
@@ -6137,26 +6146,27 @@
         1768.1275634765625
       ],
       "classification": "foliage",
-      "render_state": "debug_flat",
+      "render_state": "textured",
       "material_summary": {
         "slot_count": 1,
-        "textured_slots": 0,
-        "flat_diffuse_slots": 1
+        "textured_slots": 1,
+        "flat_diffuse_slots": 0
       },
       "materials": [
         {
           "index": 0,
           "name": "bushes01_mat0_mid29",
           "omt_mid": 29,
-          "bitmap": "",
-          "bitmap_exists": false,
+          "bitmap": "assets/native/level1_capture_overrides/tex_0541bce8_256x256.png",
+          "bitmap_exists": true,
           "diffuse": [
             0.5,
             0.5,
             0.5
           ],
+          "override_source": "level1_texture_overrides.txt",
           "face_count": 10,
-          "render_state": "flat_diffuse"
+          "render_state": "textured"
         }
       ]
     },
@@ -9530,26 +9540,27 @@
         376.8385925292969
       ],
       "classification": "unresolved_visual",
-      "render_state": "debug_flat",
+      "render_state": "textured",
       "material_summary": {
         "slot_count": 1,
-        "textured_slots": 0,
-        "flat_diffuse_slots": 1
+        "textured_slots": 1,
+        "flat_diffuse_slots": 0
       },
       "materials": [
         {
           "index": 0,
           "name": "CHIMNEY05_mat0_mid5",
           "omt_mid": 5,
-          "bitmap": "",
-          "bitmap_exists": false,
+          "bitmap": "assets/native/level1_capture_overrides/tex_053fcbe0_128x128.png",
+          "bitmap_exists": true,
           "diffuse": [
             1.0,
             1.0,
             1.0
           ],
+          "override_source": "level1_texture_overrides.txt",
           "face_count": 28,
-          "render_state": "flat_diffuse"
+          "render_state": "textured"
         }
       ]
     },
@@ -9586,26 +9597,27 @@
         -1261.3994140625
       ],
       "classification": "unresolved_visual",
-      "render_state": "debug_flat",
+      "render_state": "textured",
       "material_summary": {
         "slot_count": 1,
-        "textured_slots": 0,
-        "flat_diffuse_slots": 1
+        "textured_slots": 1,
+        "flat_diffuse_slots": 0
       },
       "materials": [
         {
           "index": 0,
           "name": "CHIMNEY06_mat0_mid5",
           "omt_mid": 5,
-          "bitmap": "",
-          "bitmap_exists": false,
+          "bitmap": "assets/native/level1_capture_overrides/tex_053fcbe0_128x128.png",
+          "bitmap_exists": true,
           "diffuse": [
             1.0,
             1.0,
             1.0
           ],
+          "override_source": "level1_texture_overrides.txt",
           "face_count": 28,
-          "render_state": "flat_diffuse"
+          "render_state": "textured"
         }
       ]
     },
@@ -10034,26 +10046,27 @@
         -3256.869140625
       ],
       "classification": "unresolved_visual",
-      "render_state": "debug_flat",
+      "render_state": "textured",
       "material_summary": {
         "slot_count": 1,
-        "textured_slots": 0,
-        "flat_diffuse_slots": 1
+        "textured_slots": 1,
+        "flat_diffuse_slots": 0
       },
       "materials": [
         {
           "index": 0,
           "name": "RampsNEW02_mat0_mid156",
           "omt_mid": 156,
-          "bitmap": "",
-          "bitmap_exists": false,
+          "bitmap": "assets/native/level1_capture_overrides/tex_0408fda8_128x128.png",
+          "bitmap_exists": true,
           "diffuse": [
             0.5,
             0.5,
             0.5
           ],
+          "override_source": "level1_texture_overrides.txt",
           "face_count": 8,
-          "render_state": "flat_diffuse"
+          "render_state": "textured"
         }
       ]
     },
@@ -10482,26 +10495,27 @@
         -4676.3369140625
       ],
       "classification": "unresolved_visual",
-      "render_state": "debug_flat",
+      "render_state": "textured",
       "material_summary": {
         "slot_count": 1,
-        "textured_slots": 0,
-        "flat_diffuse_slots": 1
+        "textured_slots": 1,
+        "flat_diffuse_slots": 0
       },
       "materials": [
         {
           "index": 0,
           "name": "Box01_mat0_mid15",
           "omt_mid": 15,
-          "bitmap": "",
-          "bitmap_exists": false,
+          "bitmap": "assets/native/level1_capture_overrides/tex_054062c8_64x64.png",
+          "bitmap_exists": true,
           "diffuse": [
             1.0,
             1.0,
             1.0
           ],
+          "override_source": "level1_texture_overrides.txt",
           "face_count": 2,
-          "render_state": "flat_diffuse"
+          "render_state": "textured"
         }
       ]
     },
@@ -11239,26 +11253,27 @@
         -2901.298828125
       ],
       "classification": "unresolved_visual",
-      "render_state": "debug_flat",
+      "render_state": "textured",
       "material_summary": {
         "slot_count": 1,
-        "textured_slots": 0,
-        "flat_diffuse_slots": 1
+        "textured_slots": 1,
+        "flat_diffuse_slots": 0
       },
       "materials": [
         {
           "index": 0,
           "name": "BLOCKCR01_mat0_mid0",
           "omt_mid": 0,
-          "bitmap": "",
-          "bitmap_exists": false,
+          "bitmap": "assets/native/level1_capture_overrides/tex_03edcfa8_256x256.png",
+          "bitmap_exists": true,
           "diffuse": [
             1.0,
             1.0,
             1.0
           ],
+          "override_source": "level1_texture_overrides.txt",
           "face_count": 34,
-          "render_state": "flat_diffuse"
+          "render_state": "textured"
         }
       ]
     },
@@ -12094,26 +12109,27 @@
         1197.107666015625
       ],
       "classification": "unresolved_visual",
-      "render_state": "debug_flat",
+      "render_state": "textured",
       "material_summary": {
         "slot_count": 1,
-        "textured_slots": 0,
-        "flat_diffuse_slots": 1
+        "textured_slots": 1,
+        "flat_diffuse_slots": 0
       },
       "materials": [
         {
           "index": 0,
           "name": "BLOCKpost02_mat0_mid0",
           "omt_mid": 0,
-          "bitmap": "",
-          "bitmap_exists": false,
+          "bitmap": "assets/native/level1_capture_overrides/tex_053fcbe0_128x128.png",
+          "bitmap_exists": true,
           "diffuse": [
             1.0,
             1.0,
             1.0
           ],
+          "override_source": "level1_texture_overrides.txt",
           "face_count": 24,
-          "render_state": "flat_diffuse"
+          "render_state": "textured"
         }
       ]
     },

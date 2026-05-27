@@ -49,12 +49,32 @@
     {"mesh": "Constsign01",    "slot": 0, "texture": "assets/native/level1_capture_overrides/tex_0540ab70_64x64.png", "capture_tex_id": "0540ab70", "match_quality": "mid_unambiguous", "xz_distance": 465.7, "rationale": "0540ab70 is dark grey (50,49,49) -- sign post / pole"},
 
     {"mesh": "grill",          "slot": 0, "texture": "assets/native/level1_capture_overrides/tex_03dcd780_64x64.png", "capture_tex_id": "03dcd780", "match_quality": "mid_ambiguous",   "xz_distance": 556.8, "rationale": "03dcd780 is gold/yellow (201,163,25) -- grill / hazard bar pattern"},
-    {"mesh": "BLOCKCR08",      "slot": 0, "texture": "assets/native/level1_capture_overrides/tex_03dcd780_64x64.png", "capture_tex_id": "03dcd780", "match_quality": "mid_ambiguous",   "xz_distance": 556.6, "rationale": "BLOCKCR08 colocated with grill at the same world translation; same texture role"}
+    {"mesh": "BLOCKCR08",      "slot": 0, "texture": "assets/native/level1_capture_overrides/tex_03dcd780_64x64.png", "capture_tex_id": "03dcd780", "match_quality": "mid_ambiguous",   "xz_distance": 556.6, "rationale": "BLOCKCR08 colocated with grill at the same world translation; same texture role"},
+
+    {"_section": "phase_5b_unresolved_visual_sweep_2026_05_27",
+     "_rationale": "Phase 5 tree-billboard work surfaced a brown structure visible in front of Jimmy that no native mesh was rendering (RampsNEW02). Direct per-drawcall XZ-cluster matching (no ubiquity gate, no aggressive bucketing) found wood-brown 0408fda8 at 61u XZ -- a real, specific texture pairing the Phase 3b ubiquity gate had been too aggressive about. Re-ran the matcher against all 25 unresolved/debug_flat meshes in frustum at 8881; 9 had a single best capture drawcall within 100u XZ + a semantically-plausible texture colour. Those 9 are landed below. Medium-confidence rows (100-200u XZ) deferred to a future Phase 6 sweep."},
+    {"mesh": "RampsNEW02",     "slot": 0, "texture": "assets/native/level1_capture_overrides/tex_0408fda8_128x128.png", "capture_tex_id": "0408fda8", "match_quality": "near_unambiguous", "xz_distance":  61.0, "rationale": "wood-brown (118,73,42) wedge structure -- scooter ramp per user identification. 8 wood-brown triangle drawcalls at OMT (10247,?,3332) match the native placement (10287,62.6,3257) within 61u. This is the brown object directly in front of Jimmy at 8881."},
+    {"mesh": "CHIMNEY06",      "slot": 0, "texture": "assets/native/level1_capture_overrides/tex_053fcbe0_128x128.png", "capture_tex_id": "053fcbe0", "match_quality": "near_unambiguous", "xz_distance":  15.0, "rationale": "gray brick (117,115,118) -- chimney material. Closest XZ match."},
+    {"mesh": "CHIMNEY05",      "slot": 0, "texture": "assets/native/level1_capture_overrides/tex_053fcbe0_128x128.png", "capture_tex_id": "053fcbe0", "match_quality": "near_unambiguous", "xz_distance":  31.0, "rationale": "same gray brick as CHIMNEY06; sibling mesh"},
+    {"mesh": "BLOCKpost02",    "slot": 0, "texture": "assets/native/level1_capture_overrides/tex_053fcbe0_128x128.png", "capture_tex_id": "053fcbe0", "match_quality": "near_unambiguous", "xz_distance":  47.0, "rationale": "gray fence post material, same gray as chimneys"},
+    {"mesh": "Box01",          "slot": 0, "texture": "assets/native/level1_capture_overrides/tex_054062c8_64x64.png",   "capture_tex_id": "054062c8", "match_quality": "near_unambiguous", "xz_distance":  16.0, "rationale": "dark gray (81,76,72) small object texture; fits a generic box"},
+    {"mesh": "2D_Trees03",     "slot": 0, "texture": "assets/native/level1_capture_overrides/tex_05e4b388_128x128.png", "capture_tex_id": "05e4b388", "match_quality": "near_unambiguous", "xz_distance":  49.0, "rationale": "olive-green (62,86,44) foliage texture; canonical 2D tree billboard"},
+    {"mesh": "bushes01",       "slot": 0, "texture": "assets/native/level1_capture_overrides/tex_0541bce8_256x256.png", "capture_tex_id": "0541bce8", "match_quality": "near_unambiguous", "xz_distance":  74.0, "rationale": "very dark green (11,67,5) with alpha 0.93 -- bush cluster texture"},
+    {"mesh": "BLOCKCR01",      "slot": 0, "texture": "assets/native/level1_capture_overrides/tex_03edcfa8_256x256.png", "capture_tex_id": "03edcfa8", "match_quality": "near_unambiguous", "xz_distance":  92.0, "rationale": "tan/beige (118,100,86) -- crate/blocker material"},
+    {"mesh": "BLOCKING_04",    "slot": 0, "texture": "assets/native/level1_capture_overrides/tex_03e80c00_128x128.png", "capture_tex_id": "03e80c00", "match_quality": "near_unambiguous", "xz_distance":  92.0, "rationale": "tan (157,149,133) structural surface; matches at 92u XZ"}
   ],
   "deliberately_skipped": [],
   "resolved_in_phase_3b": [
-    "house01", "BLOCKcarhood", "BLOCKCR01", "BLOCKCR05", "BLOCKCR06",
-    "BIRDHOUSE03", "CHIMNEY05", "CHIMNEY06", "RampsNEW02"
+    "house01", "BLOCKcarhood", "BLOCKCR05", "BLOCKCR06",
+    "BIRDHOUSE03"
   ],
-  "resolved_in_phase_3b_notes": "After the matcher's ubiquity gate landed (textures appearing in >=5 distinct WORLD clusters are excluded from non-foliage candidate sets), the 9 rows above stopped matching the 052e7090 grass cluster and now correctly classify as native_only at keyframe 8881. They have no capture binding here, which is the truthful answer -- their textures will only be recoverable from a capture keyframe that puts them closer to centre. No override is added until that evidence exists."
+  "phase_5b_resolved": [
+    "RampsNEW02", "CHIMNEY05", "CHIMNEY06", "BLOCKpost02", "Box01",
+    "2D_Trees03", "bushes01", "BLOCKCR01", "BLOCKING_04"
+  ],
+  "phase_5b_deferred_medium_confidence": {
+    "_notes": "100-200u XZ matches surfaced by the Phase 5b sweep. Each has a single best capture drawcall but the larger distance + texture-role uncertainty (e.g. house06 matched a dark-green cluster — likely a nearby bush, not the house wall) warrants a closer-keyframe re-check before landing.",
+    "candidates": ["SIGN02", "BLOCKCR06", "BIRDHOUSE03", "Object08", "BLOCKCR05",
+                   "2D_Trees_06", "BLOCKING_Blocks2", "BLOCKING_07", "house06"]
+  }
 }

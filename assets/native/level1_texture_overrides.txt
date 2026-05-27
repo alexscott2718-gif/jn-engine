@@ -28,3 +28,16 @@ PlayGroundMonekybars01	0	assets/native/level1_capture_overrides/tex_00181da8_64x
 Constsign01	0	assets/native/level1_capture_overrides/tex_0540ab70_64x64.png
 grill	0	assets/native/level1_capture_overrides/tex_03dcd780_64x64.png
 BLOCKCR08	0	assets/native/level1_capture_overrides/tex_03dcd780_64x64.png
+# Phase 5b (2026-05-27): unresolved-visual sweep at keyframe 8881. Each row
+# is measured by XZ-cluster match against the captured drawcalls + a
+# texture-color sanity check. Closes the "native_only" gap surfaced by the
+# brown-in-front-of-Jimmy investigation (RampsNEW02 was the trigger).
+RampsNEW02	0	assets/native/level1_capture_overrides/tex_0408fda8_128x128.png
+CHIMNEY06	0	assets/native/level1_capture_overrides/tex_053fcbe0_128x128.png
+CHIMNEY05	0	assets/native/level1_capture_overrides/tex_053fcbe0_128x128.png
+BLOCKpost02	0	assets/native/level1_capture_overrides/tex_053fcbe0_128x128.png
+Box01	0	assets/native/level1_capture_overrides/tex_054062c8_64x64.png
+2D_Trees03	0	assets/native/level1_capture_overrides/tex_05e4b388_128x128.png
+bushes01	0	assets/native/level1_capture_overrides/tex_0541bce8_256x256.png
+BLOCKCR01	0	assets/native/level1_capture_overrides/tex_03edcfa8_256x256.png
+BLOCKING_04	0	assets/native/level1_capture_overrides/tex_03e80c00_128x128.png
