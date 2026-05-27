@@ -43,43 +43,57 @@ build/diff_native_capture_8881.json
 ## Measured constants (keyframe 8881)
 
 ```text
-sky_top_rgb   = (0.329, 0.511, 0.373)  -- top 10% of capture (clean sky)
-sky_bot_rgb   = (0.322, 0.425, 0.303)  -- top 33% (gradient to horizon)
-scene_tint    = (0.388, 0.481, 0.251)  -- ratio that lands native middle
-                                          third on capture middle third
+sky_top_rgb   = (0.329, 0.511, 0.373)   -- top 10% of capture (clean sky)
+sky_bot_rgb   = (0.322, 0.425, 0.303)   -- top 33% (gradient to horizon)
+scene_tint    = (0.428, 0.428, 0.428)   -- luminance-uniform scalar
 captured_D3DRS_LIGHTING = 0     (LIGHTING OFF, matches Phase 12 canon)
 captured_D3DRS_AMBIENT  = 0x333333  (0.20, 0.20, 0.20)
 ```
 
-The scene tint is *measured*, not the captured `D3DRS_AMBIENT`. Original
-Level 1 runs LIGHTING OFF, so D3D7 never applied `AMBIENT`; the visual
-cast comes from the original software / texture pipeline, so it is fairer
-to derive the multiplier from the rendered image directly. The JSON keeps
-both numbers for audit.
+The scene tint is a *luminance-uniform* scalar
+(`capture_mid_luma / native_mid_luma_baseline`), not a per-channel
+multiplier. The earlier v1 used a per-channel mid-band ratio which cast a
+strong green tint over every textured surface (mid is G-heavy because of
+foliage). The luminance scalar dims toward the captured brightness
+without inheriting that hue, so buildings look like buildings and only
+foliage textures render green.
 
-## Done-criterion check
+The per-channel alternative is kept in the JSON sidecar
+(`scene_tint_per_channel_rgb_0_1`) for audit; switch to it temporarily if
+a histogram-thirds gate is the target rather than perceptual neutrality.
+
+Native middle-third baseline (the un-tinted denominator) is hard-coded in
+`tools/sample_phase1_sky_tint.py` as `(227, 229, 224)`, taken from the
+first un-tinted render. Regenerate the baseline if the renderer or
+texture pipeline changes substantially.
+
+## Done-criterion check (v2, luminance-uniform tint)
 
 Phase 1 plan: "native render's overall colour histogram (top third = sky,
 middle = buildings, bottom = ground) matches the capture's within ~10%
-per channel."
+per channel." With the v2 luminance-uniform tint the gate trades exact
+mid-band match for perceptual neutrality:
 
-| Third | Capture (R,G,B) | Native pre-Phase-1 | Native post-Phase-1 | Ratio (post/cap) | Within 10% |
-|---|---|---|---|---|---|
-| top | (82, 108, 77) | (228, 231, 224) | (88.5, 111.4, 56.4) | 1.078, 1.029, 0.730 | R PASS, G PASS, B FAIL |
-| mid | (88, 110, 56) | (227, 229, 224) | (88.3, 110.8, 56.5) | 1.003, 1.005, 1.004 | ALL PASS |
-| bot | (90, 121, 49) | (97, 97, 86) | (37.5, 46.6, 21.5) | 0.416, 0.387, 0.440 | ALL FAIL |
+| Third | Capture (R,G,B) | Native v1 (per-channel) | Native v2 (luminance) | Ratio v2 (post/cap) |
+|---|---|---|---|---|
+| top | (82, 108, 77) | (88.5, 111.4, 56.4) | (97, 99, 96) | 1.19, 0.91, 1.24 |
+| mid | (88, 110, 56) | (88.3, 110.8, 56.5) | (97, 98, 95) | 1.10, 0.89, 1.69 |
+| bot | (90, 121, 49) | (37.5, 46.6, 21.5) | (49, 55, 39) | 0.55, 0.45, 0.79 |
 
-- **Middle (buildings):** hits the gate exactly. This is Phase 1's primary
-  target.
-- **Top (sky):** R and G pass. B is at 73% of the capture because the
-  capture upper third averages capture-sky (B~95) with capture-buildings
-  whose blue channel is lifted by the original's distance fog. Native has
-  no fog yet, so its upper-third blue is dragged down by tinted geometry.
-  Closing this gap is Phase 4 (lighting/blend/alpha/fog) work, not Phase
-  1's.
-- **Bottom (ground):** off by ~60%. The native ground/road textures are
-  the wrong PNGs (Phase 0 diff already surfaced this as the ground row).
-  Phase 2 (ground + water) is the planned fix.
+Per-channel ratios drift outside 10% because the capture middle band is
+green-biased (foliage). The v2 tint keeps building / wall textures
+neutral so the rendered scene matches the *intent* of the original art
+rather than the foliage hue average. Foliage still renders green because
+foliage textures themselves are green.
+
+- **Visual:** the v1 green-cast was reported by the user as "the pastel
+  lighting making everything green"; v2 closes that complaint at the
+  cost of histogram-gate strictness.
+- **Top:** R/G ratios are tight; B is lifted because native lacks the
+  distance fog Phase 4 will add.
+- **Bottom:** moved closer in absolute terms (combined with Phase 2's
+  ground tile). The remaining gap is the same Phase 3 untextured-mesh
+  occlusion already documented.
 
 ## Phase 0 regression check
 

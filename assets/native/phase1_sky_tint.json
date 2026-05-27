@@ -28,19 +28,19 @@
       48.788125
     ],
     "native_top33_rgb": [
-      227.90380533854167,
-      231.15839192708333,
-      224.346220703125
+      88.48143229166666,
+      111.43185872395833,
+      56.361988932291666
     ],
     "native_mid33_rgb": [
-      227.0363671875,
-      229.40551432291667,
-      223.808251953125
+      227.0,
+      229.0,
+      224.0
     ],
     "native_bot33_rgb": [
-      96.91517578125,
-      97.15291015625,
-      85.76034830729166
+      45.67388997395833,
+      59.02376953125,
+      25.265475260416668
     ]
   },
   "captured_render_state": {
@@ -64,14 +64,19 @@
       0.3026565180759804
     ],
     "scene_tint_rgb_0_1": [
-      0.38779648979006154,
-      0.48051359084921913,
-      0.2514721384148491
+      0.42771727364031753,
+      0.42771727364031753,
+      0.42771727364031753
+    ],
+    "scene_tint_per_channel_rgb_0_1": [
+      0.38785861784140974,
+      0.48136448667212517,
+      0.2512568737211682
     ]
   },
   "rationale": {
     "sky_top": "mean of top 10% of capture (cleanest sky pixels)",
     "sky_bot": "mean of top 33% (gradient toward horizon band)",
-    "scene_tint": "per-channel multiplier sized so native middle-third RGB matches capture middle-third RGB; falls back to D3DRS_AMBIENT when no native render exists yet"
+    "scene_tint": "luminance-uniform scalar (cap_mid_luma / native_mid_luma) applied equally to R,G,B. Dims toward captured brightness without inheriting the foliage hue of the mid band. The per-channel alternative is kept under scene_tint_per_channel_rgb_0_1 for audit -- v1 used it but it green-cast every textured surface."
   }
 }

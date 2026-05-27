@@ -94,6 +94,17 @@ def main():
         native_mid33 = mean_rgb(native, 1 / 3, 2 / 3)
         native_bot33 = mean_rgb(native, 2 / 3, 1.0)
 
+    # Hard-coded pre-tint baseline. The first time Phase 1 was sampled, the
+    # native middle-third rendered at this RGB with scene_tint = (1,1,1) and
+    # CANON_LIGHTING_ENABLED = 0. We use this as the denominator for the
+    # luminance scalar so successive resampling does not drift toward 1.0
+    # after Phase 1 v2's own tint is already baked into the current native
+    # screenshot. If the renderer/textures change substantially, regenerate
+    # the baseline by temporarily forcing renderer_set_scene_tint(1,1,1) and
+    # editing the constant below.
+    NATIVE_MID_BASELINE = (227.0, 229.0, 224.0)
+    native_mid33 = NATIVE_MID_BASELINE
+
     lighting, ambient_argb = (None, None)
     if CAPTURE_OMTC.is_file():
         lighting, ambient_argb = lift_capture_ambient(CAPTURE_OMTC)
@@ -103,18 +114,41 @@ def main():
     # Sky bottom (gradient toward the horizon) -- sample from the lower edge
     # of the top third so the gradient lands on the building band.
     sky_bot = tuple(c / 255.0 for c in cap_top33)
-    # Per-channel scene tint applied to all textured/flat geometry. Derived so
-    # native middle-third matches capture middle-third. Reference: the native
-    # pre-tint middle is roughly the lit shader's "lightTerm=1.0" path with
-    # average textures.
+    # Scene tint applied to all textured/flat geometry.
+    #
+    # A first version multiplied per-channel mid-band ratios (capture / native),
+    # which made middle-third RGB match the capture exactly but cast a strong
+    # GREEN tint over every textured surface in the level -- the mid band is
+    # G-heavy because of foliage, so the ratio's G channel was much higher than
+    # R or B. Buildings and props that should look neutral ended up greenish.
+    #
+    # Phase 1 v2 (the version this tool emits) uses a *luminance-uniform*
+    # scalar: the ratio of capture-mid luminance to native-mid luminance,
+    # applied equally to R, G, B. The scene dims toward the captured
+    # brightness without inheriting the foliage hue. Per-channel histogram
+    # match degrades on the mid band (acceptable -- buildings look like
+    # buildings) but the perceived colour cast is gone.
+    #
+    # The per-channel and luminance-uniform tints are both recorded in the
+    # JSON sidecar so downstream tooling can audit either choice.
+    def luma(rgb):
+        return 0.299 * rgb[0] + 0.587 * rgb[1] + 0.114 * rgb[2]
+
+    per_channel_tint = None
     if native_mid33 and min(native_mid33) > 1.0:
-        tint = tuple(
+        per_channel_tint = tuple(
             min(max(c_cap / max(c_nat, 1.0), 0.0), 1.5)
             for c_cap, c_nat in zip(cap_mid33, native_mid33)
         )
+
+    if native_mid33 and luma(native_mid33) > 1.0:
+        scalar = max(0.0, min(1.5, luma(cap_mid33) / luma(native_mid33)))
+        tint = (scalar, scalar, scalar)
+    elif per_channel_tint is not None:
+        # No native render yet, but we have one -- fall through.
+        tint = per_channel_tint
     else:
-        # Fallback: derive from the captured AMBIENT value if no native render
-        # exists yet.  D3DCOLOR is 0xAARRGGBB.
+        # Cold start: derive from D3DRS_AMBIENT. D3DCOLOR is 0xAARRGGBB.
         a = ambient_argb if ambient_argb is not None else 0xFF333333
         r = ((a >> 16) & 0xFF) / 255.0
         g = ((a >> 8) & 0xFF) / 255.0
@@ -152,14 +186,18 @@ def main():
             "sky_top_rgb_0_1": sky_top,
             "sky_bot_rgb_0_1": sky_bot,
             "scene_tint_rgb_0_1": tint,
+            "scene_tint_per_channel_rgb_0_1": per_channel_tint,
         },
         "rationale": {
             "sky_top": "mean of top 10% of capture (cleanest sky pixels)",
             "sky_bot": "mean of top 33% (gradient toward horizon band)",
             "scene_tint":
-                "per-channel multiplier sized so native middle-third RGB"
-                " matches capture middle-third RGB; falls back to D3DRS_AMBIENT"
-                " when no native render exists yet",
+                "luminance-uniform scalar (cap_mid_luma / native_mid_luma)"
+                " applied equally to R,G,B. Dims toward captured brightness"
+                " without inheriting the foliage hue of the mid band. The"
+                " per-channel alternative is kept under"
+                " scene_tint_per_channel_rgb_0_1 for audit -- v1 used it but"
+                " it green-cast every textured surface.",
         },
     }
 
