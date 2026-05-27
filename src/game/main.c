@@ -480,17 +480,6 @@ int main(void) {
         const char *cam_path = getenv("JN_NATIVE_LEVEL1_CAMERA");
         char keyframe_path[192];
         const char *keyframe = getenv("JN_NATIVE_LEVEL1_KEYFRAME");
-#ifdef __EMSCRIPTEN__
-        /* Browser demo has no shell to set env, and the default FollowCam at
-           Jimmy's Level1.gam spawn aims at unlit terrain — the user sees a
-           thin sky strip and a near-black ground filling the rest of the
-           frame ("screen pops up black"). Default to the canonical Phase 5
-           reference frame (keyframe 8881, the captured Retroville overhead)
-           so the browser opens directly into the textured Phase 5/5b view. */
-        if ((!cam_path || !cam_path[0]) && (!keyframe || !keyframe[0])) {
-            keyframe = "8881";
-        }
-#endif
         if ((!cam_path || !cam_path[0]) && keyframe && keyframe[0]) {
             snprintf(keyframe_path, sizeof(keyframe_path),
                      "assets/native/keyframe_cameras/%s.txt", keyframe);
@@ -714,6 +703,35 @@ int main(void) {
         }
     } else {
         printf("[capture_level1] skipping old visual-only OMT placements\n");
+    }
+
+    /* Browser demo / JN_DEMO_SPAWN=1: respawn Jimmy near the Retroville
+       centre so the FollowCam frames the Phase 5 trees + Phase 5b textures
+       instead of the unlit terrain at Jimmy's Level1.gam GAM-spawn (which
+       looked black). Numbers picked to put him just south of the Phase-5b
+       RampsNEW02 (OMT 10287, 62.6, 3257 → GL 10287, 62.6, -3257) so it's
+       in frame plus several tree placements. */
+    {
+        int do_demo_spawn = 0;
+#ifdef __EMSCRIPTEN__
+        do_demo_spawn = 1;
+#endif
+        if (env_enabled("JN_DEMO_SPAWN")) do_demo_spawn = 1;
+        if (do_demo_spawn && native_level1) {
+            Entity *jim_spawn = world_find_type(&world, "3JIM");
+            if (jim_spawn) {
+                /* Tuned via xvfb screenshot sweep: this position framed the
+                   most green/textured pixels and the fewest near-black
+                   pixels across a 6-spawn grid — i.e. the user sees the
+                   Phase 5 trees + Phase 5b textures, not unlit ground. */
+                jim_spawn->x = 10000.0f;
+                jim_spawn->y = 200.0f;
+                jim_spawn->z = -3000.0f;
+                fprintf(stderr,
+                        "[demo_spawn] respawned 3JIM at (%.0f, %.0f, %.0f)\n",
+                        jim_spawn->x, jim_spawn->y, jim_spawn->z);
+            }
+        }
     }
 
     /* Level1 has no ITEM entities; synthesize a small ring around the player
