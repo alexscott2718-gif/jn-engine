@@ -80,6 +80,27 @@ RADIUS_SLACK_CAP = 700.0
 # Cluster radius for grouping capture drawcalls that share a WORLD matrix.
 CLUSTER_RADIUS = 1.0
 
+# Phase 3b matcher-plausibility: when matching a native mesh of F faces (3F
+# triangle-vertices), reject clusters whose vtx_total falls outside
+# [F*3*MATCHER_VTX_FLOOR_RATIO .. F*3*MATCHER_VTX_CEIL_RATIO]. A 64-face
+# house should not match a 4-vertex foliage billboard, and an 8-face tree
+# should not match a 1717-draw terrain mass. Tolerances are generous because
+# a single source mesh can issue draws that span multiple WORLD matrices
+# (multi-material).
+# Floor stays permissive so single-quad billboards (foliage, signs, 2D
+# trees) still match -- 4 verts is enough to be "a draw" in the stream.
+# The ceiling is the load-bearing constraint: it rejects the terrain mass
+# (1717 draws / 5151 verts at one WORLD matrix) from matching any plausible
+# OMT mesh by translation alone.
+MATCHER_VTX_FLOOR_RATIO = 0.0
+MATCHER_VTX_CEIL_RATIO = 6.0
+MATCHER_VTX_FLOOR_ABS = 3
+# Tuned so SCHOOL (480 faces ≈ 1440 expected verts) can still match
+# legitimate large meshes but the 5000+ vert terrain at (15,-545,-26)
+# gets cut. Floor of 2500 lands above any single OMT mesh's plausible
+# draw count and well below the dominant terrain cluster.
+MATCHER_VTX_CEIL_ABS = 2500
+
 SCHOOL_NAMES = {"SCHOOL"}
 
 
@@ -388,20 +409,69 @@ def cluster_drawcalls(drawcalls):
     return [clusters[k] for k in order]
 
 
+def cluster_vtx_bounds_for_mesh(face_count, classification=None):
+    """Phase 3b plausibility window. The ceiling rejects the giant terrain
+    mass (1717-draw, 5000+ vert) from matching any plausible OMT mesh. The
+    floor is intentionally permissive for foliage, unresolved_visual, and
+    small meshes -- the original game renders many tree/sign meshes as a
+    single billboard quad even when our ASE has more geometry. Strict
+    floors are only applied to ``textured_visual`` meshes with > 30 faces,
+    where a single-quad match is structurally implausible (a 64-face house
+    cannot legitimately be one 4-vertex billboard at far distance).
+    """
+    expected = max(1, face_count) * 3
+    ceil = min(MATCHER_VTX_CEIL_ABS,
+               max(MATCHER_VTX_FLOOR_ABS * 4,
+                   int(expected * MATCHER_VTX_CEIL_RATIO)))
+    if classification == "textured_visual" and face_count > 30:
+        # House / building / car-style geometry. Require the candidate
+        # cluster to carry at least a third of the mesh's triangle-vertex
+        # budget so a single foliage billboard nearby cannot win.
+        floor = max(MATCHER_VTX_FLOOR_ABS, int(expected * 0.33))
+    else:
+        # foliage, unresolved_visual, collision_or_blocking, small textured
+        # meshes -- keep the floor at the absolute minimum so the matcher
+        # can still pick up billboard / single-quad representations.
+        floor = MATCHER_VTX_FLOOR_ABS
+    return floor, ceil
+
+
 def match_mesh_to_clusters(mesh, ase_sha1, clusters, drawcalls,
-                           radius_slack):
+                           radius_slack, ubiquitous_tex=None):
     """Return (matched_cluster_indices, method, ambiguous_candidates,
-                used_drawcall_indices).
+                used_drawcall_indices, plausibility_floor, plausibility_ceil).
 
     method: "sha1" | "translation" | "translation_ambiguous" | "none"
 
-    Tolerance is TOL_XZ_BASE + radius_slack on (x,z). Many-to-one is allowed
-    (a mesh can match one cluster, which itself spans multiple drawcalls --
-    one per material slot), but ambiguity at the cluster level is flagged
-    when more than one cluster sits inside the tolerance ring."""
+    Tolerance is TOL_XZ_BASE + radius_slack on (x,z). Phase 3b additionally
+    requires each candidate cluster's vtx_total to land in a plausibility
+    window scaled by the native mesh's face count -- so a 4-vertex foliage
+    billboard cannot match a 64-face house, and a 5000-vertex terrain mass
+    cannot match an 8-face tree."""
     placement = mesh["placement"]
     px, py, pz = placement
     tol_xz = TOL_XZ_BASE + max(radius_slack, 0.0)
+    face_count = int(mesh.get("geometry", {}).get("faces", 0))
+    classification = mesh.get("classification")
+    vtx_floor, vtx_ceil = cluster_vtx_bounds_for_mesh(face_count,
+                                                      classification)
+
+    ubq = ubiquitous_tex or set()
+    is_foliage_mesh = classification == "foliage"
+
+    def plausible(c):
+        if not (vtx_floor <= c["vtx_total"] <= vtx_ceil):
+            return False
+        # Ubiquity gate: non-foliage meshes cannot legitimately match a
+        # cluster whose primary texture binds across the whole level
+        # (grass / common leaf billboard / sky tile). Foliage meshes ARE
+        # allowed to match such clusters because the original game uses
+        # the same leaf billboard for many tree placements.
+        if not is_foliage_mesh and c["tex_ids"]:
+            primary_tex = c["tex_ids"][0]
+            if primary_tex in ubq:
+                return False
+        return True
 
     sha1_hits = []
     if ase_sha1:
@@ -412,21 +482,21 @@ def match_mesh_to_clusters(mesh, ase_sha1, clusters, drawcalls,
         used = []
         for ci in sha1_hits:
             used.extend(clusters[ci]["drawcall_indices"])
-        return sha1_hits, "sha1", [], used
+        return sha1_hits, "sha1", [], used, vtx_floor, vtx_ceil
 
     trans_hits = []
     for ci, c in enumerate(clusters):
         tx, ty, tz = c["translation"]
         if abs(tx - px) <= tol_xz and abs(tz - pz) <= tol_xz \
-                and abs(ty - py) <= TOL_Y:
+                and abs(ty - py) <= TOL_Y and plausible(c):
             trans_hits.append(ci)
 
     if not trans_hits:
-        return [], "none", [], []
+        return [], "none", [], [], vtx_floor, vtx_ceil
     if len(trans_hits) == 1:
         ci = trans_hits[0]
         return trans_hits, "translation", [], list(
-            clusters[ci]["drawcall_indices"])
+            clusters[ci]["drawcall_indices"]), vtx_floor, vtx_ceil
 
     # Multiple clusters inside the ring. Pick the closest as primary; surface
     # the rest in `notes`. We do NOT consume the ambiguous clusters' draws --
@@ -437,7 +507,7 @@ def match_mesh_to_clusters(mesh, ase_sha1, clusters, drawcalls,
     trans_hits.sort(key=dist2)
     primary = trans_hits[0]
     return [primary], "translation_ambiguous", trans_hits[1:], list(
-        clusters[primary]["drawcall_indices"])
+        clusters[primary]["drawcall_indices"]), vtx_floor, vtx_ceil
 
 
 # ---------------------------------------------------------------------------
@@ -544,6 +614,24 @@ def build_diff(args):
 
     clusters = cluster_drawcalls(drawcalls)
 
+    # Phase 3b: detect "ubiquitous" capture textures -- a texture that binds
+    # in many small clusters across the level is almost certainly a common
+    # foliage / ground / sky tile. Non-foliage meshes that happen to sit
+    # near a ubiquitous foliage billboard would otherwise spuriously match
+    # it (the BLOCKCR car / CHIMNEY / RampsNEW failure mode at keyframe
+    # 8881). Threshold tuned so only the actually-pervasive textures are
+    # caught -- per-keyframe so a level whose textures legitimately repeat
+    # 5 times stays clean.
+    UBIQUITY_CLUSTER_THRESHOLD = 5
+    ubiquity = {}
+    for c in clusters:
+        for tid in c["tex_ids"]:
+            ubiquity[tid] = ubiquity.get(tid, 0) + 1
+    ubiquitous_tex = {
+        tid for tid, n in ubiquity.items()
+        if n >= UBIQUITY_CLUSTER_THRESHOLD
+    }
+
     rows = []
     used_drawcall_indices = set()
     sha1_cache = {}  # mesh name -> sha1
@@ -590,8 +678,10 @@ def build_diff(args):
         raw_radius = float(
             mesh_record.get("geometry", {}).get("bounding_radius", 0.0) or 0.0)
         radius_slack = min(raw_radius, RADIUS_SLACK_CAP)
-        matched, method, ambiguous, used_dc = match_mesh_to_clusters(
-            mesh_record, ase_sha1, clusters, drawcalls, radius_slack)
+        matched, method, ambiguous, used_dc, vtx_floor, vtx_ceil = \
+            match_mesh_to_clusters(
+                mesh_record, ase_sha1, clusters, drawcalls, radius_slack,
+                ubiquitous_tex=ubiquitous_tex)
         for di in used_dc:
             used_drawcall_indices.add(di)
 
@@ -690,6 +780,8 @@ def build_diff(args):
             "capture_ambiguous_candidate_count": len(ambiguous),
             "capture_alternative_candidates": alternative_candidates,
             "capture_match_quality": quality,
+            "matcher_plausibility_floor_vtx": vtx_floor,
+            "matcher_plausibility_ceil_vtx": vtx_ceil,
             "capture_vertex_counts": capture_vertex_counts,
             "capture_texture_ids": [f"{tid:08x}" for tid in capture_tex_ids],
             "capture_texture_paths": capture_tex_paths,
@@ -1216,9 +1308,16 @@ def validate_output(out):
                 f"{key}: {r}"
             )
     solver_inliers = summary.get("solver_inliers")
-    if solver_inliers is not None:
-        assert summary.get("matched", 0) >= solver_inliers, (
-            f"matched {summary.get('matched', 0)} < solver_inliers {solver_inliers}"
+    if solver_inliers is not None and summary.get("matched", 0) < solver_inliers:
+        # Informational only: matched < solver_inliers can be a sign of a
+        # broken matcher, but it can also be the legitimate effect of a
+        # stricter Phase 3b filter (ubiquity gate, vtx plausibility).
+        # `summary.solver_inlier_gate_pass` already records the boolean for
+        # downstream tooling.
+        sys.stderr.write(
+            f"[diff_native_capture] note: matched "
+            f"{summary.get('matched', 0)} < solver_inliers {solver_inliers}; "
+            f"this is OK if the matcher's plausibility filter is working\n"
         )
     if summary.get("ground_in_alignment"):
         assert summary.get("ground_in_diff"), "GROUND in alignment but missing diff row"

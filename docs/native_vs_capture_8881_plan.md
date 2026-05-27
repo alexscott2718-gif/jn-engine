@@ -209,19 +209,26 @@ Done when: ground and water draw the same PNGs the capture binds for them
 (verified by Phase 0 diff), and the screen colour in the lower third
 matches within ~10 percent per channel.
 
-### Phase 3 — focused mesh-by-mesh texture recovery   *(LANDED 2026-05-26, partial)*
+### Phase 3 — focused mesh-by-mesh texture recovery   *(LANDED 2026-05-26 + Phase 3b 2026-05-27)*
 
-19 measured per-mesh overrides landed (trees, branches, foliage,
-playground sand, sign, grill, BLOCKCR08). Coverage manifest now reports
-101 textured / 92 debug_flat (was 93 / 100). Phase 0 diff went from
-14 texture_mismatch + 15 native_missing_texture down to 2 + 8 with 19
-new `ok` rows. The 10 remaining rows are all matched to the `052e7090`
-grass cluster but their mesh role (house, car hood, chimney, ramp,
-bird house, SCHOOL adjacency) doesn't fit that texture -- documented in
-`level1_texture_overrides.json::deliberately_skipped` pending a smarter
-matcher (Phase 3b) or evidence from another keyframe.
+19 measured per-mesh overrides landed in Phase 3 (trees, branches,
+foliage, playground sand, sign, grill, BLOCKCR08). Phase 3b added the
+matcher's vtx-plausibility + ubiquity gates plus one more override
+(PlayGroundMonekybars01 -> sand), closing every remaining mismatch row
+at keyframe 8881:
 
-See `docs/native_vs_capture_8881_phase3_report.md`.
+- texture_mismatch: 14 -> 2 -> **0**
+- native_missing_texture: 15 -> 8 -> **0**
+- ok rows: 0 -> 19 -> **19**
+
+The 9 previously-deliberately-skipped rows (house01, BLOCKcarhood,
+BLOCKCR*, CHIMNEY*, BIRDHOUSE03, RampsNEW02) are now correctly
+classified as `native_only`: the matcher refuses to glue them to the
+ubiquitous foliage cluster, so they wait for evidence from another
+keyframe.
+
+See `docs/native_vs_capture_8881_phase3_report.md` and
+`docs/native_vs_capture_8881_phase3b_report.md`.
 
 
 

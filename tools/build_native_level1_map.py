@@ -230,6 +230,13 @@ def main() -> int:
                     "ase_verts": ase_verts,
                 }
             )
+        # Compute the pre-override classification BEFORE applying overrides so
+        # that overridden meshes still surface as `unresolved_visual` etc.
+        # downstream (matcher uses this to decide cluster plausibility -- the
+        # override's purpose is to recover a texture, not to retcon the mesh
+        # into a fully-OMT-resolved one).
+        original_classification = classify_mesh(raw["name"], materials)
+
         # Apply Phase 2/3 capture-derived overrides (level1_texture_overrides.txt).
         # The runtime patches the same slots at load time, so the manifest must
         # mirror them to keep `top_untextured_*` honest.
@@ -277,7 +284,10 @@ def main() -> int:
 
         rstate = mesh_render_state(geom_ok, any_texture)
         render_state_counts[rstate] += 1
-        classification = classify_mesh(raw["name"], materials)
+        # Use the pre-override classification so the matcher (and downstream
+        # audit) sees mesh role independently of whether a sidecar happened
+        # to backfill a bitmap.
+        classification = original_classification
         class_counts[classification] += 1
         mesh_record = {
             "name": raw["name"],

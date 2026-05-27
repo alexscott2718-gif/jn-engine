@@ -23,22 +23,22 @@
     "faces": 5338,
     "verts": 4495,
     "material_slots": 258,
-    "textured_material_slots": 134,
-    "untextured_material_slots": 124,
-    "textured_face_total": 2924,
-    "untextured_face_total": 2414,
+    "textured_material_slots": 135,
+    "untextured_material_slots": 123,
+    "textured_face_total": 2936,
+    "untextured_face_total": 2402,
     "unique_textures": 38,
     "missing_bitmap_files": [],
     "classification_counts": {
-      "textured_visual": 54,
+      "textured_visual": 49,
       "foliage": 51,
-      "unresolved_visual": 62,
+      "unresolved_visual": 67,
       "collision_or_blocking": 23,
       "terrain_or_surface": 4
     },
     "render_state_counts": {
-      "textured": 101,
-      "debug_flat": 92,
+      "textured": 102,
+      "debug_flat": 91,
       "non_loadable": 1
     },
     "placement_bounds": {
@@ -693,6 +693,14 @@
         "slot_count": 1
       },
       {
+        "mesh": "Blocks_In",
+        "id": 117,
+        "render_state": "textured",
+        "faces": 60,
+        "verts": 40,
+        "slot_count": 1
+      },
+      {
         "mesh": "CHIMNEY08",
         "id": 138,
         "render_state": "debug_flat",
@@ -765,6 +773,14 @@
         "slot_count": 1
       },
       {
+        "mesh": "BLOCKpicnic03",
+        "id": 190,
+        "render_state": "textured",
+        "faces": 28,
+        "verts": 16,
+        "slot_count": 1
+      },
+      {
         "mesh": "CHIMNEY02",
         "id": 132,
         "render_state": "debug_flat",
@@ -829,6 +845,14 @@
         "slot_count": 1
       },
       {
+        "mesh": "BLOCKfence",
+        "id": 184,
+        "render_state": "textured",
+        "faces": 24,
+        "verts": 16,
+        "slot_count": 1
+      },
+      {
         "mesh": "BLOCKpost01",
         "id": 176,
         "render_state": "debug_flat",
@@ -850,6 +874,14 @@
         "render_state": "debug_flat",
         "faces": 24,
         "verts": 14,
+        "slot_count": 1
+      },
+      {
+        "mesh": "BLOCKCR08",
+        "id": 169,
+        "render_state": "textured",
+        "faces": 20,
+        "verts": 16,
         "slot_count": 1
       },
       {
@@ -951,7 +983,7 @@
       {
         "mesh": "PlayGroundMonekybars01",
         "id": 180,
-        "render_state": "debug_flat",
+        "render_state": "textured",
         "faces": 12,
         "verts": 8,
         "slot_count": 1
@@ -1125,6 +1157,14 @@
         "slot_count": 1
       },
       {
+        "mesh": "Constsign01",
+        "id": 88,
+        "render_state": "textured",
+        "faces": 2,
+        "verts": 4,
+        "slot_count": 1
+      },
+      {
         "mesh": "Cylinder01",
         "id": 84,
         "render_state": "debug_flat",
@@ -1290,7 +1330,7 @@
   },
   "textures": {
     "assets/native/level1_capture_overrides/GROUND_mat0_grass.png": 1,
-    "assets/native/level1_capture_overrides/tex_00181da8_64x64.png": 3,
+    "assets/native/level1_capture_overrides/tex_00181da8_64x64.png": 4,
     "assets/native/level1_capture_overrides/tex_03dcd780_64x64.png": 2,
     "assets/native/level1_capture_overrides/tex_03ebbbc8_64x64.png": 1,
     "assets/native/level1_capture_overrides/tex_052e7090_128x128.png": 11,
@@ -6712,7 +6752,7 @@
         0.0,
         4609.7451171875
       ],
-      "classification": "textured_visual",
+      "classification": "unresolved_visual",
       "render_state": "textured",
       "material_summary": {
         "slot_count": 1,
@@ -8452,7 +8492,7 @@
         0.0,
         -1844.8399658203125
       ],
-      "classification": "textured_visual",
+      "classification": "unresolved_visual",
       "render_state": "textured",
       "material_summary": {
         "slot_count": 1,
@@ -11590,7 +11630,7 @@
         0.0,
         -7602.828125
       ],
-      "classification": "textured_visual",
+      "classification": "unresolved_visual",
       "render_state": "textured",
       "material_summary": {
         "slot_count": 1,
@@ -12222,26 +12262,27 @@
         -1918.8438720703125
       ],
       "classification": "unresolved_visual",
-      "render_state": "debug_flat",
+      "render_state": "textured",
       "material_summary": {
         "slot_count": 1,
-        "textured_slots": 0,
-        "flat_diffuse_slots": 1
+        "textured_slots": 1,
+        "flat_diffuse_slots": 0
       },
       "materials": [
         {
           "index": 0,
           "name": "PlayGroundMonekybars01_mat0_mid0",
           "omt_mid": 0,
-          "bitmap": "",
-          "bitmap_exists": false,
+          "bitmap": "assets/native/level1_capture_overrides/tex_00181da8_64x64.png",
+          "bitmap_exists": true,
           "diffuse": [
             1.0,
             1.0,
             1.0
           ],
+          "override_source": "level1_texture_overrides.txt",
           "face_count": 12,
-          "render_state": "flat_diffuse"
+          "render_state": "textured"
         }
       ]
     },
@@ -12459,7 +12500,7 @@
         0.0,
         -5645.14599609375
       ],
-      "classification": "textured_visual",
+      "classification": "unresolved_visual",
       "render_state": "textured",
       "material_summary": {
         "slot_count": 1,
@@ -12796,7 +12837,7 @@
         0.0,
         -5643.970703125
       ],
-      "classification": "textured_visual",
+      "classification": "unresolved_visual",
       "render_state": "textured",
       "material_summary": {
         "slot_count": 1,

@@ -10,6 +10,9 @@
       "treebranch07", "tree32", "2D_Trees05", "bushes16",
       "Blocks_In", "BLOCKfence", "BLOCKpicnic03",
       "Constsign01", "grill", "BLOCKCR08"
+    ],
+    "phase_3b": [
+      "PlayGroundMonekybars01"
     ]
   },
   "overrides": [
@@ -41,22 +44,17 @@
     {"mesh": "Blocks_In",      "slot": 0, "texture": "assets/native/level1_capture_overrides/tex_00181da8_64x64.png", "capture_tex_id": "00181da8", "match_quality": "near_ambiguous",  "xz_distance": 40.0,  "rationale": "00181da8 is sandy-yellow (130,122,18) -- sandbox / dirt texture, plausible for playground 'Blocks_In' element"},
     {"mesh": "BLOCKfence",     "slot": 0, "texture": "assets/native/level1_capture_overrides/tex_00181da8_64x64.png", "capture_tex_id": "00181da8", "match_quality": "mid_unambiguous", "xz_distance": 336.4, "rationale": "sand/dirt -- BLOCKfence is the sandbox border in playground"},
     {"mesh": "BLOCKpicnic03",  "slot": 0, "texture": "assets/native/level1_capture_overrides/tex_00181da8_64x64.png", "capture_tex_id": "00181da8", "match_quality": "far_unambiguous", "xz_distance": 972.4, "rationale": "sand/dirt -- picnic area"},
+    {"mesh": "PlayGroundMonekybars01", "slot": 0, "texture": "assets/native/level1_capture_overrides/tex_00181da8_64x64.png", "capture_tex_id": "00181da8", "match_quality": "mid_ambiguous", "xz_distance": 144.4, "rationale": "Phase 3b: matcher's ubiquity gate filtered out the SCHOOL-adjacency spurious match; the surviving candidate is 00181da8 sand at dist=144, consistent with the playground sand surrounding other Blocks_In/BLOCKfence/BLOCKpicnic03 overrides."},
 
     {"mesh": "Constsign01",    "slot": 0, "texture": "assets/native/level1_capture_overrides/tex_0540ab70_64x64.png", "capture_tex_id": "0540ab70", "match_quality": "mid_unambiguous", "xz_distance": 465.7, "rationale": "0540ab70 is dark grey (50,49,49) -- sign post / pole"},
 
     {"mesh": "grill",          "slot": 0, "texture": "assets/native/level1_capture_overrides/tex_03dcd780_64x64.png", "capture_tex_id": "03dcd780", "match_quality": "mid_ambiguous",   "xz_distance": 556.8, "rationale": "03dcd780 is gold/yellow (201,163,25) -- grill / hazard bar pattern"},
     {"mesh": "BLOCKCR08",      "slot": 0, "texture": "assets/native/level1_capture_overrides/tex_03dcd780_64x64.png", "capture_tex_id": "03dcd780", "match_quality": "mid_ambiguous",   "xz_distance": 556.6, "rationale": "BLOCKCR08 colocated with grill at the same world translation; same texture role"}
   ],
-  "deliberately_skipped": [
-    {"mesh": "house01",      "reason": "capture matcher returned 052e7090 (grass); houses are walls/roofs, not grass. Wait for a capture frame that puts house01 distinctly visible."},
-    {"mesh": "BLOCKcarhood", "reason": "same grass-mismatch; needs a closer capture cluster"},
-    {"mesh": "BLOCKCR01",    "reason": "same grass-mismatch"},
-    {"mesh": "BLOCKCR05",    "reason": "same grass-mismatch"},
-    {"mesh": "BLOCKCR06",    "reason": "same grass-mismatch"},
-    {"mesh": "BIRDHOUSE03",  "reason": "matcher returned grass; bird houses aren't grass"},
-    {"mesh": "CHIMNEY05",    "reason": "matcher returned grass; chimneys aren't grass"},
-    {"mesh": "CHIMNEY06",    "reason": "same"},
-    {"mesh": "RampsNEW02",   "reason": "matcher returned grass; ramps aren't grass"},
-    {"mesh": "PlayGroundMonekybars01", "reason": "matcher returned SCHOOL textures; this is SCHOOL adjacency, not the right binding"}
-  ]
+  "deliberately_skipped": [],
+  "resolved_in_phase_3b": [
+    "house01", "BLOCKcarhood", "BLOCKCR01", "BLOCKCR05", "BLOCKCR06",
+    "BIRDHOUSE03", "CHIMNEY05", "CHIMNEY06", "RampsNEW02"
+  ],
+  "resolved_in_phase_3b_notes": "After the matcher's ubiquity gate landed (textures appearing in >=5 distinct WORLD clusters are excluded from non-foliage candidate sets), the 9 rows above stopped matching the 052e7090 grass cluster and now correctly classify as native_only at keyframe 8881. They have no capture binding here, which is the truthful answer -- their textures will only be recoverable from a capture keyframe that puts them closer to centre. No override is added until that evidence exists."
 }

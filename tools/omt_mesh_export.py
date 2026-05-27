@@ -176,6 +176,18 @@ def parse_material_body(d: bytes, off: int, size: int):
 def parse_3dsp(d: bytes, off: int, chunk_size: int = None):
     """Parse a 3DSP chunk; return dict with center, verts, faces.
 
+    NOTE: this parser hardcodes 3 corners per face and a fixed 94/84-byte
+    stride. It works for level1.omt because every face in that file is a
+    triangle, but the underlying 3DSP format actually carries a per-polygon
+    `nverts` and supports n-gons + version branching (v0..v5).
+    If we ever need to load level2.omt / level3.omt or any non-triangulated
+    mesh, look at the colleague's parser preserved at
+    /tmp/colleague_omt/omt_3d.py (Drive zip
+    drive-download-20260527T040546Z-3-001.zip) -- their parse_3dsh_bytes
+    handles per-polygon nverts and the v0..v5 record-layout split. Their
+    canvas resolver is a stub and their viewer only renders triangles,
+    but the parser core is solid.
+
     Two face-record variants observed in level1.omt (Phase 10 Step 4):
       - 94-byte stride: trailing 8-byte `3DMa` magic + u32 material id.
         Used by all multi-material meshes (tree01, SCHOOL, house*, ...).

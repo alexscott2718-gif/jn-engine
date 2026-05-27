@@ -21,6 +21,9 @@ bushes16	0	assets/native/level1_capture_overrides/tex_052e7090_128x128.png
 Blocks_In	0	assets/native/level1_capture_overrides/tex_00181da8_64x64.png
 BLOCKfence	0	assets/native/level1_capture_overrides/tex_00181da8_64x64.png
 BLOCKpicnic03	0	assets/native/level1_capture_overrides/tex_00181da8_64x64.png
+# Phase 3b (added after the matcher's ubiquity gate landed): the Phase 0 diff
+# now surfaces this row at dist=144, mid_ambiguous; sand fits a playground role.
+PlayGroundMonekybars01	0	assets/native/level1_capture_overrides/tex_00181da8_64x64.png
 # Phase 3: signage + grill (gold/yellow hazard) + sign post (dark grey)
 Constsign01	0	assets/native/level1_capture_overrides/tex_0540ab70_64x64.png
 grill	0	assets/native/level1_capture_overrides/tex_03dcd780_64x64.png
