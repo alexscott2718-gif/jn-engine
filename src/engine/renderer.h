@@ -61,6 +61,15 @@ void renderer_set_hide_untextured_groups(int enable);
  * channel was decoded by the proxy from the original D3D7 color-key. */
 void renderer_set_alpha_cutout(int enable, float threshold);
 
+/* Phase 5: invert v on subsequent renderer_draw_billboard calls. The capture's
+ * FVF152 tree quads use v=0 at local +Y (world-up) and v=1 at local -Y; our
+ * billboard VAO uses the OpenGL convention v=0 at the bottom corner. Toggling
+ * this flag matches the capture's orientation so leaf-cluster textures
+ * (transparent top of image, dense leaves at bottom) render with the leaves
+ * at the top of the quad. Stateful — set once before the tree pass, reset
+ * after. */
+void renderer_set_billboard_uv_flip_y(int enable);
+
 Camera *renderer_camera(void);
 
 /* Copy the current projection*view matrix (computed at begin_frame) into out. */

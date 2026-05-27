@@ -1,0 +1,19 @@
+# Phase 5 billboard overrides for native Level 1.
+# Format: <mesh_name> <TAB> <size_world_units> <TAB> <texture_path>
+# Source of truth + provenance: level1_billboard_overrides.json
+# Runtime loader: src/engine/assets/billboard_overrides.c
+# When a placement's mesh name appears here, the native renderer skips
+# renderer_draw_model and emits a single camera-facing quad of (size x size)
+# centred at (placement.x, size/2, -placement.z) instead.
+tree01	450	assets/native/level1_capture_overrides/tex_052e7090_128x128.png
+tree06	700	assets/native/level1_capture_overrides/tex_052e7090_128x128.png
+tree07	50	assets/native/level1_capture_overrides/tex_0541bf80_64x64.png
+tree29	650	assets/native/level1_capture_overrides/tex_052e7090_128x128.png
+tree30	550	assets/native/level1_capture_overrides/tex_052e7090_128x128.png
+tree31	600	assets/native/level1_capture_overrides/tex_052e7090_128x128.png
+tree32	600	assets/native/level1_capture_overrides/tex_052e7090_128x128.png
+treebranch02	500	assets/native/level1_capture_overrides/tex_052e7090_128x128.png
+treebranch03	600	assets/native/level1_capture_overrides/tex_052e7090_128x128.png
+treebranch04	200	assets/native/level1_capture_overrides/tex_03ebbbc8_64x64.png
+treebranch07	500	assets/native/level1_capture_overrides/tex_052e7090_128x128.png
+2D_Trees05	450	assets/native/level1_capture_overrides/tex_052e7090_128x128.png

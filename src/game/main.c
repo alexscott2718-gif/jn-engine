@@ -18,6 +18,7 @@
 #include "../engine/assets/asset_cache.h"
 #include "../engine/assets/placement_loader.h"
 #include "../engine/assets/texture_overrides.h"
+#include "../engine/assets/billboard_overrides.h"
 #include "entities.h"
 #include "entity_visual.h"
 #include "camera.h"
@@ -527,6 +528,15 @@ int main(void) {
         fprintf(stderr,
                 "[native_level1] phase 2 texture overrides loaded: %d\n",
                 texture_overrides_count());
+
+        /* Phase 5: replace per-mesh native tree geometry with the camera-
+           facing quad the original game draws. Sizes + textures come from
+           4-vertex FVF=0x152 records in the captured frame -- never guesses.
+           Provenance: assets/native/level1_billboard_overrides.json. */
+        billboard_overrides_load("assets/native/level1_billboard_overrides.txt");
+        fprintf(stderr,
+                "[native_level1] phase 5 billboard overrides loaded: %d\n",
+                billboard_overrides_count());
     }
 
     if (!audio_init()) {
@@ -1129,6 +1139,35 @@ int main(void) {
            +Z placement for legacy/hybrid validation paths. */
         for (int pi = 0; pi < world.placement_count; pi++) {
             const WorldPlacement *pl = &world.placements[pi];
+            if (native_level1) {
+                /* Phase 5: trees and similar 2D-billboard meshes render as a
+                   single camera-facing quad with measured capture geometry.
+                   This precedes the AseModel path so we don't pay the load
+                   cost for a mesh we never draw. */
+                float bb_size = 0.0f;
+                const char *bb_tex_path = NULL;
+                if (billboard_overrides_lookup(pl->name, &bb_size, &bb_tex_path)) {
+                    unsigned int bb_tex = tex_cache_get(bb_tex_path);
+                    if (bb_tex) {
+                        /* Phase 5: anchor the leaf-cluster quad to the
+                           native trunk's top. The leaf texture is naturally
+                           oriented (transparent above canopy, dark shadow
+                           below) — after stbi_set_flip_vertically_on_load,
+                           the canopy lands at v ~ 0.25..0.55 of the quad's
+                           lower-mid. Centring the quad at the trunk top
+                           moves that canopy band up to crown height while
+                           the trunk fills the gap to ground. */
+                        AseModel *trunk = model_cache_get(pl->ase_path);
+                        float trunk_top = trunk ? trunk->max[1] : (bb_size * 0.5f);
+                        renderer_draw_billboard(
+                            bb_tex,
+                            pl->x, trunk_top, -pl->z,
+                            bb_size, bb_size,
+                            1.0f, 1.0f, 1.0f, 1.0f);
+                    }
+                    continue;
+                }
+            }
             AseModel *pm = model_cache_get(pl->ase_path);
             if (!pm) continue;
             if (native_level1) {

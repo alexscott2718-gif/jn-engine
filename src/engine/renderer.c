@@ -86,12 +86,13 @@ static const char *BB_VERT_SRC =
     "uniform vec3 uRight;\n"
     "uniform vec3 uUp;\n"
     "uniform vec2 uSize;\n"
+    "uniform int  uFlipV;\n"
     "out vec2 vUV;\n"
     "void main() {\n"
     "    vec3 world = uCenter + uRight * (aCorner.x * uSize.x)\n"
     "                         + uUp    * (aCorner.y * uSize.y);\n"
     "    gl_Position = uVP * vec4(world, 1.0);\n"
-    "    vUV = aUV;\n"
+    "    vUV = vec2(aUV.x, (uFlipV != 0) ? (1.0 - aUV.y) : aUV.y);\n"
     "}\n";
 
 static const char *BB_FRAG_SRC =
@@ -241,6 +242,8 @@ static int g_rect_loc_color = -1;
 static unsigned int g_bb_prog = 0, g_bb_vao = 0, g_bb_vbo = 0;
 static int g_bb_loc_vp = -1, g_bb_loc_center = -1, g_bb_loc_right = -1;
 static int g_bb_loc_up = -1, g_bb_loc_size = -1, g_bb_loc_tex = -1, g_bb_loc_tint = -1;
+static int g_bb_loc_flip_v = -1;
+static int g_bb_flip_v = 0;
 /* Cached camera basis vectors recomputed in begin_frame. */
 static float g_cam_right[3] = { 1.0f, 0.0f, 0.0f };
 static float g_cam_up[3]    = { 0.0f, 1.0f, 0.0f };
@@ -354,6 +357,7 @@ int renderer_init(int w, int h) {
         g_bb_loc_size   = glGetUniformLocation(g_bb_prog, "uSize");
         g_bb_loc_tex    = glGetUniformLocation(g_bb_prog, "uTex");
         g_bb_loc_tint   = glGetUniformLocation(g_bb_prog, "uTint");
+        g_bb_loc_flip_v = glGetUniformLocation(g_bb_prog, "uFlipV");
 
         /* Unit quad (-0.5..0.5) with UV (0..1). V is flipped because
            tex_loader uses stbi_set_flip_vertically_on_load(1). */
@@ -446,6 +450,10 @@ void renderer_set_alpha_cutout(int enable, float threshold) {
     if (threshold > 0.0f && threshold < 1.0f) g_alpha_threshold = threshold;
 }
 
+void renderer_set_billboard_uv_flip_y(int enable) {
+    g_bb_flip_v = enable ? 1 : 0;
+}
+
 static void renderer_prepare_camera(int w, int h) {
     glViewport(0, 0, w, h);
     if (g_cam_override) {
@@ -523,6 +531,7 @@ void renderer_draw_billboard(unsigned int tex,
     glUniform2f(g_bb_loc_size, width, height);
     glUniform4f(g_bb_loc_tint, tint_r, tint_g, tint_b, tint_a);
     glUniform1i(g_bb_loc_tex, 0);
+    glUniform1i(g_bb_loc_flip_v, g_bb_flip_v);
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, tex);
     glBindVertexArray(g_bb_vao);

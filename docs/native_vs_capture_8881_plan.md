@@ -282,13 +282,60 @@ Lift from the captured D3D7 state block at frame 8881:
 Done when: side-by-side at 8881 only diverges in places where the capture
 draws content native intentionally hasn't wired (Jimmy, HUD).
 
-### Phase 5 — optional: tree as billboard
+### Phase 5 — tree as billboard   *(DONE 2026-05-27, iterated)*
 
-If the round cartoon tree in the capture is rendered as a 1-quad billboard
-(not the 3D leafy mesh native uses), the foreground composition won't match
-even with textures right. Phase 0 should tell us which it is. Defer this
-until Phases 1-4 are settled because it changes mesh interpretation and may
-move other puzzle pieces.
+12 of 12 capture-matched tree drawcalls at 8881 are 4-vertex quads with
+zero local-Z range. Native now renders every in-frustum tree as a single
+camera-facing billboard with the exact world-space size measured from
+the captured FVF152 vertices. Initial implementation landed with
+`ty = bb_size * 0.5` and the standard billboard VAO; visual review
+exposed two issues, both fixed:
+
+1. The leaf-cluster texture is natively oriented (rows 0-47 transparent
+   sky, 48-95 canopy peak, 96-127 dark undercanopy). `stbi`'s flip
+   already matches; an experimental UV-Y flip inverted the orientation
+   visibly. Reverted. The renderer keeps `renderer_set_billboard_uv_flip_y`
+   as an opt-in for textures that ship in DX-orientation.
+
+2. Anchoring the quad bottom to ground put the canopy band at trunk-mid
+   height. Switched to `ty = trunk->max[1]` (AABB top of the native 3D
+   mesh that previously represented the tree). For tree01 the canopy
+   now wraps the trunk top. Top-band histogram regressed slightly
+   (`0.93/1.05/1.06 → 0.85/0.84/0.89`) — leaves correctly project into
+   the upper screen third.
+
+**Phase 5b — unresolved-visual sweep.** While iterating on the leaf
+position, the user pointed out a wood-brown structure in front of Jimmy
+that native wasn't rendering. Direct per-drawcall XZ-cluster matching
+(bypassing Phase 3b's ubiquity gate) found `RampsNEW02 -> 0408fda8`
+at 61u XZ and 8 other near-unambiguous matches: `CHIMNEY05/06,
+BLOCKpost02, Box01, 2D_Trees03, bushes01, BLOCKCR01, BLOCKING_04`. All
+landed as `level1_texture_overrides` rows. 9 medium-confidence (100-200u)
+candidates recorded as `phase_5b_deferred_medium_confidence` for a
+closer-camera-keyframe re-check.
+
+**No tree trunks are drawn in this capture frame.** A comprehensive
+search across all FVFs, textures, and vertex counts found zero
+trunk-shaped drawcalls near any of the 12 tree placements. At LOD-far
+(~10,000 units from camera) the original game ships leaf-billboards
+only. The trunk question needs a closer keyframe to verify.
+
+Implementation:
+
+- `assets/native/level1_billboard_overrides.{json,txt}` — 12 measured
+  mesh+size+texture rows; ty anchored to native trunk AABB top.
+- `src/engine/assets/billboard_overrides.{h,c}` — TSV loader mirroring
+  the Phase 2/3 `texture_overrides` shape.
+- `src/engine/renderer.{h,c}` — added `renderer_set_billboard_uv_flip_y`
+  (opt-in; unused at runtime after revert).
+- `src/game/main.c` — intercept in the placement loop before the
+  AseModel draw path; `ty = trunk->max[1]` (cache-backed lookup); falls
+  back to `bb_size * 0.5` when no native mesh is loadable.
+- `assets/native/level1_texture_overrides.{json,txt}` — 9 new Phase 5b
+  rows (closes the `RampsNEW02` brown-thing gap and sibling unresolved
+  meshes).
+
+See `docs/native_vs_capture_8881_phase5_report.md`.
 
 ## First-step concrete action
 
