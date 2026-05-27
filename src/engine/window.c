@@ -1,6 +1,10 @@
 #include "window.h"
 #include "glad.h"
 #include <stdio.h>
+#ifdef __EMSCRIPTEN__
+#include <emscripten.h>
+#include <emscripten/html5.h>
+#endif
 
 int window_init(Window *w, const char *title, int width, int height) {
     if (SDL_Init(SDL_INIT_VIDEO) < 0) {
@@ -11,11 +15,22 @@ int window_init(Window *w, const char *title, int width, int height) {
     SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
     SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
 
+    /* Under Emscripten, SDL_WINDOW_RESIZABLE makes the runtime auto-sync the
+       canvas drawing buffer to the canvas CSS size every frame. If the page
+       layout transiently narrows the canvas (initial flexbox layout, a
+       devicePixelRatio quirk, or any DOM event during preload), the drawing
+       buffer can collapse to 1px and never recover. Drop RESIZABLE for the
+       web build and pin the drawing buffer explicitly below. The native
+       build keeps RESIZABLE because we genuinely want window resize there. */
+    Uint32 win_flags = SDL_WINDOW_OPENGL;
+#ifndef __EMSCRIPTEN__
+    win_flags |= SDL_WINDOW_RESIZABLE;
+#endif
     w->sdl_win = SDL_CreateWindow(
         title,
         SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
         width, height,
-        SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE
+        win_flags
     );
     if (!w->sdl_win) {
         fprintf(stderr, "SDL_CreateWindow failed: %s\n", SDL_GetError());
@@ -54,6 +69,13 @@ int window_init(Window *w, const char *title, int width, int height) {
     w->width      = width;
     w->height     = height;
     w->should_quit = 0;
+
+#ifdef __EMSCRIPTEN__
+    /* Pin the canvas drawing buffer to the requested SDL window size so the
+       initial render targets the full 1280x720 (or whatever caller asked
+       for). CSS can still scale the visible canvas to fit the viewport. */
+    emscripten_set_canvas_element_size("#canvas", width, height);
+#endif
 
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_BLEND);
