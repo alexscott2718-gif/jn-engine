@@ -34,8 +34,13 @@ sudo cp "$REPO/web/jnengine.data" "$DEST/jnengine.data"
 # filename, but the HTML references the hashed one.
 sudo cp "$REPO/web/jnengine.js"   "$DEST/jnengine.js"
 
-# 4. Rewrite the served HTML to point at the hashed JS filename.
-sudo sed -i "s|jnengine\.js[^\"' ]*|jnengine.${HASH}.js|g" "$DEST/jnengine.html"
+# 4. Rewrite the served HTML to point at the hashed JS filename. Match
+#    jnengine.js ONLY when followed by a valid HTML attribute terminator
+#    (>, ", ', space, /). The earlier `[^\"' ]*` form was greedy and ate
+#    the closing `></script></body></html>` along with the filename when
+#    emcc emitted unquoted attributes — producing a truncated file and a
+#    browser-mangled `jnengine.<hash>.js<script` URL.
+sudo sed -i "s|jnengine\.js\([>\"' /]\)|jnengine.${HASH}.js\1|g" "$DEST/jnengine.html"
 
 # 5. Owners + perms.
 sudo chown root:www-data "$DEST"/*
