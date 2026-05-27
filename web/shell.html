@@ -68,48 +68,77 @@
                          attributeFilter: ['width', 'height', 'style'] });
 
   var progressEl = document.getElementById('progress');
-  var DATA_TOTAL_BYTES = 114113112; /* matches --preload-file output size; if
-                                       it drifts the progress bar still works
-                                       — we fall back to indeterminate. */
-  /* Emscripten calls Module.setStatus with strings like
-       "Downloading data... (123/1024)"          (preload XHR, KB? MB?)
-       "Preparing... (4 dependencies remaining)" (asset decode)
-       "Running."                                (game loop started)
-     Parse those into a real <progress> + a human-readable byte count so the
-     user knows what's happening during the 100 MB .data fetch. */
   function fmtBytes(b) {
     if (b > 1024 * 1024) return (b / 1024 / 1024).toFixed(1) + ' MB';
     if (b > 1024) return (b / 1024).toFixed(0) + ' KB';
     return b + ' B';
   }
-  function setStatus(text) {
-    var m = text && text.match(/\((\d+(?:\.\d+)?)\/(\d+)\)/);
-    if (m) {
-      var cur = parseFloat(m[1]);
-      var tot = parseFloat(m[2]);
+  function showProgress(label, cur, tot) {
+    if (tot > 0) {
       progressEl.hidden = false;
       progressEl.max = tot;
       progressEl.value = cur;
       var pct = (cur * 100 / tot).toFixed(1);
-      var prefix = text.replace(/\s*\(.*$/, '');
-      /* If the X/Y are bytes (data download), show MB; otherwise show raw. */
-      if (tot > 1024 * 1024 || (tot === DATA_TOTAL_BYTES)) {
-        statusEl.textContent =
-            prefix + ' — ' + fmtBytes(cur) + ' / ' + fmtBytes(tot)
-            + ' (' + pct + '%)';
-      } else {
-        statusEl.textContent = prefix + ' — ' + cur + ' / ' + tot;
-      }
+      statusEl.textContent =
+          label + ' — ' + fmtBytes(cur) + ' / ' + fmtBytes(tot)
+          + ' (' + pct + '%)';
+    } else {
+      progressEl.hidden = false;
+      progressEl.removeAttribute('value');
+      statusEl.textContent = label;
+    }
+  }
+  function setStatus(text) {
+    var m = text && text.match(/\((\d+(?:\.\d+)?)\/(\d+)\)/);
+    if (m) {
+      showProgress(text.replace(/\s*\(.*$/, ''),
+                   parseFloat(m[1]), parseFloat(m[2]));
     } else if (text === 'Running.' || text === 'Running' || !text) {
       progressEl.hidden = true;
       statusEl.textContent = text || '';
     } else {
-      /* Unparseable status: show it verbatim, hide the bar so the user
-         doesn't see a stuck progress meter. */
-      progressEl.hidden = true;
+      /* Emscripten's "Preparing... N assets left" status doesn't carry
+         total bytes; show the message and a determinate-looking but
+         no-value progress bar so the user sees we're still going. */
+      progressEl.hidden = false;
+      progressEl.removeAttribute('value');
       statusEl.textContent = text;
     }
   }
+
+  /* Intercept the XHR for jnengine.data so the user sees real download
+     progress. Recent emscripten does NOT reliably emit setStatus calls
+     with (loaded/total) byte counts during the preload XHR -- it might
+     fire one initial "Downloading data..." and then go silent until
+     decode finishes, leaving the user staring at a frozen "Downloading…"
+     for the whole minute the 109 MB .data file takes. Wrapping
+     XMLHttpRequest.open / .send lets us hook the real progress event
+     for any URL containing 'jnengine.data', regardless of emscripten
+     version. The wrappers are no-ops for every other XHR. */
+  (function () {
+    var _open = XMLHttpRequest.prototype.open;
+    var _send = XMLHttpRequest.prototype.send;
+    XMLHttpRequest.prototype.open = function (method, url) {
+      this.__jnUrl = url;
+      return _open.apply(this, arguments);
+    };
+    XMLHttpRequest.prototype.send = function () {
+      if (this.__jnUrl && /jnengine\.data/.test(this.__jnUrl)) {
+        var self = this;
+        this.addEventListener('progress', function (e) {
+          if (e.lengthComputable) {
+            showProgress('Downloading game data', e.loaded, e.total);
+          } else {
+            showProgress('Downloading game data', e.loaded, 0);
+          }
+        });
+        this.addEventListener('load', function () {
+          showProgress('Decoding game data', 1, 1);
+        });
+      }
+      return _send.apply(this, arguments);
+    };
+  })();
 
   var Module = {
     canvas: (function () {
