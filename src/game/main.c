@@ -499,6 +499,10 @@ int main(void) {
         renderer_set_scene_tint(PHASE1_SCENE_TINT_R,
                                 PHASE1_SCENE_TINT_G,
                                 PHASE1_SCENE_TINT_B);
+        /* Hide multi-material slots whose canvas chain didn't resolve so
+           SCHOOL's missing slots, foliage tree trunks with debug_flat
+           branches, etc. don't render as dark slabs. */
+        renderer_set_hide_untextured_groups(1);
         fprintf(stderr,
                 "[native_level1] phase 1 sky/tint applied: sky_top=(%.3f,%.3f,%.3f) "
                 "scene_tint=(%.3f,%.3f,%.3f)\n",
@@ -863,7 +867,6 @@ int main(void) {
     int frame_count = 0;
     unsigned int cap_seq = 0;
     Uint32 fps_time = last_time;
-    int native_unresolved_notice = 0;
 
     while (!w.should_quit) {
         Uint32 now = SDL_GetTicks();
@@ -1129,12 +1132,11 @@ int main(void) {
                texture is either collision/blocking (BLOCKING_*, GROUND base
                slab) or a mesh whose canvas couldn't be resolved -- neither
                appears as a visible surface in the game. Skip them rather than
-               draw dark filler slabs. */
-            if (!native_level1 && !model_has_texture(pm)) continue;
-            if (native_level1 && !model_has_texture(pm) && !native_unresolved_notice) {
-                printf("[native_level1] native map coverage: rendering unresolved OMT materials as flat diffuse\n");
-                native_unresolved_notice = 1;
-            }
+               draw dark filler slabs. native_level1 used to render them as
+               debug_flat for audit, but the resulting huge gray BLOCKING_06
+               (radius 12697) and SCHOOL slab were dominating the view; the
+               coverage manifest tracks them, the renderer no longer needs to. */
+            if (!model_has_texture(pm)) continue;
             float draw_z = native_level1 ? -pl->z : pl->z;
             renderer_draw_model(pm, 0, pl->x, 0.0f, draw_z, 0.0f, 1.0f);
         }

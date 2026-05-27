@@ -138,7 +138,7 @@ def validate_log(log: str, expect_keyframe: bool = False) -> None:
         "[native_level1] clean native map runtime enabled",
         "gam_load: assets/gam/Level1.gam",
         "placements_load: assets/ase/omt/level1_placements.txt",
-        "native map coverage: rendering unresolved OMT materials as flat diffuse",
+        "[native_level1] phase 2 texture overrides loaded",
     ]
     for marker in required:
         if marker not in log:

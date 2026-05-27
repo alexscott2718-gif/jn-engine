@@ -49,6 +49,12 @@ void renderer_set_sky(float top_r, float top_g, float top_b,
  * src/engine/phase1_sky_tint.h for native Level 1. */
 void renderer_set_scene_tint(float r, float g, float b);
 
+/* When enabled, untextured groups within multi-material meshes are skipped
+ * instead of rendered as flat-tinted slabs. Used by native Level 1 to hide
+ * collision-only volumes (BLOCKING_*) and unresolved cross-level canvas
+ * slots (SCHOOL's missing slots etc.) that the original game never drew. */
+void renderer_set_hide_untextured_groups(int enable);
+
 Camera *renderer_camera(void);
 
 /* Copy the current projection*view matrix (computed at begin_frame) into out. */

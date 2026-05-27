@@ -213,6 +213,11 @@ static int g_lit_loc_tint = -1, g_lit_loc_hastex = -1;
 static int g_lit_loc_lighton = -1, g_lit_loc_ambient = -1, g_lit_loc_ldiff = -1;
 static int g_lit_loc_scene_tint = -1;
 static float g_scene_tint[3] = { 1.0f, 1.0f, 1.0f };
+/* When non-zero, untextured material groups inside multi-material meshes are
+   skipped instead of rendered as flat-tinted slabs. Set by native Level 1 so
+   collision-only volumes and unresolved canvas slots (BLOCKING_*, SCHOOL
+   cross-level slots, etc.) don't dominate the view. */
+static int g_hide_untextured_groups = 0;
 
 static unsigned int g_sky_prog = 0, g_sky_vao = 0, g_sky_vbo = 0;
 static int g_sky_loc_top = -1, g_sky_loc_bot = -1;
@@ -418,6 +423,10 @@ void renderer_set_scene_tint(float r, float g, float b) {
     g_scene_tint[2] = b;
 }
 
+void renderer_set_hide_untextured_groups(int enable) {
+    g_hide_untextured_groups = enable ? 1 : 0;
+}
+
 static void renderer_prepare_camera(int w, int h) {
     glViewport(0, 0, w, h);
     if (g_cam_override) {
@@ -615,6 +624,7 @@ void renderer_draw_model_matrix(const AseModel *m, unsigned int texture_id_overr
            OMT untextured materials sometimes carry (0,0,0) for invisible
            helper geometry; rendering them produces ugly black slabs. */
         if (!group_tex && tr == 0.0f && tg == 0.0f && tb == 0.0f) continue;
+        if (!group_tex && g_hide_untextured_groups) continue;
 
         glUniform3f(g_lit_loc_tint, tr, tg, tb);
         if (group_tex) {
