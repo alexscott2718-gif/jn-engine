@@ -424,7 +424,17 @@ int main(void) {
     if (!window_init(&w, "JN Engine - Step 4: Textured Scene", 1280, 720))
         return 1;
 
+    /* WASM has no env to toggle modes, so default to native_level1 — that's
+       the renderer path that ships Phase 1 sky/tint, Phase 4 alpha cutout,
+       Phase 5 tree billboards, and Phase 5b texture overrides. The native
+       binary keeps the env-driven gate so local dev can still pick any
+       mode. The hybrid/capture-backed modes need keyframe + .omtc fixtures
+       that aren't shipped to the browser, so they stay off. */
+#ifdef __EMSCRIPTEN__
+    int native_level1 = 1;
+#else
     int native_level1 = env_enabled("JN_NATIVE_LEVEL1");
+#endif
     int hybrid_level1 = env_enabled("JN_HYBRID_LEVEL1");
     int capture_backed_level1 = env_enabled("JN_CAPTURE_BACKED_LEVEL1");
     if (native_level1 && (hybrid_level1 || capture_backed_level1)) {
