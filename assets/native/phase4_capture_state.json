@@ -1,0 +1,36 @@
+{
+  "schema": "jn-phase4-capture-state/v1",
+  "source_omtc": "build/frame_v4_hudfix_candidate_8881.omtc",
+  "keyframe": "8881",
+  "draws_in_frame": 3523,
+  "sticky_state_at_frame_end": {
+    "ZENABLE": 0,
+    "ZWRITEENABLE": 1,
+    "ALPHATESTENABLE": 0,
+    "ALPHAREF": null,
+    "ALPHAFUNC": null,
+    "ALPHABLENDENABLE": 1,
+    "SRCBLEND": 5,
+    "DESTBLEND": 6,
+    "CULLMODE": 1,
+    "FOGENABLE": 0,
+    "FOGCOLOR": null,
+    "FOGTABLEMODE": null,
+    "FOGSTART": null,
+    "FOGEND": null
+  },
+  "dominant_draw_combo": {
+    "draws": 1944,
+    "alphatest_enable": 1,
+    "alpha_ref": 0,
+    "alpha_func": 0,
+    "alphablend_enable": 0,
+    "src_blend": 2,
+    "dest_blend": 1,
+    "z_write_enable": 2
+  },
+  "rationale": {
+    "alpha_cutout_threshold": "ALPHATESTENABLE=1 dominates (>89% of draws) but the captured ALPHAFUNC is 0 (uninitialized; D3D7 default = D3DCMP_ALWAYS=8 which would never discard). Native renderer uses a shader-side discard against texture alpha < 0.5 for capture-derived billboards (trees + foliage). That gives clean leaf cutouts without needing to replicate the original's color-key machinery.",
+    "fog": "FOGENABLE is OFF in the sticky state. No FOGCOLOR / FOGSTART / FOGEND were ever set in the captured stream -- the original Level 1 does not use D3D fog. The top-third B-channel cast comes from texture data + atmosphere, not from D3DFOG. Phase 4 does not enable fog; the histogram gap stays a Phase 5 investigation."
+  }
+}

@@ -37,6 +37,7 @@ PFNGLDELETEPROGRAMPROC           glDeleteProgram;
 PFNGLGETUNIFORMLOCATIONPROC      glGetUniformLocation;
 PFNGLUNIFORMMATRIX4FVPROC        glUniformMatrix4fv;
 PFNGLUNIFORM1IPROC               glUniform1i;
+PFNGLUNIFORM1FPROC               glUniform1f;
 PFNGLUNIFORM2FPROC               glUniform2f;
 PFNGLUNIFORM3FPROC               glUniform3f;
 PFNGLUNIFORM4FPROC               glUniform4f;
@@ -92,6 +93,7 @@ int glad_load_gl(void) {
     LOAD(glGetUniformLocation)
     LOAD(glUniformMatrix4fv)
     LOAD(glUniform1i)
+    LOAD(glUniform1f)
     LOAD(glUniform2f)
     LOAD(glUniform3f)
     LOAD(glUniform4f)

@@ -165,6 +165,8 @@ static const char *LIT_FRAG_SRC =
     "uniform vec3 uAmbient;\n"       /* measured D3DRS_AMBIENT (0..1) */
     "uniform vec3 uLightDiffuse;\n"  /* measured DIR-light diffuse */
     "uniform vec3 uSceneTint;\n"     /* Phase 1: per-channel ambient/scene multiplier */
+    "uniform int  uAlphaCutout;\n"   /* Phase 4: 1 = discard fragments with tex.a < threshold */
+    "uniform float uAlphaThreshold;\n"
     "void main() {\n"
     "    vec3 n = normalize(vNorm);\n"
     "    /* Match the original's measured lighting. With LIGHTING OFF (Phase 12\n"
@@ -182,12 +184,15 @@ static const char *LIT_FRAG_SRC =
     "    float alpha = 1.0;\n"
     "    if (uHasTex != 0) {\n"
     "        vec4 c = texture(uTex, vUV);\n"
+    "        if (uAlphaCutout != 0 && c.a < uAlphaThreshold) discard;\n"
     "        base *= c.rgb;\n"
     "        alpha = c.a;\n"
     "    }\n"
     "    /* Phase 1: scene-wide tint applied AFTER the lighting term so it acts\n"
-    "       as a measured ambient/sky cast on both lit and unlit paths. */\n"
-    "    FragColor = vec4(base * lightTerm * uSceneTint, alpha);\n"
+    "       as a measured ambient/sky cast on both lit and unlit paths.\n"
+    "       Phase 4: alpha forced to 1.0 (live-window X compositor safety; the\n"
+    "       alpha cutout above already handles transparency via discard). */\n"
+    "    FragColor = vec4(base * lightTerm * uSceneTint, 1.0);\n"
     "}\n";
 
 static unsigned int compile_shader(GLenum type, const char *src) {
@@ -212,7 +217,14 @@ static int g_lit_loc_tex = -1, g_lit_loc_light = -1;
 static int g_lit_loc_tint = -1, g_lit_loc_hastex = -1;
 static int g_lit_loc_lighton = -1, g_lit_loc_ambient = -1, g_lit_loc_ldiff = -1;
 static int g_lit_loc_scene_tint = -1;
+static int g_lit_loc_alpha_cutout = -1, g_lit_loc_alpha_threshold = -1;
 static float g_scene_tint[3] = { 1.0f, 1.0f, 1.0f };
+/* Phase 4: alpha-cutout state. When enabled, the lit fragment shader
+ * discards fragments whose sampled texture alpha is below the threshold.
+ * Used for capture-derived foliage / playground billboards whose alpha
+ * channel is the original D3D7 color-key, decoded by the proxy. */
+static int   g_alpha_cutout = 0;
+static float g_alpha_threshold = 0.5f;
 /* When non-zero, untextured material groups inside multi-material meshes are
    skipped instead of rendered as flat-tinted slabs. Set by native Level 1 so
    collision-only volumes and unresolved canvas slots (BLOCKING_*, SCHOOL
@@ -287,6 +299,8 @@ int renderer_init(int w, int h) {
     g_lit_loc_ambient = glGetUniformLocation(g_lit_prog, "uAmbient");
     g_lit_loc_ldiff   = glGetUniformLocation(g_lit_prog, "uLightDiffuse");
     g_lit_loc_scene_tint = glGetUniformLocation(g_lit_prog, "uSceneTint");
+    g_lit_loc_alpha_cutout    = glGetUniformLocation(g_lit_prog, "uAlphaCutout");
+    g_lit_loc_alpha_threshold = glGetUniformLocation(g_lit_prog, "uAlphaThreshold");
 
     /* Sky-gradient program + fullscreen quad. Each vertex carries an NDC
        position and a t value (1 at top, 0 at bottom) used to lerp top/bot. */
@@ -425,6 +439,11 @@ void renderer_set_scene_tint(float r, float g, float b) {
 
 void renderer_set_hide_untextured_groups(int enable) {
     g_hide_untextured_groups = enable ? 1 : 0;
+}
+
+void renderer_set_alpha_cutout(int enable, float threshold) {
+    g_alpha_cutout = enable ? 1 : 0;
+    if (threshold > 0.0f && threshold < 1.0f) g_alpha_threshold = threshold;
 }
 
 static void renderer_prepare_camera(int w, int h) {
@@ -581,6 +600,8 @@ void renderer_draw_model_matrix(const AseModel *m, unsigned int texture_id_overr
     glUniform3f(g_lit_loc_ambient, CANON_AMBIENT_R, CANON_AMBIENT_G, CANON_AMBIENT_B);
     glUniform3f(g_lit_loc_ldiff, CANON_LIGHT_DIFF_R, CANON_LIGHT_DIFF_G, CANON_LIGHT_DIFF_B);
     glUniform3f(g_lit_loc_scene_tint, g_scene_tint[0], g_scene_tint[1], g_scene_tint[2]);
+    glUniform1i(g_lit_loc_alpha_cutout, g_alpha_cutout);
+    glUniform1f(g_lit_loc_alpha_threshold, g_alpha_threshold);
     glActiveTexture(GL_TEXTURE0);
 
     int groups = m->material_count > 0 ? m->material_count : 1;

@@ -55,6 +55,12 @@ void renderer_set_scene_tint(float r, float g, float b);
  * slots (SCHOOL's missing slots etc.) that the original game never drew. */
 void renderer_set_hide_untextured_groups(int enable);
 
+/* Phase 4: shader-side alpha cutout. When enabled, the lit fragment shader
+ * discards fragments whose sampled texture alpha is below the threshold.
+ * Used for capture-derived foliage / playground billboards whose alpha
+ * channel was decoded by the proxy from the original D3D7 color-key. */
+void renderer_set_alpha_cutout(int enable, float threshold);
+
 Camera *renderer_camera(void);
 
 /* Copy the current projection*view matrix (computed at begin_frame) into out. */

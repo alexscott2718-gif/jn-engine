@@ -251,7 +251,23 @@ Done when: every in-frustum mesh's render_state moves from `debug_flat` to
 `textured`, and Phase 0 diff shows no `diverge: texture` rows for in-frustum
 meshes.
 
-### Phase 4 — lighting / blend / alpha state
+### Phase 4 — lighting / blend / alpha state   *(LANDED 2026-05-27)*
+
+Sampled per-draw render-state combos from the captured frame and wired
+the dominant intent into the lit shader: a shader-side `discard` on
+texture alpha < 0.5 for capture-derived billboards. Foliage now
+renders as cut-out silhouettes rather than opaque rectangles.
+
+The captured stream sets **no fog state** at frame 8881
+(`FOGENABLE/COLOR/START/END` never written). The fog hypothesis for
+the top-band B-channel gap is ruled out; the gap stays open for a
+Phase 5 investigation if needed.
+
+Phase 0 regression: 0 mismatch rows, gate still PASS.
+
+See `docs/native_vs_capture_8881_phase4_report.md`.
+
+
 
 Now that textures are right, capture-vs-native shading differences remain.
 Lift from the captured D3D7 state block at frame 8881:

@@ -8,6 +8,7 @@
 #include "../engine/ground.h"
 #include "../engine/canon_data.h"   /* Phase 12: measured ground footprint/topography */
 #include "../engine/phase1_sky_tint.h"  /* Phase 1: measured keyframe-8881 sky + scene tint */
+#include "../engine/phase4_capture_state.h"  /* Phase 4: measured alpha/blend/fog state */
 #include "../engine/capture.h"
 #include "../engine/replay.h"
 #include "../engine/capture_scene.h"
@@ -503,6 +504,15 @@ int main(void) {
            SCHOOL's missing slots, foliage tree trunks with debug_flat
            branches, etc. don't render as dark slabs. */
         renderer_set_hide_untextured_groups(1);
+
+        /* Phase 4: enable shader-side alpha cutout for capture-derived
+           billboards (foliage, playground sand). The original game runs
+           with ALPHATESTENABLE=1 on >89% of draws -- we approximate by
+           discarding fragments whose texture alpha is below the threshold,
+           giving clean leaf cutouts without replicating the original's
+           color-key machinery. */
+        renderer_set_alpha_cutout(PHASE4_ALPHA_CUTOUT_ENABLED,
+                                  PHASE4_ALPHA_CUTOUT_THRESHOLD);
         fprintf(stderr,
                 "[native_level1] phase 1 sky/tint applied: sky_top=(%.3f,%.3f,%.3f) "
                 "scene_tint=(%.3f,%.3f,%.3f)\n",
