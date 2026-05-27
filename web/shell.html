@@ -26,6 +26,9 @@
     outline: none;
   }
   #status { font-size: 12px; color: #7d8896; min-height: 16px; }
+  #progress { width: 360px; max-width: 90%; height: 6px;
+              accent-color: #9fb3c8; }
+  #progress[hidden] { display: none; }
   #controls { font-size: 12px; color: #6b7785; }
 </style>
 </head>
@@ -33,6 +36,7 @@
 <div id="wrap">
   <h1>Jimmy Neutron — Level 1 · Phase 12 canonicalization QA</h1>
   <div id="status">Loading…</div>
+  <progress id="progress" max="100" value="0"></progress>
   <canvas id="canvas" width="1280" height="720" tabindex="0"
           oncontextmenu="event.preventDefault()"></canvas>
   <div id="controls">WASD move · SPACE jump · SHIFT run · R respawn · drag = orbit</div>
@@ -63,6 +67,50 @@
     .observe(canvasEl, { attributes: true,
                          attributeFilter: ['width', 'height', 'style'] });
 
+  var progressEl = document.getElementById('progress');
+  var DATA_TOTAL_BYTES = 114113112; /* matches --preload-file output size; if
+                                       it drifts the progress bar still works
+                                       — we fall back to indeterminate. */
+  /* Emscripten calls Module.setStatus with strings like
+       "Downloading data... (123/1024)"          (preload XHR, KB? MB?)
+       "Preparing... (4 dependencies remaining)" (asset decode)
+       "Running."                                (game loop started)
+     Parse those into a real <progress> + a human-readable byte count so the
+     user knows what's happening during the 100 MB .data fetch. */
+  function fmtBytes(b) {
+    if (b > 1024 * 1024) return (b / 1024 / 1024).toFixed(1) + ' MB';
+    if (b > 1024) return (b / 1024).toFixed(0) + ' KB';
+    return b + ' B';
+  }
+  function setStatus(text) {
+    var m = text && text.match(/\((\d+(?:\.\d+)?)\/(\d+)\)/);
+    if (m) {
+      var cur = parseFloat(m[1]);
+      var tot = parseFloat(m[2]);
+      progressEl.hidden = false;
+      progressEl.max = tot;
+      progressEl.value = cur;
+      var pct = (cur * 100 / tot).toFixed(1);
+      var prefix = text.replace(/\s*\(.*$/, '');
+      /* If the X/Y are bytes (data download), show MB; otherwise show raw. */
+      if (tot > 1024 * 1024 || (tot === DATA_TOTAL_BYTES)) {
+        statusEl.textContent =
+            prefix + ' — ' + fmtBytes(cur) + ' / ' + fmtBytes(tot)
+            + ' (' + pct + '%)';
+      } else {
+        statusEl.textContent = prefix + ' — ' + cur + ' / ' + tot;
+      }
+    } else if (text === 'Running.' || text === 'Running' || !text) {
+      progressEl.hidden = true;
+      statusEl.textContent = text || '';
+    } else {
+      /* Unparseable status: show it verbatim, hide the bar so the user
+         doesn't see a stuck progress meter. */
+      progressEl.hidden = true;
+      statusEl.textContent = text;
+    }
+  }
+
   var Module = {
     canvas: (function () {
       canvasEl.addEventListener('webglcontextlost', function (e) {
@@ -72,14 +120,14 @@
     })(),
     print: function (t) { console.log(t); },
     printErr: function (t) { console.error(t); },
-    setStatus: function (t) { if (statusEl) statusEl.textContent = t; },
+    setStatus: setStatus,
     totalDependencies: 0,
     monitorRunDependencies: function (left) {
-      this.setStatus(left ? ('Preparing… (' + left + ' assets left)') : 'Running.');
+      setStatus(left ? ('Preparing… (' + left + ' assets left)') : 'Running.');
     }
   };
-  Module.setStatus('Downloading…');
-  window.onerror = function (msg) { Module.setStatus('Error: ' + msg); };
+  setStatus('Downloading…');
+  window.onerror = function (msg) { setStatus('Error: ' + msg); };
 </script>
 {{{ SCRIPT }}}
 </body>
