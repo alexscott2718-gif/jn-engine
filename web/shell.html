@@ -10,8 +10,21 @@
   #wrap { display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 14px; }
   h1 { font-size: 15px; font-weight: 600; margin: 4px 0 0; color: #9fb3c8; }
   #note { font-size: 12px; color: #6b7785; max-width: 900px; text-align: center; }
-  canvas#canvas { background: #000; border: 1px solid #1c2530; max-width: 100%;
-                  image-rendering: auto; outline: none; }
+  /* Pin the canvas display size with !important so any inline style the
+     Emscripten SDL2 port injects on the canvas element (it sets style.width
+     / style.height to match the SDL window) can't collapse the visible
+     canvas. The drawing buffer is controlled separately by canvas.width /
+     canvas.height attributes (set by emscripten_set_canvas_element_size in
+     window_init under __EMSCRIPTEN__). */
+  canvas#canvas {
+    background: #000;
+    border: 1px solid #1c2530;
+    width: min(1280px, 100%) !important;
+    height: auto !important;
+    aspect-ratio: 1280 / 720;
+    image-rendering: auto;
+    outline: none;
+  }
   #status { font-size: 12px; color: #7d8896; min-height: 16px; }
   #controls { font-size: 12px; color: #6b7785; }
 </style>
@@ -31,13 +44,31 @@
 </div>
 <script type="text/javascript">
   var statusEl = document.getElementById('status');
+  var canvasEl = document.getElementById('canvas');
+  var TARGET_W = 1280, TARGET_H = 720;
+
+  /* Defence-in-depth: Emscripten's SDL2 port occasionally writes to the
+     canvas drawing-buffer attributes during async preload (the OffscreenCanvas
+     proxy path is the usual culprit). If a write lands while the page layout
+     is still settling — common with --preload-file's first-frame flush — the
+     buffer can end up at 0×0 or 1×1 and stay that way. We watch for stale
+     dimensions and snap them back. The trigger is a real bug, not a guess:
+     the symptom is "all data loads, game starts, resolution is one pixel". */
+  function pinCanvasSize() {
+    if (canvasEl.width !== TARGET_W) canvasEl.width = TARGET_W;
+    if (canvasEl.height !== TARGET_H) canvasEl.height = TARGET_H;
+  }
+  pinCanvasSize();
+  new MutationObserver(pinCanvasSize)
+    .observe(canvasEl, { attributes: true,
+                         attributeFilter: ['width', 'height', 'style'] });
+
   var Module = {
     canvas: (function () {
-      var c = document.getElementById('canvas');
-      c.addEventListener('webglcontextlost', function (e) {
+      canvasEl.addEventListener('webglcontextlost', function (e) {
         alert('WebGL context lost — reload the page.'); e.preventDefault();
       }, false);
-      return c;
+      return canvasEl;
     })(),
     print: function (t) { console.log(t); },
     printErr: function (t) { console.error(t); },
