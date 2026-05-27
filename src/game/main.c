@@ -480,6 +480,17 @@ int main(void) {
         const char *cam_path = getenv("JN_NATIVE_LEVEL1_CAMERA");
         char keyframe_path[192];
         const char *keyframe = getenv("JN_NATIVE_LEVEL1_KEYFRAME");
+#ifdef __EMSCRIPTEN__
+        /* Browser demo has no shell to set env, and the default FollowCam at
+           Jimmy's Level1.gam spawn aims at unlit terrain — the user sees a
+           thin sky strip and a near-black ground filling the rest of the
+           frame ("screen pops up black"). Default to the canonical Phase 5
+           reference frame (keyframe 8881, the captured Retroville overhead)
+           so the browser opens directly into the textured Phase 5/5b view. */
+        if ((!cam_path || !cam_path[0]) && (!keyframe || !keyframe[0])) {
+            keyframe = "8881";
+        }
+#endif
         if ((!cam_path || !cam_path[0]) && keyframe && keyframe[0]) {
             snprintf(keyframe_path, sizeof(keyframe_path),
                      "assets/native/keyframe_cameras/%s.txt", keyframe);
