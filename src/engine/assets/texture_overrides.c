@@ -72,12 +72,15 @@ int texture_overrides_load(const char *tsv_path) {
 
 void texture_overrides_apply(AseModel *m, const char *mesh_name) {
     if (!m || !mesh_name || !*mesh_name || g_ov_n == 0) return;
+    /* Each override is explicitly authored against measured capture
+       evidence -- always replace, even if the OMT canvas chain resolved
+       something. Phase 3 (mesh-by-mesh recovery) specifically swaps
+       OMT-resolved bitmaps for the texture the capture binds. */
     for (int i = 0; i < g_ov_n; i++) {
         if (strcmp(g_ov[i].mesh, mesh_name) != 0) continue;
         int slot = g_ov[i].slot;
         if (slot < 0 || slot >= m->material_count) continue;
         AseMaterial *am = &m->materials[slot];
-        if (am->texture_id) continue;  /* don't override an already-resolved slot */
         unsigned int tid = tex_cache_get(g_ov[i].texture);
         if (!tid) continue;
         am->texture_id = tid;

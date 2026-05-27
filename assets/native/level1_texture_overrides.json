@@ -1,18 +1,62 @@
 {
   "schema": "jn-native-level1-texture-overrides/v1",
-  "source": "build/diff_native_capture_8881.json (keyframe 8881)",
-  "rationale": "Phase 2 of docs/native_vs_capture_8881_plan.md. Each entry assigns a mesh+slot to a capture-derived PNG because the OMT canvas chain in level1.omt does not resolve the slot (e.g. the material record has no Canv field). Every override must come from a measured drawcall in the capture stream -- not from heuristic dimension matching or PNG SHA-1 guessing.",
+  "source": "build/diff_native_capture_8881.json (keyframe 8881) summary.suggested_non_school_review_order",
+  "rationale": "Every override is a measured mesh+slot -> texture mapping derived from a capture drawcall cluster. Per-row rationale records the capture tex_id, the cluster size, and the visual / colour reason the assignment is accepted. SCHOOL multi-level slots are out of scope (see [[jn-school-multilevel]]). Curated subset of the Phase 0 review queue: high-confidence by alpha shape (transparent billboards) and by colour role (sand, sign, gold/black hazard, brown trunk). Rows whose only capture candidate is 052e7090 grass are kept only when the mesh is foliage (trees, branches, bushes, 2D billboard trees) -- not when it is a house/chimney/car (those rows are deliberately skipped pending non-grass evidence).",
+  "phases": {
+    "phase_2": ["GROUND"],
+    "phase_3": [
+      "tree01", "tree31", "treebranch03", "treebranch04",
+      "tree06", "tree07", "tree29", "tree30", "treebranch02",
+      "treebranch07", "tree32", "2D_Trees05", "bushes16",
+      "Blocks_In", "BLOCKfence", "BLOCKpicnic03",
+      "Constsign01", "grill", "BLOCKCR08"
+    ]
+  },
   "overrides": [
     {
-      "mesh": "GROUND",
-      "slot": 0,
+      "mesh": "GROUND", "slot": 0,
       "texture": "assets/native/level1_capture_overrides/GROUND_mat0_grass.png",
       "capture_tex_id": "05e10d68",
       "capture_draw_count_at_8881": 133,
       "capture_world_translation": [15.0, -545.0, -26.0],
       "capture_texture_mean_rgb": [87.8, 123.9, 45.4],
       "capture_bottom_third_mean_rgb": [90.1, 120.5, 48.8],
-      "notes": "GROUND material mid 0 has no Canv field in level1.omt so resolve_bitmap returns ''. The capture binds tex_05e10d68_128x128.png 133 times from a single WORLD matrix near the origin (one source mesh, many sub-triangles). The texture's mean colour matches the capture's bottom-third within ~3% per channel, confirming it is the ground tile.\n\nSCHOOL-style multi-level meshes are NOT eligible for this override file -- see [[jn-school-multilevel]]."
-    }
+      "notes": "Phase 2. See phase2 report. Original ground = 133 draws of the same WORLD matrix; no matching OMT placement, hence the synthetic ground.c flat tile uses this PNG."
+    },
+
+    {"mesh": "tree01",       "slot": 0, "texture": "assets/native/level1_capture_overrides/tex_052e7090_128x128.png", "capture_tex_id": "052e7090", "match_quality": "near_unambiguous", "xz_distance": 40.1, "rationale": "tree foliage billboard. 052e7090 is the original game's leaf-cluster cutout (alpha channel present)."},
+    {"mesh": "tree31",       "slot": 0, "texture": "assets/native/level1_capture_overrides/tex_052e7090_128x128.png", "capture_tex_id": "052e7090", "match_quality": "near_unambiguous", "xz_distance": 32.6, "rationale": "same as tree01"},
+    {"mesh": "treebranch03", "slot": 0, "texture": "assets/native/level1_capture_overrides/tex_052e7090_128x128.png", "capture_tex_id": "052e7090", "match_quality": "near_unambiguous", "xz_distance": 33.8, "rationale": "same as tree01"},
+    {"mesh": "treebranch04", "slot": 0, "texture": "assets/native/level1_capture_overrides/tex_03ebbbc8_64x64.png",   "capture_tex_id": "03ebbbc8", "match_quality": "near_ambiguous",   "xz_distance": 27.3, "rationale": "treebranch04 cluster is on a distinct foliage texture (brighter green, smaller bitmap)"},
+    {"mesh": "tree06",       "slot": 0, "texture": "assets/native/level1_capture_overrides/tex_052e7090_128x128.png", "capture_tex_id": "052e7090", "match_quality": "near_ambiguous",   "xz_distance": 21.5, "rationale": "tree foliage"},
+    {"mesh": "tree07",       "slot": 0, "texture": "assets/native/level1_capture_overrides/tex_0541bf80_64x64.png",   "capture_tex_id": "0541bf80", "match_quality": "mid_ambiguous",    "xz_distance": 359.0, "rationale": "0541bf80 has a brown-orange mean (157,72,36) -- tree trunk texture. Higher xz but the colour role is distinct from grass."},
+    {"mesh": "tree29",       "slot": 0, "texture": "assets/native/level1_capture_overrides/tex_052e7090_128x128.png", "capture_tex_id": "052e7090", "match_quality": "near_ambiguous",   "xz_distance": 22.5, "rationale": "tree foliage"},
+    {"mesh": "tree30",       "slot": 0, "texture": "assets/native/level1_capture_overrides/tex_052e7090_128x128.png", "capture_tex_id": "052e7090", "match_quality": "near_ambiguous",   "xz_distance": 12.1, "rationale": "tree foliage"},
+    {"mesh": "tree32",       "slot": 0, "texture": "assets/native/level1_capture_overrides/tex_052e7090_128x128.png", "capture_tex_id": "052e7090", "match_quality": "far_unambiguous",  "xz_distance": 947.9, "rationale": "foliage role consistent; far xz acceptable because the matcher's ambig count is 0"},
+    {"mesh": "treebranch02", "slot": 0, "texture": "assets/native/level1_capture_overrides/tex_052e7090_128x128.png", "capture_tex_id": "052e7090", "match_quality": "near_ambiguous",   "xz_distance": 21.9, "rationale": "tree branch foliage. High ambig count (14) but the assigned texture is consistent with role."},
+    {"mesh": "treebranch07", "slot": 0, "texture": "assets/native/level1_capture_overrides/tex_052e7090_128x128.png", "capture_tex_id": "052e7090", "match_quality": "far_ambiguous",    "xz_distance": 830.3, "rationale": "tree branch foliage"},
+    {"mesh": "2D_Trees05",   "slot": 0, "texture": "assets/native/level1_capture_overrides/tex_052e7090_128x128.png", "capture_tex_id": "052e7090", "match_quality": "far_unambiguous",  "xz_distance": 1026.7, "rationale": "2D billboard tree; foliage role direct."},
+    {"mesh": "bushes16",     "slot": 0, "texture": "assets/native/level1_capture_overrides/tex_052e7090_128x128.png", "capture_tex_id": "052e7090", "match_quality": "near_ambiguous",   "xz_distance": 80.1, "rationale": "bush foliage"},
+
+    {"mesh": "Blocks_In",      "slot": 0, "texture": "assets/native/level1_capture_overrides/tex_00181da8_64x64.png", "capture_tex_id": "00181da8", "match_quality": "near_ambiguous",  "xz_distance": 40.0,  "rationale": "00181da8 is sandy-yellow (130,122,18) -- sandbox / dirt texture, plausible for playground 'Blocks_In' element"},
+    {"mesh": "BLOCKfence",     "slot": 0, "texture": "assets/native/level1_capture_overrides/tex_00181da8_64x64.png", "capture_tex_id": "00181da8", "match_quality": "mid_unambiguous", "xz_distance": 336.4, "rationale": "sand/dirt -- BLOCKfence is the sandbox border in playground"},
+    {"mesh": "BLOCKpicnic03",  "slot": 0, "texture": "assets/native/level1_capture_overrides/tex_00181da8_64x64.png", "capture_tex_id": "00181da8", "match_quality": "far_unambiguous", "xz_distance": 972.4, "rationale": "sand/dirt -- picnic area"},
+
+    {"mesh": "Constsign01",    "slot": 0, "texture": "assets/native/level1_capture_overrides/tex_0540ab70_64x64.png", "capture_tex_id": "0540ab70", "match_quality": "mid_unambiguous", "xz_distance": 465.7, "rationale": "0540ab70 is dark grey (50,49,49) -- sign post / pole"},
+
+    {"mesh": "grill",          "slot": 0, "texture": "assets/native/level1_capture_overrides/tex_03dcd780_64x64.png", "capture_tex_id": "03dcd780", "match_quality": "mid_ambiguous",   "xz_distance": 556.8, "rationale": "03dcd780 is gold/yellow (201,163,25) -- grill / hazard bar pattern"},
+    {"mesh": "BLOCKCR08",      "slot": 0, "texture": "assets/native/level1_capture_overrides/tex_03dcd780_64x64.png", "capture_tex_id": "03dcd780", "match_quality": "mid_ambiguous",   "xz_distance": 556.6, "rationale": "BLOCKCR08 colocated with grill at the same world translation; same texture role"}
+  ],
+  "deliberately_skipped": [
+    {"mesh": "house01",      "reason": "capture matcher returned 052e7090 (grass); houses are walls/roofs, not grass. Wait for a capture frame that puts house01 distinctly visible."},
+    {"mesh": "BLOCKcarhood", "reason": "same grass-mismatch; needs a closer capture cluster"},
+    {"mesh": "BLOCKCR01",    "reason": "same grass-mismatch"},
+    {"mesh": "BLOCKCR05",    "reason": "same grass-mismatch"},
+    {"mesh": "BLOCKCR06",    "reason": "same grass-mismatch"},
+    {"mesh": "BIRDHOUSE03",  "reason": "matcher returned grass; bird houses aren't grass"},
+    {"mesh": "CHIMNEY05",    "reason": "matcher returned grass; chimneys aren't grass"},
+    {"mesh": "CHIMNEY06",    "reason": "same"},
+    {"mesh": "RampsNEW02",   "reason": "matcher returned grass; ramps aren't grass"},
+    {"mesh": "PlayGroundMonekybars01", "reason": "matcher returned SCHOOL textures; this is SCHOOL adjacency, not the right binding"}
   ]
 }

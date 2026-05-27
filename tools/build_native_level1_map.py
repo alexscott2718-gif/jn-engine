@@ -157,9 +157,37 @@ def bounds(points: list[list[float]]) -> dict[str, list[float]]:
     }
 
 
+def load_texture_overrides() -> dict[tuple[str, int], str]:
+    """Load assets/native/level1_texture_overrides.txt into
+    {(mesh_name, slot_index): texture_path}. Runtime applies the same file;
+    the manifest needs to mirror it so render_state counts and
+    `top_untextured_*` accurately reflect what reaches the screen."""
+    p = ROOT / "assets/native/level1_texture_overrides.txt"
+    out: dict[tuple[str, int], str] = {}
+    if not p.is_file():
+        return out
+    for line in p.read_text().splitlines():
+        s = line.strip()
+        if not s or s.startswith("#"):
+            continue
+        parts = s.split("\t")
+        if len(parts) < 3:
+            continue
+        mesh = parts[0].strip()
+        try:
+            slot = int(parts[1].strip())
+        except ValueError:
+            continue
+        tex = parts[2].strip()
+        if mesh and tex:
+            out[(mesh, slot)] = tex
+    return out
+
+
 def main() -> int:
     source = ROOT / "assets/ase/omt/level1_manifest.json"
     manifest = json.loads(source.read_text())
+    overrides = load_texture_overrides()
     meshes = []
     class_counts: Counter[str] = Counter()
     render_state_counts: Counter[str] = Counter()
@@ -202,6 +230,17 @@ def main() -> int:
                     "ase_verts": ase_verts,
                 }
             )
+        # Apply Phase 2/3 capture-derived overrides (level1_texture_overrides.txt).
+        # The runtime patches the same slots at load time, so the manifest must
+        # mirror them to keep `top_untextured_*` honest.
+        for m in materials:
+            key = (raw["name"], int(m["index"]))
+            tex = overrides.get(key)
+            if tex:
+                m["bitmap"] = tex
+                m["bitmap_exists"] = (ROOT / tex).exists()
+                m["override_source"] = "level1_texture_overrides.txt"
+
         total_materials += len(materials)
         textured_materials += sum(1 for m in materials if m["bitmap"])
         any_texture = any(m["bitmap"] for m in materials)

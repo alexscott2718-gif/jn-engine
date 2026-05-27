@@ -23,22 +23,22 @@
     "faces": 5338,
     "verts": 4495,
     "material_slots": 258,
-    "textured_material_slots": 126,
-    "untextured_material_slots": 132,
-    "textured_face_total": 2758,
-    "untextured_face_total": 2580,
-    "unique_textures": 31,
+    "textured_material_slots": 134,
+    "untextured_material_slots": 124,
+    "textured_face_total": 2924,
+    "untextured_face_total": 2414,
+    "unique_textures": 38,
     "missing_bitmap_files": [],
     "classification_counts": {
-      "textured_visual": 49,
+      "textured_visual": 54,
       "foliage": 51,
-      "unresolved_visual": 67,
+      "unresolved_visual": 62,
       "collision_or_blocking": 23,
       "terrain_or_surface": 4
     },
     "render_state_counts": {
-      "textured": 93,
-      "debug_flat": 100,
+      "textured": 101,
+      "debug_flat": 92,
       "non_loadable": 1
     },
     "placement_bounds": {
@@ -121,17 +121,6 @@
         "slot_index": 4,
         "omt_mid": 37,
         "face_count": 64,
-        "diffuse": [
-          1.0,
-          1.0,
-          1.0
-        ]
-      },
-      {
-        "mesh": "Blocks_In",
-        "slot_index": 0,
-        "omt_mid": 0,
-        "face_count": 60,
         "diffuse": [
           1.0,
           1.0,
@@ -346,6 +335,17 @@
           1.0,
           1.0
         ]
+      },
+      {
+        "mesh": "BLOCK_Slide",
+        "slot_index": 0,
+        "omt_mid": 5,
+        "face_count": 28,
+        "diffuse": [
+          1.0,
+          1.0,
+          1.0
+        ]
       }
     ],
     "top_untextured_meshes": [
@@ -373,19 +373,6 @@
           5273.54052734375,
           388.34405517578125,
           3806.833251953125
-        ]
-      },
-      {
-        "mesh": "Blocks_In",
-        "id": 117,
-        "faces": 60,
-        "verts": 40,
-        "slot_count": 1,
-        "classification": "unresolved_visual",
-        "placement": [
-          9769.875,
-          244.9380645751953,
-          1844.8399658203125
         ]
       },
       {
@@ -545,19 +532,6 @@
         ]
       },
       {
-        "mesh": "BLOCKpicnic03",
-        "id": 190,
-        "faces": 28,
-        "verts": 16,
-        "slot_count": 1,
-        "classification": "unresolved_visual",
-        "placement": [
-          10205.3212890625,
-          -51.82820129394531,
-          5643.970703125
-        ]
-      },
-      {
         "mesh": "CHIMNEY02",
         "id": 132,
         "faces": 28,
@@ -673,6 +647,32 @@
           7042.13671875,
           -11225.703125
         ]
+      },
+      {
+        "mesh": "BLOCKING_PHONE",
+        "id": 118,
+        "faces": 24,
+        "verts": 26,
+        "slot_count": 1,
+        "classification": "collision_or_blocking",
+        "placement": [
+          3744.196044921875,
+          412.28729248046875,
+          9542.130859375
+        ]
+      },
+      {
+        "mesh": "BLOCKpost01",
+        "id": 176,
+        "faces": 24,
+        "verts": 16,
+        "slot_count": 1,
+        "classification": "unresolved_visual",
+        "placement": [
+          6759.8154296875,
+          255.25650024414062,
+          2014.5181884765625
+        ]
       }
     ],
     "unresolved_meshes_full": [
@@ -690,14 +690,6 @@
         "render_state": "debug_flat",
         "faces": 68,
         "verts": 38,
-        "slot_count": 1
-      },
-      {
-        "mesh": "Blocks_In",
-        "id": 117,
-        "render_state": "debug_flat",
-        "faces": 60,
-        "verts": 40,
         "slot_count": 1
       },
       {
@@ -773,14 +765,6 @@
         "slot_count": 1
       },
       {
-        "mesh": "BLOCKpicnic03",
-        "id": 190,
-        "render_state": "debug_flat",
-        "faces": 28,
-        "verts": 16,
-        "slot_count": 1
-      },
-      {
         "mesh": "CHIMNEY02",
         "id": 132,
         "render_state": "debug_flat",
@@ -845,14 +829,6 @@
         "slot_count": 1
       },
       {
-        "mesh": "BLOCKfence",
-        "id": 184,
-        "render_state": "debug_flat",
-        "faces": 24,
-        "verts": 16,
-        "slot_count": 1
-      },
-      {
         "mesh": "BLOCKpost01",
         "id": 176,
         "render_state": "debug_flat",
@@ -874,14 +850,6 @@
         "render_state": "debug_flat",
         "faces": 24,
         "verts": 14,
-        "slot_count": 1
-      },
-      {
-        "mesh": "BLOCKCR08",
-        "id": 169,
-        "render_state": "debug_flat",
-        "faces": 20,
-        "verts": 16,
         "slot_count": 1
       },
       {
@@ -1157,14 +1125,6 @@
         "slot_count": 1
       },
       {
-        "mesh": "Constsign01",
-        "id": 88,
-        "render_state": "debug_flat",
-        "faces": 2,
-        "verts": 4,
-        "slot_count": 1
-      },
-      {
         "mesh": "Cylinder01",
         "id": 84,
         "render_state": "debug_flat",
@@ -1329,16 +1289,23 @@
     ]
   },
   "textures": {
+    "assets/native/level1_capture_overrides/GROUND_mat0_grass.png": 1,
+    "assets/native/level1_capture_overrides/tex_00181da8_64x64.png": 3,
+    "assets/native/level1_capture_overrides/tex_03dcd780_64x64.png": 2,
+    "assets/native/level1_capture_overrides/tex_03ebbbc8_64x64.png": 1,
+    "assets/native/level1_capture_overrides/tex_052e7090_128x128.png": 11,
+    "assets/native/level1_capture_overrides/tex_0540ab70_64x64.png": 1,
+    "assets/native/level1_capture_overrides/tex_0541bf80_64x64.png": 1,
     "assets/parsed/level1/level1_images/0000_128x128d16.png": 6,
     "assets/parsed/level1/level1_images/0001_128x128d16.png": 2,
     "assets/parsed/level1/level1_images/0002_128x128d16.png": 1,
-    "assets/parsed/level1/level1_images/0003_128x128d16.png": 32,
+    "assets/parsed/level1/level1_images/0003_128x128d16.png": 23,
     "assets/parsed/level1/level1_images/0004_256x256d16.png": 5,
     "assets/parsed/level1/level1_images/0005_256x256d16.png": 2,
     "assets/parsed/level1/level1_images/0006_256x256d16.png": 3,
     "assets/parsed/level1/level1_images/0009_128x128d16.png": 1,
     "assets/parsed/level1/level1_images/0010_64x64d16.png": 2,
-    "assets/parsed/level1/level1_images/0012_128x128d16.png": 3,
+    "assets/parsed/level1/level1_images/0012_128x128d16.png": 2,
     "assets/parsed/level1/level1_images/0013_64x64d16.png": 1,
     "assets/parsed/level1/level1_images/0014_128x128d16.png": 1,
     "assets/parsed/level1/level1_images/0015_64x64d16.png": 1,
@@ -1352,8 +1319,8 @@
     "assets/parsed/level1/level1_images/0028_64x64d16.png": 3,
     "assets/parsed/level1/level1_images/0029_64x64d16.png": 4,
     "assets/parsed/level1/level1_images/0031_128x128d16.png": 8,
-    "assets/parsed/level1/level1_images/0035_128x128d16.png": 16,
-    "assets/parsed/level1/level1_images/0039_128x128d16.png": 7,
+    "assets/parsed/level1/level1_images/0035_128x128d16.png": 15,
+    "assets/parsed/level1/level1_images/0039_128x128d16.png": 6,
     "assets/parsed/level1/level1_images/0041_128x128d16.png": 3,
     "assets/parsed/level1/level1_images/0043_128x128d16.png": 2,
     "assets/parsed/level1/level1_images/0046_256x256d16.png": 8,
@@ -1742,13 +1709,14 @@
           "index": 0,
           "name": "treebranch02_mat0_mid23",
           "omt_mid": 23,
-          "bitmap": "assets/parsed/level1/level1_images/0003_128x128d16.png",
+          "bitmap": "assets/native/level1_capture_overrides/tex_052e7090_128x128.png",
           "bitmap_exists": true,
           "diffuse": [
             1.0,
             1.0,
             1.0
           ],
+          "override_source": "level1_texture_overrides.txt",
           "face_count": 8,
           "render_state": "textured"
         }
@@ -1854,13 +1822,14 @@
           "index": 0,
           "name": "treebranch04_mat0_mid23",
           "omt_mid": 23,
-          "bitmap": "assets/parsed/level1/level1_images/0003_128x128d16.png",
+          "bitmap": "assets/native/level1_capture_overrides/tex_03ebbbc8_64x64.png",
           "bitmap_exists": true,
           "diffuse": [
             1.0,
             1.0,
             1.0
           ],
+          "override_source": "level1_texture_overrides.txt",
           "face_count": 29,
           "render_state": "textured"
         }
@@ -2582,13 +2551,14 @@
           "index": 0,
           "name": "treebranch07_mat0_mid61",
           "omt_mid": 61,
-          "bitmap": "assets/parsed/level1/level1_images/0039_128x128d16.png",
+          "bitmap": "assets/native/level1_capture_overrides/tex_052e7090_128x128.png",
           "bitmap_exists": true,
           "diffuse": [
             1.0,
             1.0,
             1.0
           ],
+          "override_source": "level1_texture_overrides.txt",
           "face_count": 43,
           "render_state": "textured"
         },
@@ -3688,13 +3658,14 @@
           "index": 0,
           "name": "tree29_mat0_mid23",
           "omt_mid": 23,
-          "bitmap": "assets/parsed/level1/level1_images/0003_128x128d16.png",
+          "bitmap": "assets/native/level1_capture_overrides/tex_052e7090_128x128.png",
           "bitmap_exists": true,
           "diffuse": [
             1.0,
             1.0,
             1.0
           ],
+          "override_source": "level1_texture_overrides.txt",
           "face_count": 8,
           "render_state": "textured"
         }
@@ -3744,13 +3715,14 @@
           "index": 0,
           "name": "tree30_mat0_mid23",
           "omt_mid": 23,
-          "bitmap": "assets/parsed/level1/level1_images/0003_128x128d16.png",
+          "bitmap": "assets/native/level1_capture_overrides/tex_052e7090_128x128.png",
           "bitmap_exists": true,
           "diffuse": [
             1.0,
             1.0,
             1.0
           ],
+          "override_source": "level1_texture_overrides.txt",
           "face_count": 8,
           "render_state": "textured"
         }
@@ -3800,13 +3772,14 @@
           "index": 0,
           "name": "tree31_mat0_mid23",
           "omt_mid": 23,
-          "bitmap": "assets/parsed/level1/level1_images/0003_128x128d16.png",
+          "bitmap": "assets/native/level1_capture_overrides/tex_052e7090_128x128.png",
           "bitmap_exists": true,
           "diffuse": [
             1.0,
             1.0,
             1.0
           ],
+          "override_source": "level1_texture_overrides.txt",
           "face_count": 8,
           "render_state": "textured"
         }
@@ -3845,26 +3818,27 @@
         -1402.3724365234375
       ],
       "classification": "foliage",
-      "render_state": "debug_flat",
+      "render_state": "textured",
       "material_summary": {
         "slot_count": 1,
-        "textured_slots": 0,
-        "flat_diffuse_slots": 1
+        "textured_slots": 1,
+        "flat_diffuse_slots": 0
       },
       "materials": [
         {
           "index": 0,
           "name": "tree32_mat0_mid29",
           "omt_mid": 29,
-          "bitmap": "",
-          "bitmap_exists": false,
+          "bitmap": "assets/native/level1_capture_overrides/tex_052e7090_128x128.png",
+          "bitmap_exists": true,
           "diffuse": [
             0.5,
             0.5,
             0.5
           ],
+          "override_source": "level1_texture_overrides.txt",
           "face_count": 10,
-          "render_state": "flat_diffuse"
+          "render_state": "textured"
         }
       ]
     },
@@ -5080,13 +5054,14 @@
           "index": 0,
           "name": "bushes16_mat0_mid23",
           "omt_mid": 23,
-          "bitmap": "assets/parsed/level1/level1_images/0003_128x128d16.png",
+          "bitmap": "assets/native/level1_capture_overrides/tex_052e7090_128x128.png",
           "bitmap_exists": true,
           "diffuse": [
             1.0,
             1.0,
             1.0
           ],
+          "override_source": "level1_texture_overrides.txt",
           "face_count": 28,
           "render_state": "textured"
         }
@@ -5136,13 +5111,14 @@
           "index": 0,
           "name": "treebranch03_mat0_mid23",
           "omt_mid": 23,
-          "bitmap": "assets/parsed/level1/level1_images/0003_128x128d16.png",
+          "bitmap": "assets/native/level1_capture_overrides/tex_052e7090_128x128.png",
           "bitmap_exists": true,
           "diffuse": [
             1.0,
             1.0,
             1.0
           ],
+          "override_source": "level1_texture_overrides.txt",
           "face_count": 8,
           "render_state": "textured"
         }
@@ -5192,13 +5168,14 @@
           "index": 0,
           "name": "tree01_mat0_mid23",
           "omt_mid": 23,
-          "bitmap": "assets/parsed/level1/level1_images/0003_128x128d16.png",
+          "bitmap": "assets/native/level1_capture_overrides/tex_052e7090_128x128.png",
           "bitmap_exists": true,
           "diffuse": [
             1.0,
             1.0,
             1.0
           ],
+          "override_source": "level1_texture_overrides.txt",
           "face_count": 8,
           "render_state": "textured"
         }
@@ -6063,26 +6040,27 @@
         2981.494384765625
       ],
       "classification": "foliage",
-      "render_state": "debug_flat",
+      "render_state": "textured",
       "material_summary": {
         "slot_count": 1,
-        "textured_slots": 0,
-        "flat_diffuse_slots": 1
+        "textured_slots": 1,
+        "flat_diffuse_slots": 0
       },
       "materials": [
         {
           "index": 0,
           "name": "2D_Trees05_mat0_mid29",
           "omt_mid": 29,
-          "bitmap": "",
-          "bitmap_exists": false,
+          "bitmap": "assets/native/level1_capture_overrides/tex_052e7090_128x128.png",
+          "bitmap_exists": true,
           "diffuse": [
             0.5,
             0.5,
             0.5
           ],
+          "override_source": "level1_texture_overrides.txt",
           "face_count": 10,
-          "render_state": "flat_diffuse"
+          "render_state": "textured"
         }
       ]
     },
@@ -6734,27 +6712,28 @@
         0.0,
         4609.7451171875
       ],
-      "classification": "unresolved_visual",
-      "render_state": "debug_flat",
+      "classification": "textured_visual",
+      "render_state": "textured",
       "material_summary": {
         "slot_count": 1,
-        "textured_slots": 0,
-        "flat_diffuse_slots": 1
+        "textured_slots": 1,
+        "flat_diffuse_slots": 0
       },
       "materials": [
         {
           "index": 0,
           "name": "Constsign01_mat0_mid56",
           "omt_mid": 56,
-          "bitmap": "",
-          "bitmap_exists": false,
+          "bitmap": "assets/native/level1_capture_overrides/tex_0540ab70_64x64.png",
+          "bitmap_exists": true,
           "diffuse": [
             0.5,
             0.5,
             0.5
           ],
+          "override_source": "level1_texture_overrides.txt",
           "face_count": 2,
-          "render_state": "flat_diffuse"
+          "render_state": "textured"
         }
       ]
     },
@@ -7852,13 +7831,14 @@
           "index": 0,
           "name": "tree06_mat0_mid23",
           "omt_mid": 23,
-          "bitmap": "assets/parsed/level1/level1_images/0003_128x128d16.png",
+          "bitmap": "assets/native/level1_capture_overrides/tex_052e7090_128x128.png",
           "bitmap_exists": true,
           "diffuse": [
             1.0,
             1.0,
             1.0
           ],
+          "override_source": "level1_texture_overrides.txt",
           "face_count": 8,
           "render_state": "textured"
         }
@@ -7908,13 +7888,14 @@
           "index": 0,
           "name": "tree07_mat0_mid39",
           "omt_mid": 39,
-          "bitmap": "assets/parsed/level1/level1_images/0012_128x128d16.png",
+          "bitmap": "assets/native/level1_capture_overrides/tex_0541bf80_64x64.png",
           "bitmap_exists": true,
           "diffuse": [
             1.0,
             1.0,
             1.0
           ],
+          "override_source": "level1_texture_overrides.txt",
           "face_count": 34,
           "render_state": "textured"
         }
@@ -7964,13 +7945,14 @@
           "index": 0,
           "name": "grill_mat0_mid153",
           "omt_mid": 153,
-          "bitmap": "assets/parsed/level1/level1_images/0035_128x128d16.png",
+          "bitmap": "assets/native/level1_capture_overrides/tex_03dcd780_64x64.png",
           "bitmap_exists": true,
           "diffuse": [
             1.0,
             1.0,
             1.0
           ],
+          "override_source": "level1_texture_overrides.txt",
           "face_count": 32,
           "render_state": "textured"
         },
@@ -8470,27 +8452,28 @@
         0.0,
         -1844.8399658203125
       ],
-      "classification": "unresolved_visual",
-      "render_state": "debug_flat",
+      "classification": "textured_visual",
+      "render_state": "textured",
       "material_summary": {
         "slot_count": 1,
-        "textured_slots": 0,
-        "flat_diffuse_slots": 1
+        "textured_slots": 1,
+        "flat_diffuse_slots": 0
       },
       "materials": [
         {
           "index": 0,
           "name": "Blocks_In_mat0_mid0",
           "omt_mid": 0,
-          "bitmap": "",
-          "bitmap_exists": false,
+          "bitmap": "assets/native/level1_capture_overrides/tex_00181da8_64x64.png",
+          "bitmap_exists": true,
           "diffuse": [
             1.0,
             1.0,
             1.0
           ],
+          "override_source": "level1_texture_overrides.txt",
           "face_count": 60,
-          "render_state": "flat_diffuse"
+          "render_state": "textured"
         }
       ]
     },
@@ -11047,26 +11030,27 @@
         -1860.4764404296875
       ],
       "classification": "terrain_or_surface",
-      "render_state": "debug_flat",
+      "render_state": "textured",
       "material_summary": {
         "slot_count": 1,
-        "textured_slots": 0,
-        "flat_diffuse_slots": 1
+        "textured_slots": 1,
+        "flat_diffuse_slots": 0
       },
       "materials": [
         {
           "index": 0,
           "name": "GROUND_mat0_mid0",
           "omt_mid": 0,
-          "bitmap": "",
-          "bitmap_exists": false,
+          "bitmap": "assets/native/level1_capture_overrides/GROUND_mat0_grass.png",
+          "bitmap_exists": true,
           "diffuse": [
             1.0,
             1.0,
             1.0
           ],
+          "override_source": "level1_texture_overrides.txt",
           "face_count": 12,
-          "render_state": "flat_diffuse"
+          "render_state": "textured"
         }
       ]
     },
@@ -11606,27 +11590,28 @@
         0.0,
         -7602.828125
       ],
-      "classification": "unresolved_visual",
-      "render_state": "debug_flat",
+      "classification": "textured_visual",
+      "render_state": "textured",
       "material_summary": {
         "slot_count": 1,
-        "textured_slots": 0,
-        "flat_diffuse_slots": 1
+        "textured_slots": 1,
+        "flat_diffuse_slots": 0
       },
       "materials": [
         {
           "index": 0,
           "name": "BLOCKCR08_mat0_mid0",
           "omt_mid": 0,
-          "bitmap": "",
-          "bitmap_exists": false,
+          "bitmap": "assets/native/level1_capture_overrides/tex_03dcd780_64x64.png",
+          "bitmap_exists": true,
           "diffuse": [
             1.0,
             1.0,
             1.0
           ],
+          "override_source": "level1_texture_overrides.txt",
           "face_count": 20,
-          "render_state": "flat_diffuse"
+          "render_state": "textured"
         }
       ]
     },
@@ -12474,27 +12459,28 @@
         0.0,
         -5645.14599609375
       ],
-      "classification": "unresolved_visual",
-      "render_state": "debug_flat",
+      "classification": "textured_visual",
+      "render_state": "textured",
       "material_summary": {
         "slot_count": 1,
-        "textured_slots": 0,
-        "flat_diffuse_slots": 1
+        "textured_slots": 1,
+        "flat_diffuse_slots": 0
       },
       "materials": [
         {
           "index": 0,
           "name": "BLOCKfence_mat0_mid0",
           "omt_mid": 0,
-          "bitmap": "",
-          "bitmap_exists": false,
+          "bitmap": "assets/native/level1_capture_overrides/tex_00181da8_64x64.png",
+          "bitmap_exists": true,
           "diffuse": [
             1.0,
             1.0,
             1.0
           ],
+          "override_source": "level1_texture_overrides.txt",
           "face_count": 24,
-          "render_state": "flat_diffuse"
+          "render_state": "textured"
         }
       ]
     },
@@ -12810,27 +12796,28 @@
         0.0,
         -5643.970703125
       ],
-      "classification": "unresolved_visual",
-      "render_state": "debug_flat",
+      "classification": "textured_visual",
+      "render_state": "textured",
       "material_summary": {
         "slot_count": 1,
-        "textured_slots": 0,
-        "flat_diffuse_slots": 1
+        "textured_slots": 1,
+        "flat_diffuse_slots": 0
       },
       "materials": [
         {
           "index": 0,
           "name": "BLOCKpicnic03_mat0_mid0",
           "omt_mid": 0,
-          "bitmap": "",
-          "bitmap_exists": false,
+          "bitmap": "assets/native/level1_capture_overrides/tex_00181da8_64x64.png",
+          "bitmap_exists": true,
           "diffuse": [
             1.0,
             1.0,
             1.0
           ],
+          "override_source": "level1_texture_overrides.txt",
           "face_count": 28,
-          "render_state": "flat_diffuse"
+          "render_state": "textured"
         }
       ]
     },
