@@ -29,3 +29,16 @@ __pycache__/
 # tools/gen_asset_galleries.py and tools/gen_texture_gallery.py)
 docs/gallery-*.html
 docs/texture-gallery.html
+
+# Proxy build artifacts. The DLL can embed the receiver host IP supplied via
+# -DOMTC_RECEIVER_IP=... at build time, so keep binaries out of the repo.
+instrument/proxy/*.dll
+instrument/proxy/*.pdb
+instrument/proxy/*.obj
+instrument/proxy/*.lib
+instrument/proxy/*.exp
+instrument/proxy/com_wrappers_gen.inc
+
+# Local environment file -- host IPs, tokens, VNC passwords live here.
+.env
+.env.local

@@ -10,7 +10,7 @@ ddraw_orig.dll (the proxy's 20 forwarders resolve there).
 --- M5 on-XP test, run order -------------------------------------------------
   1. terminal A (Debian):  python3 receiver/receive.py serve --out level1.omtc
   2. terminal B (Debian):  python3 deploy_xp.py
-  3. launch the game on XP (VNC at https://<DEBIAN_HOST>:4401, or --launch)
+  3. launch the game on XP (over your usual remote-desktop, or --launch)
   4. play a level-1 session; watch terminal A fill with per-frame lines
   5. quit the game; terminal A prints the captured-session summary
 ------------------------------------------------------------------------------
@@ -31,9 +31,11 @@ import subprocess
 sys.path.insert(0, os.path.expanduser("~/xp-command-server"))
 from xp_client import XpClient, XpError
 
-XP_HOST  = "<XP_HOST>"
-XP_PORT  = 9999
-XP_TOKEN = "<XP_TOKEN_REDACTED>"
+XP_HOST  = os.environ.get("XP_HOST")
+XP_PORT  = int(os.environ.get("XP_PORT", "9999"))
+XP_TOKEN = os.environ.get("XP_TOKEN")
+if not XP_HOST or not XP_TOKEN:
+    sys.exit("error: set XP_HOST and XP_TOKEN environment variables before running")
 
 GAME_DIR = r"C:\Program Files\THQ\Jimmy Neutron\Jimmy Neutron Boy Genius"
 PROXY_LOCAL = os.path.join(os.path.dirname(os.path.abspath(__file__)),
@@ -41,7 +43,9 @@ PROXY_LOCAL = os.path.join(os.path.dirname(os.path.abspath(__file__)),
 PROXY_SRCS = ["capture.c", "capture.h", "com_wrappers.c", "ddraw_proxy.c",
               "protocol.h"]
 
-RECEIVER_ENDPOINT = "<DEBIAN_HOST>:7070"   # must match OMTC_RECEIVER_* in capture.c
+# Receiver endpoint the on-XP proxy connects out to (must match the
+# OMTC_RECEIVER_IP/PORT baked into capture.c at proxy build time).
+RECEIVER_ENDPOINT = os.environ.get("OMTC_RECEIVER_ENDPOINT", "127.0.0.1:7070")
 
 
 def q(path):

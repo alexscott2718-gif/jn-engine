@@ -86,7 +86,7 @@ See also: `docs/ghidra_notes.md` (Phase 11 section), `docs/omt_3dsp_format.md`
 - Game: `C:\Program Files\THQ\Jimmy Neutron\Jimmy Neutron Boy Genius\Neutron.exe`
   (PE32, i386). `OMT2.dll` sits alongside it.
 - Original install also copied to Debian at `~/xp-jnbg-original/`.
-- XP TightVNC: `<XP_HOST>:5900`, RFB 3.8, VNC auth, password `password`.
+- XP TightVNC: `<XP_HOST>:5900`, RFB 3.8, VNC auth, password `<VNC_PASSWORD>`.
 - VNC screenshot tool: **`tools/vnccap.py`** (minimal RFB client; copied into
   the repo this session). Usage: `python3 tools/vnccap.py <out.png> [password]`.
   Captures whatever is on the XP framebuffer — game must be foreground.

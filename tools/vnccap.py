@@ -1,11 +1,14 @@
 #!/usr/bin/env python3
 """Minimal RFB/VNC client: connect, VNC-auth, grab one framebuffer, save PNG."""
-import socket, struct, sys, zlib
+import os, socket, struct, sys, zlib
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 
-HOST, PORT = '<XP_HOST>', 5900
-PASSWORD = sys.argv[2] if len(sys.argv) > 2 else 'password'
+HOST = os.environ.get('VNC_HOST')
+PORT = int(os.environ.get('VNC_PORT', '5900'))
+PASSWORD = sys.argv[2] if len(sys.argv) > 2 else os.environ.get('VNC_PASSWORD')
 OUT = sys.argv[1] if len(sys.argv) > 1 else '/tmp/xp_vnc.png'
+if not HOST or not PASSWORD:
+    sys.exit('usage: vnccap.py <out.png> [password]   (requires VNC_HOST env, and VNC_PASSWORD env if no positional password)')
 
 
 def recvn(s, n):

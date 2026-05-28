@@ -129,7 +129,7 @@ control channel works on a live game. Specifically:
 ```python
 # from Debian, ~/jn-engine
 from xp_client import XpClient
-TOKEN = '<XP_TOKEN_REDACTED>'
+TOKEN = '<XP_TOKEN>'
 with XpClient('<XP_HOST>', 9999, TOKEN) as c:
     print(c.ping(), 'ms')
     # Stop the game if it's running (no-op if not):

@@ -23,9 +23,15 @@
 #include "protocol.h"
 #include "capture.h"
 
-/* --- receiver endpoint (proxy connects OUT to the Debian box) --- */
-#define OMTC_RECEIVER_IP    "<DEBIAN_HOST>"
+/* --- receiver endpoint (proxy connects OUT to the host box) ---
+ * Override at build time: -DOMTC_RECEIVER_IP=\"x.x.x.x\" -DOMTC_RECEIVER_PORT=NNNN.
+ * Default is loopback so a stock build never leaks a real host address. */
+#ifndef OMTC_RECEIVER_IP
+#define OMTC_RECEIVER_IP    "127.0.0.1"
+#endif
+#ifndef OMTC_RECEIVER_PORT
 #define OMTC_RECEIVER_PORT  7070
+#endif
 
 /* --- SPSC ring buffer ----------------------------------------------------
  * Free-running uint32 byte counters: a buffer position is counter & MASK,

@@ -86,7 +86,7 @@ completion with no manual SIGINT (validates (a)) and section 2 read
 
 **Environment gotchas discovered this session:**
 - `xp_client.py` is at `~/xp-command-server/`, **not** `~/jn-engine/`. Token
-  `<XP_TOKEN_REDACTED>`, XP command server `<XP_HOST>:9999`.
+  `<XP_TOKEN>`, XP command server `<XP_HOST>:9999`.
 - XP has **no `certutil`** — verify an upload by `xp_client.download()` of the
   deployed file and comparing SHA-1 locally (round-trip).
 - `tools/vnccap.py` is **capture-only** (grabs one framebuffer → PNG; no RFB

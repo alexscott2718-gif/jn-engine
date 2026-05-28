@@ -24,9 +24,18 @@ echo "[build] generate COM wrapper thunks from DX7 headers"
 python3 gen_wrappers.py "$WINHDR/ddraw.h" "$WINHDR/d3d.h" com_wrappers_gen.inc
 
 echo "[build] compile"
+# Receiver host can be supplied via env so it is never committed in source.
+#   OMTC_RECEIVER_IP=10.0.0.5 OMTC_RECEIVER_PORT=7070 ./build.sh
+RECV_DEFS=()
+if [ -n "${OMTC_RECEIVER_IP:-}" ]; then
+    RECV_DEFS+=(-DOMTC_RECEIVER_IP=\"${OMTC_RECEIVER_IP}\")
+fi
+if [ -n "${OMTC_RECEIVER_PORT:-}" ]; then
+    RECV_DEFS+=(-DOMTC_RECEIVER_PORT=${OMTC_RECEIVER_PORT})
+fi
 "$ZIG" cc -target x86-windows-gnu -O2 -c ddraw_proxy.c  -o ddraw_proxy.obj
 "$ZIG" cc -target x86-windows-gnu -O2 -c com_wrappers.c -o com_wrappers.obj
-"$ZIG" cc -target x86-windows-gnu -O2 -c capture.c -o capture.obj
+"$ZIG" cc -target x86-windows-gnu -O2 "${RECV_DEFS[@]}" -c capture.c -o capture.obj
 
 echo "[build] link (-nostdlib, entry=DllMain) -> $OUT"
 # ws2_32: M5 streams the capture out over TCP. ws2_32.dll ships with XP, so

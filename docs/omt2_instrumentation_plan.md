@@ -609,7 +609,7 @@ the Phase 12 critical path.
   `jn-engine-phase11-progress`.
 - Ghidra project: `~/ghidra-projects/JN_decomp` (Neutron.exe + OMT2.dll).
 - Original install: `~/xp-jnbg-original/` (incl. `OMT2.dll`, `png/`).
-- XP capture tool: `tools/vnccap.py`. XP TightVNC `<XP_HOST>:5900` pw `password`.
+- XP capture tool: `tools/vnccap.py`. XP TightVNC `<XP_HOST>:5900` pw `<VNC_PASSWORD>`.
 - Toolchain: `~/zig/zig` (0.14.0), target `x86-windows-gnu`.
 - Autonomy contract: memory `feedback-autonomy-and-effort-checkpoints`.
 

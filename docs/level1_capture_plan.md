@@ -49,7 +49,7 @@ begins, so the diff later lands on a representative frame.
    python3 - <<'PY'
    import sys; sys.path.insert(0, '/home/scotty/xp-command-server')
    from xp_client import XpClient
-   with XpClient('<XP_HOST>', 9999, '<XP_TOKEN_REDACTED>') as c:
+   with XpClient('<XP_HOST>', 9999, '<XP_TOKEN>') as c:
        c.download(r'C:\Program Files\THQ\Jimmy Neutron\Jimmy Neutron Boy Genius\ddraw.dll',
                   '/tmp/xp_ddraw.dll')
    PY
@@ -130,7 +130,7 @@ the Phase 12 engine fixes (lighting/ground/terrain/water) become the next plan.
   Recover: `sudo systemctl restart xp-daemon.service`. Use `reg`/`sc`/`dir`/
   `type` only; read XP CPU off Task Manager in the noVNC session.
 - `xp_client.py` lives at `~/xp-command-server/` (not `~/jn-engine/`). Token
-  `<XP_TOKEN_REDACTED>`, command server `<XP_HOST>:9999`.
+  `<XP_TOKEN>`, command server `<XP_HOST>:9999`.
 - XP has **no `certutil`** — verify uploads by download-back SHA-1.
 - `tools/vnccap.py` is **capture-only** (no input injection) — user must pilot.
 - Proxy retries `<DEBIAN_HOST>:7070` on a background thread and never blocks the
