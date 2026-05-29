@@ -533,8 +533,14 @@ int main(void) {
         /* Phase 2: ground/water texture overrides for slots whose
            level1.omt canvas chain resolves to nothing. Provenance and
            per-entry rationale live in
-           assets/native/level1_texture_overrides.json. */
-        texture_overrides_load("assets/native/level1_texture_overrides.txt");
+           assets/native/level1_texture_overrides.json.
+           JN_TEXTURE_OVERRIDES selects an alternate TSV (e.g. the
+           capture-derived ground-truth file) for A/B comparison. */
+        {
+            const char *ovr = getenv("JN_TEXTURE_OVERRIDES");
+            texture_overrides_load(ovr && *ovr ? ovr
+                : "assets/native/level1_texture_overrides.txt");
+        }
         fprintf(stderr,
                 "[native_level1] phase 2 texture overrides loaded: %d\n",
                 texture_overrides_count());
