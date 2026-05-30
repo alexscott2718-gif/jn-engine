@@ -197,53 +197,55 @@ Material body (textured variant, 52 bytes):
 Non-textured variant (38 bytes): same prefix; +0 type = `0x0001`;
 no `Canv` sub-record; the trailing 14 bytes are colors+flags only.
 
-## Canvas table (Phase 11 correction, 2026-05-15)
+## Canvas table (corrected 2026-05-30 — supersedes Phase 11 note)
 
-The material body's `Canv` u32 is **NOT** a sequential image index. The
-OMT has a third record table — the **canvas table** — with the same
-record layout as the material table (`offset u32, size u32, namelen u8,
-name, id u32`), but each `offset` points at an `OmCv` image chunk.
+**Do not use heuristic table scanners.** Read the OMT file header directly.
+The u32 BE at `file[4]` is the offset of the chunk-table header, which lists
+every `Canv`, `3DMa`, and `3DSh` chunk with its authoritative `chunk_id`,
+file offset, size, and name. See `_read_omt_header()` in
+`omt_asset_toolkit/core/materials.py`.
 
-**A material's `Canv` field = the referenced canvas record's `id` minus
-one.** Resolution chain:
+**Correct resolution chain:**
 
 ```
-face.mid → material_table[mid]  (the material record)
-         → material body Canv u32
-         → canvas id = Canv + 1
-         → canvas_table[ id ].offset   (the OmCv chunk)
-         → image index = rank of that offset among all OmCv offsets
-           sorted ascending  (this is how omt_parser.py numbers images)
-         → assets/parsed/<omt>/<omt>_images/####_*.png
+face.mid → materials header table → material body (offset, size)
+         → if size==52 and body[42:46]==b'Canv':
+               canvas_chunk_id = u32_BE(body[46:50])   ← DIRECT, NO +1
+         → canvases header table[canvas_chunk_id] → decode canvas
 ```
 
-The canvas table is roughly alphabetical by name — **not** in file-offset
-order — so the old "Canv = image index" assumption silently mismatched
-textures (e.g. a house wall got a target decal). Fixed in
-`tools/omt_mesh_export.py` (`find_canvas_table()`, `resolve_bitmap()`).
+The earlier "Canv + 1" rule was an artefact of the heuristic scanner finding
+a different in-file structure with different IDs. With the OMT header, the
+canvas chunk_id from the material body is used directly — no arithmetic offset.
 
-A few canvas record `id` fields are corrupt in-file (`level1.omt`:
-`labshak2` reads 810; the last record `brickwall` reads garbage). The
-exporter falls back to an **exact material-name ↔ canvas-name match**
-(materials are authored named after their texture) for those.
+`mid = 0` is the 'grass' material (a real, valid material). Collision meshes
+that lack per-face material stream links should be assigned `mid = -1`
+(sentinel) rather than `mid = 0`, to avoid incorrectly rendering them with the
+grass texture. See the 84-byte stride section above.
 
-Examples in `level1.omt` (corrected):
-- `house01` mid 9 → material `cindhouse1` → canvas id 17 → house facade
-- `house01` mid 151 → material `151JHouse` → canvas id 28 (`jhouse1`)
-- `SCHOOL` uses 15 distinct mids (multi-material mesh)
+## UV convention (corrected 2026-05-30)
 
-`mid=0` is special — observed in `SCHOOL`'s top mats; likely
-"no material / use default" since the table starts at id=1.
+3DSP per-corner UV values are stored in a **negative range**, typically
+`V ∈ [−1, 0]`, `U ∈ [0, 1]`. Sampling requires a wrap step:
 
-## UV convention (Phase 11, 2026-05-15)
+```python
+u_wrap = u - math.floor(u)          # → [0, 1]
+v_wrap = v - math.floor(v)          # → [0, 1]
+x = int(u_wrap * (w - 1))
+y = int(v_wrap * (h - 1))           # NO V-flip
+```
 
-3DSP per-corner UVs are **DirectX-convention** (v=0 = top of texture).
-3DSMax ASE convention is v=0 = bottom. `omt_mesh_export.py` writes
-`1.0 - v` so OMT-exported ASEs match the hand-exported originals in
-`assets/ase/`. The engine's `ase_loader.c` then passes V through
-unmodified (`tex_loader.c`'s stbi vertical flip handles orientation).
-Ground truth: OMT2.dll's `OMediaDXRenderPort::draw_shape` copies UVs
-straight into the D3D7 vertex buffer with no transform.
+Canvas images are decoded **top-down** by the OMT library (PIL row 0 = visual
+top). The wrapped V values map directly to PIL row indices. **No V-flip is
+applied.** Earlier analysis (Phase 11) incorrectly stated DX convention
+(V=0=top) required a flip; empirical testing on the fire hydrant and sign
+meshes confirmed no flip is correct.
+
+For the ASE exporter: `omt_mesh_export.py` still writes `1.0 − v` in the
+ASE output because 3ds Max ASE is Z-up / V=0-bottom convention, and stbi's
+vertical flip in `tex_loader.c` handles the orientation for the native engine
+renderer. The ASE-export flip and the catalog-render no-flip are not
+contradictory — they target different consumers.
 
 ## A4 coordinate convention — confirmed (2026-05-14)
 
@@ -279,22 +281,15 @@ coords.)
   for `level1.omt`; assumed identical structure in other OMTs but
   not yet verified. First step of B1 is to validate.
 
-## How to resume
+## Status (2026-05-30)
 
-A1–A4 are landed. Next is Track B: write
-`tools/omt_mesh_export.py` per the Phase 7 plan. The exporter
-should:
+All format questions are resolved. The full pipeline is implemented and
+producing correct renders for all 195 meshes in `level1.omt`:
 
-1. Parse the OMT mesh index table (use the algorithm at top of
-   this doc).
-2. Parse the global material table at end-of-file (180 entries
-   for `level1.omt`; format above). Cache `id → (canv_index)`.
-3. For each `3DSP` chunk, parse header, vertex array, face array
-   (94-byte stride), and per-vertex tail (skipped).
-4. Convert OMT verts → ASE Z-up using the A4 mapping.
-5. Emit an ASE per mesh into `assets/ase/omt/<name>.ASE`
-   referencing `assets/parsed/<omt>/<omt>_images/####_*.png`.
+- **Mesh table:** OMT header `3DSh` chunks (authoritative)
+- **Material resolution:** header `3DMa` + `Canv` chunks, direct canvas ID
+- **UV sampling:** wrap + no-flip, perspective-correct interpolation
+- **Rasterizer:** backface cull (`denom ≥ 0` in screen Y-down), z-buffer
+- **GL renderer:** no FLIP_TOP_BOTTOM on texture upload
 
-Until that's done, 3TRE/3ROK/3NEU continue to render as their
-fallback colored placeholder boxes (the Phase 6 resolver simply
-has no entry for them, so it falls through gracefully).
+See `omt_rendering_breakthrough.md` for the complete technical writeup.
