@@ -56,11 +56,24 @@ OMT → [toolkit: the ONE correct parser] → per-mesh .glb → cgltf loader →
 - Deliverable: a single `.glb` we open in an external viewer to confirm upright
   + correctly textured **before any C is touched**.
 
-### Phase B — native cgltf loader (C)
-- Vendor `cgltf.h` (single-header, MIT — like the existing `stb_image.h`).
-- New `gltf_loader.c/.h` filling the **existing `AseModel` struct** (renderer
-  untouched). Decode embedded PNGs with the already-vendored `stb_image.h`.
-- Wire into `Makefile` + the Emscripten/web build.
+### Phase B — native cgltf loader (C)  ✅ DONE (2026-05-31, commit 7cf8ad9)
+- Vendored `cgltf.h` v1.15 (single-header, MIT) at `src/engine/cgltf.h`.
+- `src/engine/assets/gltf_loader.{c,h}` fills the **existing `AseModel` struct**
+  (renderer untouched): `parse_glb` → interleaved pos3+uv2+nrm3 VBO, de-indexed
+  sequential EBO, one draw group per primitive. Positions/normals/UVs consumed
+  as-is (exporter pre-baked them). Embedded `baseColorTexture` PNGs decoded with
+  `stb_image` (flip **OFF** — glTF UV origin is top-left, matches raw UVs) and
+  uploaded directly → `materials[k].texture_id` set here (self-contained .glb,
+  no asset-cache filename resolution). `gltf_inspect()` = GL-free parse summary
+  for testing without a context.
+- Auto-wired into both builds via the existing `SRC` / `WEB_SRC` globs — no
+  Makefile edit needed. Native + Emscripten builds verified clean.
+- Verified: CPU parse cross-checked against `pygltflib` on tree01 / SCHOOL /
+  JHOUSE (5 mats) / BLOCKING_road (untextured) — exact match on vertex &
+  material counts, first-vertex positions, bboxes, texture presence.
+- ⏳ Not yet exercised on GPU: `gltf_load`'s GL upload + texture decode run only
+  when the engine actually loads a .glb (Phase C/D). The upload path mirrors
+  `tex_loader` (proven), minus the V-flip.
 
 ### Phase C — swap & retire (the payoff)
 - `asset_cache` loads `.glb` instead of `.ASE`.
