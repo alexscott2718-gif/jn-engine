@@ -221,7 +221,13 @@ def parse_3dsp(d: bytes, off: int, chunk_size: int = None):
             vidx, u, v, nidx = struct.unpack_from('>IffI', d, co)
             corners.append((vidx, u, v))
         nx, ny, nz = struct.unpack_from('>fff', d, p + 70)
-        mid = struct.unpack_from('>I', d, p + 90)[0] if stride == 94 else 0
+        # 94-byte stride carries a per-face material chunk-id; 84-byte stride
+        # (collision/blocker geometry) has no stream link. Material chunk-ids
+        # are non-negative, so -1 is an unambiguous "no material" sentinel that
+        # resolves to no texture (flat fallback). Do NOT use 0 here — that is a
+        # real material chunk-id and used to paint every blocker with its
+        # texture (historically the 'grass' canvas).
+        mid = struct.unpack_from('>I', d, p + 90)[0] if stride == 94 else -1
         faces.append({'corners': corners, 'normal': (nx, ny, nz), 'mid': mid})
         p = rec_start + stride
     return {'center': (cx, cy, cz), 'verts': verts, 'faces': faces}
