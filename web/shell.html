@@ -30,6 +30,29 @@
               accent-color: #9fb3c8; }
   #progress[hidden] { display: none; }
   #controls { font-size: 12px; color: #6b7785; }
+
+  /* ---- Touch controls (mobile) ---- */
+  /* #stage wraps the canvas so the overlay can position over it. */
+  #stage { position: relative; width: min(1280px, 100%); }
+  #stage canvas#canvas { display: block; width: 100% !important; }
+  #touch { position: absolute; inset: 0; pointer-events: none;
+           display: none; touch-action: none; -webkit-user-select: none; user-select: none; }
+  /* Shown only when the device reports coarse (touch) pointer. */
+  body.touch #touch { display: block; }
+  #joy { position: absolute; left: 5%; bottom: 8%;
+         width: 38vw; max-width: 180px; aspect-ratio: 1;
+         border-radius: 50%; background: rgba(40,52,66,0.35);
+         border: 2px solid rgba(159,179,200,0.4); pointer-events: auto; }
+  #joynub { position: absolute; left: 50%; top: 50%; width: 42%; height: 42%;
+            transform: translate(-50%,-50%); border-radius: 50%;
+            background: rgba(159,179,200,0.65); border: 2px solid rgba(200,216,230,0.8); }
+  #jump { position: absolute; right: 6%; bottom: 12%;
+          width: 22vw; max-width: 110px; aspect-ratio: 1; border-radius: 50%;
+          background: rgba(70,110,70,0.5); border: 2px solid rgba(160,210,160,0.8);
+          color: #eaffea; font: 600 18px/1 system-ui, sans-serif;
+          display: flex; align-items: center; justify-content: center;
+          pointer-events: auto; -webkit-tap-highlight-color: transparent; }
+  #jump:active { background: rgba(90,150,90,0.7); }
 </style>
 </head>
 <body>
@@ -37,8 +60,14 @@
   <h1>Jimmy Neutron — Level 1 · Phase 12 canonicalization QA</h1>
   <div id="status">Loading…</div>
   <progress id="progress" max="100" value="0"></progress>
-  <canvas id="canvas" width="1280" height="720" tabindex="0"
-          oncontextmenu="event.preventDefault()"></canvas>
+  <div id="stage">
+    <canvas id="canvas" width="1280" height="720" tabindex="0"
+            oncontextmenu="event.preventDefault()"></canvas>
+    <div id="touch">
+      <div id="joy"><div id="joynub"></div></div>
+      <div id="jump">JUMP</div>
+    </div>
+  </div>
   <div id="controls">WASD move · SPACE jump · SHIFT run · R respawn · drag = orbit</div>
   <div id="note">
     Flat full-bright lighting (original Level&nbsp;1 ran D3D&nbsp;LIGHTING=OFF) and a
@@ -172,6 +201,82 @@
   };
   setStatus('Downloading…');
   window.onerror = function (msg) { setStatus('Error: ' + msg); };
+
+  /* ---- Touch controls: on-screen joystick + jump button ----
+     Feeds the engine's virtual analog input (input.c) via the exported C
+     functions. The joystick reports a camera-relative (right, forward) vector
+     in the unit disc; the engine scales speed by its magnitude. Pointer Events
+     give us multi-touch (move + jump simultaneously) with one code path. */
+  (function () {
+    var isTouch = window.matchMedia &&
+                  window.matchMedia('(pointer: coarse)').matches;
+    if (!isTouch) return;            /* desktop: keep keyboard only */
+    document.body.classList.add('touch');
+
+    var joy = document.getElementById('joy');
+    var nub = document.getElementById('joynub');
+    var jumpBtn = document.getElementById('jump');
+
+    var mvx = 0, mvy = 0;            /* current stick vector, [-1,1] */
+    var joyId = null;                /* active pointer id on the joystick */
+
+    function setMove(x, y) {
+      /* C signature: input_set_virtual_move(float x, float y). y is +forward
+         (stick pushed up = move away from camera). */
+      if (Module && Module.ccall)
+        try { Module.ccall('input_set_virtual_move', null,
+                            ['number', 'number'], [x, y]); } catch (e) {}
+    }
+    function tapJump() {
+      if (Module && Module.ccall)
+        try { Module.ccall('input_press_virtual_jump', null, [], []); } catch (e) {}
+    }
+
+    function updateNub() {
+      /* Visual: move nub to (mvx, -mvy) within the ring (screen y is down). */
+      nub.style.left = (50 + mvx * 50) + '%';
+      nub.style.top  = (50 - mvy * 50) + '%';
+    }
+    function fromEvent(ev) {
+      var r = joy.getBoundingClientRect();
+      var cx = r.left + r.width / 2, cy = r.top + r.height / 2;
+      var dx = (ev.clientX - cx) / (r.width / 2);
+      var dy = (ev.clientY - cy) / (r.height / 2);
+      /* screen y-down -> forward is up -> negate */
+      var x = dx, y = -dy;
+      var m = Math.hypot(x, y);
+      if (m > 1) { x /= m; y /= m; }
+      mvx = x; mvy = y; updateNub();
+    }
+
+    joy.addEventListener('pointerdown', function (ev) {
+      joyId = ev.pointerId; joy.setPointerCapture(joyId);
+      fromEvent(ev); ev.preventDefault();
+    });
+    joy.addEventListener('pointermove', function (ev) {
+      if (ev.pointerId === joyId) { fromEvent(ev); ev.preventDefault(); }
+    });
+    function joyEnd(ev) {
+      if (ev.pointerId === joyId) {
+        joyId = null; mvx = 0; mvy = 0; updateNub();
+      }
+    }
+    joy.addEventListener('pointerup', joyEnd);
+    joy.addEventListener('pointercancel', joyEnd);
+
+    jumpBtn.addEventListener('pointerdown', function (ev) {
+      tapJump(); ev.preventDefault();
+    });
+
+    /* Push the stick vector to the engine every animation frame while held.
+       Continuous push (not just on move) keeps movement going when the finger
+       is stationary at a deflected position. */
+    function pump() {
+      setMove(mvx, mvy);
+      requestAnimationFrame(pump);
+    }
+    requestAnimationFrame(pump);
+  })();
 </script>
 {{{ SCRIPT }}}
 </body>

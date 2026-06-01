@@ -34,31 +34,47 @@ static void player_on_update(Entity *e, World *w, float dt) {
     (void)w;
     Camera *cam = renderer_camera();
 
-    /* Movement is relative to the camera yaw so WASD is screen-space. */
+    /* Movement is relative to the camera yaw so input is screen-space. */
     float cy = cosf(cam->yaw), sy = sinf(cam->yaw);
     float speed = PLAYER_MOVE_SPEED;
     if (input_is_down(SDL_SCANCODE_LSHIFT)) speed *= PLAYER_RUN_MULT;
 
-    float mx = 0.0f, mz = 0.0f;
-    if (input_is_down(SDL_SCANCODE_W)) { mx += sy;  mz += -cy; }
-    if (input_is_down(SDL_SCANCODE_S)) { mx += -sy; mz += cy;  }
-    if (input_is_down(SDL_SCANCODE_A)) { mx += -cy; mz += -sy; }
-    if (input_is_down(SDL_SCANCODE_D)) { mx += cy;  mz += sy;  }
+    /* Keyboard contributes unit steps on a screen-space (right, forward) basis;
+       the virtual joystick contributes an analog (right, forward) vector. We
+       sum them, then the resulting magnitude (capped at 1) scales speed -- so a
+       half-pushed stick walks and a full push runs, while WASD stays digital. */
+    float ix = 0.0f, iy = 0.0f;   /* +ix = right, +iy = forward */
+    if (input_is_down(SDL_SCANCODE_W)) iy += 1.0f;
+    if (input_is_down(SDL_SCANCODE_S)) iy -= 1.0f;
+    if (input_is_down(SDL_SCANCODE_A)) ix -= 1.0f;
+    if (input_is_down(SDL_SCANCODE_D)) ix += 1.0f;
+    float vjx, vjy;
+    input_get_virtual_move(&vjx, &vjy);
+    ix += vjx; iy += vjy;
+
+    float in_mag = sqrtf(ix * ix + iy * iy);
+    if (in_mag > 1.0f) { ix /= in_mag; iy /= in_mag; in_mag = 1.0f; }
+
+    /* Map (right, forward) screen-space input onto world XZ via camera yaw. */
+    float mx = ix * cy + iy * sy;
+    float mz = ix * sy - iy * cy;
 
     float len = sqrtf(mx * mx + mz * mz);
     if (len > 0.0001f) {
-        mx /= len; mz /= len;
-        e->vx = mx * speed;
-        e->vz = mz * speed;
+        float dirx = mx / len, dirz = mz / len;
+        e->vx = dirx * speed * in_mag;
+        e->vz = dirz * speed * in_mag;
         /* Face direction of travel. */
-        e->ry = atan2f(mx, mz);
+        e->ry = atan2f(dirx, dirz);
     } else {
         e->vx = 0.0f;
         e->vz = 0.0f;
     }
 
-    /* Jump (only when grounded). Use just_pressed so holding doesn't auto-bunny-hop. */
-    if (e->on_ground && input_just_pressed(SDL_SCANCODE_SPACE)) {
+    /* Jump (only when grounded). Keyboard SPACE edge OR a touch jump tap.
+       just_pressed / take_jump prevent holding from auto-bunny-hopping. */
+    int jump_pressed = input_just_pressed(SDL_SCANCODE_SPACE) || input_virtual_take_jump();
+    if (e->on_ground && jump_pressed) {
         e->vy = PLAYER_JUMP_VEL;
         e->on_ground = 0;
     }

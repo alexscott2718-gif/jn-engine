@@ -9,4 +9,14 @@ int  input_just_pressed(SDL_Scancode code);
 void input_update(void);
 void input_destroy(void);
 
+/* Virtual analog input, driven by on-screen touch controls (web). The move
+   axis is camera-relative screen space: x = +right, y = +forward (up on the
+   joystick), each in [-1, 1]; magnitude scales speed. jump is edge-triggered
+   and consumed by input_virtual_take_jump(). On native these stay zero unless
+   set, so keyboard remains the only input. */
+void  input_set_virtual_move(float x, float y);  /* JS: each frame from stick */
+void  input_get_virtual_move(float *x, float *y);
+void  input_press_virtual_jump(void);            /* JS: jump button tap */
+int   input_virtual_take_jump(void);             /* behavior: consume the tap */
+
 #endif

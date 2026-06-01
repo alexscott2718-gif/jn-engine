@@ -2,10 +2,20 @@
 #include <stdio.h>
 #include <string.h>
 
+#ifdef __EMSCRIPTEN__
+#include <emscripten.h>
+#else
+#define EMSCRIPTEN_KEEPALIVE
+#endif
+
 static const Uint8 *keys_current = NULL;
 static Uint8 keys_previous[SDL_NUM_SCANCODES];
 static int num_keys = 0;
 static int input_initialized = 0;
+
+/* Virtual touch input state. */
+static float g_vmove_x = 0.0f, g_vmove_y = 0.0f;
+static int   g_vjump_pending = 0;
 
 int input_init(void) {
     keys_current = SDL_GetKeyboardState(&num_keys);
@@ -39,4 +49,31 @@ void input_destroy(void) {
     if (!input_initialized) return;
     input_initialized = 0;
     printf("Input subsystem destroyed\n");
+}
+
+/* --- Virtual touch input (exported to JS via EMSCRIPTEN_KEEPALIVE) --- */
+
+EMSCRIPTEN_KEEPALIVE
+void input_set_virtual_move(float x, float y) {
+    /* Clamp to the unit disc so diagonal stick throws don't exceed full speed. */
+    float m2 = x * x + y * y;
+    if (m2 > 1.0f) { float inv = 1.0f / SDL_sqrtf(m2); x *= inv; y *= inv; }
+    g_vmove_x = x;
+    g_vmove_y = y;
+}
+
+void input_get_virtual_move(float *x, float *y) {
+    if (x) *x = g_vmove_x;
+    if (y) *y = g_vmove_y;
+}
+
+EMSCRIPTEN_KEEPALIVE
+void input_press_virtual_jump(void) {
+    g_vjump_pending = 1;
+}
+
+int input_virtual_take_jump(void) {
+    int j = g_vjump_pending;
+    g_vjump_pending = 0;
+    return j;
 }
