@@ -140,7 +140,22 @@
     };
   })();
 
+  /* Content-hash suffix for the wasm/data assets. deploy_wasm.sh rewrites the
+     literal __JN_ASSET_VER__ to ".<hash>" so the served files are
+     jnengine.<hash>.wasm / jnengine.<hash>.data. These are cached immutable by
+     fixed... no longer fixed: the hash changes every deploy, so a new build
+     gets fresh URLs and can never pair new JS glue with a stale cached wasm
+     (the ASM_CONSTS-mismatch black screen). Empty string in the dev tree
+     (running `make web` locally) keeps the plain jnengine.wasm/.data names. */
+  var JN_ASSET_VER = "__JN_ASSET_VER__";
+  if (JN_ASSET_VER.indexOf("JN_ASSET_VER") !== -1) JN_ASSET_VER = "";
+
   var Module = {
+    locateFile: function (path) {
+      if (JN_ASSET_VER && (path === 'jnengine.wasm' || path === 'jnengine.data'))
+        return path.replace(/\.(wasm|data)$/, JN_ASSET_VER + '.$1');
+      return path;
+    },
     canvas: (function () {
       canvasEl.addEventListener('webglcontextlost', function (e) {
         alert('WebGL context lost — reload the page.'); e.preventDefault();
