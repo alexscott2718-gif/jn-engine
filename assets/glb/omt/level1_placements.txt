@@ -51,7 +51,6 @@ houseSteps	assets/glb/omt/houseSteps.glb	14526.6055	240.7334	2102.9595
 2D_Trees_04	assets/glb/omt/2D_Trees_04.glb	607.7497	1138.8821	5867.6733
 2D_Trees01	assets/glb/omt/2D_Trees01.glb	11660.7363	926.6028	13109.4199
 fence03	assets/glb/omt/fence03.glb	12159.3164	152.0735	215.7638
-Object11	assets/glb/omt/Object11.glb	5476.6436	-0.0462	14222.0293
 2D_Trees_06	assets/glb/omt/2D_Trees_06.glb	4923.1040	928.0411	-4648.0571
 bushes15	assets/glb/omt/bushes15.glb	12194.3418	-90.0949	-8110.8340
 2D_Trees03	assets/glb/omt/2D_Trees03.glb	9956.6406	928.0256	-9266.6006

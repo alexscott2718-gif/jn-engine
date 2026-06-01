@@ -863,26 +863,19 @@ int main(void) {
     }
 
     /* Ground: a real level (placements present) supplies its own ground/street/
-       terrain and water meshes (GROUND.ASE, ncwater*, etc.) at their authored
-       world positions -- the faithful representation. We do NOT lay a synthetic
-       ground over them (an earlier heightfield was a stand-in that buried the
-       real geometry, including the stream). The synthetic flat floor is kept
-       ONLY for empty test scenes with no level geometry. */
+       terrain and water meshes via the glTF GROUND mesh (roads, lawn, stream)
+       at their authored world positions -- the faithful representation. We do
+       NOT lay a synthetic ground over them.
+
+       Historically native Level 1 laid a ground.c flat green tile here as a
+       Phase-2 stand-in (when the OMT GROUND mesh resolved no usable texture).
+       Post-breakthrough the glTF GROUND mesh is correct, so that tile is now
+       redundant AND harmful: it floats a flat green sheet over the real road
+       and stream. Removed. The synthetic floor is kept ONLY for empty test
+       scenes with no level geometry. */
     if (world.placement_count == 0 && !capture_scene_ready) {
         unsigned int ground_tex = tex_cache_get(CANON_GROUND_TEXTURE);
         ground_init(ground_tex, 20000.0f, 20000.0f,
-                    jim ? jim->x : 0.0f, jim ? jim->z : 0.0f,
-                    80.0f, 0.0f);
-    } else if (native_level1) {
-        /* Phase 2 of docs/native_vs_capture_8881_plan.md: the capture's
-           dominant ground texture (tex_05e10d68, 133 draws at world
-           translation (15,-545,-26)) corresponds to a large terrain mesh
-           that has no single counterpart in level1.omt placements. Use the
-           ground.c flat tile (y_amplitude=0) so the bottom of every native
-           Level 1 view matches the captured grass tint. */
-        unsigned int grass_tex = tex_cache_get(
-            "assets/native/level1_capture_overrides/GROUND_mat0_grass.png");
-        ground_init(grass_tex, 20000.0f, 20000.0f,
                     jim ? jim->x : 0.0f, jim ? jim->z : 0.0f,
                     80.0f, 0.0f);
     }
@@ -1117,6 +1110,9 @@ int main(void) {
         } else {
         renderer_begin_frame(w.width, w.height);
 
+        /* No-op when ground_init was skipped (placement scenes): the glTF
+           GROUND mesh supplies the real terrain. Only empty test scenes
+           initialize the synthetic floor. */
         ground_draw(world.ground_y);
 
         unsigned int box_vao = world_box_vao();
