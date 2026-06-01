@@ -216,6 +216,9 @@ int gltf_load(AseModel *m, const char *path) {
     m->vertex_count = cpu.vertex_count;
     m->frame_count = 1;
     m->framespeed = 0.0f;
+    m->frames = (float*)malloc((size_t)cpu.vertex_count * 8u * sizeof(float));
+    if (m->frames)
+        memcpy(m->frames, s_vbuf, (size_t)cpu.vertex_count * 8u * sizeof(float));
 
     m->material_count = cpu.group_count;
     for (int k = 0; k < cpu.group_count; k++) {

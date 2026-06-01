@@ -38,6 +38,9 @@ static void bind_shared_jimmy_texture(AseModel *m) {
     for (int k = 0; k < m->material_count; k++) {
         if (!m->materials[k].texture_id)
             m->materials[k].texture_id = g_shared_tex;
+        m->materials[k].diffuse[0] = 1.0f;
+        m->materials[k].diffuse[1] = 1.0f;
+        m->materials[k].diffuse[2] = 1.0f;
     }
 }
 

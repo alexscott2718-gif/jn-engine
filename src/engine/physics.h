@@ -10,7 +10,6 @@
 /* Integrate one fixed step:
    - apply gravity + integrate velocity for entities flagged ENTITY_FLAG_PHYSICS
    - resolve AABB collisions against entities flagged ENTITY_FLAG_SOLID
-   - clamp to world->ground_y as a floor fallback
    - fire on_trigger for entities flagged ENTITY_FLAG_TRIGGER that the player overlaps
 */
 void physics_step(World *w, float dt);
