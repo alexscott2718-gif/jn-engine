@@ -42,3 +42,4 @@ instrument/proxy/com_wrappers_gen.inc
 # Local environment file -- host IPs, tokens, VNC passwords live here.
 .env
 .env.local
+assets/glb/omt/gltf_manifest.json

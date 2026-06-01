@@ -75,16 +75,36 @@ OMT → [toolkit: the ONE correct parser] → per-mesh .glb → cgltf loader →
   when the engine actually loads a .glb (Phase C/D). The upload path mirrors
   `tex_loader` (proven), minus the V-flip.
 
-### Phase C — swap & retire (the payoff)
-- `asset_cache` loads `.glb` instead of `.ASE`.
-- Parity check: render keyframe 8881 + regenerate the catalog; screenshot-diff
-  against current.
-- Once parity holds, **retire `texture_overrides.c` + the Phase 2–5 sidecar
-  overrides** — they only existed to patch wrong resolution, now correct at
-  source.
-- ⚠️ **HOLD:** `billboard_overrides` and `placements` are **out of scope until
-  the user checks in.** Do not modify or retire them in this pass — flag and
-  stop for a decision when Phase C reaches them.
+### Phase C — swap & retire (the payoff)  ✅ DONE (2026-05-31)
+- `asset_cache.c` dispatches by extension: `.glb` → `gltf_load`, else `ase_load`.
+- `main.c` defaults Level-1 static placements to the `.glb` set
+  (`JN_OMT_PLACEMENTS` overrides for A/B; legacy ASE list still works).
+- **`texture_overrides` retired and deleted.** The 30-entry capture override
+  layer was a patch for the *old broken* OMT resolution. Per-mesh audit:
+  12 were dead (billboarded meshes), 4 matched the OMT canvas, the rest
+  resolved correctly from the breakthrough OMT chain or are untextured
+  collision meshes. Dropping all 30 changed keyframe-8881 by **0.69%** (only
+  GROUND's grass shifting from baked-override to its OMT canvas — visually
+  fine). Deleted: `src/engine/assets/texture_overrides.{c,h}`,
+  `assets/native/level1_texture_overrides.txt`,
+  `assets/native/level1_capture_overrides/` (14 PNGs).
+- **Placement bug found + fixed.** The header-based table assigns each mesh a
+  different (geometry, center) pair than the old heuristic export. Initially I
+  built `.glb` placements by copying the *ASE* centers → correct geometry at the
+  wrong location (empty/garbage renders). Fix: `gltf_export.export_omt` now
+  emits `<stem>_placements.txt` from each mesh's own baked `omt_center`, so
+  geometry+center are always a consistent pair.
+- **`gltf_export` escape hatch (kept, unused):** optional `overrides_path` bakes
+  a capture texture-override TSV into matching slots. Not used in the canonical
+  export (we dropped overrides), but retained for any future capture-only mesh.
+- ✅ **HOLD respected — `billboard_overrides` KEPT (tested, not retired).**
+  A/B at keyframe 8881: with billboards off, the `.glb` tree meshes render as
+  bare trunks with **no foliage** (15.7% delta). The billboard quads supply the
+  leaf canopy the trunk geometry lacks — this is the original game's
+  tree-rendering technique, not a resolution patch. Anchor reads the corrected
+  glb `trunk->max[1]`; canopies still land at crown height. Left untouched.
+- `placements` mechanism itself (the loader + format) is unchanged; only the
+  *source file* moved to the glb set + auto-emission.
 
 ### Phase D — QA
 - External glTF viewer (upright + textured confirms baked conventions).

@@ -17,7 +17,6 @@
 #include "../engine/assets/tex_loader.h"
 #include "../engine/assets/asset_cache.h"
 #include "../engine/assets/placement_loader.h"
-#include "../engine/assets/texture_overrides.h"
 #include "../engine/assets/billboard_overrides.h"
 #include "entities.h"
 #include "entity_visual.h"
@@ -40,6 +39,14 @@ static int env_enabled_default(const char *name, int default_value) {
     const char *s = getenv(name);
     if (!s || !s[0]) return default_value;
     return strcmp(s, "0") != 0;
+}
+
+/* Level-1 static OMT placements. Default to the self-contained .glb set
+   (Phase C: glTF replaces .ASE; textures are embedded, no override pass).
+   JN_OMT_PLACEMENTS overrides the path (e.g. the legacy ASE list for A/B). */
+static const char *omt_placements_path(void) {
+    const char *p = getenv("JN_OMT_PLACEMENTS");
+    return (p && p[0]) ? p : "assets/glb/omt/level1_placements.txt";
 }
 
 static int load_camera_descriptor_file(const char *path, int *screen_w, int *screen_h) {
@@ -530,20 +537,12 @@ int main(void) {
                 PHASE1_SKY_TOP_R, PHASE1_SKY_TOP_G, PHASE1_SKY_TOP_B,
                 PHASE1_SCENE_TINT_R, PHASE1_SCENE_TINT_G, PHASE1_SCENE_TINT_B);
 
-        /* Phase 2: ground/water texture overrides for slots whose
-           level1.omt canvas chain resolves to nothing. Provenance and
-           per-entry rationale live in
-           assets/native/level1_texture_overrides.json.
-           JN_TEXTURE_OVERRIDES selects an alternate TSV (e.g. the
-           capture-derived ground-truth file) for A/B comparison. */
-        {
-            const char *ovr = getenv("JN_TEXTURE_OVERRIDES");
-            texture_overrides_load(ovr && *ovr ? ovr
-                : "assets/native/level1_texture_overrides.txt");
-        }
-        fprintf(stderr,
-                "[native_level1] phase 2 texture overrides loaded: %d\n",
-                texture_overrides_count());
+        /* Phase C: the Phase 2/3/5b capture texture-override layer is retired.
+           The glTF meshes carry breakthrough-correct OMT-canvas textures, so
+           the 30-entry override set is redundant (the 4 that matched OMT, the
+           12 dead billboards, and the visible-mesh set all resolve from OMT;
+           the BLOCK* collision meshes correctly stay untextured/skipped).
+           See docs/gltf_export_plan.md. */
 
         /* Phase 5: replace per-mesh native tree geometry with the camera-
            facing quad the original game draws. Sizes + textures come from
@@ -700,7 +699,7 @@ int main(void) {
     }
     if (!capture_scene_ready) {
         /* Static city geometry: OMT chunk centers from level1.omt → world placements. */
-        placements_load(&world, "assets/ase/omt/level1_placements.txt");
+        placements_load(&world, omt_placements_path());
         {
             int missing = 0;
             for (int i = 0; i < world.placement_count; i++)
@@ -983,8 +982,7 @@ int main(void) {
                            processed. */
                         if (strncasecmp(level_buf, "level1", 6) == 0 &&
                             !capture_scene_ready)
-                            placements_load(&world,
-                                            "assets/ase/omt/level1_placements.txt");
+                            placements_load(&world, omt_placements_path());
                         entity_bind_vtables(&world);
                         /* Player textures + models + ground stay live across levels. */
                         if (need_native_jim_visual) {
@@ -1215,12 +1213,10 @@ int main(void) {
             }
             AseModel *pm = model_cache_get(pl->ase_path);
             if (!pm) continue;
-            if (native_level1) {
-                /* Phase 2: apply capture-derived texture overrides for
-                   meshes whose OMT canvas chain didn't resolve. No-op for
-                   meshes without an override entry. */
-                texture_overrides_apply(pm, pl->name);
-            }
+            /* Phase C: capture-derived texture overrides retired. The glTF
+               meshes carry breakthrough-correct OMT-canvas textures, so the
+               30-entry override layer is redundant (verified: keyframe 8881
+               changes <1% without it). See docs/gltf_export_plan.md. */
             /* Faithfulness (audit D1/D2): the original game renders ZERO
                untextured geometry. A placement whose OMT material resolved no
                texture is either collision/blocking (BLOCKING_*, GROUND base
@@ -1230,6 +1226,14 @@ int main(void) {
                debug_flat for audit, but the resulting huge gray BLOCKING_06
                (radius 12697) and SCHOOL slab were dominating the view; the
                coverage manifest tracks them, the renderer no longer needs to. */
+            if (getenv("JN_DEBUG_DRAW") && pi < 6)
+                fprintf(stderr, "[draw] %s mats=%d m0.tex=%u m.tex=%u hastex=%d "
+                        "bbox=(%.0f,%.0f,%.0f)-(%.0f,%.0f,%.0f) at(%.0f,%.0f)\n",
+                        pl->name, pm->material_count,
+                        pm->material_count>0?pm->materials[0].texture_id:0,
+                        pm->texture_id, model_has_texture(pm),
+                        pm->min[0],pm->min[1],pm->min[2],
+                        pm->max[0],pm->max[1],pm->max[2], pl->x, pl->z);
             if (!model_has_texture(pm)) continue;
             float draw_z = native_level1 ? -pl->z : pl->z;
             renderer_draw_model(pm, 0, pl->x, 0.0f, draw_z, 0.0f, 1.0f);

@@ -1,11 +1,22 @@
 #include "asset_cache.h"
 #include "tex_loader.h"
 #include "ase_loader.h"
+#include "gltf_loader.h"
 #include <stdlib.h>
 #include <string.h>
+#include <strings.h>
 #include <stdio.h>
 #include <unistd.h>
 #include <ctype.h>
+
+/* Dispatch by file extension: .glb -> self-contained glTF (textures embedded,
+   texture_id populated by the loader); anything else -> legacy ASE text. */
+static int load_model_by_ext(AseModel *m, const char *path) {
+    size_t n = strlen(path);
+    if (n >= 4 && strcasecmp(path + n - 4, ".glb") == 0)
+        return gltf_load(m, path);
+    return ase_load(m, path);
+}
 
 /* Phase 8: level1.omt contributes 194 static placements on top of ~15 entity
    models, so MAX_MODEL must be > ~210. Bump both caches together. */
@@ -119,7 +130,7 @@ AseModel *model_cache_get(const char *path) {
             g_model[i].used = 1;
             g_model[i].gen  = g_gen;
             snprintf(g_model[i].path, PATH_LEN, "%s", path);
-            g_model[i].loaded = ase_load(&g_model[i].model, path);
+            g_model[i].loaded = load_model_by_ext(&g_model[i].model, path);
             if (!g_model[i].loaded) {
                 fprintf(stderr, "model_cache: failed to load %s\n", path);
                 return NULL;
