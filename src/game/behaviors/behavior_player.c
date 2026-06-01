@@ -97,6 +97,7 @@ static void player_on_update(Entity *e, World *w, float dt) {
         anim = PA_IDLE;
     }
     e->user_flag = (int)anim;
+    player_anim_advance(anim, dt);
 }
 
 const EntityVTable vt_player = {

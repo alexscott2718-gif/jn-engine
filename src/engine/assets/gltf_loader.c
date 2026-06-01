@@ -213,6 +213,9 @@ int gltf_load(AseModel *m, const char *path) {
     glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 8*sizeof(float), (void*)(5*sizeof(float)));
     glBindVertexArray(0);
     m->index_count = cpu.vertex_count;
+    m->vertex_count = cpu.vertex_count;
+    m->frame_count = 1;
+    m->framespeed = 0.0f;
 
     m->material_count = cpu.group_count;
     for (int k = 0; k < cpu.group_count; k++) {

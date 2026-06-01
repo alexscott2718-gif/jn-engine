@@ -672,6 +672,39 @@ void renderer_draw_model_matrix(const AseModel *m, unsigned int texture_id_overr
     glBindTexture(GL_TEXTURE_2D, 0);
 }
 
+static void renderer_upload_model_anim_frame(const AseModel *m,
+                                             int frame_a, int frame_b, float lerp) {
+    if (!m || !m->frames || !m->anim_scratch || m->frame_count <= 1 ||
+        m->vertex_count <= 0 || !m->vbo) {
+        return;
+    }
+    if (frame_a < 0) frame_a = 0;
+    if (frame_b < 0) frame_b = 0;
+    frame_a %= m->frame_count;
+    frame_b %= m->frame_count;
+    if (lerp < 0.0f) lerp = 0.0f;
+    if (lerp > 1.0f) lerp = 1.0f;
+
+    size_t frame_stride = (size_t)m->vertex_count * 8u;
+    const float *a = m->frames + (size_t)frame_a * frame_stride;
+    const float *b = m->frames + (size_t)frame_b * frame_stride;
+    float *dst = ((AseModel*)m)->anim_scratch;
+    for (size_t i = 0; i < frame_stride; i++) {
+        dst[i] = a[i] + (b[i] - a[i]) * lerp;
+    }
+
+    glBindBuffer(GL_ARRAY_BUFFER, m->vbo);
+    glBufferData(GL_ARRAY_BUFFER, frame_stride * sizeof(float), dst, GL_STATIC_DRAW);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+}
+
+void renderer_draw_model_matrix_anim(const AseModel *m, unsigned int texture_id_override,
+                                     const float model[16],
+                                     int frame_a, int frame_b, float lerp) {
+    renderer_upload_model_anim_frame(m, frame_a, frame_b, lerp);
+    renderer_draw_model_matrix(m, texture_id_override, model);
+}
+
 void renderer_draw_model(const AseModel *m, unsigned int texture_id_override,
                          float tx, float ty, float tz, float yaw, float scale) {
     Mat4 model;
@@ -682,6 +715,19 @@ void renderer_draw_model(const AseModel *m, unsigned int texture_id_override,
     model[8]= s;  model[9]=0;     model[10]=c;     model[11]=0;
     model[12]=tx; model[13]=ty;   model[14]=tz;    model[15]=1;
     renderer_draw_model_matrix(m, texture_id_override, model);
+}
+
+void renderer_draw_model_anim(const AseModel *m, unsigned int texture_id_override,
+                              float tx, float ty, float tz, float yaw, float scale,
+                              int frame_a, int frame_b, float lerp) {
+    Mat4 model;
+    float c = cosf(yaw) * scale, s = sinf(yaw) * scale;
+    model[0]= c;  model[1]=0;     model[2]=-s;     model[3]=0;
+    model[4]= 0;  model[5]=scale; model[6]= 0;     model[7]=0;
+    model[8]= s;  model[9]=0;     model[10]=c;     model[11]=0;
+    model[12]=tx; model[13]=ty;   model[14]=tz;    model[15]=1;
+    renderer_draw_model_matrix_anim(m, texture_id_override, model,
+                                    frame_a, frame_b, lerp);
 }
 
 void renderer_draw_box(unsigned int vao, int index_count,

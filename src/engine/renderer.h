@@ -25,6 +25,12 @@ void renderer_draw_model(const AseModel *m, unsigned int texture_id_override,
                          float tx, float ty, float tz, float yaw, float scale);
 void renderer_draw_model_matrix(const AseModel *m, unsigned int texture_id_override,
                                 const float model[16]);
+void renderer_draw_model_anim(const AseModel *m, unsigned int texture_id_override,
+                              float tx, float ty, float tz, float yaw, float scale,
+                              int frame_a, int frame_b, float lerp);
+void renderer_draw_model_matrix_anim(const AseModel *m, unsigned int texture_id_override,
+                                     const float model[16],
+                                     int frame_a, int frame_b, float lerp);
 void renderer_draw_box(unsigned int vao, int index_count,
                        float tx, float ty, float tz, float scale,
                        float r, float g, float b);

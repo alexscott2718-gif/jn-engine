@@ -7,13 +7,12 @@
 
 #define MAX_VERTS  65536
 #define MAX_FACES  65536
+#define MAX_FRAMES 128
 
 typedef struct { float x, y, z; } V3;
 typedef struct { float u, v; }    V2;
 typedef struct { int a, b, c; }   Tri;
 
-static V3  s_pos[MAX_VERTS];
-static V3  s_vnorm[MAX_VERTS];   /* per-vertex normals keyed by position index */
 static V2  s_uv[MAX_VERTS];
 static Tri s_faces[MAX_FACES];
 static Tri s_tfaces[MAX_FACES];
@@ -29,6 +28,15 @@ static int   s_mat_count = 0;
 /* Output: interleaved pos(3) + uv(2) + normal(3) = 8 floats per vertex */
 static float        s_vbuf[MAX_FACES * 3 * 8];
 static unsigned int s_ibuf[MAX_FACES * 3];
+
+static void free_temp_frames(V3 **pos, V3 **norm, int count) {
+    for (int i = 0; i < count; i++) {
+        free(pos[i]);
+        free(norm[i]);
+        pos[i] = NULL;
+        norm[i] = NULL;
+    }
+}
 
 static char *skip_ws(char *p) {
     while (*p == ' ' || *p == '\t') p++;
@@ -80,8 +88,33 @@ int ase_load(AseModel *m, const char *path) {
     FILE *f = fopen(path, "r");
     if (!f) { fprintf(stderr, "ase_load: cannot open %s\n", path); return 0; }
 
+    int has_mesh_animation = 0;
+    float scene_framespeed = 10.0f;
+    char line[512];
+    while (fgets(line, sizeof(line), f)) {
+        char *p = skip_ws(line);
+        char *tok = next_tok(&p);
+        if (!tok) continue;
+        if (strcmp(tok, "*MESH_ANIMATION") == 0) {
+            has_mesh_animation = 1;
+        } else if (strcmp(tok, "*SCENE_FRAMESPEED") == 0) {
+            char *fps = next_tok(&p);
+            if (fps) scene_framespeed = strtof(fps, NULL);
+        }
+    }
+    rewind(f);
+
+    V3 *frame_pos[MAX_FRAMES] = {0};
+    V3 *frame_norm[MAX_FRAMES] = {0};
+    int frame_pos_count[MAX_FRAMES] = {0};
+    int frame_have_normals[MAX_FRAMES] = {0};
+    int frame_count = 0;
+    float *all_frames = NULL;
+
     int  n_pos=0, n_uv=0, n_face=0, n_tface=0;
     int  in_vlist=0, in_flist=0, in_tvert=0, in_tface=0, in_normals=0;
+    int  in_mesh=0, mesh_depth=0, cur_frame=-1;
+    int  in_mesh_anim=0, mesh_anim_depth=0;
     int  in_mlist=0;            /* inside *MATERIAL_LIST { ... } */
     int  mat_depth=0;           /* brace depth inside MATERIAL_LIST (1 at list level, 2 inside a *MATERIAL) */
     int  cur_mat_idx = -1;      /* current submaterial being parsed */
@@ -99,7 +132,6 @@ int ase_load(AseModel *m, const char *path) {
 
     float bmin[3]={ 1e30f, 1e30f, 1e30f}, bmax[3]={-1e30f,-1e30f,-1e30f};
 
-    char line[512];
     while (fgets(line, sizeof(line), f)) {
         /* Count braces in the raw line before tokenization mangles it. */
         int n_open=0, n_close=0;
@@ -120,14 +152,49 @@ int ase_load(AseModel *m, const char *path) {
             if (mat_depth == 0) in_mlist = 0;
         }
 
-        if (!tok) continue;
+        if (!tok) {
+            goto update_depths;
+        }
+
+        if (strcmp(tok, "*SCENE_FRAMESPEED") == 0) {
+            char *fps = next_tok(&p);
+            if (fps) scene_framespeed = strtof(fps, NULL);
+        }
+
+        if (strcmp(tok, "*MESH_ANIMATION") == 0) {
+            in_mesh_anim = 1;
+            mesh_anim_depth = 0;
+            goto update_depths;
+        }
+
+        if (!in_mesh && strcmp(tok, "*MESH") == 0 &&
+            (!has_mesh_animation || in_mesh_anim)) {
+            if (frame_count >= MAX_FRAMES) {
+                fprintf(stderr, "ase_load: %s has too many animation frames (max %d)\n",
+                        path, MAX_FRAMES);
+                goto fail;
+            }
+            cur_frame = frame_count++;
+            frame_pos[cur_frame] = (V3*)calloc(MAX_VERTS, sizeof(V3));
+            frame_norm[cur_frame] = (V3*)calloc(MAX_VERTS, sizeof(V3));
+            if (!frame_pos[cur_frame] || !frame_norm[cur_frame]) {
+                fprintf(stderr, "ase_load: out of memory loading %s\n", path);
+                goto fail;
+            }
+            in_mesh = 1;
+            mesh_depth = 0;
+            in_vlist = in_flist = in_tvert = in_tface = in_normals = 0;
+            cur_face_ni = -1;
+            cur_vnorm_count = 0;
+            goto update_depths;
+        }
 
         /* Section entry/exit */
-        if (strcmp(tok, "*MESH_VERTEX_LIST")  == 0) { in_vlist=1; in_flist=in_tvert=in_tface=in_normals=0; }
-        else if (strcmp(tok, "*MESH_FACE_LIST")    == 0) { in_flist=1; in_vlist=in_tvert=in_tface=in_normals=0; }
-        else if (strcmp(tok, "*MESH_TVERTLIST")    == 0) { in_tvert=1; in_vlist=in_flist=in_tface=in_normals=0; }
-        else if (strcmp(tok, "*MESH_TFACELIST")    == 0) { in_tface=1; in_vlist=in_flist=in_tvert=in_normals=0; }
-        else if (strcmp(tok, "*MESH_NORMALS")      == 0) { in_normals=1; in_vlist=in_flist=in_tvert=in_tface=0; cur_face_ni=-1; }
+        if (in_mesh && strcmp(tok, "*MESH_VERTEX_LIST")  == 0) { in_vlist=1; in_flist=in_tvert=in_tface=in_normals=0; }
+        else if (in_mesh && strcmp(tok, "*MESH_FACE_LIST")    == 0) { in_flist=1; in_vlist=in_tvert=in_tface=in_normals=0; }
+        else if (in_mesh && strcmp(tok, "*MESH_TVERTLIST")    == 0) { in_tvert=1; in_vlist=in_flist=in_tface=in_normals=0; }
+        else if (in_mesh && strcmp(tok, "*MESH_TFACELIST")    == 0) { in_tface=1; in_vlist=in_flist=in_tvert=in_normals=0; }
+        else if (in_mesh && strcmp(tok, "*MESH_NORMALS")      == 0) { in_normals=1; in_vlist=in_flist=in_tvert=in_tface=0; cur_face_ni=-1; }
         else if (strcmp(tok, "*MATERIAL_LIST")     == 0) {
             in_mlist = 1;
             mat_depth = n_open - n_close;   /* opens to 1 in normal ASE files */
@@ -179,14 +246,23 @@ int ase_load(AseModel *m, const char *path) {
         }
 
         /* Vertices */
-        else if (in_vlist && strcmp(tok, "*MESH_VERTEX") == 0 && n_pos < MAX_VERTS) {
-            next_tok(&p);
-            float x=strtof(next_tok(&p),NULL), y=strtof(next_tok(&p),NULL), z=strtof(next_tok(&p),NULL);
-            s_pos[n_pos++] = (V3){x, z, -y}; /* Max → GL coord */
+        else if (in_mesh && in_vlist && strcmp(tok, "*MESH_VERTEX") == 0 && cur_frame >= 0) {
+            char *is = next_tok(&p);
+            char *xs = next_tok(&p), *ys = next_tok(&p), *zs = next_tok(&p);
+            if (is && xs && ys && zs) {
+                int idx = atoi(is);
+                if (idx >= 0 && idx < MAX_VERTS) {
+                    float x=strtof(xs,NULL), y=strtof(ys,NULL), z=strtof(zs,NULL);
+                    frame_pos[cur_frame][idx] = (V3){x, z, -y}; /* Max → GL coord */
+                    if (idx + 1 > frame_pos_count[cur_frame])
+                        frame_pos_count[cur_frame] = idx + 1;
+                }
+            }
         }
 
         /* Faces */
-        else if (in_flist && strcmp(tok, "*MESH_FACE") == 0 && n_face < MAX_FACES) {
+        else if (in_mesh && in_flist && cur_frame == 0 &&
+                 strcmp(tok, "*MESH_FACE") == 0 && n_face < MAX_FACES) {
             next_tok(&p);
             int a=0,b=0,c=0,mtlid=0;
             char *lbl;
@@ -214,44 +290,80 @@ int ase_load(AseModel *m, const char *path) {
         /* UV verts. ASE/3DSMax stores V bottom-up (v=0 = bottom of texture);
            tex_loader loads textures bottom-up via stbi vertical flip, so V is
            passed through unmodified — the two conventions already agree. */
-        else if (in_tvert && strcmp(tok,"*MESH_TVERT")==0 && n_uv < MAX_VERTS) {
+        else if (in_mesh && in_tvert && cur_frame == 0 &&
+                 strcmp(tok,"*MESH_TVERT")==0 && n_uv < MAX_VERTS) {
             next_tok(&p);
             float u=strtof(next_tok(&p),NULL), v=strtof(next_tok(&p),NULL);
             s_uv[n_uv++]=(V2){u, v};
         }
 
         /* UV faces */
-        else if (in_tface && strcmp(tok,"*MESH_TFACE")==0 && n_tface < MAX_FACES) {
+        else if (in_mesh && in_tface && cur_frame == 0 &&
+                 strcmp(tok,"*MESH_TFACE")==0 && n_tface < MAX_FACES) {
             next_tok(&p);
             int a=atoi(next_tok(&p)),b=atoi(next_tok(&p)),c=atoi(next_tok(&p));
             s_tfaces[n_tface++]=(Tri){a,b,c};
         }
 
         /* Normals */
-        else if (in_normals && strcmp(tok,"*MESH_FACENORMAL")==0) {
+        else if (in_mesh && in_normals && strcmp(tok,"*MESH_FACENORMAL")==0) {
             cur_face_ni = atoi(next_tok(&p));
             /* face normal - read and discard (we use per-vertex normals) */
             cur_vnorm_count = 0;
         }
-        else if (in_normals && strcmp(tok,"*MESH_VERTEXNORMAL")==0 && cur_face_ni >= 0 && cur_face_ni < MAX_FACES) {
+        else if (in_mesh && in_normals && cur_frame >= 0 &&
+                 strcmp(tok,"*MESH_VERTEXNORMAL")==0 && cur_face_ni >= 0 && cur_face_ni < MAX_FACES) {
             int vi = atoi(next_tok(&p));
             float nx=strtof(next_tok(&p),NULL), ny=strtof(next_tok(&p),NULL), nz=strtof(next_tok(&p),NULL);
             /* Convert normal: same coord swap as positions */
             V3 n = (V3){nx, nz, -ny};
             /* Map to vertex slot for this face corner */
             if (cur_vnorm_count < 3) {
-                s_face_vnorm[cur_face_ni][cur_vnorm_count] = vi;
+                if (cur_frame == 0)
+                    s_face_vnorm[cur_face_ni][cur_vnorm_count] = vi;
                 /* Store normal indexed by vertex position index */
-                if (vi < MAX_VERTS) s_vnorm[vi] = n;
+                if (vi >= 0 && vi < MAX_VERTS) {
+                    frame_norm[cur_frame][vi] = n;
+                    frame_have_normals[cur_frame] = 1;
+                }
                 cur_vnorm_count++;
+            }
+        }
+
+update_depths:
+        if (in_mesh) {
+            mesh_depth += n_open - n_close;
+            if (mesh_depth <= 0) {
+                in_mesh = 0;
+                mesh_depth = 0;
+                cur_frame = -1;
+                in_vlist = in_flist = in_tvert = in_tface = in_normals = 0;
+                cur_face_ni = -1;
+            }
+        }
+        if (in_mesh_anim) {
+            mesh_anim_depth += n_open - n_close;
+            if (mesh_anim_depth <= 0) {
+                in_mesh_anim = 0;
+                mesh_anim_depth = 0;
             }
         }
     }
     fclose(f);
+    f = NULL;
 
+    if (frame_count > 0) n_pos = frame_pos_count[0];
     if (n_pos==0 || n_face==0) {
         fprintf(stderr, "ase_load: no geometry in %s\n", path);
-        return 0;
+        goto fail;
+    }
+
+    for (int fr = 1; fr < frame_count; fr++) {
+        if (frame_pos_count[fr] != n_pos) {
+            fprintf(stderr, "ase_load: %s frame %d vertex count %d != frame0 %d\n",
+                    path, fr, frame_pos_count[fr], n_pos);
+            goto fail;
+        }
     }
 
     /* Reject meshes with out-of-range face indices. Some OMT exports (Phase 7
@@ -263,22 +375,22 @@ int ase_load(AseModel *m, const char *path) {
             fprintf(stderr, "ase_load: %s has corrupt face %d (%d,%d,%d) "
                             "vs n_pos=%d — skipping mesh\n",
                     path, fi, a, b, c, n_pos);
-            return 0;
+            goto fail;
         }
     }
 
     /* Fallback: compute flat face normals if no MESH_NORMALS block */
-    int have_normals = (s_vnorm[0].x != 0 || s_vnorm[0].y != 0 || s_vnorm[0].z != 0);
-    if (!have_normals) {
+    for (int fr = 0; fr < frame_count; fr++) {
+        if (frame_have_normals[fr]) continue;
         for (int fi=0; fi<n_face; fi++) {
-            V3 a=s_pos[s_faces[fi].a], b=s_pos[s_faces[fi].b], c=s_pos[s_faces[fi].c];
+            V3 a=frame_pos[fr][s_faces[fi].a], b=frame_pos[fr][s_faces[fi].b], c=frame_pos[fr][s_faces[fi].c];
             float ex=b.x-a.x, ey=b.y-a.y, ez=b.z-a.z;
             float fx=c.x-a.x, fy=c.y-a.y, fz=c.z-a.z;
             float nx=ey*fz-ez*fy, ny=ez*fx-ex*fz, nz=ex*fy-ey*fx;
             float len=sqrtf(nx*nx+ny*ny+nz*nz);
             if (len>0){nx/=len;ny/=len;nz/=len;}
             V3 fn=(V3){nx,ny,nz};
-            s_vnorm[s_faces[fi].a]=s_vnorm[s_faces[fi].b]=s_vnorm[s_faces[fi].c]=fn;
+            frame_norm[fr][s_faces[fi].a]=frame_norm[fr][s_faces[fi].b]=frame_norm[fr][s_faces[fi].c]=fn;
         }
     }
 
@@ -345,38 +457,54 @@ int ase_load(AseModel *m, const char *path) {
     /* Cursor per group (advances within its slice as we emit faces). */
     int  group_cursor[ASE_MAX_MATERIALS] = {0};
 
-    /* Emit vbuf/ibuf. For each face, write its 3 vertices at the slot dictated
-       by its group's slice: (group_face_off[g] + cursor[g]) × 3. */
-    for (int fi=0; fi<n_face; fi++) {
-        int g = group_of_face[fi];
-        int slot = (group_face_off[g] + group_cursor[g]) * 3;
-        group_cursor[g]++;
-
-        int vi[3]={s_faces[fi].a, s_faces[fi].b, s_faces[fi].c};
-        int ti[3]={0,0,0};
-        if (have_uvs){ti[0]=s_tfaces[fi].a;ti[1]=s_tfaces[fi].b;ti[2]=s_tfaces[fi].c;}
-
-        for (int k=0; k<3; k++) {
-            int base=(slot+k)*8;
-            V3 pos=s_pos[vi[k]];
-            V3 nrm=s_vnorm[vi[k]];
-            s_vbuf[base+0]=pos.x; s_vbuf[base+1]=pos.y; s_vbuf[base+2]=pos.z;
-            if (have_uvs && ti[k]<n_uv) {
-                s_vbuf[base+3]=s_uv[ti[k]].u; s_vbuf[base+4]=s_uv[ti[k]].v;
-            } else {
-                s_vbuf[base+3]=s_vbuf[base+4]=0.0f;
-            }
-            s_vbuf[base+5]=nrm.x; s_vbuf[base+6]=nrm.y; s_vbuf[base+7]=nrm.z;
-
-            for (int d=0;d<3;d++){
-                float val=((float*)&pos)[d];
-                if (val<bmin[d]) bmin[d]=val;
-                if (val>bmax[d]) bmax[d]=val;
-            }
-            s_ibuf[slot+k]=slot+k;
+    int out_v = n_face * 3;
+    if (frame_count > 1) {
+        size_t frame_floats = (size_t)frame_count * (size_t)out_v * 8u;
+        all_frames = (float*)malloc(frame_floats * sizeof(float));
+        if (!all_frames) {
+            fprintf(stderr, "ase_load: out of memory storing animation frames for %s\n", path);
+            goto fail;
         }
     }
-    int out_v = n_face * 3;
+
+    /* Emit static frame 0 plus optional per-frame interleaved buffers. For each
+       face, write its 3 vertices at the slot dictated by its material slice. */
+    for (int fr = 0; fr < frame_count; fr++) {
+        memset(group_cursor, 0, sizeof(group_cursor));
+        float *dst = (frame_count > 1) ? (all_frames + (size_t)fr * (size_t)out_v * 8u)
+                                       : s_vbuf;
+        for (int fi=0; fi<n_face; fi++) {
+            int g = group_of_face[fi];
+            int slot = (group_face_off[g] + group_cursor[g]) * 3;
+            group_cursor[g]++;
+
+            int vi[3]={s_faces[fi].a, s_faces[fi].b, s_faces[fi].c};
+            int ti[3]={0,0,0};
+            if (have_uvs){ti[0]=s_tfaces[fi].a;ti[1]=s_tfaces[fi].b;ti[2]=s_tfaces[fi].c;}
+
+            for (int k=0; k<3; k++) {
+                int base=(slot+k)*8;
+                V3 pos=frame_pos[fr][vi[k]];
+                V3 nrm=frame_norm[fr][vi[k]];
+                dst[base+0]=pos.x; dst[base+1]=pos.y; dst[base+2]=pos.z;
+                if (have_uvs && ti[k]>=0 && ti[k]<n_uv) {
+                    dst[base+3]=s_uv[ti[k]].u; dst[base+4]=s_uv[ti[k]].v;
+                } else {
+                    dst[base+3]=dst[base+4]=0.0f;
+                }
+                dst[base+5]=nrm.x; dst[base+6]=nrm.y; dst[base+7]=nrm.z;
+
+                for (int d=0;d<3;d++){
+                    float val=((float*)&pos)[d];
+                    if (val<bmin[d]) bmin[d]=val;
+                    if (val>bmax[d]) bmax[d]=val;
+                }
+                if (fr == 0) s_ibuf[slot+k]=slot+k;
+            }
+        }
+    }
+    if (frame_count > 1)
+        memcpy(s_vbuf, all_frames, (size_t)out_v * 8u * sizeof(float));
 
     for (int d=0;d<3;d++){
         m->min[d]=bmin[d]; m->max[d]=bmax[d]; m->center[d]=(bmin[d]+bmax[d])*0.5f;
@@ -403,6 +531,18 @@ int ase_load(AseModel *m, const char *path) {
 
     glBindVertexArray(0);
     m->index_count=out_v;
+    m->vertex_count=out_v;
+    m->frame_count=frame_count;
+    m->framespeed=scene_framespeed;
+    if (frame_count > 1) {
+        m->frames = all_frames;
+        all_frames = NULL;
+        m->anim_scratch = (float*)malloc((size_t)out_v * 8u * sizeof(float));
+        if (!m->anim_scratch) {
+            fprintf(stderr, "ase_load: out of memory storing animation scratch for %s\n", path);
+            goto fail;
+        }
+    }
 
     /* Populate per-material draw ranges. For each group g, look up the source
        MTLID and pull its bitmap out of s_mat_tex[mtlid] (the ASE numbers
@@ -435,9 +575,18 @@ int ase_load(AseModel *m, const char *path) {
         }
     }
 
-    printf("ase_load: %s  faces=%d  mats=%d  ref=%d  tex='%s'\n",
-           path, n_face, n_groups, geomobject_mat_ref, m->tex_file[0]?m->tex_file:"(none)");
+    printf("ase_load: %s  faces=%d  frames=%d  fps=%.1f  mats=%d  ref=%d  tex='%s'\n",
+           path, n_face, frame_count, scene_framespeed, n_groups, geomobject_mat_ref,
+           m->tex_file[0]?m->tex_file:"(none)");
+    free_temp_frames(frame_pos, frame_norm, frame_count);
     return 1;
+
+fail:
+    if (f) fclose(f);
+    free(all_frames);
+    free_temp_frames(frame_pos, frame_norm, frame_count);
+    ase_free(m);
+    return 0;
 }
 
 void ase_free(AseModel *m) {
@@ -445,6 +594,8 @@ void ase_free(AseModel *m) {
     if (m->vbo) glDeleteBuffers(1,&m->vbo);
     if (m->ebo) glDeleteBuffers(1,&m->ebo);
     if (m->texture_id) glDeleteTextures(1,&m->texture_id);
+    free(m->frames);
+    free(m->anim_scratch);
     /* Per-material textures are owned by the asset cache; do not free here. */
     memset(m,0,sizeof(*m));
 }

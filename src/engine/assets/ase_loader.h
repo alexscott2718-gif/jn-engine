@@ -26,6 +26,11 @@ typedef struct {
     unsigned int vbo;
     unsigned int ebo;
     int          index_count;        /* total */
+    int          vertex_count;       /* interleaved vertices in vbo */
+    int          frame_count;        /* 1 for static meshes / glTF */
+    float        framespeed;         /* ASE *SCENE_FRAMESPEED, fps */
+    float       *frames;             /* optional: frame_count * vertex_count * 8 floats */
+    float       *anim_scratch;       /* renderer-owned CPU lerp buffer */
     /* bounding box in OpenGL space */
     float        min[3], max[3], center[3];
     /* Legacy single-bitmap fields — populated from materials[0] for callers

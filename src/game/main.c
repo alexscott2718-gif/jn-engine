@@ -312,8 +312,8 @@ static void render_capture_live_jimmy(Entity *jim, int jim_model_ok,
                                       int camera_pan,
                                       int viewport_w, int viewport_h) {
     if (!jim || !jim_model_ok) return;
-    const AseModel *pose = player_anim_model((PlayerAnim)jim->user_flag);
-    if (!pose) return;
+    PlayerAnimSample sample = player_anim_sample((PlayerAnim)jim->user_flag);
+    if (!sample.model) return;
 
     float model[16];
     memcpy(model, CAPTURE_LEVEL1_JIMMY_MODEL, sizeof(model));
@@ -340,7 +340,8 @@ static void render_capture_live_jimmy(Entity *jim, int jim_model_ok,
     glEnable(GL_DEPTH_TEST);
     glDepthMask(GL_TRUE);
     glDisable(GL_BLEND);
-    renderer_draw_model_matrix(pose, 0, model);
+    renderer_draw_model_matrix_anim(sample.model, 0, model,
+                                    sample.frame_a, sample.frame_b, sample.lerp);
     renderer_end_frame();
     renderer_set_camera_override(NULL, NULL);
 }
@@ -896,7 +897,17 @@ int main(void) {
     /* In screenshot mode let a few physics ticks fire first so pending state
        (level swaps, animation transitions) actually flushes before capture. */
     int screenshot_warmup_ticks = 0;
-    const int SCREENSHOT_WARMUP_GOAL = 4;
+    int screenshot_warmup_goal = 4;
+    {
+        const char *warmup = getenv("JN_SCREENSHOT_WARMUP_TICKS");
+        if (warmup && *warmup) {
+            int n = atoi(warmup);
+            if (n > 0) screenshot_warmup_goal = n;
+        }
+    }
+    if (env_enabled("JN_DEMO_AUTORUN")) {
+        input_set_virtual_move(0.0f, 1.0f);
+    }
 
     /* Debug: pre-queue a level swap so the swap path can be exercised
        without walking to a LOAD trigger. Format: "level1c.gam:FRONTDOOR" */
@@ -934,7 +945,7 @@ int main(void) {
         if (frame_time > 0.1f) frame_time = 0.1f;
 
         accumulator += frame_time;
-        if (screenshot_mode && screenshot_warmup_ticks < SCREENSHOT_WARMUP_GOAL) {
+        if (screenshot_mode && screenshot_warmup_ticks < screenshot_warmup_goal) {
             accumulator = DT;   /* force one tick per render frame during warmup */
         }
 
@@ -1123,8 +1134,12 @@ int main(void) {
 
             /* Player: dedicated anim path. */
             if (jim_model_ok && strcmp(e->type, "3JIM") == 0) {
-                const AseModel *pose = player_anim_model((PlayerAnim)e->user_flag);
-                if (pose) renderer_draw_model(pose, 0, e->x, e->y, e->z, e->ry, 1.0f);
+                PlayerAnimSample sample = player_anim_sample((PlayerAnim)e->user_flag);
+                if (sample.model) {
+                    renderer_draw_model_anim(sample.model, 0, e->x, e->y, e->z,
+                                             e->ry + 3.14159265f, 1.0f,
+                                             sample.frame_a, sample.frame_b, sample.lerp);
+                }
                 continue;
             }
 
@@ -1245,7 +1260,7 @@ int main(void) {
         if (capture_should_exit()) break;
 
         if (screenshot_mode && !screenshot_taken) {
-            if (screenshot_warmup_ticks >= SCREENSHOT_WARMUP_GOAL) {
+            if (screenshot_warmup_ticks >= screenshot_warmup_goal) {
                 glFinish();
                 save_screenshot(screenshot_path, w.width, w.height);
                 screenshot_taken = 1;
