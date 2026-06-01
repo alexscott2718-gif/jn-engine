@@ -7,6 +7,9 @@
 static const char *POSE_PATHS[PA_COUNT] = {
     "assets/ase/jimstop.ase",
     "assets/ase/jimrun.ASE",
+    "assets/ase/jimleft.ASE",
+    "assets/ase/jimright.ASE",
+    "assets/ase/jimbackpedal.ASE",
     "assets/ase/jimjump.ASE",
     "assets/ase/jimfall.ASE",
     "assets/ase/jimpickup.ASE",
@@ -50,6 +53,11 @@ static void ensure_shared_jimmy_clip_data(PlayerAnim a, AseModel *m) {
     AseModel *idle = model_cache_get(POSE_PATHS[PA_IDLE]);
     bind_shared_jimmy_texture(idle);
     copy_shared_jimmy_uvs(m, idle);
+}
+
+static int anim_loops(PlayerAnim a) {
+    return a == PA_IDLE || a == PA_RUN || a == PA_LEFT ||
+           a == PA_RIGHT || a == PA_BACKPEDAL || a == PA_FALL;
 }
 
 int player_anim_init(unsigned int shared_texture_id) {
@@ -122,16 +130,24 @@ PlayerAnimSample player_anim_sample(PlayerAnim a) {
     s.lerp = 0.0f;
     if (!s.model || s.model->frame_count <= 1) return s;
 
-    /* Phase 1 only promotes the forward run to a real source-fps loop. The
-       other loaded poses stay frame-0 compatible until the directional state
-       machine lands in Phase 2. */
-    if (a != PA_RUN) return s;
-
     float fps = s.model->framespeed > 0.0f ? s.model->framespeed : 10.0f;
     float frame_pos = g_clip_time * fps;
     int base = (int)floorf(frame_pos);
-    s.frame_a = base % s.model->frame_count;
-    s.frame_b = (s.frame_a + 1) % s.model->frame_count;
-    s.lerp = frame_pos - floorf(frame_pos);
+    if (anim_loops(a)) {
+        s.frame_a = base % s.model->frame_count;
+        s.frame_b = (s.frame_a + 1) % s.model->frame_count;
+        s.lerp = frame_pos - floorf(frame_pos);
+    } else {
+        int last = s.model->frame_count - 1;
+        if (base >= last) {
+            s.frame_a = last;
+            s.frame_b = last;
+            s.lerp = 0.0f;
+        } else {
+            s.frame_a = base;
+            s.frame_b = base + 1;
+            s.lerp = frame_pos - floorf(frame_pos);
+        }
+    }
     return s;
 }

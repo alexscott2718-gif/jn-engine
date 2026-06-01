@@ -19,6 +19,12 @@ Entity *g_player = NULL;
 
 static int s_last_items_collected = 0;
 
+static PlayerAnim locomotion_anim_from_input(float ix, float iy) {
+    if (fabsf(ix) > fabsf(iy))
+        return (ix < 0.0f) ? PA_LEFT : PA_RIGHT;
+    return (iy < 0.0f) ? PA_BACKPEDAL : PA_RUN;
+}
+
 static void player_on_spawn(Entity *e, World *w) {
     (void)w;
     e->half_extents[0] = PLAYER_HALF_X;
@@ -64,8 +70,9 @@ static void player_on_update(Entity *e, World *w, float dt) {
         float dirx = mx / len, dirz = mz / len;
         e->vx = dirx * speed * in_mag;
         e->vz = dirz * speed * in_mag;
-        /* Face direction of travel. */
-        e->ry = atan2f(dirx, dirz);
+        /* Directional clips are relative to facing/camera, so keep Jimmy
+           facing camera-forward while side/back inputs move on their own axes. */
+        e->ry = atan2f(sy, -cy);
     } else {
         e->vx = 0.0f;
         e->vz = 0.0f;
@@ -92,7 +99,7 @@ static void player_on_update(Entity *e, World *w, float dt) {
     } else if (!e->on_ground) {
         anim = (e->vy > 0.0f) ? PA_JUMP : PA_FALL;
     } else if (len > 0.0001f) {
-        anim = PA_RUN;
+        anim = locomotion_anim_from_input(ix, iy);
     } else {
         anim = PA_IDLE;
     }

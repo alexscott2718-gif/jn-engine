@@ -41,6 +41,16 @@ static int env_enabled_default(const char *name, int default_value) {
     return strcmp(s, "0") != 0;
 }
 
+static float env_float_default(const char *name, float default_value) {
+    const char *s = getenv(name);
+    return (s && s[0]) ? (float)atof(s) : default_value;
+}
+
+static int env_int_default(const char *name, int default_value) {
+    const char *s = getenv(name);
+    return (s && s[0]) ? atoi(s) : default_value;
+}
+
 /* Level-1 static OMT placements. Default to the self-contained .glb set
    (Phase C: glTF replaces .ASE; textures are embedded, no override pass).
    JN_OMT_PLACEMENTS overrides the path (e.g. the legacy ASE list for A/B). */
@@ -907,7 +917,13 @@ int main(void) {
     }
     if (env_enabled("JN_DEMO_AUTORUN")) {
         input_set_virtual_move(0.0f, 1.0f);
+    } else if (getenv("JN_DEMO_MOVE_X") || getenv("JN_DEMO_MOVE_Y")) {
+        input_set_virtual_move(env_float_default("JN_DEMO_MOVE_X", 0.0f),
+                               env_float_default("JN_DEMO_MOVE_Y", 0.0f));
     }
+    int demo_jump_enabled = env_enabled("JN_DEMO_JUMP");
+    int demo_jump_sent = 0;
+    int demo_jump_tick = demo_jump_enabled ? env_int_default("JN_DEMO_JUMP_TICK", 2) : 0;
 
     /* Debug: pre-queue a level swap so the swap path can be exercised
        without walking to a LOAD trigger. Format: "level1c.gam:FRONTDOOR" */
@@ -954,6 +970,11 @@ int main(void) {
             accumulator -= DT;
 
             input_update();
+            if (demo_jump_enabled && !demo_jump_sent &&
+                screenshot_warmup_ticks >= demo_jump_tick) {
+                input_press_virtual_jump();
+                demo_jump_sent = 1;
+            }
 
             /* Per-entity behavior tick (player reads input, platforms move, etc.) */
             for (Entity *e = world.head; e; e = e->next) {
