@@ -1,4 +1,5 @@
 #include "gam_loader.h"
+#include "../player_physics.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -31,6 +32,8 @@ int gam_load(World *w, const char *path) {
     if (!read_u32be(f, &obj_count)) { fclose(f); return -1; }
 
     printf("gam_load: %s  magic='%s'  objects=%u\n", path, magic, obj_count);
+
+    player_physics_reset_defaults();   /* C3DPlayer props below overwrite these */
 
     int loaded = 0;
     char prop_name[256];
@@ -93,6 +96,19 @@ int gam_load(World *w, const char *path) {
                 else if (strcmp(prop_name, "RotationX") == 0) e->rx = fval;
                 else if (strcmp(prop_name, "RotationY") == 0) e->ry = fval;
                 else if (strcmp(prop_name, "RotationZ") == 0) e->rz = fval;
+                else {
+                    /* C3DPlayer movement/physics constants -> PlayerPhysics. */
+                    PlayerPhysics *pp = player_physics_mutable();
+                    if      (strcmp(prop_name, "MaxSpeed")==0)        { pp->max_speed=fval;         pp->loaded=1; }
+                    else if (strcmp(prop_name, "AccelRate")==0)       { pp->accel_rate=fval;        pp->loaded=1; }
+                    else if (strcmp(prop_name, "DecelRate")==0)       { pp->decel_rate=fval;        pp->loaded=1; }
+                    else if (strcmp(prop_name, "MaxHeight")==0)       { pp->max_height=fval;        pp->loaded=1; }
+                    else if (strcmp(prop_name, "UpRate")==0)          { pp->up_rate=fval;           pp->loaded=1; }
+                    else if (strcmp(prop_name, "DownRate")==0)        { pp->down_rate=fval;         pp->loaded=1; }
+                    else if (strcmp(prop_name, "MaxVertVelocity")==0) { pp->max_vert_velocity=fval; pp->loaded=1; }
+                    else if (strcmp(prop_name, "AccelLean")==0)       { pp->accel_lean=fval;        pp->loaded=1; }
+                    else if (strcmp(prop_name, "DecelLean")==0)       { pp->decel_lean=fval;        pp->loaded=1; }
+                }
 
             } else if (type_id == 6) {
                 /* int32 BE — skip */
@@ -113,5 +129,13 @@ int gam_load(World *w, const char *path) {
 done:
     fclose(f);
     printf("gam_load: loaded %d entities\n", loaded);
+    {
+        const PlayerPhysics *pp = player_physics_get();
+        printf("gam_load: player physics %s: MaxSpeed=%.0f Accel=%.0f Decel=%.0f "
+               "Up=%.0f Down=%.0f MaxVert=%.0f Lean=%.0f/%.0f\n",
+               pp->loaded ? "from .gam" : "DEFAULT", pp->max_speed, pp->accel_rate,
+               pp->decel_rate, pp->up_rate, pp->down_rate, pp->max_vert_velocity,
+               pp->accel_lean, pp->decel_lean);
+    }
     return loaded;
 }

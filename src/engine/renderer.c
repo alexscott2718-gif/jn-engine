@@ -3,6 +3,7 @@
 #include "canon_data.h"   /* Phase 12: measured lighting from build/canon.json */
 #include "glad.h"
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <math.h>
 
@@ -168,6 +169,9 @@ static const char *LIT_FRAG_SRC =
     "uniform vec3 uSceneTint;\n"     /* Phase 1: per-channel ambient/scene multiplier */
     "uniform int  uAlphaCutout;\n"   /* Phase 4: 1 = discard fragments with tex.a < threshold */
     "uniform float uAlphaThreshold;\n"
+    "uniform int  uColorKeyOn;\n"    /* foliage cutout: 1 = discard near uColorKey */
+    "uniform vec3 uColorKey;\n"      /* chroma-key RGB (e.g. the 2D_Trees sky blue) */
+    "uniform float uColorKeyTol;\n"  /* squared-distance threshold */
     "void main() {\n"
     "    vec3 n = normalize(vNorm);\n"
     "    /* Match the original's measured lighting. With LIGHTING OFF (Phase 12\n"
@@ -186,6 +190,10 @@ static const char *LIT_FRAG_SRC =
     "    if (uHasTex != 0) {\n"
     "        vec4 c = texture(uTex, vUV);\n"
     "        if (uAlphaCutout != 0 && c.a < uAlphaThreshold) discard;\n"
+    "        if (uColorKeyOn != 0) {\n"
+    "            vec3 d = c.rgb - uColorKey;\n"
+    "            if (dot(d, d) < uColorKeyTol) discard;\n"   /* sky -> transparent */
+    "        }\n"
     "        base *= c.rgb;\n"
     "        alpha = c.a;\n"
     "    }\n"
@@ -219,7 +227,13 @@ static int g_lit_loc_tint = -1, g_lit_loc_hastex = -1;
 static int g_lit_loc_lighton = -1, g_lit_loc_ambient = -1, g_lit_loc_ldiff = -1;
 static int g_lit_loc_scene_tint = -1;
 static int g_lit_loc_alpha_cutout = -1, g_lit_loc_alpha_threshold = -1;
+static int g_lit_loc_colorkey_on = -1, g_lit_loc_colorkey = -1, g_lit_loc_colorkey_tol = -1;
 static float g_scene_tint[3] = { 1.0f, 1.0f, 1.0f };
+/* Foliage chroma-key: the 2D_Trees boundary walls bake an opaque sky-blue
+ * background (RGB 57,148,198) the original keyed to transparent. */
+static int   g_colorkey_on = 0;
+static float g_colorkey[3] = { 0.0f, 0.0f, 0.0f };
+static float g_colorkey_tol = 0.05f;
 /* Phase 4: alpha-cutout state. When enabled, the lit fragment shader
  * discards fragments whose sampled texture alpha is below the threshold.
  * Used for capture-derived foliage / playground billboards whose alpha
@@ -304,6 +318,9 @@ int renderer_init(int w, int h) {
     g_lit_loc_scene_tint = glGetUniformLocation(g_lit_prog, "uSceneTint");
     g_lit_loc_alpha_cutout    = glGetUniformLocation(g_lit_prog, "uAlphaCutout");
     g_lit_loc_alpha_threshold = glGetUniformLocation(g_lit_prog, "uAlphaThreshold");
+    g_lit_loc_colorkey_on     = glGetUniformLocation(g_lit_prog, "uColorKeyOn");
+    g_lit_loc_colorkey        = glGetUniformLocation(g_lit_prog, "uColorKey");
+    g_lit_loc_colorkey_tol    = glGetUniformLocation(g_lit_prog, "uColorKeyTol");
 
     /* Sky-gradient program + fullscreen quad. Each vertex carries an NDC
        position and a t value (1 at top, 0 at bottom) used to lerp top/bot. */
@@ -448,6 +465,12 @@ void renderer_set_hide_untextured_groups(int enable) {
 void renderer_set_alpha_cutout(int enable, float threshold) {
     g_alpha_cutout = enable ? 1 : 0;
     if (threshold > 0.0f && threshold < 1.0f) g_alpha_threshold = threshold;
+}
+
+void renderer_set_color_key(int enable, float r, float g, float b, float tol) {
+    g_colorkey_on = enable ? 1 : 0;
+    g_colorkey[0] = r; g_colorkey[1] = g; g_colorkey[2] = b;
+    if (tol > 0.0f) g_colorkey_tol = tol;
 }
 
 void renderer_set_billboard_uv_flip_y(int enable) {
@@ -611,6 +634,9 @@ void renderer_draw_model_matrix(const AseModel *m, unsigned int texture_id_overr
     glUniform3f(g_lit_loc_scene_tint, g_scene_tint[0], g_scene_tint[1], g_scene_tint[2]);
     glUniform1i(g_lit_loc_alpha_cutout, g_alpha_cutout);
     glUniform1f(g_lit_loc_alpha_threshold, g_alpha_threshold);
+    glUniform1i(g_lit_loc_colorkey_on, g_colorkey_on);
+    glUniform3f(g_lit_loc_colorkey, g_colorkey[0], g_colorkey[1], g_colorkey[2]);
+    glUniform1f(g_lit_loc_colorkey_tol, g_colorkey_tol);
     glActiveTexture(GL_TEXTURE0);
 
     int groups = m->material_count > 0 ? m->material_count : 1;
@@ -728,6 +754,162 @@ void renderer_draw_model_anim(const AseModel *m, unsigned int texture_id_overrid
     model[12]=tx; model[13]=ty;   model[14]=tz;    model[15]=1;
     renderer_draw_model_matrix_anim(m, texture_id_override, model,
                                     frame_a, frame_b, lerp);
+}
+
+/* Animated draw with full yaw/pitch/roll (model = T * Ry * Rx * Rz * scale).
+   Pitch/roll are applied in the yawed body frame -- used for Jimmy's
+   accel/turn body lean (AccelLean/DecelLean). */
+void renderer_draw_model_anim_euler(const AseModel *m, unsigned int texture_id_override,
+                                    float tx, float ty, float tz,
+                                    float yaw, float pitch, float roll, float scale,
+                                    int frame_a, int frame_b, float lerp) {
+    Mat4 Ry, Rx, Rz, tmp, rot, model;
+    float cy = cosf(yaw),   sy = sinf(yaw);
+    float cx = cosf(pitch), sx = sinf(pitch);
+    float cz = cosf(roll),  sz = sinf(roll);
+    mat4_identity(Ry); Ry[0]=cy; Ry[2]=-sy; Ry[8]=sy;  Ry[10]=cy;
+    mat4_identity(Rx); Rx[5]=cx; Rx[6]=sx;  Rx[9]=-sx;  Rx[10]=cx;
+    mat4_identity(Rz); Rz[0]=cz; Rz[1]=sz;  Rz[4]=-sz;  Rz[5]=cz;
+    mat4_mul(tmp, Ry, Rx);
+    mat4_mul(rot, tmp, Rz);
+    /* scale the rotation basis (cols 0-2), then set translation. */
+    for (int i = 0; i < 16; i++) model[i] = rot[i];
+    model[0]*=scale; model[1]*=scale; model[2]*=scale;
+    model[4]*=scale; model[5]*=scale; model[6]*=scale;
+    model[8]*=scale; model[9]*=scale; model[10]*=scale;
+    model[12]=tx; model[13]=ty; model[14]=tz; model[15]=1;
+    renderer_draw_model_matrix_anim(m, texture_id_override, model,
+                                    frame_a, frame_b, lerp);
+}
+
+/* Full procedural cloud hemisphere. The faithful bluesky3 Plane01 is a low-poly
+   partial backdrop with azimuth gaps, so it can't enclose a free-roaming camera.
+   This dome guarantees blue sky + clouds across the whole upper hemisphere using
+   the game's real sky.png cloud texture, and it's the layer that rotates. The
+   faithful Plane01 is still drawn on top (static) for the painted neighborhood
+   horizon band. */
+#define CLOUD_DOME_RINGS    10
+#define CLOUD_DOME_SECTORS  24
+#define CLOUD_DOME_SCALE    12000.0f   /* radius; inside native far_z=28000 */
+static unsigned int g_clouddome_vao = 0, g_clouddome_vbo = 0, g_clouddome_ebo = 0;
+static int g_clouddome_index_count = 0;
+
+static void renderer_build_cloud_dome(void) {
+    if (g_clouddome_vao) return;
+    const int R = CLOUD_DOME_RINGS, S = CLOUD_DOME_SECTORS;
+    int vcount = (R + 1) * (S + 1);
+    int icount = R * S * 6;
+    float *verts = (float*)malloc((size_t)vcount * 8 * sizeof(float));
+    unsigned int *idx = (unsigned int*)malloc((size_t)icount * sizeof(unsigned int));
+    if (!verts || !idx) { free(verts); free(idx); return; }
+
+    const float el0 = -0.06f;            /* dip slightly below horizon (rad) */
+    const float el1 = 1.55334f;          /* ~89 deg (just shy of zenith) */
+    int vi = 0;
+    for (int i = 0; i <= R; i++) {
+        float fe = (float)i / (float)R;
+        float el = el0 + (el1 - el0) * fe;
+        float ce = cosf(el), se = sinf(el);
+        for (int j = 0; j <= S; j++) {
+            float az = (float)j / (float)S * 6.2831853f;
+            float dx = ce * sinf(az), dy = se, dz = ce * cosf(az);
+            /* Fisheye-from-zenith UV: cloud image projected onto the dome.
+               r=0 overhead -> texture centre; r->1 at horizon -> texture edge. */
+            float r = 1.0f - el / 1.5708f;        /* 0 at zenith, ~1 at horizon */
+            float u = 0.5f + 0.5f * r * sinf(az);
+            float v = 0.5f + 0.5f * r * cosf(az);
+            float *p = verts + (size_t)vi * 8;
+            p[0]=dx; p[1]=dy; p[2]=dz; p[3]=u; p[4]=v; p[5]=0; p[6]=1; p[7]=0;
+            vi++;
+        }
+    }
+    int ii = 0;
+    for (int i = 0; i < R; i++) {
+        for (int j = 0; j < S; j++) {
+            int a = i * (S + 1) + j;
+            int b = a + (S + 1);
+            idx[ii++]=a; idx[ii++]=b; idx[ii++]=a+1;
+            idx[ii++]=a+1; idx[ii++]=b; idx[ii++]=b+1;
+        }
+    }
+    glGenVertexArrays(1, &g_clouddome_vao);
+    glGenBuffers(1, &g_clouddome_vbo);
+    glGenBuffers(1, &g_clouddome_ebo);
+    glBindVertexArray(g_clouddome_vao);
+    glBindBuffer(GL_ARRAY_BUFFER, g_clouddome_vbo);
+    glBufferData(GL_ARRAY_BUFFER, (size_t)vcount * 8 * sizeof(float), verts, GL_STATIC_DRAW);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, g_clouddome_ebo);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, (size_t)icount * sizeof(unsigned int), idx, GL_STATIC_DRAW);
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
+    glEnableVertexAttribArray(2);
+    glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(5 * sizeof(float)));
+    glBindVertexArray(0);
+    g_clouddome_index_count = icount;
+    free(verts); free(idx);
+}
+
+void renderer_draw_cloud_dome(unsigned int tex, float spin) {
+    if (!tex) return;
+    renderer_build_cloud_dome();
+    if (!g_clouddome_vao) return;
+
+    /* model = rotateY(spin) * scale, translated to camera (infinitely far). */
+    float c = cosf(spin) * CLOUD_DOME_SCALE, s = sinf(spin) * CLOUD_DOME_SCALE;
+    Mat4 model = {
+        c, 0, -s, 0,
+        0, CLOUD_DOME_SCALE, 0, 0,
+        s, 0, c, 0,
+        g_cam.pos[0], g_cam.pos[1], g_cam.pos[2], 1
+    };
+    Mat4 mvp, vp;
+    mat4_mul(vp, g_proj, g_view);
+    mat4_mul(mvp, vp, model);
+
+    glDisable(GL_DEPTH_TEST);
+    glDepthMask(GL_FALSE);
+    glDisable(GL_CULL_FACE);
+    glUseProgram(g_lit_prog);
+    glUniformMatrix4fv(g_lit_loc_mvp,   1, GL_FALSE, mvp);
+    glUniformMatrix4fv(g_lit_loc_model, 1, GL_FALSE, model);
+    glUniform1i(g_lit_loc_tex, 0);
+    glUniform1i(g_lit_loc_lighton, 0);          /* flat full-bright */
+    glUniform3f(g_lit_loc_scene_tint, 1.0f, 1.0f, 1.0f);
+    glUniform1i(g_lit_loc_alpha_cutout, 0);
+    glUniform3f(g_lit_loc_tint, 1.0f, 1.0f, 1.0f);
+    glUniform1i(g_lit_loc_hastex, 1);
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, tex);
+    glBindVertexArray(g_clouddome_vao);
+    glDrawElements(GL_TRIANGLES, g_clouddome_index_count, GL_UNSIGNED_INT, 0);
+    glBindVertexArray(0);
+    glBindTexture(GL_TEXTURE_2D, 0);
+    glDepthMask(GL_TRUE);
+    glEnable(GL_DEPTH_TEST);
+}
+
+/* Faithful sky dome (bluesky3 Plane01: cloud cap + hoodfar backdrop). Drawn
+   centered on the camera so it reads as infinitely far, and with depth
+   writes/test off so it sits behind all scene geometry. The dome's native
+   radius (~53k) is scaled inside far_z. Drawn static (spin=0) for the painted
+   neighborhood horizon; the rotating clouds come from renderer_draw_cloud_dome. */
+#define SKY_DOME_SCALE 0.30f   /* native far_z=28000; keep dome corners inside it */
+void renderer_draw_sky_dome(const AseModel *m, float spin) {
+    if (!m) return;
+    /* The sky must render solid: bypass the foliage alpha-cutout (the hoodfar
+       backdrop tiles carry low alpha that would otherwise punch holes). */
+    int saved_cutout = g_alpha_cutout;
+    g_alpha_cutout = 0;
+    glDisable(GL_DEPTH_TEST);
+    glDepthMask(GL_FALSE);
+    glDisable(GL_CULL_FACE);           /* viewed from inside (renderer leaves cull off) */
+    renderer_draw_model(m, 0, g_cam.pos[0], g_cam.pos[1], g_cam.pos[2],
+                        spin, SKY_DOME_SCALE);
+    glDepthMask(GL_TRUE);
+    glEnable(GL_DEPTH_TEST);
+    g_alpha_cutout = saved_cutout;
 }
 
 void renderer_draw_box(unsigned int vao, int index_count,

@@ -1,0 +1,27 @@
+# OMT glTF placements emitted by omt_asset_toolkit.gltf_export
+# format: <name>\t<glb_path>\t<center_x>\t<center_y>\t<center_z>
+# native GL translation = (center_x, 0, -center_z); height baked into mesh
+Object04	assets/glb/omt/level7/Object04.glb	-5438.7290	1516.7014	-772.2045
+Cylinder01	assets/glb/omt/level7/Cylinder01.glb	-6359.7207	1796.1306	-593.9882
+Cylinder02	assets/glb/omt/level7/Cylinder02.glb	-6359.7207	1796.1306	1209.8478
+Cylinder03	assets/glb/omt/level7/Cylinder03.glb	-15526.4004	-0.0536	41.6490
+Box03	assets/glb/omt/level7/Box03.glb	-6538.5337	1550.7560	5041.4058
+Box04	assets/glb/omt/level7/Box04.glb	-6535.2285	1414.2188	5047.6846
+Plane02	assets/glb/omt/level7/Plane02.glb	-6517.5669	1693.2092	4724.3735
+pod	assets/glb/omt/level7/pod.glb	-8708.5693	1099.8030	-1562.8279
+Object01	assets/glb/omt/level7/Object01.glb	-8970.7461	866.8054	-2055.9128
+Box05	assets/glb/omt/level7/Box05.glb	-1053.4327	1400.2448	386.8879
+invisible01	assets/glb/omt/level7/invisible01.glb	-8698.2646	1404.4121	-5159.0605
+cellhall	assets/glb/omt/level7/cellhall.glb	-7216.4180	1837.4133	3071.4009
+Plane03	assets/glb/omt/level7/Plane03.glb	-6517.5669	2074.9268	4724.3735
+Box06	assets/glb/omt/level7/Box06.glb	-6538.5337	1932.4734	5041.4058
+Box07	assets/glb/omt/level7/Box07.glb	-6535.2285	1865.7366	5047.6846
+alcoveblock	assets/glb/omt/level7/alcoveblock.glb	-7396.3501	1967.8109	3099.1897
+alcoveblock01	assets/glb/omt/level7/alcoveblock01.glb	-7396.3501	1967.8110	2618.5391
+alcoveblock02	assets/glb/omt/level7/alcoveblock02.glb	-6836.3081	1967.8109	3887.7156
+alcoveblock03	assets/glb/omt/level7/alcoveblock03.glb	-7396.6431	1967.8109	3887.7156
+alcoveblock04	assets/glb/omt/level7/alcoveblock04.glb	-9955.0566	1303.8591	-4239.7690
+alcoveblock05	assets/glb/omt/level7/alcoveblock05.glb	-9955.0566	1303.8591	-4800.1050
+cell	assets/glb/omt/level7/cell.glb	-7133.3877	1835.6910	4650.2695
+YokianF	assets/glb/omt/level7/YokianF.glb	-22079.5664	636.8898	-675.1888
+Object02	assets/glb/omt/level7/Object02.glb	-7036.8848	844.9818	-4749.1719

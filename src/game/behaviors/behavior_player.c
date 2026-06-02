@@ -1,6 +1,5 @@
 #include "behaviors.h"
 #include "../../engine/input.h"
-#include "../../engine/renderer.h"
 #include "../gamestate.h"
 #include "../player_anim.h"
 #include <math.h>
@@ -8,21 +7,25 @@
 
 Entity *g_player = NULL;
 
-/* Tuned for Level1 units (JIM spawns near y=31, world extents ~10000). */
+/* Tuned for Level1 units (JIM spawns near y=31, world extents ~10000).
+   NOTE: the data-driven C3DPlayer physics (accel/decel ramp, .gam speed/jump,
+   body lean) is DEFERRED — it produced ice-skating / wrong turn+speed. This is
+   the approved simple tank-turn movement (instant velocity). The .gam parsing
+   (player_physics) stays in place, dormant, for when the physics track resumes. */
 #define PLAYER_HALF_X     35.0f
 #define PLAYER_HALF_Y     60.0f
 #define PLAYER_HALF_Z     35.0f
 #define PLAYER_MOVE_SPEED 600.0f   /* units / sec */
 #define PLAYER_RUN_MULT   2.0f
 #define PLAYER_JUMP_VEL   650.0f
+#define PLAYER_NOCLIP_VERTICAL_SPEED 600.0f
+#define PLAYER_TURN_RATE  2.8f     /* radians / sec (~160 deg/s) */
 #define PICKUP_ANIM_TIME  0.45f    /* seconds the pickup pose overrides */
 
 static int s_last_items_collected = 0;
 
-static PlayerAnim locomotion_anim_from_input(float ix, float iy) {
-    if (fabsf(ix) > fabsf(iy))
-        return (ix < 0.0f) ? PA_LEFT : PA_RIGHT;
-    return (iy < 0.0f) ? PA_BACKPEDAL : PA_RUN;
+static float clampf(float v, float lo, float hi) {
+    return v < lo ? lo : (v > hi ? hi : v);
 }
 
 static void player_on_spawn(Entity *e, World *w) {
@@ -36,52 +39,71 @@ static void player_on_spawn(Entity *e, World *w) {
     if (!g_player) g_player = e;
 }
 
-static void player_on_update(Entity *e, World *w, float dt) {
-    (void)w;
-    Camera *cam = renderer_camera();
+/* Phase 4 contextual state: is the player standing near a playground swing
+   (3SWN)? Level 1's only contextual prop with a player animation. */
+#define SWING_RADIUS 400.0f
+static int player_near_swing(World *w, const Entity *p) {
+    if (!w) return 0;
+    const float r2 = SWING_RADIUS * SWING_RADIUS;
+    for (Entity *s = w->head; s; s = s->next) {
+        if (!s->alive || s == p) continue;
+        if (strncmp(s->type, "3SWN", 4) != 0) continue;
+        float dx = s->x - p->x, dz = s->z - p->z;
+        if (dx * dx + dz * dz <= r2) return 1;
+    }
+    return 0;
+}
 
-    /* Movement is relative to the camera yaw so input is screen-space. */
-    float cy = cosf(cam->yaw), sy = sinf(cam->yaw);
+static void player_on_update(Entity *e, World *w, float dt) {
     float speed = PLAYER_MOVE_SPEED;
     if (input_is_down(SDL_SCANCODE_LSHIFT)) speed *= PLAYER_RUN_MULT;
+    if (input_just_pressed(SDL_SCANCODE_N))
+        input_toggle_noclip();
+    int noclip = input_noclip_enabled();
 
-    /* Keyboard contributes unit steps on a screen-space (right, forward) basis;
-       the virtual joystick contributes an analog (right, forward) vector. We
-       sum them, then the resulting magnitude (capped at 1) scales speed -- so a
-       half-pushed stick walks and a full push runs, while WASD stays digital. */
-    float ix = 0.0f, iy = 0.0f;   /* +ix = right, +iy = forward */
-    if (input_is_down(SDL_SCANCODE_W)) iy += 1.0f;
-    if (input_is_down(SDL_SCANCODE_S)) iy -= 1.0f;
-    if (input_is_down(SDL_SCANCODE_A)) ix -= 1.0f;
-    if (input_is_down(SDL_SCANCODE_D)) ix += 1.0f;
+    /* Tank-turn controls (original JNBG): Left/Right (arrows + A/D) ROTATE
+       Jimmy's heading; Up/Down (arrows + W/S) drive forward/backpedal along
+       that heading. The follow camera tracks the heading from behind, so input
+       is body-relative, not screen-relative. The virtual stick maps x->turn,
+       y->forward. */
+    float turn = 0.0f;   /* +1 = turn right */
+    float fwd  = 0.0f;   /* +1 = forward, -1 = backpedal */
+    if (input_is_down(SDL_SCANCODE_LEFT)  || input_is_down(SDL_SCANCODE_A)) turn -= 1.0f;
+    if (input_is_down(SDL_SCANCODE_RIGHT) || input_is_down(SDL_SCANCODE_D)) turn += 1.0f;
+    if (input_is_down(SDL_SCANCODE_UP)    || input_is_down(SDL_SCANCODE_W)) fwd  += 1.0f;
+    if (input_is_down(SDL_SCANCODE_DOWN)  || input_is_down(SDL_SCANCODE_S)) fwd  -= 1.0f;
     float vjx, vjy;
     input_get_virtual_move(&vjx, &vjy);
-    ix += vjx; iy += vjy;
+    turn += vjx; fwd += vjy;
+    turn = clampf(turn, -1.0f, 1.0f);
+    fwd  = clampf(fwd,  -1.0f, 1.0f);
 
-    float in_mag = sqrtf(ix * ix + iy * iy);
-    if (in_mag > 1.0f) { ix /= in_mag; iy /= in_mag; in_mag = 1.0f; }
+    /* Rotate heading. forward dir in world XZ is (sin ry, cos ry).
+       Negative so LEFT turns left / RIGHT turns right (matches the original). */
+    e->ry -= turn * PLAYER_TURN_RATE * dt;
 
-    /* Map (right, forward) screen-space input onto world XZ via camera yaw. */
-    float mx = ix * cy + iy * sy;
-    float mz = ix * sy - iy * cy;
-
-    float len = sqrtf(mx * mx + mz * mz);
-    if (len > 0.0001f) {
-        float dirx = mx / len, dirz = mz / len;
-        e->vx = dirx * speed * in_mag;
-        e->vz = dirz * speed * in_mag;
-        /* Directional clips are relative to facing/camera, so keep Jimmy
-           facing camera-forward while side/back inputs move on their own axes. */
-        e->ry = atan2f(sy, -cy);
+    if (fabsf(fwd) > 0.0001f) {
+        e->vx = sinf(e->ry) * speed * fwd;
+        e->vz = cosf(e->ry) * speed * fwd;
     } else {
         e->vx = 0.0f;
         e->vz = 0.0f;
     }
 
+    if (noclip) {
+        float up = 0.0f;
+        if (input_is_down(SDL_SCANCODE_SPACE)) up += 1.0f;
+        if (input_is_down(SDL_SCANCODE_LCTRL) || input_is_down(SDL_SCANCODE_RCTRL) ||
+            input_is_down(SDL_SCANCODE_Q)) up -= 1.0f;
+        e->vy = up * PLAYER_NOCLIP_VERTICAL_SPEED *
+            (input_is_down(SDL_SCANCODE_LSHIFT) ? PLAYER_RUN_MULT : 1.0f);
+        e->on_ground = 1;
+    }
+
     /* Jump (only when grounded). Keyboard SPACE edge OR a touch jump tap.
        just_pressed / take_jump prevent holding from auto-bunny-hopping. */
     int jump_pressed = input_just_pressed(SDL_SCANCODE_SPACE) || input_virtual_take_jump();
-    if (e->on_ground && jump_pressed) {
+    if (!noclip && e->on_ground && jump_pressed) {
         e->vy = PLAYER_JUMP_VEL;
         e->on_ground = 0;
     }
@@ -92,14 +114,22 @@ static void player_on_update(Entity *e, World *w, float dt) {
     s_last_items_collected = cur_items;
     if (e->user_float > 0.0f) e->user_float -= dt;
 
-    /* Animation state machine. PICKUP wins while its countdown is active. */
+    /* Animation state machine. PICKUP wins while its countdown is active.
+       jimleft/jimright are now the turn-in-place lean clips. */
     PlayerAnim anim;
     if (e->user_float > 0.0f) {
         anim = PA_PICKUP;
-    } else if (!e->on_ground) {
+    } else if (!noclip && !e->on_ground) {
         anim = (e->vy > 0.0f) ? PA_JUMP : PA_FALL;
-    } else if (len > 0.0001f) {
-        anim = locomotion_anim_from_input(ix, iy);
+    } else if (fabsf(turn) > fabsf(fwd) && fabsf(turn) > 0.0001f) {
+        /* Turn-dominant input plays the sidestep/strafe clip (LEFT->jimleft). */
+        anim = (turn < 0.0f) ? PA_LEFT : PA_RIGHT;
+    } else if (fwd > 0.0001f) {
+        anim = PA_RUN;
+    } else if (fwd < -0.0001f) {
+        anim = PA_BACKPEDAL;
+    } else if (player_near_swing(w, e)) {
+        anim = PA_SWING;   /* contextual: idling by a swing */
     } else {
         anim = PA_IDLE;
     }

@@ -1,0 +1,13 @@
+{
+  "written": [
+    "BLOCK_HOODFAR",
+    "bridge",
+    "Box01",
+    "Plane01",
+    "Plane02",
+    "DOOR"
+  ],
+  "skipped": [],
+  "overridden": [],
+  "placements": "assets/glb/omt/level1d_placements.txt"
+}

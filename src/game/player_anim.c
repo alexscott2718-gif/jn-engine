@@ -13,6 +13,8 @@ static const char *POSE_PATHS[PA_COUNT] = {
     "assets/ase/jimjump.ASE",
     "assets/ase/jimfall.ASE",
     "assets/ase/jimpickup.ASE",
+    "assets/ase/jimswing.ASE",
+    "assets/ase/jimladder.ASE",
 };
 
 static unsigned int g_shared_tex = 0;
@@ -57,7 +59,8 @@ static void ensure_shared_jimmy_clip_data(PlayerAnim a, AseModel *m) {
 
 static int anim_loops(PlayerAnim a) {
     return a == PA_IDLE || a == PA_RUN || a == PA_LEFT ||
-           a == PA_RIGHT || a == PA_BACKPEDAL || a == PA_FALL;
+           a == PA_RIGHT || a == PA_BACKPEDAL || a == PA_FALL ||
+           a == PA_SWING || a == PA_LADDER;
 }
 
 int player_anim_init(unsigned int shared_texture_id) {

@@ -1,0 +1,22 @@
+{
+  "written": [
+    "moon",
+    "Plane07",
+    "1",
+    "2",
+    "3",
+    "4",
+    "5",
+    "6",
+    "7",
+    "Object01",
+    "satelite",
+    "Cylinder01",
+    "cast01",
+    "cast02",
+    "rec"
+  ],
+  "skipped": [],
+  "overridden": [],
+  "placements": "assets/glb/omt/level1f_placements.txt"
+}

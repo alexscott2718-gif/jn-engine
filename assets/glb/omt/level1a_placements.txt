@@ -1,0 +1,34 @@
+# OMT glTF placements emitted by omt_asset_toolkit.gltf_export
+# format: <name>\t<glb_path>\t<center_x>\t<center_y>\t<center_z>
+# native GL translation = (center_x, 0, -center_z); height baked into mesh
+map01	assets/glb/omt/level1a/map01.glb	6194.3115	819.2085	-8753.8770
+Cylinder04	assets/glb/omt/level1a/Cylinder04.glb	4785.0840	1159.9846	-2305.8589
+Cylinder06	assets/glb/omt/level1a/Cylinder06.glb	5130.6094	486.8716	-3302.5889
+Cylinder07	assets/glb/omt/level1a/Cylinder07.glb	4835.1758	486.8716	-3302.5889
+TRAIN02	assets/glb/omt/level1a/TRAIN02.glb	10366.3018	269.6381	-7405.6392
+Train	assets/glb/omt/level1a/Train.glb	10685.3789	271.9214	-5796.1953
+EXIT	assets/glb/omt/level1a/EXIT.glb	9678.4570	805.2452	2278.1436
+Train01	assets/glb/omt/level1a/Train01.glb	9849.7256	271.9214	-8981.4756
+Cylinder08	assets/glb/omt/level1a/Cylinder08.glb	4765.0176	-110.2905	-2253.0420
+Cylinder09	assets/glb/omt/level1a/Cylinder09.glb	5196.5713	-627.7871	-2253.0420
+vending m	assets/glb/omt/level1a/vending m.glb	9300.3203	304.6346	2152.8633
+Plane01	assets/glb/omt/level1a/Plane01.glb	9181.0059	715.3778	739.1802
+Box01	assets/glb/omt/level1a/Box01.glb	8286.7500	1643.7871	-4672.0835
+Plane02	assets/glb/omt/level1a/Plane02.glb	4782.3618	1268.3894	-2276.7197
+Plane03	assets/glb/omt/level1a/Plane03.glb	6067.7217	-1050.1700	-2268.8660
+Plane04	assets/glb/omt/level1a/Plane04.glb	6105.6299	23.2747	-3443.9407
+Box02	assets/glb/omt/level1a/Box02.glb	4066.6816	-15.3319	-2851.5554
+station	assets/glb/omt/level1a/station.glb	10353.5391	1096.7383	1259.2277
+sewersentrance	assets/glb/omt/level1a/sewersentrance.glb	9422.3242	31.0352	-2934.5630
+Object01	assets/glb/omt/level1a/Object01.glb	9972.6953	457.4928	-3767.6655
+Box03	assets/glb/omt/level1a/Box03.glb	9835.0820	107.8689	-1032.7676
+Cylinder01	assets/glb/omt/level1a/Cylinder01.glb	10184.9082	424.9640	-2079.5659
+flurpmachine	assets/glb/omt/level1a/flurpmachine.glb	10045.8652	304.6346	2152.8633
+Box04	assets/glb/omt/level1a/Box04.glb	9986.3691	355.8121	-1122.4331
+Box05	assets/glb/omt/level1a/Box05.glb	10026.1631	393.2344	-3741.6016
+Box08	assets/glb/omt/level1a/Box08.glb	10584.5156	1007.4159	-2252.1084
+barrier	assets/glb/omt/level1a/barrier.glb	10858.0273	169.5202	2430.0129
+Plane05	assets/glb/omt/level1a/Plane05.glb	7630.6445	499.0368	-12880.6934
+Object02	assets/glb/omt/level1a/Object02.glb	6354.7808	2.3457	-14169.0957
+Cylinder10	assets/glb/omt/level1a/Cylinder10.glb	7426.3594	716.9736	-13068.0020
+Plane06	assets/glb/omt/level1a/Plane06.glb	11531.3008	400.3246	-894.9809

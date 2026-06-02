@@ -7,6 +7,12 @@
 
 void world_init(World *w) {
     w->head = NULL; w->count = 0; w->ground_y = 0.0f;
+    w->safety_floor_enabled = 0;
+    w->safety_floor_y = 0.0f;
+    w->safety_floor_cx = 0.0f;
+    w->safety_floor_cz = 0.0f;
+    w->safety_floor_half_x = 0.0f;
+    w->safety_floor_half_z = 0.0f;
     w->placements = NULL; w->placement_count = 0;
 }
 
@@ -32,6 +38,7 @@ void world_destroy(World *w) {
     w->head = NULL; w->count = 0;
     free(w->placements);
     w->placements = NULL; w->placement_count = 0;
+    w->safety_floor_enabled = 0;
 }
 
 /* Slab method: clip the parametric segment p + t*(q-p) against an AABB and

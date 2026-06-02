@@ -1,0 +1,45 @@
+# OMT glTF placements emitted by omt_asset_toolkit.gltf_export
+# format: <name>\t<glb_path>\t<center_x>\t<center_y>\t<center_z>
+# native GL translation = (center_x, 0, -center_z); height baked into mesh
+Box01	assets/glb/omt/level6/Box01.glb	-8267.4609	1168.5577	4829.7451
+Box02	assets/glb/omt/level6/Box02.glb	-9912.1533	1168.5577	3388.9849
+Box03	assets/glb/omt/level6/Box03.glb	-8624.0957	1168.5577	363.4404
+6	assets/glb/omt/level6/6.glb	-9684.6172	1158.7617	-1819.3009
+7	assets/glb/omt/level6/7.glb	-9089.6992	1158.9355	1903.0548
+8	assets/glb/omt/level6/8.glb	-10150.4062	855.4390	5799.7891
+05	assets/glb/omt/level6/05.glb	-5405.2144	1047.3965	6400.6104
+9	assets/glb/omt/level6/9.glb	-1024.2578	836.7490	5958.4678
+stars01	assets/glb/omt/level6/stars01.glb	-10097.3828	1288.1160	-709.6125
+blockacove01	assets/glb/omt/level6/blockacove01.glb	-5167.5220	1244.5619	5493.6177
+blockacove02	assets/glb/omt/level6/blockacove02.glb	-5614.9258	1244.5619	5493.6177
+blockacove03	assets/glb/omt/level6/blockacove03.glb	-5194.4429	1244.5619	7304.9238
+blockacove04	assets/glb/omt/level6/blockacove04.glb	-5641.8467	1244.5619	7304.9238
+blockacove05	assets/glb/omt/level6/blockacove05.glb	-8811.1094	1244.5619	4597.7710
+blockacove06	assets/glb/omt/level6/blockacove06.glb	-8811.1094	1244.5619	5045.1753
+blockacove07	assets/glb/omt/level6/blockacove07.glb	-9384.1943	1244.5619	3619.6021
+blockacove08	assets/glb/omt/level6/blockacove08.glb	-9384.1943	1244.5619	3172.1978
+blockacove09	assets/glb/omt/level6/blockacove09.glb	-9294.4668	1244.5619	118.3358
+blockacove10	assets/glb/omt/level6/blockacove10.glb	-9294.4668	1244.5619	565.7402
+blockacove27	assets/glb/omt/level6/blockacove27.glb	-179.2018	436.6669	4997.3232
+blockacove28	assets/glb/omt/level6/blockacove28.glb	186.4390	436.6669	4999.7886
+blockacove29	assets/glb/omt/level6/blockacove29.glb	-7925.7373	1244.5619	6129.1567
+blockacove30	assets/glb/omt/level6/blockacove30.glb	-7925.7373	1244.5619	6696.3628
+blockacove31	assets/glb/omt/level6/blockacove31.glb	-2087.2305	1244.5619	6667.1411
+blockacove32	assets/glb/omt/level6/blockacove32.glb	-1639.8267	1244.5619	6667.1411
+blockacove33	assets/glb/omt/level6/blockacove33.glb	-1639.8267	1244.5619	6158.3003
+blockacove34	assets/glb/omt/level6/blockacove34.glb	-2087.2305	1244.5619	6158.3003
+firstroom	assets/glb/omt/level6/firstroom.glb	1.7246	786.6953	2386.9697
+Plane04	assets/glb/omt/level6/Plane04.glb	-640.1544	3.4863	3309.0867
+Plane05	assets/glb/omt/level6/Plane05.glb	-640.3209	3.4863	2627.7788
+Plane06	assets/glb/omt/level6/Plane06.glb	-640.1544	3.4863	1945.0906
+Plane07	assets/glb/omt/level6/Plane07.glb	641.5870	3.4863	1945.0906
+Plane08	assets/glb/omt/level6/Plane08.glb	641.5870	3.4863	2628.1567
+Plane09	assets/glb/omt/level6/Plane09.glb	641.2355	3.4863	3310.2891
+Plane10	assets/glb/omt/level6/Plane10.glb	-11869.1924	348.6557	6418.6099
+tesla	assets/glb/omt/level6/tesla.glb	-10486.3848	837.8690	5725.8945
+tesla01	assets/glb/omt/level6/tesla01.glb	-3003.2073	837.8690	6412.7402
+teslaswitch	assets/glb/omt/level6/teslaswitch.glb	-2470.3970	861.4709	6573.3843
+tesla04	assets/glb/omt/level6/tesla04.glb	-9610.3115	837.8690	723.5119
+2	assets/glb/omt/level6/2.glb	-1637.7104	2092.3794	-157.0935
+stars02	assets/glb/omt/level6/stars02.glb	-1629.3540	1309.5945	-2754.4399
+cage	assets/glb/omt/level6/cage.glb	-2412.6958	2240.6985	-339.6966

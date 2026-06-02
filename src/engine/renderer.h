@@ -28,12 +28,27 @@ void renderer_draw_model_matrix(const AseModel *m, unsigned int texture_id_overr
 void renderer_draw_model_anim(const AseModel *m, unsigned int texture_id_override,
                               float tx, float ty, float tz, float yaw, float scale,
                               int frame_a, int frame_b, float lerp);
+/* As above, plus pitch/roll body lean (radians) applied in the yawed frame. */
+void renderer_draw_model_anim_euler(const AseModel *m, unsigned int texture_id_override,
+                                    float tx, float ty, float tz,
+                                    float yaw, float pitch, float roll, float scale,
+                                    int frame_a, int frame_b, float lerp);
 void renderer_draw_model_matrix_anim(const AseModel *m, unsigned int texture_id_override,
                                      const float model[16],
                                      int frame_a, int frame_b, float lerp);
 void renderer_draw_box(unsigned int vao, int index_count,
                        float tx, float ty, float tz, float scale,
                        float r, float g, float b);
+/* Faithful sky dome (bluesky3): centered on the camera, drawn behind all scene
+   geometry (pass spin=0 for the static painted-neighborhood backdrop). */
+void renderer_draw_sky_dome(const AseModel *m, float spin);
+/* Full procedural cloud hemisphere (real sky.png texture), rotated by `spin`
+   radians for drifting clouds. Drawn behind the faithful neighborhood backdrop. */
+void renderer_draw_cloud_dome(unsigned int tex, float spin);
+/* Foliage chroma-key: while enabled, the lit shader discards textured fragments
+   within `tol` (squared RGB distance, 0..3) of (r,g,b). Used to punch the baked
+   sky-blue out of the 2D_Trees boundary walls so the real sky shows through. */
+void renderer_set_color_key(int enable, float r, float g, float b, float tol);
 /* Phase 10 Step 2: camera-facing alpha-tested billboard. Width/height in
    world units. Tint multiplies the texel; pass tint_a == 0 for no tint. */
 void renderer_draw_billboard(unsigned int tex,

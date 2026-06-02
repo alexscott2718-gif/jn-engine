@@ -130,7 +130,7 @@ WEB_LDFLAGS = -sUSE_SDL=2 -sUSE_SDL_MIXER=2 -sUSE_ZLIB=1 \
               -sFULL_ES3=1 -sMIN_WEBGL_VERSION=2 -sMAX_WEBGL_VERSION=2 \
               -sALLOW_MEMORY_GROWTH=1 -sASYNCIFY \
               -sEXIT_RUNTIME=0 \
-              -sEXPORTED_FUNCTIONS=_main,_input_set_virtual_move,_input_press_virtual_jump \
+              -sEXPORTED_FUNCTIONS=_main,_input_set_virtual_move,_input_press_virtual_jump,_input_toggle_noclip,_input_set_noclip,_input_noclip_enabled \
               -sEXPORTED_RUNTIME_METHODS=ccall,cwrap \
               --preload-file assets \
               --shell-file web/shell.html

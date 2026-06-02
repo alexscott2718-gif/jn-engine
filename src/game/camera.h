@@ -4,15 +4,20 @@
 #include "../engine/world.h"
 #include "../engine/renderer.h"
 
-/* Smoothed third-person follow camera. */
+/* Third-person follow camera locked behind the player's back (tank-turn).
+   The camera yaw tracks the player's heading (cam.yaw = PI - target->ry) so it
+   always sits behind Jimmy and turns with him. `yaw_offset` is an optional
+   mouse free-look delta layered on top; it decays back to zero (snaps behind)
+   while the player is moving or turning. */
 
 typedef struct {
-    float yaw;            /* orbital yaw around player (radians) */
+    float yaw;            /* smoothed effective orbital yaw (radians) */
     float pitch;          /* orbital pitch (radians; downward = negative) */
     float distance;       /* distance from player */
     float height;         /* vertical offset above player's feet */
-    float smoothing;      /* 0 = no smoothing, 1 = no movement */
-    int   manual_yaw;     /* if non-zero, mouse-drag overrides yaw */
+    float smoothing;      /* position smoothing: 0 = snap, ->1 = sluggish */
+    float yaw_smoothing;  /* how tightly yaw tracks the player's heading */
+    float yaw_offset;     /* mouse free-look delta from behind-the-back (rad) */
 } FollowCam;
 
 void follow_cam_init(FollowCam *fc);

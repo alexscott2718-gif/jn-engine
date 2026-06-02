@@ -52,6 +52,12 @@ typedef struct World {
     Entity *head;
     int     count;
     float   ground_y;            /* ground plane elevation */
+    int     safety_floor_enabled;
+    float   safety_floor_y;
+    float   safety_floor_cx;
+    float   safety_floor_cz;
+    float   safety_floor_half_x;
+    float   safety_floor_half_z;
 
     WorldPlacement *placements;  /* static-geometry array (NULL when none) */
     int             placement_count;

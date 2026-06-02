@@ -12,7 +12,9 @@ typedef enum {
     PA_JUMP      = 5,
     PA_FALL      = 6,
     PA_PICKUP    = 7,
-    PA_COUNT     = 8
+    PA_SWING     = 8,   /* contextual: near a playground swing (3SWN) */
+    PA_LADDER    = 9,   /* contextual: on a ladder (dormant — no Level-1 ladder) */
+    PA_COUNT     = 10
 } PlayerAnim;
 
 typedef struct {

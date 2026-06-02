@@ -108,6 +108,8 @@ static float hgt_at(int i, int j) { return g_hgt[j * (GRID_N + 1) + i]; }
 int ground_init(unsigned int texture_id, float half_x, float half_z,
                 float center_x, float center_z, float tile_repeat,
                 float y_amplitude) {
+    ground_destroy();
+
     g_tex    = texture_id;
     g_cx     = center_x;
     g_cz     = center_z;

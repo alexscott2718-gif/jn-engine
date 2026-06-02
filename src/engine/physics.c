@@ -1,5 +1,6 @@
 #include "physics.h"
 #include "assets/asset_cache.h"
+#include "input.h"
 #include <math.h>
 #include <stddef.h>
 #include <string.h>
@@ -94,6 +95,14 @@ static int world_terrain_height(const World *w, float x, float z, float *out_y) 
     return hit;
 }
 
+static int world_safety_floor_height(const World *w, float x, float z, float *out_y) {
+    if (!w->safety_floor_enabled) return 0;
+    if (fabsf(x - w->safety_floor_cx) > w->safety_floor_half_x) return 0;
+    if (fabsf(z - w->safety_floor_cz) > w->safety_floor_half_z) return 0;
+    if (out_y) *out_y = w->safety_floor_y;
+    return 1;
+}
+
 void physics_step(World *w, float dt) {
     if (dt <= 0.0f) return;
 
@@ -101,6 +110,14 @@ void physics_step(World *w, float dt) {
     for (Entity *e = w->head; e; e = e->next) {
         if (!e->alive || !e->vt) continue;
         if (!(e->vt->flags & ENTITY_FLAG_PHYSICS)) continue;
+
+        if ((e->vt->flags & ENTITY_FLAG_PLAYER) && input_noclip_enabled()) {
+            e->x += e->vx * dt;
+            e->y += e->vy * dt;
+            e->z += e->vz * dt;
+            e->on_ground = 1;
+            continue;
+        }
 
         e->vy -= PHYSICS_GRAVITY * dt;
         if (e->vy < -PHYSICS_MAX_FALL) e->vy = -PHYSICS_MAX_FALL;
@@ -130,7 +147,14 @@ void physics_step(World *w, float dt) {
         }
         if (!e->on_ground) {
             float terrain_y;
-            if (world_terrain_height(w, e->x, e->z, &terrain_y)) {
+            int have_floor = world_terrain_height(w, e->x, e->z, &terrain_y);
+            float safety_y;
+            if (world_safety_floor_height(w, e->x, e->z, &safety_y) &&
+                (!have_floor || safety_y > terrain_y)) {
+                terrain_y = safety_y;
+                have_floor = 1;
+            }
+            if (have_floor) {
                 float floor_y = terrain_y + e->half_extents[1];
                 if (e->y < floor_y) {
                     e->y = floor_y;

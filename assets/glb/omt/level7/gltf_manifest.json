@@ -1,0 +1,33 @@
+{
+  "written": [
+    "Object04",
+    "Cylinder01",
+    "Cylinder02",
+    "Cylinder03",
+    "Box03",
+    "Box04",
+    "Plane02",
+    "pod",
+    "Object01",
+    "Box05",
+    "invisible01",
+    "cellhall",
+    "Plane03",
+    "Box06",
+    "Box07",
+    "alcoveblock",
+    "alcoveblock01",
+    "alcoveblock02",
+    "alcoveblock03",
+    "alcoveblock04",
+    "alcoveblock05",
+    "cell",
+    "YokianF",
+    "Object02"
+  ],
+  "skipped": [
+    "Group01"
+  ],
+  "overridden": [],
+  "placements": "assets/glb/omt/level7_placements.txt"
+}

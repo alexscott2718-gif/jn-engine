@@ -1,0 +1,34 @@
+# OMT glTF placements emitted by omt_asset_toolkit.gltf_export
+# format: <name>\t<glb_path>\t<center_x>\t<center_y>\t<center_z>
+# native GL translation = (center_x, 0, -center_z); height baked into mesh
+Plane01	assets/glb/omt/level3d/Plane01.glb	-2405.2910	1458.5027	-461.4038
+viking	assets/glb/omt/level3d/viking.glb	405.5772	595.4000	3028.8872
+octogate	assets/glb/omt/level3d/octogate.glb	1699.1763	162.8853	1239.9200
+bench02	assets/glb/omt/level3d/bench02.glb	-1491.3534	67.0909	-48.6627
+treetrunk	assets/glb/omt/level3d/treetrunk.glb	-2455.5466	631.9621	411.7686
+stomach	assets/glb/omt/level3d/stomach.glb	632.8867	852.3854	-3797.0469
+bench03	assets/glb/omt/level3d/bench03.glb	-1490.0292	67.0909	665.9406
+Object01	assets/glb/omt/level3d/Object01.glb	1969.2350	63.1059	-977.5691
+treetrunk01	assets/glb/omt/level3d/treetrunk01.glb	1579.0740	532.7409	3021.3633
+treetrunk02	assets/glb/omt/level3d/treetrunk02.glb	2641.1316	532.7409	1259.4006
+treetrunk03	assets/glb/omt/level3d/treetrunk03.glb	2561.8010	532.7409	-3590.7405
+bench04	assets/glb/omt/level3d/bench04.glb	-914.7102	67.0909	-48.6627
+bench05	assets/glb/omt/level3d/bench05.glb	-913.3861	67.0909	665.9406
+Object02	assets/glb/omt/level3d/Object02.glb	1829.6227	141.4922	-967.0037
+Box12	assets/glb/omt/level3d/Box12.glb	3997.0842	1777.5833	-3607.2666
+Cables01	assets/glb/omt/level3d/Cables01.glb	-2905.0195	2275.4814	-3548.0942
+Cylinder01	assets/glb/omt/level3d/Cylinder01.glb	-612.1404	2413.9919	-406.2676
+Plane02	assets/glb/omt/level3d/Plane02.glb	-477.5762	-201.4320	-150.5645
+Box02	assets/glb/omt/level3d/Box02.glb	234.2314	203.8261	2747.5171
+Box14	assets/glb/omt/level3d/Box14.glb	274.9928	203.8268	-3446.8193
+Box15	assets/glb/omt/level3d/Box15.glb	1742.9177	203.8262	1346.1228
+Cylinder02	assets/glb/omt/level3d/Cylinder02.glb	1829.7539	715.9885	-979.0079
+Plane04	assets/glb/omt/level3d/Plane04.glb	-7022.9692	1243.8988	1646.9934
+Box03	assets/glb/omt/level3d/Box03.glb	440.6106	182.2357	3051.2776
+Box01	assets/glb/omt/level3d/Box01.glb	445.2290	395.4434	3030.4048
+block	assets/glb/omt/level3d/block.glb	1696.4551	383.9269	1241.6479
+benchblock	assets/glb/omt/level3d/benchblock.glb	-1488.4384	36.1686	733.1906
+benchblock01	assets/glb/omt/level3d/benchblock01.glb	-916.6847	36.1686	733.1906
+benchblock02	assets/glb/omt/level3d/benchblock02.glb	-1488.4385	36.1686	-117.1372
+benchblock03	assets/glb/omt/level3d/benchblock03.glb	-916.6847	36.1686	-117.1373
+Box04	assets/glb/omt/level3d/Box04.glb	566.8037	1231.0981	-3798.5225

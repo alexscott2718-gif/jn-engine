@@ -1,0 +1,9 @@
+# OMT glTF placements emitted by omt_asset_toolkit.gltf_export
+# format: <name>\t<glb_path>\t<center_x>\t<center_y>\t<center_z>
+# native GL translation = (center_x, 0, -center_z); height baked into mesh
+BLOCK_HOODFAR	assets/glb/omt/level1e/BLOCK_HOODFAR.glb	32.6390	606.3732	-4.8506
+bridge	assets/glb/omt/level1e/bridge.glb	23.4929	-3504.0840	-1418.3550
+Box01	assets/glb/omt/level1e/Box01.glb	-121.4504	2820.3467	-75.2991
+Plane01	assets/glb/omt/level1e/Plane01.glb	-1169.6257	-3700.6526	-486.5654
+Plane02	assets/glb/omt/level1e/Plane02.glb	1241.6973	-3700.6526	-486.5654
+DOOR	assets/glb/omt/level1e/DOOR.glb	1.1713	260.8404	0.0668

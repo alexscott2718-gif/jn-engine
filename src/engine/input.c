@@ -16,6 +16,7 @@ static int input_initialized = 0;
 /* Virtual touch input state. */
 static float g_vmove_x = 0.0f, g_vmove_y = 0.0f;
 static int   g_vjump_pending = 0;
+static int   g_noclip_enabled = 0;
 
 int input_init(void) {
     keys_current = SDL_GetKeyboardState(&num_keys);
@@ -76,4 +77,21 @@ int input_virtual_take_jump(void) {
     int j = g_vjump_pending;
     g_vjump_pending = 0;
     return j;
+}
+
+EMSCRIPTEN_KEEPALIVE
+void input_set_noclip(int enabled) {
+    g_noclip_enabled = enabled ? 1 : 0;
+    printf("[noclip] %s\n", g_noclip_enabled ? "enabled" : "disabled");
+}
+
+EMSCRIPTEN_KEEPALIVE
+int input_toggle_noclip(void) {
+    input_set_noclip(!g_noclip_enabled);
+    return g_noclip_enabled;
+}
+
+EMSCRIPTEN_KEEPALIVE
+int input_noclip_enabled(void) {
+    return g_noclip_enabled;
 }

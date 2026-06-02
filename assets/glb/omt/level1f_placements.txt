@@ -1,0 +1,18 @@
+# OMT glTF placements emitted by omt_asset_toolkit.gltf_export
+# format: <name>\t<glb_path>\t<center_x>\t<center_y>\t<center_z>
+# native GL translation = (center_x, 0, -center_z); height baked into mesh
+moon	assets/glb/omt/level1f/moon.glb	-55.9248	10400.4043	-4034.3691
+Plane07	assets/glb/omt/level1f/Plane07.glb	512.6582	14015.7646	72279.2344
+1	assets/glb/omt/level1f/1.glb	4753.3369	12665.5645	6381.6982
+2	assets/glb/omt/level1f/2.glb	-2986.8877	12972.5488	8684.7393
+3	assets/glb/omt/level1f/3.glb	3939.8167	11875.3008	14796.8965
+4	assets/glb/omt/level1f/4.glb	-2207.9023	11204.2559	22106.5996
+5	assets/glb/omt/level1f/5.glb	4868.7490	12195.6758	29615.4668
+6	assets/glb/omt/level1f/6.glb	4529.5020	12068.9619	58204.7188
+7	assets/glb/omt/level1f/7.glb	-1869.7747	12038.8320	64331.2109
+Object01	assets/glb/omt/level1f/Object01.glb	159.7140	13709.5488	-294.4374
+satelite	assets/glb/omt/level1f/satelite.glb	3807.6995	15554.3535	37802.9688
+Cylinder01	assets/glb/omt/level1f/Cylinder01.glb	655.9742	10567.6191	13689.0859
+cast01	assets/glb/omt/level1f/cast01.glb	-2492.6311	12038.8320	50120.2734
+cast02	assets/glb/omt/level1f/cast02.glb	4950.3364	12038.8320	43596.0391
+rec	assets/glb/omt/level1f/rec.glb	-1936.1008	12038.8320	36430.5156

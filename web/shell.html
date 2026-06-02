@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
-<title>JN Engine — Level 1 (Phase 12 QA)</title>
+<title>JN Engine — Playable Levels</title>
 <style>
   html, body { margin: 0; padding: 0; height: 100%; background: #0b0d10; color: #c8d0d8;
                font: 14px/1.4 system-ui, sans-serif; }
@@ -30,6 +30,21 @@
               accent-color: #9fb3c8; }
   #progress[hidden] { display: none; }
   #controls { font-size: 12px; color: #6b7785; }
+  #levelnav { display: flex; align-items: center; justify-content: center; gap: 8px;
+              flex-wrap: wrap; max-width: 980px; }
+  #levelnav button, #levelSelect {
+    background: #151b22; color: #c8d0d8; border: 1px solid #273241;
+    border-radius: 4px; padding: 5px 8px; font: 12px system-ui, sans-serif;
+  }
+  #levelnav button { cursor: pointer; }
+  #levelnav button:hover, #levelSelect:hover { border-color: #53677f; }
+  #levelLinks { display: flex; flex-wrap: wrap; justify-content: center;
+                gap: 5px; max-width: 980px; }
+  #levelLinks a {
+    color: #9fb3c8; text-decoration: none; border: 1px solid #273241;
+    border-radius: 4px; padding: 3px 6px; font-size: 12px;
+  }
+  #levelLinks a.active { background: #263244; border-color: #7890ad; color: #e8f0f8; }
 
   /* ---- Touch controls (mobile) ---- */
   /* #stage wraps the canvas so the overlay can position over it. */
@@ -57,7 +72,14 @@
 </head>
 <body>
 <div id="wrap">
-  <h1>Jimmy Neutron — Level 1 · Phase 12 canonicalization QA</h1>
+  <h1 id="title">Jimmy Neutron — Level 2</h1>
+  <div id="levelnav">
+    <button id="prevLevel" type="button">Previous</button>
+    <select id="levelSelect" aria-label="Playable level"></select>
+    <button id="nextLevel" type="button">Next</button>
+    <button id="noclipToggle" type="button">Noclip: Off</button>
+  </div>
+  <div id="levelLinks"></div>
   <div id="status">Loading…</div>
   <progress id="progress" max="100" value="0"></progress>
   <div id="stage">
@@ -68,14 +90,91 @@
       <div id="jump">JUMP</div>
     </div>
   </div>
-  <div id="controls">WASD move · SPACE jump · SHIFT run · R respawn · drag = orbit</div>
+  <div id="controls">WASD move · SPACE jump/up · Ctrl/Q down · SHIFT run · N noclip · R respawn · drag = orbit</div>
   <div id="note">
-    Flat full-bright lighting (original Level&nbsp;1 ran D3D&nbsp;LIGHTING=OFF) and a
-    data-driven mud terrain heightfield. Large dark untextured surfaces are
-    unresolved placement meshes (Phase&nbsp;9/10), out of Phase&nbsp;12 scope.
+    Native WebGL2 rebuild using original GAM/OMT data.
   </div>
 </div>
 <script type="text/javascript">
+  var PLAYABLE_LEVELS = [
+    'level1', 'level1a', 'level1b', 'level1c', 'level1d', 'level1e', 'level1f',
+    'level2', 'level2a', 'level2b',
+    'level3', 'level3a', 'level3c', 'level3d',
+    'level4', 'level4a', 'level4b', 'level4c', 'level4d',
+    'level5', 'level5a', 'level5b',
+    'level6', 'level6a',
+    'level7'
+  ];
+  var LEVEL_LABELS = {
+    level1: 'Level 1', level1a: 'Level 1A', level1b: 'Level 1B',
+    level1c: 'Level 1C', level1d: 'Level 1D', level1e: 'Level 1E',
+    level1f: 'Level 1F', level2: 'Level 2', level2a: 'Level 2A',
+    level2b: 'Level 2B', level3: 'Level 3', level3a: 'Level 3A',
+    level3c: 'Level 3C', level3d: 'Level 3D', level4: 'Level 4',
+    level4a: 'Level 4A', level4b: 'Level 4B', level4c: 'Level 4C',
+    level4d: 'Level 4D', level5: 'Level 5', level5a: 'Level 5A',
+    level5b: 'Level 5B', level6: 'Level 6', level6a: 'Level 6A',
+    level7: 'Level 7'
+  };
+  function normalizeLevelParam(v) {
+    if (!v) return '';
+    v = String(v).toLowerCase().replace(/\.gam$/, '');
+    return PLAYABLE_LEVELS.indexOf(v) >= 0 ? v : '';
+  }
+  var selectedLevel = normalizeLevelParam(
+      new URLSearchParams(window.location.search).get('level')) || 'level2';
+  var selectedLabel = LEVEL_LABELS[selectedLevel] || selectedLevel;
+  document.title = 'JN Engine — ' + selectedLabel;
+  document.getElementById('title').textContent = 'Jimmy Neutron — ' + selectedLabel;
+
+  function levelHref(level) {
+    var url = new URL(window.location.href);
+    url.searchParams.set('level', level);
+    return url.pathname + url.search + url.hash;
+  }
+  function goLevel(level) {
+    window.location.href = levelHref(level);
+  }
+  (function buildLevelCatalog() {
+    var select = document.getElementById('levelSelect');
+    var links = document.getElementById('levelLinks');
+    for (var i = 0; i < PLAYABLE_LEVELS.length; i++) {
+      var level = PLAYABLE_LEVELS[i];
+      var label = LEVEL_LABELS[level] || level;
+      var opt = document.createElement('option');
+      opt.value = level;
+      opt.textContent = label;
+      if (level === selectedLevel) opt.selected = true;
+      select.appendChild(opt);
+
+      var a = document.createElement('a');
+      a.href = levelHref(level);
+      a.textContent = label;
+      if (level === selectedLevel) a.className = 'active';
+      links.appendChild(a);
+    }
+    select.addEventListener('change', function () { goLevel(select.value); });
+    document.getElementById('prevLevel').addEventListener('click', function () {
+      var i = PLAYABLE_LEVELS.indexOf(selectedLevel);
+      goLevel(PLAYABLE_LEVELS[(i + PLAYABLE_LEVELS.length - 1) % PLAYABLE_LEVELS.length]);
+    });
+    document.getElementById('nextLevel').addEventListener('click', function () {
+      var i = PLAYABLE_LEVELS.indexOf(selectedLevel);
+      goLevel(PLAYABLE_LEVELS[(i + 1) % PLAYABLE_LEVELS.length]);
+    });
+  })();
+
+  var noclipButton = document.getElementById('noclipToggle');
+  function setNoclipButton(enabled) {
+    noclipButton.textContent = enabled ? 'Noclip: On' : 'Noclip: Off';
+  }
+  noclipButton.addEventListener('click', function () {
+    if (!Module || !Module.ccall) return;
+    try {
+      setNoclipButton(!!Module.ccall('input_toggle_noclip', 'number', [], []));
+    } catch (e) {}
+  });
+
   var statusEl = document.getElementById('status');
   var canvasEl = document.getElementById('canvas');
   var TARGET_W = 1280, TARGET_H = 720;
@@ -179,12 +278,69 @@
   var JN_ASSET_VER = "__JN_ASSET_VER__";
   if (JN_ASSET_VER.indexOf("JN_ASSET_VER") !== -1) JN_ASSET_VER = "";
 
+  /* Cache the heavy build artifacts in CacheStorage. The level picker reloads
+     this page with a new ?level=... argument, but the wasm/data URLs stay the
+     same for a given deploy. Emscripten fetches those assets through
+     window.fetch, so intercept them here: first load stores the response,
+     later level reloads read the 170MB data package directly from disk cache. */
+  (function installBuildCache() {
+    if (!('caches' in window) || !window.fetch) return;
+
+    var nativeFetch = window.fetch.bind(window);
+    var cacheName = 'jn-engine-build-' + (JN_ASSET_VER || 'dev');
+
+    function buildAssetRequest(input, init) {
+      var method = (init && init.method) ||
+                   (input && input.method) ||
+                   'GET';
+      if (String(method).toUpperCase() !== 'GET') return null;
+
+      var url;
+      try {
+        url = new URL((input && input.url) || input, window.location.href);
+      } catch (e) {
+        return null;
+      }
+      if (url.origin !== window.location.origin) return null;
+      if (!/\/jnengine(?:\.[0-9a-f]{8})?\.(?:data|wasm)$/.test(url.pathname))
+        return null;
+
+      try {
+        return input instanceof Request ? input : new Request(url.href, init);
+      } catch (e) {
+        return null;
+      }
+    }
+
+    window.fetch = function (input, init) {
+      var req = buildAssetRequest(input, init);
+      if (!req) return nativeFetch(input, init);
+
+      return caches.open(cacheName).then(function (cache) {
+        return cache.match(req).then(function (cached) {
+          if (cached) {
+            if (/\.data$/.test(req.url))
+              showProgress('Using cached game data', 1, 1);
+            return cached;
+          }
+          return nativeFetch(req).then(function (response) {
+            if (response && response.ok) {
+              cache.put(req, response.clone()).catch(function () {});
+            }
+            return response;
+          });
+        });
+      });
+    };
+  })();
+
   var Module = {
     locateFile: function (path) {
       if (JN_ASSET_VER && (path === 'jnengine.wasm' || path === 'jnengine.data'))
         return path.replace(/\.(wasm|data)$/, JN_ASSET_VER + '.$1');
       return path;
     },
+    arguments: ['--level', selectedLevel],
     canvas: (function () {
       canvasEl.addEventListener('webglcontextlost', function (e) {
         alert('WebGL context lost — reload the page.'); e.preventDefault();
@@ -199,6 +355,12 @@
       setStatus(left ? ('Preparing… (' + left + ' assets left)') : 'Running.');
     }
   };
+  setInterval(function () {
+    if (!Module || !Module.ccall) return;
+    try {
+      setNoclipButton(!!Module.ccall('input_noclip_enabled', 'number', [], []));
+    } catch (e) {}
+  }, 250);
   setStatus('Downloading…');
   window.onerror = function (msg) { setStatus('Error: ' + msg); };
 

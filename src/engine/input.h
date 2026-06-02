@@ -19,4 +19,9 @@ void  input_get_virtual_move(float *x, float *y);
 void  input_press_virtual_jump(void);            /* JS: jump button tap */
 int   input_virtual_take_jump(void);             /* behavior: consume the tap */
 
+/* Noclip/fly mode. Exported for web UI; native toggles it from player input. */
+void  input_set_noclip(int enabled);
+int   input_toggle_noclip(void);
+int   input_noclip_enabled(void);
+
 #endif

@@ -11,7 +11,6 @@
 #include "../engine/phase4_capture_state.h"  /* Phase 4: measured alpha/blend/fog state */
 #include "../engine/capture.h"
 #include "../engine/replay.h"
-#include "../engine/capture_scene.h"
 #include "../engine/assets/gam_loader.h"
 #include "../engine/assets/ase_loader.h"
 #include "../engine/assets/tex_loader.h"
@@ -27,18 +26,13 @@
 #include <stdlib.h>
 #include <math.h>
 #include <string.h>
+#include <ctype.h>
 #include <zlib.h>
 #include <SDL.h>
 
 static int env_enabled(const char *name) {
     const char *s = getenv(name);
     return (s && s[0] && strcmp(s, "0") != 0) ? 1 : 0;
-}
-
-static int env_enabled_default(const char *name, int default_value) {
-    const char *s = getenv(name);
-    if (!s || !s[0]) return default_value;
-    return strcmp(s, "0") != 0;
 }
 
 static float env_float_default(const char *name, float default_value) {
@@ -49,14 +43,6 @@ static float env_float_default(const char *name, float default_value) {
 static int env_int_default(const char *name, int default_value) {
     const char *s = getenv(name);
     return (s && s[0]) ? atoi(s) : default_value;
-}
-
-/* Level-1 static OMT placements. Default to the self-contained .glb set
-   (Phase C: glTF replaces .ASE; textures are embedded, no override pass).
-   JN_OMT_PLACEMENTS overrides the path (e.g. the legacy ASE list for A/B). */
-static const char *omt_placements_path(void) {
-    const char *p = getenv("JN_OMT_PLACEMENTS");
-    return (p && p[0]) ? p : "assets/glb/omt/level1_placements.txt";
 }
 
 static int load_camera_descriptor_file(const char *path, int *screen_w, int *screen_h) {
@@ -102,79 +88,6 @@ static int load_camera_descriptor_file(const char *path, int *screen_w, int *scr
     fprintf(stderr, "[native_camera] keyframe camera override from %s (%dx%d)\n",
             path, sw, sh);
     return 1;
-}
-
-static const float CAPTURE_LEVEL1_VIEW_IDENTITY[16] = {
-    1.0f, 0.0f, 0.0f, 0.0f,
-    0.0f, 1.0f, 0.0f, 0.0f,
-    0.0f, 0.0f, 1.0f, 0.0f,
-    0.0f, 0.0f, 0.0f, 1.0f,
-};
-
-/* D3D capture projection from frame_v4_hudfix with the capture_scene z fix
-   baked into row 2, so native model depth matches the pre-transformed scene. */
-static const float CAPTURE_LEVEL1_PROJ_GL[16] = {
-    1.29942167f, 0.0f,       0.0f,        0.0f,
-    0.0f,       1.73256218f, 0.0f,        0.0f,
-    0.0f,       0.0f,        1.00142956f, 1.0f,
-    0.0f,       0.0f,      -41.0285912f,  1.0f,
-};
-
-static const float CAPTURE_LEVEL1_JIMMY_MODEL[16] = {
-    1.0f,          7.4505806e-09f,  2.98023224e-08f, 0.0f,
-    0.0f,          0.974252999f,   -0.225457549f,    0.0f,
-    0.0f,          0.225457549f,    0.974253058f,    0.0f,
-   -0.009765625f, -96.4539566f,   381.575134f,      1.0f,
-};
-
-#define CAPTURE_LIVE_MIN_Z_DELTA  (-90.0f)
-#define CAPTURE_LIVE_MAX_Z_DELTA  (240.0f)
-#define CAPTURE_LIVE_MIN_Y_DELTA  (-50.0f)
-#define CAPTURE_LIVE_MAX_Y_DELTA  (220.0f)
-#define CAPTURE_LIVE_NEAR_X_LIMIT (140.0f)
-#define CAPTURE_LIVE_FAR_X_LIMIT  (220.0f)
-
-static float clampf_local(float v, float lo, float hi) {
-    if (v < lo) return lo;
-    if (v > hi) return hi;
-    return v;
-}
-
-static void capture_live_visual_delta(const Entity *jim, const float spawn[3],
-                                      int bounded, float out_delta[3]) {
-    out_delta[0] = jim->x - spawn[0];
-    out_delta[1] = jim->y - spawn[1];
-    out_delta[2] = jim->z - spawn[2];
-
-    /* Headless QA helper: add a visual-only movement delta without mutating
-       gameplay state. Format: x,y,z in native Level 1 units. */
-    const char *test_delta = getenv("JN_CAPTURE_BACKED_TEST_JIMMY_DELTA");
-    if (test_delta && test_delta[0]) {
-        float tx = 0.0f, ty = 0.0f, tz = 0.0f;
-        if (sscanf(test_delta, "%f,%f,%f", &tx, &ty, &tz) == 3) {
-            out_delta[0] += tx;
-            out_delta[1] += ty;
-            out_delta[2] += tz;
-        }
-    }
-
-    if (bounded) {
-        /* Fixed-camera bounded QA: keep the accepted captured world/camera
-           static and only bound the live actor's visual delta so normal
-           movement remains visible. The simulation position, collision,
-           triggers, and camera state remain untouched. */
-        out_delta[2] = clampf_local(out_delta[2],
-                                    CAPTURE_LIVE_MIN_Z_DELTA,
-                                    CAPTURE_LIVE_MAX_Z_DELTA);
-        float z_t = (out_delta[2] - CAPTURE_LIVE_MIN_Z_DELTA) /
-            (CAPTURE_LIVE_MAX_Z_DELTA - CAPTURE_LIVE_MIN_Z_DELTA);
-        float x_limit = CAPTURE_LIVE_NEAR_X_LIMIT +
-            (CAPTURE_LIVE_FAR_X_LIMIT - CAPTURE_LIVE_NEAR_X_LIMIT) * z_t;
-        out_delta[0] = clampf_local(out_delta[0], -x_limit, x_limit);
-        out_delta[1] = clampf_local(out_delta[1],
-                                    CAPTURE_LIVE_MIN_Y_DELTA,
-                                    CAPTURE_LIVE_MAX_Y_DELTA);
-    }
 }
 
 /* True if the model resolves at least one real texture (model-level or any
@@ -281,6 +194,166 @@ static int resolve_gam_path(const char *name, char *out, size_t out_size) {
     return found;
 }
 
+typedef struct {
+    char name[32];
+    char gam_path[160];
+    char placements_path[160];
+    char billboard_overrides[160];
+    char sky_type[32];
+} LevelDesc;
+
+static int file_exists_local(const char *path) {
+    FILE *f = fopen(path, "rb");
+    if (!f) return 0;
+    fclose(f);
+    return 1;
+}
+
+static void normalize_level_name(const char *name, char *out, size_t out_size) {
+    if (!out_size) return;
+    out[0] = '\0';
+    if (!name) return;
+
+    const char *base = strrchr(name, '/');
+    base = base ? base + 1 : name;
+    size_t n = strlen(base);
+    if (n > 4 && strcasecmp(base + n - 4, ".gam") == 0)
+        n -= 4;
+    if (n >= out_size) n = out_size - 1;
+    for (size_t i = 0; i < n; i++)
+        out[i] = (char)tolower((unsigned char)base[i]);
+    out[n] = '\0';
+}
+
+static int level_desc_for(const char *name, LevelDesc *desc) {
+    char gam_name[64];
+    if (!desc) return 0;
+    memset(desc, 0, sizeof(*desc));
+    normalize_level_name(name, desc->name, sizeof(desc->name));
+    if (!desc->name[0]) return 0;
+
+    snprintf(gam_name, sizeof(gam_name), "%s.gam", desc->name);
+    if (!resolve_gam_path(gam_name, desc->gam_path, sizeof(desc->gam_path)))
+        return 0;
+
+    snprintf(desc->placements_path, sizeof(desc->placements_path),
+             "assets/glb/omt/%s_placements.txt", desc->name);
+    if (!file_exists_local(desc->placements_path))
+        desc->placements_path[0] = '\0';
+
+    snprintf(desc->billboard_overrides, sizeof(desc->billboard_overrides),
+             "assets/native/%s_billboard_overrides.txt", desc->name);
+    if (!file_exists_local(desc->billboard_overrides))
+        desc->billboard_overrides[0] = '\0';
+
+    if (strncmp(desc->name, "level1", 6) == 0 ||
+        strncmp(desc->name, "level2", 6) == 0) {
+        snprintf(desc->sky_type, sizeof(desc->sky_type), "bluesky3");
+    } else if (strncmp(desc->name, "level5", 6) == 0) {
+        snprintf(desc->sky_type, sizeof(desc->sky_type), "dusksky");
+    }
+    return 1;
+}
+
+static int load_level(const LevelDesc *desc, World *world) {
+    int n = gam_load(world, desc->gam_path);
+    if (n < 0) return -1;
+    if (desc->placements_path[0])
+        placements_load(world, desc->placements_path);
+    if (desc->billboard_overrides[0])
+        billboard_overrides_load(desc->billboard_overrides);
+    else
+        billboard_overrides_load("");
+    return n;
+}
+
+static void configure_level_sky(const LevelDesc *desc,
+                                AseModel **sky_model,
+                                unsigned int *clouds_tex) {
+    renderer_set_scene_tint(1.0f, 1.0f, 1.0f);
+    *sky_model = NULL;
+    *clouds_tex = 0;
+
+    if (strcmp(desc->sky_type, "bluesky3") == 0) {
+        renderer_set_sky(0.09f, 0.40f, 0.62f,
+                         0.24f, 0.50f, 0.68f);
+        *sky_model = model_cache_get("assets/glb/sky/bluesky3.glb");
+        *clouds_tex = tex_cache_get("assets/glb/sky/clouds.png");
+        fprintf(stderr, "[native_level] faithful bluesky3 dome %s; neutral scene tint\n",
+                *sky_model ? "loaded" : "MISSING");
+    } else if (strcmp(desc->sky_type, "dusksky") == 0) {
+        renderer_set_sky(0.24f, 0.18f, 0.33f,
+                         0.78f, 0.40f, 0.24f);
+    } else {
+        renderer_set_sky(0.10f, 0.32f, 0.48f,
+                         0.34f, 0.50f, 0.58f);
+    }
+}
+
+static void configure_safety_floor(World *world, const Entity *jim) {
+    float min_x = jim ? jim->x : 0.0f;
+    float max_x = min_x;
+    float min_z = jim ? jim->z : 0.0f;
+    float max_z = min_z;
+    int have_bounds = jim != NULL;
+
+    for (int i = 0; i < world->placement_count; i++) {
+        const WorldPlacement *pl = &world->placements[i];
+        float x = pl->x;
+        float z = -pl->z;
+        if (!have_bounds) {
+            min_x = max_x = x;
+            min_z = max_z = z;
+            have_bounds = 1;
+        } else {
+            if (x < min_x) min_x = x;
+            if (x > max_x) max_x = x;
+            if (z < min_z) min_z = z;
+            if (z > max_z) max_z = z;
+        }
+    }
+
+    for (Entity *e = world->head; e; e = e->next) {
+        if (!e->alive) continue;
+        if (!have_bounds) {
+            min_x = max_x = e->x;
+            min_z = max_z = e->z;
+            have_bounds = 1;
+        } else {
+            if (e->x < min_x) min_x = e->x;
+            if (e->x > max_x) max_x = e->x;
+            if (e->z < min_z) min_z = e->z;
+            if (e->z > max_z) max_z = e->z;
+        }
+    }
+
+    if (!have_bounds) {
+        min_x = min_z = -20000.0f;
+        max_x = max_z =  20000.0f;
+    }
+
+    const float margin = 12000.0f;
+    float cx = (min_x + max_x) * 0.5f;
+    float cz = (min_z + max_z) * 0.5f;
+    float half_x = (max_x - min_x) * 0.5f + margin;
+    float half_z = (max_z - min_z) * 0.5f + margin;
+    if (half_x < 25000.0f) half_x = 25000.0f;
+    if (half_z < 25000.0f) half_z = 25000.0f;
+
+    world->safety_floor_enabled = 1;
+    world->safety_floor_y = world->ground_y - 1000.0f;
+    world->safety_floor_cx = cx;
+    world->safety_floor_cz = cz;
+    world->safety_floor_half_x = half_x;
+    world->safety_floor_half_z = half_z;
+
+    unsigned int ground_tex = tex_cache_get(CANON_GROUND_TEXTURE);
+    ground_init(ground_tex, half_x, half_z, cx, cz, 120.0f, 0.0f);
+    fprintf(stderr,
+            "[safety_floor] y=%.1f center=(%.0f, %.0f) half=(%.0f, %.0f)\n",
+            world->safety_floor_y, cx, cz, half_x, half_z);
+}
+
 /* Place player at the named STRT in the world (case-insensitive on tag).
    Falls back to the 3JIM spawn if start_point is empty or not found. */
 static Entity *place_player(World *world, const char *start_point) {
@@ -317,200 +390,47 @@ static void entity_color(const char *type, float *r, float *g, float *b) {
     else                                { *r=0.5f; *g=0.5f; *b=0.5f; }  /* grey   = other  */
 }
 
-static void render_capture_live_jimmy(Entity *jim, int jim_model_ok,
-                                      const float spawn[3], int bounded,
-                                      int camera_pan,
-                                      int viewport_w, int viewport_h) {
-    if (!jim || !jim_model_ok) return;
-    PlayerAnimSample sample = player_anim_sample((PlayerAnim)jim->user_flag);
-    if (!sample.model) return;
-
-    float model[16];
-    memcpy(model, CAPTURE_LEVEL1_JIMMY_MODEL, sizeof(model));
-    /* The native ASE faces opposite the captured Jimmy mesh in this camera. */
-    for (int i = 0; i < 4; i++) {
-        model[i] = -model[i];
-        model[8 + i] = -model[8 + i];
+int main(int argc, char **argv) {
+    const char *start_level = "level1";
+    for (int i = 1; i < argc - 1; i++) {
+        if (strcmp(argv[i], "--level") == 0) {
+            start_level = argv[i + 1];
+            i++;
+        }
     }
-    float visual_delta[3];
-    if (camera_pan) {
-        visual_delta[0] = 0.0f;
-        visual_delta[1] = 0.0f;
-        visual_delta[2] = 0.0f;
-    } else {
-        capture_live_visual_delta(jim, spawn, bounded, visual_delta);
+
+    LevelDesc current_desc;
+    if (!level_desc_for(start_level, &current_desc)) {
+        fprintf(stderr, "Failed to resolve level '%s'\n", start_level);
+        return 1;
     }
-    model[12] += visual_delta[0];
-    model[13] += visual_delta[1];
-    model[14] += visual_delta[2];
 
-    renderer_set_camera_override(CAPTURE_LEVEL1_VIEW_IDENTITY,
-                                 CAPTURE_LEVEL1_PROJ_GL);
-    renderer_begin_overlay(viewport_w, viewport_h);
-    glEnable(GL_DEPTH_TEST);
-    glDepthMask(GL_TRUE);
-    glDisable(GL_BLEND);
-    renderer_draw_model_matrix_anim(sample.model, 0, model,
-                                    sample.frame_a, sample.frame_b, sample.lerp);
-    renderer_end_frame();
-    renderer_set_camera_override(NULL, NULL);
-}
-
-static void draw_hud_segment(int viewport_w, int viewport_h,
-                             float x, float y, float scale,
-                             int horizontal) {
-    float w = horizontal ? 18.0f : 4.0f;
-    float h = horizontal ? 4.0f : 18.0f;
-    renderer_draw_screen_rect(viewport_w, viewport_h, x, y, w * scale, h * scale,
-                              1.0f, 0.96f, 0.70f, 1.0f);
-}
-
-static void draw_hud_digit(int viewport_w, int viewport_h,
-                           int digit, float x, float y, float scale) {
-    static const unsigned char SEGMENTS[10] = {
-        0x3F, 0x06, 0x5B, 0x4F, 0x66,
-        0x6D, 0x7D, 0x07, 0x7F, 0x6F,
-    };
-    if (digit < 0 || digit > 9) return;
-    unsigned char bits = SEGMENTS[digit];
-    if (bits & 0x01) draw_hud_segment(viewport_w, viewport_h, x + 4.0f * scale,  y,                 scale, 1);
-    if (bits & 0x02) draw_hud_segment(viewport_w, viewport_h, x + 22.0f * scale, y + 4.0f * scale,  scale, 0);
-    if (bits & 0x04) draw_hud_segment(viewport_w, viewport_h, x + 22.0f * scale, y + 26.0f * scale, scale, 0);
-    if (bits & 0x08) draw_hud_segment(viewport_w, viewport_h, x + 4.0f * scale,  y + 44.0f * scale, scale, 1);
-    if (bits & 0x10) draw_hud_segment(viewport_w, viewport_h, x,                y + 26.0f * scale, scale, 0);
-    if (bits & 0x20) draw_hud_segment(viewport_w, viewport_h, x,                y + 4.0f * scale,  scale, 0);
-    if (bits & 0x40) draw_hud_segment(viewport_w, viewport_h, x + 4.0f * scale,  y + 22.0f * scale, scale, 1);
-}
-
-static void draw_hud_slash(int viewport_w, int viewport_h,
-                           float x, float y, float scale) {
-    for (int i = 0; i < 7; i++) {
-        renderer_draw_screen_rect(viewport_w, viewport_h,
-                                  x + (float)(6 - i) * 3.0f * scale,
-                                  y + (float)i * 7.0f * scale,
-                                  4.0f * scale, 6.0f * scale,
-                                  1.0f, 0.96f, 0.70f, 1.0f);
-    }
-}
-
-static void render_capture_live_hud(int viewport_w, int viewport_h) {
-    const GameState *gs = gamestate_get();
-    int collected = gs->items_collected;
-    int total = gs->items_total;
-    if (collected < 0) collected = 0;
-    if (total < 0) total = 0;
-    if (collected > 99) collected = 99;
-    if (total > 99) total = 99;
-
-    float scale = (float)viewport_h / 720.0f;
-    if (scale < 0.5f) scale = 0.5f;
-    float x = 22.0f * scale;
-    float y = 16.0f * scale;
-
-    renderer_draw_screen_rect(viewport_w, viewport_h,
-                              x, y, 48.0f * scale, 48.0f * scale,
-                              0.06f, 0.09f, 0.12f, 0.72f);
-    renderer_draw_screen_rect(viewport_w, viewport_h,
-                              x + 10.0f * scale, y + 10.0f * scale,
-                              28.0f * scale, 28.0f * scale,
-                              0.95f, 0.78f, 0.24f, 1.0f);
-    renderer_draw_screen_rect(viewport_w, viewport_h,
-                              x + 17.0f * scale, y + 17.0f * scale,
-                              14.0f * scale, 14.0f * scale,
-                              0.18f, 0.22f, 0.28f, 1.0f);
-
-    float tx = x + 64.0f * scale;
-    int col_tens = collected / 10;
-    int col_ones = collected % 10;
-    if (col_tens > 0) {
-        draw_hud_digit(viewport_w, viewport_h, col_tens, tx, y + 2.0f * scale, scale);
-        tx += 34.0f * scale;
-    }
-    draw_hud_digit(viewport_w, viewport_h, col_ones, tx, y + 2.0f * scale, scale);
-    tx += 34.0f * scale;
-    draw_hud_slash(viewport_w, viewport_h, tx, y + 1.0f * scale, scale);
-    tx += 28.0f * scale;
-    if (total >= 10) {
-        draw_hud_digit(viewport_w, viewport_h, total / 10, tx, y + 2.0f * scale, scale);
-        tx += 34.0f * scale;
-    }
-    draw_hud_digit(viewport_w, viewport_h, total % 10, tx, y + 2.0f * scale, scale);
-}
-
-int main(void) {
     Window w;
     if (!window_init(&w, "JN Engine - Step 4: Textured Scene", 1280, 720))
         return 1;
 
-    /* WASM has no env to toggle modes, so default to native_level1 — that's
-       the renderer path that ships Phase 1 sky/tint, Phase 4 alpha cutout,
-       Phase 5 tree billboards, and Phase 5b texture overrides. The native
-       binary keeps the env-driven gate so local dev can still pick any
-       mode. The hybrid/capture-backed modes need keyframe + .omtc fixtures
-       that aren't shipped to the browser, so they stay off. */
-#ifdef __EMSCRIPTEN__
-    int native_level1 = 1;
-#else
-    int native_level1 = env_enabled("JN_NATIVE_LEVEL1");
-#endif
-    int hybrid_level1 = env_enabled("JN_HYBRID_LEVEL1");
-    int capture_backed_level1 = env_enabled("JN_CAPTURE_BACKED_LEVEL1");
-    if (native_level1 && (hybrid_level1 || capture_backed_level1)) {
-        fprintf(stderr,
-                "[native_level1] clean native map runtime supersedes hybrid/capture-backed modes\n");
-        hybrid_level1 = 0;
-        capture_backed_level1 = 0;
-    } else if (hybrid_level1 && capture_backed_level1) {
-        fprintf(stderr,
-                "[hybrid_level1] native hybrid mode supersedes JN_CAPTURE_BACKED_LEVEL1\n");
-        capture_backed_level1 = 0;
-    }
-    int capture_live_jimmy = capture_backed_level1 &&
-        env_enabled("JN_CAPTURE_BACKED_LIVE_JIMMY");
-    int capture_live_jimmy_bounded = capture_live_jimmy &&
-        env_enabled_default("JN_CAPTURE_BACKED_LIVE_JIMMY_BOUNDS", 1);
-    int capture_live_world_pan = capture_live_jimmy &&
-        env_enabled("JN_CAPTURE_BACKED_WORLD_PAN");
-    int capture_live_hud = capture_backed_level1 &&
-        env_enabled("JN_CAPTURE_BACKED_LIVE_HUD");
-    int capture_multiframe = capture_backed_level1 &&
-        env_enabled("JN_CAPTURE_BACKED_MULTIFRAME");
-    if (capture_multiframe) {
-        /* Multi-frame world reproject supersedes the single-frame world pan
-           because both want to drive the static world group through a
-           runtime view*proj. */
-        capture_live_world_pan = 0;
-    }
-    if (capture_backed_level1 || hybrid_level1 || native_level1) {
-        SDL_SetWindowSize(w.sdl_win, 1280, 720);
-        w.width = 1280;
-        w.height = 720;
-    }
-    if (native_level1) {
-        fprintf(stderr,
-                "[native_level1] clean native map runtime enabled: full OMT geometry + native camera\n");
-    } else if (hybrid_level1) {
-        fprintf(stderr,
-                "[hybrid_level1] native runtime enabled: GAM simulation + OMT placements + native camera\n");
-    }
+    SDL_SetWindowSize(w.sdl_win, 1280, 720);
+    w.width = 1280;
+    w.height = 720;
+    fprintf(stderr,
+            "[native_level] loading %s from %s\n",
+            current_desc.name, current_desc.gam_path);
 
-    if (native_level1) {
-        const char *cam_path = getenv("JN_NATIVE_LEVEL1_CAMERA");
-        char keyframe_path[192];
-        const char *keyframe = getenv("JN_NATIVE_LEVEL1_KEYFRAME");
-        if ((!cam_path || !cam_path[0]) && keyframe && keyframe[0]) {
-            snprintf(keyframe_path, sizeof(keyframe_path),
-                     "assets/native/keyframe_cameras/%s.txt", keyframe);
-            cam_path = keyframe_path;
-        }
-        if (cam_path && cam_path[0]) {
-            int cam_sw = w.width;
-            int cam_sh = w.height;
-            if (load_camera_descriptor_file(cam_path, &cam_sw, &cam_sh)) {
-                SDL_SetWindowSize(w.sdl_win, cam_sw, cam_sh);
-                w.width = cam_sw;
-                w.height = cam_sh;
-            }
+    const char *cam_path = getenv("JN_NATIVE_LEVEL1_CAMERA");
+    char keyframe_path[192];
+    const char *keyframe = getenv("JN_NATIVE_LEVEL1_KEYFRAME");
+    if ((!cam_path || !cam_path[0]) && keyframe && keyframe[0]) {
+        snprintf(keyframe_path, sizeof(keyframe_path),
+                 "assets/native/keyframe_cameras/%s.txt", keyframe);
+        cam_path = keyframe_path;
+    }
+    if (cam_path && cam_path[0]) {
+        int cam_sw = w.width;
+        int cam_sh = w.height;
+        if (load_camera_descriptor_file(cam_path, &cam_sw, &cam_sh)) {
+            SDL_SetWindowSize(w.sdl_win, cam_sw, cam_sh);
+            w.width = cam_sw;
+            w.height = cam_sh;
         }
     }
 
@@ -519,51 +439,23 @@ int main(void) {
         return 1;
     }
 
-    if (native_level1) {
-        /* Phase 1 of docs/native_vs_capture_8881_plan.md: lift sky gradient
-           + scene tint from the captured keyframe-8881 reference so the
-           overall colour cast matches the original.  Header is regenerated
-           by `make phase1-sky-tint`. */
-        renderer_set_sky(PHASE1_SKY_TOP_R, PHASE1_SKY_TOP_G, PHASE1_SKY_TOP_B,
-                         PHASE1_SKY_BOT_R, PHASE1_SKY_BOT_G, PHASE1_SKY_BOT_B);
-        renderer_set_scene_tint(PHASE1_SCENE_TINT_R,
-                                PHASE1_SCENE_TINT_G,
-                                PHASE1_SCENE_TINT_B);
-        /* Hide multi-material slots whose canvas chain didn't resolve so
-           SCHOOL's missing slots, foliage tree trunks with debug_flat
-           branches, etc. don't render as dark slabs. */
-        renderer_set_hide_untextured_groups(1);
+    AseModel *sky_model = NULL;   /* faithful sky dome when the level declares one */
+    unsigned int clouds_tex = 0;  /* real sky.png cloud texture for the dome */
+    float sky_spin = 0.0f;        /* accumulated cloud-drift rotation (rad) */
 
-        /* Phase 4: enable shader-side alpha cutout for capture-derived
-           billboards (foliage, playground sand). The original game runs
-           with ALPHATESTENABLE=1 on >89% of draws -- we approximate by
-           discarding fragments whose texture alpha is below the threshold,
-           giving clean leaf cutouts without replicating the original's
-           color-key machinery. */
-        renderer_set_alpha_cutout(PHASE4_ALPHA_CUTOUT_ENABLED,
-                                  PHASE4_ALPHA_CUTOUT_THRESHOLD);
-        fprintf(stderr,
-                "[native_level1] phase 1 sky/tint applied: sky_top=(%.3f,%.3f,%.3f) "
-                "scene_tint=(%.3f,%.3f,%.3f)\n",
-                PHASE1_SKY_TOP_R, PHASE1_SKY_TOP_G, PHASE1_SKY_TOP_B,
-                PHASE1_SCENE_TINT_R, PHASE1_SCENE_TINT_G, PHASE1_SCENE_TINT_B);
+    configure_level_sky(&current_desc, &sky_model, &clouds_tex);
+    /* Hide multi-material slots whose canvas chain didn't resolve so SCHOOL's
+       missing slots, foliage tree trunks with debug_flat branches, etc. don't
+       render as dark slabs. */
+    renderer_set_hide_untextured_groups(1);
 
-        /* Phase C: the Phase 2/3/5b capture texture-override layer is retired.
-           The glTF meshes carry breakthrough-correct OMT-canvas textures, so
-           the 30-entry override set is redundant (the 4 that matched OMT, the
-           12 dead billboards, and the visible-mesh set all resolve from OMT;
-           the BLOCK* collision meshes correctly stay untextured/skipped).
-           See docs/gltf_export_plan.md. */
-
-        /* Phase 5: replace per-mesh native tree geometry with the camera-
-           facing quad the original game draws. Sizes + textures come from
-           4-vertex FVF=0x152 records in the captured frame -- never guesses.
-           Provenance: assets/native/level1_billboard_overrides.json. */
-        billboard_overrides_load("assets/native/level1_billboard_overrides.txt");
-        fprintf(stderr,
-                "[native_level1] phase 5 billboard overrides loaded: %d\n",
-                billboard_overrides_count());
-    }
+    /* Phase 4: enable shader-side alpha cutout for capture-derived billboards
+       (foliage, playground sand). The original game runs with ALPHATESTENABLE=1
+       on >89% of draws -- we approximate by discarding fragments whose texture
+       alpha is below the threshold, giving clean leaf cutouts without
+       replicating the original's color-key machinery. */
+    renderer_set_alpha_cutout(PHASE4_ALPHA_CUTOUT_ENABLED,
+                              PHASE4_ALPHA_CUTOUT_THRESHOLD);
 
     if (!audio_init()) {
         renderer_destroy();
@@ -590,54 +482,6 @@ int main(void) {
         renderer_destroy();
         window_destroy(&w);
         return 1;
-    }
-
-    int capture_scene_ready = 0;
-    if (capture_backed_level1) {
-        const char *scene_path;
-        if (capture_multiframe)
-            scene_path = "assets/capture/level1_hudfix/scene_world.bin";
-        else if (capture_live_world_pan)
-            scene_path = "assets/capture/level1_hudfix/scene_reproject.bin";
-        else
-            scene_path = "assets/capture/level1_hudfix/scene.bin";
-        capture_scene_ready =
-            capture_scene_init(scene_path);
-        if (!capture_scene_ready && capture_multiframe) {
-            fprintf(stderr,
-                    "[capture_level1] multi-frame world fixture unavailable; falling back to single-frame scene\n");
-            capture_multiframe = 0;
-            capture_scene_ready =
-                capture_scene_init("assets/capture/level1_hudfix/scene.bin");
-        }
-        if (!capture_scene_ready && capture_live_world_pan) {
-            fprintf(stderr,
-                    "[capture_level1] reproject scene unavailable; retrying stable capture scene\n");
-            capture_live_world_pan = 0;
-            capture_scene_ready =
-                capture_scene_init("assets/capture/level1_hudfix/scene.bin");
-        }
-        if (!capture_scene_ready)
-            fprintf(stderr, "[capture_level1] capture scene unavailable; using old renderer\n");
-        if (capture_scene_ready && capture_multiframe) {
-            /* In multi-frame mode the static_world group is always world-space
-               and driven by the runtime view*proj uniform. */
-            capture_scene_set_group_use_world(CAPTURE_SCENE_GROUP_STATIC_WORLD, 1);
-            fprintf(stderr,
-                    "[capture_level1] multi-frame world reproject enabled\n");
-        }
-        if (capture_scene_ready && capture_live_jimmy) {
-            capture_scene_set_group_visible(CAPTURE_SCENE_GROUP_PLAYER_JIMMY, 0);
-            fprintf(stderr,
-                    "[capture_level1] %s live Jimmy overlay enabled%s; captured Jimmy group hidden\n",
-                    capture_live_jimmy_bounded ? "bounded" : "unbounded",
-                    capture_live_world_pan ? " with static-world pan" : "");
-        }
-        if (capture_scene_ready && capture_live_hud) {
-            capture_scene_set_group_visible(CAPTURE_SCENE_GROUP_HUD, 0);
-            fprintf(stderr,
-                    "[capture_level1] live HUD overlay enabled; captured HUD group hidden\n");
-        }
     }
 
     /* Faithful .omtc replay path: when JN_REPLAY=<path> is set, skip game
@@ -675,7 +519,6 @@ int main(void) {
             SDL_Delay(16);
         }
         replay_destroy();
-        capture_scene_destroy();
         input_destroy(); audio_destroy(); renderer_destroy();
         window_destroy(&w);
         return 0;
@@ -690,35 +533,23 @@ int main(void) {
        reference jimmylast.bmp (which doesn't exist); jimycarl.png is the
        atlas that matches the model UVs (red shirt, atom emblem, backpack). */
     asset_cache_begin_level();
-    int need_native_jim_visual = !capture_scene_ready || capture_live_jimmy;
-    int jim_poses_loaded = 0;
-    if (need_native_jim_visual) {
-        unsigned int jim_tex = tex_cache_get("assets/png/jimycarl.png");
-        jim_poses_loaded = player_anim_init(jim_tex);
-    } else {
-        printf("[capture_level1] skipping native Jimmy visual assets\n");
-    }
+    unsigned int jim_tex = tex_cache_get("assets/png/jimycarl.png");
+    int jim_poses_loaded = player_anim_init(jim_tex);
     int jim_model_ok = (jim_poses_loaded > 0);
 
-    int n = gam_load(&world, "assets/gam/Level1.gam");
+    int n = load_level(&current_desc, &world);
     if (n < 0) {
-        fprintf(stderr, "Failed to load Level1.gam\n");
+        fprintf(stderr, "Failed to load %s\n", current_desc.gam_path);
         world_destroy(&world);
         renderer_destroy();
         window_destroy(&w);
         return 1;
     }
-    if (!capture_scene_ready) {
-        /* Static city geometry: OMT chunk centers from level1.omt → world placements. */
-        placements_load(&world, omt_placements_path());
-        {
-            int missing = 0;
-            for (int i = 0; i < world.placement_count; i++)
-                if (!model_cache_get(world.placements[i].ase_path)) missing++;
-            printf("placements_loaded=%d, missing_mesh=%d\n", world.placement_count, missing);
-        }
-    } else {
-        printf("[capture_level1] skipping old visual-only OMT placements\n");
+    {
+        int missing = 0;
+        for (int i = 0; i < world.placement_count; i++)
+            if (!model_cache_get(world.placements[i].ase_path)) missing++;
+        printf("placements_loaded=%d, missing_mesh=%d\n", world.placement_count, missing);
     }
 
     /* Browser demo / JN_DEMO_SPAWN=1: respawn Jimmy near the Retroville
@@ -733,7 +564,7 @@ int main(void) {
         do_demo_spawn = 1;
 #endif
         if (env_enabled("JN_DEMO_SPAWN")) do_demo_spawn = 1;
-        if (do_demo_spawn && native_level1) {
+        if (do_demo_spawn) {
             Entity *jim_spawn = world_find_type(&world, "3JIM");
             if (jim_spawn) {
                 /* Tuned via xvfb screenshot sweep: this position framed the
@@ -746,26 +577,6 @@ int main(void) {
                 fprintf(stderr,
                         "[demo_spawn] respawned 3JIM at (%.0f, %.0f, %.0f)\n",
                         jim_spawn->x, jim_spawn->y, jim_spawn->z);
-            }
-        }
-    }
-
-    /* Level1 has no ITEM entities; synthesize a small ring around the player
-       spawn so the Phase 4 pickup/win loop is exercisable. */
-    {
-        Entity *jim_pre = world_find_type(&world, "3JIM");
-        if (jim_pre && !native_level1) {
-            const int N = 5;
-            const float R = 600.0f;
-            for (int i = 0; i < N; i++) {
-                float ang = (6.28318f * i) / N;
-                Entity *it = world_add(&world);
-                if (!it) break;
-                memcpy(it->type, "ITEM", 4); it->type[4] = '\0';
-                snprintf(it->tag, sizeof(it->tag), "test_item_%d", i);
-                it->x = jim_pre->x + R * cosf(ang);
-                it->y = jim_pre->y + 40.0f;
-                it->z = jim_pre->z + R * sinf(ang);
             }
         }
     }
@@ -848,48 +659,17 @@ int main(void) {
     /* Find JIM and frame the camera on him. JIM's spawn Y becomes the ground plane. */
     Camera *cam = renderer_camera();
     Entity *jim  = world_find_type(&world, "3JIM");
-    float capture_live_spawn[3] = {0.0f, 0.0f, 0.0f};
     if (jim) {
         world.ground_y = jim->y - jim->half_extents[1];
         gamestate_set_spawn(jim->x, jim->y, jim->z);
-        capture_live_spawn[0] = jim->x;
-        capture_live_spawn[1] = jim->y;
-        capture_live_spawn[2] = jim->z;
         printf("Player at (%.1f, %.1f, %.1f), ground_y=%.1f\n",
                jim->x, jim->y, jim->z, world.ground_y);
     }
-    cam->fov    = 1.0472f;
-    cam->near_z = 1.0f;
-    cam->far_z  = 80000.0f;
-    if (capture_backed_level1 || hybrid_level1 || native_level1) {
-        cam->fov = 1.047215f;
-        cam->near_z = 20.0f;
-        cam->far_z = 28000.0f;
-        if (capture_backed_level1)
-            printf("[capture_level1] capture-scene viewport=1280x720 fov_y=60.001 near=20 far=28000\n");
-        else if (native_level1)
-            printf("[native_level1] viewport=1280x720 fov_y=60.001 near=20 far=28000\n");
-        else
-            printf("[hybrid_level1] viewport=1280x720 fov_y=60.001 near=20 far=28000\n");
-    }
-
-    /* Ground: a real level (placements present) supplies its own ground/street/
-       terrain and water meshes via the glTF GROUND mesh (roads, lawn, stream)
-       at their authored world positions -- the faithful representation. We do
-       NOT lay a synthetic ground over them.
-
-       Historically native Level 1 laid a ground.c flat green tile here as a
-       Phase-2 stand-in (when the OMT GROUND mesh resolved no usable texture).
-       Post-breakthrough the glTF GROUND mesh is correct, so that tile is now
-       redundant AND harmful: it floats a flat green sheet over the real road
-       and stream. Removed. The synthetic floor is kept ONLY for empty test
-       scenes with no level geometry. */
-    if (world.placement_count == 0 && !capture_scene_ready) {
-        unsigned int ground_tex = tex_cache_get(CANON_GROUND_TEXTURE);
-        ground_init(ground_tex, 20000.0f, 20000.0f,
-                    jim ? jim->x : 0.0f, jim ? jim->z : 0.0f,
-                    80.0f, 0.0f);
-    }
+    configure_safety_floor(&world, jim);
+    cam->fov = 1.047215f;
+    cam->near_z = 20.0f;
+    cam->far_z = 28000.0f;
+    printf("[native_level] viewport=1280x720 fov_y=60.001 near=20 far=28000\n");
 
     FollowCam fcam;
     follow_cam_init(&fcam);
@@ -897,7 +677,7 @@ int main(void) {
 
     int mouse_down = 0, last_mx = 0, last_my = 0;
 
-    printf("Controls: WASD = move  |  SPACE = jump  |  SHIFT = run  |  R = respawn  |  LMB drag = orbit  |  ESC = quit\n");
+    printf("Controls: Up/Down (W/S) = forward/back  |  Left/Right (A/D) = turn  |  SPACE = jump  |  SHIFT = run  |  R = respawn  |  LMB drag = free-look  |  ESC = quit\n");
     printf("Entities: %d   Items: %d\n", world.count, gamestate_get()->items_total);
     int screenshot_taken = 0;
     int screenshot_mode  = getenv("JN_SCREENSHOT") != NULL;
@@ -988,48 +768,39 @@ int main(void) {
                iteration above so we don't mutate the list mid-walk. */
             const GameState *gs_pre = gamestate_get();
             if (gs_pre->swap_level[0] != '\0') {
-                char path[160];
                 char level_buf[64];
                 char spawn_buf[32];
+                LevelDesc swap_desc;
                 snprintf(level_buf, sizeof(level_buf), "%s", gs_pre->swap_level);
                 snprintf(spawn_buf, sizeof(spawn_buf), "%s", gs_pre->swap_spawn);
-                if (resolve_gam_path(level_buf, path, sizeof(path))) {
+                if (level_desc_for(level_buf, &swap_desc)) {
                     printf("[SWAP] loading %s (cache: %d tex, %d models)\n",
-                           path, asset_cache_tex_count(), asset_cache_model_count());
+                           swap_desc.gam_path, asset_cache_tex_count(), asset_cache_model_count());
                     world_destroy(&world);
                     world_init(&world);
                     gamestate_reset_for_new_level();
                     asset_cache_begin_level();
-                    if (gam_load(&world, path) >= 0) {
-                        /* Re-load static placements when staying within Retroville
-                           (Level1*.gam shares level1.omt geometry). Other levels
-                           will get their own *_placements.txt once those OMTs are
-                           processed. */
-                        if (strncasecmp(level_buf, "level1", 6) == 0 &&
-                            !capture_scene_ready)
-                            placements_load(&world, omt_placements_path());
+                    if (load_level(&swap_desc, &world) >= 0) {
+                        current_desc = swap_desc;
+                        configure_level_sky(&current_desc, &sky_model, &clouds_tex);
                         entity_bind_vtables(&world);
                         /* Player textures + models + ground stay live across levels. */
-                        if (need_native_jim_visual) {
-                            tex_cache_get("assets/png/jimycarl.png");
-                            tex_cache_get("assets/png/mud.png");
-                            for (int pa = 0; pa < PA_COUNT; pa++)
-                                (void)player_anim_model((PlayerAnim)pa);
-                        }
-                        asset_cache_purge_stale();
-                        printf("[SWAP] post-purge cache: %d tex, %d models\n",
-                               asset_cache_tex_count(), asset_cache_model_count());
+                        tex_cache_get("assets/png/jimycarl.png");
+                        tex_cache_get("assets/png/mud.png");
+                        for (int pa = 0; pa < PA_COUNT; pa++)
+                            (void)player_anim_model((PlayerAnim)pa);
                         jim = place_player(&world, spawn_buf);
                         if (jim) {
                             world.ground_y = jim->y - jim->half_extents[1];
                             gamestate_set_spawn(jim->x, jim->y, jim->z);
-                            capture_live_spawn[0] = jim->x;
-                            capture_live_spawn[1] = jim->y;
-                            capture_live_spawn[2] = jim->z;
                         }
+                        configure_safety_floor(&world, jim);
+                        asset_cache_purge_stale();
+                        printf("[SWAP] post-purge cache: %d tex, %d models\n",
+                               asset_cache_tex_count(), asset_cache_model_count());
                         follow_cam_snap(&fcam, cam, jim);
                     } else {
-                        fprintf(stderr, "[SWAP] gam_load failed for %s\n", path);
+                        fprintf(stderr, "[SWAP] gam_load failed for %s\n", swap_desc.gam_path);
                     }
                 } else {
                     fprintf(stderr, "[SWAP] could not find %s under assets/gam\n", level_buf);
@@ -1042,7 +813,10 @@ int main(void) {
             /* Lifecycle: manual respawn (R) or death plane below ground. */
             if (jim) {
                 int want_respawn = input_just_pressed(SDL_SCANCODE_R);
-                if (!want_respawn && jim->y < world.ground_y - 2000.0f) {
+                float kill_y = world.safety_floor_enabled
+                    ? world.safety_floor_y - 2000.0f
+                    : world.ground_y - 2000.0f;
+                if (!want_respawn && jim->y < kill_y) {
                     printf("[DEATH] below kill plane (y=%.1f)\n", jim->y);
                     want_respawn = 1;
                 }
@@ -1078,8 +852,10 @@ int main(void) {
             if (ev.type == SDL_MOUSEMOTION && mouse_down) {
                 int dx = ev.motion.x - last_mx, dy = ev.motion.y - last_my;
                 last_mx = ev.motion.x; last_my = ev.motion.y;
-                fcam.yaw   -= dx * 0.004f;
-                fcam.pitch -= dy * 0.004f;
+                /* Free-look: layer a temporary yaw offset (decays back behind
+                   the player once he moves) + direct pitch control. */
+                fcam.yaw_offset -= dx * 0.004f;
+                fcam.pitch      -= dy * 0.004f;
                 if (fcam.pitch >  0.6f) fcam.pitch =  0.6f;
                 if (fcam.pitch < -1.2f) fcam.pitch = -1.2f;
             }
@@ -1087,65 +863,17 @@ int main(void) {
 
         /* Render phase: uncapped */
         capture_begin_frame(cap_seq, SDL_GetTicks());
-        if (capture_scene_ready) {
-            float view[16] = {
-                1.0f, 0.0f, 0.0f, 0.0f,
-                0.0f, 1.0f, 0.0f, 0.0f,
-                0.0f, 0.0f, 1.0f, 0.0f,
-                0.0f, 0.0f, 0.0f, 1.0f,
-            };
-            if (capture_multiframe && jim) {
-                /* Camera-follow Jimmy by translating the captured view origin
-                   by -visual_delta. The captured projection has the anchor
-                   frame's camera baked in; this adds a per-frame offset on
-                   top so movement reveals geometry contributed by other
-                   keyframes in scene_world.bin. */
-                float visual_delta[3];
-                capture_live_visual_delta(jim, capture_live_spawn,
-                                          capture_live_jimmy_bounded,
-                                          visual_delta);
-                view[12] = -visual_delta[0];
-                view[13] = -visual_delta[1];
-                view[14] = -visual_delta[2];
-            }
-            capture_scene_set_world_view_proj(view, CAPTURE_LEVEL1_PROJ_GL);
-            capture_scene_set_group_ndc_offset(CAPTURE_SCENE_GROUP_STATIC_WORLD,
-                                               0.0f, 0.0f);
-            capture_scene_set_group_world_offset(CAPTURE_SCENE_GROUP_STATIC_WORLD,
-                                                 0.0f, 0.0f, 0.0f);
-            if (capture_multiframe) {
-                /* The multi-frame fixture uses a zero group offset at spawn,
-                   but still needs the static-world group rendered through the
-                   runtime view*proj. capture_scene_set_group_world_offset()
-                   disables world mode for zero offsets for the older pan path,
-                   so restore the explicit world-mode flag here. */
-                capture_scene_set_group_use_world(CAPTURE_SCENE_GROUP_STATIC_WORLD, 1);
-            }
-            if (capture_live_world_pan && jim) {
-                float visual_delta[3];
-                capture_live_visual_delta(jim, capture_live_spawn,
-                                          capture_live_jimmy_bounded,
-                                          visual_delta);
-                capture_scene_set_group_world_offset(CAPTURE_SCENE_GROUP_STATIC_WORLD,
-                                                     -visual_delta[0],
-                                                     -visual_delta[1],
-                                                     -visual_delta[2]);
-            }
-            capture_scene_render(w.width, w.height);
-            if (capture_live_jimmy)
-                render_capture_live_jimmy(jim, jim_model_ok, capture_live_spawn,
-                                          capture_live_jimmy_bounded,
-                                          capture_live_world_pan,
-                                          w.width, w.height);
-            if (capture_live_hud)
-                render_capture_live_hud(w.width, w.height);
-        } else {
         renderer_begin_frame(w.width, w.height);
 
-        /* No-op when ground_init was skipped (placement scenes): the glTF
-           GROUND mesh supplies the real terrain. Only empty test scenes
-           initialize the synthetic floor. */
-        ground_draw(world.ground_y);
+        /* Sky behind everything: full rotating cloud hemisphere first, then the
+           faithful static painted-neighborhood backdrop on top at the horizon. */
+        sky_spin += DT * 0.012f;   /* slow cloud drift */
+        if (clouds_tex) renderer_draw_cloud_dome(clouds_tex, sky_spin);
+        if (sky_model)  renderer_draw_sky_dome(sky_model, 0.0f);
+
+        /* Safety floor: drawn beneath the authored OMT level and used by
+           physics only when authored terrain does not catch the player. */
+        ground_draw(world.safety_floor_enabled ? world.safety_floor_y : world.ground_y);
 
         unsigned int box_vao = world_box_vao();
         int          box_idx = world_box_index_count();
@@ -1214,34 +942,46 @@ int main(void) {
            +Z placement for legacy/hybrid validation paths. */
         for (int pi = 0; pi < world.placement_count; pi++) {
             const WorldPlacement *pl = &world.placements[pi];
-            if (native_level1) {
-                /* Phase 5: trees and similar 2D-billboard meshes render as a
-                   single camera-facing quad with measured capture geometry.
-                   This precedes the AseModel path so we don't pay the load
-                   cost for a mesh we never draw. */
+            if (strncmp(pl->name, "tree", 4) == 0) {
+                /* Full scattered tree = bark TRUNK mesh (base at ground) + a
+                   camera-facing green-crown CANOPY billboard sitting on the
+                   trunk top. The trunk mesh's own canvas mis-resolves to a fence
+                   texture, so we override it with the real brown bark canvas
+                   (level1.omt "tree"). The canopy (tex_052e7090) is alpha-keyed
+                   so the sky shows through; sized from the measured override
+                   table. */
                 float bb_size = 0.0f;
-                const char *bb_tex_path = NULL;
-                if (billboard_overrides_lookup(pl->name, &bb_size, &bb_tex_path)) {
-                    unsigned int bb_tex = tex_cache_get(bb_tex_path);
-                    if (bb_tex) {
-                        /* Phase 5: anchor the leaf-cluster quad to the
-                           native trunk's top. The leaf texture is naturally
-                           oriented (transparent above canopy, dark shadow
-                           below) — after stbi_set_flip_vertically_on_load,
-                           the canopy lands at v ~ 0.25..0.55 of the quad's
-                           lower-mid. Centring the quad at the trunk top
-                           moves that canopy band up to crown height while
-                           the trunk fills the gap to ground. */
-                        AseModel *trunk = model_cache_get(pl->ase_path);
-                        float trunk_top = trunk ? trunk->max[1] : (bb_size * 0.5f);
-                        renderer_draw_billboard(
-                            bb_tex,
-                            pl->x, trunk_top, -pl->z,
-                            bb_size, bb_size,
-                            1.0f, 1.0f, 1.0f, 1.0f);
-                    }
-                    continue;
+                const char *unused_tex = NULL;
+                if (!billboard_overrides_lookup(pl->name, &bb_size, &unused_tex)
+                    || bb_size <= 0.0f) {
+                    /* Not in the capture-measured table (only ~12 trees were in
+                       frame 8881). Fall back to the measured median for the
+                       category so untabled trees match the others rather than
+                       defaulting small. Exact per-tree sizes would come from a
+                       full-capture scan of build/level1_session.omtc. */
+                    bb_size = (strncmp(pl->name, "treebranch", 10) == 0)
+                              ? 500.0f : 600.0f;
                 }
+
+                AseModel *trunk = model_cache_get(pl->ase_path);
+                float trunk_top = trunk ? trunk->max[1] : 300.0f;
+                if (trunk) {
+                    unsigned int bark = tex_cache_get("assets/native/tree_bark.png");
+                    renderer_draw_model(trunk, bark, pl->x, 0.0f, -pl->z, 0.0f, 1.0f);
+                }
+                unsigned int crown = tex_cache_get(
+                    "assets/native/billboard_textures/tex_052e7090_128x128.png");
+                if (crown) {
+                    /* The crown's opaque pixels sit in the lower ~57% of the
+                       texture, so raise the quad centre above the trunk top to
+                       seat the crown ON the trunk (overlapping it slightly)
+                       instead of hanging below it. */
+                    float canopy_y = trunk_top + bb_size * 0.40f;
+                    renderer_draw_billboard(crown, pl->x, canopy_y, -pl->z,
+                                            bb_size, bb_size,
+                                            1.0f, 1.0f, 1.0f, 1.0f);
+                }
+                continue;
             }
             AseModel *pm = model_cache_get(pl->ase_path);
             if (!pm) continue;
@@ -1254,8 +994,8 @@ int main(void) {
                texture is either collision/blocking (BLOCKING_*, GROUND base
                slab) or a mesh whose canvas couldn't be resolved -- neither
                appears as a visible surface in the game. Skip them rather than
-               draw dark filler slabs. native_level1 used to render them as
-               debug_flat for audit, but the resulting huge gray BLOCKING_06
+               draw dark filler slabs. The old audit mode rendered them as
+               debug_flat, but the resulting huge gray BLOCKING_06
                (radius 12697) and SCHOOL slab were dominating the view; the
                coverage manifest tracks them, the renderer no longer needs to. */
             if (getenv("JN_DEBUG_DRAW") && pi < 6)
@@ -1267,12 +1007,19 @@ int main(void) {
                         pm->min[0],pm->min[1],pm->min[2],
                         pm->max[0],pm->max[1],pm->max[2], pl->x, pl->z);
             if (!model_has_texture(pm)) continue;
-            float draw_z = native_level1 ? -pl->z : pl->z;
+            float draw_z = -pl->z;
+            /* 2D_Trees boundary walls bake the sky behind the tree-line as an
+               opaque chroma blue (RGB 57,148,198); key it out so the real sky
+               shows through (Retroville feel pass, issue 5). */
+            int foliage_wall = (strncmp(pl->name, "2D_Trees", 8) == 0);
+            if (foliage_wall)
+                renderer_set_color_key(1, 57.0f/255.0f, 148.0f/255.0f, 198.0f/255.0f, 0.08f);
             renderer_draw_model(pm, 0, pl->x, 0.0f, draw_z, 0.0f, 1.0f);
+            if (foliage_wall)
+                renderer_set_color_key(0, 0, 0, 0, 0.08f);
         }
 
         renderer_end_frame();
-        }
         capture_end_frame();
         cap_seq++;
 
@@ -1316,7 +1063,6 @@ int main(void) {
     }
 
     capture_shutdown();
-    capture_scene_destroy();
     player_anim_destroy();
     world_box_destroy();
     ground_destroy();
