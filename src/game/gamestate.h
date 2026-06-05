@@ -3,9 +3,25 @@
 
 struct Entity;
 
+/* Fixed-size inventory. The original C3DPickupItem path logs "ERROR: OVER max
+   pickup items" beyond a hard cap; 16 is a safe mirror until Ghidra pins the
+   exact size. Each owned tool/key occupies one slot. */
+#define INVENTORY_MAX 16
+
+typedef struct {
+    char        tag[24];     /* tool/key identity, e.g. "watergun1" */
+    const char *icon_path;   /* HUD icon (static string), NULL = generic */
+} InventorySlot;
+
 typedef struct {
     int items_total;
     int items_collected;
+    /* Typed counters (Step 3). */
+    int gems_collected;      /* 3GEM pickups */
+    int points;              /* accumulated GAM "Points" */
+    /* Player status (Step 2 HUD). health is a 0..health_max bar. */
+    int health;
+    int health_max;
     int level_done;
     int level_change_requested;
     /* Cached respawn pose, set when the player is bound to a level. */
@@ -14,11 +30,21 @@ typedef struct {
     /* Pending swap, drained by main loop. Empty strings = no swap. */
     char  swap_level[64];
     char  swap_spawn[32];
+    /* Inventory / tools (Step 4). */
+    InventorySlot inventory[INVENTORY_MAX];
+    int           inventory_count;
 } GameState;
 
 void gamestate_init(void);
 void gamestate_item_added(void);
 void gamestate_item_collected(void);
+/* Typed pickups (Step 3). */
+void gamestate_gem_collected(void);
+void gamestate_add_points(int points);
+/* Inventory (Step 4). Grant a tool slot identified by tag (deduped); icon_path
+   is a static string used by the HUD (may be NULL). Returns 1 if newly added. */
+int  gamestate_grant_tool(const char *tag, const char *icon_path);
+int  gamestate_has_tool(const char *tag);
 void gamestate_request_level_change(void);
 /* Stash a target level path + spawn-point name for the main loop to drain. */
 void gamestate_request_level_swap(const char *level, const char *start_point);

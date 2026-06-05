@@ -2,7 +2,9 @@
 #include "../player_physics.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdint.h>
 #include <string.h>
+#include <strings.h>
 
 /* Big-endian read helpers */
 static int read_u32be(FILE *f, unsigned int *out) {
@@ -20,6 +22,10 @@ static int read_f32be(FILE *f, float *out) {
     return 1;
 }
 
+static void copy_string(char *dst, size_t dst_size, const char *src) {
+    if (!dst || dst_size == 0 || !src) return;
+    snprintf(dst, dst_size, "%s", src);
+}
 
 int gam_load(World *w, const char *path) {
     FILE *f = fopen(path, "rb");
@@ -78,11 +84,50 @@ int gam_load(World *w, const char *path) {
                 if (slen < val_len) fseek(f, val_len - slen, SEEK_CUR);
 
                 if (strcmp(prop_name, "ObjectTag") == 0)
-                    snprintf(e->tag, sizeof(e->tag), "%s", str_val);
+                    copy_string(e->tag, sizeof(e->tag), str_val);
                 else if (strcmp(prop_name, "LevelName") == 0)
-                    snprintf(e->target_level, sizeof(e->target_level), "%s", str_val);
+                    copy_string(e->target_level, sizeof(e->target_level), str_val);
                 else if (strcmp(prop_name, "StartPoint") == 0)
-                    snprintf(e->start_point, sizeof(e->start_point), "%s", str_val);
+                    copy_string(e->start_point, sizeof(e->start_point), str_val);
+                else if (strcmp(prop_name, "BASEAnimation") == 0)
+                    copy_string(e->grn_base, sizeof(e->grn_base), str_val);
+                else if (strcmp(prop_name, "WALKAnimation") == 0)
+                    copy_string(e->grn_walk, sizeof(e->grn_walk), str_val);
+                else if (strcmp(prop_name, "TALKAnimation") == 0)
+                    copy_string(e->grn_talk, sizeof(e->grn_talk), str_val);
+                else if (strcmp(prop_name, "STOPAnimation") == 0)
+                    copy_string(e->grn_stop, sizeof(e->grn_stop), str_val);
+                else if (strcmp(prop_name, "RUNAnimation") == 0)
+                    copy_string(e->grn_run, sizeof(e->grn_run), str_val);
+                else if (strcmp(prop_name, "FLYAnimation") == 0)
+                    copy_string(e->grn_fly, sizeof(e->grn_fly), str_val);
+                else if (strcmp(prop_name, "ANIM1") == 0 || strcmp(prop_name, "ANIM1Animation") == 0)
+                    copy_string(e->grn_anim[0], sizeof(e->grn_anim[0]), str_val);
+                else if (strcmp(prop_name, "ANIM2") == 0 || strcmp(prop_name, "ANIM2Animation") == 0)
+                    copy_string(e->grn_anim[1], sizeof(e->grn_anim[1]), str_val);
+                else if (strcmp(prop_name, "ANIM3") == 0 || strcmp(prop_name, "ANIM3Animation") == 0)
+                    copy_string(e->grn_anim[2], sizeof(e->grn_anim[2]), str_val);
+                else if (strcmp(prop_name, "ANIM4") == 0 || strcmp(prop_name, "ANIM4Animation") == 0)
+                    copy_string(e->grn_anim[3], sizeof(e->grn_anim[3]), str_val);
+                else if (strcmp(prop_name, "SpriteDatabase") == 0)
+                    copy_string(e->sprite_database, sizeof(e->sprite_database), str_val);
+                /* 3ASE (C3DASEObj): per-object ASE mesh + PNG texture. Prefer
+                   the Stop pose; fall back to Walk only if Stop is unset. */
+                else if (strcmp(prop_name, "ASEStop") == 0) {
+                    if (str_val[0] && strcasecmp(str_val, "none") != 0)
+                        copy_string(e->ase_file, sizeof(e->ase_file), str_val);
+                } else if (strcmp(prop_name, "ASEWalk") == 0) {
+                    if (!e->ase_file[0] && str_val[0] && strcasecmp(str_val, "none") != 0)
+                        copy_string(e->ase_file, sizeof(e->ase_file), str_val);
+                } else if (strcmp(prop_name, "PNGFile") == 0)
+                    copy_string(e->png_file, sizeof(e->png_file), str_val);
+                else if (strcmp(prop_name, "PatrolPoint") == 0) {
+                    if (str_val[0] && strcasecmp(str_val, "none") != 0)
+                        copy_string(e->patrol_point, sizeof(e->patrol_point), str_val);
+                } else if (strcmp(prop_name, "ActivateButton") == 0) {
+                    if (str_val[0] && strcasecmp(str_val, "none") != 0)
+                        copy_string(e->activate_target, sizeof(e->activate_target), str_val);
+                }
 
             } else if (type_id == 3) {
                 /* float32 BE */
@@ -96,6 +141,7 @@ int gam_load(World *w, const char *path) {
                 else if (strcmp(prop_name, "RotationX") == 0) e->rx = fval;
                 else if (strcmp(prop_name, "RotationY") == 0) e->ry = fval;
                 else if (strcmp(prop_name, "RotationZ") == 0) e->rz = fval;
+                else if (strcmp(prop_name, "SpriteSize") == 0) e->sprite_size = fval;
                 else {
                     /* C3DPlayer movement/physics constants -> PlayerPhysics. */
                     PlayerPhysics *pp = player_physics_mutable();
@@ -111,8 +157,27 @@ int gam_load(World *w, const char *path) {
                 }
 
             } else if (type_id == 6) {
-                /* int32 BE — skip */
-                fseek(f, val_len, SEEK_CUR);
+                /* int32 BE */
+                int ival = 0;
+                if (val_len >= 4) {
+                    unsigned int raw = 0;
+                    read_u32be(f, &raw);
+                    ival = (int)(int32_t)raw;
+                    if (val_len > 4) fseek(f, val_len - 4, SEEK_CUR);
+                } else {
+                    fseek(f, val_len, SEEK_CUR);
+                }
+
+                if (strcmp(prop_name, "InitiallyVisible") == 0) {
+                    e->has_initially_visible = 1;
+                    e->initially_visible = ival;
+                } else if (strcmp(prop_name, "SpriteIndex") == 0) {
+                    e->sprite_index = ival;
+                } else if (strcmp(prop_name, "EffectType") == 0) {
+                    e->effect_type = ival;
+                } else if (strcmp(prop_name, "Points") == 0) {
+                    e->points = ival;
+                }
             } else {
                 /* raw / unknown — skip */
                 fseek(f, val_len, SEEK_CUR);

@@ -40,3 +40,13 @@ const EntityVTable vt_door = {
     .on_trigger = door_on_trigger,
     .flags = ENTITY_FLAG_SOLID | ENTITY_FLAG_TRIGGER,
 };
+
+/* Level door (3DOR/3DUD/3SCD): same rise-open animation but NOT solid, so
+   binding it can't trap the player at a doorway (these were previously walked
+   through). Opens on a direct touch or when a button forwards a trigger. */
+const EntityVTable vt_leveldoor = {
+    .on_spawn = door_on_spawn,
+    .on_update = door_on_update,
+    .on_trigger = door_on_trigger,
+    .flags = ENTITY_FLAG_TRIGGER,
+};

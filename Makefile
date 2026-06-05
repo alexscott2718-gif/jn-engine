@@ -6,7 +6,7 @@ SDL2_LIB     = $(HOME_DIR)/sdl2/lib
 X11_INC      = $(HOME_DIR)/toolchain/usr/include
 X11_LIB      = $(HOME_DIR)/toolchain/usr/lib/x86_64-linux-gnu
 
-CFLAGS  = -Wall -O2 \
+CFLAGS  = -Wall -O2 -MMD -MP \
           -I$(SDL2_INC) -I$(SDL2_INC)/SDL2 \
           -I$(X11_INC) \
           -Isrc/engine
@@ -19,6 +19,7 @@ LIBS    = $(SDL2_LIB)/libSDL2.a \
 
 SRC     = $(wildcard src/engine/*.c src/engine/assets/*.c src/game/*.c src/game/behaviors/*.c)
 OBJ     = $(SRC:.c=.o)
+DEP     = $(OBJ:.o=.d)
 TARGET  = jnengine
 
 all: $(TARGET)
@@ -30,7 +31,7 @@ $(TARGET): $(OBJ)
 	$(CC) $(CFLAGS) -c $< -o $@
 
 clean:
-	rm -f $(OBJ) $(TARGET)
+	rm -f $(OBJ) $(DEP) $(TARGET)
 	# Remove web build outputs only -- keep web/shell.html (tracked source),
 	# otherwise `make capture` (which runs clean) wipes the WASM shell.
 	rm -f web/jnengine.html web/jnengine.js web/jnengine.wasm web/jnengine.data
@@ -130,7 +131,7 @@ WEB_LDFLAGS = -sUSE_SDL=2 -sUSE_SDL_MIXER=2 -sUSE_ZLIB=1 \
               -sFULL_ES3=1 -sMIN_WEBGL_VERSION=2 -sMAX_WEBGL_VERSION=2 \
               -sALLOW_MEMORY_GROWTH=1 -sASYNCIFY \
               -sEXIT_RUNTIME=0 \
-              -sEXPORTED_FUNCTIONS=_main,_input_set_virtual_move,_input_press_virtual_jump,_input_toggle_noclip,_input_set_noclip,_input_noclip_enabled \
+              -sEXPORTED_FUNCTIONS=_main,_input_set_virtual_move,_input_set_virtual_fly,_input_press_virtual_jump,_input_toggle_noclip,_input_set_noclip,_input_noclip_enabled,_input_toggle_turbo,_input_set_turbo,_input_turbo_enabled \
               -sEXPORTED_RUNTIME_METHODS=ccall,cwrap \
               --preload-file assets \
               --shell-file web/shell.html
@@ -139,4 +140,19 @@ web:
 	mkdir -p $(WEB_OUT_DIR)
 	$(EMCC) $(WEB_CFLAGS) $(WEB_SRC) $(WEB_LDFLAGS) -o $(WEB_TARGET)
 
-.PHONY: all clean web capture replay-hudfix capture-static capture-live-jimmy capture-live-hud capture-multiframe hybrid-level1 hybrid-level1-manifest native-level1-map native-level1 native-level1-keyframes diff-native-capture native-vs-capture-8881-review phase1-sky-tint phase4-capture-state capture-fixture capture-world-fixture solve-keyframe-views
+# JNvsJN web build: same engine + shell, preloads the curated JNvsJN asset tree
+# (tools/stage_jnvsjn_web.sh) at /assets instead of the game-1 assets/ dir.
+# Keeps the `jnengine` base name (shell.html hard-codes it) but emits into a
+# separate dir so it never collides with the game-1 bundle.
+WEB_JNV_OUT = $(WEB_OUT_DIR)/jnvsjn
+web-jnvsjn:
+	./tools/stage_jnvsjn_web.sh
+	mkdir -p $(WEB_JNV_OUT)
+	$(EMCC) $(WEB_CFLAGS) $(WEB_SRC) \
+	  $(filter-out --preload-file assets,$(WEB_LDFLAGS)) \
+	  --preload-file build/jnvsjn_web/assets@/assets \
+	  -o $(WEB_JNV_OUT)/jnengine.html
+
+.PHONY: all clean web web-jnvsjn capture replay-hudfix capture-static capture-live-jimmy capture-live-hud capture-multiframe hybrid-level1 hybrid-level1-manifest native-level1-map native-level1 native-level1-keyframes diff-native-capture native-vs-capture-8881-review phase1-sky-tint phase4-capture-state capture-fixture capture-world-fixture solve-keyframe-views
+
+-include $(DEP)

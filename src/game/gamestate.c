@@ -2,11 +2,43 @@
 #include "../engine/world.h"
 #include <stdio.h>
 #include <string.h>
+#include <strings.h>
 
 static GameState g_state;
 
 void gamestate_init(void) {
     memset(&g_state, 0, sizeof(g_state));
+    g_state.health_max = 100;
+    g_state.health     = 100;
+}
+
+void gamestate_gem_collected(void) {
+    g_state.gems_collected++;
+}
+
+void gamestate_add_points(int points) {
+    g_state.points += points;
+}
+
+int gamestate_has_tool(const char *tag) {
+    if (!tag || !tag[0]) return 0;
+    for (int i = 0; i < g_state.inventory_count; i++)
+        if (strcasecmp(g_state.inventory[i].tag, tag) == 0) return 1;
+    return 0;
+}
+
+int gamestate_grant_tool(const char *tag, const char *icon_path) {
+    if (!tag || !tag[0]) return 0;
+    if (gamestate_has_tool(tag)) return 0;
+    if (g_state.inventory_count >= INVENTORY_MAX) {
+        printf("[INVENTORY] ERROR: OVER max pickup items (%d)\n", INVENTORY_MAX);
+        return 0;
+    }
+    InventorySlot *s = &g_state.inventory[g_state.inventory_count++];
+    snprintf(s->tag, sizeof(s->tag), "%s", tag);
+    s->icon_path = icon_path;
+    printf("[INVENTORY] +tool '%s' (slot %d)\n", s->tag, g_state.inventory_count);
+    return 1;
 }
 
 void gamestate_item_added(void) {

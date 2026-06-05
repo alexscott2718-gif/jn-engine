@@ -59,6 +59,14 @@ void renderer_draw_billboard(unsigned int tex,
 void renderer_draw_screen_rect(int viewport_w, int viewport_h,
                                float x, float y, float width, float height,
                                float r, float g, float b, float a);
+/* Screen-space textured sprite (HUD layer). Coordinates in pixels from the
+   top-left; drawn with an orthographic NDC mapping, depth test off, alpha
+   blending on. The texel is multiplied by (tint_r,tint_g,tint_b) and its alpha
+   by tint_a (pass 1,1,1,1 for the raw texture). Intended to be called AFTER the
+   3D scene each frame. */
+void renderer_draw_sprite_2d(unsigned int tex, int viewport_w, int viewport_h,
+                             float x, float y, float width, float height,
+                             float tint_r, float tint_g, float tint_b, float tint_a);
 void renderer_end_frame(void);
 
 /* Set the sky gradient (top and bottom RGB). Drawn before depth-tested geometry. */

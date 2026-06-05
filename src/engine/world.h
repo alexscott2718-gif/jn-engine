@@ -24,10 +24,31 @@ typedef struct Entity {
     char  tag[64];               /* ObjectTag property */
     char  target_level[64];      /* LOAD: LevelName destination (e.g. "level2.gam") */
     char  start_point[32];       /* LOAD: StartPoint name in the destination level */
+    char  grn_base[64];          /* BASEAnimation GRN filename, when present */
+    char  grn_walk[64];          /* WALKAnimation GRN filename, when present */
+    char  grn_talk[64];          /* TALKAnimation GRN filename, when present */
+    char  grn_stop[64];          /* STOPAnimation GRN filename, when present */
+    char  grn_run[64];           /* RUNAnimation GRN filename, when present */
+    char  grn_fly[64];           /* FLYAnimation GRN filename, when present */
+    char  grn_anim[4][64];       /* ANIM1Animation..ANIM4Animation filenames */
+    char  sprite_database[64];   /* SpriteDatabase property, when present */
+    char  ase_file[64];          /* 3ASE: ASEStop/ASEWalk mesh filename */
+    char  png_file[64];          /* 3ASE: PNGFile texture filename */
+    char  patrol_point[32];      /* 3MOP/AI: PatrolPoint target marker tag */
+    char  activate_target[32];   /* 3BUT/3WAB: ActivateButton -> target ObjectTag */
+    float home[3];               /* behavior scratch: captured spawn position */
+    float patrol_to[3];          /* behavior scratch: resolved patrol target */
+    struct Entity *link_target;  /* behavior scratch: resolved activate target */
     float x, y, z;               /* world position */
     float rx, ry, rz;            /* rotation */
     float vx, vy, vz;            /* velocity (units/sec) */
     float half_extents[3];       /* AABB half-size for collision */
+    int   has_initially_visible; /* 1 when InitiallyVisible was authored */
+    int   initially_visible;     /* GAM InitiallyVisible value */
+    int   sprite_index;          /* SpriteIndex property (sprites.omt chunk id) */
+    float sprite_size;           /* SpriteSize property (world units), 0 = unset */
+    int   effect_type;           /* EffectType property, when present */
+    int   points;                /* Points property (pickup score value) */
     int   on_ground;
     int   alive;
     int   user_flag;             /* per-type: door open, item collected, ... */

@@ -17,6 +17,7 @@ Entity *g_player = NULL;
 #define PLAYER_HALF_Z     35.0f
 #define PLAYER_MOVE_SPEED 600.0f   /* units / sec */
 #define PLAYER_RUN_MULT   2.0f
+#define PLAYER_TURBO_MULT 4.0f     /* sticky fast-explore boost (T / web button) */
 #define PLAYER_JUMP_VEL   650.0f
 #define PLAYER_NOCLIP_VERTICAL_SPEED 600.0f
 #define PLAYER_TURN_RATE  2.8f     /* radians / sec (~160 deg/s) */
@@ -55,11 +56,15 @@ static int player_near_swing(World *w, const Entity *p) {
 }
 
 static void player_on_update(Entity *e, World *w, float dt) {
-    float speed = PLAYER_MOVE_SPEED;
-    if (input_is_down(SDL_SCANCODE_LSHIFT)) speed *= PLAYER_RUN_MULT;
     if (input_just_pressed(SDL_SCANCODE_N))
         input_toggle_noclip();
+    if (input_just_pressed(SDL_SCANCODE_T))
+        input_toggle_turbo();
     int noclip = input_noclip_enabled();
+    /* Turbo (sticky) stacks with the held SHIFT run. */
+    float speed = PLAYER_MOVE_SPEED;
+    if (input_is_down(SDL_SCANCODE_LSHIFT)) speed *= PLAYER_RUN_MULT;
+    if (input_turbo_enabled()) speed *= PLAYER_TURBO_MULT;
 
     /* Tank-turn controls (original JNBG): Left/Right (arrows + A/D) ROTATE
        Jimmy's heading; Up/Down (arrows + W/S) drive forward/backpedal along
@@ -95,8 +100,11 @@ static void player_on_update(Entity *e, World *w, float dt) {
         if (input_is_down(SDL_SCANCODE_SPACE)) up += 1.0f;
         if (input_is_down(SDL_SCANCODE_LCTRL) || input_is_down(SDL_SCANCODE_RCTRL) ||
             input_is_down(SDL_SCANCODE_Q)) up -= 1.0f;
+        up += input_get_virtual_fly();
+        up = clampf(up, -1.0f, 1.0f);
         e->vy = up * PLAYER_NOCLIP_VERTICAL_SPEED *
-            (input_is_down(SDL_SCANCODE_LSHIFT) ? PLAYER_RUN_MULT : 1.0f);
+            (input_is_down(SDL_SCANCODE_LSHIFT) ? PLAYER_RUN_MULT : 1.0f) *
+            (input_turbo_enabled() ? PLAYER_TURBO_MULT : 1.0f);
         e->on_ground = 1;
     }
 

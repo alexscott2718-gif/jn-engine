@@ -15,8 +15,10 @@ static int input_initialized = 0;
 
 /* Virtual touch input state. */
 static float g_vmove_x = 0.0f, g_vmove_y = 0.0f;
+static float g_vfly_y = 0.0f;
 static int   g_vjump_pending = 0;
 static int   g_noclip_enabled = 0;
+static int   g_turbo_enabled  = 0;
 
 int input_init(void) {
     keys_current = SDL_GetKeyboardState(&num_keys);
@@ -69,6 +71,17 @@ void input_get_virtual_move(float *x, float *y) {
 }
 
 EMSCRIPTEN_KEEPALIVE
+void input_set_virtual_fly(float y) {
+    if (y > 1.0f) y = 1.0f;
+    if (y < -1.0f) y = -1.0f;
+    g_vfly_y = y;
+}
+
+float input_get_virtual_fly(void) {
+    return g_vfly_y;
+}
+
+EMSCRIPTEN_KEEPALIVE
 void input_press_virtual_jump(void) {
     g_vjump_pending = 1;
 }
@@ -94,4 +107,23 @@ int input_toggle_noclip(void) {
 EMSCRIPTEN_KEEPALIVE
 int input_noclip_enabled(void) {
     return g_noclip_enabled;
+}
+
+/* Turbo: a sticky speed boost for fast level exploration (separate from the
+   held SHIFT run, with which it stacks). Exported so the web UI can toggle it. */
+EMSCRIPTEN_KEEPALIVE
+void input_set_turbo(int enabled) {
+    g_turbo_enabled = enabled ? 1 : 0;
+    printf("[turbo] %s\n", g_turbo_enabled ? "enabled" : "disabled");
+}
+
+EMSCRIPTEN_KEEPALIVE
+int input_toggle_turbo(void) {
+    input_set_turbo(!g_turbo_enabled);
+    return g_turbo_enabled;
+}
+
+EMSCRIPTEN_KEEPALIVE
+int input_turbo_enabled(void) {
+    return g_turbo_enabled;
 }

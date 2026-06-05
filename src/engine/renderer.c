@@ -138,6 +138,26 @@ static const char *RECT_FRAG_SRC =
     "uniform vec4 uColor;\n"
     "void main() { FragColor = uColor; }\n";
 
+/* Screen-space textured sprite shader (HUD). Position already in NDC; samples a
+   texture, multiplies RGB by uTint.rgb and alpha by uTint.a. */
+static const char *SPR2D_VERT_SRC =
+    GLSL_VS
+    "layout(location=0) in vec2 aPos;\n"
+    "layout(location=1) in vec2 aUV;\n"
+    "out vec2 vUV;\n"
+    "void main() { gl_Position = vec4(aPos, 0.0, 1.0); vUV = aUV; }\n";
+
+static const char *SPR2D_FRAG_SRC =
+    GLSL_FS
+    "in vec2 vUV;\n"
+    "out vec4 FragColor;\n"
+    "uniform sampler2D uTex;\n"
+    "uniform vec4 uTint;\n"
+    "void main() {\n"
+    "    vec4 c = texture(uTex, vUV);\n"
+    "    FragColor = vec4(c.rgb * uTint.rgb, c.a * uTint.a);\n"
+    "}\n";
+
 /* Lit + textured shader — pos(0) uv(1) normal(2) */
 static const char *LIT_VERT_SRC =
     GLSL_VS
@@ -251,6 +271,10 @@ static int g_sky_loc_top = -1, g_sky_loc_bot = -1;
 
 static unsigned int g_rect_prog = 0, g_rect_vao = 0, g_rect_vbo = 0;
 static int g_rect_loc_color = -1;
+
+/* Screen-space textured sprite (HUD) program. */
+static unsigned int g_spr2d_prog = 0, g_spr2d_vao = 0, g_spr2d_vbo = 0;
+static int g_spr2d_loc_tex = -1, g_spr2d_loc_tint = -1;
 
 /* Billboard program state. */
 static unsigned int g_bb_prog = 0, g_bb_vao = 0, g_bb_vbo = 0;
@@ -419,6 +443,30 @@ int renderer_init(int w, int h) {
         glBindVertexArray(0);
     }
 
+    /* Screen-space textured sprite program + dynamic quad (pos.xy, uv.xy). */
+    {
+        unsigned int svs2 = compile_shader(GL_VERTEX_SHADER, SPR2D_VERT_SRC);
+        unsigned int sfs2 = compile_shader(GL_FRAGMENT_SHADER, SPR2D_FRAG_SRC);
+        g_spr2d_prog = glCreateProgram();
+        glAttachShader(g_spr2d_prog, svs2); glAttachShader(g_spr2d_prog, sfs2);
+        glLinkProgram(g_spr2d_prog);
+        glGetProgramiv(g_spr2d_prog, GL_LINK_STATUS, &ok);
+        if (!ok) { char log[512]; glGetProgramInfoLog(g_spr2d_prog, 512, NULL, log); fprintf(stderr, "spr2d link: %s\n", log); return 0; }
+        glDeleteShader(svs2); glDeleteShader(sfs2);
+        g_spr2d_loc_tex  = glGetUniformLocation(g_spr2d_prog, "uTex");
+        g_spr2d_loc_tint = glGetUniformLocation(g_spr2d_prog, "uTint");
+        glGenVertexArrays(1, &g_spr2d_vao);
+        glGenBuffers(1, &g_spr2d_vbo);
+        glBindVertexArray(g_spr2d_vao);
+        glBindBuffer(GL_ARRAY_BUFFER, g_spr2d_vbo);
+        glBufferData(GL_ARRAY_BUFFER, 24 * sizeof(float), NULL, GL_STATIC_DRAW);
+        glEnableVertexAttribArray(0);
+        glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
+        glEnableVertexAttribArray(1);
+        glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(2 * sizeof(float)));
+        glBindVertexArray(0);
+    }
+
     /* Default camera */
     g_cam.pos[0] = 0; g_cam.pos[1] = 200; g_cam.pos[2] = 400;
     g_cam.yaw    = 0;
@@ -444,6 +492,9 @@ void renderer_destroy(void) {
     if (g_rect_prog){ glDeleteProgram(g_rect_prog); g_rect_prog = 0; }
     if (g_rect_vao) { glDeleteVertexArrays(1, &g_rect_vao); g_rect_vao = 0; }
     if (g_rect_vbo) { glDeleteBuffers(1, &g_rect_vbo);      g_rect_vbo = 0; }
+    if (g_spr2d_prog){ glDeleteProgram(g_spr2d_prog); g_spr2d_prog = 0; }
+    if (g_spr2d_vao) { glDeleteVertexArrays(1, &g_spr2d_vao); g_spr2d_vao = 0; }
+    if (g_spr2d_vbo) { glDeleteBuffers(1, &g_spr2d_vbo);      g_spr2d_vbo = 0; }
 }
 
 void renderer_set_sky(float tr, float tg, float tb,
@@ -595,6 +646,49 @@ void renderer_draw_screen_rect(int viewport_w, int viewport_h,
     glDrawArrays(GL_TRIANGLES, 0, 6);
     glBindVertexArray(0);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glDisable(GL_BLEND);
+    glDepthMask(GL_TRUE);
+    glEnable(GL_DEPTH_TEST);
+}
+
+void renderer_draw_sprite_2d(unsigned int tex, int viewport_w, int viewport_h,
+                             float x, float y, float width, float height,
+                             float tint_r, float tint_g, float tint_b, float tint_a) {
+    if (!tex || !g_spr2d_prog || !g_spr2d_vao || viewport_w <= 0 || viewport_h <= 0)
+        return;
+    if (width <= 0.0f || height <= 0.0f) return;
+
+    float x0 = (x / (float)viewport_w) * 2.0f - 1.0f;
+    float x1 = ((x + width) / (float)viewport_w) * 2.0f - 1.0f;
+    float y0 = 1.0f - (y / (float)viewport_h) * 2.0f;          /* top */
+    float y1 = 1.0f - ((y + height) / (float)viewport_h) * 2.0f; /* bottom */
+    /* tex_loader flips rows on load (stbi flip), so the bottom screen edge maps
+       to v=0 and the top edge to v=1 to render the image upright. */
+    const float verts[24] = {
+        x0, y0, 0.0f, 1.0f,
+        x1, y0, 1.0f, 1.0f,
+        x1, y1, 1.0f, 0.0f,
+        x0, y0, 0.0f, 1.0f,
+        x1, y1, 1.0f, 0.0f,
+        x0, y1, 0.0f, 0.0f,
+    };
+
+    glDisable(GL_DEPTH_TEST);
+    glDepthMask(GL_FALSE);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glUseProgram(g_spr2d_prog);
+    glUniform1i(g_spr2d_loc_tex, 0);
+    glUniform4f(g_spr2d_loc_tint, tint_r, tint_g, tint_b, tint_a);
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, tex);
+    glBindVertexArray(g_spr2d_vao);
+    glBindBuffer(GL_ARRAY_BUFFER, g_spr2d_vbo);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(verts), verts, GL_STATIC_DRAW);
+    glDrawArrays(GL_TRIANGLES, 0, 6);
+    glBindVertexArray(0);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindTexture(GL_TEXTURE_2D, 0);
     glDisable(GL_BLEND);
     glDepthMask(GL_TRUE);
     glEnable(GL_DEPTH_TEST);

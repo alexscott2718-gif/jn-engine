@@ -3,7 +3,9 @@
 #include "input.h"
 #include <math.h>
 #include <stddef.h>
+#include <stdlib.h>
 #include <string.h>
+#include <strings.h>
 
 static Entity *find_player(World *w) {
     for (Entity *e = w->head; e; e = e->next) {
@@ -76,18 +78,47 @@ static int sample_mesh_height_xz(const AseModel *m, float local_x, float local_z
     return hit;
 }
 
-static int world_terrain_height(const World *w, float x, float z, float *out_y) {
+/* A placement participates in walk-on collision if it is the ground or one of
+   the original game's BLOCK* / BLOCKING_* collision proxies. */
+static int placement_is_collider(const char *name) {
+    return strncasecmp(name, "GROUND", 6) == 0 ||
+           strncasecmp(name, "BLOCK",  5) == 0;
+}
+
+/* Global collision toggle (default ON; JN_NO_WORLD_COLLISION=1 disables). */
+static int world_collision_enabled(void) {
+    static int cached = -1;
+    if (cached < 0) {
+        const char *s = getenv("JN_NO_WORLD_COLLISION");
+        cached = (s && s[0] && strcmp(s, "0") != 0) ? 0 : 1;
+    }
+    return cached;
+}
+
+/* Highest collision surface at (x,z) that is at or below ref_y + STEP — so the
+   player lands on terrain / floors / steps and never snaps up onto a roof that
+   is above them. Samples GROUND + every BLOCK* collision mesh whose XZ-AABB
+   contains the point. */
+static int world_terrain_height(const World *w, float x, float z,
+                                float ref_y, float *out_y) {
+    if (!world_collision_enabled()) return 0;
+    const float STEP = 100.0f;   /* max step-up height */
     int hit = 0;
     float best_y = -1.0e30f;
     for (int i = 0; i < w->placement_count; i++) {
         const WorldPlacement *pl = &w->placements[i];
-        if (strcmp(pl->name, "GROUND") != 0) continue;
+        if (!placement_is_collider(pl->name)) continue;
         AseModel *m = model_cache_get(pl->ase_path);
         if (!m) continue;
+        /* Native Level 1 draws placements at (x, 0, -z); collide in that basis. */
+        float lx = x - pl->x;
+        float lz = z - (-pl->z);
+        /* Cheap XZ-AABB reject before the triangle scan. */
+        if (lx < m->min[0] || lx > m->max[0] ||
+            lz < m->min[2] || lz > m->max[2]) continue;
         float y;
-        /* Native Level 1 draws placements at (x, 0, -z); use the same basis
-           for terrain collision so the flat world.ground_y slab is not needed. */
-        if (!sample_mesh_height_xz(m, x - pl->x, z - (-pl->z), &y)) continue;
+        if (!sample_mesh_height_xz(m, lx, lz, &y)) continue;
+        if (y > ref_y + STEP) continue;   /* don't teleport up onto a roof above us */
         if (y > best_y) best_y = y;
         hit = 1;
     }
@@ -147,7 +178,8 @@ void physics_step(World *w, float dt) {
         }
         if (!e->on_ground) {
             float terrain_y;
-            int have_floor = world_terrain_height(w, e->x, e->z, &terrain_y);
+            float feet_y = e->y - e->half_extents[1];
+            int have_floor = world_terrain_height(w, e->x, e->z, feet_y, &terrain_y);
             float safety_y;
             if (world_safety_floor_height(w, e->x, e->z, &safety_y) &&
                 (!have_floor || safety_y > terrain_y)) {

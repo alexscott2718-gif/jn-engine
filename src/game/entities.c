@@ -20,6 +20,17 @@ static const EntityTypeInfo entity_types[] = {
     { "TRIG", "Trigger volume",        &vt_trig    },
     { "CRAT", "Crate",                 &vt_static  },
     { "ITEM", "Collectible item",      &vt_item    },
+    { "3GEM", "Gem pickup",            &vt_item    },
+    { "3PIC", "Pickup item",           &vt_item    },
+    { "3CHK", "Checkpoint",            &vt_checkpoint },
+    { "3MOP", "Moving platform",       &vt_movplat },
+    { "3BUT", "Button",                &vt_button  },
+    { "3WAB", "Water button",          &vt_button  },
+    /* Doors openable by buttons (and by direct touch); non-solid so they never
+       trap the player at a doorway. */
+    { "3DOR", "Door",                  &vt_leveldoor },
+    { "3DUD", "Door up/down",          &vt_leveldoor },
+    { "3SCD", "School door",           &vt_leveldoor },
     { NULL, NULL, NULL }
 };
 

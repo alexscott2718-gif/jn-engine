@@ -61,13 +61,21 @@
   #joynub { position: absolute; left: 50%; top: 50%; width: 42%; height: 42%;
             transform: translate(-50%,-50%); border-radius: 50%;
             background: rgba(159,179,200,0.65); border: 2px solid rgba(200,216,230,0.8); }
-  #jump { position: absolute; right: 6%; bottom: 12%;
+  #flyButtons { position: absolute; right: 6%; bottom: 8%;
+                display: flex; flex-direction: column; gap: 12px;
+                pointer-events: none; }
+  #jump, #flyDown {
           width: 22vw; max-width: 110px; aspect-ratio: 1; border-radius: 50%;
-          background: rgba(70,110,70,0.5); border: 2px solid rgba(160,210,160,0.8);
           color: #eaffea; font: 600 18px/1 system-ui, sans-serif;
           display: flex; align-items: center; justify-content: center;
           pointer-events: auto; -webkit-tap-highlight-color: transparent; }
+  #jump { background: rgba(70,110,70,0.5);
+          border: 2px solid rgba(160,210,160,0.8); }
   #jump:active { background: rgba(90,150,90,0.7); }
+  #flyDown { display: none; background: rgba(92,74,54,0.55);
+             border: 2px solid rgba(220,180,135,0.82); color: #fff1df; }
+  body.noclip #flyDown { display: flex; }
+  #flyDown:active { background: rgba(130,96,62,0.75); }
 </style>
 </head>
 <body>
@@ -78,6 +86,7 @@
     <select id="levelSelect" aria-label="Playable level"></select>
     <button id="nextLevel" type="button">Next</button>
     <button id="noclipToggle" type="button">Noclip: Off</button>
+    <button id="turboToggle" type="button">Speed: 1x</button>
   </div>
   <div id="levelLinks"></div>
   <div id="status">Loading…</div>
@@ -87,16 +96,19 @@
             oncontextmenu="event.preventDefault()"></canvas>
     <div id="touch">
       <div id="joy"><div id="joynub"></div></div>
-      <div id="jump">JUMP</div>
+      <div id="flyButtons">
+        <div id="jump">JUMP</div>
+        <div id="flyDown">DOWN</div>
+      </div>
     </div>
   </div>
-  <div id="controls">WASD move · SPACE jump/up · Ctrl/Q down · SHIFT run · N noclip · R respawn · drag = orbit</div>
+  <div id="controls">WASD move · SPACE jump/up · Ctrl/Q down · SHIFT run · T speed · N noclip · R respawn · drag = orbit</div>
   <div id="note">
     Native WebGL2 rebuild using original GAM/OMT data.
   </div>
 </div>
 <script type="text/javascript">
-  var PLAYABLE_LEVELS = [
+  var GAME1_LEVELS = [
     'level1', 'level1a', 'level1b', 'level1c', 'level1d', 'level1e', 'level1f',
     'level2', 'level2a', 'level2b',
     'level3', 'level3a', 'level3c', 'level3d',
@@ -105,7 +117,7 @@
     'level6', 'level6a',
     'level7'
   ];
-  var LEVEL_LABELS = {
+  var GAME1_LABELS = {
     level1: 'Level 1', level1a: 'Level 1A', level1b: 'Level 1B',
     level1c: 'Level 1C', level1d: 'Level 1D', level1e: 'Level 1E',
     level1f: 'Level 1F', level2: 'Level 2', level2a: 'Level 2A',
@@ -116,16 +128,40 @@
     level5b: 'Level 5B', level6: 'Level 6', level6a: 'Level 6A',
     level7: 'Level 7'
   };
+  var JNVSJN_LEVELS = [
+    'level1', 'level1_a', 'level1_b', 'level1_c', 'level1b', 'level1d',
+    'level3', 'level3a', 'level3c', 'level3d',
+    'level4', 'level4a', 'level4b',
+    'level5', 'level5a', 'level5b', 'level5b1', 'level5c'
+  ];
+  var JNVSJN_LABELS = {
+    level1: 'Level 1', level1_a: 'Level 1 A', level1_b: 'Level 1 B',
+    level1_c: 'Level 1 C', level1b: 'Level 1B', level1d: 'Level 1D',
+    level3: 'Level 3', level3a: 'Level 3A', level3c: 'Level 3C',
+    level3d: 'Level 3D', level4: 'Level 4', level4a: 'Level 4A',
+    level4b: 'Level 4B', level5: 'Level 5', level5a: 'Level 5A',
+    level5b: 'Level 5B', level5b1: 'Level 5B1', level5c: 'Level 5C'
+  };
+  function isJnvsjnBuild() {
+    return /(^|\/)(jnvsjn)(\/|$)/.test(window.location.pathname.toLowerCase());
+  }
+  var GAME_TITLE = isJnvsjnBuild()
+      ? 'Jimmy Neutron vs Jimmy Negatron'
+      : 'Jimmy Neutron';
+  var PLAYABLE_LEVELS = isJnvsjnBuild() ? JNVSJN_LEVELS : GAME1_LEVELS;
+  var LEVEL_LABELS = isJnvsjnBuild() ? JNVSJN_LABELS : GAME1_LABELS;
+  var DEFAULT_LEVEL = isJnvsjnBuild() ? 'level1_a' : 'level2';
+
   function normalizeLevelParam(v) {
     if (!v) return '';
     v = String(v).toLowerCase().replace(/\.gam$/, '');
     return PLAYABLE_LEVELS.indexOf(v) >= 0 ? v : '';
   }
   var selectedLevel = normalizeLevelParam(
-      new URLSearchParams(window.location.search).get('level')) || 'level2';
+      new URLSearchParams(window.location.search).get('level')) || DEFAULT_LEVEL;
   var selectedLabel = LEVEL_LABELS[selectedLevel] || selectedLevel;
-  document.title = 'JN Engine — ' + selectedLabel;
-  document.getElementById('title').textContent = 'Jimmy Neutron — ' + selectedLabel;
+  document.title = GAME_TITLE + ' — ' + selectedLabel;
+  document.getElementById('title').textContent = GAME_TITLE + ' — ' + selectedLabel;
 
   function levelHref(level) {
     var url = new URL(window.location.href);
@@ -167,11 +203,27 @@
   var noclipButton = document.getElementById('noclipToggle');
   function setNoclipButton(enabled) {
     noclipButton.textContent = enabled ? 'Noclip: On' : 'Noclip: Off';
+    document.body.classList.toggle('noclip', !!enabled);
+    var jump = document.getElementById('jump');
+    if (jump) jump.textContent = enabled ? 'UP' : 'JUMP';
   }
   noclipButton.addEventListener('click', function () {
     if (!Module || !Module.ccall) return;
     try {
       setNoclipButton(!!Module.ccall('input_toggle_noclip', 'number', [], []));
+      document.getElementById('canvas').focus();
+    } catch (e) {}
+  });
+
+  var turboButton = document.getElementById('turboToggle');
+  function setTurboButton(enabled) {
+    turboButton.textContent = enabled ? 'Speed: 4x' : 'Speed: 1x';
+  }
+  turboButton.addEventListener('click', function () {
+    if (!Module || !Module.ccall) return;
+    try {
+      setTurboButton(!!Module.ccall('input_toggle_turbo', 'number', [], []));
+      document.getElementById('canvas').focus();
     } catch (e) {}
   });
 
@@ -378,9 +430,12 @@
     var joy = document.getElementById('joy');
     var nub = document.getElementById('joynub');
     var jumpBtn = document.getElementById('jump');
+    var downBtn = document.getElementById('flyDown');
 
     var mvx = 0, mvy = 0;            /* current stick vector, [-1,1] */
+    var flyY = 0;                    /* held noclip vertical axis */
     var joyId = null;                /* active pointer id on the joystick */
+    var jumpId = null, downId = null;
 
     function setMove(x, y) {
       /* C signature: input_set_virtual_move(float x, float y). y is +forward
@@ -392,6 +447,14 @@
     function tapJump() {
       if (Module && Module.ccall)
         try { Module.ccall('input_press_virtual_jump', null, [], []); } catch (e) {}
+    }
+    function setFly(y) {
+      flyY = y;
+      if (Module && Module.ccall)
+        try { Module.ccall('input_set_virtual_fly', null, ['number'], [flyY]); } catch (e) {}
+    }
+    function noclipEnabled() {
+      return document.body.classList.contains('noclip');
     }
 
     function updateNub() {
@@ -427,14 +490,39 @@
     joy.addEventListener('pointercancel', joyEnd);
 
     jumpBtn.addEventListener('pointerdown', function (ev) {
-      tapJump(); ev.preventDefault();
+      jumpId = ev.pointerId; jumpBtn.setPointerCapture(jumpId);
+      if (noclipEnabled()) setFly(1);
+      else tapJump();
+      ev.preventDefault();
     });
+    function jumpEnd(ev) {
+      if (ev.pointerId === jumpId) {
+        jumpId = null;
+        if (flyY > 0) setFly(0);
+      }
+    }
+    jumpBtn.addEventListener('pointerup', jumpEnd);
+    jumpBtn.addEventListener('pointercancel', jumpEnd);
+
+    downBtn.addEventListener('pointerdown', function (ev) {
+      downId = ev.pointerId; downBtn.setPointerCapture(downId);
+      setFly(-1); ev.preventDefault();
+    });
+    function downEnd(ev) {
+      if (ev.pointerId === downId) {
+        downId = null;
+        if (flyY < 0) setFly(0);
+      }
+    }
+    downBtn.addEventListener('pointerup', downEnd);
+    downBtn.addEventListener('pointercancel', downEnd);
 
     /* Push the stick vector to the engine every animation frame while held.
        Continuous push (not just on move) keeps movement going when the finger
        is stationary at a deflected position. */
     function pump() {
       setMove(mvx, mvy);
+      if (flyY !== 0) setFly(flyY);
       requestAnimationFrame(pump);
     }
     requestAnimationFrame(pump);

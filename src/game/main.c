@@ -21,6 +21,7 @@
 #include "entity_visual.h"
 #include "camera.h"
 #include "gamestate.h"
+#include "hud.h"
 #include "player_anim.h"
 #include <stdio.h>
 #include <stdlib.h>
@@ -168,24 +169,41 @@ static void save_screenshot(const char *path, int w, int h) {
     printf("Screenshot saved: %s (%dx%d)\n", path, w, h);
 }
 
-/* Strip directory; try direct open then case-insensitive scan of assets/gam.
-   Writes the resolved relative path into out. Returns 1 on success. */
+static const char *env_root_default(const char *env_name, const char *fallback) {
+    const char *value = getenv(env_name);
+    return (value && value[0]) ? value : fallback;
+}
+
+static void join_path(char *out, size_t out_size, const char *root, const char *leaf) {
+    if (!out_size) return;
+    if (!root || !root[0]) root = ".";
+    if (!leaf || !leaf[0]) {
+        snprintf(out, out_size, "%s", root);
+        return;
+    }
+    size_t n = strlen(root);
+    snprintf(out, out_size, "%s%s%s", root, (n > 0 && root[n - 1] == '/') ? "" : "/", leaf);
+}
+
+/* Strip directory; try direct open then case-insensitive scan of the configured
+   GAM root. Default is assets/gam; JN_GAM_ROOT can point at another game. */
 #include <dirent.h>
 #include <strings.h>
 static int resolve_gam_path(const char *name, char *out, size_t out_size) {
     if (!name || !name[0]) return 0;
+    const char *root = env_root_default("JN_GAM_ROOT", "assets/gam");
     /* Try as-is first. */
-    snprintf(out, out_size, "assets/gam/%s", name);
+    join_path(out, out_size, root, name);
     FILE *f = fopen(out, "rb");
     if (f) { fclose(f); return 1; }
     /* Case-insensitive scan. */
-    DIR *d = opendir("assets/gam");
+    DIR *d = opendir(root);
     if (!d) return 0;
     struct dirent *de;
     int found = 0;
     while ((de = readdir(d)) != NULL) {
         if (strcasecmp(de->d_name, name) == 0) {
-            snprintf(out, out_size, "assets/gam/%s", de->d_name);
+            join_path(out, out_size, root, de->d_name);
             found = 1;
             break;
         }
@@ -236,13 +254,22 @@ static int level_desc_for(const char *name, LevelDesc *desc) {
     if (!resolve_gam_path(gam_name, desc->gam_path, sizeof(desc->gam_path)))
         return 0;
 
-    snprintf(desc->placements_path, sizeof(desc->placements_path),
-             "assets/glb/omt/%s_placements.txt", desc->name);
+    const char *placements_root = getenv("JN_PLACEMENTS_ROOT");
+    if (!placements_root || !placements_root[0])
+        placements_root = env_root_default("JN_PLB_ROOT", "assets/glb/omt");
+    char placements_name[80];
+    snprintf(placements_name, sizeof(placements_name), "%s_placements.txt", desc->name);
+    join_path(desc->placements_path, sizeof(desc->placements_path),
+              placements_root, placements_name);
     if (!file_exists_local(desc->placements_path))
         desc->placements_path[0] = '\0';
 
-    snprintf(desc->billboard_overrides, sizeof(desc->billboard_overrides),
-             "assets/native/%s_billboard_overrides.txt", desc->name);
+    const char *native_root = env_root_default("JN_NATIVE_ROOT", "assets/native");
+    char overrides_name[96];
+    snprintf(overrides_name, sizeof(overrides_name), "%s_billboard_overrides.txt",
+             desc->name);
+    join_path(desc->billboard_overrides, sizeof(desc->billboard_overrides),
+              native_root, overrides_name);
     if (!file_exists_local(desc->billboard_overrides))
         desc->billboard_overrides[0] = '\0';
 
@@ -537,6 +564,12 @@ int main(int argc, char **argv) {
     int jim_poses_loaded = player_anim_init(jim_tex);
     int jim_model_ok = (jim_poses_loaded > 0);
 
+    /* 2D HUD overlay. Disabled when a matched-camera override is active (the
+       game-1 native-vs-capture faithfulness validators render through this same
+       loop and must stay pixel-identical) or via JN_DISABLE_HUD. */
+    int hud_enabled = !renderer_camera_override_active() && !env_enabled("JN_DISABLE_HUD");
+    if (hud_enabled) hud_init();
+
     int n = load_level(&current_desc, &world);
     if (n < 0) {
         fprintf(stderr, "Failed to load %s\n", current_desc.gam_path);
@@ -561,9 +594,27 @@ int main(int argc, char **argv) {
     {
         int do_demo_spawn = 0;
 #ifdef __EMSCRIPTEN__
-        do_demo_spawn = 1;
+        /* The hardcoded Retroville framing coords below are tuned for level1
+           only. For every other level the browser build uses the level's own
+           3JIM start so the camera lands in that level's actual content
+           (gems, enemies, vehicles) instead of off-map empty terrain. */
+        if (strcmp(current_desc.name, "level1") == 0) do_demo_spawn = 1;
 #endif
         if (env_enabled("JN_DEMO_SPAWN")) do_demo_spawn = 1;
+        /* Explicit spawn override "x,y,z" — QA helper to park the camera on a
+           specific entity (gem, vehicle, NPC) in any level. Takes precedence. */
+        const char *spawn_xyz = getenv("JN_DEMO_SPAWN_XYZ");
+        if (spawn_xyz && spawn_xyz[0]) {
+            float sx = 0, sy = 0, sz = 0;
+            if (sscanf(spawn_xyz, "%f,%f,%f", &sx, &sy, &sz) == 3) {
+                Entity *js = world_find_type(&world, "3JIM");
+                if (js) {
+                    js->x = sx; js->y = sy; js->z = sz;
+                    fprintf(stderr, "[demo_spawn] override 3JIM at (%.0f,%.0f,%.0f)\n", sx, sy, sz);
+                }
+                do_demo_spawn = 0;
+            }
+        }
         if (do_demo_spawn) {
             Entity *jim_spawn = world_find_type(&world, "3JIM");
             if (jim_spawn) {
@@ -605,6 +656,76 @@ int main(int argc, char **argv) {
         }
     }
 
+    if (getenv("JN_TEST_PICKUPS")) {
+        Entity *jp = world_find_type(&world, "3JIM");
+        if (jp) {
+            const int ids[] = { 51, 162, 68, 191, 296, 87 };  /* apple,coin,diamond,gem,present,candy */
+            const int N = (int)(sizeof(ids) / sizeof(ids[0]));
+            for (int i = 0; i < N; i++) {
+                Entity *e = world_add(&world);
+                if (!e) break;
+                memcpy(e->type, "3PIC", 4); e->type[4] = '\0';
+                snprintf(e->tag, sizeof(e->tag), "test_pic_%d", ids[i]);
+                e->sprite_index = ids[i];
+                e->x = jp->x + (i - N / 2) * 70.0f;
+                e->y = jp->y + 50.0f;
+                e->z = jp->z - 170.0f;
+            }
+        }
+    }
+
+    if (getenv("JN_TEST_CLEAR")) {
+        /* Force a one-item objective and complete it to exercise the HUD
+           level-clear banner. */
+        gamestate_item_added();
+        gamestate_item_collected();
+    }
+
+    if (getenv("JN_TEST_COV")) {
+        Entity *jp = world_find_type(&world, "3JIM");
+        if (jp) {
+            const char *kinds[] = { "3CIN","3HUG","3ULT","3FOW","3SPK","3BOT",
+                                    "3NUM","3TES","3MOP","3SHU","3GRT","3TAR" };
+            const int N = (int)(sizeof(kinds) / sizeof(kinds[0]));
+            const float R = 300.0f;
+            for (int i = 0; i < N; i++) {
+                float ang = (6.28318f * i) / N;
+                Entity *e = world_add(&world);
+                if (!e) break;
+                memcpy(e->type, kinds[i], 4); e->type[4] = '\0';
+                snprintf(e->tag, sizeof(e->tag), "cov_%s", kinds[i]);
+                e->x = jp->x + R * cosf(ang);
+                e->y = jp->y + 60.0f;
+                e->z = jp->z - 200.0f + R * sinf(ang);
+                e->ry = ang + 3.14159f;
+            }
+        }
+    }
+
+    if (getenv("JN_TEST_TOOLS")) {
+        gamestate_grant_tool("watergun", "assets/hud/tool_watergun.png");
+        gamestate_grant_tool("glasses",  "assets/hud/tool_glasses.png");
+        gamestate_grant_tool("jetpack",  "assets/hud/tool_jetpack.png");
+        gamestate_grant_tool("wrench",   "assets/hud/tool_wrench.png");
+    }
+
+    if (getenv("JN_TEST_GEMS")) {
+        Entity *jp = world_find_type(&world, "3JIM");
+        if (jp) {
+            const char *grn[] = { "gemred.grn", "gemblue.grn", "gemyellow.grn" };
+            for (int i = 0; i < 3; i++) {
+                Entity *e = world_add(&world);
+                if (!e) break;
+                memcpy(e->type, "3GEM", 4); e->type[4] = '\0';
+                snprintf(e->tag, sizeof(e->tag), "test_gem_%d", i);
+                snprintf(e->grn_base, sizeof(e->grn_base), "%s", grn[i]);
+                e->x = jp->x + (i - 1) * 80.0f;
+                e->y = jp->y + 40.0f;
+                e->z = jp->z - 160.0f;
+            }
+        }
+    }
+
     if (getenv("JN_TEST_SPRITES")) {
         Entity *jp = world_find_type(&world, "3JIM");
         if (jp) {
@@ -634,6 +755,9 @@ int main(int argc, char **argv) {
             if (!e->alive) continue;
             EntityVisual v;
             if (entity_visual_resolve(e, &v)) continue;
+            /* 3ASE is drawn by the dedicated per-object branch (ASEStop mesh),
+               not the resolver, so it's not a placeholder when it has a mesh. */
+            if (strcmp(e->type, "3ASE") == 0 && e->ase_file[0]) continue;
             /* Check if we already noted this FourCC. */
             int found = 0;
             for (int k = 0; k < nseen; k++) {
@@ -803,7 +927,8 @@ int main(int argc, char **argv) {
                         fprintf(stderr, "[SWAP] gam_load failed for %s\n", swap_desc.gam_path);
                     }
                 } else {
-                    fprintf(stderr, "[SWAP] could not find %s under assets/gam\n", level_buf);
+                    fprintf(stderr, "[SWAP] could not find %s under %s\n",
+                            level_buf, env_root_default("JN_GAM_ROOT", "assets/gam"));
                     gamestate_reset_for_new_level();
                 }
                 /* skip respawn/cam steps this tick — world just rebuilt */
@@ -892,6 +1017,50 @@ int main(int argc, char **argv) {
                 continue;
             }
 
+            /* 3ASE (C3DASEObj): generic per-object mesh named by the GAM's
+               ASEStop/ASEWalk, textured by PNGFile. Meshes live under
+               assets/ase/jnvsjn/ (lowercased on import). */
+            if (strcmp(e->type, "3ASE") == 0 && e->ase_file[0]) {
+                char lower[64]; size_t li = 0;
+                for (const char *p = e->ase_file; *p && li < sizeof(lower) - 1; p++)
+                    lower[li++] = (char)tolower((unsigned char)*p);
+                lower[li] = '\0';
+                char path[160];
+                snprintf(path, sizeof(path), "assets/ase/jnvsjn/%s", lower);
+                AseModel *m = model_cache_get(path);
+                if (m) {
+                    unsigned int tex = e->png_file[0] ? tex_cache_resolve_bmp(e->png_file) : 0;
+                    renderer_set_hide_untextured_groups(0);
+                    renderer_draw_model(m, tex, e->x, e->y, e->z, e->ry, 1.0f);
+                    renderer_set_hide_untextured_groups(1);
+                    continue;
+                }
+                /* mesh missing -> fall through to placeholder box */
+            }
+
+            /* Sprite-indexed objects: 3PIC pickups and sprite objects are 2D
+               sprites from sprites.omt (chunk id == SpriteIndex), NOT meshes.
+               Render the real sprite as a camera-facing billboard instead of a
+               placeholder. (sprite_index 0 falls through so game-1 3PIC, which
+               predates SpriteIndex, keep their ASE props.) */
+            if ((strcmp(e->type, "3PIC") == 0 || strcmp(e->type, "3SRO") == 0 ||
+                 strcmp(e->type, "3SPR") == 0 || strcmp(e->type, "3ANI") == 0)
+                && e->sprite_index > 0) {
+                char spath[96];
+                snprintf(spath, sizeof(spath),
+                         "assets/parsed/sprites/jnvsjn/spr_%d.png", e->sprite_index);
+                unsigned int stex = tex_cache_get(spath);
+                if (stex) {
+                    float sz = e->sprite_size > 1.0f ? e->sprite_size : 110.0f;
+                    /* Lift the quad so its bottom edge sits at the pickup's Y
+                       (its position is at ground level) instead of sinking the
+                       lower half into the floor; the item bob keeps it floating. */
+                    renderer_draw_billboard(stex, e->x, e->y + sz * 0.5f, e->z,
+                                            sz, sz, 0.0f, 0.0f, 0.0f, 0.0f);
+                    continue;
+                }
+            }
+
             /* Pre-bound model from entity vtable (legacy path). */
             if (e->model) {
                 renderer_draw_model(e->model, 0, e->x, e->y, e->z, 0.0f, 1.0f);
@@ -916,7 +1085,13 @@ int main(int argc, char **argv) {
                     if (m) {
                         unsigned int tex = v.texture_path ? tex_cache_get(v.texture_path) : 0;
                         float sc = v.scale > 0.0f ? v.scale : 1.0f;
+                        /* Entity props are deliberately-chosen meshes; some
+                           (gems, converted GRN props) are untextured flat-color
+                           meshes. The global hide-untextured flag is for OMT
+                           collision slabs, not these — render them regardless. */
+                        renderer_set_hide_untextured_groups(0);
                         renderer_draw_model(m, tex, e->x, e->y, e->z, e->ry, sc);
+                        renderer_set_hide_untextured_groups(1);
                         continue;
                     }
                 }
@@ -942,7 +1117,8 @@ int main(int argc, char **argv) {
            +Z placement for legacy/hybrid validation paths. */
         for (int pi = 0; pi < world.placement_count; pi++) {
             const WorldPlacement *pl = &world.placements[pi];
-            if (strncmp(pl->name, "tree", 4) == 0) {
+            if (!env_enabled("JN_DISABLE_TREE_BILLBOARDS") &&
+                strncmp(pl->name, "tree", 4) == 0) {
                 /* Full scattered tree = bark TRUNK mesh (base at ground) + a
                    camera-facing green-crown CANOPY billboard sitting on the
                    trunk top. The trunk mesh's own canvas mis-resolves to a fence
@@ -1018,6 +1194,10 @@ int main(int argc, char **argv) {
             if (foliage_wall)
                 renderer_set_color_key(0, 0, 0, 0, 0.08f);
         }
+
+        /* 2D HUD overlay, drawn after all 3D geometry. */
+        if (hud_enabled)
+            hud_draw(w.width, w.height, gamestate_get());
 
         renderer_end_frame();
         capture_end_frame();

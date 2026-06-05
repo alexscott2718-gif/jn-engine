@@ -21,7 +21,7 @@ static int load_model_by_ext(AseModel *m, const char *path) {
 /* Phase 8: level1.omt contributes 194 static placements on top of ~15 entity
    models, so MAX_MODEL must be > ~210. Bump both caches together. */
 #define MAX_TEX    256
-#define MAX_MODEL  384
+#define MAX_MODEL  768
 #define PATH_LEN   128
 
 typedef struct {

@@ -16,6 +16,8 @@ void input_destroy(void);
    set, so keyboard remains the only input. */
 void  input_set_virtual_move(float x, float y);  /* JS: each frame from stick */
 void  input_get_virtual_move(float *x, float *y);
+void  input_set_virtual_fly(float y);            /* JS: held noclip up/down */
+float input_get_virtual_fly(void);
 void  input_press_virtual_jump(void);            /* JS: jump button tap */
 int   input_virtual_take_jump(void);             /* behavior: consume the tap */
 
@@ -23,5 +25,10 @@ int   input_virtual_take_jump(void);             /* behavior: consume the tap */
 void  input_set_noclip(int enabled);
 int   input_toggle_noclip(void);
 int   input_noclip_enabled(void);
+
+/* Turbo: sticky speed boost for fast level exploration (stacks with SHIFT). */
+void  input_set_turbo(int enabled);
+int   input_toggle_turbo(void);
+int   input_turbo_enabled(void);
 
 #endif
