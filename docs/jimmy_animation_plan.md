@@ -136,6 +136,34 @@ Fully reversing all 9 phase handlers byte-for-byte is Phase-3 work.
 - **Gate:** strafing/backpedaling/jumping show the correct distinct clips.
 
 ### Phase 3 — Movement & physics (data-driven, 1:1 with C3DPlayer)
+**Status 2026-06-01: WHOLE TRACK DEFERRED / REVERTED.** The data-driven movement
+(accel/decel ramp, .gam speed/jump, body lean) produced ice-skating + wrong
+turn/speed feel; reverted `behavior_player.c` to the approved simple tank-turn
+(instant velocity, MOVE_SPEED 600, TURN_RATE 2.8, JUMP_VEL 650) per user. The
+`.gam` parse (`player_physics.{c,h}` + gam_loader) + `renderer_draw_model_anim_euler`
+stay in the tree, dormant, ready to resume. Resume needs the C3DPlayer
+phase-handler RE + capture validation (capture rig). Original 3a/3b/3c notes:
+- 3a: `src/engine/player_physics.{c,h}` holds the C3DPlayer constants; `gam_loader.c`
+  parses them from the `.gam` (verified: "player physics from .gam: MaxSpeed=1400
+  Accel=400 Decel=1 Up=650 Down=-650 MaxVert=650 Lean=20/-20").
+- 3b: `behavior_player.c` ramps a signed along-heading speed toward MaxSpeed*input
+  by AccelRate / DecelRate (kept along the tank-turn heading). Rates applied per
+  assumed 30 Hz sim tick (`PLAYER_SIM_HZ`, calibration knob). Jump uses UpRate.
+- 3c PARTIAL: **body lean DONE** (2026-06-01) — AccelLean/DecelLean drive pitch
+  (fwd/back) + roll (into turns) on the player, applied via new
+  `renderer_draw_model_anim_euler` (yaw/pitch/roll); stored in e->rx/rz, smoothed.
+  Sign/magnitude QA-tunable. STILL TODO: phase-based vertical jump arc (not
+  accel-gravity; needs Neutron.exe phase-handler RE + capture validation, routed
+  to the capture rig).
+
+### Phase 4 — Contextual states (Level-1 only)  — DONE (2026-06-01)
+- Added PA_SWING (jimswing) + PA_LADDER (jimladder) to the player anim system
+  (player_anim.{c,h}, loop-classified, clips load). Level 1's only contextual
+  prop is the swing (3SWN x2; no ladder FourCC -> PA_LADDER dormant).
+- `behavior_player.c`: `player_near_swing()` scans the world for a 3SWN within
+  SWING_RADIUS (400); when the player is otherwise idle near a swing it plays
+  PA_SWING. Verified clips load + the idle->swing path renders.
+
 - **Parse the C3DPlayer param block** from the `.gam` in `gam_loader.c`:
   MaxSpeed, AccelRate, DecelRate, MaxHeight, UpRate, DownRate, MaxVertVelocity,
   AccelLean, DecelLean → a `PlayerPhysics` struct on the player entity. (BE

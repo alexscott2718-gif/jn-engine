@@ -79,6 +79,34 @@ nginx reload needed.
 Access via the landing page at `https://<EXTERNAL_HOST>:8420/` (LAN: `https://<DEBIAN_HOST>:8420/`),
 which links all gateway services.
 
+## JNvsJN GRN Catalog
+
+The JNvsJN textured-GRN mesh catalog is deployed separately from the Emscripten
+game bundle:
+
+```text
+https://exentt.com/jnvsjn/grn-catalog/index.html
+```
+
+It lives under `/var/www/jnvsjn/grn-catalog/` and contains:
+
+- `models/*.glb` — the 23 M2d proxy-captured textured GLBs;
+- `thumbs/*.png` — software-rendered first-paint thumbnails;
+- `data/catalog.json` — generated metadata;
+- local vendored Three.js modules for optional WebGL enhancement.
+
+Regenerate and deploy it with:
+
+```bash
+cd ~/jn-engine
+tools/deploy_grn_catalog.sh
+```
+
+The catalog source files under `web/grn-catalog/` are currently ignored by the
+repo's broad `web/*` ignore rule; the deploy script and
+`tools/render_grn_catalog_thumbnails.py` are the reproducible path for the live
+page.
+
 ## Known issues / TODO
 
 - 84 MB initial download — trim assets or split into lazy packs.
