@@ -264,10 +264,55 @@ facts), then **C** when ready to re-engage XP.
 
 ## Post-report actions
 
-*(Appended after the report was reviewed.)*
+*(Appended after the report was reviewed and steps A + B were approved.)*
 
-- **Step A — DONE.** Capture toolchain, GRN tools, capture docs, and this report
-  committed locally (not pushed). See commit footer added below by the wiring
-  session.
-- **Step B — DONE.** Captured textured GLBs wired into the native + WASM entity
-  resolver with a Level-1 visual-QA pass. See commit footer.
+### Step A — DONE (commit `d5040a4`, local only, not pushed)
+
+Safety commit on `master`: the Granny capture proxy
+(`instrument/granny_proxy/`, incl. the verified `granny.dll`), the static-GRN
+tools (`tools/grn_{probe,mesh,to_glb}.py`), the catalog deploy/render scripts,
+the GRN docs, and this report — 45 files. A new
+`instrument/granny_proxy/.gitignore` excludes regenerable build intermediates.
+`build.sh` gates unchanged; no behavior change.
+
+### Step B — DONE — captured textured GLBs wired into the runtime
+
+- **Asset library:** 13 captured textured GLBs staged into
+  `assets/glb/grn_capture/` (source-stem names): `springbase`, `gemred`,
+  `gemblue`, `gemyellow`, `chutebase`, `speedbase`, `hand`, `doom`, `momybase`,
+  `dadpiramidbase`, `fowlmummybase`, `fowlbase`, `sheenbase`.
+- **Binding (data-driven):** the JNvsJN GAMs reference `.grn` files via
+  `BASEAnimation`/`STOPAnimation`/etc. (read by `gam_loader.c` into `e->grn_*`).
+  Intersecting those refs with the captures gave the entity-bound prop set
+  (`springbase`, gems, `chutebase`, `speedbase`, `hand`, `doom`, `momybase`,
+  `dadpiramidbase`, `fowlmummybase`) → added/upgraded in `GRN_ASSET_TABLE`. The
+  resolver's GRN stem path was broadened to fire for any entity naming a GRN
+  animation (still gated by explicit table membership, so it can only redirect to
+  a mesh we have).
+- **Characters by RTTI class:** `3FOW`→`fowlbase.glb` (capture material
+  `C3DFOWL`) and `3SHE`→`sheenbase.glb` (`C3DSHEEN`) upgraded in `TYPE_TABLE`
+  from borrowed first-game ASEs.
+- **WASM:** `tools/stage_jnvsjn_web.sh` now bundles `assets/glb/grn_capture`
+  into the `web-jnvsjn` VFS (a `make web-jnvsjn` rebuild picks it up; not rebuilt
+  in this session).
+- **NOT wired (no clean binding; deferred with rationale):** the player
+  (`jimmybase` — engine-loaded + animated ASE poses, don't regress), `goddbase`
+  (Goddard — no FourCC; player-tied), `nummeybase` (entities reference
+  `nummeywalk.grn`; `3NUM` intentionally maps to the scooter), `mummybase`
+  (`3ENE` generic enemy — level-dependent), `headspinbase`/`goddshadow`
+  (Goddard sub-objects). These remain available under `jnvsjn-runtime/` for a
+  later, evidence-backed pass.
+
+**Visual QA (xvfb screenshots, `jnvsjn-runtime/screenshots/qa_*.png`):**
+
+- Level 1 regression: 32 entities, `placements_loaded=210, missing_mesh=0`,
+  `[entity_visual] all entities resolved` — no regression.
+- Level 1 + `JN_TEST_CHARS`: character ring renders, incl. `sheenbase.glb`
+  capture (textured).
+- Level5a: gems render as textured faceted meshes; `gltf_load` logged clean
+  loads of all 9 capture GLBs present in that level (no failures).
+- level1_b: `springbase`/`speedbase` captures load and the scene renders clean.
+- No `gltf_load` failures / `no drawable` / `missing` across any run.
+
+Both commits are **local only — not pushed** (no push was requested; the repo is
+a public GitHub mirror, so a push is a separate, explicit decision).
