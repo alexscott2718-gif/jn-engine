@@ -13,6 +13,8 @@ Jimmy Negatron* (JNvsJN).
 > faithfully (measured against the original's capture); JNvsJN runs with 22 levels and
 > a gameplay layer. See the history doc for where each piece stands.
 
+**▶ Play in your browser** — [Boy Genius](https://exentt.com/jn-engine/) · [JNvsJN](https://exentt.com/jnvsjn/) · or the **[project hub →](https://exentt.com/jn)** (demos, assets & docs in one place).
+
 ## Start here
 
 | If you want to… | Read |
