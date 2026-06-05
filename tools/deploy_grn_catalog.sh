@@ -90,9 +90,10 @@ def nice_name(item):
 cards = []
 for item in items:
     cards.append(f'''
-      <article class="mesh-card" data-state="static" data-model="{html.escape(item["model"])}">
+      <a class="mesh-card" href="view.html?m={html.escape(item["name"])}">
         <div class="viewport">
           <img class="thumb" src="{html.escape(item["thumb"])}" alt="" loading="lazy" decoding="async">
+          <span class="view-badge">View ›</span>
         </div>
         <div class="info">
           <div class="name-row">
@@ -105,14 +106,15 @@ for item in items:
             <span>{item["verts"]} verts · {item["tris"]} tris · {html.escape(item["dims"])}</span>
           </div>
         </div>
-      </article>''')
+      </a>''')
 
 print(template.replace("      <!-- CATALOG_CARDS -->", "\n".join(cards)))
 PY
 
 sudo mkdir -p "$DEST/data" "$DEST/models"
 sudo cp "$TMP_INDEX" "$DEST/index.html"
-sudo cp "$SRC_PAGE"/styles.css "$SRC_PAGE"/catalog.js "$DEST"/
+sudo cp "$SRC_PAGE"/styles.css "$SRC_PAGE"/view.html "$SRC_PAGE"/view.js "$DEST"/
+sudo rm -f "$DEST"/catalog.js   # legacy live-overlay renderer (replaced by per-mesh view.html)
 sudo rm -rf "$DEST/vendor"
 sudo cp -r "$SRC_PAGE/vendor" "$DEST/vendor"
 sudo cp "$TMP_JSON" "$DEST/data/catalog.json"

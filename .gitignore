@@ -6,6 +6,14 @@ core.*
 jnengine
 web/*
 !web/shell.html
+# grn-catalog page is hand-authored source (track it), unlike the rest of web/*
+# which is generated WASM output. Its data/models/thumbs are generated at deploy
+# time (from the runtime capture dir) and stay untracked.
+!web/grn-catalog/
+!web/grn-catalog/**
+web/grn-catalog/data/
+web/grn-catalog/models/
+web/grn-catalog/thumbs/
 demo.omtc
 demo.omtc.tex
 camera.cam
