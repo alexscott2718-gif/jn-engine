@@ -76,6 +76,33 @@
              border: 2px solid rgba(220,180,135,0.82); color: #fff1df; }
   body.noclip #flyDown { display: flex; }
   #flyDown:active { background: rgba(130,96,62,0.75); }
+
+  /* ---- Phone layout: maximize the game, overlay controls on the whole screen ----
+     Without this the 16:9 canvas letterboxes to a thin strip in portrait and the
+     vw-sized joystick/jump dwarf it. Make the game fill the viewport (the 1280x720
+     buffer letterboxes inside via object-fit), so the touch overlay sits at the
+     SCREEN edges and stays proportionate to the game. */
+  @media (max-width: 820px) {
+    body.touch #wrap { padding: 0; gap: 0; }
+    body.touch #stage { position: fixed; inset: 0; width: 100vw;
+                        height: 100vh; height: 100dvh; z-index: 40; }
+    body.touch #stage canvas#canvas { width: 100% !important; height: 100% !important;
+                        aspect-ratio: auto; object-fit: contain; border: 0; }
+    /* Slim translucent level bar stays reachable on top of the game. */
+    body.touch #levelnav { position: fixed; top: 0; left: 0; right: 0; z-index: 50;
+                        justify-content: flex-start; overflow-x: auto;
+                        background: rgba(11,13,16,0.55); padding: 5px; gap: 6px; }
+    /* Desktop-only chrome is noise on a phone. */
+    body.touch #title, body.touch #note, body.touch #controls,
+    body.touch #levelLinks { display: none; }
+    body.touch #progress { position: fixed; top: 40px; left: 50%;
+                        transform: translateX(-50%); z-index: 45; }
+    body.touch #status { position: fixed; top: 50px; left: 50%;
+                        transform: translateX(-50%); z-index: 45; }
+    /* Controls are now relative to the full screen — trim so they don't dominate. */
+    body.touch #joy { width: 30vw; max-width: 150px; }
+    body.touch #jump, body.touch #flyDown { width: 18vw; max-width: 96px; }
+  }
 </style>
 </head>
 <body>
