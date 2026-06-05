@@ -1,0 +1,9 @@
+# Build intermediates / generated artifacts for the Granny capture proxy.
+# Source of truth is granny_proxy.c + gen_def.py + granny_exports.txt; build.sh
+# regenerates the rest. The verified granny.dll IS tracked (provenance: its SHA-1
+# is recorded in docs/jnvsjn_granny_proxy_capture.md).
+granny_proxy.def
+granny_proxy.obj
+granny_proxy.lib
+granny.pdb
+__pycache__/

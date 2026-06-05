@@ -1,0 +1,28 @@
+# GRN static-prop glb manifest emitted by tools/grn_to_glb.py
+# format: <name>\t<glb_path>\t<center_x>\t<center_y>\t<center_z>
+# GL convention: pos/normal mapped (x,z,-y), localized to center
+Jonnyshootbase	assets/glb/grn/Jonnyshootbase.glb	-122.1900	76.4758	-0.0003
+Mailboxbase	assets/glb/grn/Mailboxbase.glb	-0.8662	0.0000	2.1325
+boxbase	assets/glb/grn/boxbase.glb	19.6850	-19.6850	-19.6850
+cagedoormove	assets/glb/grn/cagedoormove.glb	19.6850	-19.6850	-19.6850
+cagedoorstop	assets/glb/grn/cagedoorstop.glb	19.6850	-19.6850	-19.6850
+flurpbottlebase	assets/glb/grn/flurpbottlebase.glb	8.2061	0.0000	-7.8100
+gembase	assets/glb/grn/gembase.glb	15.1322	-0.1220	-18.9627
+gemblue	assets/glb/grn/gemblue.glb	15.1322	-0.1220	-18.9627
+gemred	assets/glb/grn/gemred.glb	15.1322	-0.1220	-18.9627
+gemyellow	assets/glb/grn/gemyellow.glb	15.1322	-0.1220	-18.9627
+gunbones	assets/glb/grn/gunbones.glb	19.6850	-19.6850	-19.6850
+headspinmove	assets/glb/grn/headspinmove.glb	19.6850	-19.6850	-19.6850
+headspinstop	assets/glb/grn/headspinstop.glb	19.6850	-19.6850	-19.6850
+jimmybase	assets/glb/grn/jimmybase.glb	-0.0300	106.5265	3.6754
+jimmyjumpjoy	assets/glb/grn/jimmyjumpjoy.glb	19.6850	-19.6850	-19.6850
+jimmylookup	assets/glb/grn/jimmylookup.glb	4.2021	30.4529	11.6967
+jimmyscratch	assets/glb/grn/jimmyscratch.glb	1.3232	40.3442	-14.3051
+megaburpgun	assets/glb/grn/megaburpgun.glb	-3.2091	16.7975	-5.1642
+nummeyscooterbase	assets/glb/grn/nummeyscooterbase.glb	8.1230	16.5461	-0.3238
+seagullmove	assets/glb/grn/seagullmove.glb	27.4294	-4.5266	-1.1012
+springbase	assets/glb/grn/springbase.glb	-3.4774	0.0000	-13.3306
+steamer	assets/glb/grn/steamer.glb	33.9486	20.0732	4.1184
+tombstonestop	assets/glb/grn/tombstonestop.glb	19.6850	-19.6850	-19.6850
+watergun2	assets/glb/grn/watergun2.glb	-0.0953	3.1634	-0.1586
+watertowerbase	assets/glb/grn/watertowerbase.glb	3.1630	91.4591	2.1594
