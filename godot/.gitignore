@@ -1,0 +1,8 @@
+# Godot editor import cache + per-machine state. Regenerated on first open.
+.godot/
+.import/
+export_presets.cfg
+
+# Foundry glbs are read directly from ../assets by absolute path (LevelLoader
+# ._foundry_abs); they are intentionally NOT mounted under res://, so Godot's
+# importer never scans the 6500+ glb tree. Nothing to ignore here.

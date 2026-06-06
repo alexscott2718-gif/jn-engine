@@ -1,0 +1,22 @@
+; JN Retroville — Godot bridge (Phase-0 spike)
+; See ../docs/godot_bridge_plan.md. This Godot project is the *game* track; it
+; consumes the foundry's seam artifacts (levels/*.json, physics/*.json, the
+; assets/ symlink to ../assets) and never participates in the RE/capture work.
+
+config_version=5
+
+[application]
+
+config/name="JN Retroville (bridge spike)"
+run/main_scene="res://scenes/spike.tscn"
+config/features=PackedStringArray("4.3", "Forward Plus")
+
+[autoload]
+
+GameState="*res://autoload/GameState.gd"
+EntityRegistry="*res://autoload/EntityRegistry.gd"
+
+[rendering]
+
+; Big world (native units in the thousands, scaled by CoordSpace.WORLD_SCALE).
+; Defaults are fine post-scale; left here as a marker for §4 tuning.

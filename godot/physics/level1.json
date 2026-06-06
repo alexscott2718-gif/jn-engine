@@ -1,0 +1,16 @@
+{
+  "level": "level1",
+  "loaded": true,
+  "source": "C3DROCKETSHIP",
+  "constants": {
+    "max_speed": 1400.0,
+    "accel_rate": 400.0,
+    "decel_rate": 1.0,
+    "max_height": 1500.0,
+    "up_rate": 650.0,
+    "down_rate": -650.0,
+    "max_vert_velocity": 650.0,
+    "accel_lean": 20.0,
+    "decel_lean": -20.0
+  }
+}
