@@ -125,9 +125,15 @@ func _overview_camera(loader: LevelLoader) -> void:
 	cam.near = maxf(span * 0.001, 0.05)
 	cam.far = span * 8.0
 	# Straight down from above the top of the world; screen-up = world -Z.
-	cam.position = Vector3(center.x, bounds.position.y + bounds.size.y + span * 0.9, center.z)
+	var tilt := float(OS.get_environment("JN_TILT"))   # 0 = straight down
+	if tilt > 0.0:
+		var back := span * 0.6 * sin(deg_to_rad(tilt))
+		var high := bounds.position.y + bounds.size.y + span * 0.7 * cos(deg_to_rad(tilt))
+		cam.position = Vector3(center.x, high, center.z + back)
+	else:
+		cam.position = Vector3(center.x, bounds.position.y + bounds.size.y + span * 0.9, center.z)
 	add_child(cam)
-	cam.look_at(center, Vector3(0, 0, -1))
+	cam.look_at(center, Vector3(0, 0, -1) if tilt <= 0.0 else Vector3(0, 1, 0))
 	cam.make_current()
 	if OS.get_environment("JN_MARKS") != "":
 		_landmark_marks(loader)

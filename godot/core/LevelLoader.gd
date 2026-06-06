@@ -111,14 +111,67 @@ func _mesh_instances(node: Node, acc: Array = []) -> Array:
 	return acc
 
 func _build_entities() -> void:
+	var stats := {"glb": 0, "sprite": 0, "placeholder": 0, "skip": 0}
 	for e in manifest.get("entities", []):
 		var fourcc := str(e.get("type", ""))
-		if EntityRegistry.is_invisible(fourcc):
+		var rec: Dictionary = EntityRegistry.resolve(fourcc, str(e.get("tag", "")))
+		var kind := str(rec.get("kind", "none"))
+		if kind == "invisible" or kind == "none":
+			stats["skip"] += 1
 			continue
-		var marker := _debug_marker(EntityRegistry.debug_color(fourcc))
-		marker.name = "%s_%s" % [fourcc, str(e.get("tag", ""))]
-		marker.position = CoordSpace.to_godot(CoordSpace.vec_from(e.get("pos")))
-		_entities_root.add_child(marker)
+		var node := _make_entity(rec)
+		if node == null:
+			stats["skip"] += 1
+			continue
+		node.name = "%s_%s" % [fourcc, str(e.get("tag", ""))]
+		node.position = CoordSpace.to_godot(CoordSpace.vec_from(e.get("pos")))
+		var rot = e.get("rot")
+		if rot is Array and rot.size() >= 3 and not (node is Sprite3D):
+			node.rotation.y = deg_to_rad(float(rot[1]))
+		_entities_root.add_child(node)
+		stats[kind] += 1
+	print("[LevelLoader] entities: %d glb, %d sprite, %d placeholder, %d skipped" % [
+		stats["glb"], stats["sprite"], stats["placeholder"], stats["skip"]])
+
+func _make_entity(rec: Dictionary) -> Node3D:
+	match str(rec.get("kind", "")):
+		"glb":
+			var node := _load_glb(_foundry_abs(str(rec.get("glb", ""))))
+			if node == null:
+				return null
+			# Entity glb geometry is native-unit (localized), like placements.
+			node.scale = Vector3.ONE * (CoordSpace.WORLD_SCALE * float(rec.get("scale", 1.0)))
+			return node
+		"sprite":
+			return _make_sprite(rec)
+		"placeholder":
+			# Small dim box: a real glb is pending the ASE->glb converter (2b).
+			return _debug_marker(Color(0.55, 0.55, 0.6))
+	return null
+
+## Camera-facing alpha-cut billboard from a foundry PNG (mirrors the C engine's
+## renderer_draw_billboard; bottom sits at the entity position).
+func _make_sprite(rec: Dictionary) -> Sprite3D:
+	var abs_png := _foundry_abs(str(rec.get("png", "")))
+	if not FileAccess.file_exists(abs_png):
+		return null
+	var img := Image.load_from_file(abs_png)
+	if img == null:
+		return null
+	var tex := ImageTexture.create_from_image(img)
+	var spr := Sprite3D.new()
+	spr.texture = tex
+	spr.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+	spr.shaded = false
+	spr.alpha_cut = SpriteBase3D.ALPHA_CUT_DISCARD
+	spr.alpha_scissor_threshold = 0.5
+	var world_h: float = CoordSpace.scalar(float(rec.get("size", 64.0)))
+	spr.pixel_size = world_h / maxf(float(img.get_height()), 1.0)
+	spr.position.y = world_h * 0.5   # bottom at the entity position
+	var tint = rec.get("tint")
+	if tint is Array and tint.size() >= 4:
+		spr.modulate = Color(tint[0], tint[1], tint[2], 1.0)
+	return spr
 
 ## Resolve a foundry-relative path (e.g. "assets/glb/omt/labshak.glb") to an
 ## absolute path in the C/Python repo (<repo>/assets/...), so Godot reads the
@@ -128,16 +181,25 @@ func _foundry_abs(rel: String) -> String:
 	var repo := ProjectSettings.globalize_path("res://").path_join("..")
 	return repo.path_join(rel).simplify_path()
 
-## Runtime glb -> Node3D (parses the raw file; no editor import needed).
+var _glb_cache: Dictionary = {}   ## abs_path -> template Node3D (kept out of tree)
+
+## Runtime glb -> Node3D (parses the raw file; no editor import needed). Parsed
+## scenes are cached and duplicated, so reused meshes (e.g. 47x tree01.glb) are
+## only parsed once.
 func _load_glb(abs_path: String) -> Node3D:
+	if _glb_cache.has(abs_path):
+		return _glb_cache[abs_path].duplicate()
 	if not FileAccess.file_exists(abs_path):
 		return null
 	var doc := GLTFDocument.new()
 	var state := GLTFState.new()
 	if doc.append_from_file(abs_path, state) != OK:
 		return null
-	var scene := doc.generate_scene(state)
-	return scene as Node3D
+	var scene := doc.generate_scene(state) as Node3D
+	if scene == null:
+		return null
+	_glb_cache[abs_path] = scene
+	return scene.duplicate()
 
 ## A small unlit cube, tinted, for eyeballing entity placement.
 func _debug_marker(color: Color) -> MeshInstance3D:

@@ -1,0 +1,729 @@
+{
+  "_meta": {
+    "source": "src/game/entity_visual.c",
+    "counts": {
+      "invisible": 37,
+      "sprite": 8,
+      "glb": 29,
+      "placeholder": 56
+    }
+  },
+  "tag": {
+    "3PIC|bubblepickup": {
+      "kind": "glb",
+      "glb": "assets/glb/omt/level2/nest.glb",
+      "scale": 1.0
+    },
+    "3PIC|nest": {
+      "kind": "glb",
+      "glb": "assets/glb/omt/level2/nest.glb",
+      "scale": 1.0
+    },
+    "3PIC|nest2": {
+      "kind": "glb",
+      "glb": "assets/glb/omt/level2/nest.glb",
+      "scale": 1.0
+    },
+    "3PIC|nest1": {
+      "kind": "glb",
+      "glb": "assets/glb/omt/level2/nest.glb",
+      "scale": 1.0
+    },
+    "3PIC|hydrant": {
+      "kind": "placeholder",
+      "ase": "assets/ase/firehydrant.ASE",
+      "scale": 1.0
+    },
+    "3PIC|godphone": {
+      "kind": "glb",
+      "glb": "assets/glb/omt/level5b/phone.glb",
+      "scale": 1.0
+    },
+    "3PIC|pad": {
+      "kind": "glb",
+      "glb": "assets/glb/omt/RocketPad.glb",
+      "scale": 1.0
+    },
+    "3PIC|pad2": {
+      "kind": "glb",
+      "glb": "assets/glb/omt/RocketPad.glb",
+      "scale": 1.0
+    },
+    "3PIC|egg2b": {
+      "kind": "placeholder",
+      "ase": "assets/ase/omt/egg.ASE",
+      "scale": 0.5
+    },
+    "3PIC|boatl": {
+      "kind": "placeholder",
+      "ase": "assets/ase/omt/SailBoat.ASE",
+      "scale": 0.5
+    },
+    "3PIC|hsounds": {
+      "kind": "invisible"
+    },
+    "3GRN|mailbox": {
+      "kind": "glb",
+      "glb": "assets/glb/omt/mailbox.glb",
+      "scale": 1.0
+    },
+    "3OMT|bench01": {
+      "kind": "placeholder",
+      "ase": "assets/ase/board.ASE",
+      "scale": 1.0
+    },
+    "3OMT|beam": {
+      "kind": "placeholder",
+      "ase": "assets/ase/beams.ASE",
+      "scale": 1.0
+    },
+    "3OMT|beams": {
+      "kind": "placeholder",
+      "ase": "assets/ase/beams.ASE",
+      "scale": 1.0
+    },
+    "3OMT|board": {
+      "kind": "placeholder",
+      "ase": "assets/ase/board.ASE",
+      "scale": 1.0
+    },
+    "3OMT|ray": {
+      "kind": "placeholder",
+      "ase": "assets/ase/ray.ASE",
+      "scale": 1.0
+    },
+    "3DOR|doorpp1": {
+      "kind": "placeholder",
+      "ase": "assets/ase/DoorPP1.ASE",
+      "scale": 1.0
+    },
+    "3DOR|doorpp2": {
+      "kind": "placeholder",
+      "ase": "assets/ase/DoorPP2.ASE",
+      "scale": 1.0
+    },
+    "3DOR|doorgrill": {
+      "kind": "placeholder",
+      "ase": "assets/ase/doorgrill.ASE",
+      "scale": 1.0
+    },
+    "3DOR|doorgrill2": {
+      "kind": "placeholder",
+      "ase": "assets/ase/DoorGrill2.ASE",
+      "scale": 1.0
+    },
+    "3DOR|doorgrill3": {
+      "kind": "placeholder",
+      "ase": "assets/ase/DoorGrill3.ASE",
+      "scale": 1.0
+    },
+    "3DOR|doorcloset": {
+      "kind": "placeholder",
+      "ase": "assets/ase/DoorCloset.ASE",
+      "scale": 1.0
+    },
+    "3DOR|doorfowl": {
+      "kind": "placeholder",
+      "ase": "assets/ase/doorfowl.ASE",
+      "scale": 1.0
+    },
+    "3DOR|doorcave": {
+      "kind": "placeholder",
+      "ase": "assets/ase/doorcave.ASE",
+      "scale": 1.0
+    },
+    "3DOR|doorretro": {
+      "kind": "placeholder",
+      "ase": "assets/ase/doorretro.ASE",
+      "scale": 1.0
+    },
+    "3DOR|firedoor": {
+      "kind": "placeholder",
+      "ase": "assets/ase/firedoor.ASE",
+      "scale": 1.0
+    }
+  },
+  "type": {
+    "3PAT": {
+      "kind": "invisible"
+    },
+    "3AIT": {
+      "kind": "invisible"
+    },
+    "3CAM": {
+      "kind": "invisible"
+    },
+    "3MCA": {
+      "kind": "invisible"
+    },
+    "3SOU": {
+      "kind": "invisible"
+    },
+    "3LIO": {
+      "kind": "invisible"
+    },
+    "STRT": {
+      "kind": "invisible"
+    },
+    "TRIG": {
+      "kind": "invisible"
+    },
+    "3SPR": {
+      "kind": "invisible"
+    },
+    "3ANI": {
+      "kind": "invisible"
+    },
+    "3LAS": {
+      "kind": "invisible"
+    },
+    "3DAI": {
+      "kind": "invisible"
+    },
+    "3RCK": {
+      "kind": "invisible"
+    },
+    "LOAD": {
+      "kind": "invisible"
+    },
+    "3TSP": {
+      "kind": "invisible"
+    },
+    "3CHK": {
+      "kind": "sprite",
+      "png": "assets/parsed/sprites/jnvsjn/spr_checkpoint.png",
+      "size": 160.0
+    },
+    "3FAD": {
+      "kind": "invisible"
+    },
+    "3FOG": {
+      "kind": "invisible"
+    },
+    "3MUS": {
+      "kind": "invisible"
+    },
+    "3HEL": {
+      "kind": "invisible"
+    },
+    "3AIJ": {
+      "kind": "invisible"
+    },
+    "3FLY": {
+      "kind": "invisible"
+    },
+    "3GRN": {
+      "kind": "invisible"
+    },
+    "3GRO": {
+      "kind": "invisible"
+    },
+    "3GEM": {
+      "kind": "invisible"
+    },
+    "3HER": {
+      "kind": "placeholder",
+      "ase": "assets/ase/bigbotstop.ASE",
+      "scale": 1.0
+    },
+    "ITEM": {
+      "kind": "placeholder",
+      "ase": "assets/ase/jimpickup.ASE",
+      "scale": 1.0
+    },
+    "3PIC": {
+      "kind": "placeholder",
+      "ase": "assets/ase/jimpickup.ASE",
+      "scale": 0.5
+    },
+    "3OMT": {
+      "kind": "glb",
+      "glb": "assets/glb/omt/level4/Sphere01.glb",
+      "scale": 1.0
+    },
+    "3ROC": {
+      "kind": "placeholder",
+      "ase": "assets/ase/rocket.ASE",
+      "scale": 1.0
+    },
+    "3ARR": {
+      "kind": "placeholder",
+      "ase": "assets/ase/3Darrow.ASE",
+      "scale": 1.0
+    },
+    "3BUT": {
+      "kind": "placeholder",
+      "ase": "assets/ase/buttonup.ASE",
+      "scale": 1.0
+    },
+    "3DOR": {
+      "kind": "glb",
+      "glb": "assets/glb/omt/level1e/DOOR.glb",
+      "scale": 1.0
+    },
+    "3CAR": {
+      "kind": "placeholder",
+      "ase": "assets/ase/carlstop.ASE",
+      "scale": 1.0
+    },
+    "3BEN": {
+      "kind": "placeholder",
+      "ase": "assets/ase/bennystop.ASE",
+      "scale": 1.0
+    },
+    "3HUM": {
+      "kind": "placeholder",
+      "ase": "assets/ase/humpstop.ASE",
+      "scale": 1.0
+    },
+    "3FIS": {
+      "kind": "placeholder",
+      "ase": "assets/ase/fish2.ASE",
+      "scale": 1.0
+    },
+    "3PHO": {
+      "kind": "glb",
+      "glb": "assets/glb/omt/level5b/phone.glb",
+      "scale": 1.0
+    },
+    "3HYD": {
+      "kind": "placeholder",
+      "ase": "assets/ase/firehydrant.ASE",
+      "scale": 1.0
+    },
+    "3JIM": {
+      "kind": "placeholder",
+      "ase": "assets/ase/jimstop.ase",
+      "scale": 1.0
+    },
+    "3SHE": {
+      "kind": "glb",
+      "glb": "assets/glb/grn_capture/sheenbase.glb",
+      "scale": 1.0
+    },
+    "3LIB": {
+      "kind": "placeholder",
+      "ase": "assets/ase/libystop.ASE",
+      "scale": 1.0
+    },
+    "3MOM": {
+      "kind": "placeholder",
+      "ase": "assets/ase/judystop.ASE",
+      "scale": 1.0
+    },
+    "3GIR": {
+      "kind": "placeholder",
+      "ase": "assets/ase/plantstop.ASE",
+      "scale": 1.0
+    },
+    "3KIT": {
+      "kind": "placeholder",
+      "ase": "assets/ase/catsit.ASE",
+      "scale": 1.0
+    },
+    "3NIC": {
+      "kind": "placeholder",
+      "ase": "assets/ase/nickstop.ASE",
+      "scale": 1.0
+    },
+    "3GUA": {
+      "kind": "placeholder",
+      "ase": "assets/ase/guardwalk.ASE",
+      "scale": 1.0
+    },
+    "3SOL": {
+      "kind": "placeholder",
+      "ase": "assets/ase/soldwalk.ASE",
+      "scale": 1.0
+    },
+    "3FLA": {
+      "kind": "placeholder",
+      "ase": "assets/ase/firestrato.ASE",
+      "scale": 1.0
+    },
+    "3SBU": {
+      "kind": "placeholder",
+      "ase": "assets/ase/retrobus.ASE",
+      "scale": 1.0
+    },
+    "3TRE": {
+      "kind": "glb",
+      "glb": "assets/glb/omt/tree01.glb",
+      "scale": 1.0
+    },
+    "3DIN": {
+      "kind": "placeholder",
+      "ase": "assets/ase/omt/dino.ASE",
+      "scale": 1.0
+    },
+    "3FAN": {
+      "kind": "glb",
+      "glb": "assets/glb/omt/level5a/fan.glb",
+      "scale": 1.0
+    },
+    "3SAI": {
+      "kind": "placeholder",
+      "ase": "assets/ase/omt/SailBoat.ASE",
+      "scale": 1.0
+    },
+    "3SPH": {
+      "kind": "glb",
+      "glb": "assets/glb/omt/level4/Sphere01.glb",
+      "scale": 1.0
+    },
+    "3MER": {
+      "kind": "placeholder",
+      "ase": "assets/ase/omt/Rocket.ASE",
+      "scale": 1.0
+    },
+    "3SUV": {
+      "kind": "placeholder",
+      "ase": "assets/ase/omt/lawnmower.ASE",
+      "scale": 1.0
+    },
+    "3AIO": {
+      "kind": "glb",
+      "glb": "assets/glb/omt/Box03.glb",
+      "scale": 1.0
+    },
+    "3SWN": {
+      "kind": "placeholder",
+      "ase": "assets/ase/doorfowl.ASE",
+      "scale": 1.0
+    },
+    "3NEU": {
+      "kind": "sprite",
+      "png": "assets/parsed/sprites/sprites_images/0000_100x100d32.png",
+      "size": 90.0
+    },
+    "3RED": {
+      "kind": "sprite",
+      "png": "assets/parsed/sprites/sprites_images/0000_100x100d32.png",
+      "size": 90.0,
+      "tint": [
+        1.0,
+        0.25,
+        0.25,
+        1.0
+      ]
+    },
+    "3BAL": {
+      "kind": "sprite",
+      "png": "assets/parsed/sprites/sprites_images/0050_32x32d32.png",
+      "size": 70.0
+    },
+    "3CON": {
+      "kind": "sprite",
+      "png": "assets/parsed/sprites/sprites_images/0041_128x128d16.png",
+      "size": 90.0
+    },
+    "3LEA": {
+      "kind": "sprite",
+      "png": "assets/parsed/sprites/sprites_images/0045_129x100d16.png",
+      "size": 90.0
+    },
+    "3CIN": {
+      "kind": "placeholder",
+      "ase": "assets/ase/cindycheer.ASE",
+      "scale": 1.0
+    },
+    "3HUG": {
+      "kind": "placeholder",
+      "ase": "assets/ase/hughstop.ASE",
+      "scale": 1.0
+    },
+    "3ULT": {
+      "kind": "placeholder",
+      "ase": "assets/ase/ultrastop.ASE",
+      "scale": 1.0
+    },
+    "3FOW": {
+      "kind": "glb",
+      "glb": "assets/glb/grn_capture/fowlbase.glb",
+      "scale": 1.0
+    },
+    "3SPK": {
+      "kind": "placeholder",
+      "ase": "assets/ase/sporkystop.ASE",
+      "scale": 1.0
+    },
+    "3BOT": {
+      "kind": "placeholder",
+      "ase": "assets/ase/bigbotstop.ASE",
+      "scale": 1.0
+    },
+    "3ENE": {
+      "kind": "placeholder",
+      "ase": "assets/ase/bigbotstop.ASE",
+      "scale": 1.0
+    },
+    "3NUM": {
+      "kind": "glb",
+      "glb": "assets/glb/grn/nummeyscooterbase.glb",
+      "scale": 1.0
+    },
+    "3TES": {
+      "kind": "glb",
+      "glb": "assets/glb/omt/level6/tesla.glb",
+      "scale": 1.0
+    },
+    "3MOP": {
+      "kind": "glb",
+      "glb": "assets/glb/omt/level3d/block.glb",
+      "scale": 1.0
+    },
+    "3MOR": {
+      "kind": "glb",
+      "glb": "assets/glb/omt/Box01.glb",
+      "scale": 1.0
+    },
+    "3SHU": {
+      "kind": "glb",
+      "glb": "assets/glb/omt/BUSH01.glb",
+      "scale": 1.0
+    },
+    "3DUD": {
+      "kind": "placeholder",
+      "ase": "assets/ase/downdoor2a.ASE",
+      "scale": 1.0
+    },
+    "3WAB": {
+      "kind": "placeholder",
+      "ase": "assets/ase/buttondown.ASE",
+      "scale": 1.0
+    },
+    "3SCR": {
+      "kind": "glb",
+      "glb": "assets/glb/omt/level1b/blockscreen.glb",
+      "scale": 1.0
+    },
+    "3SCD": {
+      "kind": "glb",
+      "glb": "assets/glb/omt/level1e/DOOR.glb",
+      "scale": 1.0
+    },
+    "3CRB": {
+      "kind": "glb",
+      "glb": "assets/glb/omt/level3d/block.glb",
+      "scale": 1.0
+    },
+    "3GRT": {
+      "kind": "sprite",
+      "png": "assets/parsed/sprites/jnvsjn/spr_greenneutron.png",
+      "size": 80.0
+    },
+    "3TAR": {
+      "kind": "sprite",
+      "png": "assets/parsed/sprites/jnvsjn/spr_target.png",
+      "size": 90.0
+    },
+    "3JEE": {
+      "kind": "glb",
+      "glb": "assets/glb/omt/CAR.glb",
+      "scale": 1.0
+    },
+    "3NCA": {
+      "kind": "glb",
+      "glb": "assets/glb/omt/CAR.glb",
+      "scale": 1.0
+    },
+    "3NC2": {
+      "kind": "glb",
+      "glb": "assets/glb/omt/CAR.glb",
+      "scale": 1.0
+    },
+    "3HOV": {
+      "kind": "placeholder",
+      "ase": "assets/ase/jnvsjn/godflycycle.ase",
+      "scale": 1.0
+    },
+    "3SUB": {
+      "kind": "placeholder",
+      "ase": "assets/ase/jnvsjn/substop.ase",
+      "scale": 1.0
+    },
+    "3VRT": {
+      "kind": "placeholder",
+      "ase": "assets/ase/jnvsjn/tankstop.ase",
+      "scale": 1.0
+    },
+    "3LUN": {
+      "kind": "placeholder",
+      "ase": "assets/ase/jnvsjn/lunerlanderstop.ase",
+      "scale": 1.0
+    },
+    "3TEX": {
+      "kind": "invisible"
+    },
+    "3COR": {
+      "kind": "invisible"
+    },
+    "3VOR": {
+      "kind": "invisible"
+    },
+    "3TSU": {
+      "kind": "invisible"
+    },
+    "3SRO": {
+      "kind": "invisible"
+    },
+    "3ELE": {
+      "kind": "invisible"
+    },
+    "3BUG": {
+      "kind": "invisible"
+    },
+    "3GWA": {
+      "kind": "invisible"
+    },
+    "3WAT": {
+      "kind": "invisible"
+    },
+    "3ROP": {
+      "kind": "invisible"
+    },
+    "3PEN": {
+      "kind": "invisible"
+    },
+    "3TRA": {
+      "kind": "invisible"
+    }
+  },
+  "grn": {
+    "mailboxbase": {
+      "kind": "glb",
+      "glb": "assets/glb/omt/mailbox.glb",
+      "scale": 1.0
+    },
+    "jetpack": {
+      "kind": "glb",
+      "glb": "assets/glb/omt/jetpack.glb",
+      "scale": 1.0
+    },
+    "watergun2": {
+      "kind": "glb",
+      "glb": "assets/glb/grn/watergun2.glb",
+      "scale": 1.0
+    },
+    "flurpbottlebase": {
+      "kind": "glb",
+      "glb": "assets/glb/grn/flurpbottlebase.glb",
+      "scale": 1.0
+    },
+    "steamer": {
+      "kind": "glb",
+      "glb": "assets/glb/grn/steamer.glb",
+      "scale": 1.0
+    },
+    "springbase": {
+      "kind": "glb",
+      "glb": "assets/glb/grn_capture/springbase.glb",
+      "scale": 1.0
+    },
+    "jonnyshootbase": {
+      "kind": "glb",
+      "glb": "assets/glb/grn/Jonnyshootbase.glb",
+      "scale": 1.0
+    },
+    "gemred": {
+      "kind": "glb",
+      "glb": "assets/glb/grn_capture/gemred.glb",
+      "scale": 1.0
+    },
+    "gemblue": {
+      "kind": "glb",
+      "glb": "assets/glb/grn_capture/gemblue.glb",
+      "scale": 1.0
+    },
+    "gemyellow": {
+      "kind": "glb",
+      "glb": "assets/glb/grn_capture/gemyellow.glb",
+      "scale": 1.0
+    },
+    "gembase": {
+      "kind": "glb",
+      "glb": "assets/glb/grn/gembase.glb",
+      "scale": 1.0
+    },
+    "watertowerbase": {
+      "kind": "glb",
+      "glb": "assets/glb/grn/watertowerbase.glb",
+      "scale": 1.0
+    },
+    "megaburpgun": {
+      "kind": "glb",
+      "glb": "assets/glb/grn/megaburpgun.glb",
+      "scale": 1.0
+    },
+    "megaburpgun1": {
+      "kind": "glb",
+      "glb": "assets/glb/grn/megaburpgun.glb",
+      "scale": 1.0
+    },
+    "megaburpgun2": {
+      "kind": "glb",
+      "glb": "assets/glb/grn/megaburpgun.glb",
+      "scale": 1.0
+    },
+    "megaburpgun3": {
+      "kind": "glb",
+      "glb": "assets/glb/grn/megaburpgun.glb",
+      "scale": 1.0
+    },
+    "nummeyscooterbase": {
+      "kind": "glb",
+      "glb": "assets/glb/grn/nummeyscooterbase.glb",
+      "scale": 1.0
+    },
+    "cagedoorbase": {
+      "kind": "glb",
+      "glb": "assets/glb/grn/cagedoorstop.glb",
+      "scale": 1.0
+    },
+    "tombstonebase": {
+      "kind": "glb",
+      "glb": "assets/glb/grn/tombstonestop.glb",
+      "scale": 1.0
+    },
+    "tombstonebase2": {
+      "kind": "glb",
+      "glb": "assets/glb/grn/tombstonestop.glb",
+      "scale": 1.0
+    },
+    "chutebase": {
+      "kind": "glb",
+      "glb": "assets/glb/grn_capture/chutebase.glb",
+      "scale": 1.0
+    },
+    "speedbase": {
+      "kind": "glb",
+      "glb": "assets/glb/grn_capture/speedbase.glb",
+      "scale": 1.0
+    },
+    "hand": {
+      "kind": "glb",
+      "glb": "assets/glb/grn_capture/hand.glb",
+      "scale": 1.0
+    },
+    "doom": {
+      "kind": "glb",
+      "glb": "assets/glb/grn_capture/doom.glb",
+      "scale": 1.0
+    },
+    "momybase": {
+      "kind": "glb",
+      "glb": "assets/glb/grn_capture/momybase.glb",
+      "scale": 1.0
+    },
+    "dadpiramidbase": {
+      "kind": "glb",
+      "glb": "assets/glb/grn_capture/dadpiramidbase.glb",
+      "scale": 1.0
+    },
+    "fowlmummybase": {
+      "kind": "glb",
+      "glb": "assets/glb/grn_capture/fowlmummybase.glb",
+      "scale": 1.0
+    }
+  }
+}
