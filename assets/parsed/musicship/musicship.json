@@ -1,0 +1,29 @@
+{
+  "file": "/home/scotty/xp-jnbg-original/omt/musicship.omt",
+  "total_size": 848394,
+  "has_images": false,
+  "has_audio": true,
+  "audio": [
+    {
+      "index": 0,
+      "name": "yoke ship BG sounds",
+      "offset": 8,
+      "size": 155770,
+      "file": "/home/scotty/jn-engine/assets/parsed/musicship/musicship_audio/0000_yoke_ship_BG_sounds.wav"
+    },
+    {
+      "index": 1,
+      "name": "Snip1_22k",
+      "offset": 155805,
+      "size": 200976,
+      "file": "/home/scotty/jn-engine/assets/parsed/musicship/musicship_audio/0001_Snip1_22k.wav"
+    },
+    {
+      "index": 2,
+      "name": "Spooky_22k",
+      "offset": 356781,
+      "size": 491568,
+      "file": "/home/scotty/jn-engine/assets/parsed/musicship/musicship_audio/0002_Spooky_22k.wav"
+    }
+  ]
+}

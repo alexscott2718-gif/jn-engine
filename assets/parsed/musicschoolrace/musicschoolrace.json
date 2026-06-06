@@ -1,0 +1,22 @@
+{
+  "file": "/home/scotty/xp-jnbg-original/omt/musicschoolrace.omt",
+  "total_size": 1140800,
+  "has_images": false,
+  "has_audio": true,
+  "audio": [
+    {
+      "index": 0,
+      "name": "Race_IntroOutro_11k",
+      "offset": 8,
+      "size": 356402,
+      "file": "/home/scotty/jn-engine/assets/parsed/musicschoolrace/musicschoolrace_audio/0000_Race_IntroOutro_11k.wav"
+    },
+    {
+      "index": 1,
+      "name": "HuntTension1 11k",
+      "offset": 356892,
+      "size": 783908,
+      "file": "/home/scotty/jn-engine/assets/parsed/musicschoolrace/musicschoolrace_audio/0001_HuntTension1_11k.wav"
+    }
+  ]
+}

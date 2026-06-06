@@ -1,0 +1,15 @@
+{
+  "file": "/home/scotty/xp-jnbg-original/omt/musicschoolinside.omt",
+  "total_size": 705659,
+  "has_images": false,
+  "has_audio": true,
+  "audio": [
+    {
+      "index": 0,
+      "name": "ScaryHunting A",
+      "offset": 8,
+      "size": 705624,
+      "file": "/home/scotty/jn-engine/assets/parsed/musicschoolinside/musicschoolinside_audio/0000_ScaryHunting_A.wav"
+    }
+  ]
+}

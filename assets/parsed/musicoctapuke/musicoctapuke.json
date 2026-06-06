@@ -1,0 +1,15 @@
+{
+  "file": "/home/scotty/xp-jnbg-original/omt/musicoctapuke.omt",
+  "total_size": 364769,
+  "has_images": false,
+  "has_audio": true,
+  "audio": [
+    {
+      "index": 0,
+      "name": "bg octapuke",
+      "offset": 35,
+      "size": 364734,
+      "file": "/home/scotty/jn-engine/assets/parsed/musicoctapuke/musicoctapuke_audio/0000_bg_octapuke.wav"
+    }
+  ]
+}

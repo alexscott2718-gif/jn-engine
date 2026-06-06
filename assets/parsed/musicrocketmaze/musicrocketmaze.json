@@ -1,0 +1,15 @@
+{
+  "file": "/home/scotty/xp-jnbg-original/omt/musicrocketmaze.omt",
+  "total_size": 397115,
+  "has_images": false,
+  "has_audio": true,
+  "audio": [
+    {
+      "index": 0,
+      "name": "Surf Music Demo End",
+      "offset": 53,
+      "size": 397062,
+      "file": "/home/scotty/jn-engine/assets/parsed/musicrocketmaze/musicrocketmaze_audio/0000_Surf_Music_Demo_End.wav"
+    }
+  ]
+}

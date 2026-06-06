@@ -1,0 +1,15 @@
+{
+  "file": "/home/scotty/xp-jnbg-original/omt/musicend.omt",
+  "total_size": 239695,
+  "has_images": false,
+  "has_audio": true,
+  "audio": [
+    {
+      "index": 0,
+      "name": "cheer crowd small",
+      "offset": 8,
+      "size": 239660,
+      "file": "/home/scotty/jn-engine/assets/parsed/musicend/musicend_audio/0000_cheer_crowd_small.wav"
+    }
+  ]
+}

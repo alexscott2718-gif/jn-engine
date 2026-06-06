@@ -1,0 +1,15 @@
+{
+  "file": "/home/scotty/xp-jnbg-original/omt/musiccandybar.omt",
+  "total_size": 682983,
+  "has_images": false,
+  "has_audio": true,
+  "audio": [
+    {
+      "index": 0,
+      "name": "Candy",
+      "offset": 35,
+      "size": 682948,
+      "file": "/home/scotty/jn-engine/assets/parsed/musiccandybar/musiccandybar_audio/0000_Candy.wav"
+    }
+  ]
+}

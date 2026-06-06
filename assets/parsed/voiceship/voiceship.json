@@ -1,0 +1,540 @@
+{
+  "file": "/home/scotty/xp-jnbg-original/omt/voiceship.omt",
+  "total_size": 4542262,
+  "has_images": false,
+  "has_audio": true,
+  "audio": [
+    {
+      "index": 0,
+      "name": "yokian1",
+      "offset": 8,
+      "size": 24136,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceship/voiceship_audio/0000_yokian1.wav"
+    },
+    {
+      "index": 1,
+      "name": "yokian4",
+      "offset": 24144,
+      "size": 14394,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceship/voiceship_audio/0001_yokian4.wav"
+    },
+    {
+      "index": 2,
+      "name": "empty",
+      "offset": 39159,
+      "size": 992,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceship/voiceship_audio/0002_empty.wav"
+    },
+    {
+      "index": 3,
+      "name": "empty",
+      "offset": 40151,
+      "size": 992,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceship/voiceship_audio/0003_empty.wav"
+    },
+    {
+      "index": 4,
+      "name": "empty",
+      "offset": 41782,
+      "size": 992,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceship/voiceship_audio/0004_empty.wav"
+    },
+    {
+      "index": 5,
+      "name": "empty",
+      "offset": 42774,
+      "size": 992,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceship/voiceship_audio/0005_empty.wav"
+    },
+    {
+      "index": 6,
+      "name": "empty",
+      "offset": 43766,
+      "size": 992,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceship/voiceship_audio/0006_empty.wav"
+    },
+    {
+      "index": 7,
+      "name": "yokian2b",
+      "offset": 48787,
+      "size": 11994,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceship/voiceship_audio/0007_yokian2b.wav"
+    },
+    {
+      "index": 8,
+      "name": "savecarl2B",
+      "offset": 60781,
+      "size": 44666,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceship/voiceship_audio/0008_savecarl2B.wav"
+    },
+    {
+      "index": 9,
+      "name": "yokian28",
+      "offset": 105447,
+      "size": 15758,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceship/voiceship_audio/0009_yokian28.wav"
+    },
+    {
+      "index": 10,
+      "name": "yokian18",
+      "offset": 122265,
+      "size": 29074,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceship/voiceship_audio/0010_yokian18.wav"
+    },
+    {
+      "index": 11,
+      "name": "jimmyking3",
+      "offset": 151339,
+      "size": 27626,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceship/voiceship_audio/0011_jimmyking3.wav"
+    },
+    {
+      "index": 12,
+      "name": "yokian6",
+      "offset": 182118,
+      "size": 26382,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceship/voiceship_audio/0012_yokian6.wav"
+    },
+    {
+      "index": 13,
+      "name": "ship blast",
+      "offset": 210864,
+      "size": 116858,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceship/voiceship_audio/0013_ship_blast.wav"
+    },
+    {
+      "index": 14,
+      "name": "jimmyking4",
+      "offset": 327722,
+      "size": 31272,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceship/voiceship_audio/0014_jimmyking4.wav"
+    },
+    {
+      "index": 15,
+      "name": "savecarl8",
+      "offset": 358994,
+      "size": 25054,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceship/voiceship_audio/0015_savecarl8.wav"
+    },
+    {
+      "index": 16,
+      "name": "yokian25",
+      "offset": 402734,
+      "size": 32470,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceship/voiceship_audio/0016_yokian25.wav"
+    },
+    {
+      "index": 17,
+      "name": "yokian3",
+      "offset": 437858,
+      "size": 86836,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceship/voiceship_audio/0017_yokian3.wav"
+    },
+    {
+      "index": 18,
+      "name": "yokian2",
+      "offset": 524694,
+      "size": 83180,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceship/voiceship_audio/0018_yokian2.wav"
+    },
+    {
+      "index": 19,
+      "name": "yokian9",
+      "offset": 607874,
+      "size": 24656,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceship/voiceship_audio/0019_yokian9.wav"
+    },
+    {
+      "index": 20,
+      "name": "shrinkray",
+      "offset": 632530,
+      "size": 56926,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceship/voiceship_audio/0020_shrinkray.wav"
+    },
+    {
+      "index": 21,
+      "name": "yokiansolider1",
+      "offset": 689456,
+      "size": 48036,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceship/voiceship_audio/0021_yokiansolider1.wav"
+    },
+    {
+      "index": 22,
+      "name": "yokiansolider4",
+      "offset": 737492,
+      "size": 54740,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceship/voiceship_audio/0022_yokiansolider4.wav"
+    },
+    {
+      "index": 23,
+      "name": "yokian29",
+      "offset": 792232,
+      "size": 23500,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceship/voiceship_audio/0023_yokian29.wav"
+    },
+    {
+      "index": 24,
+      "name": "yokian7",
+      "offset": 820664,
+      "size": 28356,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceship/voiceship_audio/0024_yokian7.wav"
+    },
+    {
+      "index": 25,
+      "name": "yokian8",
+      "offset": 849020,
+      "size": 88814,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceship/voiceship_audio/0025_yokian8.wav"
+    },
+    {
+      "index": 26,
+      "name": "savecarl1&2",
+      "offset": 937834,
+      "size": 60080,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceship/voiceship_audio/0026_savecarl1_2.wav"
+    },
+    {
+      "index": 27,
+      "name": "savecarl6",
+      "offset": 997914,
+      "size": 208356,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceship/voiceship_audio/0027_savecarl6.wav"
+    },
+    {
+      "index": 28,
+      "name": "jimmyking6",
+      "offset": 1210536,
+      "size": 23886,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceship/voiceship_audio/0028_jimmyking6.wav"
+    },
+    {
+      "index": 29,
+      "name": "jimmyend4",
+      "offset": 1234422,
+      "size": 62392,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceship/voiceship_audio/0029_jimmyend4.wav"
+    },
+    {
+      "index": 30,
+      "name": "yokian21",
+      "offset": 1296814,
+      "size": 61638,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceship/voiceship_audio/0030_yokian21.wav"
+    },
+    {
+      "index": 31,
+      "name": "yokiancindy22",
+      "offset": 1358452,
+      "size": 38284,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceship/voiceship_audio/0031_yokiancindy22.wav"
+    },
+    {
+      "index": 32,
+      "name": "yokian23",
+      "offset": 1396736,
+      "size": 24902,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceship/voiceship_audio/0032_yokian23.wav"
+    },
+    {
+      "index": 33,
+      "name": "yokian30",
+      "offset": 1423308,
+      "size": 55138,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceship/voiceship_audio/0033_yokian30.wav"
+    },
+    {
+      "index": 34,
+      "name": "yokiancindy20",
+      "offset": 1478446,
+      "size": 60528,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceship/voiceship_audio/0034_yokiancindy20.wav"
+    },
+    {
+      "index": 35,
+      "name": "jimmyking5",
+      "offset": 1558538,
+      "size": 20624,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceship/voiceship_audio/0035_jimmyking5.wav"
+    },
+    {
+      "index": 36,
+      "name": "yokian19",
+      "offset": 1579162,
+      "size": 106194,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceship/voiceship_audio/0036_yokian19.wav"
+    },
+    {
+      "index": 37,
+      "name": "jimmyking7",
+      "offset": 1687354,
+      "size": 58606,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceship/voiceship_audio/0037_jimmyking7.wav"
+    },
+    {
+      "index": 38,
+      "name": "audio_38",
+      "offset": 1745960,
+      "size": 992,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceship/voiceship_audio/0038_audio_38.wav"
+    },
+    {
+      "index": 39,
+      "name": "rocket blast",
+      "offset": 1746952,
+      "size": 95610,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceship/voiceship_audio/0039_rocket_blast.wav"
+    },
+    {
+      "index": 40,
+      "name": "savecarl7",
+      "offset": 1842562,
+      "size": 32818,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceship/voiceship_audio/0040_savecarl7.wav"
+    },
+    {
+      "index": 41,
+      "name": "yokian14",
+      "offset": 1879186,
+      "size": 26674,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceship/voiceship_audio/0041_yokian14.wav"
+    },
+    {
+      "index": 42,
+      "name": "jimmyking9",
+      "offset": 1906690,
+      "size": 43080,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceship/voiceship_audio/0042_jimmyking9.wav"
+    },
+    {
+      "index": 43,
+      "name": "audio_43",
+      "offset": 1949770,
+      "size": 28524,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceship/voiceship_audio/0043_audio_43.wav"
+    },
+    {
+      "index": 44,
+      "name": "yokian16",
+      "offset": 1978586,
+      "size": 46000,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceship/voiceship_audio/0044_yokian16.wav"
+    },
+    {
+      "index": 45,
+      "name": "jimmyking8",
+      "offset": 2024586,
+      "size": 67498,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceship/voiceship_audio/0045_jimmyking8.wav"
+    },
+    {
+      "index": 46,
+      "name": "yokian15B",
+      "offset": 2112152,
+      "size": 32208,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceship/voiceship_audio/0046_yokian15B.wav"
+    },
+    {
+      "index": 47,
+      "name": "audio_47",
+      "offset": 2144458,
+      "size": 26674,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceship/voiceship_audio/0047_audio_47.wav"
+    },
+    {
+      "index": 48,
+      "name": "yokian15",
+      "offset": 2171132,
+      "size": 44012,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceship/voiceship_audio/0048_yokian15.wav"
+    },
+    {
+      "index": 49,
+      "name": "savecarl4",
+      "offset": 2215144,
+      "size": 48868,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceship/voiceship_audio/0049_savecarl4.wav"
+    },
+    {
+      "index": 50,
+      "name": "savecarl9",
+      "offset": 2264012,
+      "size": 37088,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceship/voiceship_audio/0050_savecarl9.wav"
+    },
+    {
+      "index": 51,
+      "name": "yokian12",
+      "offset": 2321258,
+      "size": 38730,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceship/voiceship_audio/0051_yokian12.wav"
+    },
+    {
+      "index": 52,
+      "name": "yokian13",
+      "offset": 2359988,
+      "size": 44380,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceship/voiceship_audio/0052_yokian13.wav"
+    },
+    {
+      "index": 53,
+      "name": "savecarl5",
+      "offset": 2438976,
+      "size": 56952,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceship/voiceship_audio/0053_savecarl5.wav"
+    },
+    {
+      "index": 54,
+      "name": "audio_54",
+      "offset": 2495928,
+      "size": 180442,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceship/voiceship_audio/0054_audio_54.wav"
+    },
+    {
+      "index": 55,
+      "name": "yokian10",
+      "offset": 2530326,
+      "size": 57428,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceship/voiceship_audio/0055_yokian10.wav"
+    },
+    {
+      "index": 56,
+      "name": "yokian11",
+      "offset": 2587754,
+      "size": 53520,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceship/voiceship_audio/0056_yokian11.wav"
+    },
+    {
+      "index": 57,
+      "name": "yokian17b",
+      "offset": 2641274,
+      "size": 41082,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceship/voiceship_audio/0057_yokian17b.wav"
+    },
+    {
+      "index": 58,
+      "name": "jimmyend3",
+      "offset": 2710950,
+      "size": 42142,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceship/voiceship_audio/0058_jimmyend3.wav"
+    },
+    {
+      "index": 59,
+      "name": "spacedoor",
+      "offset": 2755748,
+      "size": 121432,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceship/voiceship_audio/0059_spacedoor.wav"
+    },
+    {
+      "index": 60,
+      "name": "yokian17C",
+      "offset": 2898544,
+      "size": 135222,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceship/voiceship_audio/0060_yokian17C.wav"
+    },
+    {
+      "index": 61,
+      "name": "jimmyking2",
+      "offset": 3033766,
+      "size": 67348,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceship/voiceship_audio/0061_jimmyking2.wav"
+    },
+    {
+      "index": 62,
+      "name": "yokian26",
+      "offset": 3101114,
+      "size": 50202,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceship/voiceship_audio/0062_yokian26.wav"
+    },
+    {
+      "index": 63,
+      "name": "jimmyend2",
+      "offset": 3151316,
+      "size": 58790,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceship/voiceship_audio/0063_jimmyend2.wav"
+    },
+    {
+      "index": 64,
+      "name": "yokian17",
+      "offset": 3210106,
+      "size": 71724,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceship/voiceship_audio/0064_yokian17.wav"
+    },
+    {
+      "index": 65,
+      "name": "yokian27",
+      "offset": 3307152,
+      "size": 44986,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceship/voiceship_audio/0065_yokian27.wav"
+    },
+    {
+      "index": 66,
+      "name": "jimmyking1",
+      "offset": 3362048,
+      "size": 44642,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceship/voiceship_audio/0066_jimmyking1.wav"
+    },
+    {
+      "index": 67,
+      "name": "jimmyking10",
+      "offset": 3406690,
+      "size": 40042,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceship/voiceship_audio/0067_jimmyking10.wav"
+    },
+    {
+      "index": 68,
+      "name": "jimmyend1",
+      "offset": 3463728,
+      "size": 58698,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceship/voiceship_audio/0068_jimmyend1.wav"
+    },
+    {
+      "index": 69,
+      "name": "yokian24",
+      "offset": 3522426,
+      "size": 94252,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceship/voiceship_audio/0069_yokian24.wav"
+    },
+    {
+      "index": 70,
+      "name": "audio_70",
+      "offset": 3616678,
+      "size": 71724,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceship/voiceship_audio/0070_audio_70.wav"
+    },
+    {
+      "index": 71,
+      "name": "fcintro2 bkg",
+      "offset": 3688402,
+      "size": 161146,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceship/voiceship_audio/0071_fcintro2_bkg.wav"
+    },
+    {
+      "index": 72,
+      "name": "audio_72",
+      "offset": 3849548,
+      "size": 626070,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceship/voiceship_audio/0072_audio_72.wav"
+    },
+    {
+      "index": 73,
+      "name": "spaceship blasts by2d",
+      "offset": 3923358,
+      "size": 275500,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceship/voiceship_audio/0073_spaceship_blasts_by2d.wav"
+    },
+    {
+      "index": 74,
+      "name": "audio_74",
+      "offset": 4198858,
+      "size": 25054,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceship/voiceship_audio/0074_audio_74.wav"
+    },
+    {
+      "index": 75,
+      "name": "Jaws Carl Entrance",
+      "offset": 4294590,
+      "size": 247672,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceship/voiceship_audio/0075_Jaws_Carl_Entrance.wav"
+    }
+  ]
+}

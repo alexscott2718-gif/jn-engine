@@ -1,0 +1,29 @@
+{
+  "file": "/home/scotty/xp-jnbg-original/omt/voicedemo.omt",
+  "total_size": 112404,
+  "has_images": false,
+  "has_audio": true,
+  "audio": [
+    {
+      "index": 0,
+      "name": "savecarl2",
+      "offset": 8,
+      "size": 28524,
+      "file": "/home/scotty/jn-engine/assets/parsed/voicedemo/voicedemo_audio/0000_savecarl2.wav"
+    },
+    {
+      "index": 1,
+      "name": "savecarl2B",
+      "offset": 28532,
+      "size": 44666,
+      "file": "/home/scotty/jn-engine/assets/parsed/voicedemo/voicedemo_audio/0001_savecarl2B.wav"
+    },
+    {
+      "index": 2,
+      "name": "jimmyend3",
+      "offset": 73198,
+      "size": 39134,
+      "file": "/home/scotty/jn-engine/assets/parsed/voicedemo/voicedemo_audio/0002_jimmyend3.wav"
+    }
+  ]
+}

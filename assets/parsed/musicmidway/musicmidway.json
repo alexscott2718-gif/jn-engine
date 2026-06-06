@@ -1,0 +1,15 @@
+{
+  "file": "/home/scotty/xp-jnbg-original/omt/musicmidway.omt",
+  "total_size": 363745,
+  "has_images": false,
+  "has_audio": true,
+  "audio": [
+    {
+      "index": 0,
+      "name": "bg arcade",
+      "offset": 35,
+      "size": 363710,
+      "file": "/home/scotty/jn-engine/assets/parsed/musicmidway/musicmidway_audio/0000_bg_arcade.wav"
+    }
+  ]
+}

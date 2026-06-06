@@ -1,0 +1,15 @@
+{
+  "file": "/home/scotty/xp-jnbg-original/omt/musicshipend.omt",
+  "total_size": 2052823,
+  "has_images": false,
+  "has_audio": true,
+  "audio": [
+    {
+      "index": 0,
+      "name": "ScaryHunting2",
+      "offset": 392159,
+      "size": 1660664,
+      "file": "/home/scotty/jn-engine/assets/parsed/musicshipend/musicshipend_audio/0000_ScaryHunting2.wav"
+    }
+  ]
+}

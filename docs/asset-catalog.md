@@ -2,6 +2,16 @@
 
 Comprehensive visual reference and annotation log for all extracted assets: textures, sprites, icons, effects, 3D models, and more.
 
+> **Full catalog (2026-06-06):** every OMT container is now extracted — **all 58
+> image-bearing OMTs (1,658 canvases)** plus audio — via
+> `tools/extract_all_omt.py`, browsable in [`asset-index.html`](./asset-index.html)
+> (61 galleries). The hand-annotation tables below still cover the original core
+> categories; the newly-added containers (`screens` (373 UI canvases), every
+> `level*`/`VR*`/sky/vehicle set, `permanenticons`, `RetainedSprites`, `splash`,
+> …) are extracted and in the galleries but **not yet role-annotated** — that's
+> the open annotation task. Audio (WAV) is extracted on disk via `--audio` (not
+> committed).
+
 **Navigation:**
 - [Textures](#textures) (128)
 - [Alpha](#alpha) (136)

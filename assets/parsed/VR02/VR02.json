@@ -1,0 +1,78 @@
+{
+  "file": "/home/scotty/xp-jnbg-original/omt/VR02.omt",
+  "total_size": 168266,
+  "has_images": true,
+  "has_audio": false,
+  "images": [
+    {
+      "index": 0,
+      "width": 32,
+      "height": 32,
+      "depth": 16,
+      "compression": 1,
+      "stride": 64,
+      "dotransparent": false,
+      "transp_packed": 0,
+      "dopalette": false,
+      "bufsize": 1012,
+      "file": "/home/scotty/jn-engine/assets/parsed/VR02/VR02_images/0000_32x32d16.png",
+      "status": "ok"
+    },
+    {
+      "index": 1,
+      "width": 32,
+      "height": 32,
+      "depth": 16,
+      "compression": 1,
+      "stride": 64,
+      "dotransparent": false,
+      "transp_packed": 0,
+      "dopalette": false,
+      "bufsize": 976,
+      "file": "/home/scotty/jn-engine/assets/parsed/VR02/VR02_images/0001_32x32d16.png",
+      "status": "ok"
+    },
+    {
+      "index": 2,
+      "width": 32,
+      "height": 32,
+      "depth": 16,
+      "compression": 1,
+      "stride": 64,
+      "dotransparent": false,
+      "transp_packed": 0,
+      "dopalette": false,
+      "bufsize": 1170,
+      "file": "/home/scotty/jn-engine/assets/parsed/VR02/VR02_images/0002_32x32d16.png",
+      "status": "ok"
+    },
+    {
+      "index": 3,
+      "width": 32,
+      "height": 32,
+      "depth": 16,
+      "compression": 1,
+      "stride": 64,
+      "dotransparent": false,
+      "transp_packed": 0,
+      "dopalette": false,
+      "bufsize": 1030,
+      "file": "/home/scotty/jn-engine/assets/parsed/VR02/VR02_images/0003_32x32d16.png",
+      "status": "ok"
+    },
+    {
+      "index": 4,
+      "width": 256,
+      "height": 256,
+      "depth": 16,
+      "compression": 1,
+      "stride": 512,
+      "dotransparent": false,
+      "transp_packed": 0,
+      "dopalette": false,
+      "bufsize": 69546,
+      "file": "/home/scotty/jn-engine/assets/parsed/VR02/VR02_images/0004_256x256d16.png",
+      "status": "ok"
+    }
+  ]
+}

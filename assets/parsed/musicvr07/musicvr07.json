@@ -1,0 +1,15 @@
+{
+  "file": "/home/scotty/xp-jnbg-original/omt/musicvr07.omt",
+  "total_size": 192891,
+  "has_images": false,
+  "has_audio": true,
+  "audio": [
+    {
+      "index": 0,
+      "name": "Vr1_b_22k",
+      "offset": 8,
+      "size": 192856,
+      "file": "/home/scotty/jn-engine/assets/parsed/musicvr07/musicvr07_audio/0000_Vr1_b_22k.wav"
+    }
+  ]
+}

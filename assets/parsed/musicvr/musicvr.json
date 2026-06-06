@@ -1,0 +1,15 @@
+{
+  "file": "/home/scotty/xp-jnbg-original/omt/musicvr.omt",
+  "total_size": 627931,
+  "has_images": false,
+  "has_audio": true,
+  "audio": [
+    {
+      "index": 0,
+      "name": "musicvr1",
+      "offset": 8,
+      "size": 627824,
+      "file": "/home/scotty/jn-engine/assets/parsed/musicvr/musicvr_audio/0000_musicvr1.wav"
+    }
+  ]
+}

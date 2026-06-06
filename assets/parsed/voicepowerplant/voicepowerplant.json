@@ -1,0 +1,365 @@
+{
+  "file": "/home/scotty/xp-jnbg-original/omt/voicepowerplant.omt",
+  "total_size": 5353545,
+  "has_images": false,
+  "has_audio": true,
+  "audio": [
+    {
+      "index": 0,
+      "name": "jimmyinv11",
+      "offset": 8,
+      "size": 42344,
+      "file": "/home/scotty/jn-engine/assets/parsed/voicepowerplant/voicepowerplant_audio/0000_jimmyinv11.wav"
+    },
+    {
+      "index": 1,
+      "name": "jimmyself9",
+      "offset": 42793,
+      "size": 22764,
+      "file": "/home/scotty/jn-engine/assets/parsed/voicepowerplant/voicepowerplant_audio/0001_jimmyself9.wav"
+    },
+    {
+      "index": 2,
+      "name": "goddarddogbark twice",
+      "offset": 70850,
+      "size": 17356,
+      "file": "/home/scotty/jn-engine/assets/parsed/voicepowerplant/voicepowerplant_audio/0002_goddarddogbark_twice.wav"
+    },
+    {
+      "index": 3,
+      "name": "jimmygoddard51",
+      "offset": 88842,
+      "size": 19728,
+      "file": "/home/scotty/jn-engine/assets/parsed/voicepowerplant/voicepowerplant_audio/0003_jimmygoddard51.wav"
+    },
+    {
+      "index": 4,
+      "name": "jimmyself17",
+      "offset": 108570,
+      "size": 41260,
+      "file": "/home/scotty/jn-engine/assets/parsed/voicepowerplant/voicepowerplant_audio/0004_jimmyself17.wav"
+    },
+    {
+      "index": 5,
+      "name": "jimmygoddard54",
+      "offset": 152168,
+      "size": 20624,
+      "file": "/home/scotty/jn-engine/assets/parsed/voicepowerplant/voicepowerplant_audio/0005_jimmygoddard54.wav"
+    },
+    {
+      "index": 6,
+      "name": "jimmyinv2",
+      "offset": 184322,
+      "size": 31300,
+      "file": "/home/scotty/jn-engine/assets/parsed/voicepowerplant/voicepowerplant_audio/0006_jimmyinv2.wav"
+    },
+    {
+      "index": 7,
+      "name": "audio_7",
+      "offset": 215622,
+      "size": 36684,
+      "file": "/home/scotty/jn-engine/assets/parsed/voicepowerplant/voicepowerplant_audio/0007_audio_7.wav"
+    },
+    {
+      "index": 8,
+      "name": "jimmyinv1",
+      "offset": 252306,
+      "size": 35344,
+      "file": "/home/scotty/jn-engine/assets/parsed/voicepowerplant/voicepowerplant_audio/0008_jimmyinv1.wav"
+    },
+    {
+      "index": 9,
+      "name": "jimmyinv13",
+      "offset": 288670,
+      "size": 56952,
+      "file": "/home/scotty/jn-engine/assets/parsed/voicepowerplant/voicepowerplant_audio/0009_jimmyinv13.wav"
+    },
+    {
+      "index": 10,
+      "name": "jimmyself18",
+      "offset": 361738,
+      "size": 42528,
+      "file": "/home/scotty/jn-engine/assets/parsed/voicepowerplant/voicepowerplant_audio/0010_jimmyself18.wav"
+    },
+    {
+      "index": 11,
+      "name": "jimmymissfowl1",
+      "offset": 404266,
+      "size": 44550,
+      "file": "/home/scotty/jn-engine/assets/parsed/voicepowerplant/voicepowerplant_audio/0011_jimmymissfowl1.wav"
+    },
+    {
+      "index": 12,
+      "name": "jimmyinv9",
+      "offset": 448816,
+      "size": 46570,
+      "file": "/home/scotty/jn-engine/assets/parsed/voicepowerplant/voicepowerplant_audio/0012_jimmyinv9.wav"
+    },
+    {
+      "index": 13,
+      "name": "startpower",
+      "offset": 498792,
+      "size": 378808,
+      "file": "/home/scotty/jn-engine/assets/parsed/voicepowerplant/voicepowerplant_audio/0013_startpower.wav"
+    },
+    {
+      "index": 14,
+      "name": "savecarl1c",
+      "offset": 877699,
+      "size": 74490,
+      "file": "/home/scotty/jn-engine/assets/parsed/voicepowerplant/voicepowerplant_audio/0014_savecarl1c.wav"
+    },
+    {
+      "index": 15,
+      "name": "emptyspace",
+      "offset": 952189,
+      "size": 229568,
+      "file": "/home/scotty/jn-engine/assets/parsed/voicepowerplant/voicepowerplant_audio/0015_emptyspace.wav"
+    },
+    {
+      "index": 16,
+      "name": "jimmymissfowl3",
+      "offset": 1181757,
+      "size": 62208,
+      "file": "/home/scotty/jn-engine/assets/parsed/voicepowerplant/voicepowerplant_audio/0016_jimmymissfowl3.wav"
+    },
+    {
+      "index": 17,
+      "name": "jimmymissfowl4",
+      "offset": 1243965,
+      "size": 37430,
+      "file": "/home/scotty/jn-engine/assets/parsed/voicepowerplant/voicepowerplant_audio/0017_jimmymissfowl4.wav"
+    },
+    {
+      "index": 18,
+      "name": "jimmyinv14",
+      "offset": 1281395,
+      "size": 52780,
+      "file": "/home/scotty/jn-engine/assets/parsed/voicepowerplant/voicepowerplant_audio/0018_jimmyinv14.wav"
+    },
+    {
+      "index": 19,
+      "name": "jimmygoddard50",
+      "offset": 1358587,
+      "size": 54656,
+      "file": "/home/scotty/jn-engine/assets/parsed/voicepowerplant/voicepowerplant_audio/0019_jimmygoddard50.wav"
+    },
+    {
+      "index": 20,
+      "name": "audio_20",
+      "offset": 1413243,
+      "size": 35344,
+      "file": "/home/scotty/jn-engine/assets/parsed/voicepowerplant/voicepowerplant_audio/0020_audio_20.wav"
+    },
+    {
+      "index": 21,
+      "name": "savecarl3c",
+      "offset": 1451989,
+      "size": 415354,
+      "file": "/home/scotty/jn-engine/assets/parsed/voicepowerplant/voicepowerplant_audio/0021_savecarl3c.wav"
+    },
+    {
+      "index": 22,
+      "name": "spaceship blasts by2d",
+      "offset": 1867343,
+      "size": 387634,
+      "file": "/home/scotty/jn-engine/assets/parsed/voicepowerplant/voicepowerplant_audio/0022_spaceship_blasts_by2d.wav"
+    },
+    {
+      "index": 23,
+      "name": "jimmygoddard52",
+      "offset": 2254977,
+      "size": 87388,
+      "file": "/home/scotty/jn-engine/assets/parsed/voicepowerplant/voicepowerplant_audio/0023_jimmygoddard52.wav"
+    },
+    {
+      "index": 24,
+      "name": "jimmygoddard53",
+      "offset": 2342365,
+      "size": 59974,
+      "file": "/home/scotty/jn-engine/assets/parsed/voicepowerplant/voicepowerplant_audio/0024_jimmygoddard53.wav"
+    },
+    {
+      "index": 25,
+      "name": "jimmygoddard53b",
+      "offset": 2404899,
+      "size": 83616,
+      "file": "/home/scotty/jn-engine/assets/parsed/voicepowerplant/voicepowerplant_audio/0025_jimmygoddard53b.wav"
+    },
+    {
+      "index": 26,
+      "name": "jimmygoddard53c",
+      "offset": 2488515,
+      "size": 78392,
+      "file": "/home/scotty/jn-engine/assets/parsed/voicepowerplant/voicepowerplant_audio/0026_jimmygoddard53c.wav"
+    },
+    {
+      "index": 27,
+      "name": "jimmygoddard55",
+      "offset": 2566907,
+      "size": 104834,
+      "file": "/home/scotty/jn-engine/assets/parsed/voicepowerplant/voicepowerplant_audio/0027_jimmygoddard55.wav"
+    },
+    {
+      "index": 28,
+      "name": "audio_28",
+      "offset": 2671741,
+      "size": 31300,
+      "file": "/home/scotty/jn-engine/assets/parsed/voicepowerplant/voicepowerplant_audio/0028_audio_28.wav"
+    },
+    {
+      "index": 29,
+      "name": "jimmyinv3",
+      "offset": 2703041,
+      "size": 46020,
+      "file": "/home/scotty/jn-engine/assets/parsed/voicepowerplant/voicepowerplant_audio/0029_jimmyinv3.wav"
+    },
+    {
+      "index": 30,
+      "name": "jimmyinv5",
+      "offset": 2749061,
+      "size": 56556,
+      "file": "/home/scotty/jn-engine/assets/parsed/voicepowerplant/voicepowerplant_audio/0030_jimmyinv5.wav"
+    },
+    {
+      "index": 31,
+      "name": "jimmygoddard53d",
+      "offset": 2826745,
+      "size": 64838,
+      "file": "/home/scotty/jn-engine/assets/parsed/voicepowerplant/voicepowerplant_audio/0031_jimmygoddard53d.wav"
+    },
+    {
+      "index": 32,
+      "name": "jimmyinv10",
+      "offset": 2891583,
+      "size": 53828,
+      "file": "/home/scotty/jn-engine/assets/parsed/voicepowerplant/voicepowerplant_audio/0032_jimmyinv10.wav"
+    },
+    {
+      "index": 33,
+      "name": "audio_33",
+      "offset": 2945411,
+      "size": 41260,
+      "file": "/home/scotty/jn-engine/assets/parsed/voicepowerplant/voicepowerplant_audio/0033_audio_33.wav"
+    },
+    {
+      "index": 34,
+      "name": "jimmyinv12",
+      "offset": 2986671,
+      "size": 70660,
+      "file": "/home/scotty/jn-engine/assets/parsed/voicepowerplant/voicepowerplant_audio/0034_jimmyinv12.wav"
+    },
+    {
+      "index": 35,
+      "name": "jimmyinv8",
+      "offset": 3057331,
+      "size": 107998,
+      "file": "/home/scotty/jn-engine/assets/parsed/voicepowerplant/voicepowerplant_audio/0035_jimmyinv8.wav"
+    },
+    {
+      "index": 36,
+      "name": "jimmyself13",
+      "offset": 3175379,
+      "size": 95384,
+      "file": "/home/scotty/jn-engine/assets/parsed/voicepowerplant/voicepowerplant_audio/0036_jimmyself13.wav"
+    },
+    {
+      "index": 37,
+      "name": "spaceship blasts by2c",
+      "offset": 3270763,
+      "size": 387634,
+      "file": "/home/scotty/jn-engine/assets/parsed/voicepowerplant/voicepowerplant_audio/0037_spaceship_blasts_by2c.wav"
+    },
+    {
+      "index": 38,
+      "name": "savecarl3b",
+      "offset": 3658397,
+      "size": 425432,
+      "file": "/home/scotty/jn-engine/assets/parsed/voicepowerplant/voicepowerplant_audio/0038_savecarl3b.wav"
+    },
+    {
+      "index": 39,
+      "name": "savecarl1b",
+      "offset": 4083829,
+      "size": 169436,
+      "file": "/home/scotty/jn-engine/assets/parsed/voicepowerplant/voicepowerplant_audio/0039_savecarl1b.wav"
+    },
+    {
+      "index": 40,
+      "name": "jimmyself17b",
+      "offset": 4253265,
+      "size": 92400,
+      "file": "/home/scotty/jn-engine/assets/parsed/voicepowerplant/voicepowerplant_audio/0040_jimmyself17b.wav"
+    },
+    {
+      "index": 41,
+      "name": "pod escape",
+      "offset": 4345665,
+      "size": 50682,
+      "file": "/home/scotty/jn-engine/assets/parsed/voicepowerplant/voicepowerplant_audio/0041_pod_escape.wav"
+    },
+    {
+      "index": 42,
+      "name": "jimmyinv4",
+      "offset": 4396347,
+      "size": 92450,
+      "file": "/home/scotty/jn-engine/assets/parsed/voicepowerplant/voicepowerplant_audio/0042_jimmyinv4.wav"
+    },
+    {
+      "index": 43,
+      "name": "jimmymissfowl2",
+      "offset": 4497305,
+      "size": 171468,
+      "file": "/home/scotty/jn-engine/assets/parsed/voicepowerplant/voicepowerplant_audio/0043_jimmymissfowl2.wav"
+    },
+    {
+      "index": 44,
+      "name": "jimmyinv7",
+      "offset": 4668773,
+      "size": 34444,
+      "file": "/home/scotty/jn-engine/assets/parsed/voicepowerplant/voicepowerplant_audio/0044_jimmyinv7.wav"
+    },
+    {
+      "index": 45,
+      "name": "jimmyself16",
+      "offset": 4725165,
+      "size": 135396,
+      "file": "/home/scotty/jn-engine/assets/parsed/voicepowerplant/voicepowerplant_audio/0045_jimmyself16.wav"
+    },
+    {
+      "index": 46,
+      "name": "jimmymissfowl4b",
+      "offset": 4860561,
+      "size": 183962,
+      "file": "/home/scotty/jn-engine/assets/parsed/voicepowerplant/voicepowerplant_audio/0046_jimmymissfowl4b.wav"
+    },
+    {
+      "index": 47,
+      "name": "spacedoor",
+      "offset": 5061419,
+      "size": 74192,
+      "file": "/home/scotty/jn-engine/assets/parsed/voicepowerplant/voicepowerplant_audio/0047_spacedoor.wav"
+    },
+    {
+      "index": 48,
+      "name": "spaceship blasts by",
+      "offset": 5135611,
+      "size": 60588,
+      "file": "/home/scotty/jn-engine/assets/parsed/voicepowerplant/voicepowerplant_audio/0048_spaceship_blasts_by.wav"
+    },
+    {
+      "index": 49,
+      "name": "pod crashing",
+      "offset": 5196199,
+      "size": 87350,
+      "file": "/home/scotty/jn-engine/assets/parsed/voicepowerplant/voicepowerplant_audio/0049_pod_crashing.wav"
+    },
+    {
+      "index": 50,
+      "name": "jimmyinv6",
+      "offset": 5283549,
+      "size": 69996,
+      "file": "/home/scotty/jn-engine/assets/parsed/voicepowerplant/voicepowerplant_audio/0050_jimmyinv6.wav"
+    }
+  ]
+}

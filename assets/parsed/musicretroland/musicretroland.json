@@ -1,0 +1,15 @@
+{
+  "file": "/home/scotty/xp-jnbg-original/omt/musicretroland.omt",
+  "total_size": 435425,
+  "has_images": false,
+  "has_audio": true,
+  "audio": [
+    {
+      "index": 0,
+      "name": "bg rollercoaster",
+      "offset": 35,
+      "size": 435390,
+      "file": "/home/scotty/jn-engine/assets/parsed/musicretroland/musicretroland_audio/0000_bg_rollercoaster.wav"
+    }
+  ]
+}

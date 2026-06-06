@@ -1,0 +1,120 @@
+{
+  "file": "/home/scotty/xp-jnbg-original/omt/voicephonebooth.omt",
+  "total_size": 818284,
+  "has_images": false,
+  "has_audio": true,
+  "audio": [
+    {
+      "index": 0,
+      "name": "voxphone1",
+      "offset": 8,
+      "size": 76044,
+      "file": "/home/scotty/jn-engine/assets/parsed/voicephonebooth/voicephonebooth_audio/0000_voxphone1.wav"
+    },
+    {
+      "index": 1,
+      "name": "voxphone6",
+      "offset": 76052,
+      "size": 108684,
+      "file": "/home/scotty/jn-engine/assets/parsed/voicephonebooth/voicephonebooth_audio/0001_voxphone6.wav"
+    },
+    {
+      "index": 2,
+      "name": "voxphone5-9",
+      "offset": 184736,
+      "size": 43532,
+      "file": "/home/scotty/jn-engine/assets/parsed/voicephonebooth/voicephonebooth_audio/0002_voxphone5-9.wav"
+    },
+    {
+      "index": 3,
+      "name": "voxphone5-8",
+      "offset": 228268,
+      "size": 59340,
+      "file": "/home/scotty/jn-engine/assets/parsed/voicephonebooth/voicephonebooth_audio/0003_voxphone5-8.wav"
+    },
+    {
+      "index": 4,
+      "name": "voxphone5-7",
+      "offset": 287608,
+      "size": 50380,
+      "file": "/home/scotty/jn-engine/assets/parsed/voicephonebooth/voicephonebooth_audio/0004_voxphone5-7.wav"
+    },
+    {
+      "index": 5,
+      "name": "voxphone5-6",
+      "offset": 337988,
+      "size": 45644,
+      "file": "/home/scotty/jn-engine/assets/parsed/voicephonebooth/voicephonebooth_audio/0005_voxphone5-6.wav"
+    },
+    {
+      "index": 6,
+      "name": "voxphone5-5",
+      "offset": 383632,
+      "size": 40780,
+      "file": "/home/scotty/jn-engine/assets/parsed/voicephonebooth/voicephonebooth_audio/0006_voxphone5-5.wav"
+    },
+    {
+      "index": 7,
+      "name": "voxphone5-4",
+      "offset": 424412,
+      "size": 43404,
+      "file": "/home/scotty/jn-engine/assets/parsed/voicephonebooth/voicephonebooth_audio/0007_voxphone5-4.wav"
+    },
+    {
+      "index": 8,
+      "name": "voxphone5-3",
+      "offset": 467816,
+      "size": 37772,
+      "file": "/home/scotty/jn-engine/assets/parsed/voicephonebooth/voicephonebooth_audio/0008_voxphone5-3.wav"
+    },
+    {
+      "index": 9,
+      "name": "voxphone5-2",
+      "offset": 505588,
+      "size": 38348,
+      "file": "/home/scotty/jn-engine/assets/parsed/voicephonebooth/voicephonebooth_audio/0009_voxphone5-2.wav"
+    },
+    {
+      "index": 10,
+      "name": "voxphone5-10",
+      "offset": 543936,
+      "size": 33132,
+      "file": "/home/scotty/jn-engine/assets/parsed/voicephonebooth/voicephonebooth_audio/0010_voxphone5-10.wav"
+    },
+    {
+      "index": 11,
+      "name": "voxphone5-1",
+      "offset": 577068,
+      "size": 36300,
+      "file": "/home/scotty/jn-engine/assets/parsed/voicephonebooth/voicephonebooth_audio/0011_voxphone5-1.wav"
+    },
+    {
+      "index": 12,
+      "name": "voxphone4",
+      "offset": 613368,
+      "size": 76428,
+      "file": "/home/scotty/jn-engine/assets/parsed/voicephonebooth/voicephonebooth_audio/0012_voxphone4.wav"
+    },
+    {
+      "index": 13,
+      "name": "voxphone3",
+      "offset": 689796,
+      "size": 62988,
+      "file": "/home/scotty/jn-engine/assets/parsed/voicephonebooth/voicephonebooth_audio/0013_voxphone3.wav"
+    },
+    {
+      "index": 14,
+      "name": "voxphone2",
+      "offset": 752784,
+      "size": 41230,
+      "file": "/home/scotty/jn-engine/assets/parsed/voicephonebooth/voicephonebooth_audio/0014_voxphone2.wav"
+    },
+    {
+      "index": 15,
+      "name": "voxphone7",
+      "offset": 794014,
+      "size": 24044,
+      "file": "/home/scotty/jn-engine/assets/parsed/voicephonebooth/voicephonebooth_audio/0015_voxphone7.wav"
+    }
+  ]
+}

@@ -1,0 +1,15 @@
+{
+  "file": "/home/scotty/xp-jnbg-original/omt/voiceend.omt",
+  "total_size": 1427329,
+  "has_images": false,
+  "has_audio": true,
+  "audio": [
+    {
+      "index": 0,
+      "name": "ending credits w music2",
+      "offset": 8,
+      "size": 1427294,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceend/voiceend_audio/0000_ending_credits_w_music2.wav"
+    }
+  ]
+}

@@ -1,0 +1,78 @@
+{
+  "file": "/home/scotty/xp-jnbg-original/omt/RetainedSprites.omt",
+  "total_size": 164576,
+  "has_images": true,
+  "has_audio": false,
+  "images": [
+    {
+      "index": 0,
+      "width": 128,
+      "height": 128,
+      "depth": 32,
+      "compression": 2,
+      "stride": 512,
+      "dotransparent": true,
+      "transp_packed": 6843067,
+      "dopalette": false,
+      "bufsize": 35068,
+      "file": "/home/scotty/jn-engine/assets/parsed/RetainedSprites/RetainedSprites_images/0000_128x128d32.png",
+      "status": "ok"
+    },
+    {
+      "index": 1,
+      "width": 64,
+      "height": 64,
+      "depth": 32,
+      "compression": 2,
+      "stride": 256,
+      "dotransparent": true,
+      "transp_packed": 0,
+      "dopalette": false,
+      "bufsize": 12408,
+      "file": "/home/scotty/jn-engine/assets/parsed/RetainedSprites/RetainedSprites_images/0001_64x64d32.png",
+      "status": "ok"
+    },
+    {
+      "index": 2,
+      "width": 64,
+      "height": 64,
+      "depth": 32,
+      "compression": 2,
+      "stride": 256,
+      "dotransparent": true,
+      "transp_packed": 3612650,
+      "dopalette": false,
+      "bufsize": 10000,
+      "file": "/home/scotty/jn-engine/assets/parsed/RetainedSprites/RetainedSprites_images/0002_64x64d32.png",
+      "status": "ok"
+    },
+    {
+      "index": 3,
+      "width": 32,
+      "height": 32,
+      "depth": 32,
+      "compression": 2,
+      "stride": 128,
+      "dotransparent": true,
+      "transp_packed": 0,
+      "dopalette": false,
+      "bufsize": 3760,
+      "file": "/home/scotty/jn-engine/assets/parsed/RetainedSprites/RetainedSprites_images/0003_32x32d32.png",
+      "status": "ok"
+    },
+    {
+      "index": 4,
+      "width": 146,
+      "height": 146,
+      "depth": 32,
+      "compression": 2,
+      "stride": 584,
+      "dotransparent": true,
+      "transp_packed": 7635228,
+      "dopalette": false,
+      "bufsize": 66288,
+      "file": "/home/scotty/jn-engine/assets/parsed/RetainedSprites/RetainedSprites_images/0004_146x146d32.png",
+      "status": "ok"
+    }
+  ]
+}

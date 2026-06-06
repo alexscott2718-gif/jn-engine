@@ -379,6 +379,42 @@ the digit recapture).
 
 ---
 
+## Era 12 — Completing the asset catalog: all OMT containers (~June 6)
+
+**Goal.** The catalog only ingested ~8 of the game's ~100 OMT containers. The
+HUD-font investigation (Era 11) exposed how much was missing — the chrome digit
+font was sitting *unextracted* in `alpha.omt`, and we'd nearly recaptured it from
+XP instead. Pull **everything** so static extraction + annotation is the default
+and capture is reserved for genuinely runtime-only data (placement/role).
+
+**What we learned.** Everything `ddraw` draws originates from static files —
+almost entirely **OMT canvases**. The install is 100 `.omt` + 128 PNG + 254 ASE +
+35 GAM. A "dynamic surface at runtime" is just a blit of a static canvas, so the
+right default is *static extraction*, not runtime capture. Concretely: the full
+chrome HUD digit font (0–9, **including the 3/4/6 we were about to recapture**)
+lives in `alpha.omt` #118–135; the front-end/menu art (save slots, objective
+text, buttons, Jimmy portrait) is `screens.omt`'s 373 canvases.
+
+**What landed.**
+- **`tools/extract_all_omt.py`** — extracts every image-bearing OMT to
+  `assets/parsed/<name>/<name>_images/` (and audio via `--audio`), idempotent.
+  Result: **1,658 canvases from 58 OMTs, 0 decode errors** (was ~8 catalogued);
+  1,017 audio WAVs on disk (gitignored — ~70 MB proprietary, regenerable).
+- **`tools/gen_asset_galleries.py`** now discovers categories dynamically, so the
+  catalog auto-covers the full OMT set: **61 galleries, 2,086 assets** in
+  `asset-index.html` (was 11 / ~921).
+- Decode verified clean against `screens`/`permanenticons` (transparency + color
+  correct; the faint HUD overlay icons are genuine additive-overlay art).
+
+**Open task (the user's thesis).** Assets are now maximally *harvested*; the next
+lever is a **role-annotation layer** so found assets (e.g. "`alpha.omt` #128 =
+HUD digit 3") are tagged once and reused, turning per-feature capture spelunking
+into catalog lookups. Immediate beneficiary: finish the HUD digits 3/4/6
+statically from `alpha.omt` (obsoleting the XP recapture in
+`hud_chrome_digit_recapture.md`).
+
+---
+
 ## Invariants (don't relitigate these)
 
 Paid for with measured evidence. Changing one needs *new* measurement, not argument.

@@ -1,0 +1,15 @@
+{
+  "file": "/home/scotty/xp-jnbg-original/omt/musicpowerplant.omt",
+  "total_size": 169204,
+  "has_images": false,
+  "has_audio": true,
+  "audio": [
+    {
+      "index": 0,
+      "name": "Electro2_22k",
+      "offset": 8,
+      "size": 169160,
+      "file": "/home/scotty/jn-engine/assets/parsed/musicpowerplant/musicpowerplant_audio/0000_Electro2_22k.wav"
+    }
+  ]
+}

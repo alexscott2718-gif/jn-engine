@@ -1,0 +1,15 @@
+{
+  "file": "/home/scotty/xp-jnbg-original/omt/musicppinside.omt",
+  "total_size": 170527,
+  "has_images": false,
+  "has_audio": true,
+  "audio": [
+    {
+      "index": 0,
+      "name": "Electro1b powerplant",
+      "offset": 8,
+      "size": 170492,
+      "file": "/home/scotty/jn-engine/assets/parsed/musicppinside/musicppinside_audio/0000_Electro1b_powerplant.wav"
+    }
+  ]
+}

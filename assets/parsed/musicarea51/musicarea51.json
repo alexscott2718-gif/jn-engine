@@ -1,0 +1,15 @@
+{
+  "file": "/home/scotty/xp-jnbg-original/omt/musicarea51.omt",
+  "total_size": 1636106,
+  "has_images": false,
+  "has_audio": true,
+  "audio": [
+    {
+      "index": 0,
+      "name": "Hunting3_11k",
+      "offset": 62,
+      "size": 1636044,
+      "file": "/home/scotty/jn-engine/assets/parsed/musicarea51/musicarea51_audio/0000_Hunting3_11k.wav"
+    }
+  ]
+}

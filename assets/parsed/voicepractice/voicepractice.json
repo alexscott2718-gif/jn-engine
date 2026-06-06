@@ -1,0 +1,316 @@
+{
+  "file": "/home/scotty/xp-jnbg-original/omt/voicepractice.omt",
+  "total_size": 4913319,
+  "has_images": false,
+  "has_audio": true,
+  "audio": [
+    {
+      "index": 0,
+      "name": "shrinkray5",
+      "offset": 8,
+      "size": 61484,
+      "file": "/home/scotty/jn-engine/assets/parsed/voicepractice/voicepractice_audio/0000_shrinkray5.wav"
+    },
+    {
+      "index": 1,
+      "name": "grappler4",
+      "offset": 61492,
+      "size": 62666,
+      "file": "/home/scotty/jn-engine/assets/parsed/voicepractice/voicepractice_audio/0001_grappler4.wav"
+    },
+    {
+      "index": 2,
+      "name": "rocketship2",
+      "offset": 126652,
+      "size": 68914,
+      "file": "/home/scotty/jn-engine/assets/parsed/voicepractice/voicepractice_audio/0002_rocketship2.wav"
+    },
+    {
+      "index": 3,
+      "name": "Remote3",
+      "offset": 195566,
+      "size": 19450,
+      "file": "/home/scotty/jn-engine/assets/parsed/voicepractice/voicepractice_audio/0003_Remote3.wav"
+    },
+    {
+      "index": 4,
+      "name": "shrinkray3",
+      "offset": 220834,
+      "size": 117756,
+      "file": "/home/scotty/jn-engine/assets/parsed/voicepractice/voicepractice_audio/0004_shrinkray3.wav"
+    },
+    {
+      "index": 5,
+      "name": "shrinkray2",
+      "offset": 353142,
+      "size": 69804,
+      "file": "/home/scotty/jn-engine/assets/parsed/voicepractice/voicepractice_audio/0005_shrinkray2.wav"
+    },
+    {
+      "index": 6,
+      "name": "baseball1",
+      "offset": 422946,
+      "size": 38100,
+      "file": "/home/scotty/jn-engine/assets/parsed/voicepractice/voicepractice_audio/0006_baseball1.wav"
+    },
+    {
+      "index": 7,
+      "name": "scooter1",
+      "offset": 461046,
+      "size": 33506,
+      "file": "/home/scotty/jn-engine/assets/parsed/voicepractice/voicepractice_audio/0007_scooter1.wav"
+    },
+    {
+      "index": 8,
+      "name": "scooter6",
+      "offset": 517006,
+      "size": 89884,
+      "file": "/home/scotty/jn-engine/assets/parsed/voicepractice/voicepractice_audio/0008_scooter6.wav"
+    },
+    {
+      "index": 9,
+      "name": "baseball4",
+      "offset": 607259,
+      "size": 79314,
+      "file": "/home/scotty/jn-engine/assets/parsed/voicepractice/voicepractice_audio/0009_baseball4.wav"
+    },
+    {
+      "index": 10,
+      "name": "remote4",
+      "offset": 686573,
+      "size": 24240,
+      "file": "/home/scotty/jn-engine/assets/parsed/voicepractice/voicepractice_audio/0010_remote4.wav"
+    },
+    {
+      "index": 11,
+      "name": "scooter4",
+      "offset": 713430,
+      "size": 184048,
+      "file": "/home/scotty/jn-engine/assets/parsed/voicepractice/voicepractice_audio/0011_scooter4.wav"
+    },
+    {
+      "index": 12,
+      "name": "shrinkray1",
+      "offset": 897478,
+      "size": 41750,
+      "file": "/home/scotty/jn-engine/assets/parsed/voicepractice/voicepractice_audio/0012_shrinkray1.wav"
+    },
+    {
+      "index": 13,
+      "name": "bubble1",
+      "offset": 939228,
+      "size": 38060,
+      "file": "/home/scotty/jn-engine/assets/parsed/voicepractice/voicepractice_audio/0013_bubble1.wav"
+    },
+    {
+      "index": 14,
+      "name": "scooter2",
+      "offset": 1008118,
+      "size": 66250,
+      "file": "/home/scotty/jn-engine/assets/parsed/voicepractice/voicepractice_audio/0014_scooter2.wav"
+    },
+    {
+      "index": 15,
+      "name": "shrinkray4",
+      "offset": 1074368,
+      "size": 72314,
+      "file": "/home/scotty/jn-engine/assets/parsed/voicepractice/voicepractice_audio/0015_shrinkray4.wav"
+    },
+    {
+      "index": 16,
+      "name": "jetpack6",
+      "offset": 1158458,
+      "size": 166636,
+      "file": "/home/scotty/jn-engine/assets/parsed/voicepractice/voicepractice_audio/0016_jetpack6.wav"
+    },
+    {
+      "index": 17,
+      "name": "grappler1",
+      "offset": 1325094,
+      "size": 30866,
+      "file": "/home/scotty/jn-engine/assets/parsed/voicepractice/voicepractice_audio/0017_grappler1.wav"
+    },
+    {
+      "index": 18,
+      "name": "jetpack5",
+      "offset": 1362598,
+      "size": 97892,
+      "file": "/home/scotty/jn-engine/assets/parsed/voicepractice/voicepractice_audio/0018_jetpack5.wav"
+    },
+    {
+      "index": 19,
+      "name": "jetpack7",
+      "offset": 1460490,
+      "size": 31300,
+      "file": "/home/scotty/jn-engine/assets/parsed/voicepractice/voicepractice_audio/0019_jetpack7.wav"
+    },
+    {
+      "index": 20,
+      "name": "scooter3",
+      "offset": 1491790,
+      "size": 105818,
+      "file": "/home/scotty/jn-engine/assets/parsed/voicepractice/voicepractice_audio/0020_scooter3.wav"
+    },
+    {
+      "index": 21,
+      "name": "jetpack3",
+      "offset": 1604186,
+      "size": 161892,
+      "file": "/home/scotty/jn-engine/assets/parsed/voicepractice/voicepractice_audio/0021_jetpack3.wav"
+    },
+    {
+      "index": 22,
+      "name": "invisibility1",
+      "offset": 1800262,
+      "size": 37080,
+      "file": "/home/scotty/jn-engine/assets/parsed/voicepractice/voicepractice_audio/0022_invisibility1.wav"
+    },
+    {
+      "index": 23,
+      "name": "jetpack2",
+      "offset": 1837342,
+      "size": 90156,
+      "file": "/home/scotty/jn-engine/assets/parsed/voicepractice/voicepractice_audio/0023_jetpack2.wav"
+    },
+    {
+      "index": 24,
+      "name": "jetpack4",
+      "offset": 1927498,
+      "size": 113452,
+      "file": "/home/scotty/jn-engine/assets/parsed/voicepractice/voicepractice_audio/0024_jetpack4.wav"
+    },
+    {
+      "index": 25,
+      "name": "rocketship3",
+      "offset": 2040950,
+      "size": 85930,
+      "file": "/home/scotty/jn-engine/assets/parsed/voicepractice/voicepractice_audio/0025_rocketship3.wav"
+    },
+    {
+      "index": 26,
+      "name": "invisibility2",
+      "offset": 2158562,
+      "size": 80968,
+      "file": "/home/scotty/jn-engine/assets/parsed/voicepractice/voicepractice_audio/0026_invisibility2.wav"
+    },
+    {
+      "index": 27,
+      "name": "jetpack1",
+      "offset": 2239530,
+      "size": 54380,
+      "file": "/home/scotty/jn-engine/assets/parsed/voicepractice/voicepractice_audio/0027_jetpack1.wav"
+    },
+    {
+      "index": 28,
+      "name": "baseball6",
+      "offset": 2293910,
+      "size": 79590,
+      "file": "/home/scotty/jn-engine/assets/parsed/voicepractice/voicepractice_audio/0028_baseball6.wav"
+    },
+    {
+      "index": 29,
+      "name": "rocketship1",
+      "offset": 2373500,
+      "size": 37548,
+      "file": "/home/scotty/jn-engine/assets/parsed/voicepractice/voicepractice_audio/0029_rocketship1.wav"
+    },
+    {
+      "index": 30,
+      "name": "grappler2",
+      "offset": 2423205,
+      "size": 76908,
+      "file": "/home/scotty/jn-engine/assets/parsed/voicepractice/voicepractice_audio/0030_grappler2.wav"
+    },
+    {
+      "index": 31,
+      "name": "audio_31",
+      "offset": 2500113,
+      "size": 24240,
+      "file": "/home/scotty/jn-engine/assets/parsed/voicepractice/voicepractice_audio/0031_audio_31.wav"
+    },
+    {
+      "index": 32,
+      "name": "bubble2",
+      "offset": 2566559,
+      "size": 78090,
+      "file": "/home/scotty/jn-engine/assets/parsed/voicepractice/voicepractice_audio/0032_bubble2.wav"
+    },
+    {
+      "index": 33,
+      "name": "rocketship4",
+      "offset": 2644649,
+      "size": 158034,
+      "file": "/home/scotty/jn-engine/assets/parsed/voicepractice/voicepractice_audio/0033_rocketship4.wav"
+    },
+    {
+      "index": 34,
+      "name": "shrinkray6",
+      "offset": 2802683,
+      "size": 141468,
+      "file": "/home/scotty/jn-engine/assets/parsed/voicepractice/voicepractice_audio/0034_shrinkray6.wav"
+    },
+    {
+      "index": 35,
+      "name": "bubble3",
+      "offset": 2956321,
+      "size": 179826,
+      "file": "/home/scotty/jn-engine/assets/parsed/voicepractice/voicepractice_audio/0035_bubble3.wav"
+    },
+    {
+      "index": 36,
+      "name": "grappler3",
+      "offset": 3182911,
+      "size": 376050,
+      "file": "/home/scotty/jn-engine/assets/parsed/voicepractice/voicepractice_audio/0036_grappler3.wav"
+    },
+    {
+      "index": 37,
+      "name": "audio_37",
+      "offset": 3558961,
+      "size": 62666,
+      "file": "/home/scotty/jn-engine/assets/parsed/voicepractice/voicepractice_audio/0037_audio_37.wav"
+    },
+    {
+      "index": 38,
+      "name": "invisibility3",
+      "offset": 3621627,
+      "size": 245618,
+      "file": "/home/scotty/jn-engine/assets/parsed/voicepractice/voicepractice_audio/0038_invisibility3.wav"
+    },
+    {
+      "index": 39,
+      "name": "scooter5",
+      "offset": 3891101,
+      "size": 147632,
+      "file": "/home/scotty/jn-engine/assets/parsed/voicepractice/voicepractice_audio/0039_scooter5.wav"
+    },
+    {
+      "index": 40,
+      "name": "invisibility4",
+      "offset": 4038733,
+      "size": 198476,
+      "file": "/home/scotty/jn-engine/assets/parsed/voicepractice/voicepractice_audio/0040_invisibility4.wav"
+    },
+    {
+      "index": 41,
+      "name": "baseball2",
+      "offset": 4297939,
+      "size": 213864,
+      "file": "/home/scotty/jn-engine/assets/parsed/voicepractice/voicepractice_audio/0041_baseball2.wav"
+    },
+    {
+      "index": 42,
+      "name": "baseball3",
+      "offset": 4511803,
+      "size": 213792,
+      "file": "/home/scotty/jn-engine/assets/parsed/voicepractice/voicepractice_audio/0042_baseball3.wav"
+    },
+    {
+      "index": 43,
+      "name": "Remote2",
+      "offset": 4725595,
+      "size": 187724,
+      "file": "/home/scotty/jn-engine/assets/parsed/voicepractice/voicepractice_audio/0043_Remote2.wav"
+    }
+  ]
+}

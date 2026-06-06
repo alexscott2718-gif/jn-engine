@@ -1,0 +1,15 @@
+{
+  "file": "/home/scotty/xp-jnbg-original/omt/musicjimmyshouse.omt",
+  "total_size": 1154619,
+  "has_images": false,
+  "has_audio": true,
+  "audio": [
+    {
+      "index": 0,
+      "name": "modernhunting A",
+      "offset": 35,
+      "size": 1154584,
+      "file": "/home/scotty/jn-engine/assets/parsed/musicjimmyshouse/musicjimmyshouse_audio/0000_modernhunting_A.wav"
+    }
+  ]
+}

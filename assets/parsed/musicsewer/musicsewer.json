@@ -1,0 +1,15 @@
+{
+  "file": "/home/scotty/xp-jnbg-original/omt/musicsewer.omt",
+  "total_size": 221411,
+  "has_images": false,
+  "has_audio": true,
+  "audio": [
+    {
+      "index": 0,
+      "name": "bg sewer",
+      "offset": 35,
+      "size": 221376,
+      "file": "/home/scotty/jn-engine/assets/parsed/musicsewer/musicsewer_audio/0000_bg_sewer.wav"
+    }
+  ]
+}

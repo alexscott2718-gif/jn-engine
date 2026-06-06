@@ -1,0 +1,92 @@
+{
+  "file": "/home/scotty/xp-jnbg-original/omt/dusksky.omt",
+  "total_size": 291505,
+  "has_images": true,
+  "has_audio": false,
+  "images": [
+    {
+      "index": 0,
+      "width": 256,
+      "height": 256,
+      "depth": 16,
+      "compression": 1,
+      "stride": 512,
+      "dotransparent": false,
+      "transp_packed": 0,
+      "dopalette": false,
+      "bufsize": 125938,
+      "file": "/home/scotty/jn-engine/assets/parsed/dusksky/dusksky_images/0000_256x256d16.png",
+      "status": "ok"
+    },
+    {
+      "index": 1,
+      "width": 256,
+      "height": 256,
+      "depth": 16,
+      "compression": 1,
+      "stride": 512,
+      "dotransparent": false,
+      "transp_packed": 0,
+      "dopalette": false,
+      "bufsize": 19652,
+      "file": "/home/scotty/jn-engine/assets/parsed/dusksky/dusksky_images/0001_256x256d16.png",
+      "status": "ok"
+    },
+    {
+      "index": 2,
+      "width": 256,
+      "height": 256,
+      "depth": 16,
+      "compression": 1,
+      "stride": 512,
+      "dotransparent": false,
+      "transp_packed": 0,
+      "dopalette": false,
+      "bufsize": 82970,
+      "file": "/home/scotty/jn-engine/assets/parsed/dusksky/dusksky_images/0002_256x256d16.png",
+      "status": "ok"
+    },
+    {
+      "index": 3,
+      "width": 128,
+      "height": 128,
+      "depth": 16,
+      "compression": 1,
+      "stride": 256,
+      "dotransparent": false,
+      "transp_packed": 0,
+      "dopalette": false,
+      "bufsize": 29098,
+      "file": "/home/scotty/jn-engine/assets/parsed/dusksky/dusksky_images/0003_128x128d16.png",
+      "status": "ok"
+    },
+    {
+      "index": 4,
+      "width": 128,
+      "height": 128,
+      "depth": 16,
+      "compression": 1,
+      "stride": 256,
+      "dotransparent": false,
+      "transp_packed": 0,
+      "dopalette": false,
+      "bufsize": 24314,
+      "file": "/home/scotty/jn-engine/assets/parsed/dusksky/dusksky_images/0004_128x128d16.png",
+      "status": "ok"
+    },
+    {
+      "index": 5,
+      "width": 8,
+      "height": 8,
+      "depth": 16,
+      "compression": 1,
+      "stride": 16,
+      "dotransparent": false,
+      "transp_packed": 0,
+      "dopalette": false,
+      "bufsize": 48,
+      "file": "/home/scotty/jn-engine/assets/parsed/dusksky/dusksky_images/0005_8x8d16.png",
+      "status": "ok"
+    }
+  ]
+}

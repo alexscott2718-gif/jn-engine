@@ -1,0 +1,323 @@
+{
+  "file": "/home/scotty/xp-jnbg-original/omt/voicemiscellaneous.omt",
+  "total_size": 2187010,
+  "has_images": false,
+  "has_audio": true,
+  "audio": [
+    {
+      "index": 0,
+      "name": "yokiansolider4",
+      "offset": 8,
+      "size": 50388,
+      "file": "/home/scotty/jn-engine/assets/parsed/voicemiscellaneous/voicemiscellaneous_audio/0000_yokiansolider4.wav"
+    },
+    {
+      "index": 1,
+      "name": "jimmygoddard14",
+      "offset": 50986,
+      "size": 27502,
+      "file": "/home/scotty/jn-engine/assets/parsed/voicemiscellaneous/voicemiscellaneous_audio/0001_jimmygoddard14.wav"
+    },
+    {
+      "index": 2,
+      "name": "jimmyitem1",
+      "offset": 78488,
+      "size": 20802,
+      "file": "/home/scotty/jn-engine/assets/parsed/voicemiscellaneous/voicemiscellaneous_audio/0002_jimmyitem1.wav"
+    },
+    {
+      "index": 3,
+      "name": "yokiansolider2",
+      "offset": 100956,
+      "size": 44182,
+      "file": "/home/scotty/jn-engine/assets/parsed/voicemiscellaneous/voicemiscellaneous_audio/0003_yokiansolider2.wav"
+    },
+    {
+      "index": 4,
+      "name": "carlhelp4",
+      "offset": 145138,
+      "size": 73740,
+      "file": "/home/scotty/jn-engine/assets/parsed/voicemiscellaneous/voicemiscellaneous_audio/0004_carlhelp4.wav"
+    },
+    {
+      "index": 5,
+      "name": "yokiansolider1",
+      "offset": 233588,
+      "size": 113722,
+      "file": "/home/scotty/jn-engine/assets/parsed/voicemiscellaneous/voicemiscellaneous_audio/0005_yokiansolider1.wav"
+    },
+    {
+      "index": 6,
+      "name": "jimmygoddard16",
+      "offset": 347310,
+      "size": 34560,
+      "file": "/home/scotty/jn-engine/assets/parsed/voicemiscellaneous/voicemiscellaneous_audio/0006_jimmygoddard16.wav"
+    },
+    {
+      "index": 7,
+      "name": "yokianofficer5",
+      "offset": 390010,
+      "size": 15182,
+      "file": "/home/scotty/jn-engine/assets/parsed/voicemiscellaneous/voicemiscellaneous_audio/0007_yokianofficer5.wav"
+    },
+    {
+      "index": 8,
+      "name": "yokianofficer6",
+      "offset": 405192,
+      "size": 24480,
+      "file": "/home/scotty/jn-engine/assets/parsed/voicemiscellaneous/voicemiscellaneous_audio/0008_yokianofficer6.wav"
+    },
+    {
+      "index": 9,
+      "name": "yokianofficer7",
+      "offset": 429672,
+      "size": 24406,
+      "file": "/home/scotty/jn-engine/assets/parsed/voicemiscellaneous/voicemiscellaneous_audio/0009_yokianofficer7.wav"
+    },
+    {
+      "index": 10,
+      "name": "carlhelp1",
+      "offset": 454078,
+      "size": 94092,
+      "file": "/home/scotty/jn-engine/assets/parsed/voicemiscellaneous/voicemiscellaneous_audio/0010_carlhelp1.wav"
+    },
+    {
+      "index": 11,
+      "name": "yokianofficer2",
+      "offset": 552846,
+      "size": 43328,
+      "file": "/home/scotty/jn-engine/assets/parsed/voicemiscellaneous/voicemiscellaneous_audio/0011_yokianofficer2.wav"
+    },
+    {
+      "index": 12,
+      "name": "yokianguard4",
+      "offset": 596174,
+      "size": 35354,
+      "file": "/home/scotty/jn-engine/assets/parsed/voicemiscellaneous/voicemiscellaneous_audio/0012_yokianguard4.wav"
+    },
+    {
+      "index": 13,
+      "name": "yokianofficer3",
+      "offset": 631528,
+      "size": 35176,
+      "file": "/home/scotty/jn-engine/assets/parsed/voicemiscellaneous/voicemiscellaneous_audio/0013_yokianofficer3.wav"
+    },
+    {
+      "index": 14,
+      "name": "yokianofficer4",
+      "offset": 666704,
+      "size": 20896,
+      "file": "/home/scotty/jn-engine/assets/parsed/voicemiscellaneous/voicemiscellaneous_audio/0014_yokianofficer4.wav"
+    },
+    {
+      "index": 15,
+      "name": "yokiansolider3",
+      "offset": 687600,
+      "size": 30590,
+      "file": "/home/scotty/jn-engine/assets/parsed/voicemiscellaneous/voicemiscellaneous_audio/0015_yokiansolider3.wav"
+    },
+    {
+      "index": 16,
+      "name": "carlhelp5",
+      "offset": 718190,
+      "size": 87436,
+      "file": "/home/scotty/jn-engine/assets/parsed/voicemiscellaneous/voicemiscellaneous_audio/0016_carlhelp5.wav"
+    },
+    {
+      "index": 17,
+      "name": "yokianguard2",
+      "offset": 805862,
+      "size": 36660,
+      "file": "/home/scotty/jn-engine/assets/parsed/voicemiscellaneous/voicemiscellaneous_audio/0017_yokianguard2.wav"
+    },
+    {
+      "index": 18,
+      "name": "yokianguard3",
+      "offset": 842522,
+      "size": 18634,
+      "file": "/home/scotty/jn-engine/assets/parsed/voicemiscellaneous/voicemiscellaneous_audio/0018_yokianguard3.wav"
+    },
+    {
+      "index": 19,
+      "name": "yokianofficer1",
+      "offset": 861156,
+      "size": 33672,
+      "file": "/home/scotty/jn-engine/assets/parsed/voicemiscellaneous/voicemiscellaneous_audio/0019_yokianofficer1.wav"
+    },
+    {
+      "index": 20,
+      "name": "jimmygoddard17",
+      "offset": 894828,
+      "size": 30156,
+      "file": "/home/scotty/jn-engine/assets/parsed/voicemiscellaneous/voicemiscellaneous_audio/0020_jimmygoddard17.wav"
+    },
+    {
+      "index": 21,
+      "name": "jimmygoddard18",
+      "offset": 924984,
+      "size": 29260,
+      "file": "/home/scotty/jn-engine/assets/parsed/voicemiscellaneous/voicemiscellaneous_audio/0021_jimmygoddard18.wav"
+    },
+    {
+      "index": 22,
+      "name": "jimmyitem9",
+      "offset": 971518,
+      "size": 48556,
+      "file": "/home/scotty/jn-engine/assets/parsed/voicemiscellaneous/voicemiscellaneous_audio/0022_jimmyitem9.wav"
+    },
+    {
+      "index": 23,
+      "name": "jimmyitem8",
+      "offset": 1020074,
+      "size": 29140,
+      "file": "/home/scotty/jn-engine/assets/parsed/voicemiscellaneous/voicemiscellaneous_audio/0023_jimmyitem8.wav"
+    },
+    {
+      "index": 24,
+      "name": "jimmyitem7",
+      "offset": 1049214,
+      "size": 35096,
+      "file": "/home/scotty/jn-engine/assets/parsed/voicemiscellaneous/voicemiscellaneous_audio/0024_jimmyitem7.wav"
+    },
+    {
+      "index": 25,
+      "name": "jimmyitem6",
+      "offset": 1084310,
+      "size": 38312,
+      "file": "/home/scotty/jn-engine/assets/parsed/voicemiscellaneous/voicemiscellaneous_audio/0025_jimmyitem6.wav"
+    },
+    {
+      "index": 26,
+      "name": "jimmyitem5",
+      "offset": 1122622,
+      "size": 23780,
+      "file": "/home/scotty/jn-engine/assets/parsed/voicemiscellaneous/voicemiscellaneous_audio/0026_jimmyitem5.wav"
+    },
+    {
+      "index": 27,
+      "name": "jimmyitem4",
+      "offset": 1146402,
+      "size": 20714,
+      "file": "/home/scotty/jn-engine/assets/parsed/voicemiscellaneous/voicemiscellaneous_audio/0027_jimmyitem4.wav"
+    },
+    {
+      "index": 28,
+      "name": "jimmyitem3",
+      "offset": 1167116,
+      "size": 22618,
+      "file": "/home/scotty/jn-engine/assets/parsed/voicemiscellaneous/voicemiscellaneous_audio/0028_jimmyitem3.wav"
+    },
+    {
+      "index": 29,
+      "name": "jimmyitem2",
+      "offset": 1189734,
+      "size": 29290,
+      "file": "/home/scotty/jn-engine/assets/parsed/voicemiscellaneous/voicemiscellaneous_audio/0029_jimmyitem2.wav"
+    },
+    {
+      "index": 30,
+      "name": "jimmyitem10",
+      "offset": 1219024,
+      "size": 29438,
+      "file": "/home/scotty/jn-engine/assets/parsed/voicemiscellaneous/voicemiscellaneous_audio/0030_jimmyitem10.wav"
+    },
+    {
+      "index": 31,
+      "name": "audio_31",
+      "offset": 1248462,
+      "size": 20802,
+      "file": "/home/scotty/jn-engine/assets/parsed/voicemiscellaneous/voicemiscellaneous_audio/0031_audio_31.wav"
+    },
+    {
+      "index": 32,
+      "name": "jimmygoddard29",
+      "offset": 1269264,
+      "size": 27660,
+      "file": "/home/scotty/jn-engine/assets/parsed/voicemiscellaneous/voicemiscellaneous_audio/0032_jimmygoddard29.wav"
+    },
+    {
+      "index": 33,
+      "name": "jimmygoddard28",
+      "offset": 1296924,
+      "size": 40814,
+      "file": "/home/scotty/jn-engine/assets/parsed/voicemiscellaneous/voicemiscellaneous_audio/0033_jimmygoddard28.wav"
+    },
+    {
+      "index": 34,
+      "name": "jimmygoddard27",
+      "offset": 1337738,
+      "size": 52300,
+      "file": "/home/scotty/jn-engine/assets/parsed/voicemiscellaneous/voicemiscellaneous_audio/0034_jimmygoddard27.wav"
+    },
+    {
+      "index": 35,
+      "name": "jimmygoddard26",
+      "offset": 1390038,
+      "size": 52606,
+      "file": "/home/scotty/jn-engine/assets/parsed/voicemiscellaneous/voicemiscellaneous_audio/0035_jimmygoddard26.wav"
+    },
+    {
+      "index": 36,
+      "name": "jimmygoddard24",
+      "offset": 1442644,
+      "size": 36108,
+      "file": "/home/scotty/jn-engine/assets/parsed/voicemiscellaneous/voicemiscellaneous_audio/0036_jimmygoddard24.wav"
+    },
+    {
+      "index": 37,
+      "name": "jimmygoddard22",
+      "offset": 1478752,
+      "size": 32594,
+      "file": "/home/scotty/jn-engine/assets/parsed/voicemiscellaneous/voicemiscellaneous_audio/0037_jimmygoddard22.wav"
+    },
+    {
+      "index": 38,
+      "name": "jimmygoddard20",
+      "offset": 1511346,
+      "size": 25120,
+      "file": "/home/scotty/jn-engine/assets/parsed/voicemiscellaneous/voicemiscellaneous_audio/0038_jimmygoddard20.wav"
+    },
+    {
+      "index": 39,
+      "name": "jimmygoddard19",
+      "offset": 1536466,
+      "size": 33804,
+      "file": "/home/scotty/jn-engine/assets/parsed/voicemiscellaneous/voicemiscellaneous_audio/0039_jimmygoddard19.wav"
+    },
+    {
+      "index": 40,
+      "name": "carlhelp2",
+      "offset": 1570270,
+      "size": 120460,
+      "file": "/home/scotty/jn-engine/assets/parsed/voicemiscellaneous/voicemiscellaneous_audio/0040_carlhelp2.wav"
+    },
+    {
+      "index": 41,
+      "name": "carlhelp6b",
+      "offset": 1691748,
+      "size": 101742,
+      "file": "/home/scotty/jn-engine/assets/parsed/voicemiscellaneous/voicemiscellaneous_audio/0041_carlhelp6b.wav"
+    },
+    {
+      "index": 42,
+      "name": "carlhelp6",
+      "offset": 1793490,
+      "size": 123532,
+      "file": "/home/scotty/jn-engine/assets/parsed/voicemiscellaneous/voicemiscellaneous_audio/0042_carlhelp6.wav"
+    },
+    {
+      "index": 43,
+      "name": "yokianguard1",
+      "offset": 1917022,
+      "size": 161044,
+      "file": "/home/scotty/jn-engine/assets/parsed/voicemiscellaneous/voicemiscellaneous_audio/0043_yokianguard1.wav"
+    },
+    {
+      "index": 44,
+      "name": "carlhelp3",
+      "offset": 2078198,
+      "size": 108812,
+      "file": "/home/scotty/jn-engine/assets/parsed/voicemiscellaneous/voicemiscellaneous_audio/0044_carlhelp3.wav"
+    }
+  ]
+}

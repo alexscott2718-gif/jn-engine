@@ -1,0 +1,15 @@
+{
+  "file": "/home/scotty/xp-jnbg-original/omt/voicestartmusic.omt",
+  "total_size": 796571,
+  "has_images": false,
+  "has_audio": true,
+  "audio": [
+    {
+      "index": 0,
+      "name": "intro short 2",
+      "offset": 8,
+      "size": 796536,
+      "file": "/home/scotty/jn-engine/assets/parsed/voicestartmusic/voicestartmusic_audio/0000_intro_short_2.wav"
+    }
+  ]
+}

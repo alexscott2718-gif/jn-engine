@@ -1,0 +1,36 @@
+{
+  "file": "/home/scotty/xp-jnbg-original/omt/jeep.omt",
+  "total_size": 491543,
+  "has_images": true,
+  "has_audio": false,
+  "images": [
+    {
+      "index": 0,
+      "width": 256,
+      "height": 256,
+      "depth": 32,
+      "compression": 2,
+      "stride": 1024,
+      "dotransparent": false,
+      "transp_packed": 0,
+      "dopalette": false,
+      "bufsize": 210540,
+      "file": "/home/scotty/jn-engine/assets/parsed/jeep/jeep_images/0000_256x256d32.png",
+      "status": "ok"
+    },
+    {
+      "index": 1,
+      "width": 256,
+      "height": 256,
+      "depth": 32,
+      "compression": 2,
+      "stride": 1024,
+      "dotransparent": false,
+      "transp_packed": 0,
+      "dopalette": false,
+      "bufsize": 213020,
+      "file": "/home/scotty/jn-engine/assets/parsed/jeep/jeep_images/0001_256x256d32.png",
+      "status": "ok"
+    }
+  ]
+}

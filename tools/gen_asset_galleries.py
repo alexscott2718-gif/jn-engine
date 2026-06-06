@@ -9,18 +9,19 @@ ASSETS_DIR = Path.home() / 'jn-engine' / 'assets'
 DOCS_DIR = Path.home() / 'jn-engine' / 'docs'
 
 def get_asset_categories():
-    """Scan assets directory and categorize all assets."""
+    """Scan assets directory and categorize all assets. Every OMT container
+    extracted under assets/parsed/<name>/<name>_images/ becomes a category
+    automatically (see tools/extract_all_omt.py), so the catalog covers the full
+    OMT set, not a hand-picked subset."""
     categories = {
         'textures': {'path': ASSETS_DIR / 'png', 'files': []},
-        'alpha': {'path': ASSETS_DIR / 'parsed' / 'alpha' / 'alpha_images', 'files': []},
-        'doors': {'path': ASSETS_DIR / 'parsed' / 'doors' / 'doors_images', 'files': []},
-        'effects': {'path': ASSETS_DIR / 'parsed' / 'effects' / 'effects_images', 'files': []},
-        'icons': {'path': ASSETS_DIR / 'parsed' / 'icons' / 'icons_images', 'files': []},
-        'inventory': {'path': ASSETS_DIR / 'parsed' / 'inventory' / 'inventory_images', 'files': []},
-        'level1': {'path': ASSETS_DIR / 'parsed' / 'level1' / 'level1_images', 'files': []},
-        'objects': {'path': ASSETS_DIR / 'parsed' / 'objects' / 'objects_images', 'files': []},
-        'sprites': {'path': ASSETS_DIR / 'parsed' / 'sprites' / 'sprites_images', 'files': []},
     }
+    parsed = ASSETS_DIR / 'parsed'
+    if parsed.exists():
+        for sub in sorted(parsed.iterdir(), key=lambda p: p.name.lower()):
+            img_dir = sub / f'{sub.name}_images'
+            if img_dir.is_dir():
+                categories[sub.name] = {'path': img_dir, 'files': []}
 
     for cat, info in categories.items():
         if info['path'].exists():

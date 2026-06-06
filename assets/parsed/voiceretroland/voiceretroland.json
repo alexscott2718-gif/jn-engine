@@ -1,0 +1,463 @@
+{
+  "file": "/home/scotty/xp-jnbg-original/omt/voiceretroland.omt",
+  "total_size": 3326468,
+  "has_images": false,
+  "has_audio": true,
+  "audio": [
+    {
+      "index": 0,
+      "name": "jimmycarl51",
+      "offset": 8,
+      "size": 39430,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceretroland/voiceretroland_audio/0000_jimmycarl51.wav"
+    },
+    {
+      "index": 1,
+      "name": "empty",
+      "offset": 40430,
+      "size": 992,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceretroland/voiceretroland_audio/0001_empty.wav"
+    },
+    {
+      "index": 2,
+      "name": "empty",
+      "offset": 41422,
+      "size": 992,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceretroland/voiceretroland_audio/0002_empty.wav"
+    },
+    {
+      "index": 3,
+      "name": "empty",
+      "offset": 42414,
+      "size": 992,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceretroland/voiceretroland_audio/0003_empty.wav"
+    },
+    {
+      "index": 4,
+      "name": "empty",
+      "offset": 44113,
+      "size": 992,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceretroland/voiceretroland_audio/0004_empty.wav"
+    },
+    {
+      "index": 5,
+      "name": "empty",
+      "offset": 45105,
+      "size": 992,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceretroland/voiceretroland_audio/0005_empty.wav"
+    },
+    {
+      "index": 6,
+      "name": "empty",
+      "offset": 46097,
+      "size": 992,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceretroland/voiceretroland_audio/0006_empty.wav"
+    },
+    {
+      "index": 7,
+      "name": "empty",
+      "offset": 47089,
+      "size": 992,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceretroland/voiceretroland_audio/0007_empty.wav"
+    },
+    {
+      "index": 8,
+      "name": "empty",
+      "offset": 48081,
+      "size": 992,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceretroland/voiceretroland_audio/0008_empty.wav"
+    },
+    {
+      "index": 9,
+      "name": "jimmyultralord6",
+      "offset": 49073,
+      "size": 10060,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceretroland/voiceretroland_audio/0009_jimmyultralord6.wav"
+    },
+    {
+      "index": 10,
+      "name": "jimmylibby23",
+      "offset": 59133,
+      "size": 69190,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceretroland/voiceretroland_audio/0010_jimmylibby23.wav"
+    },
+    {
+      "index": 11,
+      "name": "jimmycindy12A",
+      "offset": 128323,
+      "size": 60410,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceretroland/voiceretroland_audio/0011_jimmycindy12A.wav"
+    },
+    {
+      "index": 12,
+      "name": "jimmyultralord6a",
+      "offset": 188733,
+      "size": 23296,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceretroland/voiceretroland_audio/0012_jimmyultralord6a.wav"
+    },
+    {
+      "index": 13,
+      "name": "empty",
+      "offset": 212029,
+      "size": 992,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceretroland/voiceretroland_audio/0013_empty.wav"
+    },
+    {
+      "index": 14,
+      "name": "empty",
+      "offset": 213021,
+      "size": 992,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceretroland/voiceretroland_audio/0014_empty.wav"
+    },
+    {
+      "index": 15,
+      "name": "empty",
+      "offset": 214013,
+      "size": 992,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceretroland/voiceretroland_audio/0015_empty.wav"
+    },
+    {
+      "index": 16,
+      "name": "jimmycindy12C",
+      "offset": 215005,
+      "size": 13664,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceretroland/voiceretroland_audio/0016_jimmycindy12C.wav"
+    },
+    {
+      "index": 17,
+      "name": "jimmylibby25",
+      "offset": 228669,
+      "size": 20992,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceretroland/voiceretroland_audio/0017_jimmylibby25.wav"
+    },
+    {
+      "index": 18,
+      "name": "jimmyhuman5",
+      "offset": 251983,
+      "size": 23102,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceretroland/voiceretroland_audio/0018_jimmyhuman5.wav"
+    },
+    {
+      "index": 19,
+      "name": "jimmyhuman2",
+      "offset": 275085,
+      "size": 18350,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceretroland/voiceretroland_audio/0019_jimmyhuman2.wav"
+    },
+    {
+      "index": 20,
+      "name": "jimmyhuman1",
+      "offset": 293435,
+      "size": 29022,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceretroland/voiceretroland_audio/0020_jimmyhuman1.wav"
+    },
+    {
+      "index": 21,
+      "name": "jimmycarl50",
+      "offset": 328850,
+      "size": 34746,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceretroland/voiceretroland_audio/0021_jimmycarl50.wav"
+    },
+    {
+      "index": 22,
+      "name": "jimmyhuman6",
+      "offset": 363596,
+      "size": 24652,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceretroland/voiceretroland_audio/0022_jimmyhuman6.wav"
+    },
+    {
+      "index": 23,
+      "name": "jimmyultralord12",
+      "offset": 388248,
+      "size": 78508,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceretroland/voiceretroland_audio/0023_jimmyultralord12.wav"
+    },
+    {
+      "index": 24,
+      "name": "jimmyultralord6b",
+      "offset": 466756,
+      "size": 51858,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceretroland/voiceretroland_audio/0024_jimmyultralord6b.wav"
+    },
+    {
+      "index": 25,
+      "name": "jimmyultralord11",
+      "offset": 532416,
+      "size": 71800,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceretroland/voiceretroland_audio/0025_jimmyultralord11.wav"
+    },
+    {
+      "index": 26,
+      "name": "audio_26",
+      "offset": 604216,
+      "size": 23102,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceretroland/voiceretroland_audio/0026_audio_26.wav"
+    },
+    {
+      "index": 27,
+      "name": "jimmyultralord2",
+      "offset": 628636,
+      "size": 97344,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceretroland/voiceretroland_audio/0027_jimmyultralord2.wav"
+    },
+    {
+      "index": 28,
+      "name": "jimmyultralord3",
+      "offset": 725980,
+      "size": 37088,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceretroland/voiceretroland_audio/0028_jimmyultralord3.wav"
+    },
+    {
+      "index": 29,
+      "name": "jimmyultralord4",
+      "offset": 763068,
+      "size": 74914,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceretroland/voiceretroland_audio/0029_jimmyultralord4.wav"
+    },
+    {
+      "index": 30,
+      "name": "audio_30",
+      "offset": 837982,
+      "size": 992,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceretroland/voiceretroland_audio/0030_audio_30.wav"
+    },
+    {
+      "index": 31,
+      "name": "jimmyultralord9",
+      "offset": 838974,
+      "size": 36906,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceretroland/voiceretroland_audio/0031_jimmyultralord9.wav"
+    },
+    {
+      "index": 32,
+      "name": "jimmyultralord10",
+      "offset": 875880,
+      "size": 89752,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceretroland/voiceretroland_audio/0032_jimmyultralord10.wav"
+    },
+    {
+      "index": 33,
+      "name": "jimmycarl51",
+      "offset": 965632,
+      "size": 39430,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceretroland/voiceretroland_audio/0033_jimmycarl51.wav"
+    },
+    {
+      "index": 34,
+      "name": "jimmycarl52",
+      "offset": 1005062,
+      "size": 44258,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceretroland/voiceretroland_audio/0034_jimmycarl52.wav"
+    },
+    {
+      "index": 35,
+      "name": "jimmyhuman4",
+      "offset": 1058978,
+      "size": 49240,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceretroland/voiceretroland_audio/0035_jimmyhuman4.wav"
+    },
+    {
+      "index": 36,
+      "name": "jimmyhuman3",
+      "offset": 1108218,
+      "size": 68878,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceretroland/voiceretroland_audio/0036_jimmyhuman3.wav"
+    },
+    {
+      "index": 37,
+      "name": "jimmyultralord1",
+      "offset": 1201982,
+      "size": 72130,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceretroland/voiceretroland_audio/0037_jimmyultralord1.wav"
+    },
+    {
+      "index": 38,
+      "name": "jimmyultralord5",
+      "offset": 1274112,
+      "size": 70184,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceretroland/voiceretroland_audio/0038_jimmyultralord5.wav"
+    },
+    {
+      "index": 39,
+      "name": "jimmycarl53B",
+      "offset": 1344296,
+      "size": 101242,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceretroland/voiceretroland_audio/0039_jimmycarl53B.wav"
+    },
+    {
+      "index": 40,
+      "name": "jimmylibby22",
+      "offset": 1445538,
+      "size": 46296,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceretroland/voiceretroland_audio/0040_jimmylibby22.wav"
+    },
+    {
+      "index": 41,
+      "name": "jimmylibby21",
+      "offset": 1507210,
+      "size": 27626,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceretroland/voiceretroland_audio/0041_jimmylibby21.wav"
+    },
+    {
+      "index": 42,
+      "name": "jimmycindy9",
+      "offset": 1534836,
+      "size": 82346,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceretroland/voiceretroland_audio/0042_jimmycindy9.wav"
+    },
+    {
+      "index": 43,
+      "name": "jimmylibby24",
+      "offset": 1617182,
+      "size": 83266,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceretroland/voiceretroland_audio/0043_jimmylibby24.wav"
+    },
+    {
+      "index": 44,
+      "name": "jimmycarl52",
+      "offset": 1700448,
+      "size": 44258,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceretroland/voiceretroland_audio/0044_jimmycarl52.wav"
+    },
+    {
+      "index": 45,
+      "name": "jimmycindy12",
+      "offset": 1744706,
+      "size": 59948,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceretroland/voiceretroland_audio/0045_jimmycindy12.wav"
+    },
+    {
+      "index": 46,
+      "name": "jimmycarl50",
+      "offset": 1820926,
+      "size": 34746,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceretroland/voiceretroland_audio/0046_jimmycarl50.wav"
+    },
+    {
+      "index": 47,
+      "name": "audio_47",
+      "offset": 1862890,
+      "size": 29022,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceretroland/voiceretroland_audio/0047_audio_47.wav"
+    },
+    {
+      "index": 48,
+      "name": "jimmycarl54A",
+      "offset": 1891912,
+      "size": 76154,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceretroland/voiceretroland_audio/0048_jimmycarl54A.wav"
+    },
+    {
+      "index": 49,
+      "name": "audio_49",
+      "offset": 1968066,
+      "size": 45676,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceretroland/voiceretroland_audio/0049_audio_49.wav"
+    },
+    {
+      "index": 50,
+      "name": "jimmycindy11",
+      "offset": 2013742,
+      "size": 70292,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceretroland/voiceretroland_audio/0050_jimmycindy11.wav"
+    },
+    {
+      "index": 51,
+      "name": "jimmyhuman",
+      "offset": 2086014,
+      "size": 71802,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceretroland/voiceretroland_audio/0051_jimmyhuman.wav"
+    },
+    {
+      "index": 52,
+      "name": "audio_52",
+      "offset": 2157816,
+      "size": 90252,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceretroland/voiceretroland_audio/0052_audio_52.wav"
+    },
+    {
+      "index": 53,
+      "name": "jimmycarl53",
+      "offset": 2236246,
+      "size": 105132,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceretroland/voiceretroland_audio/0053_jimmycarl53.wav"
+    },
+    {
+      "index": 54,
+      "name": "audio_54",
+      "offset": 2341378,
+      "size": 23296,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceretroland/voiceretroland_audio/0054_audio_54.wav"
+    },
+    {
+      "index": 55,
+      "name": "jimmyultralord13",
+      "offset": 2396050,
+      "size": 139824,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceretroland/voiceretroland_audio/0055_jimmyultralord13.wav"
+    },
+    {
+      "index": 56,
+      "name": "jimmycindy10",
+      "offset": 2535874,
+      "size": 88268,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceretroland/voiceretroland_audio/0056_jimmycindy10.wav"
+    },
+    {
+      "index": 57,
+      "name": "audio_57",
+      "offset": 2624142,
+      "size": 80578,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceretroland/voiceretroland_audio/0057_audio_57.wav"
+    },
+    {
+      "index": 58,
+      "name": "jimmylibby26",
+      "offset": 2696992,
+      "size": 95576,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceretroland/voiceretroland_audio/0058_jimmylibby26.wav"
+    },
+    {
+      "index": 59,
+      "name": "audio_59",
+      "offset": 2792568,
+      "size": 90452,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceretroland/voiceretroland_audio/0059_audio_59.wav"
+    },
+    {
+      "index": 60,
+      "name": "jimmycarl53",
+      "offset": 2864370,
+      "size": 108076,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceretroland/voiceretroland_audio/0060_jimmycarl53.wav"
+    },
+    {
+      "index": 61,
+      "name": "jimmycindy12B",
+      "offset": 2972446,
+      "size": 83066,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceretroland/voiceretroland_audio/0061_jimmycindy12B.wav"
+    },
+    {
+      "index": 62,
+      "name": "jimmyultralord12B",
+      "offset": 3055512,
+      "size": 90452,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceretroland/voiceretroland_audio/0062_jimmyultralord12B.wav"
+    },
+    {
+      "index": 63,
+      "name": "jimmycarl54",
+      "offset": 3145964,
+      "size": 90252,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceretroland/voiceretroland_audio/0063_jimmycarl54.wav"
+    },
+    {
+      "index": 64,
+      "name": "jimmycarl54",
+      "offset": 3236216,
+      "size": 90252,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceretroland/voiceretroland_audio/0064_jimmycarl54.wav"
+    }
+  ]
+}

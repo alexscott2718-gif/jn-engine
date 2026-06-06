@@ -1,5 +1,5 @@
 {
-  "file": "assets/omt/doors.omt",
+  "file": "/home/scotty/xp-jnbg-original/omt/doors.omt",
   "total_size": 181867,
   "has_images": true,
   "has_audio": false,
@@ -15,7 +15,7 @@
       "transp_packed": 0,
       "dopalette": false,
       "bufsize": 320,
-      "file": "assets/parsed/doors/doors_images/0000_32x32d32.png",
+      "file": "/home/scotty/jn-engine/assets/parsed/doors/doors_images/0000_32x32d32.png",
       "status": "ok"
     },
     {
@@ -29,7 +29,7 @@
       "transp_packed": 0,
       "dopalette": false,
       "bufsize": 8330,
-      "file": "assets/parsed/doors/doors_images/0001_64x64d16.png",
+      "file": "/home/scotty/jn-engine/assets/parsed/doors/doors_images/0001_64x64d16.png",
       "status": "ok"
     },
     {
@@ -43,7 +43,7 @@
       "transp_packed": 0,
       "dopalette": false,
       "bufsize": 31730,
-      "file": "assets/parsed/doors/doors_images/0002_128x128d16.png",
+      "file": "/home/scotty/jn-engine/assets/parsed/doors/doors_images/0002_128x128d16.png",
       "status": "ok"
     },
     {
@@ -57,7 +57,7 @@
       "transp_packed": 0,
       "dopalette": false,
       "bufsize": 32522,
-      "file": "assets/parsed/doors/doors_images/0003_128x128d16.png",
+      "file": "/home/scotty/jn-engine/assets/parsed/doors/doors_images/0003_128x128d16.png",
       "status": "ok"
     },
     {
@@ -71,7 +71,7 @@
       "transp_packed": 0,
       "dopalette": false,
       "bufsize": 64704,
-      "file": "assets/parsed/doors/doors_images/0004_128x128d32.png",
+      "file": "/home/scotty/jn-engine/assets/parsed/doors/doors_images/0004_128x128d32.png",
       "status": "ok"
     },
     {
@@ -85,7 +85,7 @@
       "transp_packed": 0,
       "dopalette": false,
       "bufsize": 32986,
-      "file": "assets/parsed/doors/doors_images/0005_128x128d16.png",
+      "file": "/home/scotty/jn-engine/assets/parsed/doors/doors_images/0005_128x128d16.png",
       "status": "ok"
     }
   ]

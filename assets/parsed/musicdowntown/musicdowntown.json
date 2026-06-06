@@ -1,0 +1,15 @@
+{
+  "file": "/home/scotty/xp-jnbg-original/omt/musicdowntown.omt",
+  "total_size": 264865,
+  "has_images": false,
+  "has_audio": true,
+  "audio": [
+    {
+      "index": 0,
+      "name": "surf2 short NS",
+      "offset": 35,
+      "size": 264830,
+      "file": "/home/scotty/jn-engine/assets/parsed/musicdowntown/musicdowntown_audio/0000_surf2_short_NS.wav"
+    }
+  ]
+}

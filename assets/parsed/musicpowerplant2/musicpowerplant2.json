@@ -1,0 +1,15 @@
+{
+  "file": "/home/scotty/xp-jnbg-original/omt/musicpowerplant2.omt",
+  "total_size": 888155,
+  "has_images": false,
+  "has_audio": true,
+  "audio": [
+    {
+      "index": 0,
+      "name": "hybrid_1_a_11k",
+      "offset": 8,
+      "size": 888120,
+      "file": "/home/scotty/jn-engine/assets/parsed/musicpowerplant2/musicpowerplant2_audio/0000_hybrid_1_a_11k.wav"
+    }
+  ]
+}

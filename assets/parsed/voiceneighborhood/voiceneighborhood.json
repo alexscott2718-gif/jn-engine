@@ -1,0 +1,799 @@
+{
+  "file": "/home/scotty/xp-jnbg-original/omt/voiceneighborhood.omt",
+  "total_size": 5970340,
+  "has_images": false,
+  "has_audio": true,
+  "audio": [
+    {
+      "index": 0,
+      "name": "jimmymom1",
+      "offset": 8,
+      "size": 15126,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceneighborhood/voiceneighborhood_audio/0000_jimmymom1.wav"
+    },
+    {
+      "index": 1,
+      "name": "jimmymom15",
+      "offset": 15134,
+      "size": 18788,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceneighborhood/voiceneighborhood_audio/0001_jimmymom15.wav"
+    },
+    {
+      "index": 2,
+      "name": "audio_2",
+      "offset": 35906,
+      "size": 992,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceneighborhood/voiceneighborhood_audio/0002_audio_2.wav"
+    },
+    {
+      "index": 3,
+      "name": "audio_3",
+      "offset": 36898,
+      "size": 992,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceneighborhood/voiceneighborhood_audio/0003_audio_3.wav"
+    },
+    {
+      "index": 4,
+      "name": "audio_4",
+      "offset": 38882,
+      "size": 992,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceneighborhood/voiceneighborhood_audio/0004_audio_4.wav"
+    },
+    {
+      "index": 5,
+      "name": "jimmycarl22",
+      "offset": 44964,
+      "size": 57976,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceneighborhood/voiceneighborhood_audio/0005_jimmycarl22.wav"
+    },
+    {
+      "index": 6,
+      "name": "jimmycarl23",
+      "offset": 102940,
+      "size": 116102,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceneighborhood/voiceneighborhood_audio/0006_jimmycarl23.wav"
+    },
+    {
+      "index": 7,
+      "name": "jimmycarl13",
+      "offset": 220034,
+      "size": 45652,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceneighborhood/voiceneighborhood_audio/0007_jimmycarl13.wav"
+    },
+    {
+      "index": 8,
+      "name": "audio_8",
+      "offset": 265686,
+      "size": 992,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceneighborhood/voiceneighborhood_audio/0008_audio_8.wav"
+    },
+    {
+      "index": 9,
+      "name": "audio_9",
+      "offset": 266678,
+      "size": 992,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceneighborhood/voiceneighborhood_audio/0009_audio_9.wav"
+    },
+    {
+      "index": 10,
+      "name": "jimmycarl24",
+      "offset": 272412,
+      "size": 47356,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceneighborhood/voiceneighborhood_audio/0010_jimmycarl24.wav"
+    },
+    {
+      "index": 11,
+      "name": "jimmycarl21",
+      "offset": 319768,
+      "size": 53370,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceneighborhood/voiceneighborhood_audio/0011_jimmycarl21.wav"
+    },
+    {
+      "index": 12,
+      "name": "jimmycarl20",
+      "offset": 373138,
+      "size": 58640,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceneighborhood/voiceneighborhood_audio/0012_jimmycarl20.wav"
+    },
+    {
+      "index": 13,
+      "name": "jimmycarl19",
+      "offset": 432966,
+      "size": 130618,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceneighborhood/voiceneighborhood_audio/0013_jimmycarl19.wav"
+    },
+    {
+      "index": 14,
+      "name": "jimmycarl5",
+      "offset": 563584,
+      "size": 52724,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceneighborhood/voiceneighborhood_audio/0014_jimmycarl5.wav"
+    },
+    {
+      "index": 15,
+      "name": "jimmycarl18",
+      "offset": 627542,
+      "size": 21222,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceneighborhood/voiceneighborhood_audio/0015_jimmycarl18.wav"
+    },
+    {
+      "index": 16,
+      "name": "jimmycarl15",
+      "offset": 648764,
+      "size": 99510,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceneighborhood/voiceneighborhood_audio/0016_jimmycarl15.wav"
+    },
+    {
+      "index": 17,
+      "name": "jimmycarl16",
+      "offset": 755920,
+      "size": 63514,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceneighborhood/voiceneighborhood_audio/0017_jimmycarl16.wav"
+    },
+    {
+      "index": 18,
+      "name": "jimmycarl17",
+      "offset": 819434,
+      "size": 54932,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceneighborhood/voiceneighborhood_audio/0018_jimmycarl17.wav"
+    },
+    {
+      "index": 19,
+      "name": "jimmycarl9",
+      "offset": 874366,
+      "size": 57000,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceneighborhood/voiceneighborhood_audio/0019_jimmycarl9.wav"
+    },
+    {
+      "index": 20,
+      "name": "carlinhaler",
+      "offset": 931366,
+      "size": 30562,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceneighborhood/voiceneighborhood_audio/0020_carlinhaler.wav"
+    },
+    {
+      "index": 21,
+      "name": "jimmymom5",
+      "offset": 961928,
+      "size": 23564,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceneighborhood/voiceneighborhood_audio/0021_jimmymom5.wav"
+    },
+    {
+      "index": 22,
+      "name": "jimmygoddard3",
+      "offset": 985492,
+      "size": 11804,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceneighborhood/voiceneighborhood_audio/0022_jimmygoddard3.wav"
+    },
+    {
+      "index": 23,
+      "name": "jimmycarl14",
+      "offset": 998932,
+      "size": 77276,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceneighborhood/voiceneighborhood_audio/0023_jimmycarl14.wav"
+    },
+    {
+      "index": 24,
+      "name": "jimmyvox3",
+      "offset": 1076208,
+      "size": 58790,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceneighborhood/voiceneighborhood_audio/0024_jimmyvox3.wav"
+    },
+    {
+      "index": 25,
+      "name": "audio_25",
+      "offset": 1134998,
+      "size": 11804,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceneighborhood/voiceneighborhood_audio/0025_audio_25.wav"
+    },
+    {
+      "index": 26,
+      "name": "jimmylibby9",
+      "offset": 1146802,
+      "size": 24042,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceneighborhood/voiceneighborhood_audio/0026_jimmylibby9.wav"
+    },
+    {
+      "index": 27,
+      "name": "jimmybenny4",
+      "offset": 1179666,
+      "size": 57514,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceneighborhood/voiceneighborhood_audio/0027_jimmybenny4.wav"
+    },
+    {
+      "index": 28,
+      "name": "jimmycarl4",
+      "offset": 1237180,
+      "size": 40108,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceneighborhood/voiceneighborhood_audio/0028_jimmycarl4.wav"
+    },
+    {
+      "index": 29,
+      "name": "jimmyself1",
+      "offset": 1284486,
+      "size": 41124,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceneighborhood/voiceneighborhood_audio/0029_jimmyself1.wav"
+    },
+    {
+      "index": 30,
+      "name": "jimmybenny3",
+      "offset": 1325610,
+      "size": 54828,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceneighborhood/voiceneighborhood_audio/0030_jimmybenny3.wav"
+    },
+    {
+      "index": 31,
+      "name": "bennywipe",
+      "offset": 1380438,
+      "size": 14940,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceneighborhood/voiceneighborhood_audio/0031_bennywipe.wav"
+    },
+    {
+      "index": 32,
+      "name": "jimmylibby3",
+      "offset": 1395378,
+      "size": 47256,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceneighborhood/voiceneighborhood_audio/0032_jimmylibby3.wav"
+    },
+    {
+      "index": 33,
+      "name": "jimmylibby11",
+      "offset": 1442634,
+      "size": 15524,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceneighborhood/voiceneighborhood_audio/0033_jimmylibby11.wav"
+    },
+    {
+      "index": 34,
+      "name": "jimmygoddard1",
+      "offset": 1458158,
+      "size": 24748,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceneighborhood/voiceneighborhood_audio/0034_jimmygoddard1.wav"
+    },
+    {
+      "index": 35,
+      "name": "jimmysheen1",
+      "offset": 1484180,
+      "size": 53644,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceneighborhood/voiceneighborhood_audio/0035_jimmysheen1.wav"
+    },
+    {
+      "index": 36,
+      "name": "jimmygoddard2",
+      "offset": 1537824,
+      "size": 27570,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceneighborhood/voiceneighborhood_audio/0036_jimmygoddard2.wav"
+    },
+    {
+      "index": 37,
+      "name": "jimmylibby8",
+      "offset": 1566388,
+      "size": 14444,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceneighborhood/voiceneighborhood_audio/0037_jimmylibby8.wav"
+    },
+    {
+      "index": 38,
+      "name": "jimmylibby6W",
+      "offset": 1580832,
+      "size": 25754,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceneighborhood/voiceneighborhood_audio/0038_jimmylibby6W.wav"
+    },
+    {
+      "index": 39,
+      "name": "jimmybenny2",
+      "offset": 1606678,
+      "size": 50062,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceneighborhood/voiceneighborhood_audio/0039_jimmybenny2.wav"
+    },
+    {
+      "index": 40,
+      "name": "jimmycarl14b",
+      "offset": 1656740,
+      "size": 83128,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceneighborhood/voiceneighborhood_audio/0040_jimmycarl14b.wav"
+    },
+    {
+      "index": 41,
+      "name": "jimmymom2",
+      "offset": 1739868,
+      "size": 72498,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceneighborhood/voiceneighborhood_audio/0041_jimmymom2.wav"
+    },
+    {
+      "index": 42,
+      "name": "jimmygoddard36",
+      "offset": 1812366,
+      "size": 19522,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceneighborhood/voiceneighborhood_audio/0042_jimmygoddard36.wav"
+    },
+    {
+      "index": 43,
+      "name": "jimmybenny1b",
+      "offset": 1834030,
+      "size": 80152,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceneighborhood/voiceneighborhood_audio/0043_jimmybenny1b.wav"
+    },
+    {
+      "index": 44,
+      "name": "audio_44",
+      "offset": 1914182,
+      "size": 992,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceneighborhood/voiceneighborhood_audio/0044_audio_44.wav"
+    },
+    {
+      "index": 45,
+      "name": "jimmybenny1",
+      "offset": 1915174,
+      "size": 28044,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceneighborhood/voiceneighborhood_audio/0045_jimmybenny1.wav"
+    },
+    {
+      "index": 46,
+      "name": "jimmybenny5",
+      "offset": 1943218,
+      "size": 40556,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceneighborhood/voiceneighborhood_audio/0046_jimmybenny5.wav"
+    },
+    {
+      "index": 47,
+      "name": "jimmycarl10",
+      "offset": 1983774,
+      "size": 85132,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceneighborhood/voiceneighborhood_audio/0047_jimmycarl10.wav"
+    },
+    {
+      "index": 48,
+      "name": "jimmylibby5",
+      "offset": 2068906,
+      "size": 22924,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceneighborhood/voiceneighborhood_audio/0048_jimmylibby5.wav"
+    },
+    {
+      "index": 49,
+      "name": "jimmylibby7",
+      "offset": 2091830,
+      "size": 22678,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceneighborhood/voiceneighborhood_audio/0049_jimmylibby7.wav"
+    },
+    {
+      "index": 50,
+      "name": "jimmylibby10W",
+      "offset": 2114508,
+      "size": 37634,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceneighborhood/voiceneighborhood_audio/0050_jimmylibby10W.wav"
+    },
+    {
+      "index": 51,
+      "name": "jimmylibby2",
+      "offset": 2152588,
+      "size": 58586,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceneighborhood/voiceneighborhood_audio/0051_jimmylibby2.wav"
+    },
+    {
+      "index": 52,
+      "name": "jimmymom16",
+      "offset": 2211174,
+      "size": 43630,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceneighborhood/voiceneighborhood_audio/0052_jimmymom16.wav"
+    },
+    {
+      "index": 53,
+      "name": "jimmymom3",
+      "offset": 2269066,
+      "size": 53350,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceneighborhood/voiceneighborhood_audio/0053_jimmymom3.wav"
+    },
+    {
+      "index": 54,
+      "name": "jimmymom4",
+      "offset": 2322416,
+      "size": 91810,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceneighborhood/voiceneighborhood_audio/0054_jimmymom4.wav"
+    },
+    {
+      "index": 55,
+      "name": "jimmymom6",
+      "offset": 2414226,
+      "size": 62208,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceneighborhood/voiceneighborhood_audio/0055_jimmymom6.wav"
+    },
+    {
+      "index": 56,
+      "name": "jimmymom7",
+      "offset": 2476434,
+      "size": 26524,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceneighborhood/voiceneighborhood_audio/0056_jimmymom7.wav"
+    },
+    {
+      "index": 57,
+      "name": "jimmymom8",
+      "offset": 2502958,
+      "size": 20716,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceneighborhood/voiceneighborhood_audio/0057_jimmymom8.wav"
+    },
+    {
+      "index": 58,
+      "name": "jimmymom13",
+      "offset": 2523674,
+      "size": 37180,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceneighborhood/voiceneighborhood_audio/0058_jimmymom13.wav"
+    },
+    {
+      "index": 59,
+      "name": "jimmymom14",
+      "offset": 2560854,
+      "size": 86390,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceneighborhood/voiceneighborhood_audio/0059_jimmymom14.wav"
+    },
+    {
+      "index": 60,
+      "name": "audio_60",
+      "offset": 2647244,
+      "size": 992,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceneighborhood/voiceneighborhood_audio/0060_audio_60.wav"
+    },
+    {
+      "index": 61,
+      "name": "audio_61",
+      "offset": 2648236,
+      "size": 992,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceneighborhood/voiceneighborhood_audio/0061_audio_61.wav"
+    },
+    {
+      "index": 62,
+      "name": "jimmylibby1",
+      "offset": 2649228,
+      "size": 56364,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceneighborhood/voiceneighborhood_audio/0062_jimmylibby1.wav"
+    },
+    {
+      "index": 63,
+      "name": "jimmylibby4",
+      "offset": 2705592,
+      "size": 108138,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceneighborhood/voiceneighborhood_audio/0063_jimmylibby4.wav"
+    },
+    {
+      "index": 64,
+      "name": "appleteleports",
+      "offset": 2813730,
+      "size": 17900,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceneighborhood/voiceneighborhood_audio/0064_appleteleports.wav"
+    },
+    {
+      "index": 65,
+      "name": "jimmymom17",
+      "offset": 2841300,
+      "size": 74336,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceneighborhood/voiceneighborhood_audio/0065_jimmymom17.wav"
+    },
+    {
+      "index": 66,
+      "name": "jimmyvox1",
+      "offset": 2915636,
+      "size": 30014,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceneighborhood/voiceneighborhood_audio/0066_jimmyvox1.wav"
+    },
+    {
+      "index": 67,
+      "name": "jimmylibby10",
+      "offset": 2945650,
+      "size": 25642,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceneighborhood/voiceneighborhood_audio/0067_jimmylibby10.wav"
+    },
+    {
+      "index": 68,
+      "name": "jimmyvox2",
+      "offset": 2971292,
+      "size": 42816,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceneighborhood/voiceneighborhood_audio/0068_jimmyvox2.wav"
+    },
+    {
+      "index": 69,
+      "name": "Hump growl2",
+      "offset": 3014108,
+      "size": 62906,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceneighborhood/voiceneighborhood_audio/0069_Hump_growl2.wav"
+    },
+    {
+      "index": 70,
+      "name": "jimmygoddard37",
+      "offset": 3077836,
+      "size": 44548,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceneighborhood/voiceneighborhood_audio/0070_jimmygoddard37.wav"
+    },
+    {
+      "index": 71,
+      "name": "jimmygoddard35",
+      "offset": 3122384,
+      "size": 64062,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceneighborhood/voiceneighborhood_audio/0071_jimmygoddard35.wav"
+    },
+    {
+      "index": 72,
+      "name": "jimmygoddard39",
+      "offset": 3186446,
+      "size": 126208,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceneighborhood/voiceneighborhood_audio/0072_jimmygoddard39.wav"
+    },
+    {
+      "index": 73,
+      "name": "jimmycarl1",
+      "offset": 3312654,
+      "size": 37822,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceneighborhood/voiceneighborhood_audio/0073_jimmycarl1.wav"
+    },
+    {
+      "index": 74,
+      "name": "jimmyshrink4",
+      "offset": 3350476,
+      "size": 35052,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceneighborhood/voiceneighborhood_audio/0074_jimmyshrink4.wav"
+    },
+    {
+      "index": 75,
+      "name": "jimmygoddard40",
+      "offset": 3389938,
+      "size": 100004,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceneighborhood/voiceneighborhood_audio/0075_jimmygoddard40.wav"
+    },
+    {
+      "index": 76,
+      "name": "jimmygoddard38",
+      "offset": 3489942,
+      "size": 52342,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceneighborhood/voiceneighborhood_audio/0076_jimmygoddard38.wav"
+    },
+    {
+      "index": 77,
+      "name": "jimmycarl11",
+      "offset": 3542284,
+      "size": 76666,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceneighborhood/voiceneighborhood_audio/0077_jimmycarl11.wav"
+    },
+    {
+      "index": 78,
+      "name": "jimmycarl3",
+      "offset": 3624350,
+      "size": 61012,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceneighborhood/voiceneighborhood_audio/0078_jimmycarl3.wav"
+    },
+    {
+      "index": 79,
+      "name": "jimmylibby6",
+      "offset": 3685362,
+      "size": 89526,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceneighborhood/voiceneighborhood_audio/0079_jimmylibby6.wav"
+    },
+    {
+      "index": 80,
+      "name": "jimmycarl31",
+      "offset": 3774888,
+      "size": 41996,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceneighborhood/voiceneighborhood_audio/0080_jimmycarl31.wav"
+    },
+    {
+      "index": 81,
+      "name": "jimmycarl7",
+      "offset": 3838134,
+      "size": 79884,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceneighborhood/voiceneighborhood_audio/0081_jimmycarl7.wav"
+    },
+    {
+      "index": 82,
+      "name": "jimmylibby12",
+      "offset": 3918018,
+      "size": 69702,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceneighborhood/voiceneighborhood_audio/0082_jimmylibby12.wav"
+    },
+    {
+      "index": 83,
+      "name": "jimmycarl2",
+      "offset": 4004148,
+      "size": 57140,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceneighborhood/voiceneighborhood_audio/0083_jimmycarl2.wav"
+    },
+    {
+      "index": 84,
+      "name": "audio_84",
+      "offset": 4061288,
+      "size": 42816,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceneighborhood/voiceneighborhood_audio/0084_audio_84.wav"
+    },
+    {
+      "index": 85,
+      "name": "jimmygoddard39a",
+      "offset": 4088246,
+      "size": 66834,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceneighborhood/voiceneighborhood_audio/0085_jimmygoddard39a.wav"
+    },
+    {
+      "index": 86,
+      "name": "teleportation",
+      "offset": 4155080,
+      "size": 55546,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceneighborhood/voiceneighborhood_audio/0086_teleportation.wav"
+    },
+    {
+      "index": 87,
+      "name": "audio_87",
+      "offset": 4210626,
+      "size": 103546,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceneighborhood/voiceneighborhood_audio/0087_audio_87.wav"
+    },
+    {
+      "index": 88,
+      "name": "jimmycarl13b",
+      "offset": 4234668,
+      "size": 95832,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceneighborhood/voiceneighborhood_audio/0088_jimmycarl13b.wav"
+    },
+    {
+      "index": 89,
+      "name": "jimmysheen5",
+      "offset": 4330500,
+      "size": 72682,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceneighborhood/voiceneighborhood_audio/0089_jimmysheen5.wav"
+    },
+    {
+      "index": 90,
+      "name": "jimmysheen6",
+      "offset": 4403182,
+      "size": 48592,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceneighborhood/voiceneighborhood_audio/0090_jimmysheen6.wav"
+    },
+    {
+      "index": 91,
+      "name": "jimmysheen2",
+      "offset": 4451774,
+      "size": 80326,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceneighborhood/voiceneighborhood_audio/0091_jimmysheen2.wav"
+    },
+    {
+      "index": 92,
+      "name": "jimmysheen4",
+      "offset": 4537700,
+      "size": 50430,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceneighborhood/voiceneighborhood_audio/0092_jimmysheen4.wav"
+    },
+    {
+      "index": 93,
+      "name": "jimmysheen3",
+      "offset": 4588130,
+      "size": 41774,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceneighborhood/voiceneighborhood_audio/0093_jimmysheen3.wav"
+    },
+    {
+      "index": 94,
+      "name": "jimmylibby8w",
+      "offset": 4629904,
+      "size": 84120,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceneighborhood/voiceneighborhood_audio/0094_jimmylibby8w.wav"
+    },
+    {
+      "index": 95,
+      "name": "jimmycarl6",
+      "offset": 4719144,
+      "size": 96816,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceneighborhood/voiceneighborhood_audio/0095_jimmycarl6.wav"
+    },
+    {
+      "index": 96,
+      "name": "jimmycarl26",
+      "offset": 4815960,
+      "size": 64574,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceneighborhood/voiceneighborhood_audio/0096_jimmycarl26.wav"
+    },
+    {
+      "index": 97,
+      "name": "jimmycarl1b",
+      "offset": 4903554,
+      "size": 111482,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceneighborhood/voiceneighborhood_audio/0097_jimmycarl1b.wav"
+    },
+    {
+      "index": 98,
+      "name": "jimmycarl12",
+      "offset": 5018562,
+      "size": 106764,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceneighborhood/voiceneighborhood_audio/0098_jimmycarl12.wav"
+    },
+    {
+      "index": 99,
+      "name": "jimmyshrink2",
+      "offset": 5125326,
+      "size": 114988,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceneighborhood/voiceneighborhood_audio/0099_jimmyshrink2.wav"
+    },
+    {
+      "index": 100,
+      "name": "jimmyshrink1",
+      "offset": 5240314,
+      "size": 92488,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceneighborhood/voiceneighborhood_audio/0100_jimmyshrink1.wav"
+    },
+    {
+      "index": 101,
+      "name": "vox recharge2",
+      "offset": 5332802,
+      "size": 36652,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceneighborhood/voiceneighborhood_audio/0101_vox_recharge2.wav"
+    },
+    {
+      "index": 102,
+      "name": "shrink humphrey",
+      "offset": 5375534,
+      "size": 42722,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceneighborhood/voiceneighborhood_audio/0102_shrink_humphrey.wav"
+    },
+    {
+      "index": 103,
+      "name": "typing",
+      "offset": 5418256,
+      "size": 49530,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceneighborhood/voiceneighborhood_audio/0103_typing.wav"
+    },
+    {
+      "index": 104,
+      "name": "hump bark1",
+      "offset": 5479080,
+      "size": 50490,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceneighborhood/voiceneighborhood_audio/0104_hump_bark1.wav"
+    },
+    {
+      "index": 105,
+      "name": "hump bark3",
+      "offset": 5529570,
+      "size": 43194,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceneighborhood/voiceneighborhood_audio/0105_hump_bark3.wav"
+    },
+    {
+      "index": 106,
+      "name": "hump bark4",
+      "offset": 5586588,
+      "size": 43578,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceneighborhood/voiceneighborhood_audio/0106_hump_bark4.wav"
+    },
+    {
+      "index": 107,
+      "name": "hump bark2",
+      "offset": 5630166,
+      "size": 44218,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceneighborhood/voiceneighborhood_audio/0107_hump_bark2.wav"
+    },
+    {
+      "index": 108,
+      "name": "jimmyvox4",
+      "offset": 5674384,
+      "size": 101300,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceneighborhood/voiceneighborhood_audio/0108_jimmyvox4.wav"
+    },
+    {
+      "index": 109,
+      "name": "jimmyvox4b",
+      "offset": 5775684,
+      "size": 60252,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceneighborhood/voiceneighborhood_audio/0109_jimmyvox4b.wav"
+    },
+    {
+      "index": 110,
+      "name": "audio_110",
+      "offset": 5835936,
+      "size": 36652,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceneighborhood/voiceneighborhood_audio/0110_audio_110.wav"
+    },
+    {
+      "index": 111,
+      "name": "vox recharge",
+      "offset": 5872588,
+      "size": 45612,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceneighborhood/voiceneighborhood_audio/0111_vox_recharge.wav"
+    },
+    {
+      "index": 112,
+      "name": "phone ring",
+      "offset": 5918200,
+      "size": 52140,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceneighborhood/voiceneighborhood_audio/0112_phone_ring.wav"
+    }
+  ]
+}

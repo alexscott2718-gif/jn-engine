@@ -1,0 +1,22 @@
+{
+  "file": "/home/scotty/xp-jnbg-original/omt/water.omt",
+  "total_size": 108156,
+  "has_images": true,
+  "has_audio": false,
+  "images": [
+    {
+      "index": 0,
+      "width": 256,
+      "height": 256,
+      "depth": 16,
+      "compression": 1,
+      "stride": 512,
+      "dotransparent": false,
+      "transp_packed": 0,
+      "dopalette": false,
+      "bufsize": 107264,
+      "file": "/home/scotty/jn-engine/assets/parsed/water/water_images/0000_256x256d16.png",
+      "status": "ok"
+    }
+  ]
+}

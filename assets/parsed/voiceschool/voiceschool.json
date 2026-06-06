@@ -1,0 +1,470 @@
+{
+  "file": "/home/scotty/xp-jnbg-original/omt/voiceschool.omt",
+  "total_size": 3970378,
+  "has_images": false,
+  "has_audio": true,
+  "audio": [
+    {
+      "index": 0,
+      "name": "jimmybenny6",
+      "offset": 8,
+      "size": 43814,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceschool/voiceschool_audio/0000_jimmybenny6.wav"
+    },
+    {
+      "index": 1,
+      "name": "jimmysheen19",
+      "offset": 43822,
+      "size": 33338,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceschool/voiceschool_audio/0001_jimmysheen19.wav"
+    },
+    {
+      "index": 2,
+      "name": "empty",
+      "offset": 77718,
+      "size": 992,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceschool/voiceschool_audio/0002_empty.wav"
+    },
+    {
+      "index": 3,
+      "name": "empty",
+      "offset": 79144,
+      "size": 992,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceschool/voiceschool_audio/0003_empty.wav"
+    },
+    {
+      "index": 4,
+      "name": "audio_4",
+      "offset": 80136,
+      "size": 992,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceschool/voiceschool_audio/0004_audio_4.wav"
+    },
+    {
+      "index": 5,
+      "name": "audio_5",
+      "offset": 81686,
+      "size": 992,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceschool/voiceschool_audio/0005_audio_5.wav"
+    },
+    {
+      "index": 6,
+      "name": "audio_6",
+      "offset": 83382,
+      "size": 992,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceschool/voiceschool_audio/0006_audio_6.wav"
+    },
+    {
+      "index": 7,
+      "name": "jimmynick13",
+      "offset": 84932,
+      "size": 30750,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceschool/voiceschool_audio/0007_jimmynick13.wav"
+    },
+    {
+      "index": 8,
+      "name": "jimmycarl29",
+      "offset": 115682,
+      "size": 18858,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceschool/voiceschool_audio/0008_jimmycarl29.wav"
+    },
+    {
+      "index": 9,
+      "name": "jimmynick11",
+      "offset": 135912,
+      "size": 31300,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceschool/voiceschool_audio/0009_jimmynick11.wav"
+    },
+    {
+      "index": 10,
+      "name": "jimmybenny15",
+      "offset": 167212,
+      "size": 53078,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceschool/voiceschool_audio/0010_jimmybenny15.wav"
+    },
+    {
+      "index": 11,
+      "name": "bennywipe",
+      "offset": 220290,
+      "size": 14940,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceschool/voiceschool_audio/0011_bennywipe.wav"
+    },
+    {
+      "index": 12,
+      "name": "jimmybenny16",
+      "offset": 238128,
+      "size": 36078,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceschool/voiceschool_audio/0012_jimmybenny16.wav"
+    },
+    {
+      "index": 13,
+      "name": "jimmymissfowl5",
+      "offset": 274206,
+      "size": 37732,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceschool/voiceschool_audio/0013_jimmymissfowl5.wav"
+    },
+    {
+      "index": 14,
+      "name": "jimmybenny14",
+      "offset": 312074,
+      "size": 21636,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceschool/voiceschool_audio/0014_jimmybenny14.wav"
+    },
+    {
+      "index": 15,
+      "name": "jimmysheen15",
+      "offset": 333710,
+      "size": 32404,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceschool/voiceschool_audio/0015_jimmysheen15.wav"
+    },
+    {
+      "index": 16,
+      "name": "jimmynick1",
+      "offset": 371366,
+      "size": 30566,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceschool/voiceschool_audio/0016_jimmynick1.wav"
+    },
+    {
+      "index": 17,
+      "name": "jimmynick4",
+      "offset": 423940,
+      "size": 69834,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceschool/voiceschool_audio/0017_jimmynick4.wav"
+    },
+    {
+      "index": 18,
+      "name": "jimmynick5",
+      "offset": 493774,
+      "size": 35528,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceschool/voiceschool_audio/0018_jimmynick5.wav"
+    },
+    {
+      "index": 19,
+      "name": "jimmynick6",
+      "offset": 529302,
+      "size": 109100,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceschool/voiceschool_audio/0019_jimmynick6.wav"
+    },
+    {
+      "index": 20,
+      "name": "jimmynick26",
+      "offset": 638402,
+      "size": 68546,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceschool/voiceschool_audio/0020_jimmynick26.wav"
+    },
+    {
+      "index": 21,
+      "name": "jimmybenny17",
+      "offset": 706948,
+      "size": 34184,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceschool/voiceschool_audio/0021_jimmybenny17.wav"
+    },
+    {
+      "index": 22,
+      "name": "jimmynick15",
+      "offset": 755354,
+      "size": 48960,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceschool/voiceschool_audio/0022_jimmynick15.wav"
+    },
+    {
+      "index": 23,
+      "name": "jimmybenny10",
+      "offset": 804314,
+      "size": 29096,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceschool/voiceschool_audio/0023_jimmybenny10.wav"
+    },
+    {
+      "index": 24,
+      "name": "jimmynick17",
+      "offset": 835064,
+      "size": 67720,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceschool/voiceschool_audio/0024_jimmynick17.wav"
+    },
+    {
+      "index": 25,
+      "name": "jimmymissfowl9",
+      "offset": 902784,
+      "size": 26524,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceschool/voiceschool_audio/0025_jimmymissfowl9.wav"
+    },
+    {
+      "index": 26,
+      "name": "jimmynick24",
+      "offset": 929308,
+      "size": 27074,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceschool/voiceschool_audio/0026_jimmynick24.wav"
+    },
+    {
+      "index": 27,
+      "name": "jimmynick23",
+      "offset": 962270,
+      "size": 73232,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceschool/voiceschool_audio/0027_jimmynick23.wav"
+    },
+    {
+      "index": 28,
+      "name": "jimmybenny9",
+      "offset": 1035502,
+      "size": 57004,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceschool/voiceschool_audio/0028_jimmybenny9.wav"
+    },
+    {
+      "index": 29,
+      "name": "jimmybenny8",
+      "offset": 1094856,
+      "size": 42344,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceschool/voiceschool_audio/0029_jimmybenny8.wav"
+    },
+    {
+      "index": 30,
+      "name": "jimmynick21",
+      "offset": 1137200,
+      "size": 38558,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceschool/voiceschool_audio/0030_jimmynick21.wav"
+    },
+    {
+      "index": 31,
+      "name": "jimmynick20",
+      "offset": 1175758,
+      "size": 50612,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceschool/voiceschool_audio/0031_jimmynick20.wav"
+    },
+    {
+      "index": 32,
+      "name": "audio_32",
+      "offset": 1226370,
+      "size": 27074,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceschool/voiceschool_audio/0032_audio_32.wav"
+    },
+    {
+      "index": 33,
+      "name": "jimmynick12",
+      "offset": 1259424,
+      "size": 95576,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceschool/voiceschool_audio/0033_jimmynick12.wav"
+    },
+    {
+      "index": 34,
+      "name": "jimmybenny12",
+      "offset": 1367468,
+      "size": 43354,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceschool/voiceschool_audio/0034_jimmybenny12.wav"
+    },
+    {
+      "index": 35,
+      "name": "audio_35",
+      "offset": 1410822,
+      "size": 29096,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceschool/voiceschool_audio/0035_audio_35.wav"
+    },
+    {
+      "index": 36,
+      "name": "jimmynick2",
+      "offset": 1439918,
+      "size": 58330,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceschool/voiceschool_audio/0036_jimmynick2.wav"
+    },
+    {
+      "index": 37,
+      "name": "jimmybenny18",
+      "offset": 1498248,
+      "size": 34058,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceschool/voiceschool_audio/0037_jimmybenny18.wav"
+    },
+    {
+      "index": 38,
+      "name": "jimmycarl31",
+      "offset": 1532306,
+      "size": 49156,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceschool/voiceschool_audio/0038_jimmycarl31.wav"
+    },
+    {
+      "index": 39,
+      "name": "jimmysheen17",
+      "offset": 1581462,
+      "size": 39692,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceschool/voiceschool_audio/0039_jimmysheen17.wav"
+    },
+    {
+      "index": 40,
+      "name": "jimmynick18",
+      "offset": 1636878,
+      "size": 91534,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceschool/voiceschool_audio/0040_jimmynick18.wav"
+    },
+    {
+      "index": 41,
+      "name": "jimmynick19",
+      "offset": 1728412,
+      "size": 83908,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceschool/voiceschool_audio/0041_jimmynick19.wav"
+    },
+    {
+      "index": 42,
+      "name": "jimmynick14",
+      "offset": 1812320,
+      "size": 45652,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceschool/voiceschool_audio/0042_jimmynick14.wav"
+    },
+    {
+      "index": 43,
+      "name": "jimmynick16",
+      "offset": 1860400,
+      "size": 124002,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceschool/voiceschool_audio/0043_jimmynick16.wav"
+    },
+    {
+      "index": 44,
+      "name": "jimmynick3",
+      "offset": 1984402,
+      "size": 42050,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceschool/voiceschool_audio/0044_jimmynick3.wav"
+    },
+    {
+      "index": 45,
+      "name": "jimmymissfowl7",
+      "offset": 2026452,
+      "size": 69190,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceschool/voiceschool_audio/0045_jimmymissfowl7.wav"
+    },
+    {
+      "index": 46,
+      "name": "jimmysheen16",
+      "offset": 2097296,
+      "size": 52252,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceschool/voiceschool_audio/0046_jimmysheen16.wav"
+    },
+    {
+      "index": 47,
+      "name": "jimmynick7",
+      "offset": 2149548,
+      "size": 50980,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceschool/voiceschool_audio/0047_jimmynick7.wav"
+    },
+    {
+      "index": 48,
+      "name": "jimmynick16b",
+      "offset": 2201280,
+      "size": 60260,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceschool/voiceschool_audio/0048_jimmynick16b.wav"
+    },
+    {
+      "index": 49,
+      "name": "jimmynick10",
+      "offset": 2261540,
+      "size": 62484,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceschool/voiceschool_audio/0049_jimmynick10.wav"
+    },
+    {
+      "index": 50,
+      "name": "jimmynick9",
+      "offset": 2324382,
+      "size": 53186,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceschool/voiceschool_audio/0050_jimmynick9.wav"
+    },
+    {
+      "index": 51,
+      "name": "jimmybenny19",
+      "offset": 2377568,
+      "size": 101460,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceschool/voiceschool_audio/0051_jimmybenny19.wav"
+    },
+    {
+      "index": 52,
+      "name": "jimmybenny11",
+      "offset": 2487220,
+      "size": 87408,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceschool/voiceschool_audio/0052_jimmybenny11.wav"
+    },
+    {
+      "index": 53,
+      "name": "jimmycarl30",
+      "offset": 2600354,
+      "size": 68274,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceschool/voiceschool_audio/0053_jimmycarl30.wav"
+    },
+    {
+      "index": 54,
+      "name": "jimmybenny13",
+      "offset": 2668628,
+      "size": 49142,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceschool/voiceschool_audio/0054_jimmybenny13.wav"
+    },
+    {
+      "index": 55,
+      "name": "jimmysheen18",
+      "offset": 2742434,
+      "size": 134118,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceschool/voiceschool_audio/0055_jimmysheen18.wav"
+    },
+    {
+      "index": 56,
+      "name": "jimmynick25",
+      "offset": 2876552,
+      "size": 84496,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceschool/voiceschool_audio/0056_jimmynick25.wav"
+    },
+    {
+      "index": 57,
+      "name": "jimmycarl32",
+      "offset": 2966982,
+      "size": 99810,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceschool/voiceschool_audio/0057_jimmycarl32.wav"
+    },
+    {
+      "index": 58,
+      "name": "jimmymissfowl8",
+      "offset": 3066792,
+      "size": 118368,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceschool/voiceschool_audio/0058_jimmymissfowl8.wav"
+    },
+    {
+      "index": 59,
+      "name": "jimmybenny7",
+      "offset": 3185160,
+      "size": 83808,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceschool/voiceschool_audio/0059_jimmybenny7.wav"
+    },
+    {
+      "index": 60,
+      "name": "jimmynick22",
+      "offset": 3268968,
+      "size": 93280,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceschool/voiceschool_audio/0060_jimmynick22.wav"
+    },
+    {
+      "index": 61,
+      "name": "audio_61",
+      "offset": 3362248,
+      "size": 49142,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceschool/voiceschool_audio/0061_audio_61.wav"
+    },
+    {
+      "index": 62,
+      "name": "Intro Race A",
+      "offset": 3457938,
+      "size": 108540,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceschool/voiceschool_audio/0062_Intro_Race_A.wav"
+    },
+    {
+      "index": 63,
+      "name": "jimmymissfowl6",
+      "offset": 3595350,
+      "size": 159686,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceschool/voiceschool_audio/0063_jimmymissfowl6.wav"
+    },
+    {
+      "index": 64,
+      "name": "Intro Race B",
+      "offset": 3755036,
+      "size": 105978,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceschool/voiceschool_audio/0064_Intro_Race_B.wav"
+    },
+    {
+      "index": 65,
+      "name": "Intro Race C",
+      "offset": 3861014,
+      "size": 109364,
+      "file": "/home/scotty/jn-engine/assets/parsed/voiceschool/voiceschool_audio/0065_Intro_Race_C.wav"
+    }
+  ]
+}

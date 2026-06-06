@@ -1,5 +1,5 @@
 {
-  "file": "assets/omt/objects.omt",
+  "file": "/home/scotty/xp-jnbg-original/omt/objects.omt",
   "total_size": 2246939,
   "has_images": true,
   "has_audio": false,
@@ -15,7 +15,7 @@
       "transp_packed": 0,
       "dopalette": false,
       "bufsize": 63384,
-      "file": "assets/parsed/objects/objects_images/0000_128x128d32.png",
+      "file": "/home/scotty/jn-engine/assets/parsed/objects/objects_images/0000_128x128d32.png",
       "status": "ok"
     },
     {
@@ -29,7 +29,7 @@
       "transp_packed": 0,
       "dopalette": false,
       "bufsize": 152088,
-      "file": "assets/parsed/objects/objects_images/0001_256x256d32.png",
+      "file": "/home/scotty/jn-engine/assets/parsed/objects/objects_images/0001_256x256d32.png",
       "status": "ok"
     },
     {
@@ -43,7 +43,7 @@
       "transp_packed": 0,
       "dopalette": false,
       "bufsize": 264680,
-      "file": "assets/parsed/objects/objects_images/0002_256x256d32.png",
+      "file": "/home/scotty/jn-engine/assets/parsed/objects/objects_images/0002_256x256d32.png",
       "status": "ok"
     },
     {
@@ -57,7 +57,7 @@
       "transp_packed": 0,
       "dopalette": false,
       "bufsize": 58012,
-      "file": "assets/parsed/objects/objects_images/0003_128x128d32.png",
+      "file": "/home/scotty/jn-engine/assets/parsed/objects/objects_images/0003_128x128d32.png",
       "status": "ok"
     },
     {
@@ -71,7 +71,7 @@
       "transp_packed": 0,
       "dopalette": false,
       "bufsize": 65560,
-      "file": "assets/parsed/objects/objects_images/0004_128x128d32.png",
+      "file": "/home/scotty/jn-engine/assets/parsed/objects/objects_images/0004_128x128d32.png",
       "status": "ok"
     },
     {
@@ -85,7 +85,7 @@
       "transp_packed": 0,
       "dopalette": false,
       "bufsize": 15412,
-      "file": "assets/parsed/objects/objects_images/0005_64x64d32.png",
+      "file": "/home/scotty/jn-engine/assets/parsed/objects/objects_images/0005_64x64d32.png",
       "status": "ok"
     },
     {
@@ -99,7 +99,7 @@
       "transp_packed": 0,
       "dopalette": false,
       "bufsize": 6596,
-      "file": "assets/parsed/objects/objects_images/0006_64x64d16.png",
+      "file": "/home/scotty/jn-engine/assets/parsed/objects/objects_images/0006_64x64d16.png",
       "status": "ok"
     },
     {
@@ -113,7 +113,7 @@
       "transp_packed": 0,
       "dopalette": false,
       "bufsize": 33238,
-      "file": "assets/parsed/objects/objects_images/0007_128x128d16.png",
+      "file": "/home/scotty/jn-engine/assets/parsed/objects/objects_images/0007_128x128d16.png",
       "status": "ok"
     },
     {
@@ -127,7 +127,7 @@
       "transp_packed": 0,
       "dopalette": false,
       "bufsize": 3788,
-      "file": "assets/parsed/objects/objects_images/0008_64x64d16.png",
+      "file": "/home/scotty/jn-engine/assets/parsed/objects/objects_images/0008_64x64d16.png",
       "status": "ok"
     },
     {
@@ -141,7 +141,7 @@
       "transp_packed": 0,
       "dopalette": false,
       "bufsize": 32966,
-      "file": "assets/parsed/objects/objects_images/0009_128x128d16.png",
+      "file": "/home/scotty/jn-engine/assets/parsed/objects/objects_images/0009_128x128d16.png",
       "status": "ok"
     },
     {
@@ -155,7 +155,7 @@
       "transp_packed": 0,
       "dopalette": false,
       "bufsize": 20982,
-      "file": "assets/parsed/objects/objects_images/0010_128x128d16.png",
+      "file": "/home/scotty/jn-engine/assets/parsed/objects/objects_images/0010_128x128d16.png",
       "status": "ok"
     },
     {
@@ -169,7 +169,7 @@
       "transp_packed": 0,
       "dopalette": false,
       "bufsize": 22682,
-      "file": "assets/parsed/objects/objects_images/0011_128x128d16.png",
+      "file": "/home/scotty/jn-engine/assets/parsed/objects/objects_images/0011_128x128d16.png",
       "status": "ok"
     },
     {
@@ -183,7 +183,7 @@
       "transp_packed": 0,
       "dopalette": false,
       "bufsize": 22236,
-      "file": "assets/parsed/objects/objects_images/0012_128x128d16.png",
+      "file": "/home/scotty/jn-engine/assets/parsed/objects/objects_images/0012_128x128d16.png",
       "status": "ok"
     },
     {
@@ -197,7 +197,7 @@
       "transp_packed": 0,
       "dopalette": false,
       "bufsize": 22872,
-      "file": "assets/parsed/objects/objects_images/0013_128x128d16.png",
+      "file": "/home/scotty/jn-engine/assets/parsed/objects/objects_images/0013_128x128d16.png",
       "status": "ok"
     },
     {
@@ -211,7 +211,7 @@
       "transp_packed": 0,
       "dopalette": false,
       "bufsize": 29474,
-      "file": "assets/parsed/objects/objects_images/0014_128x128d16.png",
+      "file": "/home/scotty/jn-engine/assets/parsed/objects/objects_images/0014_128x128d16.png",
       "status": "ok"
     },
     {
@@ -225,7 +225,7 @@
       "transp_packed": 0,
       "dopalette": false,
       "bufsize": 22682,
-      "file": "assets/parsed/objects/objects_images/0015_128x128d16.png",
+      "file": "/home/scotty/jn-engine/assets/parsed/objects/objects_images/0015_128x128d16.png",
       "status": "ok"
     },
     {
@@ -239,7 +239,7 @@
       "transp_packed": 0,
       "dopalette": false,
       "bufsize": 23120,
-      "file": "assets/parsed/objects/objects_images/0016_128x128d16.png",
+      "file": "/home/scotty/jn-engine/assets/parsed/objects/objects_images/0016_128x128d16.png",
       "status": "ok"
     },
     {
@@ -253,7 +253,7 @@
       "transp_packed": 0,
       "dopalette": false,
       "bufsize": 65412,
-      "file": "assets/parsed/objects/objects_images/0017_128x128d32.png",
+      "file": "/home/scotty/jn-engine/assets/parsed/objects/objects_images/0017_128x128d32.png",
       "status": "ok"
     },
     {
@@ -267,7 +267,7 @@
       "transp_packed": 0,
       "dopalette": false,
       "bufsize": 57144,
-      "file": "assets/parsed/objects/objects_images/0018_128x128d32.png",
+      "file": "/home/scotty/jn-engine/assets/parsed/objects/objects_images/0018_128x128d32.png",
       "status": "ok"
     },
     {
@@ -281,7 +281,7 @@
       "transp_packed": 13043977,
       "dopalette": false,
       "bufsize": 151508,
-      "file": "assets/parsed/objects/objects_images/0019_256x256d32.png",
+      "file": "/home/scotty/jn-engine/assets/parsed/objects/objects_images/0019_256x256d32.png",
       "status": "ok"
     },
     {
@@ -295,7 +295,7 @@
       "transp_packed": 0,
       "dopalette": false,
       "bufsize": 32780,
-      "file": "assets/parsed/objects/objects_images/0020_128x128d32.png",
+      "file": "/home/scotty/jn-engine/assets/parsed/objects/objects_images/0020_128x128d32.png",
       "status": "ok"
     },
     {
@@ -309,7 +309,7 @@
       "transp_packed": 0,
       "dopalette": false,
       "bufsize": 61008,
-      "file": "assets/parsed/objects/objects_images/0021_128x128d32.png",
+      "file": "/home/scotty/jn-engine/assets/parsed/objects/objects_images/0021_128x128d32.png",
       "status": "ok"
     },
     {
@@ -323,7 +323,7 @@
       "transp_packed": 6776679,
       "dopalette": false,
       "bufsize": 40452,
-      "file": "assets/parsed/objects/objects_images/0022_128x128d32.png",
+      "file": "/home/scotty/jn-engine/assets/parsed/objects/objects_images/0022_128x128d32.png",
       "status": "ok"
     },
     {
@@ -337,7 +337,7 @@
       "transp_packed": 6710369,
       "dopalette": false,
       "bufsize": 32016,
-      "file": "assets/parsed/objects/objects_images/0023_128x128d32.png",
+      "file": "/home/scotty/jn-engine/assets/parsed/objects/objects_images/0023_128x128d32.png",
       "status": "ok"
     },
     {
@@ -351,7 +351,7 @@
       "transp_packed": 267809,
       "dopalette": false,
       "bufsize": 28744,
-      "file": "assets/parsed/objects/objects_images/0024_128x128d32.png",
+      "file": "/home/scotty/jn-engine/assets/parsed/objects/objects_images/0024_128x128d32.png",
       "status": "ok"
     },
     {
@@ -365,7 +365,7 @@
       "transp_packed": 0,
       "dopalette": false,
       "bufsize": 234412,
-      "file": "assets/parsed/objects/objects_images/0025_256x256d32.png",
+      "file": "/home/scotty/jn-engine/assets/parsed/objects/objects_images/0025_256x256d32.png",
       "status": "ok"
     },
     {
@@ -379,7 +379,7 @@
       "transp_packed": 0,
       "dopalette": false,
       "bufsize": 15072,
-      "file": "assets/parsed/objects/objects_images/0026_128x128d32.png",
+      "file": "/home/scotty/jn-engine/assets/parsed/objects/objects_images/0026_128x128d32.png",
       "status": "ok"
     },
     {
@@ -393,7 +393,7 @@
       "transp_packed": 0,
       "dopalette": false,
       "bufsize": 82416,
-      "file": "assets/parsed/objects/objects_images/0027_256x256d32.png",
+      "file": "/home/scotty/jn-engine/assets/parsed/objects/objects_images/0027_256x256d32.png",
       "status": "ok"
     },
     {
@@ -407,7 +407,7 @@
       "transp_packed": 0,
       "dopalette": false,
       "bufsize": 237196,
-      "file": "assets/parsed/objects/objects_images/0028_256x256d32.png",
+      "file": "/home/scotty/jn-engine/assets/parsed/objects/objects_images/0028_256x256d32.png",
       "status": "ok"
     },
     {
@@ -421,7 +421,7 @@
       "transp_packed": 0,
       "dopalette": false,
       "bufsize": 61008,
-      "file": "assets/parsed/objects/objects_images/0029_128x128d32.png",
+      "file": "/home/scotty/jn-engine/assets/parsed/objects/objects_images/0029_128x128d32.png",
       "status": "ok"
     }
   ]

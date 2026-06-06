@@ -1,0 +1,15 @@
+{
+  "file": "/home/scotty/xp-jnbg-original/omt/musicdirtrace.omt",
+  "total_size": 794191,
+  "has_images": false,
+  "has_audio": true,
+  "audio": [
+    {
+      "index": 0,
+      "name": "Surf1_11k",
+      "offset": 8,
+      "size": 794156,
+      "file": "/home/scotty/jn-engine/assets/parsed/musicdirtrace/musicdirtrace_audio/0000_Surf1_11k.wav"
+    }
+  ]
+}
