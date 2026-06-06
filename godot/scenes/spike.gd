@@ -11,6 +11,10 @@ extends Node3D
 const LEVEL_PATH := "res://levels/level1.json"
 
 func _ready() -> void:
+	var preview := OS.get_environment("JN_PREVIEW")
+	if preview != "":
+		_preview_mesh(preview)
+		return
 	_build_environment()
 	var loader := _build_loader()
 	_build_player(loader)
@@ -149,6 +153,37 @@ func _screenshot_after(path: String, frames: int) -> void:
 	img.save_png(path)
 	print("[spike] wrote screenshot -> %s" % path)
 	get_tree().quit()
+
+## Load a single glb (foundry-relative path) centered, framed, and screenshot it
+## — for validating ASE->glb conversions (upright? correct texture/UVs?).
+func _preview_mesh(rel: String) -> void:
+	_build_environment()
+	var repo := ProjectSettings.globalize_path("res://").path_join("..")
+	var abs_path := repo.path_join(rel).simplify_path()
+	var doc := GLTFDocument.new()
+	var state := GLTFState.new()
+	if doc.append_from_file(abs_path, state) != OK:
+		print("[preview] failed to load %s" % abs_path); get_tree().quit(); return
+	var node := doc.generate_scene(state) as Node3D
+	add_child(node)
+	# Frame it: compute AABB from mesh instances, place a 3/4 camera.
+	var meshes: Array = []
+	_gather_meshes(node, meshes)
+	if meshes.is_empty():
+		print("[preview] no meshes"); get_tree().quit(); return
+	var b: AABB = meshes[0].global_transform * meshes[0].get_aabb()
+	for mi in meshes:
+		b = b.merge(mi.global_transform * mi.get_aabb())
+	var c := b.position + b.size * 0.5
+	var r: float = maxf(b.size.x, maxf(b.size.y, b.size.z)) * 1.2 + 1.0
+	var cam := Camera3D.new()
+	cam.near = r * 0.001; cam.far = r * 10.0
+	cam.position = c + Vector3(r, r * 0.7, r)
+	add_child(cam); cam.look_at(c, Vector3.UP); cam.make_current()
+	print("[preview] %s aabb.size=%s" % [rel, b.size])
+	var shot := OS.get_environment("JN_SHOT")
+	if shot != "":
+		_screenshot_after(shot, 5)
 
 func _build_environment() -> void:
 	# Sky tint mirrors renderer_set_sky(bluesky3) in src/game/main.c.

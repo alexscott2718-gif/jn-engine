@@ -4,8 +4,8 @@
     "counts": {
       "invisible": 37,
       "sprite": 8,
-      "glb": 29,
-      "placeholder": 56
+      "glb": 82,
+      "placeholder": 3
     }
   },
   "tag": {
@@ -30,8 +30,8 @@
       "scale": 1.0
     },
     "3PIC|hydrant": {
-      "kind": "placeholder",
-      "ase": "assets/ase/firehydrant.ASE",
+      "kind": "glb",
+      "glb": "assets/glb/ase/firehydrant.glb",
       "scale": 1.0
     },
     "3PIC|godphone": {
@@ -50,13 +50,13 @@
       "scale": 1.0
     },
     "3PIC|egg2b": {
-      "kind": "placeholder",
-      "ase": "assets/ase/omt/egg.ASE",
+      "kind": "glb",
+      "glb": "assets/glb/ase/egg.glb",
       "scale": 0.5
     },
     "3PIC|boatl": {
-      "kind": "placeholder",
-      "ase": "assets/ase/omt/SailBoat.ASE",
+      "kind": "glb",
+      "glb": "assets/glb/ase/SailBoat.glb",
       "scale": 0.5
     },
     "3PIC|hsounds": {
@@ -68,78 +68,78 @@
       "scale": 1.0
     },
     "3OMT|bench01": {
-      "kind": "placeholder",
-      "ase": "assets/ase/board.ASE",
+      "kind": "glb",
+      "glb": "assets/glb/ase/board.glb",
       "scale": 1.0
     },
     "3OMT|beam": {
-      "kind": "placeholder",
-      "ase": "assets/ase/beams.ASE",
+      "kind": "glb",
+      "glb": "assets/glb/ase/beams.glb",
       "scale": 1.0
     },
     "3OMT|beams": {
-      "kind": "placeholder",
-      "ase": "assets/ase/beams.ASE",
+      "kind": "glb",
+      "glb": "assets/glb/ase/beams.glb",
       "scale": 1.0
     },
     "3OMT|board": {
-      "kind": "placeholder",
-      "ase": "assets/ase/board.ASE",
+      "kind": "glb",
+      "glb": "assets/glb/ase/board.glb",
       "scale": 1.0
     },
     "3OMT|ray": {
-      "kind": "placeholder",
-      "ase": "assets/ase/ray.ASE",
+      "kind": "glb",
+      "glb": "assets/glb/ase/ray.glb",
       "scale": 1.0
     },
     "3DOR|doorpp1": {
-      "kind": "placeholder",
-      "ase": "assets/ase/DoorPP1.ASE",
+      "kind": "glb",
+      "glb": "assets/glb/ase/DoorPP1.glb",
       "scale": 1.0
     },
     "3DOR|doorpp2": {
-      "kind": "placeholder",
-      "ase": "assets/ase/DoorPP2.ASE",
+      "kind": "glb",
+      "glb": "assets/glb/ase/DoorPP2.glb",
       "scale": 1.0
     },
     "3DOR|doorgrill": {
-      "kind": "placeholder",
-      "ase": "assets/ase/doorgrill.ASE",
+      "kind": "glb",
+      "glb": "assets/glb/ase/doorgrill.glb",
       "scale": 1.0
     },
     "3DOR|doorgrill2": {
-      "kind": "placeholder",
-      "ase": "assets/ase/DoorGrill2.ASE",
+      "kind": "glb",
+      "glb": "assets/glb/ase/DoorGrill2.glb",
       "scale": 1.0
     },
     "3DOR|doorgrill3": {
-      "kind": "placeholder",
-      "ase": "assets/ase/DoorGrill3.ASE",
+      "kind": "glb",
+      "glb": "assets/glb/ase/DoorGrill3.glb",
       "scale": 1.0
     },
     "3DOR|doorcloset": {
-      "kind": "placeholder",
-      "ase": "assets/ase/DoorCloset.ASE",
+      "kind": "glb",
+      "glb": "assets/glb/ase/DoorCloset.glb",
       "scale": 1.0
     },
     "3DOR|doorfowl": {
-      "kind": "placeholder",
-      "ase": "assets/ase/doorfowl.ASE",
+      "kind": "glb",
+      "glb": "assets/glb/ase/doorfowl.glb",
       "scale": 1.0
     },
     "3DOR|doorcave": {
-      "kind": "placeholder",
-      "ase": "assets/ase/doorcave.ASE",
+      "kind": "glb",
+      "glb": "assets/glb/ase/doorcave.glb",
       "scale": 1.0
     },
     "3DOR|doorretro": {
-      "kind": "placeholder",
-      "ase": "assets/ase/doorretro.ASE",
+      "kind": "glb",
+      "glb": "assets/glb/ase/doorretro.glb",
       "scale": 1.0
     },
     "3DOR|firedoor": {
-      "kind": "placeholder",
-      "ase": "assets/ase/firedoor.ASE",
+      "kind": "glb",
+      "glb": "assets/glb/ase/firedoor.glb",
       "scale": 1.0
     }
   },
@@ -222,18 +222,18 @@
       "kind": "invisible"
     },
     "3HER": {
-      "kind": "placeholder",
-      "ase": "assets/ase/bigbotstop.ASE",
+      "kind": "glb",
+      "glb": "assets/glb/ase/bigbotstop.glb",
       "scale": 1.0
     },
     "ITEM": {
-      "kind": "placeholder",
-      "ase": "assets/ase/jimpickup.ASE",
+      "kind": "glb",
+      "glb": "assets/glb/ase/jimpickup.glb",
       "scale": 1.0
     },
     "3PIC": {
-      "kind": "placeholder",
-      "ase": "assets/ase/jimpickup.ASE",
+      "kind": "glb",
+      "glb": "assets/glb/ase/jimpickup.glb",
       "scale": 0.5
     },
     "3OMT": {
@@ -242,18 +242,18 @@
       "scale": 1.0
     },
     "3ROC": {
-      "kind": "placeholder",
-      "ase": "assets/ase/rocket.ASE",
+      "kind": "glb",
+      "glb": "assets/glb/ase/Rocket.glb",
       "scale": 1.0
     },
     "3ARR": {
-      "kind": "placeholder",
-      "ase": "assets/ase/3Darrow.ASE",
+      "kind": "glb",
+      "glb": "assets/glb/ase/3Darrow.glb",
       "scale": 1.0
     },
     "3BUT": {
-      "kind": "placeholder",
-      "ase": "assets/ase/buttonup.ASE",
+      "kind": "glb",
+      "glb": "assets/glb/ase/buttonup.glb",
       "scale": 1.0
     },
     "3DOR": {
@@ -262,23 +262,23 @@
       "scale": 1.0
     },
     "3CAR": {
-      "kind": "placeholder",
-      "ase": "assets/ase/carlstop.ASE",
+      "kind": "glb",
+      "glb": "assets/glb/ase/carlstop.glb",
       "scale": 1.0
     },
     "3BEN": {
-      "kind": "placeholder",
-      "ase": "assets/ase/bennystop.ASE",
+      "kind": "glb",
+      "glb": "assets/glb/ase/bennystop.glb",
       "scale": 1.0
     },
     "3HUM": {
-      "kind": "placeholder",
-      "ase": "assets/ase/humpstop.ASE",
+      "kind": "glb",
+      "glb": "assets/glb/ase/humpstop.glb",
       "scale": 1.0
     },
     "3FIS": {
-      "kind": "placeholder",
-      "ase": "assets/ase/fish2.ASE",
+      "kind": "glb",
+      "glb": "assets/glb/ase/fish2.glb",
       "scale": 1.0
     },
     "3PHO": {
@@ -287,13 +287,13 @@
       "scale": 1.0
     },
     "3HYD": {
-      "kind": "placeholder",
-      "ase": "assets/ase/firehydrant.ASE",
+      "kind": "glb",
+      "glb": "assets/glb/ase/firehydrant.glb",
       "scale": 1.0
     },
     "3JIM": {
-      "kind": "placeholder",
-      "ase": "assets/ase/jimstop.ase",
+      "kind": "glb",
+      "glb": "assets/glb/ase/jimstop.glb",
       "scale": 1.0
     },
     "3SHE": {
@@ -302,28 +302,28 @@
       "scale": 1.0
     },
     "3LIB": {
-      "kind": "placeholder",
-      "ase": "assets/ase/libystop.ASE",
+      "kind": "glb",
+      "glb": "assets/glb/ase/libystop.glb",
       "scale": 1.0
     },
     "3MOM": {
-      "kind": "placeholder",
-      "ase": "assets/ase/judystop.ASE",
+      "kind": "glb",
+      "glb": "assets/glb/ase/judystop.glb",
       "scale": 1.0
     },
     "3GIR": {
-      "kind": "placeholder",
-      "ase": "assets/ase/plantstop.ASE",
+      "kind": "glb",
+      "glb": "assets/glb/ase/plantstop.glb",
       "scale": 1.0
     },
     "3KIT": {
-      "kind": "placeholder",
-      "ase": "assets/ase/catsit.ASE",
+      "kind": "glb",
+      "glb": "assets/glb/ase/catsit.glb",
       "scale": 1.0
     },
     "3NIC": {
-      "kind": "placeholder",
-      "ase": "assets/ase/nickstop.ASE",
+      "kind": "glb",
+      "glb": "assets/glb/ase/nickstop.glb",
       "scale": 1.0
     },
     "3GUA": {
@@ -337,13 +337,13 @@
       "scale": 1.0
     },
     "3FLA": {
-      "kind": "placeholder",
-      "ase": "assets/ase/firestrato.ASE",
+      "kind": "glb",
+      "glb": "assets/glb/ase/firestrato.glb",
       "scale": 1.0
     },
     "3SBU": {
-      "kind": "placeholder",
-      "ase": "assets/ase/retrobus.ASE",
+      "kind": "glb",
+      "glb": "assets/glb/ase/retrobus.glb",
       "scale": 1.0
     },
     "3TRE": {
@@ -352,8 +352,8 @@
       "scale": 1.0
     },
     "3DIN": {
-      "kind": "placeholder",
-      "ase": "assets/ase/omt/dino.ASE",
+      "kind": "glb",
+      "glb": "assets/glb/ase/dino.glb",
       "scale": 1.0
     },
     "3FAN": {
@@ -362,8 +362,8 @@
       "scale": 1.0
     },
     "3SAI": {
-      "kind": "placeholder",
-      "ase": "assets/ase/omt/SailBoat.ASE",
+      "kind": "glb",
+      "glb": "assets/glb/ase/SailBoat.glb",
       "scale": 1.0
     },
     "3SPH": {
@@ -372,13 +372,13 @@
       "scale": 1.0
     },
     "3MER": {
-      "kind": "placeholder",
-      "ase": "assets/ase/omt/Rocket.ASE",
+      "kind": "glb",
+      "glb": "assets/glb/ase/Rocket.glb",
       "scale": 1.0
     },
     "3SUV": {
-      "kind": "placeholder",
-      "ase": "assets/ase/omt/lawnmower.ASE",
+      "kind": "glb",
+      "glb": "assets/glb/ase/lawnmower.glb",
       "scale": 1.0
     },
     "3AIO": {
@@ -387,8 +387,8 @@
       "scale": 1.0
     },
     "3SWN": {
-      "kind": "placeholder",
-      "ase": "assets/ase/doorfowl.ASE",
+      "kind": "glb",
+      "glb": "assets/glb/ase/doorfowl.glb",
       "scale": 1.0
     },
     "3NEU": {
@@ -428,13 +428,13 @@
       "scale": 1.0
     },
     "3HUG": {
-      "kind": "placeholder",
-      "ase": "assets/ase/hughstop.ASE",
+      "kind": "glb",
+      "glb": "assets/glb/ase/hughstop.glb",
       "scale": 1.0
     },
     "3ULT": {
-      "kind": "placeholder",
-      "ase": "assets/ase/ultrastop.ASE",
+      "kind": "glb",
+      "glb": "assets/glb/ase/ultrastop.glb",
       "scale": 1.0
     },
     "3FOW": {
@@ -443,18 +443,18 @@
       "scale": 1.0
     },
     "3SPK": {
-      "kind": "placeholder",
-      "ase": "assets/ase/sporkystop.ASE",
+      "kind": "glb",
+      "glb": "assets/glb/ase/sporkystop.glb",
       "scale": 1.0
     },
     "3BOT": {
-      "kind": "placeholder",
-      "ase": "assets/ase/bigbotstop.ASE",
+      "kind": "glb",
+      "glb": "assets/glb/ase/bigbotstop.glb",
       "scale": 1.0
     },
     "3ENE": {
-      "kind": "placeholder",
-      "ase": "assets/ase/bigbotstop.ASE",
+      "kind": "glb",
+      "glb": "assets/glb/ase/bigbotstop.glb",
       "scale": 1.0
     },
     "3NUM": {
@@ -483,13 +483,13 @@
       "scale": 1.0
     },
     "3DUD": {
-      "kind": "placeholder",
-      "ase": "assets/ase/downdoor2a.ASE",
+      "kind": "glb",
+      "glb": "assets/glb/ase/downdoor2a.glb",
       "scale": 1.0
     },
     "3WAB": {
-      "kind": "placeholder",
-      "ase": "assets/ase/buttondown.ASE",
+      "kind": "glb",
+      "glb": "assets/glb/ase/buttondown.glb",
       "scale": 1.0
     },
     "3SCR": {
@@ -533,23 +533,23 @@
       "scale": 1.0
     },
     "3HOV": {
-      "kind": "placeholder",
-      "ase": "assets/ase/jnvsjn/godflycycle.ase",
+      "kind": "glb",
+      "glb": "assets/glb/ase/godflycycle.glb",
       "scale": 1.0
     },
     "3SUB": {
-      "kind": "placeholder",
-      "ase": "assets/ase/jnvsjn/substop.ase",
+      "kind": "glb",
+      "glb": "assets/glb/ase/substop.glb",
       "scale": 1.0
     },
     "3VRT": {
-      "kind": "placeholder",
-      "ase": "assets/ase/jnvsjn/tankstop.ase",
+      "kind": "glb",
+      "glb": "assets/glb/ase/tankstop.glb",
       "scale": 1.0
     },
     "3LUN": {
-      "kind": "placeholder",
-      "ase": "assets/ase/jnvsjn/lunerlanderstop.ase",
+      "kind": "glb",
+      "glb": "assets/glb/ase/lunerlanderstop.glb",
       "scale": 1.0
     },
     "3TEX": {
