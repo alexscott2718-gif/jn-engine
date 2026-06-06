@@ -329,6 +329,56 @@ D3D7/OMT to Granny.
 
 ---
 
+## Era 11 — The HUD, rebuilt from the capture (~June 6)
+
+**Goal.** Replace the native engine's **fabricated** HUD (an invented apple
+counter, health bar, tool row, and "LEVEL CLEAR" banner in `hud.c`) with the
+*real* Level-1 HUD — measured, not guessed.
+
+**What we learned.** The original HUD is drawn at the end of each frame as
+screen-space textured quads, captured in the accepted ground-truth frame 8881
+(`build/frame_v4_hudfix.omtc`). Decoding it revealed:
+- The real HUD is a **vertical gauge bar + atom logo + item counter** (top-left),
+  a **gadget icon** (bottom-left), a **score counter** (bottom-right), and an
+  **"OBJECTIVES" notepad** that is parked *off-screen* (collapsed) in this frame.
+- OMT draws the HUD with the **same FVF `0x152`** as the world — *not* `XYZRHW`.
+  Screen placement comes from an **orthographic PROJ (x·1/320, y·1/240)** plus a
+  **per-draw WORLD translate** (D3D row-vector). So the existing replay already
+  renders the HUD correctly; the positions are recoverable by replaying that
+  transform (`screen_x = vx+tx+320`, `screen_y = 240−vy−ty`).
+- The HUD counter digits use a **runtime-generated chrome font** (purple→cyan
+  italic), **not** the on-disk `green_font`/`fontsmall` (those are the menu fonts,
+  upright and differently shaped). The chrome glyphs are the very "dynamic HUD
+  textures" the proxy was specially fixed to capture back in the v4 work.
+
+**What landed in code.**
+- **`tools/extract_hud_layout.py`** (foundry) — re-parses the frame, recovers each
+  HUD quad's exact 640×480 screen rect through the live transform, and emits
+  `hud_layout.json`, the copied HUD textures, a validation **reconstruction PNG**
+  (pixel-matches the original), and a generated C header
+  (`src/game/hud_layout_generated.h`) of positioned quads + counter slot
+  descriptors.
+- **`tools/harvest_hud_digits.py`** — scans the full Level-1 capture for the
+  chrome digit glyph surfaces (only 499 `TEXTURE_PIXELS` in the whole stream, so
+  it just decodes those). Recovered **0,1,2,5,7,8,9**; the counters never showed
+  **3,4,6** during capture, so those are pending an XP recapture
+  (`docs/hud_chrome_digit_recapture.md`).
+- **`src/game/hud.c`** — rewritten: static art straight from the captured
+  textures, and the two counters drawn **live from `GameState`** (items →
+  top-left, points → bottom-right) using the chrome font, with a graceful
+  placeholder for not-yet-harvested digits. Forcing the original's values
+  (`JN_HUD_TEST="17,250"`) reproduces the captured HUD exactly.
+
+**Mapping/relationship.** This is the **native/oracle track** (per the Era-10
+artifact decision, Godot is the primary game). The same `hud_layout.json` /
+chrome-font atlas are the seam artifacts a future Godot `hud.tscn` would consume.
+
+**Deferred:** chrome **3,4,6** (XP recapture), and dynamic **gauge fill ← health**
++ **per-tool gadget icon** (needs more captured icon art — same shape of task as
+the digit recapture).
+
+---
+
 ## Invariants (don't relitigate these)
 
 Paid for with measured evidence. Changing one needs *new* measurement, not argument.
@@ -349,6 +399,11 @@ Paid for with measured evidence. Changing one needs *new* measurement, not argum
    goes through the native/glTF path.
 8. Some FourCC tags (`3NEU`, `3LEA`, `3CON`, `3BAL`, `3RED`) are **billboard
    sprites, not 3D meshes** — their absence in `level1.omt` is expected, not a bug.
+9. **The HUD draws with FVF `0x152` (not `XYZRHW`)** — screen-space via an ortho
+   PROJ (x·1/320, y·1/240) + a per-draw WORLD translate. Its counter digits are a
+   **runtime-generated chrome font**, *not* the on-disk `green_font`/`fontsmall`
+   (those are the menu fonts). Don't "fix" the HUD by reaching for XYZRHW or the
+   on-disk fonts.
 
 The full operating-rules list (renderer debugging, XP proxy workflow, capture-pipeline
 performance, shell hygiene) lives in the repo's `CLAUDE.md` and in

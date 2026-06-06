@@ -1,0 +1,1466 @@
+{
+  "source": {
+    "fixture": "assets/capture/level1_hudfix",
+    "frame_omtc": "build/frame_v4_hudfix.omtc",
+    "frame": 8881,
+    "reference_screenshot": "build/frame_v4_hudfix.png"
+  },
+  "screen": {
+    "width": 640,
+    "height": 480,
+    "origin": "top-left"
+  },
+  "transform": "WORLD(translate) . PROJ(ortho 1/320,1/240); D3D row-vector",
+  "notes": [
+    "rect_px/rect_norm are exact on-screen pixel rects (640x480).",
+    "on_screen=false elements are parked off-frame (e.g. the OBJECTIVES notepad sits below y=480 in this frame -- collapsed/hidden).",
+    "blend src=5 dst=6 is D3D SRCALPHA/INVSRCALPHA (standard alpha)."
+  ],
+  "element_count": 37,
+  "on_screen_count": 33,
+  "elements": [
+    {
+      "draw_index": 3487,
+      "tex_id": 64805968,
+      "texture": "textures/tex_03dcdc50_64x64.png",
+      "tex_dims": [
+        64,
+        64
+      ],
+      "rect_px": [
+        31.5,
+        0.5,
+        64.0,
+        64.0
+      ],
+      "rect_norm": [
+        0.04922,
+        0.00104,
+        0.1,
+        0.13333
+      ],
+      "uv": [
+        0.0,
+        0.0,
+        0.9999,
+        0.9999
+      ],
+      "blend": {
+        "enabled": true,
+        "src": 5,
+        "dst": 6
+      },
+      "diffuse_rgba": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "on_screen": true
+    },
+    {
+      "draw_index": 3488,
+      "tex_id": 64805248,
+      "texture": "textures/tex_03dcd980_16x64.png",
+      "tex_dims": [
+        16,
+        64
+      ],
+      "rect_px": [
+        95.5,
+        0.5,
+        16.0,
+        64.0
+      ],
+      "rect_norm": [
+        0.14922,
+        0.00104,
+        0.025,
+        0.13333
+      ],
+      "uv": [
+        0.0,
+        0.0,
+        1.0,
+        0.9999
+      ],
+      "blend": {
+        "enabled": true,
+        "src": 5,
+        "dst": 6
+      },
+      "diffuse_rgba": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "on_screen": true
+    },
+    {
+      "draw_index": 3489,
+      "tex_id": 64805664,
+      "texture": "textures/tex_03dcdb20_64x8.png",
+      "tex_dims": [
+        64,
+        8
+      ],
+      "rect_px": [
+        31.5,
+        64.5,
+        64.0,
+        6.0
+      ],
+      "rect_norm": [
+        0.04922,
+        0.13437,
+        0.1,
+        0.0125
+      ],
+      "uv": [
+        0.0,
+        0.0,
+        0.9999,
+        0.75
+      ],
+      "blend": {
+        "enabled": true,
+        "src": 5,
+        "dst": 6
+      },
+      "diffuse_rgba": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "on_screen": true
+    },
+    {
+      "draw_index": 3490,
+      "tex_id": 87732152,
+      "texture": "textures/tex_053aafb8_16x8.png",
+      "tex_dims": [
+        16,
+        8
+      ],
+      "rect_px": [
+        95.5,
+        64.5,
+        16.0,
+        6.0
+      ],
+      "rect_norm": [
+        0.14922,
+        0.13437,
+        0.025,
+        0.0125
+      ],
+      "uv": [
+        0.0,
+        0.0,
+        1.0,
+        0.75
+      ],
+      "blend": {
+        "enabled": true,
+        "src": 5,
+        "dst": 6
+      },
+      "diffuse_rgba": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "on_screen": true
+    },
+    {
+      "draw_index": 3491,
+      "tex_id": 64804832,
+      "texture": "textures/tex_03dcd7e0_16x64.png",
+      "tex_dims": [
+        16,
+        64
+      ],
+      "rect_px": [
+        5.5,
+        96.2,
+        14.4,
+        10.6
+      ],
+      "rect_norm": [
+        0.00859,
+        0.20052,
+        0.0225,
+        0.02212
+      ],
+      "uv": [
+        0.0,
+        0.0,
+        0.9999,
+        0.9999
+      ],
+      "blend": {
+        "enabled": true,
+        "src": 5,
+        "dst": 2
+      },
+      "diffuse_rgba": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "on_screen": true
+    },
+    {
+      "draw_index": 3492,
+      "tex_id": 88125272,
+      "texture": "textures/tex_0540af58_128x256.png",
+      "tex_dims": [
+        128,
+        256
+      ],
+      "rect_px": [
+        19.9,
+        96.2,
+        12.6,
+        10.6
+      ],
+      "rect_norm": [
+        0.03109,
+        0.20052,
+        0.01969,
+        0.02212
+      ],
+      "uv": [
+        0.0,
+        0.0,
+        0.875,
+        0.9999
+      ],
+      "blend": {
+        "enabled": true,
+        "src": 5,
+        "dst": 2
+      },
+      "diffuse_rgba": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "on_screen": true
+    },
+    {
+      "draw_index": 3493,
+      "tex_id": 64806496,
+      "texture": "textures/tex_03dcde60_256x32.png",
+      "tex_dims": [
+        256,
+        32
+      ],
+      "rect_px": [
+        5.5,
+        106.9,
+        14.4,
+        7.6
+      ],
+      "rect_norm": [
+        0.00859,
+        0.22264,
+        0.0225,
+        0.0159
+      ],
+      "uv": [
+        0.0,
+        0.0,
+        0.9999,
+        0.71875
+      ],
+      "blend": {
+        "enabled": true,
+        "src": 5,
+        "dst": 2
+      },
+      "diffuse_rgba": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "on_screen": true
+    },
+    {
+      "draw_index": 3494,
+      "tex_id": 87732184,
+      "texture": "textures/tex_053aafd8_128x256.png",
+      "tex_dims": [
+        128,
+        256
+      ],
+      "rect_px": [
+        19.9,
+        106.9,
+        12.6,
+        7.6
+      ],
+      "rect_norm": [
+        0.03109,
+        0.22264,
+        0.01969,
+        0.0159
+      ],
+      "uv": [
+        0.0,
+        0.0,
+        0.875,
+        0.71875
+      ],
+      "blend": {
+        "enabled": true,
+        "src": 5,
+        "dst": 2
+      },
+      "diffuse_rgba": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "on_screen": true
+    },
+    {
+      "draw_index": 3495,
+      "tex_id": 71622624,
+      "texture": "textures/tex_0444dfe0_16x64.png",
+      "tex_dims": [
+        16,
+        64
+      ],
+      "rect_px": [
+        2.5,
+        7.5,
+        16.0,
+        64.0
+      ],
+      "rect_norm": [
+        0.00391,
+        0.01562,
+        0.025,
+        0.13333
+      ],
+      "uv": [
+        0.0,
+        0.0,
+        0.9999,
+        0.9999
+      ],
+      "blend": {
+        "enabled": true,
+        "src": 5,
+        "dst": 2
+      },
+      "diffuse_rgba": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "on_screen": true
+    },
+    {
+      "draw_index": 3496,
+      "tex_id": 98632400,
+      "texture": "textures/tex_05e102d0_16x64.png",
+      "tex_dims": [
+        16,
+        64
+      ],
+      "rect_px": [
+        18.5,
+        7.5,
+        14.0,
+        64.0
+      ],
+      "rect_norm": [
+        0.02891,
+        0.01562,
+        0.02188,
+        0.13333
+      ],
+      "uv": [
+        0.0,
+        0.0,
+        0.875,
+        0.9999
+      ],
+      "blend": {
+        "enabled": true,
+        "src": 5,
+        "dst": 2
+      },
+      "diffuse_rgba": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "on_screen": true
+    },
+    {
+      "draw_index": 3497,
+      "tex_id": 88580072,
+      "texture": "textures/tex_05479fe8_16x64.png",
+      "tex_dims": [
+        16,
+        64
+      ],
+      "rect_px": [
+        2.5,
+        71.5,
+        16.0,
+        46.0
+      ],
+      "rect_norm": [
+        0.00391,
+        0.14896,
+        0.025,
+        0.09583
+      ],
+      "uv": [
+        0.0,
+        0.0,
+        0.9999,
+        0.71875
+      ],
+      "blend": {
+        "enabled": true,
+        "src": 5,
+        "dst": 2
+      },
+      "diffuse_rgba": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "on_screen": true
+    },
+    {
+      "draw_index": 3498,
+      "tex_id": 64622576,
+      "texture": "textures/tex_03da0ff0_16x64.png",
+      "tex_dims": [
+        16,
+        64
+      ],
+      "rect_px": [
+        18.5,
+        71.5,
+        14.0,
+        46.0
+      ],
+      "rect_norm": [
+        0.02891,
+        0.14896,
+        0.02188,
+        0.09583
+      ],
+      "uv": [
+        0.0,
+        0.0,
+        0.875,
+        0.71875
+      ],
+      "blend": {
+        "enabled": true,
+        "src": 5,
+        "dst": 2
+      },
+      "diffuse_rgba": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "on_screen": true
+    },
+    {
+      "draw_index": 3499,
+      "tex_id": 87107000,
+      "texture": "textures/tex_053125b8_64x64.png",
+      "tex_dims": [
+        64,
+        64
+      ],
+      "rect_px": [
+        -0.5,
+        410.5,
+        64.0,
+        64.0
+      ],
+      "rect_norm": [
+        -0.00078,
+        0.85521,
+        0.1,
+        0.13333
+      ],
+      "uv": [
+        0.0,
+        0.0,
+        0.9999,
+        0.9999
+      ],
+      "blend": {
+        "enabled": true,
+        "src": 5,
+        "dst": 2
+      },
+      "diffuse_rgba": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "on_screen": true
+    },
+    {
+      "draw_index": 3500,
+      "tex_id": 85823120,
+      "texture": "textures/tex_051d8e90_16x64.png",
+      "tex_dims": [
+        16,
+        64
+      ],
+      "rect_px": [
+        63.5,
+        410.5,
+        16.0,
+        64.0
+      ],
+      "rect_norm": [
+        0.09922,
+        0.85521,
+        0.025,
+        0.13333
+      ],
+      "uv": [
+        0.0,
+        0.0,
+        1.0,
+        0.9999
+      ],
+      "blend": {
+        "enabled": true,
+        "src": 5,
+        "dst": 2
+      },
+      "diffuse_rgba": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "on_screen": true
+    },
+    {
+      "draw_index": 3501,
+      "tex_id": 85827480,
+      "texture": "textures/tex_051d9f98_64x8.png",
+      "tex_dims": [
+        64,
+        8
+      ],
+      "rect_px": [
+        -0.5,
+        474.5,
+        64.0,
+        6.0
+      ],
+      "rect_norm": [
+        -0.00078,
+        0.98854,
+        0.1,
+        0.0125
+      ],
+      "uv": [
+        0.0,
+        0.0,
+        0.9999,
+        0.75
+      ],
+      "blend": {
+        "enabled": true,
+        "src": 5,
+        "dst": 2
+      },
+      "diffuse_rgba": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "on_screen": true
+    },
+    {
+      "draw_index": 3502,
+      "tex_id": 88604096,
+      "texture": "textures/tex_0547fdc0_16x8.png",
+      "tex_dims": [
+        16,
+        8
+      ],
+      "rect_px": [
+        63.5,
+        474.5,
+        16.0,
+        6.0
+      ],
+      "rect_norm": [
+        0.09922,
+        0.98854,
+        0.025,
+        0.0125
+      ],
+      "uv": [
+        0.0,
+        0.0,
+        1.0,
+        0.75
+      ],
+      "blend": {
+        "enabled": true,
+        "src": 5,
+        "dst": 2
+      },
+      "diffuse_rgba": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "on_screen": true
+    },
+    {
+      "draw_index": 3503,
+      "tex_id": 97433136,
+      "texture": "textures/tex_05ceb630_256x128.png",
+      "tex_dims": [
+        256,
+        128
+      ],
+      "rect_px": [
+        383.5,
+        622.5,
+        256.0,
+        128.0
+      ],
+      "rect_norm": [
+        0.59922,
+        1.29688,
+        0.4,
+        0.26667
+      ],
+      "uv": [
+        0.0,
+        0.0,
+        0.9999,
+        0.9999
+      ],
+      "blend": {
+        "enabled": true,
+        "src": 5,
+        "dst": 6
+      },
+      "diffuse_rgba": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "on_screen": false
+    },
+    {
+      "draw_index": 3504,
+      "tex_id": 97568552,
+      "texture": "textures/tex_05d0c728_64x128.png",
+      "tex_dims": [
+        64,
+        128
+      ],
+      "rect_px": [
+        639.5,
+        622.5,
+        64.0,
+        128.0
+      ],
+      "rect_norm": [
+        0.99922,
+        1.29688,
+        0.1,
+        0.26667
+      ],
+      "uv": [
+        0.0,
+        0.0,
+        1.0,
+        0.9999
+      ],
+      "blend": {
+        "enabled": true,
+        "src": 5,
+        "dst": 6
+      },
+      "diffuse_rgba": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "on_screen": false
+    },
+    {
+      "draw_index": 3505,
+      "tex_id": 97569384,
+      "texture": "textures/tex_05d0ca68_256x64.png",
+      "tex_dims": [
+        256,
+        64
+      ],
+      "rect_px": [
+        383.5,
+        750.5,
+        256.0,
+        45.0
+      ],
+      "rect_norm": [
+        0.59922,
+        1.56354,
+        0.4,
+        0.09375
+      ],
+      "uv": [
+        0.0,
+        0.0,
+        0.9999,
+        0.70312
+      ],
+      "blend": {
+        "enabled": true,
+        "src": 5,
+        "dst": 6
+      },
+      "diffuse_rgba": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "on_screen": false
+    },
+    {
+      "draw_index": 3506,
+      "tex_id": 97570216,
+      "texture": "textures/tex_05d0cda8_64x64.png",
+      "tex_dims": [
+        64,
+        64
+      ],
+      "rect_px": [
+        639.5,
+        750.5,
+        64.0,
+        45.0
+      ],
+      "rect_norm": [
+        0.99922,
+        1.56354,
+        0.1,
+        0.09375
+      ],
+      "uv": [
+        0.0,
+        0.0,
+        1.0,
+        0.70312
+      ],
+      "blend": {
+        "enabled": true,
+        "src": 5,
+        "dst": 6
+      },
+      "diffuse_rgba": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "on_screen": false
+    },
+    {
+      "draw_index": 3507,
+      "tex_id": 2154400,
+      "texture": "textures/tex_0020dfa0_32x32.png",
+      "tex_dims": [
+        32,
+        32
+      ],
+      "rect_px": [
+        39.5,
+        67.5,
+        32.0,
+        32.0
+      ],
+      "rect_norm": [
+        0.06172,
+        0.14062,
+        0.05,
+        0.06667
+      ],
+      "uv": [
+        0.0,
+        0.0,
+        0.9999,
+        0.9999
+      ],
+      "blend": {
+        "enabled": true,
+        "src": 5,
+        "dst": 6
+      },
+      "diffuse_rgba": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "on_screen": true
+    },
+    {
+      "draw_index": 3508,
+      "tex_id": 97817736,
+      "texture": "textures/tex_05d49488_32x32.png",
+      "tex_dims": [
+        32,
+        32
+      ],
+      "rect_px": [
+        71.5,
+        67.5,
+        32.0,
+        32.0
+      ],
+      "rect_norm": [
+        0.11172,
+        0.14062,
+        0.05,
+        0.06667
+      ],
+      "uv": [
+        0.0,
+        0.0,
+        0.9999,
+        0.9999
+      ],
+      "blend": {
+        "enabled": true,
+        "src": 5,
+        "dst": 6
+      },
+      "diffuse_rgba": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "on_screen": true
+    },
+    {
+      "draw_index": 3509,
+      "tex_id": 1448728,
+      "texture": "textures/tex_00161b18_16x16.png",
+      "tex_dims": [
+        16,
+        16
+      ],
+      "rect_px": [
+        524.5,
+        450.5,
+        16.0,
+        16.0
+      ],
+      "rect_norm": [
+        0.81953,
+        0.93854,
+        0.025,
+        0.03333
+      ],
+      "uv": [
+        0.0,
+        0.0,
+        0.9999,
+        0.9999
+      ],
+      "blend": {
+        "enabled": true,
+        "src": 5,
+        "dst": 6
+      },
+      "diffuse_rgba": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "on_screen": true
+    },
+    {
+      "draw_index": 3510,
+      "tex_id": 1448728,
+      "texture": "textures/tex_00161b18_16x16.png",
+      "tex_dims": [
+        16,
+        16
+      ],
+      "rect_px": [
+        540.5,
+        450.5,
+        16.0,
+        16.0
+      ],
+      "rect_norm": [
+        0.84453,
+        0.93854,
+        0.025,
+        0.03333
+      ],
+      "uv": [
+        0.0,
+        0.0,
+        0.9999,
+        0.9999
+      ],
+      "blend": {
+        "enabled": true,
+        "src": 5,
+        "dst": 6
+      },
+      "diffuse_rgba": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "on_screen": true
+    },
+    {
+      "draw_index": 3511,
+      "tex_id": 1448728,
+      "texture": "textures/tex_00161b18_16x16.png",
+      "tex_dims": [
+        16,
+        16
+      ],
+      "rect_px": [
+        556.5,
+        450.5,
+        16.0,
+        16.0
+      ],
+      "rect_norm": [
+        0.86953,
+        0.93854,
+        0.025,
+        0.03333
+      ],
+      "uv": [
+        0.0,
+        0.0,
+        0.9999,
+        0.9999
+      ],
+      "blend": {
+        "enabled": true,
+        "src": 5,
+        "dst": 6
+      },
+      "diffuse_rgba": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "on_screen": true
+    },
+    {
+      "draw_index": 3512,
+      "tex_id": 1449008,
+      "texture": "textures/tex_00161c30_16x16.png",
+      "tex_dims": [
+        16,
+        16
+      ],
+      "rect_px": [
+        572.5,
+        450.5,
+        16.0,
+        16.0
+      ],
+      "rect_norm": [
+        0.89453,
+        0.93854,
+        0.025,
+        0.03333
+      ],
+      "uv": [
+        0.0,
+        0.0,
+        0.9999,
+        0.9999
+      ],
+      "blend": {
+        "enabled": true,
+        "src": 5,
+        "dst": 6
+      },
+      "diffuse_rgba": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "on_screen": true
+    },
+    {
+      "draw_index": 3513,
+      "tex_id": 2296248,
+      "texture": "textures/tex_002309b8_4x16.png",
+      "tex_dims": [
+        4,
+        16
+      ],
+      "rect_px": [
+        588.5,
+        450.5,
+        4.0,
+        16.0
+      ],
+      "rect_norm": [
+        0.91953,
+        0.93854,
+        0.00625,
+        0.03333
+      ],
+      "uv": [
+        0.0,
+        0.0,
+        1.0,
+        0.9999
+      ],
+      "blend": {
+        "enabled": true,
+        "src": 5,
+        "dst": 6
+      },
+      "diffuse_rgba": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "on_screen": true
+    },
+    {
+      "draw_index": 3514,
+      "tex_id": 2297024,
+      "texture": "textures/tex_00230cc0_16x4.png",
+      "tex_dims": [
+        16,
+        4
+      ],
+      "rect_px": [
+        572.5,
+        466.5,
+        16.0,
+        4.0
+      ],
+      "rect_norm": [
+        0.89453,
+        0.97188,
+        0.025,
+        0.00833
+      ],
+      "uv": [
+        0.0,
+        0.0,
+        0.9999,
+        1.0
+      ],
+      "blend": {
+        "enabled": true,
+        "src": 5,
+        "dst": 6
+      },
+      "diffuse_rgba": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "on_screen": true
+    },
+    {
+      "draw_index": 3515,
+      "tex_id": 2297136,
+      "texture": "textures/tex_00230d30_4x4.png",
+      "tex_dims": [
+        4,
+        4
+      ],
+      "rect_px": [
+        588.5,
+        466.5,
+        4.0,
+        4.0
+      ],
+      "rect_norm": [
+        0.91953,
+        0.97188,
+        0.00625,
+        0.00833
+      ],
+      "uv": [
+        0.0,
+        0.0,
+        1.0,
+        1.0
+      ],
+      "blend": {
+        "enabled": true,
+        "src": 5,
+        "dst": 6
+      },
+      "diffuse_rgba": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "on_screen": true
+    },
+    {
+      "draw_index": 3516,
+      "tex_id": 2296848,
+      "texture": "textures/tex_00230c10_16x16.png",
+      "tex_dims": [
+        16,
+        16
+      ],
+      "rect_px": [
+        592.5,
+        450.5,
+        16.0,
+        16.0
+      ],
+      "rect_norm": [
+        0.92578,
+        0.93854,
+        0.025,
+        0.03333
+      ],
+      "uv": [
+        0.0,
+        0.0,
+        0.9999,
+        0.9999
+      ],
+      "blend": {
+        "enabled": true,
+        "src": 5,
+        "dst": 6
+      },
+      "diffuse_rgba": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "on_screen": true
+    },
+    {
+      "draw_index": 3517,
+      "tex_id": 86682712,
+      "texture": "textures/tex_052aac58_4x16.png",
+      "tex_dims": [
+        4,
+        16
+      ],
+      "rect_px": [
+        608.5,
+        450.5,
+        4.0,
+        16.0
+      ],
+      "rect_norm": [
+        0.95078,
+        0.93854,
+        0.00625,
+        0.03333
+      ],
+      "uv": [
+        0.0,
+        0.0,
+        1.0,
+        0.9999
+      ],
+      "blend": {
+        "enabled": true,
+        "src": 5,
+        "dst": 6
+      },
+      "diffuse_rgba": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "on_screen": true
+    },
+    {
+      "draw_index": 3518,
+      "tex_id": 86942248,
+      "texture": "textures/tex_052ea228_16x4.png",
+      "tex_dims": [
+        16,
+        4
+      ],
+      "rect_px": [
+        592.5,
+        466.5,
+        16.0,
+        4.0
+      ],
+      "rect_norm": [
+        0.92578,
+        0.97188,
+        0.025,
+        0.00833
+      ],
+      "uv": [
+        0.0,
+        0.0,
+        0.9999,
+        1.0
+      ],
+      "blend": {
+        "enabled": true,
+        "src": 5,
+        "dst": 6
+      },
+      "diffuse_rgba": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "on_screen": true
+    },
+    {
+      "draw_index": 3519,
+      "tex_id": 86940936,
+      "texture": "textures/tex_052e9d08_4x4.png",
+      "tex_dims": [
+        4,
+        4
+      ],
+      "rect_px": [
+        608.5,
+        466.5,
+        4.0,
+        4.0
+      ],
+      "rect_norm": [
+        0.95078,
+        0.97188,
+        0.00625,
+        0.00833
+      ],
+      "uv": [
+        0.0,
+        0.0,
+        1.0,
+        1.0
+      ],
+      "blend": {
+        "enabled": true,
+        "src": 5,
+        "dst": 6
+      },
+      "diffuse_rgba": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "on_screen": true
+    },
+    {
+      "draw_index": 3520,
+      "tex_id": 86942104,
+      "texture": "textures/tex_052ea198_16x16.png",
+      "tex_dims": [
+        16,
+        16
+      ],
+      "rect_px": [
+        612.5,
+        450.5,
+        16.0,
+        16.0
+      ],
+      "rect_norm": [
+        0.95703,
+        0.93854,
+        0.025,
+        0.03333
+      ],
+      "uv": [
+        0.0,
+        0.0,
+        0.9999,
+        0.9999
+      ],
+      "blend": {
+        "enabled": true,
+        "src": 5,
+        "dst": 6
+      },
+      "diffuse_rgba": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "on_screen": true
+    },
+    {
+      "draw_index": 3521,
+      "tex_id": 86942216,
+      "texture": "textures/tex_052ea208_4x16.png",
+      "tex_dims": [
+        4,
+        16
+      ],
+      "rect_px": [
+        628.5,
+        450.5,
+        4.0,
+        16.0
+      ],
+      "rect_norm": [
+        0.98203,
+        0.93854,
+        0.00625,
+        0.03333
+      ],
+      "uv": [
+        0.0,
+        0.0,
+        1.0,
+        0.9999
+      ],
+      "blend": {
+        "enabled": true,
+        "src": 5,
+        "dst": 6
+      },
+      "diffuse_rgba": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "on_screen": true
+    },
+    {
+      "draw_index": 3522,
+      "tex_id": 97818360,
+      "texture": "textures/tex_05d496f8_16x4.png",
+      "tex_dims": [
+        16,
+        4
+      ],
+      "rect_px": [
+        612.5,
+        466.5,
+        16.0,
+        4.0
+      ],
+      "rect_norm": [
+        0.95703,
+        0.97188,
+        0.025,
+        0.00833
+      ],
+      "uv": [
+        0.0,
+        0.0,
+        0.9999,
+        1.0
+      ],
+      "blend": {
+        "enabled": true,
+        "src": 5,
+        "dst": 6
+      },
+      "diffuse_rgba": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "on_screen": true
+    },
+    {
+      "draw_index": 3523,
+      "tex_id": 97818608,
+      "texture": "textures/tex_05d497f0_4x4.png",
+      "tex_dims": [
+        4,
+        4
+      ],
+      "rect_px": [
+        628.5,
+        466.5,
+        4.0,
+        4.0
+      ],
+      "rect_norm": [
+        0.98203,
+        0.97188,
+        0.00625,
+        0.00833
+      ],
+      "uv": [
+        0.0,
+        0.0,
+        1.0,
+        1.0
+      ],
+      "blend": {
+        "enabled": true,
+        "src": 5,
+        "dst": 6
+      },
+      "diffuse_rgba": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "on_screen": true
+    }
+  ]
+}
