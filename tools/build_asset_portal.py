@@ -245,11 +245,33 @@ main{flex:1;padding:14px 18px;min-width:0}
 .card .fmts a:hover{border-color:var(--lnk)}
 .more{display:block;margin:18px auto;padding:9px 18px;background:var(--panel);border:1px solid var(--line);color:var(--fg);border-radius:8px;cursor:pointer}
 audio{width:100%;margin-top:6px;height:30px}
+.catbtn{display:none}
+@media (max-width:760px){
+  header{padding:11px 13px}h1{font-size:17px}.sub{font-size:11px}
+  .bar{gap:8px}input[type=search]{order:2;width:100%;flex:1 1 100%}
+  .catbtn{display:inline-flex;align-items:center;gap:6px;order:1;background:var(--panel);
+    border:1px solid var(--line);color:var(--fg);padding:9px 13px;border-radius:8px;font-size:13px;cursor:pointer}
+  .bar .chip{order:3}
+  .layout{flex-direction:column}
+  aside{position:static;top:auto;width:auto;height:auto;max-height:55vh;
+    border-right:none;border-bottom:1px solid var(--line);display:none}
+  aside.open{display:block}
+  .cat{padding:9px 10px}
+  main{padding:12px}
+  .dl{padding:11px 12px}.dl a{display:inline-block;margin:3px 12px 3px 0}
+  .grid{grid-template-columns:repeat(auto-fill,minmax(104px,1fr));gap:8px}
+  .card .ph{height:94px}.card img{max-height:94px}
+  .chip{padding:8px 13px}
+  .card .fmts a{padding:3px 9px;font-size:11px}
+  .more{width:100%}
+}
+@media (max-width:380px){.grid{grid-template-columns:repeat(auto-fill,minmax(88px,1fr))}}
 </style></head><body>
 <header>
   <h1>JN Asset Library</h1>
   <div class=sub>Jimmy Neutron: Boy Genius (2002) — extracted assets for reimplementation / preservation · <span id=tot></span></div>
   <div class=bar>
+    <button id=catbtn class=catbtn>☰ Categories</button>
     <input id=q type=search placeholder="Search assets by name…">
     <span class=chip data-g="" >All</span>
     <span class=chip data-g=2d>2D textures</span>
@@ -281,6 +303,7 @@ function init(){
     renderCats();apply()});
   document.querySelector('.chip[data-g=""]').classList.add("on");
   document.getElementById("more").onclick=()=>{shown+=PAGE;draw()};
+  document.getElementById("catbtn").onclick=()=>document.getElementById("cats").classList.toggle("open");
 }
 function renderCats(){
   const a=document.getElementById("cats");a.innerHTML="";
@@ -293,7 +316,8 @@ function renderCats(){
       d.innerHTML=`<span>${c}</span><span class=n>${n}</span>`;
       d.onclick=()=>{F.cat=F.cat===c?"":c;if(!F.group)F.group=g;
         document.querySelectorAll(".chip").forEach(x=>x.classList.toggle("on",x.dataset.g===F.group));
-        renderCats();apply()};
+        renderCats();apply();
+        if(innerWidth<=760){document.getElementById("cats").classList.remove("open");scrollTo(0,0);}};
       a.appendChild(d);
     }
   }
