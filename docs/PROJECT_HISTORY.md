@@ -405,6 +405,15 @@ text, buttons, Jimmy portrait) is `screens.omt`'s 373 canvases.
   `asset-index.html` (was 11 / ~921).
 - Decode verified clean against `screens`/`permanenticons` (transparency + color
   correct; the faint HUD overlay icons are genuine additive-overlay art).
+- **`tools/build_asset_portal.py`** + the public **Asset Library** at
+  `exentt.com/JN-assets/`: one searchable SPA over **4,957 assets** (2D canvases,
+  meshes, audio, level data), each downloadable in original + modern formats
+  (2D PNG; meshes ASE+glb, reusing the existing GL thumbnails + 3D viewer in
+  place; audio WAV; levels GAM), with per-category and bulk `.zip` batches. The
+  stale `/jn-engine/catalog/` now 301-redirects here; the hub consolidated to a
+  single Asset Library card and its disclaimer updated to reflect non-commercial
+  redistribution of extracted assets (no original executables). Portal output
+  (~400 MB) is regenerable, not committed.
 
 **Open task (the user's thesis).** Assets are now maximally *harvested*; the next
 lever is a **role-annotation layer** so found assets (e.g. "`alpha.omt` #128 =
