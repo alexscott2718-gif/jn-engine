@@ -413,7 +413,11 @@ text, buttons, Jimmy portrait) is `screens.omt`'s 373 canvases.
   stale `/jn-engine/catalog/` now 301-redirects here; the hub consolidated to a
   single Asset Library card and its disclaimer updated to reflect non-commercial
   redistribution of extracted assets (no original executables). Portal output
-  (~400 MB) is regenerable, not committed.
+  (~400 MB) is regenerable, not committed. The generator is mobile-responsive
+  (collapsible categories) and game-parameterized: `--game jnvsjn` builds a
+  parallel **JNvsJN Asset Library** at `exentt.com/JNvsJN-assets/` (357 assets —
+  sprites + Granny meshes, reusing the deployed `grn-catalog` glb/thumbnails/3D
+  viewer in place).
 
 **Open task (the user's thesis).** Assets are now maximally *harvested*; the next
 lever is a **role-annotation layer** so found assets (e.g. "`alpha.omt` #128 =

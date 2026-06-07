@@ -137,6 +137,62 @@ def collect_levels(out):
     return items
 
 
+def collect_jnvsjn(out, grn_catalog):
+    """JNvsJN (sequel) asset set: jnvsjn sprites (2D) + Granny meshes (reuse the
+    deployed grn-catalog's glb + GL thumbnails + 3D viewer in place, by absolute
+    URL) + jnvsjn ASE originals."""
+    from PIL import Image
+    items = []
+    # --- 2D sprites ---
+    sd = ASSETS / "parsed" / "sprites" / "jnvsjn"
+    if sd.is_dir():
+        (out / "files/2d/sprites").mkdir(parents=True, exist_ok=True)
+        for png in sorted(sd.glob("*.png")):
+            rel = f"files/2d/sprites/{png.name}"
+            shutil.copy2(png, out / rel)
+            th = f"thumbs/sprites/{png.name}"
+            try:
+                _thumb(png, out / th)
+            except Exception:
+                th = rel
+            try:
+                w, h = Image.open(png).size
+            except Exception:
+                w = h = 0
+            items.append({"name": png.stem, "group": "2d", "category": "sprites",
+                          "w": w, "h": h, "thumb": th, "formats": {"png": rel}})
+    # --- Granny meshes: reuse the deployed grn-catalog in place ---
+    gc = Path(grn_catalog)
+    base = "/jnvsjn/grn-catalog"
+    models = gc / "models"
+    if models.is_dir():
+        for glb in sorted(models.glob("*.glb")):
+            name = glb.stem
+            th = gc / "thumbs" / f"{name}.png"
+            items.append({"name": name, "group": "mesh", "category": "grn",
+                          "thumb": f"{base}/thumbs/{name}.png" if th.exists() else None,
+                          "formats": {"glb": f"{base}/models/{glb.name}"},
+                          "_src": {"glb": str(glb)},
+                          "viewer": f"{base}/view.html?m={name}"})
+    # --- ASE originals (+ glb if a match exists) ---
+    ase_dir = ASSETS / "ase" / "jnvsjn"
+    glb_idx = {g.stem.lower(): g for g in (ASSETS / "glb" / "grn").glob("*.glb")}
+    if ase_dir.is_dir():
+        (out / "files/mesh-ase").mkdir(parents=True, exist_ok=True)
+        for ase in sorted(list(ase_dir.glob("*.ase")) + list(ase_dir.glob("*.ASE"))):
+            name = ase.stem
+            rel = f"files/mesh-ase/{ase.name}"
+            shutil.copy2(ase, out / rel)
+            formats = {"ase": rel}; src = {"ase": str(ase)}
+            g = glb_idx.get(name.lower())
+            if g:
+                grel = f"files/mesh-ase/{name}.glb"
+                shutil.copy2(g, out / grel); formats["glb"] = grel; src["glb"] = str(g)
+            items.append({"name": name, "group": "mesh", "category": "ase",
+                          "thumb": None, "formats": formats, "_src": src})
+    return items
+
+
 def make_zips(out, items):
     """Per-category zips + grouped bulk zips, from the copied files."""
     zdir = out / "zips"; zdir.mkdir(parents=True, exist_ok=True)
@@ -172,21 +228,34 @@ def make_zips(out, items):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--out", default=str(REPO / "build" / "portal"))
-    ap.add_argument("--mesh-catalog", default="/var/www/jn-assets",
-                    help="deployed mesh catalog to reference (glb+thumb+_viewer)")
+    ap.add_argument("--game", choices=["jn", "jnvsjn"], default="jn",
+                    help="jn = Boy Genius (OMT); jnvsjn = vs Negatron (Granny)")
+    ap.add_argument("--out", default=None)
+    ap.add_argument("--mesh-catalog", default=None,
+                    help="deployed mesh catalog to reference (glb+thumb+viewer)")
     ap.add_argument("--no-zips", action="store_true")
     a = ap.parse_args()
-    out = Path(a.out)
+    GAME = {
+        "jn":     {"name": "Jimmy Neutron: Boy Genius (2002)",
+                   "out": REPO / "build" / "portal", "mesh": "/var/www/jn-assets"},
+        "jnvsjn": {"name": "Jimmy Neutron vs Jimmy Negatron",
+                   "out": REPO / "build" / "portal_jnvsjn",
+                   "mesh": "/var/www/jnvsjn/grn-catalog"},
+    }[a.game]
+    out = Path(a.out or GAME["out"])
+    mesh_catalog = a.mesh_catalog or GAME["mesh"]
     if out.exists():
         shutil.rmtree(out)
     out.mkdir(parents=True)
 
-    print("collecting 2D ..."); items = collect_2d(out)
-    print(f"  {len(items)} 2D")
-    print("collecting meshes ..."); items += collect_meshes(out, a.mesh_catalog)
-    print("collecting audio ..."); items += collect_audio(out)
-    print("collecting levels ..."); items += collect_levels(out)
+    if a.game == "jnvsjn":
+        print("collecting JNvsJN ..."); items = collect_jnvsjn(out, mesh_catalog)
+    else:
+        print("collecting 2D ..."); items = collect_2d(out)
+        print(f"  {len(items)} 2D")
+        print("collecting meshes ..."); items += collect_meshes(out, mesh_catalog)
+        print("collecting audio ..."); items += collect_audio(out)
+        print("collecting levels ..."); items += collect_levels(out)
     print(f"total assets: {len(items)}")
 
     zips = {} if a.no_zips else make_zips(out, items)
@@ -202,7 +271,7 @@ def main():
         cats.setdefault(it["group"], {}).setdefault(it["category"], 0)
         cats[it["group"]][it["category"]] += 1
 
-    manifest = {"game": "Jimmy Neutron: Boy Genius (2002)",
+    manifest = {"game": GAME["name"],
                 "total": len(items), "groups": cats, "zips": zips,
                 "assets": items}
     (out / "manifest.json").write_text(json.dumps(manifest))
@@ -269,7 +338,7 @@ audio{width:100%;margin-top:6px;height:30px}
 </style></head><body>
 <header>
   <h1>JN Asset Library</h1>
-  <div class=sub>Jimmy Neutron: Boy Genius (2002) — extracted assets for reimplementation / preservation · <span id=tot></span></div>
+  <div class=sub><span id=game></span> — extracted assets for reimplementation / preservation · <span id=tot></span></div>
   <div class=bar>
     <button id=catbtn class=catbtn>☰ Categories</button>
     <input id=q type=search placeholder="Search assets by name…">
@@ -295,6 +364,9 @@ const ICON={mesh:"◈",audio:"♪",level:"▤"};
 fetch("manifest.json").then(r=>r.json()).then(m=>{M=m;init()});
 function init(){
   document.getElementById("tot").textContent=M.total.toLocaleString()+" assets";
+  document.getElementById("game").textContent=M.game||"";
+  document.querySelectorAll(".chip[data-g]").forEach(c=>{
+    if(c.dataset.g && !(c.dataset.g in (M.groups||{}))) c.style.display="none";});
   renderCats();renderDownloads();apply();
   document.getElementById("q").addEventListener("input",e=>{F.q=e.target.value.toLowerCase();apply()});
   document.querySelectorAll(".chip").forEach(c=>c.onclick=()=>{

@@ -73,5 +73,6 @@ instrument/granny_proxy/*.exp
 build/jnvsjn_web/
 
 # Asset portal staging output (regenerable via tools/build_asset_portal.py;
-# deploys to /var/www/jn-assets). Hundreds of MB, never committed.
+# deploys to /var/www/{jn-assets,jnvsjn-assets}). Large, never committed.
 build/portal/
+build/portal_jnvsjn/
