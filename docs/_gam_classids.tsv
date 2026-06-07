@@ -1,4 +1,4 @@
-imm_fourcc  reversed  @site                 function                 nearby_string
+imm_fourcc  reversed  @site                 function                 class_or_nearby_string
 LAMS       SMAL      @00407201  ??                        
 DBA3       3ABD      @004077a2  FUN_004076e0              C3DABDUCTEE()
 IAD3       3DAI      @00407b35  FUN_00407a40              C3DAI()
@@ -37,7 +37,7 @@ REF3       3FER      @00418d8c  FUN_00418cc0              C3DFERRIS()
 TSF3       3FST      @004193e8  FUN_004192e0              
 ALF3       3FLA      @0041964b  FUN_00419550              
 ELF3       3FLE      @0041987e  FUN_00419760              
-YLF3       3FLY      @0041a09b  FUN_00419f70              
+YLF3       3FLY      @0041a09b  FUN_00419f70              C3DFlyingObject
 WOF3       3FOW      @0041b162  FUN_0041b0a0              C3DFowl()
 TAG3       3GAT      @0041bd54  FUN_0041bca0              
 YEG3       3GEY      @0041c081  FUN_0041bfd0              
@@ -98,7 +98,7 @@ OHP3       3PHO      @00435665  FUN_004355a0              C3DPHONEBOOTH()
 CIP3       3PIC      @00435971  FUN_004358b0              C3DPICKUPITEM()
 RIP3       3PIR      @00436cfe  FUN_00436c40              C3DPIRATE()
 333?       ?333      @004373c2  FUN_00437280              
-ALP3       3PLA      @00437871  FUN_00437830              
+ALP3       3PLA      @00437871  FUN_00437830              C3DPlayer
 DOP3       3POD      @0043ba5a  FUN_0043b990              
 UCP3       3PCU      @0043bd3e  FUN_0043bc70              
 ORP3       3PRO      @0043bfc4  FUN_0043bf10              C3DProjectile()
@@ -150,9 +150,9 @@ LOS3       3SOL      @0044bff5  FUN_0044bee0
 YPS3       3SPY      @0044c41b  FUN_0044c2b0              
 333?       ?333      @0044c7cb  FUN_0044c6f0              
 RUT3       3TUR      @0044c89f  FUN_0044c6f0              
-RET3       3TER      @0044d5cc  FUN_0044d4f0              
-RET3       3TER      @0044d8ec  FUN_0044d810              
-RET3       3TER      @0044dccc  FUN_0044dbf0              
+RET3       3TER      @0044d5cc  FUN_0044d4f0              CJimmyGame
+RET3       3TER      @0044d8ec  FUN_0044d810              CJimmyGame
+RET3       3TER      @0044dccc  FUN_0044dbf0              CJimmyGame
 A1VL       LV1A      @0044efe8  FUN_0044ef30              
 B1VL       LV1B      @0044f3b8  FUN_0044f300              
 C1VL       LV1C      @0044f6e8  FUN_0044f630              
@@ -207,26 +207,26 @@ YKS3       3SKY      @00455cfa  ??
 70RV       VR07      @004574a8  FUN_004573f0              
 80RV       VR08      @00457828  FUN_00457770              
 DAOL       LOAD      @00457bc7  FUN_00457b10              C3DLoadLevel()
-DAOL       LOAD      @00457eae  FUN_00457da0              
+DAOL       LOAD      @00457eae  FUN_00457da0              CLoadLevel
 NIAM       MAIN      @004591c8  FUN_00459110              
-BUC3       3CUB      @0046155b  FUN_004614e0              
-GIL3       3LIG      @00461bd8  FUN_00461bb0              
+BUC3       3CUB      @0046155b  FUN_004614e0              C3DCube
+GIL3       3LIG      @00461bd8  FUN_00461bb0              C3DLight
 JBO3       3OBJ      @0046210a  FUN_00462040              C3DObject()
 LOP3       3POL      @00462c75  FUN_00462bb0              C3DPolygon()
 YKS3       3SKY      @004631d2  FUN_00463110              C3DSky()
-HPS3       3SPH      @00463bab  FUN_00463b30              
+HPS3       3SPH      @00463bab  FUN_00463b30              C3DSphere
 RPS3       3SPR      @00463fcf  FUN_00463f10              C3DSprite()
 RET3       3TER      @004649ad  FUN_004648f0              C3DTerrain()
 333?       ?333      @00464c8e  FUN_00464b90              
-HEV3       3VEH      @00465057  FUN_00465030              
-EHW3       3WHE      @00468247  FUN_00468220              
+HEV3       3VEH      @00465057  FUN_00465030              C3DVehicle
+EHW3       3WHE      @00468247  FUN_00468220              C3DWheel
 NIAM       MAIN      @0046a65b  FUN_0046a4a0              
 LAMS       SMAL      @0046c271  ??                        
 BUC3       3CUB      @004737c0  ??                        
 HPS3       3SPH      @00473870  ??                        
 EMAG       GAME      @00474660  FUN_004745a0              
-RET3       3TER      @004756be  FUN_00475550              
-RET3       3TER      @0047590e  FUN_004757a0              
+RET3       3TER      @004756be  FUN_00475550              CGameType
+RET3       3TER      @0047590e  FUN_004757a0              CGameType
 LAMS       SMAL      @00477d22  FUN_00477cb0              
 LAMS       SMAL      @00477d7f  FUN_00477d50              
 TXET       TEXT      @00479cbb  FUN_00479bc0              
