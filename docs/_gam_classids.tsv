@@ -1,0 +1,239 @@
+imm_fourcc  reversed  @site                 function                 nearby_string
+LAMS       SMAL      @00407201  ??                        
+DBA3       3ABD      @004077a2  FUN_004076e0              C3DABDUCTEE()
+IAD3       3DAI      @00407b35  FUN_00407a40              C3DAI()
+OIA3       3AIO      @0040af50  FUN_0040ae30              
+VUS3       3SUV      @0040b26e  FUN_0040b1b0              
+TIA3       3AIT      @0040bb27  FUN_0040ba70              C3DAITrigger()
+INA3       3ANI      @0040e937  FUN_0040e880              C3DAnimatedSprite()
+RRA3       3ARR      @0040f387  FUN_0040f2d0              C3DArrow()
+LAB3       3BAL      @0040f7b9  FUN_0040f710              
+SAB3       3BAS      @0040fd0d  FUN_0040fc50              C3DBaseball()
+UPB3       3BPU      @00410147  FUN_00410090              C3DBaseballPickup()
+NEB3       3BEN      @00410402  FUN_00410340              C3DBENNY()
+BUB3       3BUB      @004108f7  FUN_00410840              C3DBubble()
+PUB3       3BUP      @00410e47  FUN_00410d90              C3DBubblePickup()
+UBS3       3SBU      @00411129  FUN_00411060              C3DBUS()
+TUB3       3BUT      @00411748  FUN_004115c0              
+LMC3       3CML      @0041220f  FUN_00412150              C3DCamel()
+RAC3       3CAR      @0041294c  FUN_00412870              
+EHW3       3WHE      @00412b17  ??                        
+EHW3       3WHE      @00412d20  ??                        
+RAC3       3CAR      @00413bb3  FUN_00413af0              C3DCarl()
+KHC3       3CHK      @00414247  FUN_00414190              C3DCheckPoint()
+NIC3       3CIN      @00414e72  FUN_00414db0              C3DCindy()
+NOC3       3CON      @00415357  FUN_004152a0              C3DCone()
+ROC3       3COR      @00415564  FUN_004154b0              C3DCorona()
+RUC3       3CUR      @0041582e  FUN_00415760              
+MAC3       3CAM      @00415abd  FUN_00415a00              C3DCutSceneCamera()
+SIF3       3FIS      @00416bdc  FUN_00416ac0              
+GID3       3DIG      @00416fc2  FUN_00416eb0              
+NID3       3DIN      @0041721c  FUN_00417100              
+DUD3       3DUD      @0041764e  FUN_004174f0              
+EYE3       3EYE      @00418159  FUN_00418090              C3DEYE()
+NAF3       3FAN      @00418441  FUN_00418390              
+AHC3       3CHA      @00418ae9  FUN_00418a20              C3DFERCHAIR()
+REF3       3FER      @00418d8c  FUN_00418cc0              C3DFERRIS()
+TSF3       3FST      @004193e8  FUN_004192e0              
+ALF3       3FLA      @0041964b  FUN_00419550              
+ELF3       3FLE      @0041987e  FUN_00419760              
+YLF3       3FLY      @0041a09b  FUN_00419f70              
+WOF3       3FOW      @0041b162  FUN_0041b0a0              C3DFowl()
+TAG3       3GAT      @0041bd54  FUN_0041bca0              
+YEG3       3GEY      @0041c081  FUN_0041bfd0              
+RIG3       3GIR      @0041c3ec  FUN_0041c2d0              
+DOG3       3GOD      @0041c8cf  FUN_0041c810              C3DGoddard()
+DER3       3RED      @0041d6ea  ??                        
+CIP3       3PIC      @0041d8a7  ??                        
+ARG3       3GRA      @0041ef81  FUN_0041eeb0              
+IRG3       3GRI      @0041f265  FUN_0041f1a0              C3DGRILL
+333?       ?333      @0041f57b  FUN_0041f4a0              
+RAH3       3HAR      @0041f653  FUN_0041f4a0              
+LEH3       3HEL      @0041fe27  FUN_0041fd70              C3DHELMET
+OOH3       3HOO      @00420125  FUN_00420060              C3DHOOK()
+GUH3       3HUG      @0042044c  FUN_00420390              C3DHugh()
+MUH3       3HUM      @0042084b  FUN_00420730              
+DYH3       3HYD      @00420eb0  FUN_00420df0              
+EEJ3       3JEE      @00421284  FUN_004211a0              
+IFJ3       3JFI      @00421e3a  FUN_00421d80              
+MIJ3       3JIM      @0042224a  FUN_00422160              C3DJimmy()
+EMIT       TIME      @00424a15  ??                        
+EMIT       TIME      @00424a30  ??                        
+EMIT       TIME      @00424a4b  ??                        
+EMIT       TIME      @00424a83  ??                        
+EMIT       TIME      @00424b4b  ??                        
+EMIT       TIME      @00424b66  ??                        
+EMIT       TIME      @00424b81  ??                        
+333?       ?333      @00424f4a  ??                        
+CIP3       3PIC      @004263ef  ??                        
+EMIT       TIME      @00426771  ??                        
+MOM3       3MOM      @0042b392  FUN_0042b2d0              C3DJUDY()
+TIK3       3KIT      @0042b911  FUN_0042b800              
+RCS3       3SCR      @0042bcc2  FUN_0042bc00              C3DLabScreen()
+SAL3       3LAS      @0042c10e  FUN_0042c050              C3DLaserTrigger()
+AEL3       3LEA      @0042c7a3  FUN_0042c6f0              C3DLeaves()
+BIL3       3LIB      @0042ce02  FUN_0042cd40              C3DLibby()
+OCL3       3LCO      @0042d4d5  FUN_0042d410              C3DLIGHTCONE()
+OIL3       3LIO      @0042dc57  FUN_0042dba0              C3DLightObj()
+REM3       3MER      @0042e2e1  FUN_0042e220              C3DMERRYGO()
+PEM3       3MEP      @0042e997  FUN_0042e8e0              C3DBubblePickup()
+NIM3       3MIN      @0042f057  FUN_0042efa0              C3DMine()
+SIM3       3MIS      @0042f5bf  FUN_0042f500              C3DMissile()
+VOM3       3MOV      @0042fab5  FUN_0042f9f0              C3DMover()
+RAT3       3TAR      @00430405  FUN_00430220              
+ACM3       3MCA      @0043098d  FUN_004308d0              C3DMultiCutSceneCamera()
+SUM3       3MUS      @00431ad7  FUN_00431a20              C3DMusicTrigger()
+TUM3       3MUT      @00432295  FUN_00432170              
+ACN3       3NCA      @00432582  FUN_004324c0              C3DNEUCAR()
+2CN3       3NC2      @004327f2  FUN_00432730              C3DNEUCAR2()
+UEN3       3NEU      @00432a53  FUN_004329a0              C3DSprite()
+MSN3       3NSM      @00433137  FUN_00433070              C3DNEWSmokePuff()
+CIN3       3NIC      @00433555  FUN_00433490              C3DNick()
+TCO3       3OCT      @00433f2e  FUN_00433e70              C3DOCTAPUKE()
+TMO3       3OMT      @00434646  FUN_00434530              
+SAP3       3PAS      @00434937  FUN_00434880              C3DPASSCARD
+TAP3       3PAT      @00434be7  FUN_00434b30              C3DPatrolPoint()
+NEP3       3PEN      @00435025  FUN_00434f60              C3DPENDULUM
+OHP3       3PHO      @00435665  FUN_004355a0              C3DPHONEBOOTH()
+CIP3       3PIC      @00435971  FUN_004358b0              C3DPICKUPITEM()
+RIP3       3PIR      @00436cfe  FUN_00436c40              C3DPIRATE()
+333?       ?333      @004373c2  FUN_00437280              
+ALP3       3PLA      @00437871  FUN_00437830              
+DOP3       3POD      @0043ba5a  FUN_0043b990              
+UCP3       3PCU      @0043bd3e  FUN_0043bc70              
+ORP3       3PRO      @0043bfc4  FUN_0043bf10              C3DProjectile()
+DER3       3RED      @0043c423  FUN_0043c370              C3DREDNEUTRON()
+KOR3       3ROK      @0043cd06  FUN_0043cc40              
+KCR3       3RCK      @0043d157  FUN_0043d090              
+EUF3       3FUE      @0043d5e7  FUN_0043d530              C3DROCKETFUEL
+COR3       3ROC      @0043d916  FUN_0043d840              
+IAS3       3SAI      @0043ed84  FUN_0043ecc0              
+DCS3       3SCD      @0043f15b  FUN_0043f070              
+AHS3       3SHA      @0043f6f7  FUN_0043f640              C3DShadow()
+EHS3       3SHE      @0043f9e2  FUN_0043f920              C3DSheen()
+RHS3       3SHR      @0043feeb  FUN_0043fe20              
+AOB3       3BOA      @00440362  FUN_004402a0              C3DSkateBoard()
+1MS3       3SM1      @004405e7  FUN_00440530              C3DSmoke()
+OMS3       3SMO      @00440a47  FUN_00440980              C3DSmokePuff()
+UOS3       3SOU      @00440ed7  FUN_00440e20              C3DSoundEffect()
+APS3       3SPA      @00441315  FUN_00441260              
+WPS3       3SPW      @004416d4  FUN_004415a0              
+ATS3       3STA      @00441c7a  FUN_00441bb0              
+TRTS       STRT      @00442398  FUN_004422d0              C3DStartPoint()
+ETS3       3STE      @004429d3  FUN_00442920              
+BUS3       3SUB      @004434d7  FUN_00443350              
+MUS3       3SUM      @00443e7e  FUN_00443dc0              C3DSUMO()
+NWS3       3SWN      @0044453b  FUN_00444450              
+IWS3       3SWI      @00444a73  FUN_004449c0              
+NAT3       3TAN      @004451b5  FUN_004450f0              C3DTank()
+RAT3       3TAR      @00445467  FUN_004453b0              C3DShadow()
+LET3       3TEL      @00445709  FUN_00445600              
+SET3       3TES      @00445925  FUN_00445870              
+333?       ?333      @00445d1c  ??                        
+LOT3       3TOL      @00445ff5  FUN_00445f30              C3DToolChest()
+CRT3       3TRC      @0044639f  FUN_004462c0              
+ART3       3TRA      @00446799  FUN_004466c0              
+SRT3       3TRS      @00446adc  FUN_00446a10              
+ERT3       3TRE      @00446d04  FUN_00446c50              C3DTree()
+IRT3       3TRI      @00446f07  FUN_00446e50              C3DTrigger()
+TLU3       3ULT      @004483d2  FUN_00448310              C3DUltraLord()
+LAV3       3VAL      @00448839  FUN_00448780              
+ORT3       3TRO      @00448d25  FUN_00448c60              C3DTrophy()
+GIB3       3BIG      @004490a5  FUN_00448fe0              C3DYokBigdoor()
+ACY3       3YCA      @00449426  FUN_00449360              
+ROD3       3DOR      @00449d6e  FUN_00449cb0              C3DYokDoor()
+EHY3       3YHE      @0044a50c  FUN_0044a440              C3DYokHelmet()
+AUG3       3GUA      @0044b33c  FUN_0044b220              
+HSY3       3YSH      @0044b5c4  FUN_0044b510              C3DBubble()
+HSY3       3YSH      @0044b896  FUN_0044b7d0              
+LOS3       3SOL      @0044bff5  FUN_0044bee0              
+YPS3       3SPY      @0044c41b  FUN_0044c2b0              
+333?       ?333      @0044c7cb  FUN_0044c6f0              
+RUT3       3TUR      @0044c89f  FUN_0044c6f0              
+RET3       3TER      @0044d5cc  FUN_0044d4f0              
+RET3       3TER      @0044d8ec  FUN_0044d810              
+RET3       3TER      @0044dccc  FUN_0044dbf0              
+A1VL       LV1A      @0044efe8  FUN_0044ef30              
+B1VL       LV1B      @0044f3b8  FUN_0044f300              
+C1VL       LV1C      @0044f6e8  FUN_0044f630              
+D1VL       LV1D      @0044f9d8  FUN_0044f920              
+YKS3       3SKY      @0044fb38  ??                        
+E1VL       LV1E      @0044fd88  FUN_0044fcd0              
+YKS3       3SKY      @0044fe68  ??                        
+F1VL       LV1F      @004500b8  FUN_00450000              
+YKS3       3SKY      @00450198  ??                        
+1VEL       LEV1      @00450478  FUN_004503c0              
+YKS3       3SKY      @004505b8  ??                        
+A2VL       LV2A      @00450a08  FUN_00450950              
+B2VL       LV2B      @00450d88  FUN_00450cd0              
+YKS3       3SKY      @00450edf  ??                        
+2VEL       LEV2      @004512d8  FUN_00451220              
+YKS3       3SKY      @0045148b  ??                        
+A3VL       LV3A      @004517e8  FUN_00451730              
+YKS3       3SKY      @0045194b  ??                        
+B3VL       LV3B      @00451ba8  FUN_00451af0              
+YKS3       3SKY      @00451d0b  ??                        
+C3VL       LV3C      @00451f88  FUN_00451ed0              
+YKS3       3SKY      @004520eb  ??                        
+D3VL       LV3D      @00452368  FUN_004522b0              
+YKS3       3SKY      @004524cb  ??                        
+E3VL       LV3E      @00452748  FUN_00452690              
+YKS3       3SKY      @004528ab  ??                        
+3VEL       LEV3      @00452b28  FUN_00452a70              
+YKS3       3SKY      @00452c59  ??                        
+A4VL       LV4A      @00452f68  FUN_00452eb0              
+YKS3       3SKY      @00453098  ??                        
+B4VL       LV4B      @00453394  FUN_004532e0              
+C4VL       LV4C      @00453a18  FUN_00453960              
+YKS3       3SKY      @00453b48  ??                        
+D4VL       LV4D      @00453f78  FUN_00453ec0              
+YKS3       3SKY      @004540a8  ??                        
+4VEL       LEV4      @004543a8  FUN_004542f0              
+YKS3       3SKY      @004544d8  ??                        
+A5VL       LV5A      @00454868  FUN_004547b0              
+B5VL       LV5B      @00454c38  FUN_00454b80              
+5VEL       LEV5      @00454fb8  FUN_00454f00              
+YKS3       3SKY      @004550e8  ??                        
+A6VL       LV6A      @004553e8  FUN_00455330              
+6VEL       LEV6      @004557b8  FUN_00455700              
+7VEL       LEV7      @00455b88  FUN_00455ad0              
+YKS3       3SKY      @00455cfa  ??                        
+10RV       VR01      @00455fa8  FUN_00455ef0              
+20RV       VR02      @00456328  FUN_00456270              
+30RV       VR03      @004566a8  FUN_004565f0              
+40RV       VR04      @00456a28  FUN_00456970              
+50RV       VR05      @00456da8  FUN_00456cf0              
+60RV       VR06      @00457128  FUN_00457070              
+70RV       VR07      @004574a8  FUN_004573f0              
+80RV       VR08      @00457828  FUN_00457770              
+DAOL       LOAD      @00457bc7  FUN_00457b10              C3DLoadLevel()
+DAOL       LOAD      @00457eae  FUN_00457da0              
+NIAM       MAIN      @004591c8  FUN_00459110              
+BUC3       3CUB      @0046155b  FUN_004614e0              
+GIL3       3LIG      @00461bd8  FUN_00461bb0              
+JBO3       3OBJ      @0046210a  FUN_00462040              C3DObject()
+LOP3       3POL      @00462c75  FUN_00462bb0              C3DPolygon()
+YKS3       3SKY      @004631d2  FUN_00463110              C3DSky()
+HPS3       3SPH      @00463bab  FUN_00463b30              
+RPS3       3SPR      @00463fcf  FUN_00463f10              C3DSprite()
+RET3       3TER      @004649ad  FUN_004648f0              C3DTerrain()
+333?       ?333      @00464c8e  FUN_00464b90              
+HEV3       3VEH      @00465057  FUN_00465030              
+EHW3       3WHE      @00468247  FUN_00468220              
+NIAM       MAIN      @0046a65b  FUN_0046a4a0              
+LAMS       SMAL      @0046c271  ??                        
+BUC3       3CUB      @004737c0  ??                        
+HPS3       3SPH      @00473870  ??                        
+EMAG       GAME      @00474660  FUN_004745a0              
+RET3       3TER      @004756be  FUN_00475550              
+RET3       3TER      @0047590e  FUN_004757a0              
+LAMS       SMAL      @00477d22  FUN_00477cb0              
+LAMS       SMAL      @00477d7f  FUN_00477d50              
+TXET       TEXT      @00479cbb  FUN_00479bc0              
+TXET       TEXT      @0047a5bd  FUN_0047a430              
+BUC3       3CUB      @0047cadd  FUN_0047cac0              
+HPS3       3SPH      @0047cc7d  FUN_0047cc60              
+LAMS       SMAL      @0047ce2c  FUN_0047ce00              
+GIRT       TRIG      @0047de03  FUN_0047dcf0              
+TIRT       TRIT      @0047e17d  FUN_0047e0e0              
+PYAW       WAYP      @0047eb85  FUN_0047eaa0              
