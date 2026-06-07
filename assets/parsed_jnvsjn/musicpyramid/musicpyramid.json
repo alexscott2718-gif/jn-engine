@@ -1,0 +1,15 @@
+{
+  "file": "/home/scotty/jnvsjn-original/omt/musicpyramid.omt",
+  "total_size": 364703,
+  "has_images": false,
+  "has_audio": true,
+  "audio": [
+    {
+      "index": 0,
+      "name": "egyptmusic3",
+      "offset": 35,
+      "size": 364668,
+      "file": "assets/parsed_jnvsjn/musicpyramid/musicpyramid_audio/0000_egyptmusic3.wav"
+    }
+  ]
+}

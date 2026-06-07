@@ -1,0 +1,274 @@
+{
+  "file": "/home/scotty/jnvsjn-original/omt/voicegamevr1.omt",
+  "total_size": 1713634,
+  "has_images": false,
+  "has_audio": true,
+  "audio": [
+    {
+      "index": 0,
+      "name": "voxlibby02",
+      "offset": 8,
+      "size": 12728,
+      "file": "assets/parsed_jnvsjn/voicegamevr1/voicegamevr1_audio/0000_voxlibby02.wav"
+    },
+    {
+      "index": 1,
+      "name": "jimmyevox11",
+      "offset": 12736,
+      "size": 14954,
+      "file": "assets/parsed_jnvsjn/voicegamevr1/voicegamevr1_audio/0001_jimmyevox11.wav"
+    },
+    {
+      "index": 2,
+      "name": "tankblip",
+      "offset": 27716,
+      "size": 6012,
+      "file": "assets/parsed_jnvsjn/voicegamevr1/voicegamevr1_audio/0002_tankblip.wav"
+    },
+    {
+      "index": 3,
+      "name": "jimmyevox10",
+      "offset": 34034,
+      "size": 8590,
+      "file": "assets/parsed_jnvsjn/voicegamevr1/voicegamevr1_audio/0003_jimmyevox10.wav"
+    },
+    {
+      "index": 4,
+      "name": "jimmyevox02b",
+      "offset": 47106,
+      "size": 34556,
+      "file": "assets/parsed_jnvsjn/voicegamevr1/voicegamevr1_audio/0004_jimmyevox02b.wav"
+    },
+    {
+      "index": 5,
+      "name": "voxlibby04c",
+      "offset": 81950,
+      "size": 39676,
+      "file": "assets/parsed_jnvsjn/voicegamevr1/voicegamevr1_audio/0005_voxlibby04c.wav"
+    },
+    {
+      "index": 6,
+      "name": "voxlibby05",
+      "offset": 121626,
+      "size": 44204,
+      "file": "assets/parsed_jnvsjn/voicegamevr1/voicegamevr1_audio/0006_voxlibby05.wav"
+    },
+    {
+      "index": 7,
+      "name": "jimmyevox02a",
+      "offset": 165830,
+      "size": 41660,
+      "file": "assets/parsed_jnvsjn/voicegamevr1/voicegamevr1_audio/0007_jimmyevox02a.wav"
+    },
+    {
+      "index": 8,
+      "name": "jimmyevox13",
+      "offset": 217952,
+      "size": 34348,
+      "file": "assets/parsed_jnvsjn/voicegamevr1/voicegamevr1_audio/0008_jimmyevox13.wav"
+    },
+    {
+      "index": 9,
+      "name": "voxlibby04b",
+      "offset": 252300,
+      "size": 38268,
+      "file": "assets/parsed_jnvsjn/voicegamevr1/voicegamevr1_audio/0009_voxlibby04b.wav"
+    },
+    {
+      "index": 10,
+      "name": "jimmyevox01",
+      "offset": 308204,
+      "size": 31000,
+      "file": "assets/parsed_jnvsjn/voicegamevr1/voicegamevr1_audio/0010_jimmyevox01.wav"
+    },
+    {
+      "index": 11,
+      "name": "jimmyevox02",
+      "offset": 339204,
+      "size": 48940,
+      "file": "assets/parsed_jnvsjn/voicegamevr1/voicegamevr1_audio/0011_jimmyevox02.wav"
+    },
+    {
+      "index": 12,
+      "name": "jimmyevox03",
+      "offset": 388144,
+      "size": 62764,
+      "file": "assets/parsed_jnvsjn/voicegamevr1/voicegamevr1_audio/0012_jimmyevox03.wav"
+    },
+    {
+      "index": 13,
+      "name": "jimmyevox04",
+      "offset": 450908,
+      "size": 82660,
+      "file": "assets/parsed_jnvsjn/voicegamevr1/voicegamevr1_audio/0013_jimmyevox04.wav"
+    },
+    {
+      "index": 14,
+      "name": "jimmyevox05",
+      "offset": 533568,
+      "size": 32856,
+      "file": "assets/parsed_jnvsjn/voicegamevr1/voicegamevr1_audio/0014_jimmyevox05.wav"
+    },
+    {
+      "index": 15,
+      "name": "jimmyevox06",
+      "offset": 566424,
+      "size": 127896,
+      "file": "assets/parsed_jnvsjn/voicegamevr1/voicegamevr1_audio/0015_jimmyevox06.wav"
+    },
+    {
+      "index": 16,
+      "name": "jimmyevox07",
+      "offset": 694320,
+      "size": 36716,
+      "file": "assets/parsed_jnvsjn/voicegamevr1/voicegamevr1_audio/0016_jimmyevox07.wav"
+    },
+    {
+      "index": 17,
+      "name": "jimmyevox08",
+      "offset": 731036,
+      "size": 32114,
+      "file": "assets/parsed_jnvsjn/voicegamevr1/voicegamevr1_audio/0017_jimmyevox08.wav"
+    },
+    {
+      "index": 18,
+      "name": "jimmyevox09",
+      "offset": 763150,
+      "size": 69468,
+      "file": "assets/parsed_jnvsjn/voicegamevr1/voicegamevr1_audio/0018_jimmyevox09.wav"
+    },
+    {
+      "index": 19,
+      "name": "audio_19",
+      "offset": 832618,
+      "size": 14954,
+      "file": "assets/parsed_jnvsjn/voicegamevr1/voicegamevr1_audio/0019_audio_19.wav"
+    },
+    {
+      "index": 20,
+      "name": "jimmyevox12",
+      "offset": 847572,
+      "size": 56108,
+      "file": "assets/parsed_jnvsjn/voicegamevr1/voicegamevr1_audio/0020_jimmyevox12.wav"
+    },
+    {
+      "index": 21,
+      "name": "jimmyevox14",
+      "offset": 903680,
+      "size": 30824,
+      "file": "assets/parsed_jnvsjn/voicegamevr1/voicegamevr1_audio/0021_jimmyevox14.wav"
+    },
+    {
+      "index": 22,
+      "name": "jimmylibby01",
+      "offset": 934504,
+      "size": 23028,
+      "file": "assets/parsed_jnvsjn/voicegamevr1/voicegamevr1_audio/0022_jimmylibby01.wav"
+    },
+    {
+      "index": 23,
+      "name": "jimmylibby02",
+      "offset": 957532,
+      "size": 44300,
+      "file": "assets/parsed_jnvsjn/voicegamevr1/voicegamevr1_audio/0023_jimmylibby02.wav"
+    },
+    {
+      "index": 24,
+      "name": "jimmylibby03",
+      "offset": 1001832,
+      "size": 88876,
+      "file": "assets/parsed_jnvsjn/voicegamevr1/voicegamevr1_audio/0024_jimmylibby03.wav"
+    },
+    {
+      "index": 25,
+      "name": "jimmylibby04",
+      "offset": 1090708,
+      "size": 53262,
+      "file": "assets/parsed_jnvsjn/voicegamevr1/voicegamevr1_audio/0025_jimmylibby04.wav"
+    },
+    {
+      "index": 26,
+      "name": "jimmylibby05",
+      "offset": 1143970,
+      "size": 44506,
+      "file": "assets/parsed_jnvsjn/voicegamevr1/voicegamevr1_audio/0026_jimmylibby05.wav"
+    },
+    {
+      "index": 27,
+      "name": "jimmylibby06",
+      "offset": 1188476,
+      "size": 32970,
+      "file": "assets/parsed_jnvsjn/voicegamevr1/voicegamevr1_audio/0027_jimmylibby06.wav"
+    },
+    {
+      "index": 28,
+      "name": "jimmylibby06a",
+      "offset": 1221446,
+      "size": 53292,
+      "file": "assets/parsed_jnvsjn/voicegamevr1/voicegamevr1_audio/0028_jimmylibby06a.wav"
+    },
+    {
+      "index": 29,
+      "name": "jimmylibby08",
+      "offset": 1274738,
+      "size": 51616,
+      "file": "assets/parsed_jnvsjn/voicegamevr1/voicegamevr1_audio/0029_jimmylibby08.wav"
+    },
+    {
+      "index": 30,
+      "name": "jimmylibby09",
+      "offset": 1326354,
+      "size": 47396,
+      "file": "assets/parsed_jnvsjn/voicegamevr1/voicegamevr1_audio/0030_jimmylibby09.wav"
+    },
+    {
+      "index": 31,
+      "name": "jimmyvr03",
+      "offset": 1373750,
+      "size": 38064,
+      "file": "assets/parsed_jnvsjn/voicegamevr1/voicegamevr1_audio/0031_jimmyvr03.wav"
+    },
+    {
+      "index": 32,
+      "name": "voxlibby01",
+      "offset": 1411814,
+      "size": 21730,
+      "file": "assets/parsed_jnvsjn/voicegamevr1/voicegamevr1_audio/0032_voxlibby01.wav"
+    },
+    {
+      "index": 33,
+      "name": "audio_33",
+      "offset": 1433544,
+      "size": 12728,
+      "file": "assets/parsed_jnvsjn/voicegamevr1/voicegamevr1_audio/0033_audio_33.wav"
+    },
+    {
+      "index": 34,
+      "name": "voxlibby03",
+      "offset": 1446272,
+      "size": 57900,
+      "file": "assets/parsed_jnvsjn/voicegamevr1/voicegamevr1_audio/0034_voxlibby03.wav"
+    },
+    {
+      "index": 35,
+      "name": "voxlibby04a",
+      "offset": 1504172,
+      "size": 77852,
+      "file": "assets/parsed_jnvsjn/voicegamevr1/voicegamevr1_audio/0035_voxlibby04a.wav"
+    },
+    {
+      "index": 36,
+      "name": "audio_36",
+      "offset": 1582024,
+      "size": 38268,
+      "file": "assets/parsed_jnvsjn/voicegamevr1/voicegamevr1_audio/0036_audio_36.wav"
+    },
+    {
+      "index": 37,
+      "name": "jimmyevox15",
+      "offset": 1620292,
+      "size": 93342,
+      "file": "assets/parsed_jnvsjn/voicegamevr1/voicegamevr1_audio/0037_jimmyevox15.wav"
+    }
+  ]
+}

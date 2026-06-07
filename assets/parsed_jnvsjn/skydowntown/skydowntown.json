@@ -1,0 +1,50 @@
+{
+  "file": "/home/scotty/jnvsjn-original/omt/skydowntown.omt",
+  "total_size": 51809,
+  "has_images": true,
+  "has_audio": false,
+  "images": [
+    {
+      "index": 0,
+      "width": 64,
+      "height": 64,
+      "depth": 32,
+      "compression": 2,
+      "stride": 256,
+      "dotransparent": false,
+      "transp_packed": 0,
+      "dopalette": false,
+      "bufsize": 640,
+      "file": "assets/parsed_jnvsjn/skydowntown/skydowntown_images/0000_64x64d32.png",
+      "status": "ok"
+    },
+    {
+      "index": 1,
+      "width": 64,
+      "height": 64,
+      "depth": 32,
+      "compression": 2,
+      "stride": 256,
+      "dotransparent": false,
+      "transp_packed": 0,
+      "dopalette": false,
+      "bufsize": 640,
+      "file": "assets/parsed_jnvsjn/skydowntown/skydowntown_images/0001_64x64d32.png",
+      "status": "ok"
+    },
+    {
+      "index": 2,
+      "width": 128,
+      "height": 128,
+      "depth": 32,
+      "compression": 2,
+      "stride": 512,
+      "dotransparent": false,
+      "transp_packed": 0,
+      "dopalette": false,
+      "bufsize": 44664,
+      "file": "assets/parsed_jnvsjn/skydowntown/skydowntown_images/0002_128x128d32.png",
+      "status": "ok"
+    }
+  ]
+}

@@ -1,0 +1,232 @@
+{
+  "file": "/home/scotty/jnvsjn-original/omt/voicegameend.omt",
+  "total_size": 1556139,
+  "has_images": false,
+  "has_audio": true,
+  "audio": [
+    {
+      "index": 0,
+      "name": "dinos02",
+      "offset": 8,
+      "size": 85878,
+      "file": "assets/parsed_jnvsjn/voicegameend/voicegameend_audio/0000_dinos02.wav"
+    },
+    {
+      "index": 1,
+      "name": "dinoalerta",
+      "offset": 86147,
+      "size": 68576,
+      "file": "assets/parsed_jnvsjn/voicegameend/voicegameend_audio/0001_dinoalerta.wav"
+    },
+    {
+      "index": 2,
+      "name": "end07",
+      "offset": 154723,
+      "size": 15226,
+      "file": "assets/parsed_jnvsjn/voicegameend/voicegameend_audio/0002_end07.wav"
+    },
+    {
+      "index": 3,
+      "name": "end10",
+      "offset": 169949,
+      "size": 4042,
+      "file": "assets/parsed_jnvsjn/voicegameend/voicegameend_audio/0003_end10.wav"
+    },
+    {
+      "index": 4,
+      "name": "audio_4",
+      "offset": 173991,
+      "size": 50766,
+      "file": "assets/parsed_jnvsjn/voicegameend/voicegameend_audio/0004_audio_4.wav"
+    },
+    {
+      "index": 5,
+      "name": "beamin",
+      "offset": 177689,
+      "size": 124796,
+      "file": "assets/parsed_jnvsjn/voicegameend/voicegameend_audio/0005_beamin.wav"
+    },
+    {
+      "index": 6,
+      "name": "dinoalertb",
+      "offset": 302485,
+      "size": 44554,
+      "file": "assets/parsed_jnvsjn/voicegameend/voicegameend_audio/0006_dinoalertb.wav"
+    },
+    {
+      "index": 7,
+      "name": "dinoalertc",
+      "offset": 347039,
+      "size": 35948,
+      "file": "assets/parsed_jnvsjn/voicegameend/voicegameend_audio/0007_dinoalertc.wav"
+    },
+    {
+      "index": 8,
+      "name": "dinoalertd",
+      "offset": 383003,
+      "size": 132436,
+      "file": "assets/parsed_jnvsjn/voicegameend/voicegameend_audio/0008_dinoalertd.wav"
+    },
+    {
+      "index": 9,
+      "name": "end01",
+      "offset": 515439,
+      "size": 23620,
+      "file": "assets/parsed_jnvsjn/voicegameend/voicegameend_audio/0009_end01.wav"
+    },
+    {
+      "index": 10,
+      "name": "end06",
+      "offset": 539059,
+      "size": 84396,
+      "file": "assets/parsed_jnvsjn/voicegameend/voicegameend_audio/0010_end06.wav"
+    },
+    {
+      "index": 11,
+      "name": "end15",
+      "offset": 623455,
+      "size": 19212,
+      "file": "assets/parsed_jnvsjn/voicegameend/voicegameend_audio/0011_end15.wav"
+    },
+    {
+      "index": 12,
+      "name": "end03",
+      "offset": 644447,
+      "size": 38618,
+      "file": "assets/parsed_jnvsjn/voicegameend/voicegameend_audio/0012_end03.wav"
+    },
+    {
+      "index": 13,
+      "name": "end04",
+      "offset": 683065,
+      "size": 86060,
+      "file": "assets/parsed_jnvsjn/voicegameend/voicegameend_audio/0013_end04.wav"
+    },
+    {
+      "index": 14,
+      "name": "end05",
+      "offset": 769125,
+      "size": 66348,
+      "file": "assets/parsed_jnvsjn/voicegameend/voicegameend_audio/0014_end05.wav"
+    },
+    {
+      "index": 15,
+      "name": "end13",
+      "offset": 835473,
+      "size": 10876,
+      "file": "assets/parsed_jnvsjn/voicegameend/voicegameend_audio/0015_end13.wav"
+    },
+    {
+      "index": 16,
+      "name": "end12",
+      "offset": 846349,
+      "size": 4492,
+      "file": "assets/parsed_jnvsjn/voicegameend/voicegameend_audio/0016_end12.wav"
+    },
+    {
+      "index": 17,
+      "name": "end08",
+      "offset": 850841,
+      "size": 9574,
+      "file": "assets/parsed_jnvsjn/voicegameend/voicegameend_audio/0017_end08.wav"
+    },
+    {
+      "index": 18,
+      "name": "audio_18",
+      "offset": 863467,
+      "size": 9574,
+      "file": "assets/parsed_jnvsjn/voicegameend/voicegameend_audio/0018_audio_18.wav"
+    },
+    {
+      "index": 19,
+      "name": "end09",
+      "offset": 873041,
+      "size": 41132,
+      "file": "assets/parsed_jnvsjn/voicegameend/voicegameend_audio/0019_end09.wav"
+    },
+    {
+      "index": 20,
+      "name": "end11",
+      "offset": 914173,
+      "size": 38636,
+      "file": "assets/parsed_jnvsjn/voicegameend/voicegameend_audio/0020_end11.wav"
+    },
+    {
+      "index": 21,
+      "name": "audio_21",
+      "offset": 952809,
+      "size": 4492,
+      "file": "assets/parsed_jnvsjn/voicegameend/voicegameend_audio/0021_audio_21.wav"
+    },
+    {
+      "index": 22,
+      "name": "audio_22",
+      "offset": 957301,
+      "size": 10876,
+      "file": "assets/parsed_jnvsjn/voicegameend/voicegameend_audio/0022_audio_22.wav"
+    },
+    {
+      "index": 23,
+      "name": "end14",
+      "offset": 968177,
+      "size": 50988,
+      "file": "assets/parsed_jnvsjn/voicegameend/voicegameend_audio/0023_end14.wav"
+    },
+    {
+      "index": 24,
+      "name": "audio_24",
+      "offset": 1019165,
+      "size": 19212,
+      "file": "assets/parsed_jnvsjn/voicegameend/voicegameend_audio/0024_audio_24.wav"
+    },
+    {
+      "index": 25,
+      "name": "end16",
+      "offset": 1038377,
+      "size": 40382,
+      "file": "assets/parsed_jnvsjn/voicegameend/voicegameend_audio/0025_end16.wav"
+    },
+    {
+      "index": 26,
+      "name": "end17",
+      "offset": 1078759,
+      "size": 106668,
+      "file": "assets/parsed_jnvsjn/voicegameend/voicegameend_audio/0026_end17.wav"
+    },
+    {
+      "index": 27,
+      "name": "end18",
+      "offset": 1185427,
+      "size": 74284,
+      "file": "assets/parsed_jnvsjn/voicegameend/voicegameend_audio/0027_end18.wav"
+    },
+    {
+      "index": 28,
+      "name": "end19",
+      "offset": 1259711,
+      "size": 44734,
+      "file": "assets/parsed_jnvsjn/voicegameend/voicegameend_audio/0028_end19.wav"
+    },
+    {
+      "index": 29,
+      "name": "end20",
+      "offset": 1304445,
+      "size": 74540,
+      "file": "assets/parsed_jnvsjn/voicegameend/voicegameend_audio/0029_end20.wav"
+    },
+    {
+      "index": 30,
+      "name": "end21",
+      "offset": 1378985,
+      "size": 50766,
+      "file": "assets/parsed_jnvsjn/voicegameend/voicegameend_audio/0030_end21.wav"
+    },
+    {
+      "index": 31,
+      "name": "end02",
+      "offset": 1429751,
+      "size": 126388,
+      "file": "assets/parsed_jnvsjn/voicegameend/voicegameend_audio/0031_end02.wav"
+    }
+  ]
+}

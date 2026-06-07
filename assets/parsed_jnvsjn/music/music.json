@@ -1,0 +1,15 @@
+{
+  "file": "/home/scotty/jnvsjn-original/omt/music.omt",
+  "total_size": 972341,
+  "has_images": false,
+  "has_audio": true,
+  "audio": [
+    {
+      "index": 0,
+      "name": "theme_words",
+      "offset": 35,
+      "size": 972306,
+      "file": "assets/parsed_jnvsjn/music/music_audio/0000_theme_words.wav"
+    }
+  ]
+}

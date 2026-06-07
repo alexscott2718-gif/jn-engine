@@ -1,0 +1,22 @@
+{
+  "file": "/home/scotty/jnvsjn-original/omt/musicflurp.omt",
+  "total_size": 935071,
+  "has_images": false,
+  "has_audio": true,
+  "audio": [
+    {
+      "index": 0,
+      "name": "glopmusic",
+      "offset": 8,
+      "size": 302124,
+      "file": "assets/parsed_jnvsjn/musicflurp/musicflurp_audio/0000_glopmusic.wav"
+    },
+    {
+      "index": 1,
+      "name": "hermanbattle",
+      "offset": 302159,
+      "size": 632876,
+      "file": "assets/parsed_jnvsjn/musicflurp/musicflurp_audio/0001_hermanbattle.wav"
+    }
+  ]
+}

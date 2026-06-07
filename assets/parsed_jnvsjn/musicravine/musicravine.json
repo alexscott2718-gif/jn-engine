@@ -1,0 +1,15 @@
+{
+  "file": "/home/scotty/jnvsjn-original/omt/musicravine.omt",
+  "total_size": 274591,
+  "has_images": false,
+  "has_audio": true,
+  "audio": [
+    {
+      "index": 0,
+      "name": "ravine",
+      "offset": 35,
+      "size": 274556,
+      "file": "assets/parsed_jnvsjn/musicravine/musicravine_audio/0000_ravine.wav"
+    }
+  ]
+}

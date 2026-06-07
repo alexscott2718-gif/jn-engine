@@ -1,0 +1,78 @@
+{
+  "file": "/home/scotty/jnvsjn-original/omt/nightsky.omt",
+  "total_size": 178747,
+  "has_images": true,
+  "has_audio": false,
+  "images": [
+    {
+      "index": 0,
+      "width": 128,
+      "height": 128,
+      "depth": 16,
+      "compression": 1,
+      "stride": 256,
+      "dotransparent": false,
+      "transp_packed": 0,
+      "dopalette": false,
+      "bufsize": 9480,
+      "file": "assets/parsed_jnvsjn/nightsky/nightsky_images/0000_128x128d16.png",
+      "status": "ok"
+    },
+    {
+      "index": 1,
+      "width": 128,
+      "height": 128,
+      "depth": 16,
+      "compression": 1,
+      "stride": 256,
+      "dotransparent": false,
+      "transp_packed": 0,
+      "dopalette": false,
+      "bufsize": 17236,
+      "file": "assets/parsed_jnvsjn/nightsky/nightsky_images/0001_128x128d16.png",
+      "status": "ok"
+    },
+    {
+      "index": 2,
+      "width": 256,
+      "height": 256,
+      "depth": 16,
+      "compression": 1,
+      "stride": 512,
+      "dotransparent": false,
+      "transp_packed": 0,
+      "dopalette": false,
+      "bufsize": 100006,
+      "file": "assets/parsed_jnvsjn/nightsky/nightsky_images/0002_256x256d16.png",
+      "status": "ok"
+    },
+    {
+      "index": 3,
+      "width": 256,
+      "height": 256,
+      "depth": 16,
+      "compression": 1,
+      "stride": 512,
+      "dotransparent": false,
+      "transp_packed": 0,
+      "dopalette": false,
+      "bufsize": 3884,
+      "file": "assets/parsed_jnvsjn/nightsky/nightsky_images/0003_256x256d16.png",
+      "status": "ok"
+    },
+    {
+      "index": 4,
+      "width": 256,
+      "height": 256,
+      "depth": 16,
+      "compression": 1,
+      "stride": 512,
+      "dotransparent": false,
+      "transp_packed": 0,
+      "dopalette": false,
+      "bufsize": 38754,
+      "file": "assets/parsed_jnvsjn/nightsky/nightsky_images/0004_256x256d16.png",
+      "status": "ok"
+    }
+  ]
+}

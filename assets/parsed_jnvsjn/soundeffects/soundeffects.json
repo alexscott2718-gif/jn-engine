@@ -1,0 +1,3081 @@
+{
+  "file": "/home/scotty/jnvsjn-original/omt/soundeffects.omt",
+  "total_size": 16572803,
+  "has_images": false,
+  "has_audio": true,
+  "audio": [
+    {
+      "index": 0,
+      "name": "shrinkray",
+      "offset": 8,
+      "size": 35358,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0000_shrinkray.wav"
+    },
+    {
+      "index": 1,
+      "name": "gravitybubbleoff",
+      "offset": 35420,
+      "size": 11364,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0001_gravitybubbleoff.wav"
+    },
+    {
+      "index": 2,
+      "name": "goddard baseballs",
+      "offset": 46784,
+      "size": 12364,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0002_goddard_baseballs.wav"
+    },
+    {
+      "index": 3,
+      "name": "HitHead",
+      "offset": 59580,
+      "size": 7132,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0003_HitHead.wav"
+    },
+    {
+      "index": 4,
+      "name": "empty",
+      "offset": 66712,
+      "size": 992,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0004_empty.wav"
+    },
+    {
+      "index": 5,
+      "name": "empty",
+      "offset": 67704,
+      "size": 992,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0005_empty.wav"
+    },
+    {
+      "index": 6,
+      "name": "audio_6",
+      "offset": 68696,
+      "size": 992,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0006_audio_6.wav"
+    },
+    {
+      "index": 7,
+      "name": "steps",
+      "offset": 70076,
+      "size": 11692,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0007_steps.wav"
+    },
+    {
+      "index": 8,
+      "name": "gravitybubble",
+      "offset": 81858,
+      "size": 16320,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0008_gravitybubble.wav"
+    },
+    {
+      "index": 9,
+      "name": "steps echo",
+      "offset": 98178,
+      "size": 11692,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0009_steps_echo.wav"
+    },
+    {
+      "index": 10,
+      "name": "horn",
+      "offset": 110210,
+      "size": 14316,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0010_horn.wav"
+    },
+    {
+      "index": 11,
+      "name": "car",
+      "offset": 124526,
+      "size": 67776,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0011_car.wav"
+    },
+    {
+      "index": 12,
+      "name": "bring",
+      "offset": 192302,
+      "size": 15212,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0012_bring.wav"
+    },
+    {
+      "index": 13,
+      "name": "blip4",
+      "offset": 207514,
+      "size": 2036,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0013_blip4.wav"
+    },
+    {
+      "index": 14,
+      "name": "Scooter",
+      "offset": 210232,
+      "size": 9152,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0014_Scooter.wav"
+    },
+    {
+      "index": 15,
+      "name": "landing",
+      "offset": 219384,
+      "size": 1688,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0015_landing.wav"
+    },
+    {
+      "index": 16,
+      "name": "jetpack",
+      "offset": 222596,
+      "size": 88268,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0016_jetpack.wav"
+    },
+    {
+      "index": 17,
+      "name": "neutron",
+      "offset": 310864,
+      "size": 30700,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0017_neutron.wav"
+    },
+    {
+      "index": 18,
+      "name": "red neutron",
+      "offset": 341564,
+      "size": 32428,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0018_red_neutron.wav"
+    },
+    {
+      "index": 19,
+      "name": "swiming",
+      "offset": 373992,
+      "size": 22272,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0019_swiming.wav"
+    },
+    {
+      "index": 20,
+      "name": "balloon pop",
+      "offset": 396264,
+      "size": 4522,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0020_balloon_pop.wav"
+    },
+    {
+      "index": 21,
+      "name": "zap",
+      "offset": 401599,
+      "size": 82348,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0021_zap.wav"
+    },
+    {
+      "index": 22,
+      "name": "goddard bark",
+      "offset": 483947,
+      "size": 55552,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0022_goddard_bark.wav"
+    },
+    {
+      "index": 23,
+      "name": "zipper",
+      "offset": 539499,
+      "size": 19116,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0023_zipper.wav"
+    },
+    {
+      "index": 24,
+      "name": "squeak",
+      "offset": 558615,
+      "size": 30734,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0024_squeak.wav"
+    },
+    {
+      "index": 25,
+      "name": "pain agh",
+      "offset": 589349,
+      "size": 3988,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0025_pain_agh.wav"
+    },
+    {
+      "index": 26,
+      "name": "goddard flying",
+      "offset": 593687,
+      "size": 67776,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0026_goddard_flying.wav"
+    },
+    {
+      "index": 27,
+      "name": "goddard off",
+      "offset": 661463,
+      "size": 71466,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0027_goddard_off.wav"
+    },
+    {
+      "index": 28,
+      "name": "pickupbaseball",
+      "offset": 732929,
+      "size": 79770,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0028_pickupbaseball.wav"
+    },
+    {
+      "index": 29,
+      "name": "audio_29",
+      "offset": 812699,
+      "size": 992,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0029_audio_29.wav"
+    },
+    {
+      "index": 30,
+      "name": "pickup blip",
+      "offset": 813691,
+      "size": 3172,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0030_pickup_blip.wav"
+    },
+    {
+      "index": 31,
+      "name": "pickup blip3",
+      "offset": 816863,
+      "size": 3202,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0031_pickup_blip3.wav"
+    },
+    {
+      "index": 32,
+      "name": "audio_32",
+      "offset": 820065,
+      "size": 2036,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0032_audio_32.wav"
+    },
+    {
+      "index": 33,
+      "name": "switch",
+      "offset": 823167,
+      "size": 3986,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0033_switch.wav"
+    },
+    {
+      "index": 34,
+      "name": "pain oww",
+      "offset": 828127,
+      "size": 3260,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0034_pain_oww.wav"
+    },
+    {
+      "index": 35,
+      "name": "arcade whistle1",
+      "offset": 831387,
+      "size": 6650,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0035_arcade_whistle1.wav"
+    },
+    {
+      "index": 36,
+      "name": "bird1",
+      "offset": 838215,
+      "size": 5982,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0036_bird1.wav"
+    },
+    {
+      "index": 37,
+      "name": "click shrink ray",
+      "offset": 844197,
+      "size": 4474,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0037_click_shrink_ray.wav"
+    },
+    {
+      "index": 38,
+      "name": "jimmyclone",
+      "offset": 849403,
+      "size": 45946,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0038_jimmyclone.wav"
+    },
+    {
+      "index": 39,
+      "name": "steps concrete gritty",
+      "offset": 899189,
+      "size": 11834,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0039_steps_concrete_gritty.wav"
+    },
+    {
+      "index": 40,
+      "name": "bell",
+      "offset": 911023,
+      "size": 7100,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0040_bell.wav"
+    },
+    {
+      "index": 41,
+      "name": "jimmyself20",
+      "offset": 921933,
+      "size": 13642,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0041_jimmyself20.wav"
+    },
+    {
+      "index": 42,
+      "name": "jimmyself15",
+      "offset": 935575,
+      "size": 16306,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0042_jimmyself15.wav"
+    },
+    {
+      "index": 43,
+      "name": "score points3",
+      "offset": 951881,
+      "size": 6866,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0043_score_points3.wav"
+    },
+    {
+      "index": 44,
+      "name": "audio_44",
+      "offset": 958747,
+      "size": 992,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0044_audio_44.wav"
+    },
+    {
+      "index": 45,
+      "name": "audio_45",
+      "offset": 959739,
+      "size": 992,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0045_audio_45.wav"
+    },
+    {
+      "index": 46,
+      "name": "scream",
+      "offset": 961663,
+      "size": 59514,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0046_scream.wav"
+    },
+    {
+      "index": 47,
+      "name": "whoosh",
+      "offset": 1021177,
+      "size": 53434,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0047_whoosh.wav"
+    },
+    {
+      "index": 48,
+      "name": "clicking",
+      "offset": 1074611,
+      "size": 146938,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0048_clicking.wav"
+    },
+    {
+      "index": 49,
+      "name": "tracksound",
+      "offset": 1221549,
+      "size": 48510,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0049_tracksound.wav"
+    },
+    {
+      "index": 50,
+      "name": "jimmyself4",
+      "offset": 1270059,
+      "size": 21772,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0050_jimmyself4.wav"
+    },
+    {
+      "index": 51,
+      "name": "need more change",
+      "offset": 1291831,
+      "size": 16138,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0051_need_more_change.wav"
+    },
+    {
+      "index": 52,
+      "name": "becareful",
+      "offset": 1307969,
+      "size": 12604,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0052_becareful.wav"
+    },
+    {
+      "index": 53,
+      "name": "jimmyself74",
+      "offset": 1320573,
+      "size": 10538,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0053_jimmyself74.wav"
+    },
+    {
+      "index": 54,
+      "name": "jimmyself14",
+      "offset": 1332081,
+      "size": 24686,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0054_jimmyself14.wav"
+    },
+    {
+      "index": 55,
+      "name": "pain ahhouch",
+      "offset": 1356767,
+      "size": 5884,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0055_pain_ahhouch.wav"
+    },
+    {
+      "index": 56,
+      "name": "jimmyburger2",
+      "offset": 1362735,
+      "size": 27180,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0056_jimmyburger2.wav"
+    },
+    {
+      "index": 57,
+      "name": "pop2 arcade",
+      "offset": 1389915,
+      "size": 5802,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0057_pop2_arcade.wav"
+    },
+    {
+      "index": 58,
+      "name": "jimmyself31",
+      "offset": 1395897,
+      "size": 22848,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0058_jimmyself31.wav"
+    },
+    {
+      "index": 59,
+      "name": "coin take",
+      "offset": 1418745,
+      "size": 9194,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0059_coin_take.wav"
+    },
+    {
+      "index": 60,
+      "name": "jimmyitem9",
+      "offset": 1428643,
+      "size": 33532,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0060_jimmyitem9.wav"
+    },
+    {
+      "index": 61,
+      "name": "jimmycoal2",
+      "offset": 1462175,
+      "size": 20332,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0061_jimmycoal2.wav"
+    },
+    {
+      "index": 62,
+      "name": "audio_62",
+      "offset": 1482507,
+      "size": 992,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0062_audio_62.wav"
+    },
+    {
+      "index": 63,
+      "name": "audio_63",
+      "offset": 1483499,
+      "size": 992,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0063_audio_63.wav"
+    },
+    {
+      "index": 64,
+      "name": "jimmyitem5",
+      "offset": 1484795,
+      "size": 14468,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0064_jimmyitem5.wav"
+    },
+    {
+      "index": 65,
+      "name": "jimmyitem6",
+      "offset": 1499263,
+      "size": 14124,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0065_jimmyitem6.wav"
+    },
+    {
+      "index": 66,
+      "name": "jimmyexp12",
+      "offset": 1513387,
+      "size": 19756,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0066_jimmyexp12.wav"
+    },
+    {
+      "index": 67,
+      "name": "goddarddogbark6",
+      "offset": 1533143,
+      "size": 8332,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0067_goddarddogbark6.wav"
+    },
+    {
+      "index": 68,
+      "name": "doorbell",
+      "offset": 1541617,
+      "size": 24614,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0068_doorbell.wav"
+    },
+    {
+      "index": 69,
+      "name": "pickup blip2",
+      "offset": 1566231,
+      "size": 6934,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0069_pickup_blip2.wav"
+    },
+    {
+      "index": 70,
+      "name": "jimmyitem7",
+      "offset": 1573719,
+      "size": 22266,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0070_jimmyitem7.wav"
+    },
+    {
+      "index": 71,
+      "name": "jimmyburger1",
+      "offset": 1595985,
+      "size": 28912,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0071_jimmyburger1.wav"
+    },
+    {
+      "index": 72,
+      "name": "audio_72",
+      "offset": 1624897,
+      "size": 992,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0072_audio_72.wav"
+    },
+    {
+      "index": 73,
+      "name": "audio_73",
+      "offset": 1625889,
+      "size": 992,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0073_audio_73.wav"
+    },
+    {
+      "index": 74,
+      "name": "audio_74",
+      "offset": 1626881,
+      "size": 992,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0074_audio_74.wav"
+    },
+    {
+      "index": 75,
+      "name": "steam",
+      "offset": 1627873,
+      "size": 11118,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0075_steam.wav"
+    },
+    {
+      "index": 76,
+      "name": "jimmyexp2",
+      "offset": 1639223,
+      "size": 39872,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0076_jimmyexp2.wav"
+    },
+    {
+      "index": 77,
+      "name": "jimmyitem2",
+      "offset": 1679095,
+      "size": 13332,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0077_jimmyitem2.wav"
+    },
+    {
+      "index": 78,
+      "name": "jimmyitem8",
+      "offset": 1692427,
+      "size": 15072,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0078_jimmyitem8.wav"
+    },
+    {
+      "index": 79,
+      "name": "jimmyitem3",
+      "offset": 1707499,
+      "size": 12754,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0079_jimmyitem3.wav"
+    },
+    {
+      "index": 80,
+      "name": "jimmyitem4",
+      "offset": 1720253,
+      "size": 9938,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0080_jimmyitem4.wav"
+    },
+    {
+      "index": 81,
+      "name": "jimmyself29",
+      "offset": 1730191,
+      "size": 12652,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0081_jimmyself29.wav"
+    },
+    {
+      "index": 82,
+      "name": "sonar",
+      "offset": 1743299,
+      "size": 31756,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0082_sonar.wav"
+    },
+    {
+      "index": 83,
+      "name": "audio_83",
+      "offset": 1775055,
+      "size": 992,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0083_audio_83.wav"
+    },
+    {
+      "index": 84,
+      "name": "GRAPLINGHOOK",
+      "offset": 1776515,
+      "size": 21772,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0084_GRAPLINGHOOK.wav"
+    },
+    {
+      "index": 85,
+      "name": "shock",
+      "offset": 1798287,
+      "size": 22336,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0085_shock.wav"
+    },
+    {
+      "index": 86,
+      "name": "alien computer hum",
+      "offset": 1820623,
+      "size": 71998,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0086_alien_computer_hum.wav"
+    },
+    {
+      "index": 87,
+      "name": "pickup2",
+      "offset": 1892621,
+      "size": 9510,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0087_pickup2.wav"
+    },
+    {
+      "index": 88,
+      "name": "coin2",
+      "offset": 1903817,
+      "size": 23180,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0088_coin2.wav"
+    },
+    {
+      "index": 89,
+      "name": "jimmysub5",
+      "offset": 1926997,
+      "size": 14036,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0089_jimmysub5.wav"
+    },
+    {
+      "index": 90,
+      "name": "jimmyself84",
+      "offset": 1941033,
+      "size": 8554,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0090_jimmyself84.wav"
+    },
+    {
+      "index": 91,
+      "name": "Lava",
+      "offset": 1953881,
+      "size": 66752,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0091_Lava.wav"
+    },
+    {
+      "index": 92,
+      "name": "steps metal",
+      "offset": 2020633,
+      "size": 11828,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0092_steps_metal.wav"
+    },
+    {
+      "index": 93,
+      "name": "pain ooh ha haa",
+      "offset": 2032461,
+      "size": 8940,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0093_pain_ooh_ha_haa.wav"
+    },
+    {
+      "index": 94,
+      "name": "audio_94",
+      "offset": 2041491,
+      "size": 992,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0094_audio_94.wav"
+    },
+    {
+      "index": 95,
+      "name": "YokianBump",
+      "offset": 2042969,
+      "size": 13536,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0095_YokianBump.wav"
+    },
+    {
+      "index": 96,
+      "name": "dragonfly",
+      "offset": 2056505,
+      "size": 4944,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0096_dragonfly.wav"
+    },
+    {
+      "index": 97,
+      "name": "steam",
+      "offset": 2065305,
+      "size": 45676,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0097_steam.wav"
+    },
+    {
+      "index": 98,
+      "name": "SPLASH",
+      "offset": 2110981,
+      "size": 24268,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0098_SPLASH.wav"
+    },
+    {
+      "index": 99,
+      "name": "fanstartup",
+      "offset": 2135249,
+      "size": 83194,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0099_fanstartup.wav"
+    },
+    {
+      "index": 100,
+      "name": "warble",
+      "offset": 2218443,
+      "size": 4868,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0100_warble.wav"
+    },
+    {
+      "index": 101,
+      "name": "plutonium2",
+      "offset": 2227531,
+      "size": 24042,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0101_plutonium2.wav"
+    },
+    {
+      "index": 102,
+      "name": "jimmyself12",
+      "offset": 2251573,
+      "size": 25228,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0102_jimmyself12.wav"
+    },
+    {
+      "index": 103,
+      "name": "jimmyitem1",
+      "offset": 2280249,
+      "size": 11942,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0103_jimmyitem1.wav"
+    },
+    {
+      "index": 104,
+      "name": "jimmyitem10",
+      "offset": 2292191,
+      "size": 16864,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0104_jimmyitem10.wav"
+    },
+    {
+      "index": 105,
+      "name": "rocket fly",
+      "offset": 2310705,
+      "size": 22398,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0105_rocket_fly.wav"
+    },
+    {
+      "index": 106,
+      "name": "audio_106",
+      "offset": 2333103,
+      "size": 992,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0106_audio_106.wav"
+    },
+    {
+      "index": 107,
+      "name": "SHUTDOWN",
+      "offset": 2335021,
+      "size": 42756,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0107_SHUTDOWN.wav"
+    },
+    {
+      "index": 108,
+      "name": "rocketship",
+      "offset": 2377777,
+      "size": 64364,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0108_rocketship.wav"
+    },
+    {
+      "index": 109,
+      "name": "pickup2",
+      "offset": 2442141,
+      "size": 18978,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0109_pickup2.wav"
+    },
+    {
+      "index": 110,
+      "name": "pain agh ahh",
+      "offset": 2461119,
+      "size": 15340,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0110_pain_agh_ahh.wav"
+    },
+    {
+      "index": 111,
+      "name": "jimmyrocket3",
+      "offset": 2479951,
+      "size": 36278,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0111_jimmyrocket3.wav"
+    },
+    {
+      "index": 112,
+      "name": "jimmyself2",
+      "offset": 2516229,
+      "size": 55796,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0112_jimmyself2.wav"
+    },
+    {
+      "index": 113,
+      "name": "jimmyself24",
+      "offset": 2572025,
+      "size": 34240,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0113_jimmyself24.wav"
+    },
+    {
+      "index": 114,
+      "name": "jimmyself26",
+      "offset": 2606265,
+      "size": 15848,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0114_jimmyself26.wav"
+    },
+    {
+      "index": 115,
+      "name": "arcade whistle2",
+      "offset": 2622113,
+      "size": 9178,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0115_arcade_whistle2.wav"
+    },
+    {
+      "index": 116,
+      "name": "steps mud",
+      "offset": 2631307,
+      "size": 11754,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0116_steps_mud.wav"
+    },
+    {
+      "index": 117,
+      "name": "jimmyexp4",
+      "offset": 2645959,
+      "size": 45652,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0117_jimmyexp4.wav"
+    },
+    {
+      "index": 118,
+      "name": "pop arcade",
+      "offset": 2691611,
+      "size": 9242,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0118_pop_arcade.wav"
+    },
+    {
+      "index": 119,
+      "name": "jimmydarwin2",
+      "offset": 2701549,
+      "size": 33184,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0119_jimmydarwin2.wav"
+    },
+    {
+      "index": 120,
+      "name": "door closing",
+      "offset": 2734733,
+      "size": 25626,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0120_door_closing.wav"
+    },
+    {
+      "index": 121,
+      "name": "jimmywrench1",
+      "offset": 2761697,
+      "size": 73888,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0121_jimmywrench1.wav"
+    },
+    {
+      "index": 122,
+      "name": "fan exhaust",
+      "offset": 2835585,
+      "size": 55102,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0122_fan_exhaust.wav"
+    },
+    {
+      "index": 123,
+      "name": "cans fall",
+      "offset": 2890687,
+      "size": 17850,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0123_cans_fall.wav"
+    },
+    {
+      "index": 124,
+      "name": "sinkdr",
+      "offset": 2911445,
+      "size": 44250,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0124_sinkdr.wav"
+    },
+    {
+      "index": 125,
+      "name": "book",
+      "offset": 2955695,
+      "size": 13776,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0125_book.wav"
+    },
+    {
+      "index": 126,
+      "name": "steps dirt",
+      "offset": 2969471,
+      "size": 11824,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0126_steps_dirt.wav"
+    },
+    {
+      "index": 127,
+      "name": "evil laugh",
+      "offset": 2982995,
+      "size": 46164,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0127_evil_laugh.wav"
+    },
+    {
+      "index": 128,
+      "name": "arcade can fall1",
+      "offset": 3029159,
+      "size": 25786,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0128_arcade_can_fall1.wav"
+    },
+    {
+      "index": 129,
+      "name": "Piano",
+      "offset": 3057299,
+      "size": 61562,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0129_Piano.wav"
+    },
+    {
+      "index": 130,
+      "name": "fanloop",
+      "offset": 3118861,
+      "size": 22464,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0130_fanloop.wav"
+    },
+    {
+      "index": 131,
+      "name": "RetroLandWorker15",
+      "offset": 3142147,
+      "size": 24280,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0131_RetroLandWorker15.wav"
+    },
+    {
+      "index": 132,
+      "name": "radio tune",
+      "offset": 3170219,
+      "size": 47418,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0132_radio_tune.wav"
+    },
+    {
+      "index": 133,
+      "name": "steps leaves",
+      "offset": 3217637,
+      "size": 11846,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0133_steps_leaves.wav"
+    },
+    {
+      "index": 134,
+      "name": "yokiansoldier1",
+      "offset": 3229483,
+      "size": 58418,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0134_yokiansoldier1.wav"
+    },
+    {
+      "index": 135,
+      "name": "vrhit",
+      "offset": 3287901,
+      "size": 7502,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0135_vrhit.wav"
+    },
+    {
+      "index": 136,
+      "name": "stalagtite fal",
+      "offset": 3296689,
+      "size": 69036,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0136_stalagtite_fal.wav"
+    },
+    {
+      "index": 137,
+      "name": "winning prize2",
+      "offset": 3365725,
+      "size": 59808,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0137_winning_prize2.wav"
+    },
+    {
+      "index": 138,
+      "name": "jimmyself22",
+      "offset": 3425533,
+      "size": 16716,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0138_jimmyself22.wav"
+    },
+    {
+      "index": 139,
+      "name": "jimmyself25",
+      "offset": 3443413,
+      "size": 24778,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0139_jimmyself25.wav"
+    },
+    {
+      "index": 140,
+      "name": "pipe",
+      "offset": 3468191,
+      "size": 19908,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0140_pipe.wav"
+    },
+    {
+      "index": 141,
+      "name": "vox talk",
+      "offset": 3488099,
+      "size": 33932,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0141_vox_talk.wav"
+    },
+    {
+      "index": 142,
+      "name": "change return",
+      "offset": 3522031,
+      "size": 10516,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0142_change_return.wav"
+    },
+    {
+      "index": 143,
+      "name": "jimmycoal3",
+      "offset": 3532617,
+      "size": 30934,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0143_jimmycoal3.wav"
+    },
+    {
+      "index": 144,
+      "name": "jimmyself27",
+      "offset": 3563551,
+      "size": 26798,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0144_jimmyself27.wav"
+    },
+    {
+      "index": 145,
+      "name": "water fall",
+      "offset": 3590349,
+      "size": 81342,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0145_water_fall.wav"
+    },
+    {
+      "index": 146,
+      "name": "tankfire",
+      "offset": 3671691,
+      "size": 6300,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0146_tankfire.wav"
+    },
+    {
+      "index": 147,
+      "name": "jimmygoddard6",
+      "offset": 3680143,
+      "size": 29114,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0147_jimmygoddard6.wav"
+    },
+    {
+      "index": 148,
+      "name": "wbgun",
+      "offset": 3709257,
+      "size": 6508,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0148_wbgun.wav"
+    },
+    {
+      "index": 149,
+      "name": "rock explosion1",
+      "offset": 3716483,
+      "size": 59514,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0149_rock_explosion1.wav"
+    },
+    {
+      "index": 150,
+      "name": "rock explosion2",
+      "offset": 3775997,
+      "size": 37946,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0150_rock_explosion2.wav"
+    },
+    {
+      "index": 151,
+      "name": "pickup3",
+      "offset": 3813943,
+      "size": 14630,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0151_pickup3.wav"
+    },
+    {
+      "index": 152,
+      "name": "exhaust fan",
+      "offset": 3830807,
+      "size": 21498,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0152_exhaust_fan.wav"
+    },
+    {
+      "index": 153,
+      "name": "pain agh agh",
+      "offset": 3852305,
+      "size": 11948,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0153_pain_agh_agh.wav"
+    },
+    {
+      "index": 154,
+      "name": "offbed",
+      "offset": 3864253,
+      "size": 29738,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0154_offbed.wav"
+    },
+    {
+      "index": 155,
+      "name": "jimmyself28",
+      "offset": 3893991,
+      "size": 17042,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0155_jimmyself28.wav"
+    },
+    {
+      "index": 156,
+      "name": "china",
+      "offset": 3913099,
+      "size": 34856,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0156_china.wav"
+    },
+    {
+      "index": 157,
+      "name": "voxentrance",
+      "offset": 3947955,
+      "size": 38090,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0157_voxentrance.wav"
+    },
+    {
+      "index": 158,
+      "name": "candybar",
+      "offset": 3986121,
+      "size": 40918,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0158_candybar.wav"
+    },
+    {
+      "index": 159,
+      "name": "fridge",
+      "offset": 4027039,
+      "size": 23142,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0159_fridge.wav"
+    },
+    {
+      "index": 160,
+      "name": "RetroLandWorker20",
+      "offset": 4050181,
+      "size": 41814,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0160_RetroLandWorker20.wav"
+    },
+    {
+      "index": 161,
+      "name": "pain ah agh aww",
+      "offset": 4091995,
+      "size": 15756,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0161_pain_ah_agh_aww.wav"
+    },
+    {
+      "index": 162,
+      "name": "audio_162",
+      "offset": 4107751,
+      "size": 992,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0162_audio_162.wav"
+    },
+    {
+      "index": 163,
+      "name": "operator check number",
+      "offset": 4108743,
+      "size": 40514,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0163_operator_check_number.wav"
+    },
+    {
+      "index": 164,
+      "name": "umph climb",
+      "offset": 4149257,
+      "size": 16976,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0164_umph_climb.wav"
+    },
+    {
+      "index": 165,
+      "name": "raptorwalk",
+      "offset": 4166233,
+      "size": 5882,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0165_raptorwalk.wav"
+    },
+    {
+      "index": 166,
+      "name": "RetroLandWorker19",
+      "offset": 4174613,
+      "size": 24906,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0166_RetroLandWorker19.wav"
+    },
+    {
+      "index": 167,
+      "name": "dogbone",
+      "offset": 4199519,
+      "size": 17588,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0167_dogbone.wav"
+    },
+    {
+      "index": 168,
+      "name": "rocket hit",
+      "offset": 4220577,
+      "size": 14764,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0168_rocket_hit.wav"
+    },
+    {
+      "index": 169,
+      "name": "shrubs",
+      "offset": 4235341,
+      "size": 10700,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0169_shrubs.wav"
+    },
+    {
+      "index": 170,
+      "name": "leaves",
+      "offset": 4246367,
+      "size": 32952,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0170_leaves.wav"
+    },
+    {
+      "index": 171,
+      "name": "cheering",
+      "offset": 4279319,
+      "size": 60076,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0171_cheering.wav"
+    },
+    {
+      "index": 172,
+      "name": "yokianteleport",
+      "offset": 4339395,
+      "size": 112404,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0172_yokianteleport.wav"
+    },
+    {
+      "index": 173,
+      "name": "computer",
+      "offset": 4451799,
+      "size": 49008,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0173_computer.wav"
+    },
+    {
+      "index": 174,
+      "name": "savecarl1",
+      "offset": 4500807,
+      "size": 34608,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0174_savecarl1.wav"
+    },
+    {
+      "index": 175,
+      "name": "operator",
+      "offset": 4535415,
+      "size": 15074,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0175_operator.wav"
+    },
+    {
+      "index": 176,
+      "name": "AlertLoop",
+      "offset": 4550489,
+      "size": 14296,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0176_AlertLoop.wav"
+    },
+    {
+      "index": 177,
+      "name": "vrzap",
+      "offset": 4564785,
+      "size": 9324,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0177_vrzap.wav"
+    },
+    {
+      "index": 178,
+      "name": "doorknob",
+      "offset": 4575749,
+      "size": 28382,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0178_doorknob.wav"
+    },
+    {
+      "index": 179,
+      "name": "turret shot",
+      "offset": 4604131,
+      "size": 29754,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0179_turret_shot.wav"
+    },
+    {
+      "index": 180,
+      "name": "cake1",
+      "offset": 4634459,
+      "size": 15554,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0180_cake1.wav"
+    },
+    {
+      "index": 181,
+      "name": "jimmyflower1",
+      "offset": 4650491,
+      "size": 22572,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0181_jimmyflower1.wav"
+    },
+    {
+      "index": 182,
+      "name": "coin1",
+      "offset": 4673063,
+      "size": 19154,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0182_coin1.wav"
+    },
+    {
+      "index": 183,
+      "name": "knocking",
+      "offset": 4692845,
+      "size": 44218,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0183_knocking.wav"
+    },
+    {
+      "index": 184,
+      "name": "steps concrete",
+      "offset": 4737063,
+      "size": 11832,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0184_steps_concrete.wav"
+    },
+    {
+      "index": 185,
+      "name": "tinfoil",
+      "offset": 4748895,
+      "size": 14380,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0185_tinfoil.wav"
+    },
+    {
+      "index": 186,
+      "name": "sodamachine",
+      "offset": 4763275,
+      "size": 31126,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0186_sodamachine.wav"
+    },
+    {
+      "index": 187,
+      "name": "jimmyself13",
+      "offset": 4794401,
+      "size": 21746,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0187_jimmyself13.wav"
+    },
+    {
+      "index": 188,
+      "name": "steps deck",
+      "offset": 4818279,
+      "size": 11838,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0188_steps_deck.wav"
+    },
+    {
+      "index": 189,
+      "name": "boing",
+      "offset": 4834349,
+      "size": 12970,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0189_boing.wav"
+    },
+    {
+      "index": 190,
+      "name": "jimmypie1",
+      "offset": 4847319,
+      "size": 47940,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0190_jimmypie1.wav"
+    },
+    {
+      "index": 191,
+      "name": "jimmypie2",
+      "offset": 4895259,
+      "size": 17484,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0191_jimmypie2.wav"
+    },
+    {
+      "index": 192,
+      "name": "jimmycoal4",
+      "offset": 4912743,
+      "size": 31668,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0192_jimmycoal4.wav"
+    },
+    {
+      "index": 193,
+      "name": "cranedrop",
+      "offset": 4944411,
+      "size": 4816,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0193_cranedrop.wav"
+    },
+    {
+      "index": 194,
+      "name": "jimmydarwin1",
+      "offset": 4949431,
+      "size": 35850,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0194_jimmydarwin1.wav"
+    },
+    {
+      "index": 195,
+      "name": "pigbank1",
+      "offset": 4985281,
+      "size": 22564,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0195_pigbank1.wav"
+    },
+    {
+      "index": 196,
+      "name": "jimmyexp1",
+      "offset": 5012173,
+      "size": 44550,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0196_jimmyexp1.wav"
+    },
+    {
+      "index": 197,
+      "name": "jimmyexp11",
+      "offset": 5056723,
+      "size": 17004,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0197_jimmyexp11.wav"
+    },
+    {
+      "index": 198,
+      "name": "jimmypie3",
+      "offset": 5073727,
+      "size": 24506,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0198_jimmypie3.wav"
+    },
+    {
+      "index": 199,
+      "name": "climbwood",
+      "offset": 5099617,
+      "size": 23792,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0199_climbwood.wav"
+    },
+    {
+      "index": 200,
+      "name": "sodacan",
+      "offset": 5123409,
+      "size": 22412,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0200_sodacan.wav"
+    },
+    {
+      "index": 201,
+      "name": "retrotickets",
+      "offset": 5145821,
+      "size": 30566,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0201_retrotickets.wav"
+    },
+    {
+      "index": 202,
+      "name": "goddardtrash",
+      "offset": 5176387,
+      "size": 18828,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0202_goddardtrash.wav"
+    },
+    {
+      "index": 203,
+      "name": "rocket blast",
+      "offset": 5197349,
+      "size": 22148,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0203_rocket_blast.wav"
+    },
+    {
+      "index": 204,
+      "name": "jimmyapple1",
+      "offset": 5219497,
+      "size": 43534,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0204_jimmyapple1.wav"
+    },
+    {
+      "index": 205,
+      "name": "jimmystore09",
+      "offset": 5263031,
+      "size": 13668,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0205_jimmystore09.wav"
+    },
+    {
+      "index": 206,
+      "name": "turbo",
+      "offset": 5276699,
+      "size": 11436,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0206_turbo.wav"
+    },
+    {
+      "index": 207,
+      "name": "vendingmachine1",
+      "offset": 5288833,
+      "size": 53626,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0207_vendingmachine1.wav"
+    },
+    {
+      "index": 208,
+      "name": "cat hiss",
+      "offset": 5342459,
+      "size": 19834,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0208_cat_hiss.wav"
+    },
+    {
+      "index": 209,
+      "name": "jimmyself3",
+      "offset": 5362367,
+      "size": 26982,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0209_jimmyself3.wav"
+    },
+    {
+      "index": 210,
+      "name": "audio_210",
+      "offset": 5389349,
+      "size": 992,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0210_audio_210.wav"
+    },
+    {
+      "index": 211,
+      "name": "jimmyhydrant1b",
+      "offset": 5390341,
+      "size": 46596,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0211_jimmyhydrant1b.wav"
+    },
+    {
+      "index": 212,
+      "name": "water stream",
+      "offset": 5436937,
+      "size": 50110,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0212_water_stream.wav"
+    },
+    {
+      "index": 213,
+      "name": "electric spark",
+      "offset": 5487047,
+      "size": 17310,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0213_electric_spark.wav"
+    },
+    {
+      "index": 214,
+      "name": "jimmy more candy",
+      "offset": 5506881,
+      "size": 20306,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0214_jimmy_more_candy.wav"
+    },
+    {
+      "index": 215,
+      "name": "banana1",
+      "offset": 5530945,
+      "size": 21290,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0215_banana1.wav"
+    },
+    {
+      "index": 216,
+      "name": "toilet1",
+      "offset": 5552235,
+      "size": 192634,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0216_toilet1.wav"
+    },
+    {
+      "index": 217,
+      "name": "suv1",
+      "offset": 5744869,
+      "size": 22766,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0217_suv1.wav"
+    },
+    {
+      "index": 218,
+      "name": "cranerun",
+      "offset": 5767635,
+      "size": 11768,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0218_cranerun.wav"
+    },
+    {
+      "index": 219,
+      "name": "objective sound",
+      "offset": 5779809,
+      "size": 26202,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0219_objective_sound.wav"
+    },
+    {
+      "index": 220,
+      "name": "keywhoosh",
+      "offset": 5806011,
+      "size": 10394,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0220_keywhoosh.wav"
+    },
+    {
+      "index": 221,
+      "name": "cash register",
+      "offset": 5818703,
+      "size": 35194,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0221_cash_register.wav"
+    },
+    {
+      "index": 222,
+      "name": "voxtele1",
+      "offset": 5853897,
+      "size": 85360,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0222_voxtele1.wav"
+    },
+    {
+      "index": 223,
+      "name": "bark humphrey",
+      "offset": 5939257,
+      "size": 30682,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0223_bark_humphrey.wav"
+    },
+    {
+      "index": 224,
+      "name": "slide",
+      "offset": 5969939,
+      "size": 10040,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0224_slide.wav"
+    },
+    {
+      "index": 225,
+      "name": "bus screams",
+      "offset": 5981591,
+      "size": 25720,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0225_bus_screams.wav"
+    },
+    {
+      "index": 226,
+      "name": "humphrey growl",
+      "offset": 6007311,
+      "size": 32396,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0226_humphrey_growl.wav"
+    },
+    {
+      "index": 227,
+      "name": "nicks lap completed",
+      "offset": 6042337,
+      "size": 25182,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0227_nicks_lap_completed.wav"
+    },
+    {
+      "index": 228,
+      "name": "voxdna",
+      "offset": 6067519,
+      "size": 46620,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0228_voxdna.wav"
+    },
+    {
+      "index": 229,
+      "name": "jimmycreature2",
+      "offset": 6114139,
+      "size": 35986,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0229_jimmycreature2.wav"
+    },
+    {
+      "index": 230,
+      "name": "tank1",
+      "offset": 6150125,
+      "size": 16076,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0230_tank1.wav"
+    },
+    {
+      "index": 231,
+      "name": "pteroflap",
+      "offset": 6166201,
+      "size": 6442,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0231_pteroflap.wav"
+    },
+    {
+      "index": 232,
+      "name": "suv2",
+      "offset": 6172891,
+      "size": 72314,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0232_suv2.wav"
+    },
+    {
+      "index": 233,
+      "name": "panelopen1",
+      "offset": 6245205,
+      "size": 18956,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0233_panelopen1.wav"
+    },
+    {
+      "index": 234,
+      "name": "bubble boing",
+      "offset": 6265511,
+      "size": 32698,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0234_bubble_boing.wav"
+    },
+    {
+      "index": 235,
+      "name": "low neutron energy",
+      "offset": 6298209,
+      "size": 52972,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0235_low_neutron_energy.wav"
+    },
+    {
+      "index": 236,
+      "name": "bigcarlsound1",
+      "offset": 6351181,
+      "size": 22580,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0236_bigcarlsound1.wav"
+    },
+    {
+      "index": 237,
+      "name": "vox pract disconnect",
+      "offset": 6374867,
+      "size": 106108,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0237_vox_pract_disconnect.wav"
+    },
+    {
+      "index": 238,
+      "name": "yeah",
+      "offset": 6480975,
+      "size": 10188,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0238_yeah.wav"
+    },
+    {
+      "index": 239,
+      "name": "yipee",
+      "offset": 6491163,
+      "size": 12732,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0239_yipee.wav"
+    },
+    {
+      "index": 240,
+      "name": "girl eating plant",
+      "offset": 6507299,
+      "size": 51820,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0240_girl_eating_plant.wav"
+    },
+    {
+      "index": 241,
+      "name": "cuckoo",
+      "offset": 6560323,
+      "size": 28922,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0241_cuckoo.wav"
+    },
+    {
+      "index": 242,
+      "name": "jimmypie4",
+      "offset": 6589245,
+      "size": 33270,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0242_jimmypie4.wav"
+    },
+    {
+      "index": 243,
+      "name": "not available",
+      "offset": 6622515,
+      "size": 5580,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0243_not_available.wav"
+    },
+    {
+      "index": 244,
+      "name": "RetroLandWorker1",
+      "offset": 6629253,
+      "size": 43132,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0244_RetroLandWorker1.wav"
+    },
+    {
+      "index": 245,
+      "name": "waterbutton1",
+      "offset": 6672385,
+      "size": 16140,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0245_waterbutton1.wav"
+    },
+    {
+      "index": 246,
+      "name": "audio_246",
+      "offset": 6689249,
+      "size": 992,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0246_audio_246.wav"
+    },
+    {
+      "index": 247,
+      "name": "no neutron energy",
+      "offset": 6690241,
+      "size": 93212,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0247_no_neutron_energy.wav"
+    },
+    {
+      "index": 248,
+      "name": "cat meow",
+      "offset": 6783453,
+      "size": 49914,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0248_cat_meow.wav"
+    },
+    {
+      "index": 249,
+      "name": "raptorroar",
+      "offset": 6833367,
+      "size": 11758,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0249_raptorroar.wav"
+    },
+    {
+      "index": 250,
+      "name": "RetroLandWorker6",
+      "offset": 6845577,
+      "size": 78708,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0250_RetroLandWorker6.wav"
+    },
+    {
+      "index": 251,
+      "name": "RetroLandWorker7",
+      "offset": 6924285,
+      "size": 36350,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0251_RetroLandWorker7.wav"
+    },
+    {
+      "index": 252,
+      "name": "audio_252",
+      "offset": 6960635,
+      "size": 992,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0252_audio_252.wav"
+    },
+    {
+      "index": 253,
+      "name": "arcade can fall2",
+      "offset": 6961627,
+      "size": 29818,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0253_arcade_can_fall2.wav"
+    },
+    {
+      "index": 254,
+      "name": "chuteopen",
+      "offset": 6991445,
+      "size": 10476,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0254_chuteopen.wav"
+    },
+    {
+      "index": 255,
+      "name": "RetroLandWorker11",
+      "offset": 7003985,
+      "size": 31174,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0255_RetroLandWorker11.wav"
+    },
+    {
+      "index": 256,
+      "name": "treasure2",
+      "offset": 7035159,
+      "size": 22908,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0256_treasure2.wav"
+    },
+    {
+      "index": 257,
+      "name": "RetroLandWorker16",
+      "offset": 7059439,
+      "size": 28700,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0257_RetroLandWorker16.wav"
+    },
+    {
+      "index": 258,
+      "name": "RetroLandWorker17",
+      "offset": 7088139,
+      "size": 56540,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0258_RetroLandWorker17.wav"
+    },
+    {
+      "index": 259,
+      "name": "RetroLandWorker18",
+      "offset": 7144679,
+      "size": 47464,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0259_RetroLandWorker18.wav"
+    },
+    {
+      "index": 260,
+      "name": "wings flap",
+      "offset": 7192143,
+      "size": 34668,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0260_wings_flap.wav"
+    },
+    {
+      "index": 261,
+      "name": "jimmyself118",
+      "offset": 7226811,
+      "size": 15862,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0261_jimmyself118.wav"
+    },
+    {
+      "index": 262,
+      "name": "jetyell",
+      "offset": 7242673,
+      "size": 32262,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0262_jetyell.wav"
+    },
+    {
+      "index": 263,
+      "name": "jimmyself82",
+      "offset": 7274935,
+      "size": 7452,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0263_jimmyself82.wav"
+    },
+    {
+      "index": 264,
+      "name": "arcade cans crash",
+      "offset": 7282421,
+      "size": 41402,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0264_arcade_cans_crash.wav"
+    },
+    {
+      "index": 265,
+      "name": "trex growl",
+      "offset": 7323823,
+      "size": 78842,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0265_trex_growl.wav"
+    },
+    {
+      "index": 266,
+      "name": "Door opening loop",
+      "offset": 7402665,
+      "size": 72698,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0266_Door_opening_loop.wav"
+    },
+    {
+      "index": 267,
+      "name": "sheenhi",
+      "offset": 7475363,
+      "size": 7564,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0267_sheenhi.wav"
+    },
+    {
+      "index": 268,
+      "name": "cheer small crowd",
+      "offset": 7483145,
+      "size": 66426,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0268_cheer_small_crowd.wav"
+    },
+    {
+      "index": 269,
+      "name": "stonedoorclose",
+      "offset": 7549571,
+      "size": 22856,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0269_stonedoorclose.wav"
+    },
+    {
+      "index": 270,
+      "name": "voxphone4",
+      "offset": 7575291,
+      "size": 147802,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0270_voxphone4.wav"
+    },
+    {
+      "index": 271,
+      "name": "darwin noises",
+      "offset": 7723093,
+      "size": 36606,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0271_darwin_noises.wav"
+    },
+    {
+      "index": 272,
+      "name": "end cheer crowd",
+      "offset": 7763329,
+      "size": 213036,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0272_end_cheer_crowd.wav"
+    },
+    {
+      "index": 273,
+      "name": "bird chirp",
+      "offset": 7976365,
+      "size": 59534,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0273_bird_chirp.wav"
+    },
+    {
+      "index": 274,
+      "name": "yokian shrunk4",
+      "offset": 8035899,
+      "size": 31676,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0274_yokian_shrunk4.wav"
+    },
+    {
+      "index": 275,
+      "name": "alarm human boy stop",
+      "offset": 8072505,
+      "size": 52332,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0275_alarm_human_boy_stop.wav"
+    },
+    {
+      "index": 276,
+      "name": "lampost",
+      "offset": 8124837,
+      "size": 10860,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0276_lampost.wav"
+    },
+    {
+      "index": 277,
+      "name": "no neutron teleport",
+      "offset": 8135857,
+      "size": 230026,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0277_no_neutron_teleport.wav"
+    },
+    {
+      "index": 278,
+      "name": "construction ambience",
+      "offset": 8365883,
+      "size": 151930,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0278_construction_ambience.wav"
+    },
+    {
+      "index": 279,
+      "name": "telemetry1",
+      "offset": 8517813,
+      "size": 68136,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0279_telemetry1.wav"
+    },
+    {
+      "index": 280,
+      "name": "scratch ass",
+      "offset": 8585949,
+      "size": 55270,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0280_scratch_ass.wav"
+    },
+    {
+      "index": 281,
+      "name": "ropeclimb",
+      "offset": 8641219,
+      "size": 8860,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0281_ropeclimb.wav"
+    },
+    {
+      "index": 282,
+      "name": "holon",
+      "offset": 8650355,
+      "size": 89864,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0282_holon.wav"
+    },
+    {
+      "index": 283,
+      "name": "cranestart",
+      "offset": 8740219,
+      "size": 12148,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0283_cranestart.wav"
+    },
+    {
+      "index": 284,
+      "name": "yokian shrunk3",
+      "offset": 8756702,
+      "size": 30914,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0284_yokian_shrunk3.wav"
+    },
+    {
+      "index": 285,
+      "name": "audio_285",
+      "offset": 8787616,
+      "size": 45108,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0285_audio_285.wav"
+    },
+    {
+      "index": 286,
+      "name": "tv distortion",
+      "offset": 8795051,
+      "size": 149164,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0286_tv_distortion.wav"
+    },
+    {
+      "index": 287,
+      "name": "xylophone",
+      "offset": 8944215,
+      "size": 31930,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0287_xylophone.wav"
+    },
+    {
+      "index": 288,
+      "name": "Computer ambient",
+      "offset": 8976611,
+      "size": 137840,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0288_Computer_ambient.wav"
+    },
+    {
+      "index": 289,
+      "name": "jimmyself103",
+      "offset": 9114451,
+      "size": 13876,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0289_jimmyself103.wav"
+    },
+    {
+      "index": 290,
+      "name": "jimmyself77",
+      "offset": 9128327,
+      "size": 7920,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0290_jimmyself77.wav"
+    },
+    {
+      "index": 291,
+      "name": "fanoff",
+      "offset": 9136915,
+      "size": 96516,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0291_fanoff.wav"
+    },
+    {
+      "index": 292,
+      "name": "water stream",
+      "offset": 9233431,
+      "size": 78270,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0292_water_stream.wav"
+    },
+    {
+      "index": 293,
+      "name": "jimmy yahoo",
+      "offset": 9311701,
+      "size": 42668,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0293_jimmy_yahoo.wav"
+    },
+    {
+      "index": 294,
+      "name": "pendulum",
+      "offset": 9354369,
+      "size": 19004,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0294_pendulum.wav"
+    },
+    {
+      "index": 295,
+      "name": "cave drip",
+      "offset": 9378451,
+      "size": 157818,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0295_cave_drip.wav"
+    },
+    {
+      "index": 296,
+      "name": "drilling",
+      "offset": 9536269,
+      "size": 88254,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0296_drilling.wav"
+    },
+    {
+      "index": 297,
+      "name": "eerie alien sound",
+      "offset": 9624523,
+      "size": 119742,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0297_eerie_alien_sound.wav"
+    },
+    {
+      "index": 298,
+      "name": "eerie tunnel",
+      "offset": 9744265,
+      "size": 89278,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0298_eerie_tunnel.wav"
+    },
+    {
+      "index": 299,
+      "name": "eerie wind",
+      "offset": 9833543,
+      "size": 92352,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0299_eerie_wind.wav"
+    },
+    {
+      "index": 300,
+      "name": "audio_300",
+      "offset": 9925895,
+      "size": 992,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0300_audio_300.wav"
+    },
+    {
+      "index": 301,
+      "name": "audio_301",
+      "offset": 9926887,
+      "size": 992,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0301_audio_301.wav"
+    },
+    {
+      "index": 302,
+      "name": "flag waving",
+      "offset": 9927879,
+      "size": 74942,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0302_flag_waving.wav"
+    },
+    {
+      "index": 303,
+      "name": "jimmytarzan",
+      "offset": 10002821,
+      "size": 28424,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0303_jimmytarzan.wav"
+    },
+    {
+      "index": 304,
+      "name": "yokian shrunk2",
+      "offset": 10031245,
+      "size": 39608,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0304_yokian_shrunk2.wav"
+    },
+    {
+      "index": 305,
+      "name": "dinodown",
+      "offset": 10070853,
+      "size": 14476,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0305_dinodown.wav"
+    },
+    {
+      "index": 306,
+      "name": "LavaCaveLoop",
+      "offset": 10085761,
+      "size": 117226,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0306_LavaCaveLoop.wav"
+    },
+    {
+      "index": 307,
+      "name": "yokian shrunk1",
+      "offset": 10202987,
+      "size": 52990,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0307_yokian_shrunk1.wav"
+    },
+    {
+      "index": 308,
+      "name": "labthrob",
+      "offset": 10255977,
+      "size": 77808,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0308_labthrob.wav"
+    },
+    {
+      "index": 309,
+      "name": "jimmy dizzy",
+      "offset": 10338253,
+      "size": 99442,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0309_jimmy_dizzy.wav"
+    },
+    {
+      "index": 310,
+      "name": "typing idle",
+      "offset": 10437695,
+      "size": 130810,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0310_typing_idle.wav"
+    },
+    {
+      "index": 311,
+      "name": "underwater",
+      "offset": 10568505,
+      "size": 121712,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0311_underwater.wav"
+    },
+    {
+      "index": 312,
+      "name": "Electricity ambient",
+      "offset": 10690217,
+      "size": 132542,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0312_Electricity_ambient.wav"
+    },
+    {
+      "index": 313,
+      "name": "dinowalk3",
+      "offset": 10822759,
+      "size": 12740,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0313_dinowalk3.wav"
+    },
+    {
+      "index": 314,
+      "name": "jimmylab01",
+      "offset": 10835499,
+      "size": 24062,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0314_jimmylab01.wav"
+    },
+    {
+      "index": 315,
+      "name": "harley1",
+      "offset": 10859561,
+      "size": 8124,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0315_harley1.wav"
+    },
+    {
+      "index": 316,
+      "name": "sandstorm",
+      "offset": 10873543,
+      "size": 114220,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0316_sandstorm.wav"
+    },
+    {
+      "index": 317,
+      "name": "jimmyself08",
+      "offset": 10992189,
+      "size": 337052,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0317_jimmyself08.wav"
+    },
+    {
+      "index": 318,
+      "name": "jimmyself11",
+      "offset": 11329241,
+      "size": 153468,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0318_jimmyself11.wav"
+    },
+    {
+      "index": 319,
+      "name": "jimmyself14",
+      "offset": 11482709,
+      "size": 78972,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0319_jimmyself14.wav"
+    },
+    {
+      "index": 320,
+      "name": "rocketcrash",
+      "offset": 11561681,
+      "size": 14396,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0320_rocketcrash.wav"
+    },
+    {
+      "index": 321,
+      "name": "pelitalk",
+      "offset": 11577029,
+      "size": 35196,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0321_pelitalk.wav"
+    },
+    {
+      "index": 322,
+      "name": "subcrash2",
+      "offset": 11612225,
+      "size": 17612,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0322_subcrash2.wav"
+    },
+    {
+      "index": 323,
+      "name": "jimmyself75",
+      "offset": 11629837,
+      "size": 9560,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0323_jimmyself75.wav"
+    },
+    {
+      "index": 324,
+      "name": "jimmyself12",
+      "offset": 11640487,
+      "size": 166156,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0324_jimmyself12.wav"
+    },
+    {
+      "index": 325,
+      "name": "jimmyself17",
+      "offset": 11806643,
+      "size": 81276,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0325_jimmyself17.wav"
+    },
+    {
+      "index": 326,
+      "name": "tot2",
+      "offset": 11887919,
+      "size": 34492,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0326_tot2.wav"
+    },
+    {
+      "index": 327,
+      "name": "blockmove",
+      "offset": 11922411,
+      "size": 77356,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0327_blockmove.wav"
+    },
+    {
+      "index": 328,
+      "name": "tilefall",
+      "offset": 11999767,
+      "size": 33590,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0328_tilefall.wav"
+    },
+    {
+      "index": 329,
+      "name": "stopwatch",
+      "offset": 12033357,
+      "size": 16670,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0329_stopwatch.wav"
+    },
+    {
+      "index": 330,
+      "name": "jimmyself64",
+      "offset": 12050027,
+      "size": 14384,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0330_jimmyself64.wav"
+    },
+    {
+      "index": 331,
+      "name": "needfood",
+      "offset": 12070557,
+      "size": 17804,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0331_needfood.wav"
+    },
+    {
+      "index": 332,
+      "name": "cindyghost",
+      "offset": 12088361,
+      "size": 18042,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0332_cindyghost.wav"
+    },
+    {
+      "index": 333,
+      "name": "bigcarlsound2",
+      "offset": 12108287,
+      "size": 37958,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0333_bigcarlsound2.wav"
+    },
+    {
+      "index": 334,
+      "name": "jimmyvr03",
+      "offset": 12146245,
+      "size": 38064,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0334_jimmyvr03.wav"
+    },
+    {
+      "index": 335,
+      "name": "needcrystal",
+      "offset": 12184309,
+      "size": 12382,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0335_needcrystal.wav"
+    },
+    {
+      "index": 336,
+      "name": "jimmyself16",
+      "offset": 12197377,
+      "size": 73604,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0336_jimmyself16.wav"
+    },
+    {
+      "index": 337,
+      "name": "sheenghost",
+      "offset": 12270981,
+      "size": 28254,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0337_sheenghost.wav"
+    },
+    {
+      "index": 338,
+      "name": "tentacle",
+      "offset": 12299235,
+      "size": 17816,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0338_tentacle.wav"
+    },
+    {
+      "index": 339,
+      "name": "pterodown",
+      "offset": 12317051,
+      "size": 16012,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0339_pterodown.wav"
+    },
+    {
+      "index": 340,
+      "name": "waterstart",
+      "offset": 12333191,
+      "size": 44268,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0340_waterstart.wav"
+    },
+    {
+      "index": 341,
+      "name": "waterfalls",
+      "offset": 12377459,
+      "size": 44156,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0341_waterfalls.wav"
+    },
+    {
+      "index": 342,
+      "name": "swim",
+      "offset": 12421615,
+      "size": 44076,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0342_swim.wav"
+    },
+    {
+      "index": 343,
+      "name": "sloshing",
+      "offset": 12465691,
+      "size": 101628,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0343_sloshing.wav"
+    },
+    {
+      "index": 344,
+      "name": "treasure1",
+      "offset": 12567319,
+      "size": 25340,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0344_treasure1.wav"
+    },
+    {
+      "index": 345,
+      "name": "dinoroar",
+      "offset": 12592659,
+      "size": 22156,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0345_dinoroar.wav"
+    },
+    {
+      "index": 346,
+      "name": "jimmyself73",
+      "offset": 12614815,
+      "size": 10066,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0346_jimmyself73.wav"
+    },
+    {
+      "index": 347,
+      "name": "pteroroar",
+      "offset": 12626065,
+      "size": 28588,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0347_pteroroar.wav"
+    },
+    {
+      "index": 348,
+      "name": "towerslosh",
+      "offset": 12654653,
+      "size": 18534,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0348_towerslosh.wav"
+    },
+    {
+      "index": 349,
+      "name": "Hum",
+      "offset": 12680011,
+      "size": 232492,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0349_Hum.wav"
+    },
+    {
+      "index": 350,
+      "name": "dinowalk2",
+      "offset": 12912503,
+      "size": 93244,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0350_dinowalk2.wav"
+    },
+    {
+      "index": 351,
+      "name": "dinowalk",
+      "offset": 13005747,
+      "size": 93244,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0351_dinowalk.wav"
+    },
+    {
+      "index": 352,
+      "name": "dinodown2",
+      "offset": 13098991,
+      "size": 36494,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0352_dinodown2.wav"
+    },
+    {
+      "index": 353,
+      "name": "trainloop",
+      "offset": 13135485,
+      "size": 130428,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0353_trainloop.wav"
+    },
+    {
+      "index": 354,
+      "name": "barrelroll",
+      "offset": 13265913,
+      "size": 40492,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0354_barrelroll.wav"
+    },
+    {
+      "index": 355,
+      "name": "billboard",
+      "offset": 13306405,
+      "size": 22334,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0355_billboard.wav"
+    },
+    {
+      "index": 356,
+      "name": "jimmyself66",
+      "offset": 13328739,
+      "size": 14064,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0356_jimmyself66.wav"
+    },
+    {
+      "index": 357,
+      "name": "traintracks",
+      "offset": 13343135,
+      "size": 60076,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0357_traintracks.wav"
+    },
+    {
+      "index": 358,
+      "name": "jimmyself12a",
+      "offset": 13403211,
+      "size": 51890,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0358_jimmyself12a.wav"
+    },
+    {
+      "index": 359,
+      "name": "vulture cry",
+      "offset": 13455101,
+      "size": 45932,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0359_vulture_cry.wav"
+    },
+    {
+      "index": 360,
+      "name": "jimmysub10",
+      "offset": 13501033,
+      "size": 23786,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0360_jimmysub10.wav"
+    },
+    {
+      "index": 361,
+      "name": "afterburner",
+      "offset": 13529515,
+      "size": 32262,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0361_afterburner.wav"
+    },
+    {
+      "index": 362,
+      "name": "woohoo",
+      "offset": 13561777,
+      "size": 17452,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0362_woohoo.wav"
+    },
+    {
+      "index": 363,
+      "name": "burpgun",
+      "offset": 13579229,
+      "size": 21404,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0363_burpgun.wav"
+    },
+    {
+      "index": 364,
+      "name": "sparkler",
+      "offset": 13600633,
+      "size": 104828,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0364_sparkler.wav"
+    },
+    {
+      "index": 365,
+      "name": "fireworks",
+      "offset": 13705461,
+      "size": 136838,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0365_fireworks.wav"
+    },
+    {
+      "index": 366,
+      "name": "ropeswing",
+      "offset": 13842299,
+      "size": 25324,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0366_ropeswing.wav"
+    },
+    {
+      "index": 367,
+      "name": "scanning",
+      "offset": 13867623,
+      "size": 54188,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0367_scanning.wav"
+    },
+    {
+      "index": 368,
+      "name": "nautical",
+      "offset": 13926803,
+      "size": 239612,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0368_nautical.wav"
+    },
+    {
+      "index": 369,
+      "name": "waterspout",
+      "offset": 14166415,
+      "size": 156028,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0369_waterspout.wav"
+    },
+    {
+      "index": 370,
+      "name": "jimmyself70",
+      "offset": 14322443,
+      "size": 10942,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0370_jimmyself70.wav"
+    },
+    {
+      "index": 371,
+      "name": "cranegrab",
+      "offset": 14334591,
+      "size": 17352,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0371_cranegrab.wav"
+    },
+    {
+      "index": 372,
+      "name": "cranelower",
+      "offset": 14351943,
+      "size": 16996,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0372_cranelower.wav"
+    },
+    {
+      "index": 373,
+      "name": "jimmyself28",
+      "offset": 14368939,
+      "size": 39382,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0373_jimmyself28.wav"
+    },
+    {
+      "index": 374,
+      "name": "jimmyself69",
+      "offset": 14408321,
+      "size": 12478,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0374_jimmyself69.wav"
+    },
+    {
+      "index": 375,
+      "name": "jimmyflurp",
+      "offset": 14421975,
+      "size": 16748,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0375_jimmyflurp.wav"
+    },
+    {
+      "index": 376,
+      "name": "jnmuseum02",
+      "offset": 14438723,
+      "size": 22620,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0376_jnmuseum02.wav"
+    },
+    {
+      "index": 377,
+      "name": "jimmyself101",
+      "offset": 14461343,
+      "size": 14564,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0377_jimmyself101.wav"
+    },
+    {
+      "index": 378,
+      "name": "jimmyself83",
+      "offset": 14475907,
+      "size": 13536,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0378_jimmyself83.wav"
+    },
+    {
+      "index": 379,
+      "name": "jnmuseum03",
+      "offset": 14493813,
+      "size": 29652,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0379_jnmuseum03.wav"
+    },
+    {
+      "index": 380,
+      "name": "jimmyself51",
+      "offset": 14525867,
+      "size": 28668,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0380_jimmyself51.wav"
+    },
+    {
+      "index": 381,
+      "name": "carlghost",
+      "offset": 14554535,
+      "size": 21140,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0381_carlghost.wav"
+    },
+    {
+      "index": 382,
+      "name": "libbyghost",
+      "offset": 14575675,
+      "size": 25268,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0382_libbyghost.wav"
+    },
+    {
+      "index": 383,
+      "name": "jimmyself20",
+      "offset": 14605009,
+      "size": 19522,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0383_jimmyself20.wav"
+    },
+    {
+      "index": 384,
+      "name": "jimmyself76",
+      "offset": 14624531,
+      "size": 7616,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0384_jimmyself76.wav"
+    },
+    {
+      "index": 385,
+      "name": "jimmyself13",
+      "offset": 14632655,
+      "size": 41450,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0385_jimmyself13.wav"
+    },
+    {
+      "index": 386,
+      "name": "elevator",
+      "offset": 14674367,
+      "size": 55586,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0386_elevator.wav"
+    },
+    {
+      "index": 387,
+      "name": "fire",
+      "offset": 14729953,
+      "size": 143130,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0387_fire.wav"
+    },
+    {
+      "index": 388,
+      "name": "jimmynick28",
+      "offset": 14873083,
+      "size": 43372,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0388_jimmynick28.wav"
+    },
+    {
+      "index": 389,
+      "name": "jimmyself14a",
+      "offset": 14916455,
+      "size": 17694,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0389_jimmyself14a.wav"
+    },
+    {
+      "index": 390,
+      "name": "jimmyself71",
+      "offset": 14934149,
+      "size": 10962,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0390_jimmyself71.wav"
+    },
+    {
+      "index": 391,
+      "name": "bigcarlsound3",
+      "offset": 14946107,
+      "size": 45132,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0391_bigcarlsound3.wav"
+    },
+    {
+      "index": 392,
+      "name": "fowlyells",
+      "offset": 14991239,
+      "size": 127576,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0392_fowlyells.wav"
+    },
+    {
+      "index": 393,
+      "name": "jimmyvr01",
+      "offset": 15118815,
+      "size": 60406,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0393_jimmyvr01.wav"
+    },
+    {
+      "index": 394,
+      "name": "jimmyself30",
+      "offset": 15179221,
+      "size": 25236,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0394_jimmyself30.wav"
+    },
+    {
+      "index": 395,
+      "name": "jimmyself31",
+      "offset": 15204457,
+      "size": 22346,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0395_jimmyself31.wav"
+    },
+    {
+      "index": 396,
+      "name": "audio_396",
+      "offset": 15226803,
+      "size": 8124,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0396_audio_396.wav"
+    },
+    {
+      "index": 397,
+      "name": "jimmyvr02",
+      "offset": 15236407,
+      "size": 91304,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0397_jimmyvr02.wav"
+    },
+    {
+      "index": 398,
+      "name": "jimmyself06d",
+      "offset": 15327711,
+      "size": 66686,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0398_jimmyself06d.wav"
+    },
+    {
+      "index": 399,
+      "name": "jimmyself32",
+      "offset": 15394397,
+      "size": 20828,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0399_jimmyself32.wav"
+    },
+    {
+      "index": 400,
+      "name": "jimmyself33",
+      "offset": 15415225,
+      "size": 32262,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0400_jimmyself33.wav"
+    },
+    {
+      "index": 401,
+      "name": "jimmyself34",
+      "offset": 15447487,
+      "size": 21838,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0401_jimmyself34.wav"
+    },
+    {
+      "index": 402,
+      "name": "jimmyself35",
+      "offset": 15469325,
+      "size": 19416,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0402_jimmyself35.wav"
+    },
+    {
+      "index": 403,
+      "name": "jimmyself36",
+      "offset": 15488741,
+      "size": 17658,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0403_jimmyself36.wav"
+    },
+    {
+      "index": 404,
+      "name": "jimmyself38",
+      "offset": 15506399,
+      "size": 15772,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0404_jimmyself38.wav"
+    },
+    {
+      "index": 405,
+      "name": "jimmyself42",
+      "offset": 15522171,
+      "size": 30672,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0405_jimmyself42.wav"
+    },
+    {
+      "index": 406,
+      "name": "jimmyself49",
+      "offset": 15552843,
+      "size": 28472,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0406_jimmyself49.wav"
+    },
+    {
+      "index": 407,
+      "name": "jimmyself50",
+      "offset": 15581315,
+      "size": 24882,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0407_jimmyself50.wav"
+    },
+    {
+      "index": 408,
+      "name": "jimmyself52",
+      "offset": 15606197,
+      "size": 36790,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0408_jimmyself52.wav"
+    },
+    {
+      "index": 409,
+      "name": "jimmyself53",
+      "offset": 15642987,
+      "size": 22106,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0409_jimmyself53.wav"
+    },
+    {
+      "index": 410,
+      "name": "jimmyself55",
+      "offset": 15665093,
+      "size": 21814,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0410_jimmyself55.wav"
+    },
+    {
+      "index": 411,
+      "name": "jimmyself56",
+      "offset": 15686907,
+      "size": 22248,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0411_jimmyself56.wav"
+    },
+    {
+      "index": 412,
+      "name": "jimmyself59",
+      "offset": 15709155,
+      "size": 24492,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0412_jimmyself59.wav"
+    },
+    {
+      "index": 413,
+      "name": "jimmyself68",
+      "offset": 15733647,
+      "size": 14890,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0413_jimmyself68.wav"
+    },
+    {
+      "index": 414,
+      "name": "subpiece",
+      "offset": 15748537,
+      "size": 14986,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0414_subpiece.wav"
+    },
+    {
+      "index": 415,
+      "name": "jimmyself79",
+      "offset": 15766995,
+      "size": 21956,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0415_jimmyself79.wav"
+    },
+    {
+      "index": 416,
+      "name": "jimmyself81",
+      "offset": 15788951,
+      "size": 32656,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0416_jimmyself81.wav"
+    },
+    {
+      "index": 417,
+      "name": "jimmyself88",
+      "offset": 15821607,
+      "size": 18200,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0417_jimmyself88.wav"
+    },
+    {
+      "index": 418,
+      "name": "jnmuseum04",
+      "offset": 15839807,
+      "size": 27874,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0418_jnmuseum04.wav"
+    },
+    {
+      "index": 419,
+      "name": "jimmyflurp15",
+      "offset": 15867681,
+      "size": 65980,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0419_jimmyflurp15.wav"
+    },
+    {
+      "index": 420,
+      "name": "getnegatron",
+      "offset": 15933661,
+      "size": 21526,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0420_getnegatron.wav"
+    },
+    {
+      "index": 421,
+      "name": "jnmuseum06",
+      "offset": 15955187,
+      "size": 20658,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0421_jnmuseum06.wav"
+    },
+    {
+      "index": 422,
+      "name": "jimmyself95",
+      "offset": 15981557,
+      "size": 26676,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0422_jimmyself95.wav"
+    },
+    {
+      "index": 423,
+      "name": "jimmyself96",
+      "offset": 16008233,
+      "size": 44064,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0423_jimmyself96.wav"
+    },
+    {
+      "index": 424,
+      "name": "jimmyself100",
+      "offset": 16052297,
+      "size": 24548,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0424_jimmyself100.wav"
+    },
+    {
+      "index": 425,
+      "name": "greenthingy",
+      "offset": 16076845,
+      "size": 20530,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0425_greenthingy.wav"
+    },
+    {
+      "index": 426,
+      "name": "subclaw",
+      "offset": 16097503,
+      "size": 37462,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0426_subclaw.wav"
+    },
+    {
+      "index": 427,
+      "name": "subprop",
+      "offset": 16134965,
+      "size": 29454,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0427_subprop.wav"
+    },
+    {
+      "index": 428,
+      "name": "jimmysmell",
+      "offset": 16164419,
+      "size": 45108,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0428_jimmysmell.wav"
+    },
+    {
+      "index": 429,
+      "name": "audio_429",
+      "offset": 16209527,
+      "size": 13232,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0429_audio_429.wav"
+    },
+    {
+      "index": 430,
+      "name": "jimmyself86",
+      "offset": 16221359,
+      "size": 59978,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0430_jimmyself86.wav"
+    },
+    {
+      "index": 431,
+      "name": "jimmyself121",
+      "offset": 16281337,
+      "size": 76480,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0431_jimmyself121.wav"
+    },
+    {
+      "index": 432,
+      "name": "jimmyself85",
+      "offset": 16357817,
+      "size": 70710,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0432_jimmyself85.wav"
+    },
+    {
+      "index": 433,
+      "name": "jimmyself9",
+      "offset": 16428527,
+      "size": 22764,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0433_jimmyself9.wav"
+    },
+    {
+      "index": 434,
+      "name": "jimmyself63",
+      "offset": 16451291,
+      "size": 27338,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0434_jimmyself63.wav"
+    },
+    {
+      "index": 435,
+      "name": "jimmyself60",
+      "offset": 16478629,
+      "size": 24662,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0435_jimmyself60.wav"
+    },
+    {
+      "index": 436,
+      "name": "jimmyself61",
+      "offset": 16503291,
+      "size": 34258,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0436_jimmyself61.wav"
+    },
+    {
+      "index": 437,
+      "name": "jimmyself62",
+      "offset": 16537549,
+      "size": 22022,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0437_jimmyself62.wav"
+    },
+    {
+      "index": 438,
+      "name": "GRAPLEUP",
+      "offset": 16559571,
+      "size": 13232,
+      "file": "assets/parsed_jnvsjn/soundeffects/soundeffects_audio/0438_GRAPLEUP.wav"
+    }
+  ]
+}

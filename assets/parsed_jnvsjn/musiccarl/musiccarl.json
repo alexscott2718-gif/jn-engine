@@ -1,0 +1,15 @@
+{
+  "file": "/home/scotty/jnvsjn-original/omt/musiccarl.omt",
+  "total_size": 545871,
+  "has_images": false,
+  "has_audio": true,
+  "audio": [
+    {
+      "index": 0,
+      "name": "carlmusic",
+      "offset": 8,
+      "size": 545836,
+      "file": "assets/parsed_jnvsjn/musiccarl/musiccarl_audio/0000_carlmusic.wav"
+    }
+  ]
+}

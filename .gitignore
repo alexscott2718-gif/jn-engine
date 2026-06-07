@@ -57,9 +57,10 @@ assets/glb/omt/gltf_manifest.json
 # (provide your own legitimate copy locally for asset extraction).
 assets/exe/
 
-# Extracted OMT audio (music/voice/sfx, ~70 MB of proprietary media). Kept on
-# disk + regenerable via `tools/extract_all_omt.py --audio`; not committed.
+# Extracted OMT audio (music/voice/sfx, proprietary media). Kept on disk +
+# regenerable via `tools/extract_all_omt.py --audio`; not committed.
 assets/parsed/**/*_audio/
+assets/parsed_jnvsjn/**/*_audio/
 
 # Granny proxy build artifacts (same rationale as instrument/proxy/* above —
 # the DLL can embed the receiver host IP at build time).

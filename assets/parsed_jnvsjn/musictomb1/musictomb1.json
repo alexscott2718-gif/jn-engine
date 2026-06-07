@@ -1,0 +1,57 @@
+{
+  "file": "/home/scotty/jnvsjn-original/omt/musictomb1.omt",
+  "total_size": 2106197,
+  "has_images": false,
+  "has_audio": true,
+  "audio": [
+    {
+      "index": 0,
+      "name": "tomb1",
+      "offset": 35,
+      "size": 651308,
+      "file": "assets/parsed_jnvsjn/musictomb1/musictomb1_audio/0000_tomb1.wav"
+    },
+    {
+      "index": 1,
+      "name": "underwater",
+      "offset": 651343,
+      "size": 60912,
+      "file": "assets/parsed_jnvsjn/musictomb1/musictomb1_audio/0001_underwater.wav"
+    },
+    {
+      "index": 2,
+      "name": "atrium",
+      "offset": 712291,
+      "size": 207404,
+      "file": "assets/parsed_jnvsjn/musictomb1/musictomb1_audio/0002_atrium.wav"
+    },
+    {
+      "index": 3,
+      "name": "tension",
+      "offset": 919695,
+      "size": 140332,
+      "file": "assets/parsed_jnvsjn/musictomb1/musictomb1_audio/0003_tension.wav"
+    },
+    {
+      "index": 4,
+      "name": "audio_4",
+      "offset": 1060099,
+      "size": 317212,
+      "file": "assets/parsed_jnvsjn/musictomb1/musictomb1_audio/0004_audio_4.wav"
+    },
+    {
+      "index": 5,
+      "name": "mummycan3",
+      "offset": 1377293,
+      "size": 411692,
+      "file": "assets/parsed_jnvsjn/musictomb1/musictomb1_audio/0005_mummycan3.wav"
+    },
+    {
+      "index": 6,
+      "name": "mummycan1",
+      "offset": 1788985,
+      "size": 317212,
+      "file": "assets/parsed_jnvsjn/musictomb1/musictomb1_audio/0006_mummycan1.wav"
+    }
+  ]
+}

@@ -1,0 +1,435 @@
+{
+  "file": "/home/scotty/jnvsjn-original/omt/voicegametomb.omt",
+  "total_size": 2709525,
+  "has_images": false,
+  "has_audio": true,
+  "audio": [
+    {
+      "index": 0,
+      "name": "walk2button",
+      "offset": 8,
+      "size": 45446,
+      "file": "assets/parsed_jnvsjn/voicegametomb/voicegametomb_audio/0000_walk2button.wav"
+    },
+    {
+      "index": 1,
+      "name": "jimmytomb08b",
+      "offset": 45454,
+      "size": 63036,
+      "file": "assets/parsed_jnvsjn/voicegametomb/voicegametomb_audio/0001_jimmytomb08b.wav"
+    },
+    {
+      "index": 2,
+      "name": "beamin",
+      "offset": 108490,
+      "size": 124796,
+      "file": "assets/parsed_jnvsjn/voicegametomb/voicegametomb_audio/0002_beamin.wav"
+    },
+    {
+      "index": 3,
+      "name": "dadfall",
+      "offset": 233286,
+      "size": 36286,
+      "file": "assets/parsed_jnvsjn/voicegametomb/voicegametomb_audio/0003_dadfall.wav"
+    },
+    {
+      "index": 4,
+      "name": "jimmomdad19",
+      "offset": 269572,
+      "size": 20366,
+      "file": "assets/parsed_jnvsjn/voicegametomb/voicegametomb_audio/0004_jimmomdad19.wav"
+    },
+    {
+      "index": 5,
+      "name": "silence1",
+      "offset": 290505,
+      "size": 11148,
+      "file": "assets/parsed_jnvsjn/voicegametomb/voicegametomb_audio/0005_silence1.wav"
+    },
+    {
+      "index": 6,
+      "name": "dadgotit",
+      "offset": 301653,
+      "size": 27656,
+      "file": "assets/parsed_jnvsjn/voicegametomb/voicegametomb_audio/0006_dadgotit.wav"
+    },
+    {
+      "index": 7,
+      "name": "johnnymom05",
+      "offset": 329309,
+      "size": 4156,
+      "file": "assets/parsed_jnvsjn/voicegametomb/voicegametomb_audio/0007_johnnymom05.wav"
+    },
+    {
+      "index": 8,
+      "name": "johnnyroom",
+      "offset": 334710,
+      "size": 88742,
+      "file": "assets/parsed_jnvsjn/voicegametomb/voicegametomb_audio/0008_johnnyroom.wav"
+    },
+    {
+      "index": 9,
+      "name": "jimmomdad09",
+      "offset": 423452,
+      "size": 8178,
+      "file": "assets/parsed_jnvsjn/voicegametomb/voicegametomb_audio/0009_jimmomdad09.wav"
+    },
+    {
+      "index": 10,
+      "name": "audio_10",
+      "offset": 431630,
+      "size": 172330,
+      "file": "assets/parsed_jnvsjn/voicegametomb/voicegametomb_audio/0010_audio_10.wav"
+    },
+    {
+      "index": 11,
+      "name": "johnnymom08a",
+      "offset": 434735,
+      "size": 61948,
+      "file": "assets/parsed_jnvsjn/voicegametomb/voicegametomb_audio/0011_johnnymom08a.wav"
+    },
+    {
+      "index": 12,
+      "name": "johnnymom10",
+      "offset": 496683,
+      "size": 36396,
+      "file": "assets/parsed_jnvsjn/voicegametomb/voicegametomb_audio/0012_johnnymom10.wav"
+    },
+    {
+      "index": 13,
+      "name": "jimmomdad01",
+      "offset": 533079,
+      "size": 30742,
+      "file": "assets/parsed_jnvsjn/voicegametomb/voicegametomb_audio/0013_jimmomdad01.wav"
+    },
+    {
+      "index": 14,
+      "name": "jimmomdad02",
+      "offset": 563821,
+      "size": 47282,
+      "file": "assets/parsed_jnvsjn/voicegametomb/voicegametomb_audio/0014_jimmomdad02.wav"
+    },
+    {
+      "index": 15,
+      "name": "jimmomdad03",
+      "offset": 611103,
+      "size": 48472,
+      "file": "assets/parsed_jnvsjn/voicegametomb/voicegametomb_audio/0015_jimmomdad03.wav"
+    },
+    {
+      "index": 16,
+      "name": "jimmomdad04",
+      "offset": 659575,
+      "size": 46758,
+      "file": "assets/parsed_jnvsjn/voicegametomb/voicegametomb_audio/0016_jimmomdad04.wav"
+    },
+    {
+      "index": 17,
+      "name": "jimmomdad05",
+      "offset": 706333,
+      "size": 54188,
+      "file": "assets/parsed_jnvsjn/voicegametomb/voicegametomb_audio/0017_jimmomdad05.wav"
+    },
+    {
+      "index": 18,
+      "name": "jimmomdad05a",
+      "offset": 760521,
+      "size": 60614,
+      "file": "assets/parsed_jnvsjn/voicegametomb/voicegametomb_audio/0018_jimmomdad05a.wav"
+    },
+    {
+      "index": 19,
+      "name": "jimmomdad06",
+      "offset": 821135,
+      "size": 57058,
+      "file": "assets/parsed_jnvsjn/voicegametomb/voicegametomb_audio/0019_jimmomdad06.wav"
+    },
+    {
+      "index": 20,
+      "name": "jimmomdad07",
+      "offset": 878193,
+      "size": 44286,
+      "file": "assets/parsed_jnvsjn/voicegametomb/voicegametomb_audio/0020_jimmomdad07.wav"
+    },
+    {
+      "index": 21,
+      "name": "jimmomdad08",
+      "offset": 922479,
+      "size": 29414,
+      "file": "assets/parsed_jnvsjn/voicegametomb/voicegametomb_audio/0021_jimmomdad08.wav"
+    },
+    {
+      "index": 22,
+      "name": "jimmomdad10",
+      "offset": 951893,
+      "size": 16440,
+      "file": "assets/parsed_jnvsjn/voicegametomb/voicegametomb_audio/0022_jimmomdad10.wav"
+    },
+    {
+      "index": 23,
+      "name": "jimmomdad11",
+      "offset": 968333,
+      "size": 39786,
+      "file": "assets/parsed_jnvsjn/voicegametomb/voicegametomb_audio/0023_jimmomdad11.wav"
+    },
+    {
+      "index": 24,
+      "name": "jimmomdad12",
+      "offset": 1008119,
+      "size": 52764,
+      "file": "assets/parsed_jnvsjn/voicegametomb/voicegametomb_audio/0024_jimmomdad12.wav"
+    },
+    {
+      "index": 25,
+      "name": "jimmomdad13",
+      "offset": 1060883,
+      "size": 35062,
+      "file": "assets/parsed_jnvsjn/voicegametomb/voicegametomb_audio/0025_jimmomdad13.wav"
+    },
+    {
+      "index": 26,
+      "name": "jimmomdad14",
+      "offset": 1095945,
+      "size": 70454,
+      "file": "assets/parsed_jnvsjn/voicegametomb/voicegametomb_audio/0026_jimmomdad14.wav"
+    },
+    {
+      "index": 27,
+      "name": "jimmomdad15",
+      "offset": 1166399,
+      "size": 15148,
+      "file": "assets/parsed_jnvsjn/voicegametomb/voicegametomb_audio/0027_jimmomdad15.wav"
+    },
+    {
+      "index": 28,
+      "name": "jimmomdad16",
+      "offset": 1181547,
+      "size": 35480,
+      "file": "assets/parsed_jnvsjn/voicegametomb/voicegametomb_audio/0028_jimmomdad16.wav"
+    },
+    {
+      "index": 29,
+      "name": "jimmomdad17",
+      "offset": 1217027,
+      "size": 8096,
+      "file": "assets/parsed_jnvsjn/voicegametomb/voicegametomb_audio/0029_jimmomdad17.wav"
+    },
+    {
+      "index": 30,
+      "name": "jimmomdad18",
+      "offset": 1225123,
+      "size": 7948,
+      "file": "assets/parsed_jnvsjn/voicegametomb/voicegametomb_audio/0030_jimmomdad18.wav"
+    },
+    {
+      "index": 31,
+      "name": "jimmytomb01",
+      "offset": 1233071,
+      "size": 57024,
+      "file": "assets/parsed_jnvsjn/voicegametomb/voicegametomb_audio/0031_jimmytomb01.wav"
+    },
+    {
+      "index": 32,
+      "name": "jimmytomb02",
+      "offset": 1290095,
+      "size": 45626,
+      "file": "assets/parsed_jnvsjn/voicegametomb/voicegametomb_audio/0032_jimmytomb02.wav"
+    },
+    {
+      "index": 33,
+      "name": "jimmytomb03",
+      "offset": 1335721,
+      "size": 45364,
+      "file": "assets/parsed_jnvsjn/voicegametomb/voicegametomb_audio/0033_jimmytomb03.wav"
+    },
+    {
+      "index": 34,
+      "name": "jimmytomb04",
+      "offset": 1381085,
+      "size": 72870,
+      "file": "assets/parsed_jnvsjn/voicegametomb/voicegametomb_audio/0034_jimmytomb04.wav"
+    },
+    {
+      "index": 35,
+      "name": "jimmytomb05",
+      "offset": 1453955,
+      "size": 10952,
+      "file": "assets/parsed_jnvsjn/voicegametomb/voicegametomb_audio/0035_jimmytomb05.wav"
+    },
+    {
+      "index": 36,
+      "name": "jimmytomb05a",
+      "offset": 1464907,
+      "size": 36068,
+      "file": "assets/parsed_jnvsjn/voicegametomb/voicegametomb_audio/0036_jimmytomb05a.wav"
+    },
+    {
+      "index": 37,
+      "name": "jimmytomb06",
+      "offset": 1500975,
+      "size": 122384,
+      "file": "assets/parsed_jnvsjn/voicegametomb/voicegametomb_audio/0037_jimmytomb06.wav"
+    },
+    {
+      "index": 38,
+      "name": "jimmytomb07",
+      "offset": 1623359,
+      "size": 15170,
+      "file": "assets/parsed_jnvsjn/voicegametomb/voicegametomb_audio/0038_jimmytomb07.wav"
+    },
+    {
+      "index": 39,
+      "name": "jimmytomb08",
+      "offset": 1638529,
+      "size": 33100,
+      "file": "assets/parsed_jnvsjn/voicegametomb/voicegametomb_audio/0039_jimmytomb08.wav"
+    },
+    {
+      "index": 40,
+      "name": "jimmytomb08a",
+      "offset": 1671629,
+      "size": 20276,
+      "file": "assets/parsed_jnvsjn/voicegametomb/voicegametomb_audio/0040_jimmytomb08a.wav"
+    },
+    {
+      "index": 41,
+      "name": "jimmytomb09",
+      "offset": 1691905,
+      "size": 25818,
+      "file": "assets/parsed_jnvsjn/voicegametomb/voicegametomb_audio/0041_jimmytomb09.wav"
+    },
+    {
+      "index": 42,
+      "name": "jimmytomb10",
+      "offset": 1717723,
+      "size": 46812,
+      "file": "assets/parsed_jnvsjn/voicegametomb/voicegametomb_audio/0042_jimmytomb10.wav"
+    },
+    {
+      "index": 43,
+      "name": "jimmytomb11",
+      "offset": 1764535,
+      "size": 35680,
+      "file": "assets/parsed_jnvsjn/voicegametomb/voicegametomb_audio/0043_jimmytomb11.wav"
+    },
+    {
+      "index": 44,
+      "name": "jimmytomb12",
+      "offset": 1800215,
+      "size": 44524,
+      "file": "assets/parsed_jnvsjn/voicegametomb/voicegametomb_audio/0044_jimmytomb12.wav"
+    },
+    {
+      "index": 45,
+      "name": "jimmytomb13",
+      "offset": 1844739,
+      "size": 53232,
+      "file": "assets/parsed_jnvsjn/voicegametomb/voicegametomb_audio/0045_jimmytomb13.wav"
+    },
+    {
+      "index": 46,
+      "name": "jimmytomb14",
+      "offset": 1897971,
+      "size": 32512,
+      "file": "assets/parsed_jnvsjn/voicegametomb/voicegametomb_audio/0046_jimmytomb14.wav"
+    },
+    {
+      "index": 47,
+      "name": "jimmytomb15",
+      "offset": 1930483,
+      "size": 26536,
+      "file": "assets/parsed_jnvsjn/voicegametomb/voicegametomb_audio/0047_jimmytomb15.wav"
+    },
+    {
+      "index": 48,
+      "name": "jimmytomb16",
+      "offset": 1957019,
+      "size": 19714,
+      "file": "assets/parsed_jnvsjn/voicegametomb/voicegametomb_audio/0048_jimmytomb16.wav"
+    },
+    {
+      "index": 49,
+      "name": "jimmytomb17",
+      "offset": 1976733,
+      "size": 40228,
+      "file": "assets/parsed_jnvsjn/voicegametomb/voicegametomb_audio/0049_jimmytomb17.wav"
+    },
+    {
+      "index": 50,
+      "name": "jimmytomb18",
+      "offset": 2016961,
+      "size": 78292,
+      "file": "assets/parsed_jnvsjn/voicegametomb/voicegametomb_audio/0050_jimmytomb18.wav"
+    },
+    {
+      "index": 51,
+      "name": "jimmytomb19",
+      "offset": 2095253,
+      "size": 19518,
+      "file": "assets/parsed_jnvsjn/voicegametomb/voicegametomb_audio/0051_jimmytomb19.wav"
+    },
+    {
+      "index": 52,
+      "name": "johnnymom01",
+      "offset": 2114771,
+      "size": 22544,
+      "file": "assets/parsed_jnvsjn/voicegametomb/voicegametomb_audio/0052_johnnymom01.wav"
+    },
+    {
+      "index": 53,
+      "name": "johnnymom02",
+      "offset": 2137315,
+      "size": 100652,
+      "file": "assets/parsed_jnvsjn/voicegametomb/voicegametomb_audio/0053_johnnymom02.wav"
+    },
+    {
+      "index": 54,
+      "name": "johnnymom03",
+      "offset": 2237967,
+      "size": 37966,
+      "file": "assets/parsed_jnvsjn/voicegametomb/voicegametomb_audio/0054_johnnymom03.wav"
+    },
+    {
+      "index": 55,
+      "name": "johnnymom04",
+      "offset": 2275933,
+      "size": 19660,
+      "file": "assets/parsed_jnvsjn/voicegametomb/voicegametomb_audio/0055_johnnymom04.wav"
+    },
+    {
+      "index": 56,
+      "name": "johnnymom06",
+      "offset": 2295593,
+      "size": 126422,
+      "file": "assets/parsed_jnvsjn/voicegametomb/voicegametomb_audio/0056_johnnymom06.wav"
+    },
+    {
+      "index": 57,
+      "name": "johnnymom07",
+      "offset": 2422015,
+      "size": 31956,
+      "file": "assets/parsed_jnvsjn/voicegametomb/voicegametomb_audio/0057_johnnymom07.wav"
+    },
+    {
+      "index": 58,
+      "name": "johnnymom07a",
+      "offset": 2453971,
+      "size": 41162,
+      "file": "assets/parsed_jnvsjn/voicegametomb/voicegametomb_audio/0058_johnnymom07a.wav"
+    },
+    {
+      "index": 59,
+      "name": "johnnymom08",
+      "offset": 2495133,
+      "size": 42062,
+      "file": "assets/parsed_jnvsjn/voicegametomb/voicegametomb_audio/0059_johnnymom08.wav"
+    },
+    {
+      "index": 60,
+      "name": "johnnymom09",
+      "offset": 2537195,
+      "size": 172330,
+      "file": "assets/parsed_jnvsjn/voicegametomb/voicegametomb_audio/0060_johnnymom09.wav"
+    }
+  ]
+}

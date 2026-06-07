@@ -1,0 +1,22 @@
+{
+  "file": "/home/scotty/jnvsjn-original/omt/musicvr1.omt",
+  "total_size": 946308,
+  "has_images": false,
+  "has_audio": true,
+  "audio": [
+    {
+      "index": 0,
+      "name": "vrboss",
+      "offset": 8,
+      "size": 321580,
+      "file": "assets/parsed_jnvsjn/musicvr1/musicvr1_audio/0000_vrboss.wav"
+    },
+    {
+      "index": 1,
+      "name": "vrmusic",
+      "offset": 321588,
+      "size": 624684,
+      "file": "assets/parsed_jnvsjn/musicvr1/musicvr1_audio/0001_vrmusic.wav"
+    }
+  ]
+}

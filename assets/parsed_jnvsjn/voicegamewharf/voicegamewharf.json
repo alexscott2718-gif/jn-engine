@@ -1,0 +1,78 @@
+{
+  "file": "/home/scotty/jnvsjn-original/omt/voicegamewharf.omt",
+  "total_size": 511884,
+  "has_images": false,
+  "has_audio": true,
+  "audio": [
+    {
+      "index": 0,
+      "name": "wharfsilence",
+      "offset": 8,
+      "size": 32892,
+      "file": "assets/parsed_jnvsjn/voicegamewharf/voicegamewharf_audio/0000_wharfsilence.wav"
+    },
+    {
+      "index": 1,
+      "name": "jimmyself07",
+      "offset": 33008,
+      "size": 37714,
+      "file": "assets/parsed_jnvsjn/voicegamewharf/voicegamewharf_audio/0001_jimmyself07.wav"
+    },
+    {
+      "index": 2,
+      "name": "jimmyself04",
+      "offset": 70722,
+      "size": 64220,
+      "file": "assets/parsed_jnvsjn/voicegamewharf/voicegamewharf_audio/0002_jimmyself04.wav"
+    },
+    {
+      "index": 3,
+      "name": "jimmyself05",
+      "offset": 134942,
+      "size": 24348,
+      "file": "assets/parsed_jnvsjn/voicegamewharf/voicegamewharf_audio/0003_jimmyself05.wav"
+    },
+    {
+      "index": 4,
+      "name": "jimmyself06",
+      "offset": 159290,
+      "size": 77228,
+      "file": "assets/parsed_jnvsjn/voicegamewharf/voicegamewharf_audio/0004_jimmyself06.wav"
+    },
+    {
+      "index": 5,
+      "name": "jimmyself06a",
+      "offset": 236518,
+      "size": 45530,
+      "file": "assets/parsed_jnvsjn/voicegamewharf/voicegamewharf_audio/0005_jimmyself06a.wav"
+    },
+    {
+      "index": 6,
+      "name": "jimmyself06b",
+      "offset": 282048,
+      "size": 77574,
+      "file": "assets/parsed_jnvsjn/voicegamewharf/voicegamewharf_audio/0006_jimmyself06b.wav"
+    },
+    {
+      "index": 7,
+      "name": "jimmyself06c",
+      "offset": 359622,
+      "size": 72748,
+      "file": "assets/parsed_jnvsjn/voicegamewharf/voicegamewharf_audio/0007_jimmyself06c.wav"
+    },
+    {
+      "index": 8,
+      "name": "jimmyself06d",
+      "offset": 432370,
+      "size": 40132,
+      "file": "assets/parsed_jnvsjn/voicegamewharf/voicegamewharf_audio/0008_jimmyself06d.wav"
+    },
+    {
+      "index": 9,
+      "name": "jimmyself28",
+      "offset": 472502,
+      "size": 39382,
+      "file": "assets/parsed_jnvsjn/voicegamewharf/voicegamewharf_audio/0009_jimmyself28.wav"
+    }
+  ]
+}

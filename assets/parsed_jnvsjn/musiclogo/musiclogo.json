@@ -1,0 +1,15 @@
+{
+  "file": "/home/scotty/jnvsjn-original/omt/musiclogo.omt",
+  "total_size": 324687,
+  "has_images": false,
+  "has_audio": true,
+  "audio": [
+    {
+      "index": 0,
+      "name": "logomusic",
+      "offset": 8,
+      "size": 324652,
+      "file": "assets/parsed_jnvsjn/musiclogo/musiclogo_audio/0000_logomusic.wav"
+    }
+  ]
+}

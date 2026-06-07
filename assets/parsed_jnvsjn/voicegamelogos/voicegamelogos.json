@@ -1,0 +1,36 @@
+{
+  "file": "/home/scotty/jnvsjn-original/omt/voicegamelogos.omt",
+  "total_size": 222061,
+  "has_images": false,
+  "has_audio": true,
+  "audio": [
+    {
+      "index": 0,
+      "name": "zooma",
+      "offset": 8,
+      "size": 44224,
+      "file": "assets/parsed_jnvsjn/voicegamelogos/voicegamelogos_audio/0000_zooma.wav"
+    },
+    {
+      "index": 1,
+      "name": "sound1",
+      "offset": 44286,
+      "size": 55932,
+      "file": "assets/parsed_jnvsjn/voicegamelogos/voicegamelogos_audio/0001_sound1.wav"
+    },
+    {
+      "index": 2,
+      "name": "sound3",
+      "offset": 100245,
+      "size": 59692,
+      "file": "assets/parsed_jnvsjn/voicegamelogos/voicegamelogos_audio/0002_sound3.wav"
+    },
+    {
+      "index": 3,
+      "name": "sound2",
+      "offset": 159937,
+      "size": 62124,
+      "file": "assets/parsed_jnvsjn/voicegamelogos/voicegamelogos_audio/0003_sound2.wav"
+    }
+  ]
+}

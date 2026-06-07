@@ -1,0 +1,288 @@
+{
+  "file": "/home/scotty/jnvsjn-original/omt/voicegamepyramid.omt",
+  "total_size": 1913417,
+  "has_images": false,
+  "has_audio": true,
+  "audio": [
+    {
+      "index": 0,
+      "name": "gemdoor",
+      "offset": 8,
+      "size": 43834,
+      "file": "assets/parsed_jnvsjn/voicegamepyramid/voicegamepyramid_audio/0000_gemdoor.wav"
+    },
+    {
+      "index": 1,
+      "name": "gemwalk",
+      "offset": 43842,
+      "size": 44226,
+      "file": "assets/parsed_jnvsjn/voicegamepyramid/voicegamepyramid_audio/0001_gemwalk.wav"
+    },
+    {
+      "index": 2,
+      "name": "godatriver",
+      "offset": 88068,
+      "size": 51946,
+      "file": "assets/parsed_jnvsjn/voicegamepyramid/voicegamepyramid_audio/0002_godatriver.wav"
+    },
+    {
+      "index": 3,
+      "name": "silence3",
+      "offset": 150275,
+      "size": 103212,
+      "file": "assets/parsed_jnvsjn/voicegamepyramid/voicegamepyramid_audio/0003_silence3.wav"
+    },
+    {
+      "index": 4,
+      "name": "toilet",
+      "offset": 253487,
+      "size": 54270,
+      "file": "assets/parsed_jnvsjn/voicegamepyramid/voicegamepyramid_audio/0004_toilet.wav"
+    },
+    {
+      "index": 5,
+      "name": "silence2",
+      "offset": 307757,
+      "size": 25900,
+      "file": "assets/parsed_jnvsjn/voicegamepyramid/voicegamepyramid_audio/0005_silence2.wav"
+    },
+    {
+      "index": 6,
+      "name": "silence1",
+      "offset": 333657,
+      "size": 37050,
+      "file": "assets/parsed_jnvsjn/voicegamepyramid/voicegamepyramid_audio/0006_silence1.wav"
+    },
+    {
+      "index": 7,
+      "name": "numeyfowl06",
+      "offset": 370707,
+      "size": 116560,
+      "file": "assets/parsed_jnvsjn/voicegamepyramid/voicegamepyramid_audio/0007_numeyfowl06.wav"
+    },
+    {
+      "index": 8,
+      "name": "jimmyfowl00a",
+      "offset": 487267,
+      "size": 37372,
+      "file": "assets/parsed_jnvsjn/voicegamepyramid/voicegamepyramid_audio/0008_jimmyfowl00a.wav"
+    },
+    {
+      "index": 9,
+      "name": "jimmyfowl00b",
+      "offset": 524639,
+      "size": 27884,
+      "file": "assets/parsed_jnvsjn/voicegamepyramid/voicegamepyramid_audio/0009_jimmyfowl00b.wav"
+    },
+    {
+      "index": 10,
+      "name": "jimmyfowl00c",
+      "offset": 552523,
+      "size": 31254,
+      "file": "assets/parsed_jnvsjn/voicegamepyramid/voicegamepyramid_audio/0010_jimmyfowl00c.wav"
+    },
+    {
+      "index": 11,
+      "name": "jimmyfowl00d",
+      "offset": 583777,
+      "size": 49086,
+      "file": "assets/parsed_jnvsjn/voicegamepyramid/voicegamepyramid_audio/0011_jimmyfowl00d.wav"
+    },
+    {
+      "index": 12,
+      "name": "jimmyfowl00e2",
+      "offset": 632863,
+      "size": 15238,
+      "file": "assets/parsed_jnvsjn/voicegamepyramid/voicegamepyramid_audio/0012_jimmyfowl00e2.wav"
+    },
+    {
+      "index": 13,
+      "name": "jimmyfowl00e",
+      "offset": 648101,
+      "size": 40108,
+      "file": "assets/parsed_jnvsjn/voicegamepyramid/voicegamepyramid_audio/0013_jimmyfowl00e.wav"
+    },
+    {
+      "index": 14,
+      "name": "jimmyfowl00f",
+      "offset": 688209,
+      "size": 16812,
+      "file": "assets/parsed_jnvsjn/voicegamepyramid/voicegamepyramid_audio/0014_jimmyfowl00f.wav"
+    },
+    {
+      "index": 15,
+      "name": "jimmyfowl00g",
+      "offset": 705021,
+      "size": 22462,
+      "file": "assets/parsed_jnvsjn/voicegamepyramid/voicegamepyramid_audio/0015_jimmyfowl00g.wav"
+    },
+    {
+      "index": 16,
+      "name": "jimmyfowl01",
+      "offset": 727483,
+      "size": 59070,
+      "file": "assets/parsed_jnvsjn/voicegamepyramid/voicegamepyramid_audio/0016_jimmyfowl01.wav"
+    },
+    {
+      "index": 17,
+      "name": "jimmyfowl02",
+      "offset": 786553,
+      "size": 72004,
+      "file": "assets/parsed_jnvsjn/voicegamepyramid/voicegamepyramid_audio/0017_jimmyfowl02.wav"
+    },
+    {
+      "index": 18,
+      "name": "jimmyfowl03",
+      "offset": 858557,
+      "size": 27174,
+      "file": "assets/parsed_jnvsjn/voicegamepyramid/voicegamepyramid_audio/0018_jimmyfowl03.wav"
+    },
+    {
+      "index": 19,
+      "name": "jimmyfowl04",
+      "offset": 885731,
+      "size": 56200,
+      "file": "assets/parsed_jnvsjn/voicegamepyramid/voicegamepyramid_audio/0019_jimmyfowl04.wav"
+    },
+    {
+      "index": 20,
+      "name": "jimmyfowl05",
+      "offset": 941931,
+      "size": 29156,
+      "file": "assets/parsed_jnvsjn/voicegamepyramid/voicegamepyramid_audio/0020_jimmyfowl05.wav"
+    },
+    {
+      "index": 21,
+      "name": "jimmypyr01",
+      "offset": 971087,
+      "size": 28086,
+      "file": "assets/parsed_jnvsjn/voicegamepyramid/voicegamepyramid_audio/0021_jimmypyr01.wav"
+    },
+    {
+      "index": 22,
+      "name": "jimmypyr02",
+      "offset": 999173,
+      "size": 28616,
+      "file": "assets/parsed_jnvsjn/voicegamepyramid/voicegamepyramid_audio/0022_jimmypyr02.wav"
+    },
+    {
+      "index": 23,
+      "name": "jimmypyr04",
+      "offset": 1027789,
+      "size": 30058,
+      "file": "assets/parsed_jnvsjn/voicegamepyramid/voicegamepyramid_audio/0023_jimmypyr04.wav"
+    },
+    {
+      "index": 24,
+      "name": "jimmypyr05",
+      "offset": 1057847,
+      "size": 77790,
+      "file": "assets/parsed_jnvsjn/voicegamepyramid/voicegamepyramid_audio/0024_jimmypyr05.wav"
+    },
+    {
+      "index": 25,
+      "name": "jimmypyr06",
+      "offset": 1135637,
+      "size": 42028,
+      "file": "assets/parsed_jnvsjn/voicegamepyramid/voicegamepyramid_audio/0025_jimmypyr06.wav"
+    },
+    {
+      "index": 26,
+      "name": "jimmypyr07",
+      "offset": 1177665,
+      "size": 80124,
+      "file": "assets/parsed_jnvsjn/voicegamepyramid/voicegamepyramid_audio/0026_jimmypyr07.wav"
+    },
+    {
+      "index": 27,
+      "name": "jimmypyr08",
+      "offset": 1257789,
+      "size": 17996,
+      "file": "assets/parsed_jnvsjn/voicegamepyramid/voicegamepyramid_audio/0027_jimmypyr08.wav"
+    },
+    {
+      "index": 28,
+      "name": "jimmypyr09",
+      "offset": 1275785,
+      "size": 40048,
+      "file": "assets/parsed_jnvsjn/voicegamepyramid/voicegamepyramid_audio/0028_jimmypyr09.wav"
+    },
+    {
+      "index": 29,
+      "name": "jimmypyr10",
+      "offset": 1315833,
+      "size": 22804,
+      "file": "assets/parsed_jnvsjn/voicegamepyramid/voicegamepyramid_audio/0029_jimmypyr10.wav"
+    },
+    {
+      "index": 30,
+      "name": "jimmypyr13",
+      "offset": 1338637,
+      "size": 43488,
+      "file": "assets/parsed_jnvsjn/voicegamepyramid/voicegamepyramid_audio/0030_jimmypyr13.wav"
+    },
+    {
+      "index": 31,
+      "name": "jimmypyr14",
+      "offset": 1382125,
+      "size": 77902,
+      "file": "assets/parsed_jnvsjn/voicegamepyramid/voicegamepyramid_audio/0031_jimmypyr14.wav"
+    },
+    {
+      "index": 32,
+      "name": "jimmypyr15",
+      "offset": 1460027,
+      "size": 77436,
+      "file": "assets/parsed_jnvsjn/voicegamepyramid/voicegamepyramid_audio/0032_jimmypyr15.wav"
+    },
+    {
+      "index": 33,
+      "name": "numeyfowl01",
+      "offset": 1537463,
+      "size": 93752,
+      "file": "assets/parsed_jnvsjn/voicegamepyramid/voicegamepyramid_audio/0033_numeyfowl01.wav"
+    },
+    {
+      "index": 34,
+      "name": "numeyfowl02",
+      "offset": 1631215,
+      "size": 73132,
+      "file": "assets/parsed_jnvsjn/voicegamepyramid/voicegamepyramid_audio/0034_numeyfowl02.wav"
+    },
+    {
+      "index": 35,
+      "name": "numeyfowl03",
+      "offset": 1704347,
+      "size": 40698,
+      "file": "assets/parsed_jnvsjn/voicegamepyramid/voicegamepyramid_audio/0035_numeyfowl03.wav"
+    },
+    {
+      "index": 36,
+      "name": "numeyfowl04",
+      "offset": 1745045,
+      "size": 32650,
+      "file": "assets/parsed_jnvsjn/voicegamepyramid/voicegamepyramid_audio/0036_numeyfowl04.wav"
+    },
+    {
+      "index": 37,
+      "name": "numeyfowl05",
+      "offset": 1777695,
+      "size": 66046,
+      "file": "assets/parsed_jnvsjn/voicegamepyramid/voicegamepyramid_audio/0037_numeyfowl05.wav"
+    },
+    {
+      "index": 38,
+      "name": "jimmypyr12",
+      "offset": 1843741,
+      "size": 43488,
+      "file": "assets/parsed_jnvsjn/voicegamepyramid/voicegamepyramid_audio/0038_jimmypyr12.wav"
+    },
+    {
+      "index": 39,
+      "name": "jimmypyr11",
+      "offset": 1887229,
+      "size": 26188,
+      "file": "assets/parsed_jnvsjn/voicegamepyramid/voicegamepyramid_audio/0039_jimmypyr11.wav"
+    }
+  ]
+}

@@ -1,0 +1,15 @@
+{
+  "file": "/home/scotty/jnvsjn-original/omt/musicwharf.omt",
+  "total_size": 641103,
+  "has_images": false,
+  "has_audio": true,
+  "audio": [
+    {
+      "index": 0,
+      "name": "wharf",
+      "offset": 8,
+      "size": 641068,
+      "file": "assets/parsed_jnvsjn/musicwharf/musicwharf_audio/0000_wharf.wav"
+    }
+  ]
+}

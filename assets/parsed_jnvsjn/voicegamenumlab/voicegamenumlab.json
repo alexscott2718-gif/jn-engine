@@ -1,0 +1,288 @@
+{
+  "file": "/home/scotty/jnvsjn-original/omt/voicegamenumlab.omt",
+  "total_size": 2301847,
+  "has_images": false,
+  "has_audio": true,
+  "audio": [
+    {
+      "index": 0,
+      "name": "godwhine",
+      "offset": 8,
+      "size": 26044,
+      "file": "assets/parsed_jnvsjn/voicegamenumlab/voicegamenumlab_audio/0000_godwhine.wav"
+    },
+    {
+      "index": 1,
+      "name": "jimmyself16c",
+      "offset": 26052,
+      "size": 62238,
+      "file": "assets/parsed_jnvsjn/voicegamenumlab/voicegamenumlab_audio/0001_jimmyself16c.wav"
+    },
+    {
+      "index": 2,
+      "name": "jimnumcind07",
+      "offset": 88650,
+      "size": 40076,
+      "file": "assets/parsed_jnvsjn/voicegamenumlab/voicegamenumlab_audio/0002_jimnumcind07.wav"
+    },
+    {
+      "index": 3,
+      "name": "jimnumcind06",
+      "offset": 128726,
+      "size": 30190,
+      "file": "assets/parsed_jnvsjn/voicegamenumlab/voicegamenumlab_audio/0003_jimnumcind06.wav"
+    },
+    {
+      "index": 4,
+      "name": "jimmyself03",
+      "offset": 158916,
+      "size": 10612,
+      "file": "assets/parsed_jnvsjn/voicegamenumlab/voicegamenumlab_audio/0004_jimmyself03.wav"
+    },
+    {
+      "index": 5,
+      "name": "lightning",
+      "offset": 169802,
+      "size": 61990,
+      "file": "assets/parsed_jnvsjn/voicegamenumlab/voicegamenumlab_audio/0005_lightning.wav"
+    },
+    {
+      "index": 6,
+      "name": "jimmyself16a",
+      "offset": 231792,
+      "size": 30078,
+      "file": "assets/parsed_jnvsjn/voicegamenumlab/voicegamenumlab_audio/0006_jimmyself16a.wav"
+    },
+    {
+      "index": 7,
+      "name": "doorcrash",
+      "offset": 261870,
+      "size": 76844,
+      "file": "assets/parsed_jnvsjn/voicegamenumlab/voicegamenumlab_audio/0007_doorcrash.wav"
+    },
+    {
+      "index": 8,
+      "name": "4beeps",
+      "offset": 338714,
+      "size": 15244,
+      "file": "assets/parsed_jnvsjn/voicegamenumlab/voicegamenumlab_audio/0008_4beeps.wav"
+    },
+    {
+      "index": 9,
+      "name": "herman06",
+      "offset": 353958,
+      "size": 22140,
+      "file": "assets/parsed_jnvsjn/voicegamenumlab/voicegamenumlab_audio/0009_herman06.wav"
+    },
+    {
+      "index": 10,
+      "name": "herman01",
+      "offset": 376449,
+      "size": 21698,
+      "file": "assets/parsed_jnvsjn/voicegamenumlab/voicegamenumlab_audio/0010_herman01.wav"
+    },
+    {
+      "index": 11,
+      "name": "herman02",
+      "offset": 398147,
+      "size": 167254,
+      "file": "assets/parsed_jnvsjn/voicegamenumlab/voicegamenumlab_audio/0011_herman02.wav"
+    },
+    {
+      "index": 12,
+      "name": "herman03",
+      "offset": 565401,
+      "size": 63790,
+      "file": "assets/parsed_jnvsjn/voicegamenumlab/voicegamenumlab_audio/0012_herman03.wav"
+    },
+    {
+      "index": 13,
+      "name": "herman04",
+      "offset": 629191,
+      "size": 94672,
+      "file": "assets/parsed_jnvsjn/voicegamenumlab/voicegamenumlab_audio/0013_herman04.wav"
+    },
+    {
+      "index": 14,
+      "name": "herman05",
+      "offset": 723863,
+      "size": 62252,
+      "file": "assets/parsed_jnvsjn/voicegamenumlab/voicegamenumlab_audio/0014_herman05.wav"
+    },
+    {
+      "index": 15,
+      "name": "herman05a",
+      "offset": 786115,
+      "size": 11124,
+      "file": "assets/parsed_jnvsjn/voicegamenumlab/voicegamenumlab_audio/0015_herman05a.wav"
+    },
+    {
+      "index": 16,
+      "name": "herman06b",
+      "offset": 797239,
+      "size": 133244,
+      "file": "assets/parsed_jnvsjn/voicegamenumlab/voicegamenumlab_audio/0016_herman06b.wav"
+    },
+    {
+      "index": 17,
+      "name": "jimmylab01",
+      "offset": 930483,
+      "size": 24062,
+      "file": "assets/parsed_jnvsjn/voicegamenumlab/voicegamenumlab_audio/0017_jimmylab01.wav"
+    },
+    {
+      "index": 18,
+      "name": "jimmylab03",
+      "offset": 954545,
+      "size": 85748,
+      "file": "assets/parsed_jnvsjn/voicegamenumlab/voicegamenumlab_audio/0018_jimmylab03.wav"
+    },
+    {
+      "index": 19,
+      "name": "jimmylab04",
+      "offset": 1040293,
+      "size": 67196,
+      "file": "assets/parsed_jnvsjn/voicegamenumlab/voicegamenumlab_audio/0019_jimmylab04.wav"
+    },
+    {
+      "index": 20,
+      "name": "jimmylab05",
+      "offset": 1107489,
+      "size": 211500,
+      "file": "assets/parsed_jnvsjn/voicegamenumlab/voicegamenumlab_audio/0020_jimmylab05.wav"
+    },
+    {
+      "index": 21,
+      "name": "jimmylab06",
+      "offset": 1318989,
+      "size": 47100,
+      "file": "assets/parsed_jnvsjn/voicegamenumlab/voicegamenumlab_audio/0021_jimmylab06.wav"
+    },
+    {
+      "index": 22,
+      "name": "jimmyself01",
+      "offset": 1366089,
+      "size": 67596,
+      "file": "assets/parsed_jnvsjn/voicegamenumlab/voicegamenumlab_audio/0022_jimmyself01.wav"
+    },
+    {
+      "index": 23,
+      "name": "jimmyself02",
+      "offset": 1433685,
+      "size": 56516,
+      "file": "assets/parsed_jnvsjn/voicegamenumlab/voicegamenumlab_audio/0023_jimmyself02.wav"
+    },
+    {
+      "index": 24,
+      "name": "jimmyself15",
+      "offset": 1500813,
+      "size": 29460,
+      "file": "assets/parsed_jnvsjn/voicegamenumlab/voicegamenumlab_audio/0024_jimmyself15.wav"
+    },
+    {
+      "index": 25,
+      "name": "jimmyself16",
+      "offset": 1530273,
+      "size": 41052,
+      "file": "assets/parsed_jnvsjn/voicegamenumlab/voicegamenumlab_audio/0025_jimmyself16.wav"
+    },
+    {
+      "index": 26,
+      "name": "jimmyself16a",
+      "offset": 1571325,
+      "size": 17614,
+      "file": "assets/parsed_jnvsjn/voicegamenumlab/voicegamenumlab_audio/0026_jimmyself16a.wav"
+    },
+    {
+      "index": 27,
+      "name": "jimmyself16b",
+      "offset": 1588939,
+      "size": 22120,
+      "file": "assets/parsed_jnvsjn/voicegamenumlab/voicegamenumlab_audio/0027_jimmyself16b.wav"
+    },
+    {
+      "index": 28,
+      "name": "jimmyself16c",
+      "offset": 1611059,
+      "size": 65010,
+      "file": "assets/parsed_jnvsjn/voicegamenumlab/voicegamenumlab_audio/0028_jimmyself16c.wav"
+    },
+    {
+      "index": 29,
+      "name": "jimmyself17",
+      "offset": 1676069,
+      "size": 35104,
+      "file": "assets/parsed_jnvsjn/voicegamenumlab/voicegamenumlab_audio/0029_jimmyself17.wav"
+    },
+    {
+      "index": 30,
+      "name": "jimnumcind00",
+      "offset": 1711173,
+      "size": 74138,
+      "file": "assets/parsed_jnvsjn/voicegamenumlab/voicegamenumlab_audio/0030_jimnumcind00.wav"
+    },
+    {
+      "index": 31,
+      "name": "jimnumcind01",
+      "offset": 1785311,
+      "size": 43116,
+      "file": "assets/parsed_jnvsjn/voicegamenumlab/voicegamenumlab_audio/0031_jimnumcind01.wav"
+    },
+    {
+      "index": 32,
+      "name": "jimnumcind02",
+      "offset": 1828427,
+      "size": 21224,
+      "file": "assets/parsed_jnvsjn/voicegamenumlab/voicegamenumlab_audio/0032_jimnumcind02.wav"
+    },
+    {
+      "index": 33,
+      "name": "jimnumcind03",
+      "offset": 1849651,
+      "size": 140816,
+      "file": "assets/parsed_jnvsjn/voicegamenumlab/voicegamenumlab_audio/0033_jimnumcind03.wav"
+    },
+    {
+      "index": 34,
+      "name": "jimnumcind04",
+      "offset": 1990467,
+      "size": 67840,
+      "file": "assets/parsed_jnvsjn/voicegamenumlab/voicegamenumlab_audio/0034_jimnumcind04.wav"
+    },
+    {
+      "index": 35,
+      "name": "jimnumcind05",
+      "offset": 2058307,
+      "size": 25292,
+      "file": "assets/parsed_jnvsjn/voicegamenumlab/voicegamenumlab_audio/0035_jimnumcind05.wav"
+    },
+    {
+      "index": 36,
+      "name": "jimnumcind09",
+      "offset": 2083599,
+      "size": 44494,
+      "file": "assets/parsed_jnvsjn/voicegamenumlab/voicegamenumlab_audio/0036_jimnumcind09.wav"
+    },
+    {
+      "index": 37,
+      "name": "jimnumcind08",
+      "offset": 2128093,
+      "size": 26668,
+      "file": "assets/parsed_jnvsjn/voicegamenumlab/voicegamenumlab_audio/0037_jimnumcind08.wav"
+    },
+    {
+      "index": 38,
+      "name": "herman06a",
+      "offset": 2154761,
+      "size": 124972,
+      "file": "assets/parsed_jnvsjn/voicegamenumlab/voicegamenumlab_audio/0038_herman06a.wav"
+    },
+    {
+      "index": 39,
+      "name": "jimmyself17a",
+      "offset": 2279733,
+      "size": 22114,
+      "file": "assets/parsed_jnvsjn/voicegamenumlab/voicegamenumlab_audio/0039_jimmyself17a.wav"
+    }
+  ]
+}

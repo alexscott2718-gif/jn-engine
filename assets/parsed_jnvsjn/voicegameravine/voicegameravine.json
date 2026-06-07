@@ -1,0 +1,50 @@
+{
+  "file": "/home/scotty/jnvsjn-original/omt/voicegameravine.omt",
+  "total_size": 608687,
+  "has_images": false,
+  "has_audio": true,
+  "audio": [
+    {
+      "index": 0,
+      "name": "ravinepdabeep",
+      "offset": 8,
+      "size": 42876,
+      "file": "assets/parsed_jnvsjn/voicegameravine/voicegameravine_audio/0000_ravinepdabeep.wav"
+    },
+    {
+      "index": 1,
+      "name": "jimmynumey01",
+      "offset": 42965,
+      "size": 62464,
+      "file": "assets/parsed_jnvsjn/voicegameravine/voicegameravine_audio/0001_jimmynumey01.wav"
+    },
+    {
+      "index": 2,
+      "name": "audio_2",
+      "offset": 105429,
+      "size": 49914,
+      "file": "assets/parsed_jnvsjn/voicegameravine/voicegameravine_audio/0002_audio_2.wav"
+    },
+    {
+      "index": 3,
+      "name": "beamin",
+      "offset": 108373,
+      "size": 124796,
+      "file": "assets/parsed_jnvsjn/voicegameravine/voicegameravine_audio/0003_beamin.wav"
+    },
+    {
+      "index": 4,
+      "name": "jimmynumey02",
+      "offset": 233169,
+      "size": 325604,
+      "file": "assets/parsed_jnvsjn/voicegameravine/voicegameravine_audio/0004_jimmynumey02.wav"
+    },
+    {
+      "index": 5,
+      "name": "jimmynumey03",
+      "offset": 558773,
+      "size": 49914,
+      "file": "assets/parsed_jnvsjn/voicegameravine/voicegameravine_audio/0005_jimmynumey03.wav"
+    }
+  ]
+}

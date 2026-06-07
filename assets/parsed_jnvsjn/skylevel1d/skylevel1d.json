@@ -1,0 +1,64 @@
+{
+  "file": "/home/scotty/jnvsjn-original/omt/skylevel1d.omt",
+  "total_size": 1076603,
+  "has_images": true,
+  "has_audio": false,
+  "images": [
+    {
+      "index": 0,
+      "width": 256,
+      "height": 256,
+      "depth": 32,
+      "compression": 2,
+      "stride": 1024,
+      "dotransparent": false,
+      "transp_packed": 0,
+      "dopalette": false,
+      "bufsize": 264580,
+      "file": "assets/parsed_jnvsjn/skylevel1d/skylevel1d_images/0000_256x256d32.png",
+      "status": "ok"
+    },
+    {
+      "index": 1,
+      "width": 256,
+      "height": 256,
+      "depth": 32,
+      "compression": 2,
+      "stride": 1024,
+      "dotransparent": false,
+      "transp_packed": 0,
+      "dopalette": false,
+      "bufsize": 264452,
+      "file": "assets/parsed_jnvsjn/skylevel1d/skylevel1d_images/0001_256x256d32.png",
+      "status": "ok"
+    },
+    {
+      "index": 2,
+      "width": 256,
+      "height": 256,
+      "depth": 32,
+      "compression": 2,
+      "stride": 1024,
+      "dotransparent": false,
+      "transp_packed": 0,
+      "dopalette": false,
+      "bufsize": 263764,
+      "file": "assets/parsed_jnvsjn/skylevel1d/skylevel1d_images/0002_256x256d32.png",
+      "status": "ok"
+    },
+    {
+      "index": 3,
+      "width": 256,
+      "height": 256,
+      "depth": 32,
+      "compression": 2,
+      "stride": 1024,
+      "dotransparent": false,
+      "transp_packed": 0,
+      "dopalette": false,
+      "bufsize": 264048,
+      "file": "assets/parsed_jnvsjn/skylevel1d/skylevel1d_images/0003_256x256d32.png",
+      "status": "ok"
+    }
+  ]
+}

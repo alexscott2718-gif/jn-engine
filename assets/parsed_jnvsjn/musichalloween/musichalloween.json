@@ -1,0 +1,15 @@
+{
+  "file": "/home/scotty/jnvsjn-original/omt/musichalloween.omt",
+  "total_size": 298063,
+  "has_images": false,
+  "has_audio": true,
+  "audio": [
+    {
+      "index": 0,
+      "name": "halloween4",
+      "offset": 35,
+      "size": 298028,
+      "file": "assets/parsed_jnvsjn/musichalloween/musichalloween_audio/0000_halloween4.wav"
+    }
+  ]
+}

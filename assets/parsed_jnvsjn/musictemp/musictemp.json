@@ -1,0 +1,15 @@
+{
+  "file": "/home/scotty/jnvsjn-original/omt/musictemp.omt",
+  "total_size": 587855,
+  "has_images": false,
+  "has_audio": true,
+  "audio": [
+    {
+      "index": 0,
+      "name": "temploop",
+      "offset": 8,
+      "size": 587820,
+      "file": "assets/parsed_jnvsjn/musictemp/musictemp_audio/0000_temploop.wav"
+    }
+  ]
+}

@@ -1,0 +1,15 @@
+{
+  "file": "/home/scotty/jnvsjn-original/omt/music4th.omt",
+  "total_size": 674895,
+  "has_images": false,
+  "has_audio": true,
+  "audio": [
+    {
+      "index": 0,
+      "name": "july4",
+      "offset": 8,
+      "size": 674860,
+      "file": "assets/parsed_jnvsjn/music4th/music4th_audio/0000_july4.wav"
+    }
+  ]
+}

@@ -1,0 +1,22 @@
+{
+  "file": "/home/scotty/jnvsjn-original/omt/musicneighborhood.omt",
+  "total_size": 1644602,
+  "has_images": false,
+  "has_audio": true,
+  "audio": [
+    {
+      "index": 0,
+      "name": "Hunting2_11k",
+      "offset": 80,
+      "size": 1514220,
+      "file": "assets/parsed_jnvsjn/musicneighborhood/musicneighborhood_audio/0000_Hunting2_11k.wav"
+    },
+    {
+      "index": 1,
+      "name": "Rescue Libby",
+      "offset": 1514300,
+      "size": 130302,
+      "file": "assets/parsed_jnvsjn/musicneighborhood/musicneighborhood_audio/0001_Rescue_Libby.wav"
+    }
+  ]
+}

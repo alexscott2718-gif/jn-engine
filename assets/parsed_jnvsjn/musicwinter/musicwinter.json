@@ -1,0 +1,15 @@
+{
+  "file": "/home/scotty/jnvsjn-original/omt/musicwinter.omt",
+  "total_size": 566351,
+  "has_images": false,
+  "has_audio": true,
+  "audio": [
+    {
+      "index": 0,
+      "name": "jinglebells",
+      "offset": 8,
+      "size": 566316,
+      "file": "assets/parsed_jnvsjn/musicwinter/musicwinter_audio/0000_jinglebells.wav"
+    }
+  ]
+}

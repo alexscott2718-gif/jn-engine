@@ -1,0 +1,15 @@
+{
+  "file": "/home/scotty/jnvsjn-original/omt/musicdinos.omt",
+  "total_size": 357464,
+  "has_images": false,
+  "has_audio": true,
+  "audio": [
+    {
+      "index": 0,
+      "name": "dinos2",
+      "offset": 44,
+      "size": 357420,
+      "file": "assets/parsed_jnvsjn/musicdinos/musicdinos_audio/0000_dinos2.wav"
+    }
+  ]
+}

@@ -1,0 +1,365 @@
+{
+  "file": "/home/scotty/jnvsjn-original/omt/voicegamebigcarl.omt",
+  "total_size": 2085479,
+  "has_images": false,
+  "has_audio": true,
+  "audio": [
+    {
+      "index": 0,
+      "name": "empty1",
+      "offset": 8,
+      "size": 38712,
+      "file": "assets/parsed_jnvsjn/voicegamebigcarl/voicegamebigcarl_audio/0000_empty1.wav"
+    },
+    {
+      "index": 1,
+      "name": "jimmystore15",
+      "offset": 39143,
+      "size": 7428,
+      "file": "assets/parsed_jnvsjn/voicegamebigcarl/voicegamebigcarl_audio/0001_jimmystore15.wav"
+    },
+    {
+      "index": 2,
+      "name": "jimmystore14",
+      "offset": 46571,
+      "size": 5056,
+      "file": "assets/parsed_jnvsjn/voicegamebigcarl/voicegamebigcarl_audio/0002_jimmystore14.wav"
+    },
+    {
+      "index": 3,
+      "name": "numeycarl07",
+      "offset": 57425,
+      "size": 40942,
+      "file": "assets/parsed_jnvsjn/voicegamebigcarl/voicegamebigcarl_audio/0003_numeycarl07.wav"
+    },
+    {
+      "index": 4,
+      "name": "bigcarlsound3",
+      "offset": 98367,
+      "size": 42220,
+      "file": "assets/parsed_jnvsjn/voicegamebigcarl/voicegamebigcarl_audio/0004_bigcarlsound3.wav"
+    },
+    {
+      "index": 5,
+      "name": "drink",
+      "offset": 140587,
+      "size": 11260,
+      "file": "assets/parsed_jnvsjn/voicegamebigcarl/voicegamebigcarl_audio/0005_drink.wav"
+    },
+    {
+      "index": 6,
+      "name": "jimmycarl06",
+      "offset": 151847,
+      "size": 31716,
+      "file": "assets/parsed_jnvsjn/voicegamebigcarl/voicegamebigcarl_audio/0006_jimmycarl06.wav"
+    },
+    {
+      "index": 7,
+      "name": "jimmystore16",
+      "offset": 186873,
+      "size": 77996,
+      "file": "assets/parsed_jnvsjn/voicegamebigcarl/voicegamebigcarl_audio/0007_jimmystore16.wav"
+    },
+    {
+      "index": 8,
+      "name": "jimmycarl10",
+      "offset": 264869,
+      "size": 23852,
+      "file": "assets/parsed_jnvsjn/voicegamebigcarl/voicegamebigcarl_audio/0008_jimmycarl10.wav"
+    },
+    {
+      "index": 9,
+      "name": "jimmycarl08",
+      "offset": 288721,
+      "size": 125484,
+      "file": "assets/parsed_jnvsjn/voicegamebigcarl/voicegamebigcarl_audio/0009_jimmycarl08.wav"
+    },
+    {
+      "index": 10,
+      "name": "jimmycarl12",
+      "offset": 414205,
+      "size": 49260,
+      "file": "assets/parsed_jnvsjn/voicegamebigcarl/voicegamebigcarl_audio/0010_jimmycarl12.wav"
+    },
+    {
+      "index": 11,
+      "name": "jimmycarl13",
+      "offset": 463465,
+      "size": 9494,
+      "file": "assets/parsed_jnvsjn/voicegamebigcarl/voicegamebigcarl_audio/0011_jimmycarl13.wav"
+    },
+    {
+      "index": 12,
+      "name": "numeycarl05",
+      "offset": 476425,
+      "size": 26822,
+      "file": "assets/parsed_jnvsjn/voicegamebigcarl/voicegamebigcarl_audio/0012_numeycarl05.wav"
+    },
+    {
+      "index": 13,
+      "name": "numeycarl03",
+      "offset": 503247,
+      "size": 29578,
+      "file": "assets/parsed_jnvsjn/voicegamebigcarl/voicegamebigcarl_audio/0013_numeycarl03.wav"
+    },
+    {
+      "index": 14,
+      "name": "jimmystore13",
+      "offset": 532825,
+      "size": 6140,
+      "file": "assets/parsed_jnvsjn/voicegamebigcarl/voicegamebigcarl_audio/0014_jimmystore13.wav"
+    },
+    {
+      "index": 15,
+      "name": "jimmystore04",
+      "offset": 538965,
+      "size": 7054,
+      "file": "assets/parsed_jnvsjn/voicegamebigcarl/voicegamebigcarl_audio/0015_jimmystore04.wav"
+    },
+    {
+      "index": 16,
+      "name": "jimmycarl01",
+      "offset": 548185,
+      "size": 23744,
+      "file": "assets/parsed_jnvsjn/voicegamebigcarl/voicegamebigcarl_audio/0016_jimmycarl01.wav"
+    },
+    {
+      "index": 17,
+      "name": "jimmycarl03",
+      "offset": 571929,
+      "size": 64460,
+      "file": "assets/parsed_jnvsjn/voicegamebigcarl/voicegamebigcarl_audio/0017_jimmycarl03.wav"
+    },
+    {
+      "index": 18,
+      "name": "jimmycarl05",
+      "offset": 636389,
+      "size": 50518,
+      "file": "assets/parsed_jnvsjn/voicegamebigcarl/voicegamebigcarl_audio/0018_jimmycarl05.wav"
+    },
+    {
+      "index": 19,
+      "name": "jimmycarl07",
+      "offset": 686907,
+      "size": 28648,
+      "file": "assets/parsed_jnvsjn/voicegamebigcarl/voicegamebigcarl_audio/0019_jimmycarl07.wav"
+    },
+    {
+      "index": 20,
+      "name": "jimmycarl09",
+      "offset": 715555,
+      "size": 80400,
+      "file": "assets/parsed_jnvsjn/voicegamebigcarl/voicegamebigcarl_audio/0020_jimmycarl09.wav"
+    },
+    {
+      "index": 21,
+      "name": "jimmycarl11",
+      "offset": 795955,
+      "size": 50128,
+      "file": "assets/parsed_jnvsjn/voicegamebigcarl/voicegamebigcarl_audio/0021_jimmycarl11.wav"
+    },
+    {
+      "index": 22,
+      "name": "audio_22",
+      "offset": 846083,
+      "size": 9494,
+      "file": "assets/parsed_jnvsjn/voicegamebigcarl/voicegamebigcarl_audio/0022_audio_22.wav"
+    },
+    {
+      "index": 23,
+      "name": "jimmycarl",
+      "offset": 855577,
+      "size": 29754,
+      "file": "assets/parsed_jnvsjn/voicegamebigcarl/voicegamebigcarl_audio/0023_jimmycarl.wav"
+    },
+    {
+      "index": 24,
+      "name": "jimmyself17a",
+      "offset": 885331,
+      "size": 22114,
+      "file": "assets/parsed_jnvsjn/voicegamebigcarl/voicegamebigcarl_audio/0024_jimmyself17a.wav"
+    },
+    {
+      "index": 25,
+      "name": "jimmystore01",
+      "offset": 907445,
+      "size": 39294,
+      "file": "assets/parsed_jnvsjn/voicegamebigcarl/voicegamebigcarl_audio/0025_jimmystore01.wav"
+    },
+    {
+      "index": 26,
+      "name": "jimmystore02",
+      "offset": 946739,
+      "size": 45356,
+      "file": "assets/parsed_jnvsjn/voicegamebigcarl/voicegamebigcarl_audio/0026_jimmystore02.wav"
+    },
+    {
+      "index": 27,
+      "name": "jimmystore03",
+      "offset": 992095,
+      "size": 42254,
+      "file": "assets/parsed_jnvsjn/voicegamebigcarl/voicegamebigcarl_audio/0027_jimmystore03.wav"
+    },
+    {
+      "index": 28,
+      "name": "audio_28",
+      "offset": 1034349,
+      "size": 7054,
+      "file": "assets/parsed_jnvsjn/voicegamebigcarl/voicegamebigcarl_audio/0028_audio_28.wav"
+    },
+    {
+      "index": 29,
+      "name": "jimmystore05",
+      "offset": 1041403,
+      "size": 64310,
+      "file": "assets/parsed_jnvsjn/voicegamebigcarl/voicegamebigcarl_audio/0029_jimmystore05.wav"
+    },
+    {
+      "index": 30,
+      "name": "jimmystore06",
+      "offset": 1105713,
+      "size": 19212,
+      "file": "assets/parsed_jnvsjn/voicegamebigcarl/voicegamebigcarl_audio/0030_jimmystore06.wav"
+    },
+    {
+      "index": 31,
+      "name": "jimmystore07",
+      "offset": 1124925,
+      "size": 152398,
+      "file": "assets/parsed_jnvsjn/voicegamebigcarl/voicegamebigcarl_audio/0031_jimmystore07.wav"
+    },
+    {
+      "index": 32,
+      "name": "jimmystore08",
+      "offset": 1277323,
+      "size": 30192,
+      "file": "assets/parsed_jnvsjn/voicegamebigcarl/voicegamebigcarl_audio/0032_jimmystore08.wav"
+    },
+    {
+      "index": 33,
+      "name": "jimmystore09",
+      "offset": 1307515,
+      "size": 14006,
+      "file": "assets/parsed_jnvsjn/voicegamebigcarl/voicegamebigcarl_audio/0033_jimmystore09.wav"
+    },
+    {
+      "index": 34,
+      "name": "jimmystore10",
+      "offset": 1321521,
+      "size": 17976,
+      "file": "assets/parsed_jnvsjn/voicegamebigcarl/voicegamebigcarl_audio/0034_jimmystore10.wav"
+    },
+    {
+      "index": 35,
+      "name": "jimmystore11",
+      "offset": 1339497,
+      "size": 71084,
+      "file": "assets/parsed_jnvsjn/voicegamebigcarl/voicegamebigcarl_audio/0035_jimmystore11.wav"
+    },
+    {
+      "index": 36,
+      "name": "jimmystore12",
+      "offset": 1410581,
+      "size": 23536,
+      "file": "assets/parsed_jnvsjn/voicegamebigcarl/voicegamebigcarl_audio/0036_jimmystore12.wav"
+    },
+    {
+      "index": 37,
+      "name": "audio_37",
+      "offset": 1434117,
+      "size": 6140,
+      "file": "assets/parsed_jnvsjn/voicegamebigcarl/voicegamebigcarl_audio/0037_audio_37.wav"
+    },
+    {
+      "index": 38,
+      "name": "audio_38",
+      "offset": 1440257,
+      "size": 5056,
+      "file": "assets/parsed_jnvsjn/voicegamebigcarl/voicegamebigcarl_audio/0038_audio_38.wav"
+    },
+    {
+      "index": 39,
+      "name": "audio_39",
+      "offset": 1445313,
+      "size": 7428,
+      "file": "assets/parsed_jnvsjn/voicegamebigcarl/voicegamebigcarl_audio/0039_audio_39.wav"
+    },
+    {
+      "index": 40,
+      "name": "jimmystore16a",
+      "offset": 1452741,
+      "size": 24700,
+      "file": "assets/parsed_jnvsjn/voicegamebigcarl/voicegamebigcarl_audio/0040_jimmystore16a.wav"
+    },
+    {
+      "index": 41,
+      "name": "jimmystore16b",
+      "offset": 1477441,
+      "size": 21822,
+      "file": "assets/parsed_jnvsjn/voicegamebigcarl/voicegamebigcarl_audio/0041_jimmystore16b.wav"
+    },
+    {
+      "index": 42,
+      "name": "jimmystore17",
+      "offset": 1499263,
+      "size": 34820,
+      "file": "assets/parsed_jnvsjn/voicegamebigcarl/voicegamebigcarl_audio/0042_jimmystore17.wav"
+    },
+    {
+      "index": 43,
+      "name": "jimmystore18",
+      "offset": 1534083,
+      "size": 58490,
+      "file": "assets/parsed_jnvsjn/voicegamebigcarl/voicegamebigcarl_audio/0043_jimmystore18.wav"
+    },
+    {
+      "index": 44,
+      "name": "numeycarl01",
+      "offset": 1592573,
+      "size": 21452,
+      "file": "assets/parsed_jnvsjn/voicegamebigcarl/voicegamebigcarl_audio/0044_numeycarl01.wav"
+    },
+    {
+      "index": 45,
+      "name": "numeycarl02",
+      "offset": 1614025,
+      "size": 18668,
+      "file": "assets/parsed_jnvsjn/voicegamebigcarl/voicegamebigcarl_audio/0045_numeycarl02.wav"
+    },
+    {
+      "index": 46,
+      "name": "numeycarl04",
+      "offset": 1662271,
+      "size": 49850,
+      "file": "assets/parsed_jnvsjn/voicegamebigcarl/voicegamebigcarl_audio/0046_numeycarl04.wav"
+    },
+    {
+      "index": 47,
+      "name": "numeycarl06",
+      "offset": 1712121,
+      "size": 39468,
+      "file": "assets/parsed_jnvsjn/voicegamebigcarl/voicegamebigcarl_audio/0047_numeycarl06.wav"
+    },
+    {
+      "index": 48,
+      "name": "jimmycarl02",
+      "offset": 1761381,
+      "size": 104006,
+      "file": "assets/parsed_jnvsjn/voicegamebigcarl/voicegamebigcarl_audio/0048_jimmycarl02.wav"
+    },
+    {
+      "index": 49,
+      "name": "jimmycarl04",
+      "offset": 1865387,
+      "size": 73280,
+      "file": "assets/parsed_jnvsjn/voicegamebigcarl/voicegamebigcarl_audio/0049_jimmycarl04.wav"
+    },
+    {
+      "index": 50,
+      "name": "numeycarl06a",
+      "offset": 1938667,
+      "size": 146812,
+      "file": "assets/parsed_jnvsjn/voicegamebigcarl/voicegamebigcarl_audio/0050_numeycarl06a.wav"
+    }
+  ]
+}

@@ -1,0 +1,15 @@
+{
+  "file": "/home/scotty/jnvsjn-original/omt/musicmuseum.omt",
+  "total_size": 288401,
+  "has_images": false,
+  "has_audio": true,
+  "audio": [
+    {
+      "index": 0,
+      "name": "museum1",
+      "offset": 8,
+      "size": 288366,
+      "file": "assets/parsed_jnvsjn/musicmuseum/musicmuseum_audio/0000_museum1.wav"
+    }
+  ]
+}

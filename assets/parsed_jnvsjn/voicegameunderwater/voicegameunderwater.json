@@ -1,0 +1,57 @@
+{
+  "file": "/home/scotty/jnvsjn-original/omt/voicegameunderwater.omt",
+  "total_size": 526081,
+  "has_images": false,
+  "has_audio": true,
+  "audio": [
+    {
+      "index": 0,
+      "name": "jimmyself14",
+      "offset": 80,
+      "size": 50930,
+      "file": "assets/parsed_jnvsjn/voicegameunderwater/voicegameunderwater_audio/0000_jimmyself14.wav"
+    },
+    {
+      "index": 1,
+      "name": "atlantis",
+      "offset": 51010,
+      "size": 58668,
+      "file": "assets/parsed_jnvsjn/voicegameunderwater/voicegameunderwater_audio/0001_atlantis.wav"
+    },
+    {
+      "index": 2,
+      "name": "jimmyself08",
+      "offset": 109678,
+      "size": 204736,
+      "file": "assets/parsed_jnvsjn/voicegameunderwater/voicegameunderwater_audio/0002_jimmyself08.wav"
+    },
+    {
+      "index": 3,
+      "name": "jimmyself11",
+      "offset": 314414,
+      "size": 86552,
+      "file": "assets/parsed_jnvsjn/voicegameunderwater/voicegameunderwater_audio/0003_jimmyself11.wav"
+    },
+    {
+      "index": 4,
+      "name": "jimmyself12b",
+      "offset": 400966,
+      "size": 46652,
+      "file": "assets/parsed_jnvsjn/voicegameunderwater/voicegameunderwater_audio/0004_jimmyself12b.wav"
+    },
+    {
+      "index": 5,
+      "name": "jimmyself12",
+      "offset": 447618,
+      "size": 56940,
+      "file": "assets/parsed_jnvsjn/voicegameunderwater/voicegameunderwater_audio/0005_jimmyself12.wav"
+    },
+    {
+      "index": 6,
+      "name": "checkitout",
+      "offset": 504558,
+      "size": 21442,
+      "file": "assets/parsed_jnvsjn/voicegameunderwater/voicegameunderwater_audio/0006_checkitout.wav"
+    }
+  ]
+}

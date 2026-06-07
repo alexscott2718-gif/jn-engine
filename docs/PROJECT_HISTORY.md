@@ -415,9 +415,14 @@ text, buttons, Jimmy portrait) is `screens.omt`'s 373 canvases.
   redistribution of extracted assets (no original executables). Portal output
   (~400 MB) is regenerable, not committed. The generator is mobile-responsive
   (collapsible categories) and game-parameterized: `--game jnvsjn` builds a
-  parallel **JNvsJN Asset Library** at `exentt.com/JNvsJN-assets/` (357 assets —
-  sprites + Granny meshes, reusing the deployed `grn-catalog` glb/thumbnails/3D
-  viewer in place).
+  parallel **JNvsJN Asset Library** at `exentt.com/JNvsJN-assets/`. The sequel
+  uses the same container stack + Granny, so it's extracted the same way (install
+  at `~/jnvsjn-original`; OMTs via `extract_all_omt.py --src` → `assets/parsed_jnvsjn`):
+  **4,258 assets** — 2,459 2D (84 OMTs' canvases + loose PNG), 1,085 audio, 684
+  meshes (389 Granny `.grn` originals — 19 with glb/thumbnail/3D viewer from the
+  deployed `grn-catalog`; only ~25/389 convert since most are skinned actors the
+  Granny decoder skips — + 295 ASE), 30 GAM. 2D images committed; audio
+  gitignored/regenerable like JNBG.
 
 **Open task (the user's thesis).** Assets are now maximally *harvested*; the next
 lever is a **role-annotation layer** so found assets (e.g. "`alpha.omt` #128 =

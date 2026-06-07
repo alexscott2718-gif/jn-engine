@@ -1,0 +1,15 @@
+{
+  "file": "/home/scotty/jnvsjn-original/omt/musicneighborhood2.omt",
+  "total_size": 130337,
+  "has_images": false,
+  "has_audio": true,
+  "audio": [
+    {
+      "index": 0,
+      "name": "Rescue Libby",
+      "offset": 8,
+      "size": 130302,
+      "file": "assets/parsed_jnvsjn/musicneighborhood2/musicneighborhood2_audio/0000_Rescue_Libby.wav"
+    }
+  ]
+}

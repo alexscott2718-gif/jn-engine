@@ -1,0 +1,36 @@
+{
+  "file": "/home/scotty/jnvsjn-original/omt/wintersky.omt",
+  "total_size": 272688,
+  "has_images": true,
+  "has_audio": false,
+  "images": [
+    {
+      "index": 0,
+      "width": 32,
+      "height": 32,
+      "depth": 32,
+      "compression": 2,
+      "stride": 128,
+      "dotransparent": false,
+      "transp_packed": 0,
+      "dopalette": false,
+      "bufsize": 320,
+      "file": "assets/parsed_jnvsjn/wintersky/wintersky_images/0000_32x32d32.png",
+      "status": "ok"
+    },
+    {
+      "index": 1,
+      "width": 256,
+      "height": 256,
+      "depth": 32,
+      "compression": 2,
+      "stride": 1024,
+      "dotransparent": false,
+      "transp_packed": 0,
+      "dopalette": false,
+      "bufsize": 261348,
+      "file": "assets/parsed_jnvsjn/wintersky/wintersky_images/0001_256x256d32.png",
+      "status": "ok"
+    }
+  ]
+}

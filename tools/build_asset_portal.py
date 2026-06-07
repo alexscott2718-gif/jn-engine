@@ -138,59 +138,100 @@ def collect_levels(out):
 
 
 def collect_jnvsjn(out, grn_catalog):
-    """JNvsJN (sequel) asset set: jnvsjn sprites (2D) + Granny meshes (reuse the
-    deployed grn-catalog's glb + GL thumbnails + 3D viewer in place, by absolute
-    URL) + jnvsjn ASE originals."""
-    from PIL import Image
+    """Full JNvsJN (sequel) asset set, mirroring the JNBG extraction:
+    all OMT canvases (2D) + loose PNG + Granny .grn (original, +glb/thumb/viewer
+    from the deployed grn-catalog where convertible) + ASE (original) + GAM."""
+    import json as _json
+    SRC = Path(os.path.expanduser("~/jnvsjn-original"))
+    PARSED = ASSETS / "parsed_jnvsjn"
     items = []
-    # --- 2D sprites ---
-    sd = ASSETS / "parsed" / "sprites" / "jnvsjn"
-    if sd.is_dir():
-        (out / "files/2d/sprites").mkdir(parents=True, exist_ok=True)
-        for png in sorted(sd.glob("*.png")):
-            rel = f"files/2d/sprites/{png.name}"
-            shutil.copy2(png, out / rel)
-            th = f"thumbs/sprites/{png.name}"
-            try:
-                _thumb(png, out / th)
-            except Exception:
-                th = rel
-            try:
-                w, h = Image.open(png).size
-            except Exception:
-                w = h = 0
-            items.append({"name": png.stem, "group": "2d", "category": "sprites",
-                          "w": w, "h": h, "thumb": th, "formats": {"png": rel}})
-    # --- Granny meshes: reuse the deployed grn-catalog in place ---
-    gc = Path(grn_catalog)
-    base = "/jnvsjn/grn-catalog"
-    models = gc / "models"
-    if models.is_dir():
-        for glb in sorted(models.glob("*.glb")):
-            name = glb.stem
-            th = gc / "thumbs" / f"{name}.png"
-            items.append({"name": name, "group": "mesh", "category": "grn",
-                          "thumb": f"{base}/thumbs/{name}.png" if th.exists() else None,
-                          "formats": {"glb": f"{base}/models/{glb.name}"},
-                          "_src": {"glb": str(glb)},
-                          "viewer": f"{base}/view.html?m={name}"})
-    # --- ASE originals (+ glb if a match exists) ---
-    ase_dir = ASSETS / "ase" / "jnvsjn"
-    glb_idx = {g.stem.lower(): g for g in (ASSETS / "glb" / "grn").glob("*.glb")}
-    if ase_dir.is_dir():
+
+    # --- 2D: OMT canvases (per container) + loose PNG textures ---
+    if PARSED.is_dir():
+        for sub in sorted(PARSED.iterdir(), key=lambda p: p.name.lower()):
+            img = sub / f"{sub.name}_images"
+            if img.is_dir():
+                for png in sorted(img.glob("*.png")):
+                    _add_2d(out, items, png, sub.name)
+    if (SRC / "png").is_dir():
+        for png in sorted((SRC / "png").glob("*.png")):
+            _add_2d(out, items, png, "textures")
+
+    # --- audio (WAV) from OMT containers ---
+    if PARSED.is_dir():
+        for sub in sorted(PARSED.iterdir(), key=lambda p: p.name.lower()):
+            ad = sub / f"{sub.name}_audio"
+            if not ad.is_dir():
+                continue
+            kind = ("music" if sub.name.startswith("music") else
+                    "voice" if sub.name.startswith("voice") else "sfx")
+            for wav in sorted(ad.glob("*.wav")):
+                rel = f"files/audio/{sub.name}/{wav.name}"
+                (out / "files/audio" / sub.name).mkdir(parents=True, exist_ok=True)
+                shutil.copy2(wav, out / rel)
+                items.append({"name": wav.stem, "group": "audio", "category": kind,
+                              "subset": sub.name, "thumb": None, "formats": {"wav": rel}})
+
+    # --- meshes: Granny .grn originals; attach glb/thumb/viewer from the
+    #     deployed grn-catalog (catalog.json maps source_grn -> mesh entry) ---
+    gc = Path(grn_catalog); base = "/jnvsjn/grn-catalog"
+    grn_map = {}
+    cj = gc / "data" / "catalog.json"
+    if cj.exists():
+        for e in _json.loads(cj.read_text()):
+            sg = e.get("source_grn", "").replace("\\", "/").split("/")[-1].lower()
+            if sg:
+                grn_map.setdefault(sg, e)
+    if (SRC / "grn").is_dir():
+        (out / "files/grn").mkdir(parents=True, exist_ok=True)
+        for grn in sorted((SRC / "grn").glob("*.grn")):
+            rel = f"files/grn/{grn.name}"; shutil.copy2(grn, out / rel)
+            it = {"name": grn.stem, "group": "mesh", "category": "grn",
+                  "thumb": None, "formats": {"grn": rel}, "_src": {"grn": str(grn)}}
+            e = grn_map.get(grn.name.lower())
+            if e:
+                it["formats"]["glb"] = f"{base}/{e['model']}"
+                it["_src"]["glb"] = str(gc / e["model"])
+                if (gc / e["thumb"]).exists():
+                    it["thumb"] = f"{base}/{e['thumb']}"
+                it["viewer"] = f"{base}/view.html?m={e['name']}"
+            items.append(it)
+
+    # --- meshes: ASE originals ---
+    if (SRC / "ase").is_dir():
         (out / "files/mesh-ase").mkdir(parents=True, exist_ok=True)
-        for ase in sorted(list(ase_dir.glob("*.ase")) + list(ase_dir.glob("*.ASE"))):
-            name = ase.stem
-            rel = f"files/mesh-ase/{ase.name}"
-            shutil.copy2(ase, out / rel)
-            formats = {"ase": rel}; src = {"ase": str(ase)}
-            g = glb_idx.get(name.lower())
-            if g:
-                grel = f"files/mesh-ase/{name}.glb"
-                shutil.copy2(g, out / grel); formats["glb"] = grel; src["glb"] = str(g)
-            items.append({"name": name, "group": "mesh", "category": "ase",
-                          "thumb": None, "formats": formats, "_src": src})
+        for ase in sorted(list((SRC / "ase").glob("*.ase")) + list((SRC / "ase").glob("*.ASE"))):
+            rel = f"files/mesh-ase/{ase.name}"; shutil.copy2(ase, out / rel)
+            items.append({"name": ase.stem, "group": "mesh", "category": "ase",
+                          "thumb": None, "formats": {"ase": rel}, "_src": {"ase": str(ase)}})
+
+    # --- level/entity data: GAM ---
+    if (SRC / "gam").is_dir():
+        (out / "files/level").mkdir(parents=True, exist_ok=True)
+        for gam in sorted((SRC / "gam").glob("*.gam")):
+            rel = f"files/level/{gam.name}"; shutil.copy2(gam, out / rel)
+            items.append({"name": gam.stem, "group": "level", "category": "level",
+                          "thumb": None, "formats": {"gam": rel}, "_src": {"gam": str(gam)}})
     return items
+
+
+def _add_2d(out, items, png, cat):
+    """Copy a 2D PNG into the portal + a thumbnail; append a manifest entry."""
+    from PIL import Image
+    rel = f"files/2d/{cat}/{png.name}"
+    (out / "files/2d" / cat).mkdir(parents=True, exist_ok=True)
+    shutil.copy2(png, out / rel)
+    th = f"thumbs/{cat}/{png.name}"
+    try:
+        _thumb(png, out / th)
+    except Exception:
+        th = rel
+    try:
+        w, h = Image.open(png).size
+    except Exception:
+        w = h = 0
+    items.append({"name": png.stem, "group": "2d", "category": cat,
+                  "w": w, "h": h, "thumb": th, "formats": {"png": rel}})
 
 
 def make_zips(out, items):

@@ -1,0 +1,330 @@
+{
+  "file": "/home/scotty/jnvsjn-original/omt/voicegametimetravel.omt",
+  "total_size": 2526553,
+  "has_images": false,
+  "has_audio": true,
+  "audio": [
+    {
+      "index": 0,
+      "name": "beamin",
+      "offset": 8,
+      "size": 124796,
+      "file": "assets/parsed_jnvsjn/voicegametimetravel/voicegametimetravel_audio/0000_beamin.wav"
+    },
+    {
+      "index": 1,
+      "name": "timetravel",
+      "offset": 124804,
+      "size": 63148,
+      "file": "assets/parsed_jnvsjn/voicegametimetravel/voicegametimetravel_audio/0001_timetravel.wav"
+    },
+    {
+      "index": 2,
+      "name": "hermwalks",
+      "offset": 187952,
+      "size": 33206,
+      "file": "assets/parsed_jnvsjn/voicegametimetravel/voicegametimetravel_audio/0002_hermwalks.wav"
+    },
+    {
+      "index": 3,
+      "name": "timetravel37",
+      "offset": 221581,
+      "size": 53506,
+      "file": "assets/parsed_jnvsjn/voicegametimetravel/voicegametimetravel_audio/0003_timetravel37.wav"
+    },
+    {
+      "index": 4,
+      "name": "herman09",
+      "offset": 275087,
+      "size": 17836,
+      "file": "assets/parsed_jnvsjn/voicegametimetravel/voicegametimetravel_audio/0004_herman09.wav"
+    },
+    {
+      "index": 5,
+      "name": "herman09a",
+      "offset": 292923,
+      "size": 22382,
+      "file": "assets/parsed_jnvsjn/voicegametimetravel/voicegametimetravel_audio/0005_herman09a.wav"
+    },
+    {
+      "index": 6,
+      "name": "herman09b2",
+      "offset": 315305,
+      "size": 100506,
+      "file": "assets/parsed_jnvsjn/voicegametimetravel/voicegametimetravel_audio/0006_herman09b2.wav"
+    },
+    {
+      "index": 7,
+      "name": "herman09b",
+      "offset": 415811,
+      "size": 29692,
+      "file": "assets/parsed_jnvsjn/voicegametimetravel/voicegametimetravel_audio/0007_herman09b.wav"
+    },
+    {
+      "index": 8,
+      "name": "timetravel01",
+      "offset": 445503,
+      "size": 104860,
+      "file": "assets/parsed_jnvsjn/voicegametimetravel/voicegametimetravel_audio/0008_timetravel01.wav"
+    },
+    {
+      "index": 9,
+      "name": "timetravel02",
+      "offset": 550363,
+      "size": 8476,
+      "file": "assets/parsed_jnvsjn/voicegametimetravel/voicegametimetravel_audio/0009_timetravel02.wav"
+    },
+    {
+      "index": 10,
+      "name": "timetravel03",
+      "offset": 558839,
+      "size": 96684,
+      "file": "assets/parsed_jnvsjn/voicegametimetravel/voicegametimetravel_audio/0010_timetravel03.wav"
+    },
+    {
+      "index": 11,
+      "name": "timetravel04",
+      "offset": 655523,
+      "size": 82336,
+      "file": "assets/parsed_jnvsjn/voicegametimetravel/voicegametimetravel_audio/0011_timetravel04.wav"
+    },
+    {
+      "index": 12,
+      "name": "timetravel05",
+      "offset": 737859,
+      "size": 131628,
+      "file": "assets/parsed_jnvsjn/voicegametimetravel/voicegametimetravel_audio/0012_timetravel05.wav"
+    },
+    {
+      "index": 13,
+      "name": "timetravel06",
+      "offset": 869487,
+      "size": 91988,
+      "file": "assets/parsed_jnvsjn/voicegametimetravel/voicegametimetravel_audio/0013_timetravel06.wav"
+    },
+    {
+      "index": 14,
+      "name": "timetravel07",
+      "offset": 961475,
+      "size": 21404,
+      "file": "assets/parsed_jnvsjn/voicegametimetravel/voicegametimetravel_audio/0014_timetravel07.wav"
+    },
+    {
+      "index": 15,
+      "name": "timetravel08",
+      "offset": 982879,
+      "size": 56446,
+      "file": "assets/parsed_jnvsjn/voicegametimetravel/voicegametimetravel_audio/0015_timetravel08.wav"
+    },
+    {
+      "index": 16,
+      "name": "timetravel09",
+      "offset": 1039325,
+      "size": 51916,
+      "file": "assets/parsed_jnvsjn/voicegametimetravel/voicegametimetravel_audio/0016_timetravel09.wav"
+    },
+    {
+      "index": 17,
+      "name": "timetravel09a",
+      "offset": 1091241,
+      "size": 25496,
+      "file": "assets/parsed_jnvsjn/voicegametimetravel/voicegametimetravel_audio/0017_timetravel09a.wav"
+    },
+    {
+      "index": 18,
+      "name": "timetravel10",
+      "offset": 1116737,
+      "size": 55468,
+      "file": "assets/parsed_jnvsjn/voicegametimetravel/voicegametimetravel_audio/0018_timetravel10.wav"
+    },
+    {
+      "index": 19,
+      "name": "timetravel11",
+      "offset": 1172205,
+      "size": 23308,
+      "file": "assets/parsed_jnvsjn/voicegametimetravel/voicegametimetravel_audio/0019_timetravel11.wav"
+    },
+    {
+      "index": 20,
+      "name": "timetravel12",
+      "offset": 1195513,
+      "size": 24236,
+      "file": "assets/parsed_jnvsjn/voicegametimetravel/voicegametimetravel_audio/0020_timetravel12.wav"
+    },
+    {
+      "index": 21,
+      "name": "timetravel13",
+      "offset": 1219749,
+      "size": 52140,
+      "file": "assets/parsed_jnvsjn/voicegametimetravel/voicegametimetravel_audio/0021_timetravel13.wav"
+    },
+    {
+      "index": 22,
+      "name": "timetravel14",
+      "offset": 1271889,
+      "size": 35372,
+      "file": "assets/parsed_jnvsjn/voicegametimetravel/voicegametimetravel_audio/0022_timetravel14.wav"
+    },
+    {
+      "index": 23,
+      "name": "timetravel15",
+      "offset": 1307261,
+      "size": 90318,
+      "file": "assets/parsed_jnvsjn/voicegametimetravel/voicegametimetravel_audio/0023_timetravel15.wav"
+    },
+    {
+      "index": 24,
+      "name": "timetravel16",
+      "offset": 1397579,
+      "size": 22640,
+      "file": "assets/parsed_jnvsjn/voicegametimetravel/voicegametimetravel_audio/0024_timetravel16.wav"
+    },
+    {
+      "index": 25,
+      "name": "timetravel18",
+      "offset": 1420219,
+      "size": 66244,
+      "file": "assets/parsed_jnvsjn/voicegametimetravel/voicegametimetravel_audio/0025_timetravel18.wav"
+    },
+    {
+      "index": 26,
+      "name": "timetravel19",
+      "offset": 1486463,
+      "size": 79400,
+      "file": "assets/parsed_jnvsjn/voicegametimetravel/voicegametimetravel_audio/0026_timetravel19.wav"
+    },
+    {
+      "index": 27,
+      "name": "timetravel20",
+      "offset": 1565863,
+      "size": 76478,
+      "file": "assets/parsed_jnvsjn/voicegametimetravel/voicegametimetravel_audio/0027_timetravel20.wav"
+    },
+    {
+      "index": 28,
+      "name": "timetravel21",
+      "offset": 1642341,
+      "size": 17176,
+      "file": "assets/parsed_jnvsjn/voicegametimetravel/voicegametimetravel_audio/0028_timetravel21.wav"
+    },
+    {
+      "index": 29,
+      "name": "timetravel22",
+      "offset": 1659517,
+      "size": 52754,
+      "file": "assets/parsed_jnvsjn/voicegametimetravel/voicegametimetravel_audio/0029_timetravel22.wav"
+    },
+    {
+      "index": 30,
+      "name": "timetravel23",
+      "offset": 1712271,
+      "size": 28904,
+      "file": "assets/parsed_jnvsjn/voicegametimetravel/voicegametimetravel_audio/0030_timetravel23.wav"
+    },
+    {
+      "index": 31,
+      "name": "timetravel24",
+      "offset": 1741175,
+      "size": 36784,
+      "file": "assets/parsed_jnvsjn/voicegametimetravel/voicegametimetravel_audio/0031_timetravel24.wav"
+    },
+    {
+      "index": 32,
+      "name": "timetravel25",
+      "offset": 1777959,
+      "size": 40000,
+      "file": "assets/parsed_jnvsjn/voicegametimetravel/voicegametimetravel_audio/0032_timetravel25.wav"
+    },
+    {
+      "index": 33,
+      "name": "timetravel26",
+      "offset": 1817959,
+      "size": 35190,
+      "file": "assets/parsed_jnvsjn/voicegametimetravel/voicegametimetravel_audio/0033_timetravel26.wav"
+    },
+    {
+      "index": 34,
+      "name": "timetravel27",
+      "offset": 1853149,
+      "size": 103534,
+      "file": "assets/parsed_jnvsjn/voicegametimetravel/voicegametimetravel_audio/0034_timetravel27.wav"
+    },
+    {
+      "index": 35,
+      "name": "timetravel28",
+      "offset": 1956683,
+      "size": 92134,
+      "file": "assets/parsed_jnvsjn/voicegametimetravel/voicegametimetravel_audio/0035_timetravel28.wav"
+    },
+    {
+      "index": 36,
+      "name": "timetravel29",
+      "offset": 2048817,
+      "size": 23626,
+      "file": "assets/parsed_jnvsjn/voicegametimetravel/voicegametimetravel_audio/0036_timetravel29.wav"
+    },
+    {
+      "index": 37,
+      "name": "timetravel30",
+      "offset": 2072443,
+      "size": 108806,
+      "file": "assets/parsed_jnvsjn/voicegametimetravel/voicegametimetravel_audio/0037_timetravel30.wav"
+    },
+    {
+      "index": 38,
+      "name": "timetravel31",
+      "offset": 2181249,
+      "size": 24950,
+      "file": "assets/parsed_jnvsjn/voicegametimetravel/voicegametimetravel_audio/0038_timetravel31.wav"
+    },
+    {
+      "index": 39,
+      "name": "timetravel32",
+      "offset": 2206199,
+      "size": 24796,
+      "file": "assets/parsed_jnvsjn/voicegametimetravel/voicegametimetravel_audio/0039_timetravel32.wav"
+    },
+    {
+      "index": 40,
+      "name": "timetravel33",
+      "offset": 2230995,
+      "size": 93936,
+      "file": "assets/parsed_jnvsjn/voicegametimetravel/voicegametimetravel_audio/0040_timetravel33.wav"
+    },
+    {
+      "index": 41,
+      "name": "timetravel34",
+      "offset": 2324931,
+      "size": 4576,
+      "file": "assets/parsed_jnvsjn/voicegametimetravel/voicegametimetravel_audio/0041_timetravel34.wav"
+    },
+    {
+      "index": 42,
+      "name": "timetravel35",
+      "offset": 2329507,
+      "size": 25618,
+      "file": "assets/parsed_jnvsjn/voicegametimetravel/voicegametimetravel_audio/0042_timetravel35.wav"
+    },
+    {
+      "index": 43,
+      "name": "timetravel36",
+      "offset": 2355125,
+      "size": 126476,
+      "file": "assets/parsed_jnvsjn/voicegametimetravel/voicegametimetravel_audio/0043_timetravel36.wav"
+    },
+    {
+      "index": 44,
+      "name": "timetravel17",
+      "offset": 2481601,
+      "size": 14188,
+      "file": "assets/parsed_jnvsjn/voicegametimetravel/voicegametimetravel_audio/0044_timetravel17.wav"
+    },
+    {
+      "index": 45,
+      "name": "beamin2",
+      "offset": 2495789,
+      "size": 30332,
+      "file": "assets/parsed_jnvsjn/voicegametimetravel/voicegametimetravel_audio/0045_beamin2.wav"
+    }
+  ]
+}

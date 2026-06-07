@@ -1,0 +1,15 @@
+{
+  "file": "/home/scotty/jnvsjn-original/omt/musicunderwater.omt",
+  "total_size": 851391,
+  "has_images": false,
+  "has_audio": true,
+  "audio": [
+    {
+      "index": 0,
+      "name": "underwatermusic",
+      "offset": 121747,
+      "size": 729644,
+      "file": "assets/parsed_jnvsjn/musicunderwater/musicunderwater_audio/0000_underwatermusic.wav"
+    }
+  ]
+}

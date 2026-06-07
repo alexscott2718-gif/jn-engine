@@ -1,0 +1,141 @@
+{
+  "file": "/home/scotty/jnvsjn-original/omt/voicegamescience.omt",
+  "total_size": 953671,
+  "has_images": false,
+  "has_audio": true,
+  "audio": [
+    {
+      "index": 0,
+      "name": "beamin",
+      "offset": 8,
+      "size": 124796,
+      "file": "assets/parsed_jnvsjn/voicegamescience/voicegamescience_audio/0000_beamin.wav"
+    },
+    {
+      "index": 1,
+      "name": "goddarddogbark4",
+      "offset": 124804,
+      "size": 6016,
+      "file": "assets/parsed_jnvsjn/voicegamescience/voicegamescience_audio/0001_goddarddogbark4.wav"
+    },
+    {
+      "index": 2,
+      "name": "jnmuseum03",
+      "offset": 131009,
+      "size": 23356,
+      "file": "assets/parsed_jnvsjn/voicegamescience/voicegamescience_audio/0002_jnmuseum03.wav"
+    },
+    {
+      "index": 3,
+      "name": "jnmuseum02",
+      "offset": 154365,
+      "size": 18940,
+      "file": "assets/parsed_jnvsjn/voicegamescience/voicegamescience_audio/0003_jnmuseum02.wav"
+    },
+    {
+      "index": 4,
+      "name": "silence",
+      "offset": 173305,
+      "size": 55250,
+      "file": "assets/parsed_jnvsjn/voicegamescience/voicegamescience_audio/0004_silence.wav"
+    },
+    {
+      "index": 5,
+      "name": "jnmuseum07",
+      "offset": 228555,
+      "size": 37220,
+      "file": "assets/parsed_jnvsjn/voicegamescience/voicegamescience_audio/0005_jnmuseum07.wav"
+    },
+    {
+      "index": 6,
+      "name": "jimmyvox01",
+      "offset": 265775,
+      "size": 72160,
+      "file": "assets/parsed_jnvsjn/voicegamescience/voicegamescience_audio/0006_jimmyvox01.wav"
+    },
+    {
+      "index": 7,
+      "name": "jimmyvox02",
+      "offset": 337935,
+      "size": 71374,
+      "file": "assets/parsed_jnvsjn/voicegamescience/voicegamescience_audio/0007_jimmyvox02.wav"
+    },
+    {
+      "index": 8,
+      "name": "jimmyvox2a",
+      "offset": 409309,
+      "size": 53778,
+      "file": "assets/parsed_jnvsjn/voicegamescience/voicegamescience_audio/0008_jimmyvox2a.wav"
+    },
+    {
+      "index": 9,
+      "name": "jimmyvox03",
+      "offset": 463087,
+      "size": 75670,
+      "file": "assets/parsed_jnvsjn/voicegamescience/voicegamescience_audio/0009_jimmyvox03.wav"
+    },
+    {
+      "index": 10,
+      "name": "jimmyvox04",
+      "offset": 538757,
+      "size": 54892,
+      "file": "assets/parsed_jnvsjn/voicegamescience/voicegamescience_audio/0010_jimmyvox04.wav"
+    },
+    {
+      "index": 11,
+      "name": "jimmyvox05",
+      "offset": 593649,
+      "size": 8822,
+      "file": "assets/parsed_jnvsjn/voicegamescience/voicegamescience_audio/0011_jimmyvox05.wav"
+    },
+    {
+      "index": 12,
+      "name": "jimmyvox06",
+      "offset": 602471,
+      "size": 97580,
+      "file": "assets/parsed_jnvsjn/voicegamescience/voicegamescience_audio/0012_jimmyvox06.wav"
+    },
+    {
+      "index": 13,
+      "name": "jimmyvox07",
+      "offset": 700051,
+      "size": 45728,
+      "file": "assets/parsed_jnvsjn/voicegamescience/voicegamescience_audio/0013_jimmyvox07.wav"
+    },
+    {
+      "index": 14,
+      "name": "jimmyvox08",
+      "offset": 745779,
+      "size": 7164,
+      "file": "assets/parsed_jnvsjn/voicegamescience/voicegamescience_audio/0014_jimmyvox08.wav"
+    },
+    {
+      "index": 15,
+      "name": "jimmyvox09",
+      "offset": 752943,
+      "size": 28096,
+      "file": "assets/parsed_jnvsjn/voicegamescience/voicegamescience_audio/0015_jimmyvox09.wav"
+    },
+    {
+      "index": 16,
+      "name": "jimmyvox10",
+      "offset": 781039,
+      "size": 68772,
+      "file": "assets/parsed_jnvsjn/voicegamescience/voicegamescience_audio/0016_jimmyvox10.wav"
+    },
+    {
+      "index": 17,
+      "name": "jnmuseum01",
+      "offset": 849811,
+      "size": 91698,
+      "file": "assets/parsed_jnvsjn/voicegamescience/voicegamescience_audio/0017_jnmuseum01.wav"
+    },
+    {
+      "index": 18,
+      "name": "jnmuseum01a",
+      "offset": 941509,
+      "size": 12162,
+      "file": "assets/parsed_jnvsjn/voicegamescience/voicegamescience_audio/0018_jnmuseum01a.wav"
+    }
+  ]
+}

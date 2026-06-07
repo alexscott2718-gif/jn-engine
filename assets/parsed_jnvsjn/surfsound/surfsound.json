@@ -1,0 +1,15 @@
+{
+  "file": "/home/scotty/jnvsjn-original/omt/surfsound.omt",
+  "total_size": 443083,
+  "has_images": false,
+  "has_audio": true,
+  "audio": [
+    {
+      "index": 0,
+      "name": "surf",
+      "offset": 8,
+      "size": 443048,
+      "file": "assets/parsed_jnvsjn/surfsound/surfsound_audio/0000_surf.wav"
+    }
+  ]
+}

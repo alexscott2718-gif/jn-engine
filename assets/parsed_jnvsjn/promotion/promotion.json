@@ -1,0 +1,15 @@
+{
+  "file": "/home/scotty/jnvsjn-original/omt/promotion.omt",
+  "total_size": 70129,
+  "has_images": false,
+  "has_audio": true,
+  "audio": [
+    {
+      "index": 0,
+      "name": "jimmypromo",
+      "offset": 8,
+      "size": 70094,
+      "file": "assets/parsed_jnvsjn/promotion/promotion_audio/0000_jimmypromo.wav"
+    }
+  ]
+}

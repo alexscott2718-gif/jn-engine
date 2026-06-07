@@ -1,0 +1,15 @@
+{
+  "file": "/home/scotty/jnvsjn-original/omt/musicegypt1.omt",
+  "total_size": 313935,
+  "has_images": false,
+  "has_audio": true,
+  "audio": [
+    {
+      "index": 0,
+      "name": "powerslave",
+      "offset": 8,
+      "size": 313900,
+      "file": "assets/parsed_jnvsjn/musicegypt1/musicegypt1_audio/0000_powerslave.wav"
+    }
+  ]
+}

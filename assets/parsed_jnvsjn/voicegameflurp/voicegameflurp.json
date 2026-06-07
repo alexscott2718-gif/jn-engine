@@ -1,0 +1,351 @@
+{
+  "file": "/home/scotty/jnvsjn-original/omt/voicegameflurp.omt",
+  "total_size": 2357227,
+  "has_images": false,
+  "has_audio": true,
+  "audio": [
+    {
+      "index": 0,
+      "name": "herman13",
+      "offset": 8,
+      "size": 23676,
+      "file": "assets/parsed_jnvsjn/voicegameflurp/voicegameflurp_audio/0000_herman13.wav"
+    },
+    {
+      "index": 1,
+      "name": "herman14",
+      "offset": 23684,
+      "size": 27580,
+      "file": "assets/parsed_jnvsjn/voicegameflurp/voicegameflurp_audio/0001_herman14.wav"
+    },
+    {
+      "index": 2,
+      "name": "herman15",
+      "offset": 51264,
+      "size": 15708,
+      "file": "assets/parsed_jnvsjn/voicegameflurp/voicegameflurp_audio/0002_herman15.wav"
+    },
+    {
+      "index": 3,
+      "name": "herman16",
+      "offset": 66972,
+      "size": 15868,
+      "file": "assets/parsed_jnvsjn/voicegameflurp/voicegameflurp_audio/0003_herman16.wav"
+    },
+    {
+      "index": 4,
+      "name": "beamin",
+      "offset": 82840,
+      "size": 124796,
+      "file": "assets/parsed_jnvsjn/voicegameflurp/voicegameflurp_audio/0004_beamin.wav"
+    },
+    {
+      "index": 5,
+      "name": "jimmyherman23",
+      "offset": 207636,
+      "size": 25098,
+      "file": "assets/parsed_jnvsjn/voicegameflurp/voicegameflurp_audio/0005_jimmyherman23.wav"
+    },
+    {
+      "index": 6,
+      "name": "fallintovat",
+      "offset": 233184,
+      "size": 25500,
+      "file": "assets/parsed_jnvsjn/voicegameflurp/voicegameflurp_audio/0006_fallintovat.wav"
+    },
+    {
+      "index": 7,
+      "name": "jimmycindy05",
+      "offset": 258684,
+      "size": 20572,
+      "file": "assets/parsed_jnvsjn/voicegameflurp/voicegameflurp_audio/0007_jimmycindy05.wav"
+    },
+    {
+      "index": 8,
+      "name": "jimmycindy06",
+      "offset": 279256,
+      "size": 20844,
+      "file": "assets/parsed_jnvsjn/voicegameflurp/voicegameflurp_audio/0008_jimmycindy06.wav"
+    },
+    {
+      "index": 9,
+      "name": "jimmycindy06a",
+      "offset": 300100,
+      "size": 30204,
+      "file": "assets/parsed_jnvsjn/voicegameflurp/voicegameflurp_audio/0009_jimmycindy06a.wav"
+    },
+    {
+      "index": 10,
+      "name": "jimmycindy06b",
+      "offset": 330304,
+      "size": 19132,
+      "file": "assets/parsed_jnvsjn/voicegameflurp/voicegameflurp_audio/0010_jimmycindy06b.wav"
+    },
+    {
+      "index": 11,
+      "name": "jimmycindy07",
+      "offset": 349436,
+      "size": 34796,
+      "file": "assets/parsed_jnvsjn/voicegameflurp/voicegameflurp_audio/0011_jimmycindy07.wav"
+    },
+    {
+      "index": 12,
+      "name": "jimmycindy08",
+      "offset": 384232,
+      "size": 51756,
+      "file": "assets/parsed_jnvsjn/voicegameflurp/voicegameflurp_audio/0012_jimmycindy08.wav"
+    },
+    {
+      "index": 13,
+      "name": "jimmycindy09",
+      "offset": 435988,
+      "size": 32620,
+      "file": "assets/parsed_jnvsjn/voicegameflurp/voicegameflurp_audio/0013_jimmycindy09.wav"
+    },
+    {
+      "index": 14,
+      "name": "jimmycindy10",
+      "offset": 468608,
+      "size": 56556,
+      "file": "assets/parsed_jnvsjn/voicegameflurp/voicegameflurp_audio/0014_jimmycindy10.wav"
+    },
+    {
+      "index": 15,
+      "name": "jimmycindy11",
+      "offset": 525164,
+      "size": 26958,
+      "file": "assets/parsed_jnvsjn/voicegameflurp/voicegameflurp_audio/0015_jimmycindy11.wav"
+    },
+    {
+      "index": 16,
+      "name": "jimmyflurp01",
+      "offset": 552122,
+      "size": 108076,
+      "file": "assets/parsed_jnvsjn/voicegameflurp/voicegameflurp_audio/0016_jimmyflurp01.wav"
+    },
+    {
+      "index": 17,
+      "name": "jimmyflurp03",
+      "offset": 660198,
+      "size": 48172,
+      "file": "assets/parsed_jnvsjn/voicegameflurp/voicegameflurp_audio/0017_jimmyflurp03.wav"
+    },
+    {
+      "index": 18,
+      "name": "jimmyflurp04",
+      "offset": 708370,
+      "size": 30420,
+      "file": "assets/parsed_jnvsjn/voicegameflurp/voicegameflurp_audio/0018_jimmyflurp04.wav"
+    },
+    {
+      "index": 19,
+      "name": "jimmyflurp05",
+      "offset": 738790,
+      "size": 25068,
+      "file": "assets/parsed_jnvsjn/voicegameflurp/voicegameflurp_audio/0019_jimmyflurp05.wav"
+    },
+    {
+      "index": 20,
+      "name": "jimmyflurp06",
+      "offset": 763858,
+      "size": 8908,
+      "file": "assets/parsed_jnvsjn/voicegameflurp/voicegameflurp_audio/0020_jimmyflurp06.wav"
+    },
+    {
+      "index": 21,
+      "name": "jimmyflurp07",
+      "offset": 772766,
+      "size": 109100,
+      "file": "assets/parsed_jnvsjn/voicegameflurp/voicegameflurp_audio/0021_jimmyflurp07.wav"
+    },
+    {
+      "index": 22,
+      "name": "jimmyflurp08",
+      "offset": 881866,
+      "size": 16172,
+      "file": "assets/parsed_jnvsjn/voicegameflurp/voicegameflurp_audio/0022_jimmyflurp08.wav"
+    },
+    {
+      "index": 23,
+      "name": "jimmyflurp09",
+      "offset": 898038,
+      "size": 76460,
+      "file": "assets/parsed_jnvsjn/voicegameflurp/voicegameflurp_audio/0023_jimmyflurp09.wav"
+    },
+    {
+      "index": 24,
+      "name": "jimmyflurp10",
+      "offset": 974498,
+      "size": 310654,
+      "file": "assets/parsed_jnvsjn/voicegameflurp/voicegameflurp_audio/0024_jimmyflurp10.wav"
+    },
+    {
+      "index": 25,
+      "name": "jimmyflurp11",
+      "offset": 1285152,
+      "size": 36140,
+      "file": "assets/parsed_jnvsjn/voicegameflurp/voicegameflurp_audio/0025_jimmyflurp11.wav"
+    },
+    {
+      "index": 26,
+      "name": "jimmyflurp12",
+      "offset": 1321292,
+      "size": 47276,
+      "file": "assets/parsed_jnvsjn/voicegameflurp/voicegameflurp_audio/0026_jimmyflurp12.wav"
+    },
+    {
+      "index": 27,
+      "name": "jimmyflurp14",
+      "offset": 1368568,
+      "size": 15182,
+      "file": "assets/parsed_jnvsjn/voicegameflurp/voicegameflurp_audio/0027_jimmyflurp14.wav"
+    },
+    {
+      "index": 28,
+      "name": "jimmyherman24",
+      "offset": 1383750,
+      "size": 41900,
+      "file": "assets/parsed_jnvsjn/voicegameflurp/voicegameflurp_audio/0028_jimmyherman24.wav"
+    },
+    {
+      "index": 29,
+      "name": "jimmyherman25",
+      "offset": 1425650,
+      "size": 54508,
+      "file": "assets/parsed_jnvsjn/voicegameflurp/voicegameflurp_audio/0029_jimmyherman25.wav"
+    },
+    {
+      "index": 30,
+      "name": "jimmyherman26",
+      "offset": 1480158,
+      "size": 39778,
+      "file": "assets/parsed_jnvsjn/voicegameflurp/voicegameflurp_audio/0030_jimmyherman26.wav"
+    },
+    {
+      "index": 31,
+      "name": "jimmyherman27",
+      "offset": 1519936,
+      "size": 62636,
+      "file": "assets/parsed_jnvsjn/voicegameflurp/voicegameflurp_audio/0031_jimmyherman27.wav"
+    },
+    {
+      "index": 32,
+      "name": "jimmyherman28",
+      "offset": 1582572,
+      "size": 30060,
+      "file": "assets/parsed_jnvsjn/voicegameflurp/voicegameflurp_audio/0032_jimmyherman28.wav"
+    },
+    {
+      "index": 33,
+      "name": "jimmyherman29",
+      "offset": 1612632,
+      "size": 49580,
+      "file": "assets/parsed_jnvsjn/voicegameflurp/voicegameflurp_audio/0033_jimmyherman29.wav"
+    },
+    {
+      "index": 34,
+      "name": "jimmyherman30",
+      "offset": 1662212,
+      "size": 57324,
+      "file": "assets/parsed_jnvsjn/voicegameflurp/voicegameflurp_audio/0034_jimmyherman30.wav"
+    },
+    {
+      "index": 35,
+      "name": "jimmyherman31",
+      "offset": 1719536,
+      "size": 42510,
+      "file": "assets/parsed_jnvsjn/voicegameflurp/voicegameflurp_audio/0035_jimmyherman31.wav"
+    },
+    {
+      "index": 36,
+      "name": "jimmyherman32",
+      "offset": 1762046,
+      "size": 27314,
+      "file": "assets/parsed_jnvsjn/voicegameflurp/voicegameflurp_audio/0036_jimmyherman32.wav"
+    },
+    {
+      "index": 37,
+      "name": "jimmyherman33",
+      "offset": 1789360,
+      "size": 61740,
+      "file": "assets/parsed_jnvsjn/voicegameflurp/voicegameflurp_audio/0037_jimmyherman33.wav"
+    },
+    {
+      "index": 38,
+      "name": "jimmyherman34",
+      "offset": 1851100,
+      "size": 154294,
+      "file": "assets/parsed_jnvsjn/voicegameflurp/voicegameflurp_audio/0038_jimmyherman34.wav"
+    },
+    {
+      "index": 39,
+      "name": "jimmyherman35",
+      "offset": 2005394,
+      "size": 42840,
+      "file": "assets/parsed_jnvsjn/voicegameflurp/voicegameflurp_audio/0039_jimmyherman35.wav"
+    },
+    {
+      "index": 40,
+      "name": "johnnycindy01",
+      "offset": 2048234,
+      "size": 46006,
+      "file": "assets/parsed_jnvsjn/voicegameflurp/voicegameflurp_audio/0040_johnnycindy01.wav"
+    },
+    {
+      "index": 41,
+      "name": "johnnycindy02",
+      "offset": 2094240,
+      "size": 49388,
+      "file": "assets/parsed_jnvsjn/voicegameflurp/voicegameflurp_audio/0041_johnnycindy02.wav"
+    },
+    {
+      "index": 42,
+      "name": "johnnycindy03",
+      "offset": 2143628,
+      "size": 18924,
+      "file": "assets/parsed_jnvsjn/voicegameflurp/voicegameflurp_audio/0042_johnnycindy03.wav"
+    },
+    {
+      "index": 43,
+      "name": "johnnycindy04",
+      "offset": 2162552,
+      "size": 27992,
+      "file": "assets/parsed_jnvsjn/voicegameflurp/voicegameflurp_audio/0043_johnnycindy04.wav"
+    },
+    {
+      "index": 44,
+      "name": "johnnycindy05",
+      "offset": 2190544,
+      "size": 36204,
+      "file": "assets/parsed_jnvsjn/voicegameflurp/voicegameflurp_audio/0044_johnnycindy05.wav"
+    },
+    {
+      "index": 45,
+      "name": "johnnycindy06",
+      "offset": 2226748,
+      "size": 43536,
+      "file": "assets/parsed_jnvsjn/voicegameflurp/voicegameflurp_audio/0045_johnnycindy06.wav"
+    },
+    {
+      "index": 46,
+      "name": "johnnycindy07",
+      "offset": 2270284,
+      "size": 38956,
+      "file": "assets/parsed_jnvsjn/voicegameflurp/voicegameflurp_audio/0046_johnnycindy07.wav"
+    },
+    {
+      "index": 47,
+      "name": "fallintovat2",
+      "offset": 2309240,
+      "size": 29036,
+      "file": "assets/parsed_jnvsjn/voicegameflurp/voicegameflurp_audio/0047_fallintovat2.wav"
+    },
+    {
+      "index": 48,
+      "name": "fallintovat3",
+      "offset": 2338276,
+      "size": 18492,
+      "file": "assets/parsed_jnvsjn/voicegameflurp/voicegameflurp_audio/0048_fallintovat3.wav"
+    }
+  ]
+}
