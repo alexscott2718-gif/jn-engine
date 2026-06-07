@@ -158,7 +158,7 @@ C3DYokianSoldier,C3DYokian -> C3DEnemy -> C3DPickupType -> C3DAI -> C3DAnimated 
 C3DYokianSpy,C3DYokian -> C3DEnemy -> C3DPickupType -> C3DAI -> C3DAnimated -> C3DObject -> OMedia3DMorphAnim -> OMedia3DShapeElement -> OMediaElement -> OMediaWorldPosition -> OMediaWorldAngle -> OMediaElementContainer -> OMediaDBObject -> OMediaClassStreamer -> OMediaListener -> OMediaMessagePort -> OMediaAnim -> CLocalGameObject -> CGameObject,004c1ffc;004c200c;004c245c;004c2498;004c24ac,,1,enemies_ai,3,todo,,,
 CAweReal,OMediaApplication -> OMediaSupervisor -> OMediaMessagePort -> OMediaListener,004d5e4c;004d5e60,,1,level_game_controllers,10,todo,,,
 CEditor,OMediaElement -> OMediaWorldPosition -> OMediaWorldAngle -> OMediaElementContainer -> OMediaDBObject -> OMediaClassStreamer -> OMediaListener -> OMediaMessagePort,004d5e7c;004d5e8c;004d5ea0,,12,level_game_controllers,10,todo,,,
-CGameObject,OMediaClassStreamer,004d5fec,,80,base_framework,1,todo,,,
+CGameObject,OMediaClassStreamer,004d5fec,,80,base_framework,1,spec,codex,Medium,common .gam registration/property-list/lifecycle base
 CGameType,OMediaElement -> OMediaWorldPosition -> OMediaWorldAngle -> OMediaElementContainer -> OMediaDBObject -> OMediaClassStreamer -> OMediaListener -> OMediaMessagePort -> CLocalGameObject -> CGameObject,004d641c;004d642c;004d687c;004d6890,,17,base_framework,1,todo,,,
 CGfx,,004d69ec,,1,base_framework,1,spec,codex,Medium,scalar deleting dtor only; no observed instance fields
 CJimmyGame,CGameType -> OMediaElement -> OMediaWorldPosition -> OMediaWorldAngle -> OMediaElementContainer -> OMediaDBObject -> OMediaClassStreamer -> OMediaListener -> OMediaMessagePort -> CLocalGameObject -> CGameObject,004c2c74;004c2c84;004c30d4;004c30e8,,11,level_game_controllers,10,todo,,,
