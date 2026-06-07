@@ -227,12 +227,51 @@ def classify(name, base_chain):
     return "creatures_one_off_set_dressing", "9"
 
 
+def load_existing():
+    """Read the current ledger so re-runs preserve hand-edited progress.
+
+    The class set / base chains / vftables / family / wave / auto-notes are
+    regenerated from the binary every run, but status/owner/confidence (and any
+    manual note segments) are the resumable campaign state per the decomp plan,
+    so they must survive regeneration. Returns {class_name: row_dict}.
+    """
+    if not OUT.exists():
+        return {}
+    with OUT.open(newline="") as f:
+        return {row["class"]: row for row in csv.DictReader(f)}
+
+
+def merge_notes(generated, existing_notes):
+    """Refresh auto-generated note segments while keeping manual annotations.
+
+    Auto segments are the deterministic `placeable:`/`init:`/`integrator:`/
+    movement-base markers this script emits; anything else in the existing
+    notes was added by hand and is appended back so it is not lost on re-run.
+    """
+    auto_prefixes = ("placeable:", "init:", "integrator:", "movement-base")
+    manual = [
+        seg.strip()
+        for seg in (existing_notes or "").split(";")
+        if seg.strip() and not seg.strip().startswith(auto_prefixes)
+    ]
+    # de-dup while preserving order (generated first, then surviving manual)
+    out, seen = [], set()
+    for seg in generated + manual:
+        if seg not in seen:
+            out.append(seg)
+            seen.add(seg)
+    return out
+
+
 def main():
     classes = parse_hierarchy()
     placeables, unresolved = parse_placeables(classes.keys())
+    existing = load_existing()
+    preserved = 0
     rows = []
     for name in sorted(classes):
         row = classes[name]
+        prev = existing.get(name, {})
         family, wave = classify(name, row["base_chain"])
         notes = []
         for fourcc, init_fn in sorted(placeables.get(name, [])):
@@ -244,6 +283,8 @@ def main():
             notes.append("movement-base for 3FLY/C3DPlayer params")
         if name == "C3DPlayer":
             notes.append("integrator:FUN_0041a140 vslot:.rdata_0049d398")
+        if prev.get("status", "todo") not in ("", "todo") or prev.get("owner") or prev.get("confidence"):
+            preserved += 1
         rows.append({
             "class": name,
             "base_chain": row["base_chain"],
@@ -252,10 +293,10 @@ def main():
             "n_methods": row["n_methods"],
             "family": family,
             "wave": wave,
-            "status": "todo",
-            "owner": "",
-            "confidence": "",
-            "notes": "; ".join(notes),
+            "status": prev.get("status") or "todo",
+            "owner": prev.get("owner", ""),
+            "confidence": prev.get("confidence", ""),
+            "notes": "; ".join(merge_notes(notes, prev.get("notes", ""))),
         })
 
     with OUT.open("w", newline="") as f:
@@ -268,7 +309,8 @@ def main():
     print(
         f"wrote {OUT} ({len(rows)} classes, "
         f"{sum(1 for row in rows if 'placeable:' in row['notes'])} tagged placeable, "
-        f"{len(unresolved)} unresolved FourCCs)"
+        f"{len(unresolved)} unresolved FourCCs, "
+        f"{preserved} rows with preserved progress)"
     )
 
 
