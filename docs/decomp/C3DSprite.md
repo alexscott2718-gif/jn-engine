@@ -1,0 +1,102 @@
+# C3DSprite
+
+## Identity
+
+| Item | Value |
+|---|---|
+| RTTI name | `C3DSprite` |
+| Base chain | `OMediaCanvasElement -> OMediaElement -> OMediaWorldPosition -> OMediaWorldAngle -> OMediaElementContainer -> OMediaDBObject -> OMediaClassStreamer -> OMediaListener -> OMediaMessagePort -> CLocalGameObject -> CGameObject` |
+| Vftable(s) | `004d4768`, `004d4778`, `004d4bc8`, `004d4bdc` |
+| Ctor(s) | constructor/body at `00464070` from disassembly |
+| Dtor(s) | adjusted scalar deleting destructor at `00464040` |
+| Ledger row | `docs/decomp_ledger.csv` |
+
+## Field Map
+
+Offsets below are byte offsets from the primary `C3DSprite` pointer. The class uses an adjusted `OMediaCanvasElement` subobject for canvas setters; negative indexes in the dump are inherited/adjusted-base accesses, not new negative fields.
+
+| Offset | Type | Name | Source | Meaning |
+|---:|---|---|---|---|
+| `0x4b4` | int | `SpriteSize` | `.gam` registration at `00464130`; canvas load at `00464780`/`00464810` | Scale/size argument passed as float to the canvas initialization path. |
+| `0x4b8` | int | `SpriteIndex` | `.gam` registration; canvas load | Canvas index loaded from `SpriteDatabase`; fallback path uses index `3`. |
+| `0x4bc` | char buffer/string | `SpriteDatabase` | `.gam` registration; `FUN_0046a910` lookup | OMT/database filename looked up before loading the canvas. |
+| adjusted OMedia | pointer | `current_canvas` | `00464780`, `00464810` | OMedia canvas pointer marked dirty at offsets `0x60` and `0x64` after load. Exact absolute offset needs full OMediaCanvasElement struct. |
+| inherited | float | `PositionX/Y/Z` | `00464210`, raw `004646c0` | Initial physics pushes inherited position to OMedia; raw slot 247 pulls OMedia position back. |
+| inherited | angle state | `Rotation*` bridge | `00464210`, raw `00464700` | Initial physics converts inherited 14-bit angles to degrees; raw slot 248 pulls OMedia angles back to wrapped 14-bit fields. |
+
+## Vtable Methods
+
+| Slot | Address | Name | Behavior | Status |
+|---:|---|---|---|---|
+| 7 | `00464130` | `InitObjectSprite` | Traces `"InitObject()"`, runs `CLocalGameObject::InitObject`, attaches global OMedia objects, then registers `SpriteSize`, `SpriteDatabase`, and `SpriteIndex`. | non-trivial |
+| 8 | `004641d0` | `UnInitObjectSprite` | Traces `"UnInitObject()"`, runs `CLocalGameObject::UnInitObject`, then detaches/clears the adjusted OMedia canvas pointer. | non-trivial |
+| 11 | `00464210` | `InitPhysicsSprite` | Runs `CLocalGameObject::InitPhysics`, pushes inherited position through slot `0x16c`, pushes inherited angle state through slot `0x174`, then invalidates/updates the OMedia element. | non-trivial |
+| 247 | `004646c0` | `PullWorldPositionToSprite` | Raw vtable target not defined as a Ghidra function. Disassembly reads OMedia world position through slot `0x310` and copies X/Y/Z back into inherited position fields. | non-trivial |
+| 248 | `00464700` | `PullWorldAnglesToSprite` | Raw vtable target not defined as a Ghidra function. Disassembly calls the base angle helper and stores OMedia orientation components as wrapped 14-bit angle fields. | non-trivial |
+| 257 | `00464780` | `LoadSpriteCanvasWithBaseHook` | Runs `CLocalGameObject` base hook, resolves `SpriteDatabase` via `FUN_0046a910`, calls adjusted canvas init with database/index/size, marks the current canvas dirty, and falls back to `icons.omt` index `3` if the named database is missing. | non-trivial |
+| 259 | `00464810` | `LoadSpriteCanvas` | Same canvas-loading logic as slot 257, but without the `CLocalGameObject` base hook. | non-trivial |
+| vtable 3 slot 49 | `00464490` | `InitCanvasByIdOrName` | Helper over OMedia canvas setters; resolves an id/name through `FUN_00477780`, calls canvas setter slots `0xac` and `0xd0`, and manages refcounted string storage. | TODO |
+| vtable 3 slot 51 | `004642a0` | `InitSpriteCanvas` | Logs `InitSprite`, resolves a canvas through `FUN_00477630`, calls adjusted canvas setter slots, then initializes sprite properties. | non-trivial |
+| vtable 3 slot 52 | `004645f0` | `InitSpriteProperties` | Sets OMedia canvas render/property fields from size: dimensions, render modes `6/7`, texture/filtering modes `3/3`, and optional software-renderer color constants when `DAT_00509a13` is set. | non-trivial |
+
+## Per-Frame Behavior
+
+`C3DSprite` itself has no class-owned update integrator. Runtime behavior is mostly initialization and asset binding:
+
+```c
+C3DSprite::InitObjectSprite():
+    CLocalGameObject::InitObject()
+    attach_global_omedia_objects(DAT_00509a4c, DAT_00509a30)
+    RegisterProperty("SpriteSize", &SpriteSize, type=6)
+    RegisterProperty("SpriteDatabase", &SpriteDatabase, type=1)
+    RegisterProperty("SpriteIndex", &SpriteIndex, type=6)
+
+C3DSprite::LoadSpriteCanvas():
+    db = lookup_omt_database(SpriteDatabase)
+    if db:
+        init_canvas(db, SpriteIndex, float(SpriteSize))
+        mark_current_canvas_dirty()
+    else:
+        fallback = lookup_omt_database("icons.omt")
+        if fallback:
+            init_canvas(fallback, 3, float(SpriteSize))
+```
+
+Physics setup mirrors `C3DObject`'s transform bridge, but through `OMediaCanvasElement` instead of `OMedia3DShapeElement`.
+
+## Constants And Wiring
+
+`C3DSprite` is mapped by class-id scan to `3NEU` (`FUN_004329a0`) and `3SPR` (`FUN_00463f10`). In the current `.gam` corpus, `3NEU` serializes the sprite fields; `3SPR` instances only carry common object/local fields and rely on defaults or later class setup for canvas binding.
+
+| Property | Type | Offset | Range / Samples | Consuming Logic |
+|---|---|---:|---|---|
+| `SpriteSize` | int (`6`) | `0x4b4` | `3NEU`: 294 values, `100..1300`; common `100` | Converted to float and passed to canvas init. |
+| `SpriteDatabase` | str (`1`) | `0x4bc` | `3NEU`: 294 values, all `"icons.omt"` | Resolved by `FUN_0046a910`; missing database falls back to `"icons.omt"`. |
+| `SpriteIndex` | int (`6`) | `0x4b8` | `3NEU`: 294 values, all `4` | Canvas index for the named database. |
+| `SpriteSize` / `SpriteDatabase` / `SpriteIndex` | - | same | `3SPR`: 0 serialized values | Registered by class, absent from current `.gam` rows. |
+
+## Assets
+
+| Kind | Name / Id | Source | Notes |
+|---|---|---|---|
+| OMT database | `icons.omt` | `.gam` `3NEU` rows; fallback string at `004ecddc` | Primary/fallback sprite database. |
+| canvas index | `4` | `.gam` `3NEU` rows | Neutron sprite index for `3NEU`. |
+| fallback canvas index | `3` | `00464780`, `00464810` | Used when `SpriteDatabase` lookup fails and `icons.omt` exists. |
+
+## Confidence
+
+Confidence: Medium
+
+Validation: Static Ghidra + local disassembly only; not runtime-validated.
+
+Open questions:
+- Create/label raw Ghidra functions `004646c0`, `00464700`, `00464040`, `00464120`, and `00464430`.
+- Name `FUN_0046a910`, `FUN_00477630`, `FUN_00477780`, and the adjusted canvas setter slots.
+- Apply full `OMediaCanvasElement` and `CGameObject` structs so inherited transform/canvas offsets are exact.
+- Determine default `SpriteSize`/database/index values used by `3SPR` instances.
+
+## Notes
+
+- Evidence: `DumpClass.java C3DSprite /tmp/decomp_C3DSprite.md` (`slots=335`, `owned_methods=8`, `offsets=4`).
+- Extra check: `DumpFunctions.java /tmp/decomp_C3DSprite_extra.md 004646c0 00464700 00464040 00464120 00464430` reports no functions in Ghidra, but `objdump` over `/home/scotty/xp-jnbg-original/Neutron.exe` shows normal bodies for the transform helpers/destructor thunks.
+- String evidence includes `C3DSprite()`, `~C3DSprite()`, `SpriteSize`, `SpriteDatabase`, `SpriteIndex`, and `LoadCanvas*`.
