@@ -128,7 +128,7 @@ IWS3       3SWI      @00444a73  FUN_004449c0
 NAT3       3TAN      @004451b5  FUN_004450f0              C3DTank()
 RAT3       3TAR      @00445467  FUN_004453b0              C3DShadow()
 LET3       3TEL      @00445709  FUN_00445600              
-SET3       3TES      @00445925  FUN_00445870              
+SET3       3TES      @00445925  FUN_00445870              C3DTesla()
 333?       ?333      @00445d1c  ??                        
 LOT3       3TOL      @00445ff5  FUN_00445f30              C3DToolChest()
 CRT3       3TRC      @0044639f  FUN_004462c0              
