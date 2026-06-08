@@ -36,7 +36,7 @@ AHC3       3CHA      @00418ae9  FUN_00418a20              C3DFERCHAIR()
 REF3       3FER      @00418d8c  FUN_00418cc0              C3DFERRIS()
 TSF3       3FST      @004193e8  FUN_004192e0              
 ALF3       3FLA      @0041964b  FUN_00419550              
-ELF3       3FLE      @0041987e  FUN_00419760              
+ELF3       3FLE      @0041987e  FUN_00419760              C3DFleetCommander()
 YLF3       3FLY      @0041a09b  FUN_00419f70              C3DFlyingObject
 WOF3       3FOW      @0041b162  FUN_0041b0a0              C3DFowl()
 TAG3       3GAT      @0041bd54  FUN_0041bca0              
