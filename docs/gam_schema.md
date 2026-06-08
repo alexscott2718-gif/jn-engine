@@ -114,7 +114,7 @@ MaxVertVelocity/NewGravity/AccelLean/DecelLean, which C3DPlayer/C3DJimmy inherit
 | `3MER` | C3DMERRYGO | `FUN_0042e220` | 1 |
 | `TRIG` | — (name pending Phase 0) | `FUN_0047dcf0` | 1 |
 | `3OCT` | C3DOCTAPUKE | `FUN_00433e70` | 1 |
-| `3PIR` | C3DPIRATE | `FUN_00436c40` | 1 |
+| `3PIR` | C3DPirate | `FUN_00436c40` | 1 |
 | `3TRA` | — (name pending Phase 0) | `FUN_004466c0` | 1 |
 | `3SM1` | C3DSmoke | `FUN_00440530` | 1 |
 | `3SCR` | C3DLabScreen | `FUN_0042bc00` | 1 |

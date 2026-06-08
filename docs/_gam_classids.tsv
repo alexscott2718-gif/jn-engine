@@ -96,7 +96,7 @@ TAP3       3PAT      @00434be7  FUN_00434b30              C3DPatrolPoint()
 NEP3       3PEN      @00435025  FUN_00434f60              C3DPENDULUM
 OHP3       3PHO      @00435665  FUN_004355a0              C3DPHONEBOOTH()
 CIP3       3PIC      @00435971  FUN_004358b0              C3DPICKUPITEM()
-RIP3       3PIR      @00436cfe  FUN_00436c40              C3DPIRATE()
+RIP3       3PIR      @00436cfe  FUN_00436c40              C3DPirate()
 333?       ?333      @004373c2  FUN_00437280              
 ALP3       3PLA      @00437871  FUN_00437830              C3DPlayer
 DOP3       3POD      @0043ba5a  FUN_0043b990              
