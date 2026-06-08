@@ -66,7 +66,7 @@ Physics setup mirrors `C3DObject`'s transform bridge, but through `OMediaCanvasE
 
 ## Constants And Wiring
 
-`C3DSprite` is mapped by class-id scan to `3NEU` (`FUN_004329a0`) and `3SPR` (`FUN_00463f10`). In the current `.gam` corpus, `3NEU` serializes the sprite fields; `3SPR` instances only carry common object/local fields and rely on defaults or later class setup for canvas binding.
+`C3DSprite` is mapped by class-id scan to `3SPR` (`FUN_00463f10`). The generated schema also points `3NEU` at `FUN_004329a0`, but `C3DNeutron` vtable evidence shows that function constructs the concrete `C3DNeutron` placeable; `C3DSprite` remains the inherited consumer of the serialized `SpriteSize`, `SpriteDatabase`, and `SpriteIndex` fields. `3SPR` instances only carry common object/local fields and rely on defaults or later class setup for canvas binding.
 
 | Property | Type | Offset | Range / Samples | Consuming Logic |
 |---|---|---:|---|---|
@@ -99,4 +99,5 @@ Open questions:
 
 - Evidence: `DumpClass.java C3DSprite /tmp/decomp_C3DSprite.md` (`slots=335`, `owned_methods=8`, `offsets=4`).
 - Extra check: `DumpFunctions.java /tmp/decomp_C3DSprite_extra.md 004646c0 00464700 00464040 00464120 00464430` reports no functions in Ghidra, but `objdump` over `/home/scotty/xp-jnbg-original/Neutron.exe` shows normal bodies for the transform helpers/destructor thunks.
+- `C3DNeutron.md` corrects the concrete ownership of `3NEU`; keep the inherited `3NEU` sprite-property ranges here because the base class still registers and consumes those fields.
 - String evidence includes `C3DSprite()`, `~C3DSprite()`, `SpriteSize`, `SpriteDatabase`, `SpriteIndex`, and `LoadCanvas*`.
