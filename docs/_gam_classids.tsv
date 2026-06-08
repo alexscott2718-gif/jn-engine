@@ -3,7 +3,7 @@ LAMS       SMAL      @00407201  ??
 DBA3       3ABD      @004077a2  FUN_004076e0              C3DABDUCTEE()
 IAD3       3DAI      @00407b35  FUN_00407a40              C3DAI()
 OIA3       3AIO      @0040af50  FUN_0040ae30              C3DAIOmtObj
-VUS3       3SUV      @0040b26e  FUN_0040b1b0              
+VUS3       3SUV      @0040b26e  FUN_0040b1b0              C3DAISuv()
 TIA3       3AIT      @0040bb27  FUN_0040ba70              C3DAITrigger()
 INA3       3ANI      @0040e937  FUN_0040e880              C3DAnimatedSprite()
 RRA3       3ARR      @0040f387  FUN_0040f2d0              C3DArrow()
