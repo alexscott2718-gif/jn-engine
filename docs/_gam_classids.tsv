@@ -224,7 +224,7 @@ NIAM       MAIN      @0046a65b  FUN_0046a4a0
 LAMS       SMAL      @0046c271  ??                        
 BUC3       3CUB      @004737c0  ??                        
 HPS3       3SPH      @00473870  ??                        
-EMAG       GAME      @00474660  FUN_004745a0              
+EMAG       GAME      @00474660  FUN_004745a0              CGameType()
 RET3       3TER      @004756be  FUN_00475550              CGameType
 RET3       3TER      @0047590e  FUN_004757a0              CGameType
 LAMS       SMAL      @00477d22  FUN_00477cb0              
