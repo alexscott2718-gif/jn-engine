@@ -50,7 +50,7 @@ IRG3       3GRI      @0041f265  FUN_0041f1a0              C3DGRILL
 333?       ?333      @0041f57b  FUN_0041f4a0              
 RAH3       3HAR      @0041f653  FUN_0041f4a0              C3DHarrier()
 LEH3       3HEL      @0041fe27  FUN_0041fd70              C3DHelmet
-OOH3       3HOO      @00420125  FUN_00420060              C3DHOOK()
+OOH3       3HOO      @00420125  FUN_00420060              C3DHook()
 GUH3       3HUG      @0042044c  FUN_00420390              C3DHugh()
 MUH3       3HUM      @0042084b  FUN_00420730              C3DHumphrey()
 DYH3       3HYD      @00420eb0  FUN_00420df0              

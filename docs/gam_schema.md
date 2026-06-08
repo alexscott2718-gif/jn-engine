@@ -124,7 +124,7 @@ MaxVertVelocity/NewGravity/AccelLean/DecelLean, which C3DPlayer/C3DJimmy inherit
 | `3TOL` | C3DToolChest | `FUN_00445f30` | 1 |
 | `3CML` | C3DCamel | `FUN_00412150` | 1 |
 | `3TRI` | C3DTrigger | `FUN_00446e50` | 1 |
-| `3HOO` | C3DHOOK | `FUN_00420060` | 1 |
+| `3HOO` | C3DHook | `FUN_00420060` | 1 |
 | `3SPW` | — (name pending Phase 0) | `FUN_004415a0` | 1 |
 
 ## Object types (by instance count)
