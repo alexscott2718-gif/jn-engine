@@ -17,15 +17,17 @@ shared docs, don't rely on tool-private memory.
    definition-of-done, §5 per-class inner loop, §0 .gam accelerator)
 3. `~/jn-engine/docs/decomp/README.md`  (headless Ghidra invocation + status values)
 4. `~/jn-engine/docs/decomp_ledger.csv`  (resumable state — 208 rows)
-5. The three reference specs already landed: `docs/decomp/{CGfx,CGameObject,
-   CLocalGameObject}.md`  (match this depth/format)
+5. The Wave 1 reference specs already landed under `docs/decomp/`; match that
+   depth/format.
 
 ## Current state (branch: decomp-campaign)
 - Phase 0 DONE: RTTI analyzer run + Ghidra project saved (annotated as of commit
   `d63c6c0`), DumpHierarchy/DumpClass/DumpFunctions/ApplyRttiClassMarkup committed,
   `_hierarchy.md` (208 C* classes), ledger seeded, .gam backfill at 55/93 named FourCCs.
-- Phase 1 STARTED: 3 of 25 base classes specced (CGfx, CGameObject, CLocalGameObject),
-  all `status=spec` / `confidence=Medium` in the ledger.
+- Phase 1 DONE: all 25 base/framework classes have specs and ledger rows at
+  `status=spec` / `owner=codex`. This batch is ready for Alex's spec-review gate.
+- Latest pushed Wave 1 commits ended at `8340051` (`decomp(CGameType): spec game
+  controller base`), after `C3DCursor`, `CViewPort`, and `CGameType`.
 - Ledger regen is now SAFE: `python3 tools/decomp_ledger.py` preserves
   status/owner/confidence + manual notes on re-run (verified idempotent). Re-run it
   freely after you back-fill FourCC↔class names; it will NOT reset your progress.
@@ -33,22 +35,22 @@ shared docs, don't rely on tool-private memory.
   `N*4` (see CGameObject spec note). Building real per-class structs (plan §0.3) as you
   go is the biggest readability win; do bases first so leaves inherit.
 
-## Your task this session: finish Phase 1 (the 22 remaining base/framework classes)
-Bases unblock every leaf, so do them strictly bases→derived. Remaining set (confirm
-the exact DAG against `_hierarchy.md` before ordering):
+## Your task this session: start Wave 2 (player/friends/NPCs)
+Start with `C3DPlayer`, then move through the player/friends/NPC family in ledger
+order unless the DAG shows a better dependency order. For each placeable class, prefill
+the property field map from `gam_schema.md` before reading code.
 
 ```
-C3DObject  ← do FIRST (root 3D base; almost everything inherits it)
-then: C3DAnimated, C3DSprite (the two mid-level bases)
-then: C3DOmtObj, C3DAI, C3DAIOmtObj, C3DVehicle, C3DFlyingObject, C3DEnemy
-then sprite chain: C3DSpriteType, C3DPermanentSprite, C3DTriggerType, CPickupType,
-      C3DAnimatedSprite, C3DPickupItem, C3DPickupType
-then: C3DTrigger, C3DProjectile, C3DCamera, C3DCursor, CViewPort, CGameType
+C3DPlayer
+C3DJimmy, C3DNeutron, C3DRedNeutron
+C3DFriends, C3DSheen, C3DCarl, C3DLibby, C3DCindy
+C3DGoddard, C3DJudy, C3DHugh, C3DNick, C3DBenny, C3DKitty, C3DHumphrey
+C3DPirate, C3DFleetCommander, C3DSumo, C3DAbductee
 ```
 
-Note `C3DFlyingObject` = the movement base (registers MaxSpeed/UpRate/DownRate/
-NewGravity/lean that C3DPlayer inherits) — spec it carefully; Wave 2's player work
-depends on it.
+Known anchors: `C3DPlayer` inherits the already-specced `C3DFlyingObject` movement
+base; prior scoping pinned the player per-frame integrator at `FUN_0041a140`, the
+movement-base registrar at `FUN_00419f70`, and the vtable slot at `.rdata 0x49d398`.
 
 ## Inner loop (per class — see plan §5)
 1. Set ledger `status=in_progress, owner=codex`.
@@ -74,7 +76,7 @@ depends on it.
 - The ledger + per-class docs + `PROJECT_HISTORY.md` are the only source of truth.
 
 ## Definition of done for this session
-The 22 remaining Phase-1 base classes have `docs/decomp/<Class>.md` at the depth of the
-existing three, their ledger rows at `status=spec` with confidence + open questions, a
-`PROJECT_HISTORY.md` era paragraph for Phase 1, and per-class commits on
-`decomp-campaign`. This batch is then ready for Alex's spec-review gate.
+Wave 2 classes handled this session have `docs/decomp/<Class>.md`, ledger rows at
+`status=spec` with confidence + open questions, and per-class commits pushed on
+`decomp-campaign`. If the whole wave closes, append a Wave 2 paragraph to
+`PROJECT_HISTORY.md` and update this handoff again.

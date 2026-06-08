@@ -423,6 +423,16 @@ text, buttons, Jimmy portrait) is `screens.omt`'s 373 canvases.
   deployed `grn-catalog`; only ~25/389 convert since most are skinned actors the
   Granny decoder skips — + 295 ASE), 30 GAM. 2D images committed; audio
   gitignored/regenerable like JNBG.
+- **2026-06-08 Neutron.exe full-tier decomp - Phase 1 base/framework specs complete.**
+  The decomp campaign's foundation wave is now review-ready: all 25 Wave 1
+  base/framework classes have committed specs under `docs/decomp/` and ledger
+  rows at `status=spec` / `owner=codex`. The wave established the shared
+  lifecycle/update vocabulary for `CGameObject`, `CLocalGameObject`,
+  `C3DObject`, `C3DAnimated`, sprite/pickup/trigger bases, AI/enemy/projectile
+  bases, vehicle and flying movement bases, `CViewPort`, and `CGameType`. The
+  `GAME` and `3CUR` class-id rows were also backfilled. Next campaign wave is
+  Wave 2 player/friends/NPCs, starting with `C3DPlayer` because its integrator
+  and `C3DFlyingObject` dependency are already pinned.
 
 **Open task (the user's thesis).** Assets are now maximally *harvested*; the next
 lever is a **role-annotation layer** so found assets (e.g. "`alpha.omt` #128 =
