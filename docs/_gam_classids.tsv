@@ -146,7 +146,7 @@ EHY3       3YHE      @0044a50c  FUN_0044a440              C3DYokHelmet()
 AUG3       3GUA      @0044b33c  FUN_0044b220              C3DYokianGuard()
 HSY3       3YSH      @0044b5c4  FUN_0044b510              C3DBubble()
 HSY3       3YSH      @0044b896  FUN_0044b7d0              
-LOS3       3SOL      @0044bff5  FUN_0044bee0              
+LOS3       3SOL      @0044bff5  FUN_0044bee0              C3DYokianSoldier()
 YPS3       3SPY      @0044c41b  FUN_0044c2b0              
 333?       ?333      @0044c7cb  FUN_0044c6f0              
 RUT3       3TUR      @0044c89f  FUN_0044c6f0              
