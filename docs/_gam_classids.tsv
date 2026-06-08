@@ -149,7 +149,7 @@ HSY3       3YSH      @0044b896  FUN_0044b7d0              C3DYokianShip()
 LOS3       3SOL      @0044bff5  FUN_0044bee0              C3DYokianSoldier()
 YPS3       3SPY      @0044c41b  FUN_0044c2b0              C3DYokianSpy()
 333?       ?333      @0044c7cb  FUN_0044c6f0              
-RUT3       3TUR      @0044c89f  FUN_0044c6f0              
+RUT3       3TUR      @0044c89f  FUN_0044c6f0              C3DYokTurret()
 RET3       3TER      @0044d5cc  FUN_0044d4f0              CJimmyGame
 RET3       3TER      @0044d8ec  FUN_0044d810              CJimmyGame
 RET3       3TER      @0044dccc  FUN_0044dbf0              CJimmyGame
