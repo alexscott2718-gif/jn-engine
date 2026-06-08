@@ -143,9 +143,9 @@ Known descendant rows using this behavior:
 | Descendant | FourCC / Notes |
 |---|---|
 | `C3DFleetCommander` | `3FLE`; already documented as a Yokian-derived commander/talk actor. |
-| `C3DYokianGuard` | `3GUA`; current schema row is still unnamed pending the leaf spec. |
-| `C3DYokianSoldier` | `3SOL`; current schema row is still unnamed pending the leaf spec. |
-| `C3DYokianSpy` | no direct top-level named schema row yet; derives from this base. |
+| `C3DYokianGuard` | `3GUA`; documented Yokian guard leaf. |
+| `C3DYokianSoldier` | `3SOL`; documented Yokian soldier leaf. |
+| `C3DYokianSpy` | `3SPY`; documented captain/spy leaf; populates `attached_visible_child` with a `C3DYokHelmet`. |
 
 Runtime constants:
 
@@ -191,7 +191,7 @@ Open questions:
 - Name the exact inherited movement/visibility slots used as `0x124`, `0x178`, `0x214`, `0x3a4`, and `0x3ac`.
 - Confirm the final semantic names of `reaction_or_attack_range`, `yokian_default_range_900`, and the hit recovery fields from runtime traces or leaf behavior.
 - Resolve the `FUN_0044b510` identity conflict when documenting `C3DYokianShield`: vtables are `C3DYokianShield`, but the constructor path still uses `C3DBubble` strings and the current schema map names `3YSH` as `C3DBubble`.
-- Check which descendants populate `attached_visible_child` at active `0x8e4`.
+- `C3DYokianSpy` populates `attached_visible_child` at active `0x8e4`; check whether other descendants also use it.
 - Runtime-check the baseball hit reaction and attack effect handle before marking this family `validated`.
 
 ## Notes
