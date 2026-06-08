@@ -68,7 +68,7 @@ EMIT       TIME      @00424b81  ??
 CIP3       3PIC      @004263ef  ??                        
 EMIT       TIME      @00426771  ??                        
 MOM3       3MOM      @0042b392  FUN_0042b2d0              C3DJUDY()
-TIK3       3KIT      @0042b911  FUN_0042b800              
+TIK3       3KIT      @0042b911  FUN_0042b800              C3DKitty()
 RCS3       3SCR      @0042bcc2  FUN_0042bc00              C3DLabScreen()
 SAL3       3LAS      @0042c10e  FUN_0042c050              C3DLaserTrigger()
 AEL3       3LEA      @0042c7a3  FUN_0042c6f0              C3DLeaves()
