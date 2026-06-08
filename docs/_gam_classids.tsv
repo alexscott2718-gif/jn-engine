@@ -106,7 +106,7 @@ DER3       3RED      @0043c423  FUN_0043c370              C3DREDNEUTRON()
 KOR3       3ROK      @0043cd06  FUN_0043cc40              
 KCR3       3RCK      @0043d157  FUN_0043d090              C3DRocket
 EUF3       3FUE      @0043d5e7  FUN_0043d530              C3DROCKETFUEL
-COR3       3ROC      @0043d916  FUN_0043d840              
+COR3       3ROC      @0043d916  FUN_0043d840              C3DRocketShip()
 IAS3       3SAI      @0043ed84  FUN_0043ecc0              C3DSAILBOAT
 DCS3       3SCD      @0043f15b  FUN_0043f070              
 AHS3       3SHA      @0043f6f7  FUN_0043f640              C3DShadow()
