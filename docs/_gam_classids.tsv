@@ -24,7 +24,7 @@ KHC3       3CHK      @00414247  FUN_00414190              C3DCheckPoint()
 NIC3       3CIN      @00414e72  FUN_00414db0              C3DCindy()
 NOC3       3CON      @00415357  FUN_004152a0              C3DCone()
 ROC3       3COR      @00415564  FUN_004154b0              C3DCorona()
-RUC3       3CUR      @0041582e  FUN_00415760              
+RUC3       3CUR      @0041582e  FUN_00415760              C3DCursor()
 MAC3       3CAM      @00415abd  FUN_00415a00              C3DCutSceneCamera()
 SIF3       3FIS      @00416bdc  FUN_00416ac0              
 GID3       3DIG      @00416fc2  FUN_00416eb0              
