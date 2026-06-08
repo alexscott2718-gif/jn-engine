@@ -111,7 +111,7 @@ IAS3       3SAI      @0043ed84  FUN_0043ecc0
 DCS3       3SCD      @0043f15b  FUN_0043f070              
 AHS3       3SHA      @0043f6f7  FUN_0043f640              C3DShadow()
 EHS3       3SHE      @0043f9e2  FUN_0043f920              C3DSheen()
-RHS3       3SHR      @0043feeb  FUN_0043fe20              
+RHS3       3SHR      @0043feeb  FUN_0043fe20              C3DShrinkRay()
 AOB3       3BOA      @00440362  FUN_004402a0              C3DSkateBoard()
 1MS3       3SM1      @004405e7  FUN_00440530              C3DSmoke()
 OMS3       3SMO      @00440a47  FUN_00440980              C3DSmokePuff()
