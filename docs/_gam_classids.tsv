@@ -7,7 +7,7 @@ VUS3       3SUV      @0040b26e  FUN_0040b1b0              C3DAISuv()
 TIA3       3AIT      @0040bb27  FUN_0040ba70              C3DAITrigger()
 INA3       3ANI      @0040e937  FUN_0040e880              C3DAnimatedSprite()
 RRA3       3ARR      @0040f387  FUN_0040f2d0              C3DArrow()
-LAB3       3BAL      @0040f7b9  FUN_0040f710              
+LAB3       3BAL      @0040f7b9  FUN_0040f710              C3DBalloon
 SAB3       3BAS      @0040fd0d  FUN_0040fc50              C3DBaseball()
 UPB3       3BPU      @00410147  FUN_00410090              C3DBaseballPickup()
 NEB3       3BEN      @00410402  FUN_00410340              C3DBENNY()
