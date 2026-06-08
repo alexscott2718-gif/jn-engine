@@ -118,4 +118,4 @@ Open questions:
 ## Notes
 
 - Evidence: `DumpClass.java C3DYokianShield /tmp/decomp_C3DYokianShield.md` (`slots=337`, `owned_methods=1`, `offsets=0`), local objdump window over `0044b510..0044b7d0`, string scans around `004ed480`, `004ed838`, and `004f17e0`, parent `C3DYokian` spec, and local `sprites.omt` metadata.
-- This spec intentionally does not backfill the first `3YSH` class-id row in `docs/_gam_classids.tsv`; doing so before the ship spec would cause `tools/gam_schema.py` to display the `.gam` `3YSH` rows as the runtime shield helper. The duplicate FourCC needs a ship-aware correction in the next leaf.
+- The duplicate `3YSH` raw rows are backfilled as `C3DYokianShield` and `C3DYokianShip`; `tools/gam_schema.py` carries a ship-aware override so the serialized `.gam` rows display as `C3DYokianShip`.

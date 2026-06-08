@@ -29,6 +29,8 @@ Named **63/93** placeable FourCCs; the rest have `InitObject fn` pinned.
 class — it registers MaxSpeed/AccelRate/DecelRate/MaxHeight/UpRate/DownRate/
 MaxVertVelocity/NewGravity/AccelLean/DecelLean, which C3DPlayer/C3DJimmy inherit.
 
+**Duplicate FourCC caveat:** `3YSH` has two registrars: `C3DYokianShield` (`FUN_0044b510`) is a runtime helper created by `C3DYokian`, while current `.gam` rows are ship-tagged AI objects and map to `C3DYokianShip` (`FUN_0044b7d0`).
+
 | FourCC | Class | InitObject fn | id sites |
 |---|---|---|---:|
 | `3PAT` | C3DPatrolPoint | `FUN_00434b30` | 1 |
@@ -64,7 +66,7 @@ MaxVertVelocity/NewGravity/AccelLean/DecelLean, which C3DPlayer/C3DJimmy inherit
 | `3FIS` | — (name pending Phase 0) | `FUN_00416ac0` | 1 |
 | `3GUA` | C3DYokianGuard | `FUN_0044b220` | 1 |
 | `3STA` | — (name pending Phase 0) | `FUN_00441bb0` | 1 |
-| `3YSH` | C3DBubble | `FUN_0044b510` | 2 |
+| `3YSH` | C3DYokianShip | `FUN_0044b7d0` | 2 |
 | `3YCA` | — (name pending Phase 0) | `FUN_00449360` | 1 |
 | `3HUM` | C3DHumphrey | `FUN_00420730` | 1 |
 | `3CAR` | C3DCarl | `FUN_00413af0` | 2 |

@@ -190,7 +190,7 @@ Validation: Static Ghidra, local objdump over `/home/scotty/xp-jnbg-original/Neu
 Open questions:
 - Name the exact inherited movement/visibility slots used as `0x124`, `0x178`, `0x214`, `0x3a4`, and `0x3ac`.
 - Confirm the final semantic names of `reaction_or_attack_range`, `yokian_default_range_900`, and the hit recovery fields from runtime traces or leaf behavior.
-- Finish the `3YSH` duplicate registrar cleanup while documenting `C3DYokianShip`: `C3DYokianShield` is the runtime helper, while current `.gam` `3YSH` rows are ship actors.
+- Runtime-check the duplicate `3YSH` registrar behavior: `C3DYokianShield` is the runtime helper, while current `.gam` `3YSH` rows are ship actors mapped to `C3DYokianShip`.
 - `C3DYokianSpy` populates `attached_visible_child` at active `0x8e4`; check whether other descendants also use it.
 - Runtime-check the baseball hit reaction and attack effect handle before marking this family `validated`.
 

@@ -25,6 +25,19 @@ OUT = ROOT / "docs" / "gam_schema.md"
 # Committed output of tools/ghidra/Scan_ClassIds.java (FourCC<->class-id sites).
 CLASSIDS = ROOT / "docs" / "_gam_classids.tsv"
 
+# Duplicate class-id registrars where the serialized .gam rows are known to
+# belong to one candidate. Keep the raw rows in _gam_classids.tsv, but display
+# the .gam-facing class here.
+CLASS_OVERRIDES = {
+    "3YSH": ("FUN_0044b7d0", "C3DYokianShip()"),
+}
+
+DUPLICATE_CLASS_NOTES = [
+    "`3YSH` has two registrars: `C3DYokianShield` (`FUN_0044b510`) is a "
+    "runtime helper created by `C3DYokian`, while current `.gam` rows are "
+    "ship-tagged AI objects and map to `C3DYokianShip` (`FUN_0044b7d0`).",
+]
+
 # Property names gam_loader.c currently consumes (everything else is dropped today).
 PARSED = set("""ObjectTag LevelName StartPoint PositionX PositionY PositionZ RotationX RotationY
 RotationZ SpriteSize InitiallyVisible SpriteIndex EffectType Points MaxSpeed AccelRate DecelRate
@@ -116,6 +129,8 @@ def load_class_map(fccs):
                 break
         if not name and cand:
             func, name = cand[0][0], cand[0][1]
+        if fcc in CLASS_OVERRIDES:
+            func, name = CLASS_OVERRIDES[fcc]
         out[fcc] = (func, name, len(cand))
     return out
 
@@ -159,6 +174,8 @@ def main():
         lines.append("**Note:** `3FLY` = `C3DFlyingObject` (`FUN_00419f70`) is the **movement base**")
         lines.append("class — it registers MaxSpeed/AccelRate/DecelRate/MaxHeight/UpRate/DownRate/")
         lines.append("MaxVertVelocity/NewGravity/AccelLean/DecelLean, which C3DPlayer/C3DJimmy inherit.\n")
+        if DUPLICATE_CLASS_NOTES:
+            lines.append("**Duplicate FourCC caveat:** " + " ".join(DUPLICATE_CLASS_NOTES) + "\n")
         lines.append("| FourCC | Class | InitObject fn | id sites |")
         lines.append("|---|---|---|---:|")
         for fcc, _ in fccs:
