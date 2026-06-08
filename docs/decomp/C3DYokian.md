@@ -158,7 +158,7 @@ Runtime constants:
 | `C3DBASEBALL` | Collision class that triggers baseball-hit reaction. | string `.data:004ecc50`; touch slot `0044b070` |
 | `C3DJIMMY` | Collision class that tweaks a hit/reaction scalar. | string `.data:004ecb20`; touch slot `0044b070` |
 | `C3DShadow` / `3SHA` | Runtime shadow child constructor. | `FUN_0043f640`; constructor stores adjusted pointer at active `0x8ec` |
-| `FUN_0044b510` helper | Runtime shield/bubble child constructor. | Constructor stores adjusted pointer at active `0x8e0`; vtables match `C3DYokianShield`, strings still name `C3DBubble` |
+| `C3DYokianShield` helper | Runtime shield/bubble child constructor. | Constructor `0044b510` stores adjusted pointer at active `0x8e0`; vtables match `C3DYokianShield`, strings still name `C3DBubble`, and the duplicate `3YSH` `.gam` rows belong to `C3DYokianShip`. |
 | `0x38` | Effect id used for attack effect handle allocation. | `0044b100`; `0044b160` |
 | `0x2f` | Sound/effect id played on baseball hit. | touch slot `0044b070` |
 | `0xf3..0xf6` | Randomized sound/effect ids played when hit recovery starts. | update `0044aa00`; RNG thresholds `0.25`, `0.5`, `0.75` |
@@ -178,7 +178,7 @@ Runtime constants:
 | Kind | Name / Id | Source | Notes |
 |---|---|---|---|
 | helper object | `C3DShadow` via `FUN_0043f640` | ctor `0044a730`; `docs/_gam_classids.tsv` `3SHA` | Runtime shadow/ground marker. The base stores its adjusted pointer at active `0x8ec`. |
-| helper object | `FUN_0044b510` shield/bubble child | ctor `0044a730`; vtables `004c0e14..004c1288` | Vtables identify `C3DYokianShield`, but constructor strings still identify `C3DBubble`; leave the FourCC/schema normalization for the `C3DYokianShield` leaf spec. |
+| helper object | `C3DYokianShield` shield/bubble child | ctor `0044a730`; vtables `004c0e14..004c1288` | Runtime helper constructed directly by the Yokian base; it has a duplicate `3YSH` registrar, but current `.gam` `3YSH` rows are ship actors. |
 | retained sprites | `RetainedSprites.omt` | helper constructors | Used by the shadow/bubble/sprite helper family. |
 
 ## Confidence
@@ -190,7 +190,7 @@ Validation: Static Ghidra, local objdump over `/home/scotty/xp-jnbg-original/Neu
 Open questions:
 - Name the exact inherited movement/visibility slots used as `0x124`, `0x178`, `0x214`, `0x3a4`, and `0x3ac`.
 - Confirm the final semantic names of `reaction_or_attack_range`, `yokian_default_range_900`, and the hit recovery fields from runtime traces or leaf behavior.
-- Resolve the `FUN_0044b510` identity conflict when documenting `C3DYokianShield`: vtables are `C3DYokianShield`, but the constructor path still uses `C3DBubble` strings and the current schema map names `3YSH` as `C3DBubble`.
+- Finish the `3YSH` duplicate registrar cleanup while documenting `C3DYokianShip`: `C3DYokianShield` is the runtime helper, while current `.gam` `3YSH` rows are ship actors.
 - `C3DYokianSpy` populates `attached_visible_child` at active `0x8e4`; check whether other descendants also use it.
 - Runtime-check the baseball hit reaction and attack effect handle before marking this family `validated`.
 
