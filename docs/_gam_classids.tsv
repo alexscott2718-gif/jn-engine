@@ -52,7 +52,7 @@ RAH3       3HAR      @0041f653  FUN_0041f4a0
 LEH3       3HEL      @0041fe27  FUN_0041fd70              C3DHELMET
 OOH3       3HOO      @00420125  FUN_00420060              C3DHOOK()
 GUH3       3HUG      @0042044c  FUN_00420390              C3DHugh()
-MUH3       3HUM      @0042084b  FUN_00420730              
+MUH3       3HUM      @0042084b  FUN_00420730              C3DHumphrey()
 DYH3       3HYD      @00420eb0  FUN_00420df0              
 EEJ3       3JEE      @00421284  FUN_004211a0              
 IFJ3       3JFI      @00421e3a  FUN_00421d80              
