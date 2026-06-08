@@ -23,7 +23,7 @@ dropped today (recoverable tuning/wiring).
 > string is the ctor's RTTI name where Ghidra captured it; blanks have the
 > function pinned and get named in decomp Phase 0 (RTTI analyzer).
 
-Named **66/93** placeable FourCCs; the rest have `InitObject fn` pinned.
+Named **67/93** placeable FourCCs; the rest have `InitObject fn` pinned.
 
 **Note:** `3FLY` = `C3DFlyingObject` (`FUN_00419f70`) is the **movement base**
 class — it registers MaxSpeed/AccelRate/DecelRate/MaxHeight/UpRate/DownRate/
@@ -111,7 +111,7 @@ MaxVertVelocity/NewGravity/AccelLean/DecelLean, which C3DPlayer/C3DJimmy inherit
 | `3ULT` | C3DUltraLord | `FUN_00448310` | 1 |
 | `3CUB` | C3DCube | `FUN_004614e0` | 3 |
 | `3HUG` | C3DHugh | `FUN_00420390` | 1 |
-| `3DIG` | — (name pending Phase 0) | `FUN_00416eb0` | 1 |
+| `3DIG` | C3DDIGGER | `FUN_00416eb0` | 1 |
 | `3SAI` | — (name pending Phase 0) | `FUN_0043ecc0` | 1 |
 | `3MER` | C3DMERRYGO | `FUN_0042e220` | 1 |
 | `TRIG` | — (name pending Phase 0) | `FUN_0047dcf0` | 1 |
