@@ -99,7 +99,7 @@ CIP3       3PIC      @00435971  FUN_004358b0              C3DPICKUPITEM()
 RIP3       3PIR      @00436cfe  FUN_00436c40              C3DPirate()
 333?       ?333      @004373c2  FUN_00437280              
 ALP3       3PLA      @00437871  FUN_00437830              C3DPlayer
-DOP3       3POD      @0043ba5a  FUN_0043b990              
+DOP3       3POD      @0043ba5a  FUN_0043b990              C3DPod()
 UCP3       3PCU      @0043bd3e  FUN_0043bc70              
 ORP3       3PRO      @0043bfc4  FUN_0043bf10              C3DProjectile()
 DER3       3RED      @0043c423  FUN_0043c370              C3DREDNEUTRON()
