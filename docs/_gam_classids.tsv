@@ -122,7 +122,7 @@ ATS3       3STA      @00441c7a  FUN_00441bb0
 TRTS       STRT      @00442398  FUN_004422d0              C3DStartPoint()
 ETS3       3STE      @004429d3  FUN_00442920              
 BUS3       3SUB      @004434d7  FUN_00443350              
-MUS3       3SUM      @00443e7e  FUN_00443dc0              C3DSUMO()
+MUS3       3SUM      @00443e7e  FUN_00443dc0              C3DSumo()
 NWS3       3SWN      @0044453b  FUN_00444450              
 IWS3       3SWI      @00444a73  FUN_004449c0              
 NAT3       3TAN      @004451b5  FUN_004450f0              C3DTank()

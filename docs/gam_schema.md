@@ -98,7 +98,7 @@ MaxVertVelocity/NewGravity/AccelLean/DecelLean, which C3DPlayer/C3DJimmy inherit
 | `3TEL` | — (name pending Phase 0) | `FUN_00445600` | 1 |
 | `3LIG` | C3DLight | `FUN_00461bb0` | 1 |
 | `3FER` | C3DFERRIS | `FUN_00418cc0` | 1 |
-| `3SUM` | C3DSUMO | `FUN_00443dc0` | 1 |
+| `3SUM` | C3DSumo | `FUN_00443dc0` | 1 |
 | `3PEN` | C3DPENDULUM | `FUN_00434f60` | 1 |
 | `3MOM` | C3DJUDY | `FUN_0042b2d0` | 1 |
 | `3HYD` | — (name pending Phase 0) | `FUN_00420df0` | 1 |
