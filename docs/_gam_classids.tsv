@@ -107,7 +107,7 @@ KOR3       3ROK      @0043cd06  FUN_0043cc40
 KCR3       3RCK      @0043d157  FUN_0043d090              
 EUF3       3FUE      @0043d5e7  FUN_0043d530              C3DROCKETFUEL
 COR3       3ROC      @0043d916  FUN_0043d840              
-IAS3       3SAI      @0043ed84  FUN_0043ecc0              
+IAS3       3SAI      @0043ed84  FUN_0043ecc0              C3DSAILBOAT
 DCS3       3SCD      @0043f15b  FUN_0043f070              
 AHS3       3SHA      @0043f6f7  FUN_0043f640              C3DShadow()
 EHS3       3SHE      @0043f9e2  FUN_0043f920              C3DSheen()
