@@ -62,7 +62,7 @@ The `OMT_LoadByName` and `OMT_Get3DShape` names are descriptive aliases used in 
 
 ## Constants And Wiring
 
-`C3DOmtObj` maps to placeable FourCC `3OMT` (`FUN_00434530`). The current corpus has 20 `3OMT` instances. `docs/gam_schema.md` already reports `C3DOMTOBJ` as the dominant object tag/class string for the row; the top FourCC map still needs the Phase 0.6 class-id backfill.
+`C3DOmtObj` maps to placeable FourCC `3OMT` (`FUN_00434530`). The current corpus has 20 `3OMT` instances. `docs/gam_schema.md` now names the top FourCC map row as `C3DOmtObj`; the per-row object tags use the original uppercase `C3DOMTOBJ` string.
 
 | Property | Type | Offset | Range / Samples | Consuming Logic |
 |---|---|---:|---|---|
@@ -91,7 +91,6 @@ Validation: Static Ghidra + local `objdump` disassembly + `.gam` schema cross-ch
 
 Open questions:
 - Name `FUN_0046a910`, `FUN_00477ba0`, and `FUN_00477550` in the Ghidra project.
-- Backfill `docs/_gam_classids.tsv` for `3OMT` and regenerate `docs/gam_schema.md` so the top FourCC table names `C3DOmtObj`.
 - Name the inherited outer-object slots used for shape assignment, current-shape retrieval, second-pass setup, and collision/interaction disabling.
 - Resolve the exact owner of the inherited `Radius` field at active offset `0x034`.
 - Apply real `C3DOmtObj` structs so Ghidra stops printing seed offsets like `this[0x17f]`.

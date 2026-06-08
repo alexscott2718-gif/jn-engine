@@ -2,7 +2,7 @@ imm_fourcc  reversed  @site                 function                 class_or_ne
 LAMS       SMAL      @00407201  ??                        
 DBA3       3ABD      @004077a2  FUN_004076e0              C3DABDUCTEE()
 IAD3       3DAI      @00407b35  FUN_00407a40              C3DAI()
-OIA3       3AIO      @0040af50  FUN_0040ae30              
+OIA3       3AIO      @0040af50  FUN_0040ae30              C3DAIOmtObj
 VUS3       3SUV      @0040b26e  FUN_0040b1b0              
 TIA3       3AIT      @0040bb27  FUN_0040ba70              C3DAITrigger()
 INA3       3ANI      @0040e937  FUN_0040e880              C3DAnimatedSprite()
@@ -90,7 +90,7 @@ UEN3       3NEU      @00432a53  FUN_004329a0              C3DSprite()
 MSN3       3NSM      @00433137  FUN_00433070              C3DNEWSmokePuff()
 CIN3       3NIC      @00433555  FUN_00433490              C3DNick()
 TCO3       3OCT      @00433f2e  FUN_00433e70              C3DOCTAPUKE()
-TMO3       3OMT      @00434646  FUN_00434530              
+TMO3       3OMT      @00434646  FUN_00434530              C3DOmtObj
 SAP3       3PAS      @00434937  FUN_00434880              C3DPASSCARD
 TAP3       3PAT      @00434be7  FUN_00434b30              C3DPatrolPoint()
 NEP3       3PEN      @00435025  FUN_00434f60              C3DPENDULUM

@@ -23,7 +23,7 @@ dropped today (recoverable tuning/wiring).
 > string is the ctor's RTTI name where Ghidra captured it; blanks have the
 > function pinned and get named in decomp Phase 0 (RTTI analyzer).
 
-Named **55/93** placeable FourCCs; the rest have `InitObject fn` pinned.
+Named **57/93** placeable FourCCs; the rest have `InitObject fn` pinned.
 
 **Note:** `3FLY` = `C3DFlyingObject` (`FUN_00419f70`) is the **movement base**
 class — it registers MaxSpeed/AccelRate/DecelRate/MaxHeight/UpRate/DownRate/
@@ -56,7 +56,7 @@ MaxVertVelocity/NewGravity/AccelLean/DecelLean, which C3DPlayer/C3DJimmy inherit
 | `3CHK` | C3DCheckPoint | `FUN_00414190` | 1 |
 | `3TAR` | C3DShadow | `FUN_004453b0` | 2 |
 | `3PHO` | C3DPHONEBOOTH | `FUN_004355a0` | 1 |
-| `3OMT` | — (name pending Phase 0) | `FUN_00434530` | 1 |
+| `3OMT` | C3DOmtObj | `FUN_00434530` | 1 |
 | `3TUR` | — (name pending Phase 0) | `FUN_0044c6f0` | 1 |
 | `3STE` | — (name pending Phase 0) | `FUN_00442920` | 1 |
 | `3SPR` | C3DSprite | `FUN_00463f10` | 1 |
@@ -75,7 +75,7 @@ MaxVertVelocity/NewGravity/AccelLean/DecelLean, which C3DPlayer/C3DJimmy inherit
 | `3MUS` | C3DMusicTrigger | `FUN_00431a20` | 1 |
 | `3SWI` | — (name pending Phase 0) | `FUN_004449c0` | 1 |
 | `3SWN` | — (name pending Phase 0) | `FUN_00444450` | 1 |
-| `3AIO` | — (name pending Phase 0) | `FUN_0040ae30` | 1 |
+| `3AIO` | C3DAIOmtObj | `FUN_0040ae30` | 1 |
 | `3FUE` | C3DROCKETFUEL | `FUN_0043d530` | 1 |
 | `3ANI` | C3DAnimatedSprite | `FUN_0040e880` | 1 |
 | `3SCD` | — (name pending Phase 0) | `FUN_0043f070` | 1 |
