@@ -66,7 +66,7 @@ The `set_inherited_active_state` call above is the adjusted outer-object vtable 
 
 ## Constants And Wiring
 
-`C3DPickupType` has no direct placeable FourCC row in `docs/gam_schema.md`. It is a base-framework class under `C3DAI`; descendants such as `C3DEnemy` are expected to provide the placeable class binding and set `pickup_fields_enabled` when they need pickup-table behavior.
+`C3DPickupType` has no direct placeable FourCC row in `docs/gam_schema.md`. It is a base-framework class under `C3DAI`; descendants or leaf classes must provide any concrete placeable binding and set `pickup_fields_enabled` when they need pickup-table behavior. `C3DEnemy` itself only installs enemy identity vtables and does not set the flag.
 
 | Property | Type | Offset | Range / Samples | Consuming Logic |
 |---|---|---:|---|---|
