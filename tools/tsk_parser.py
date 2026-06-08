@@ -1,10 +1,25 @@
 """
-TSK game-state parser for Jimmy Neutron Boy Genius.
-Format:
-  [4B magic: 'LV1B'][1B version][1B variant]
-  [large zero-padded region -- lookup table, mostly empty]
-  [STARTEXP record: string fields + 3 BE floats for start position]
-  [entity list: u8 count + [u8 name_len][name][u32 BE state] per entry]
+TSK game-state parser for Jimmy Neutron Boy Genius (original / Neutron.exe).
+
+Format (measured from NewGame.tsk, 2026-06-08):
+  [4B magic: 'LV1B'][1B version=0x41][1B variant=0xa0]
+  [large zero-filled lookup-table region]
+  [STARTEXP record (at 0x4226 in NewGame.tsk):
+      pstring task_name   e.g. 'STARTEXP'
+      pstring param1      e.g. 'none'
+      pstring gam_file    e.g. 'level1b.gam'
+      pstring param2      e.g. 'none'
+      3x BE float         spawn X, Y, Z]
+  [zero gap of variable length, then the entity-state list:
+      u8 count            number of entries (12 in NewGame.tsk)
+      count x:
+          pstring object_tag   e.g. 'MOM', 'SCENE', 'REACTOR'
+          u32 BE   state       0 = default/inactive; non-zero = custom initial state
+   the list runs to EOF]
+
+This parser targets the original-game LV1B layout only. The Jimmy Neutron vs.
+Jimmy Negatron save files (`JimmyGame*.tsk`) use a different ('DUMMY'/sequel)
+serialization and are intentionally out of scope here.
 """
 
 import struct
@@ -56,6 +71,48 @@ def _find_startexp(data: bytes) -> Optional[int]:
     return idx if idx >= 0 else None
 
 
+def _try_entity_list(data: bytes, pos: int) -> Optional[List[EntityState]]:
+    """Try to read a `u8 count` + count×(pstring,u32) list at `pos`.
+
+    Returns the parsed entities only if the records are well-formed AND they
+    consume the file up to EOF (allowing a short all-zero trailer). Otherwise
+    None. The EOF anchor is what tells a genuine count byte apart from a stray
+    non-zero byte sitting in the zero gap before the list.
+    """
+    count = data[pos]
+    if count == 0 or count > 64:
+        return None
+    p = pos + 1
+    out: List[EntityState] = []
+    for _ in range(count):
+        if p >= len(data):
+            return None
+        nlen = data[p]
+        if nlen == 0 or nlen > 32 or p + 1 + nlen + 4 > len(data):
+            return None
+        name = data[p + 1: p + 1 + nlen]
+        if not all(0x20 <= b < 0x7f for b in name):
+            return None
+        state = struct.unpack_from('>I', data, p + 1 + nlen)[0]
+        out.append(EntityState(name=name.decode('ascii'), state=state))
+        p += 1 + nlen + 4
+    # The list must reach EOF; tolerate a short zero-padded tail only.
+    if any(b != 0 for b in data[p:]):
+        return None
+    return out
+
+
+def _scan_entity_list(data: bytes, start: int) -> List[EntityState]:
+    """Scan forward from `start` for the entity-state list (see module doc)."""
+    for pos in range(start, len(data)):
+        if data[pos] == 0:
+            continue
+        entities = _try_entity_list(data, pos)
+        if entities is not None:
+            return entities
+    return []
+
+
 def parse_tsk(path: str) -> TskFile:
     data = open(path, 'rb').read()
 
@@ -68,6 +125,7 @@ def parse_tsk(path: str) -> TskFile:
 
     # Locate STARTEXP record
     start_info = None
+    after_spawn = 6  # fallback scan origin if STARTEXP is absent
     se_pos = _find_startexp(data)
     if se_pos is not None:
         pos = se_pos
@@ -86,45 +144,19 @@ def parse_tsk(path: str) -> TskFile:
             start_y=y,
             start_z=z,
         )
+        after_spawn = pos + 12  # entity list lives somewhere past the spawn floats
 
-    # Entity state list: search after STARTEXP region
-    # Located right after the STARTEXP section (which is padded to 0x80 boundary)
-    entities = []
-    # Scan for entity list: u8 count followed by [u8 name_len][name][u32 BE state]*
-    # Find the first non-zero count byte after STARTEXP that leads to valid ASCII names
-    search_start = (se_pos + 0x80) if se_pos is not None else 6
-    # Align to 0x80 (128-byte) boundary
-    search_start = (search_start + 0x7F) & ~0x7F
-
-    pos = search_start
-    while pos < len(data):
-        count = data[pos]
-        if count == 0 or count > 64:
-            pos += 1
-            continue
-        # Validate that 'count' entries follow with ASCII names
-        test_pos = pos + 1
-        ok = True
-        test_entries = []
-        for _ in range(count):
-            if test_pos >= len(data):
-                ok = False
-                break
-            nlen = data[test_pos]
-            if nlen == 0 or nlen > 32 or test_pos + 1 + nlen + 4 > len(data):
-                ok = False
-                break
-            name_bytes = data[test_pos + 1: test_pos + 1 + nlen]
-            if not all(0x20 <= b < 0x7f for b in name_bytes):
-                ok = False
-                break
-            state = struct.unpack_from('>I', data, test_pos + 1 + nlen)[0]
-            test_entries.append(EntityState(name=name_bytes.decode('ascii'), state=state))
-            test_pos += 1 + nlen + 4
-        if ok and test_entries:
-            entities = test_entries
-            break
-        pos += 1
+    # Entity-state list.
+    #
+    # It sits after the STARTEXP spawn floats, separated by a variable-length
+    # zero gap, and is introduced by a single u8 count byte followed by
+    # `count` x (pstring tag, u32 BE state) records that run to EOF.
+    #
+    # Scan forward from just past the spawn floats for the first count byte
+    # whose `count` records parse cleanly as ASCII-tagged pairs AND consume
+    # the file up to (or to within a short zero tail of) EOF. The EOF anchor
+    # disambiguates the real count byte from stray non-zero bytes in the gap.
+    entities = _scan_entity_list(data, after_spawn)
 
     return TskFile(
         path=path,
@@ -156,7 +188,7 @@ def tsk_summary(tsk: TskFile) -> str:
 def export_tsk(tsk: TskFile, out_path: str):
     si = tsk.start_info
     d = {
-        'file': tsk.path,
+        'file': os.path.basename(tsk.path),
         'magic': tsk.magic,
         'version': tsk.version,
         'variant': tsk.variant,
@@ -179,6 +211,8 @@ def main():
     ap = argparse.ArgumentParser(description='Parse TSK game-state files')
     ap.add_argument('file', nargs='?', help='TSK file')
     ap.add_argument('--out', help='Output JSON path')
+    ap.add_argument('--json', action='store_true',
+                    help='Write <file>.json alongside the input')
     args = ap.parse_args()
 
     if not args.file:
@@ -188,9 +222,12 @@ def main():
     tsk = parse_tsk(args.file)
     print(tsk_summary(tsk))
 
-    if args.out:
-        export_tsk(tsk, args.out)
-        print(f'\nSaved: {args.out}')
+    out_path = args.out
+    if args.json and not out_path:
+        out_path = args.file + '.json'
+    if out_path:
+        export_tsk(tsk, out_path)
+        print(f'\nSaved: {out_path}')
 
 
 if __name__ == '__main__':

@@ -1,0 +1,67 @@
+{
+  "file": "/home/scotty/xp-jnbg-original/NewGame.tsk",
+  "magic": "LV1B",
+  "version": 65,
+  "variant": 160,
+  "start_info": {
+    "task_name": "STARTEXP",
+    "param1": "none",
+    "gam_file": "level1b.gam",
+    "param2": "none",
+    "spawn": [
+      470.5965270996094,
+      609.24169921875,
+      -87.76305389404297
+    ]
+  },
+  "entities": [
+    {
+      "name": "MOM",
+      "state": 0
+    },
+    {
+      "name": "LIBBY",
+      "state": 0
+    },
+    {
+      "name": "BENNY",
+      "state": 0
+    },
+    {
+      "name": "SCENE",
+      "state": 30
+    },
+    {
+      "name": "DINO",
+      "state": 0
+    },
+    {
+      "name": "CLONE",
+      "state": 0
+    },
+    {
+      "name": "KITTY1",
+      "state": 0
+    },
+    {
+      "name": "KITTY2",
+      "state": 0
+    },
+    {
+      "name": "KITTY3",
+      "state": 0
+    },
+    {
+      "name": "HYDRANT1",
+      "state": 0
+    },
+    {
+      "name": "HYDRANT2",
+      "state": 0
+    },
+    {
+      "name": "REACTOR",
+      "state": 0
+    }
+  ]
+}
