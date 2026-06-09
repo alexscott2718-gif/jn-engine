@@ -4,11 +4,14 @@
  *   - InitObject registers FanSpeed (float), FanRange (float), FanOn (int).
  *   - vfunc_01_010 each frame exposes a "fan output" = FanOn ? FanSpeed : 0,
  *     which drives the airflow within range.
- * Native realisation: when FanOn, the blades spin at FanSpeed (deg/s) about the
- * fan's facing axis, and the player is pushed along the fan's forward direction
- * with a linear falloff out to FanRange. All three properties are confirmed
- * present in shipped .gam data (gam_schema 3FAN; FanSpeed 800..2700,
- * FanRange 1000..3500, FanOn 1).
+ * All three properties are confirmed present in shipped .gam data (gam_schema
+ * 3FAN; FanSpeed 800..2700, FanRange 1000..3500, FanOn 1).
+ *
+ * Native realisation: the fan.ASE mesh is a flat horizontal blade slab (large in
+ * X/Z, thin in Y), i.e. a ceiling-fan blade, so it spins about the vertical Y
+ * axis (yaw). We drive e->ry with the blade angle (the existing yaw render path
+ * applies it) and keep the authored facing in home[0] for the airflow direction.
+ * The player within FanRange is pushed along that facing.
  */
 #include "behaviors.h"
 #include <math.h>
@@ -21,7 +24,8 @@
 
 static void fan_on_spawn(Entity *e, World *w) {
     (void)w;
-    e->user_float = 0.0f;                       /* accumulated blade angle (deg) */
+    e->home[0]   = e->ry;                       /* authored facing -> airflow dir */
+    e->user_float = 0.0f;                       /* accumulated blade angle (rad) */
     e->user_flag  = gam_prop_i(e, "FanOn", 1);  /* runtime on-state; a C3DSwitch
                                                    targeting this fan toggles it */
 }
@@ -32,24 +36,22 @@ static void fan_on_update(Entity *e, World *w, float dt) {
     float fan_range = gam_prop_f(e, "FanRange", 0.0f);
     if (!e->user_flag || fan_speed <= 0.0f) return;
 
-    /* Spin the blades about the fan's local forward axis (roll). The renderer's
-       euler path applies rz after the authored yaw, so the blades spin no matter
-       which way the fan faces. Angle in radians. */
+    /* Spin the blade about vertical Y (yaw). Radians; the yaw render path uses
+       e->ry directly. */
     e->user_float = fmodf(e->user_float + fan_speed * FAN_VIS_SCALE * FAN_DEG2RAD * dt,
                           6.2831853f);
-    e->rz = e->user_float;
+    e->ry = e->user_float;
 
-    /* Airflow: push the player along the fan's forward (-Z rotated by ry) with a
-       linear falloff to FanRange. */
+    /* Airflow: push the player along the authored facing (home[0]) with a linear
+       falloff to FanRange. */
     if (fan_range > 0.0f && g_player) {
         float dx = g_player->x - e->x;
         float dz = g_player->z - e->z;
         float dist = sqrtf(dx*dx + dz*dz);
         if (dist < fan_range) {
-            float yaw = e->ry * FAN_DEG2RAD;
+            float yaw = e->home[0] * FAN_DEG2RAD;
             float fx = -sinf(yaw), fz = -cosf(yaw);     /* forward dir */
             float strength = (fan_range - dist) / fan_range;     /* 1 at fan, 0 at edge */
-            /* gentle wind impulse, scaled from FanSpeed; integrates into velocity */
             float gust = (fan_speed * 0.02f) * strength * dt;
             g_player->vx += fx * gust;
             g_player->vz += fz * gust;

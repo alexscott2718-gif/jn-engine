@@ -186,7 +186,7 @@ static const TypeEntry TYPE_TABLE[] = {
     /* Tier 4 — environment defaults sourced from OMT extraction (Phase 7). */
     { "3TRE", { "assets/ase/omt/tree01.ASE",    NULL, 1.0f, 0 } },
     { "3DIN", { "assets/ase/omt/dino.ASE",      NULL, 1.0f, 0 } },
-    { "3FAN", { "assets/ase/omt/fan.ASE",       NULL, 1.0f, 0 } },
+    { "3FAN", { "assets/ase/omt/fan.ASE",       "assets/png/fan.png", 1.0f, 0 } },
     { "3SAI", { "assets/ase/omt/SailBoat.ASE",  NULL, 1.0f, 0 } },
     { "3SPH", { "assets/ase/omt/Sphere01.ASE",  NULL, 1.0f, 0 } },
 
