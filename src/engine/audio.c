@@ -76,6 +76,43 @@ int audio_play(int sound_id) {
     return channel;
 }
 
+int audio_sound_count(void) {
+    return audio_initialized ? NUM_SOUNDS : 0;
+}
+
+int audio_play_ex(int sound_id, int loops, int gain) {
+    if (!audio_initialized) return -1;
+    if (sound_id < 0 || sound_id >= NUM_SOUNDS || !sounds[sound_id]) return -1;
+    if (gain < 0)   gain = 0;
+    if (gain > 128) gain = 128;
+    int channel = Mix_PlayChannel(-1, sounds[sound_id], loops);
+    if (channel < 0) return -1;
+    Mix_Volume(channel, gain);
+    return channel;
+}
+
+void audio_channel_gain(int channel, int gain) {
+    if (!audio_initialized || channel < 0) return;
+    if (gain < 0)   gain = 0;
+    if (gain > 128) gain = 128;
+    Mix_Volume(channel, gain);
+}
+
+void audio_channel_halt(int channel) {
+    if (!audio_initialized || channel < 0) return;
+    Mix_HaltChannel(channel);
+}
+
+static int active_music_track = -1;
+
+int audio_set_music(int track) {
+    int prev = active_music_track;
+    active_music_track = track;
+    /* No music bank loaded yet — record + log the switch only. */
+    printf("[MUSIC] switch track %d -> %d\n", prev, track);
+    return prev;
+}
+
 void audio_stop_all(void) {
     if (!audio_initialized) return;
     Mix_HaltChannel(-1);

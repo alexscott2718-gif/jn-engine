@@ -22,6 +22,8 @@ extern const EntityVTable vt_pendulum;    /* 3PEN — C3DPendulum */
 extern const EntityVTable vt_steamvent;   /* 3STE — C3DSteamVent */
 extern const EntityVTable vt_ferris;      /* 3FER — C3DFerris */
 extern const EntityVTable vt_tractor;     /* 3TRC — C3DTractorBeam */
+extern const EntityVTable vt_soundfx;     /* 3SOU — C3DSoundEffect */
+extern const EntityVTable vt_music;       /* 3MUS — C3DMusicTrigger */
 
 /* The currently-controlled player; resolved at spawn. NULL until first 3JIM resolved. */
 extern Entity *g_player;
