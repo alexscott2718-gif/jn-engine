@@ -46,6 +46,68 @@ static int env_int_default(const char *name, int default_value) {
     return (s && s[0]) ? atoi(s) : default_value;
 }
 
+/* ---- Debug coordinate overlay (QA) -------------------------------------
+   A tiny self-contained 3x5 bitmap font drawn as screen-space quads, so it
+   needs no font texture/asset and works in the WASM deploy. Shows the
+   player's live draw-space position (X/Y/Z) + facing (F, degrees). Toggle
+   with 'C'; default on. The values are in GL draw space -- the same space
+   the placement scenery is drawn in -- so a position read here can be
+   compared directly against placement coords (gam-authored Z = -Z shown). */
+static int g_show_coords = 1;
+
+/* 3x5 glyphs, 5 rows top->bottom; bits 4/2/1 = left/mid/right pixel. */
+static const unsigned char *dbg_glyph(char c) {
+    static const unsigned char
+      g0[5]={7,5,5,5,7}, g1[5]={2,6,2,2,7}, g2[5]={7,1,7,4,7},
+      g3[5]={7,1,7,1,7}, g4[5]={5,5,7,1,1}, g5[5]={7,4,7,1,7},
+      g6[5]={7,4,7,5,7}, g7[5]={7,1,2,2,2}, g8[5]={7,5,7,5,7},
+      g9[5]={7,5,7,1,7},
+      gmin[5]={0,0,7,0,0}, gspc[5]={0,0,0,0,0}, gdot[5]={0,0,0,0,2},
+      gcol[5]={0,2,0,2,0},
+      gX[5]={5,5,2,5,5}, gY[5]={5,5,2,2,2}, gZ[5]={7,1,2,4,7},
+      gF[5]={7,4,7,4,4};
+    switch (c) {
+      case '0':return g0; case '1':return g1; case '2':return g2;
+      case '3':return g3; case '4':return g4; case '5':return g5;
+      case '6':return g6; case '7':return g7; case '8':return g8;
+      case '9':return g9; case '-':return gmin; case '.':return gdot;
+      case ':':return gcol; case 'X':return gX; case 'Y':return gY;
+      case 'Z':return gZ; case 'F':return gF; default:return gspc;
+    }
+}
+
+static void dbg_text(int vw, int vh, float x, float y, float px,
+                     const char *s, float r, float g, float b) {
+    for (; *s; s++) {
+        const unsigned char *gl = dbg_glyph(*s);
+        for (int row = 0; row < 5; row++)
+            for (int col = 0; col < 3; col++)
+                if (gl[row] & (4 >> col))
+                    renderer_draw_screen_rect(vw, vh,
+                        x + col * px, y + row * px, px, px, r, g, b, 1.0f);
+        x += 4.0f * px;   /* 3 wide + 1 column gap */
+    }
+}
+
+static void dbg_coords_overlay(int vw, int vh, const Entity *jim) {
+    if (!g_show_coords || !jim) return;
+    float deg = fmodf(jim->ry * 57.29578f, 360.0f);
+    if (deg < 0.0f) deg += 360.0f;
+    char l[4][24];
+    snprintf(l[0], sizeof l[0], "X: %.0f", jim->x);
+    snprintf(l[1], sizeof l[1], "Y: %.0f", jim->y);
+    snprintf(l[2], sizeof l[2], "Z: %.0f", jim->z);
+    snprintf(l[3], sizeof l[3], "F: %.0f", deg);
+    const float px = 3.0f, lh = 5.0f * px + 4.0f, pad = 8.0f;
+    const float ox = 12.0f, oy = 96.0f;   /* below the top-left HUD cluster */
+    renderer_draw_screen_rect(vw, vh, ox - pad, oy - pad,
+                              150.0f, lh * 4.0f + pad, 0.0f, 0.0f, 0.0f, 0.72f);
+    for (int i = 0; i < 4; i++) {
+        float g = (i == 3) ? 0.9f : 1.0f, b = (i == 3) ? 0.5f : 0.6f;
+        dbg_text(vw, vh, ox, oy + lh * i, px, l[i], 0.6f, g, b);
+    }
+}
+
 static int load_camera_descriptor_file(const char *path, int *screen_w, int *screen_h) {
     FILE *f = fopen(path, "r");
     if (!f) {
@@ -963,6 +1025,7 @@ int main(int argc, char **argv) {
         while (SDL_PollEvent(&ev)) {
             if (ev.type == SDL_QUIT) w.should_quit = 1;
             if (ev.type == SDL_KEYDOWN && ev.key.keysym.sym == SDLK_ESCAPE) w.should_quit = 1;
+            if (ev.type == SDL_KEYDOWN && ev.key.keysym.sym == SDLK_c) g_show_coords = !g_show_coords;
             if (ev.type == SDL_KEYDOWN && ev.key.keysym.sym == SDLK_1) audio_play(0);
             if (ev.type == SDL_KEYDOWN && ev.key.keysym.sym == SDLK_2) audio_play(1);
             if (ev.type == SDL_KEYDOWN && ev.key.keysym.sym == SDLK_3) audio_play(2);
@@ -1222,6 +1285,9 @@ int main(int argc, char **argv) {
         /* 2D HUD overlay, drawn after all 3D geometry. */
         if (hud_enabled)
             hud_draw(w.width, w.height, gamestate_get());
+
+        /* Live coordinate readout (QA) — player draw-space pos + facing. */
+        dbg_coords_overlay(w.width, w.height, jim);
 
         renderer_end_frame();
         capture_end_frame();
