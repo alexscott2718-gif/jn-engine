@@ -50,12 +50,53 @@ and a separate gameplay `3FAN` entity that (until now) drew the 8-vert stub — 
 exporter that already produced good geometry + embedded textures). Per-object, point
 the FourCC/tag at the matching `assets/glb/omt/.../*.glb`.
 
-Done so far:
-- `3FAN` → `assets/glb/omt/level5a/fan.glb` (real fan, embedded textures).
+### Migration done (2026-06-09)
 
-Still stubbed (next asset pass): `3TRE` tree, bushes, boxes, the door family,
-`tesla`. Each needs a GLB equivalent picked from `assets/glb/omt/` /
-`assets/glb/grn/`.
+All 15 stub references in `entity_visual.c` now resolve to GLB meshes:
+
+| FourCC / tag | was (ASE stub) | now (GLB) | verts / imgs |
+|---|---|---|---:|
+| `3FAN` | `omt/fan.ASE` | `assets/glb/omt/level5a/fan.glb` | 228 / 2 |
+| `3TRE` | `omt/tree01.ASE` | `assets/glb/omt/tree01.glb` | 24 / 1 |
+| `3SHU` | `omt/BUSH01.ASE` | `assets/glb/omt/BUSH01.glb` | 96 / 2 |
+| `3MOR` | `omt/Box01.ASE` | `assets/glb/omt/Box01.glb` | 30 / 0 |
+| `3AIO` | `omt/Box03.ASE` | `assets/glb/omt/Box03.glb` | 36 / 1 |
+| `3TES` | `tesla.ASE` | `assets/glb/omt/level6/tesla.glb` | 288 / 2 |
+| `3DUD` | `downdoor2a.ASE` | `assets/glb/ase/downdoor2a.glb` | 12 / 1 |
+| `3DOR`/DOORPP2 | `DoorPP2.ASE` | `assets/glb/ase/DoorPP2.glb` | 30 / 1 |
+| `3DOR`/DOORGRILL2 | `DoorGrill2.ASE` | `assets/glb/ase/DoorGrill2.glb` | 60 / 1 |
+| `3DOR`/DOORGRILL3 | `DoorGrill3.ASE` | `assets/glb/ase/DoorGrill3.glb` | 48 / 1 |
+| `3DOR`/DOORCLOSET | `DoorCloset.ASE` | `assets/glb/ase/DoorCloset.glb` | 30 / 0 |
+| `3DOR`/DOORCAVE | `doorcave.ASE` | `assets/glb/ase/doorcave.glb` | 36 / 0 |
+| `3DOR`/DOORRETRO | `doorretro.ASE` | `assets/glb/ase/doorretro.glb` | 36 / 0 |
+| `3DOR`/FIREDOOR | `firedoor.ASE` | `assets/glb/ase/firedoor.glb` | 36 / 0 |
+| `3DOR` default, `3SCD` | `door.ASE` | `assets/glb/omt/level1d/DOOR.glb` | 66 / 2 |
+
+Notes:
+- **No same-named `door.glb` exists** in either the OMT or `ase→glb` pipeline,
+  so the generic `3DOR` default and `3SCD` (SchoolDoor) point at a representative
+  textured Retroville door from the OMT pipeline (`level1d/DOOR.glb`) instead.
+- A few `glb/ase/*` door meshes carry no embedded texture (images=0:
+  DoorCloset, doorcave, doorretro, firedoor). They render with the material
+  base colour — still a strict upgrade over the 8-vert wood stub. Embedding
+  their textures is a later polish item.
+- Left untouched (not stubs, already >12 verts): `DoorPP1.ASE`,
+  `doorgrill.ASE`, `doorfowl.ASE`.
+
+**Still stubbed: none.** All `entity_visual` ASE stubs from the table above are migrated.
+
+### Why the OMT→ASE exporter degenerated
+
+The culprit is `tools/omt_mesh_export.py::parse_3dsp`. Its own docstring admits
+it: the parser **hardcodes the `level1.omt`-specific 3DSP layout** — vertex
+count read from a fixed offset (`off+48` as u16), vertices at `off+50`, and a
+fixed **triangle-only** face record with a 94/84-byte stride. The real 3DSP
+format carries a **per-polygon vertex count**, supports **n-gons**, and has
+**version branching (v0..v5)** where those field offsets move. Shapes that come
+from other OMT files (or use a different 3DSP version than level1's) read a
+wrong/tiny vertex count at byte 48 and drop almost all geometry → the ≤12-vert
+"stubs". The OMT→GLB pipeline parses the full format correctly, which is why the
+GLB twins have real geometry (and is why it is the authoritative source).
 
 ## Open architectural question
 

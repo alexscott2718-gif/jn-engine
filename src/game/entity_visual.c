@@ -60,15 +60,18 @@ static const TagEntry TAG_TABLE[] = {
 
     /* 3DOR — door variants by tag (else FourCC default below picks a door). */
     { "3DOR", "DOORPP1",     { "assets/ase/DoorPP1.ASE",     NULL, 1.0f, 0 } },
-    { "3DOR", "DOORPP2",     { "assets/ase/DoorPP2.ASE",     NULL, 1.0f, 0 } },
+    /* Door family migrated off degenerate OMT->ASE stubs to the OMT->GLB
+       meshes (real geometry; see docs/ase_stub_export_audit.md). The
+       assets/glb/ase/ mirror carries the textured versions. */
+    { "3DOR", "DOORPP2",     { "assets/glb/ase/DoorPP2.glb",    NULL, 1.0f, 0 } },
     { "3DOR", "DOORGRILL",   { "assets/ase/doorgrill.ASE",   NULL, 1.0f, 0 } },
-    { "3DOR", "DOORGRILL2",  { "assets/ase/DoorGrill2.ASE",  NULL, 1.0f, 0 } },
-    { "3DOR", "DOORGRILL3",  { "assets/ase/DoorGrill3.ASE",  NULL, 1.0f, 0 } },
-    { "3DOR", "DOORCLOSET",  { "assets/ase/DoorCloset.ASE",  NULL, 1.0f, 0 } },
+    { "3DOR", "DOORGRILL2",  { "assets/glb/ase/DoorGrill2.glb", NULL, 1.0f, 0 } },
+    { "3DOR", "DOORGRILL3",  { "assets/glb/ase/DoorGrill3.glb", NULL, 1.0f, 0 } },
+    { "3DOR", "DOORCLOSET",  { "assets/glb/ase/DoorCloset.glb", NULL, 1.0f, 0 } },
     { "3DOR", "DOORFOWL",    { "assets/ase/doorfowl.ASE",    NULL, 1.0f, 0 } },
-    { "3DOR", "DOORCAVE",    { "assets/ase/doorcave.ASE",    NULL, 1.0f, 0 } },
-    { "3DOR", "DOORRETRO",   { "assets/ase/doorretro.ASE",   NULL, 1.0f, 0 } },
-    { "3DOR", "FIREDOOR",    { "assets/ase/firedoor.ASE",    NULL, 1.0f, 0 } },
+    { "3DOR", "DOORCAVE",    { "assets/glb/ase/doorcave.glb",   NULL, 1.0f, 0 } },
+    { "3DOR", "DOORRETRO",   { "assets/glb/ase/doorretro.glb",  NULL, 1.0f, 0 } },
+    { "3DOR", "FIREDOOR",    { "assets/glb/ase/firedoor.glb",   NULL, 1.0f, 0 } },
 };
 static const int TAG_TABLE_N = (int)(sizeof(TAG_TABLE) / sizeof(TAG_TABLE[0]));
 
@@ -161,7 +164,10 @@ static const TypeEntry TYPE_TABLE[] = {
     { "3ROC", { "assets/ase/rocket.ASE",   NULL, 1.0f, 0 } },
     { "3ARR", { "assets/ase/3Darrow.ASE",  NULL, 1.0f, 0 } },
     { "3BUT", { "assets/ase/buttonup.ASE", NULL, 1.0f, 0 } },
-    { "3DOR", { "assets/ase/door.ASE",     NULL, 1.0f, 0 } },
+    /* No same-named door.glb exists (the generic "door" mesh isn't in the
+       OMT or ase->glb pipelines); substitute a textured Retroville door from
+       the OMT->GLB pipeline instead of the 8-vert door.ASE stub. */
+    { "3DOR", { "assets/glb/omt/level1d/DOOR.glb", NULL, 1.0f, 0 } },
 
     /* Tier 3 — characters (single stop/idle pose; no per-entity anim yet). */
     { "3CAR", { "assets/ase/carlstop.ASE",    NULL, 1.0f, 0 } },
@@ -184,7 +190,7 @@ static const TypeEntry TYPE_TABLE[] = {
     { "3SBU", { "assets/ase/retrobus.ASE",    NULL, 1.0f, 0 } },
 
     /* Tier 4 — environment defaults sourced from OMT extraction (Phase 7). */
-    { "3TRE", { "assets/ase/omt/tree01.ASE",    NULL, 1.0f, 0 } },
+    { "3TRE", { "assets/glb/omt/tree01.glb",    NULL, 1.0f, 0 } },  /* GLB (ASE was 8-vert stub) */
     { "3DIN", { "assets/ase/omt/dino.ASE",      NULL, 1.0f, 0 } },
     /* 3FAN: the old OMT->ASE export produced an 8-vert stub (fan.ASE) textured
        off a metal atlas — it rendered as a "wood" board. Use the OMT->GLB
@@ -197,7 +203,7 @@ static const TypeEntry TYPE_TABLE[] = {
     /* Phase 9 — exact 3D meshes (Stage B Ghidra confirmed). */
     { "3MER", { "assets/ase/omt/Rocket.ASE",     NULL, 1.0f, 0 } },  /* objects.omt id-16 */
     { "3SUV", { "assets/ase/omt/lawnmower.ASE",  NULL, 1.0f, 0 } },  /* jeep.omt id-2 */
-    { "3AIO", { "assets/ase/omt/Box03.ASE",      NULL, 1.0f, 0 } },  /* objects.omt id-4 default */
+    { "3AIO", { "assets/glb/omt/Box03.glb",      NULL, 1.0f, 0 } },  /* objects.omt id-4 default (GLB; ASE was 11-vert stub) */
     { "3SWN", { "assets/ase/doorfowl.ASE",       NULL, 1.0f, 0 } },  /* ASE-direct */
 
     /* Phase 10 Step 2 — sprite billboards. These FourCCs back to sprites.omt
@@ -237,14 +243,14 @@ static const TypeEntry TYPE_TABLE[] = {
     { "3NUM", { "assets/glb/grn/nummeyscooterbase.glb", NULL, 1.0f, 0 } }, /* Numey */
 
     /* Props (name-matched OMT/ASE meshes). */
-    { "3TES", { "assets/ase/tesla.ASE",          NULL, 1.0f, 0 } },  /* Tesla coil */
+    { "3TES", { "assets/glb/omt/level6/tesla.glb", NULL, 1.0f, 0 } }, /* Tesla coil (GLB; ASE was 4-vert stub) */
     { "3MOP", { "assets/ase/omt/block.ASE",      NULL, 1.0f, 0 } },  /* MovingPlatform */
-    { "3MOR", { "assets/ase/omt/Box01.ASE",      NULL, 1.0f, 0 } },  /* MovableRock */
-    { "3SHU", { "assets/ase/omt/BUSH01.ASE",     NULL, 1.0f, 0 } },  /* Shrubbery */
-    { "3DUD", { "assets/ase/downdoor2a.ASE",     NULL, 1.0f, 0 } },  /* DoorUpDown */
+    { "3MOR", { "assets/glb/omt/Box01.glb",      NULL, 1.0f, 0 } },  /* MovableRock (GLB; ASE was 4-vert stub) */
+    { "3SHU", { "assets/glb/omt/BUSH01.glb",     NULL, 1.0f, 0 } },  /* Shrubbery (GLB; ASE was 6-vert stub) */
+    { "3DUD", { "assets/glb/ase/downdoor2a.glb", NULL, 1.0f, 0 } },  /* DoorUpDown (GLB; ASE was 4-vert stub) */
     { "3WAB", { "assets/ase/buttondown.ASE",     NULL, 1.0f, 0 } },  /* WaterButton */
     { "3SCR", { "assets/ase/omt/blockscreen.ASE", NULL, 1.0f, 0 } }, /* Screen */
-    { "3SCD", { "assets/ase/door.ASE",           NULL, 1.0f, 0 } },  /* SchoolDoor */
+    { "3SCD", { "assets/glb/omt/level1d/DOOR.glb", NULL, 1.0f, 0 } }, /* SchoolDoor (GLB; ASE door was 8-vert stub) */
     { "3CRB", { "assets/ase/omt/block.ASE",      NULL, 1.0f, 0 } },  /* CraneBoom */
 
     /* Sprite-backed objects (sprites.omt). Camera-facing billboards. */
