@@ -19,6 +19,18 @@ typedef struct EntityVTable {
 #define ENTITY_FLAG_TRIGGER   0x04u  /* fires on_trigger on player overlap */
 #define ENTITY_FLAG_PLAYER    0x08u  /* the controllable entity */
 
+/* Generic .gam property bag. The loader maps well-known properties onto named
+   Entity fields; every other authored float/int property is captured here so a
+   ported behavior can read its class's parameters (e.g. FanSpeed, SteamPeriod,
+   MusicIndex0) by name. This is the porting surface for the Neutron.exe gameplay
+   classes — see docs/decomp/<Class>.md for each class's validated property set. */
+#define ENTITY_MAX_PROPS 24
+typedef struct GamProp {
+    char  name[24];
+    float f;     /* float value (type-3 props) */
+    int   i;     /* int value   (type-6 props) */
+} GamProp;
+
 typedef struct Entity {
     char  type[5];               /* FourCC null-terminated */
     char  tag[64];               /* ObjectTag property */
@@ -53,10 +65,17 @@ typedef struct Entity {
     int   alive;
     int   user_flag;             /* per-type: door open, item collected, ... */
     float user_float;            /* per-type: phase, timer, ... */
+    GamProp props[ENTITY_MAX_PROPS]; /* generic .gam property bag (see above) */
+    int    nprops;
     const EntityVTable *vt;
     AseModel *model;
     struct Entity *next;
 } Entity;
+
+/* Read a captured .gam property by name from the generic bag, with a default
+   if the object didn't author it. Defined in assets/gam_loader.c. */
+float gam_prop_f(const Entity *e, const char *name, float def);
+int   gam_prop_i(const Entity *e, const char *name, int def);
 
 /* Static-geometry placement extracted from an OMT (e.g. level1.omt).
    Each entry refers to a localized ASE on disk plus the original OMT center.

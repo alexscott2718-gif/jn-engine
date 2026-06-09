@@ -15,6 +15,7 @@ extern const EntityVTable vt_checkpoint;  /* 3CHK */
 extern const EntityVTable vt_movplat;     /* 3MOP */
 extern const EntityVTable vt_button;      /* 3BUT / 3WAB */
 extern const EntityVTable vt_leveldoor;   /* 3DOR / 3DUD / 3SCD */
+extern const EntityVTable vt_fan;         /* 3FAN — C3DFan */
 
 /* The currently-controlled player; resolved at spawn. NULL until first 3JIM resolved. */
 extern Entity *g_player;

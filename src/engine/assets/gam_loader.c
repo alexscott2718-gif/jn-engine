@@ -27,6 +27,30 @@ static void copy_string(char *dst, size_t dst_size, const char *src) {
     snprintf(dst, dst_size, "%s", src);
 }
 
+/* Stash an authored float/int property the named-field mapping didn't claim,
+   so ported behaviors can read it by name (see Entity.props). */
+static void prop_bag_add(Entity *e, const char *name, float f, int i) {
+    if (e->nprops >= ENTITY_MAX_PROPS) return;
+    GamProp *p = &e->props[e->nprops++];
+    snprintf(p->name, sizeof(p->name), "%s", name);
+    p->f = f;
+    p->i = i;
+}
+
+float gam_prop_f(const Entity *e, const char *name, float def) {
+    if (!e || !name) return def;
+    for (int k = 0; k < e->nprops; k++)
+        if (strcmp(e->props[k].name, name) == 0) return e->props[k].f;
+    return def;
+}
+
+int gam_prop_i(const Entity *e, const char *name, int def) {
+    if (!e || !name) return def;
+    for (int k = 0; k < e->nprops; k++)
+        if (strcmp(e->props[k].name, name) == 0) return e->props[k].i;
+    return def;
+}
+
 int gam_load(World *w, const char *path) {
     FILE *f = fopen(path, "rb");
     if (!f) { fprintf(stderr, "gam_load: cannot open %s\n", path); return -1; }
@@ -154,6 +178,7 @@ int gam_load(World *w, const char *path) {
                     else if (strcmp(prop_name, "MaxVertVelocity")==0) { pp->max_vert_velocity=fval; pp->loaded=1; }
                     else if (strcmp(prop_name, "AccelLean")==0)       { pp->accel_lean=fval;        pp->loaded=1; }
                     else if (strcmp(prop_name, "DecelLean")==0)       { pp->decel_lean=fval;        pp->loaded=1; }
+                    else prop_bag_add(e, prop_name, fval, 0);
                 }
 
             } else if (type_id == 6) {
@@ -177,6 +202,8 @@ int gam_load(World *w, const char *path) {
                     e->effect_type = ival;
                 } else if (strcmp(prop_name, "Points") == 0) {
                     e->points = ival;
+                } else {
+                    prop_bag_add(e, prop_name, (float)ival, ival);
                 }
             } else {
                 /* raw / unknown — skip */

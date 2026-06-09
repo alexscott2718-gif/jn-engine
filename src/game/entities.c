@@ -31,6 +31,7 @@ static const EntityTypeInfo entity_types[] = {
     { "3DOR", "Door",                  &vt_leveldoor },
     { "3DUD", "Door up/down",          &vt_leveldoor },
     { "3SCD", "School door",           &vt_leveldoor },
+    { "3FAN", "Fan",                   &vt_fan       },
     { NULL, NULL, NULL }
 };
 
