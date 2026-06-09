@@ -6,154 +6,84 @@
 |---|---|
 | RTTI name | `C3DCutSceneCamera` |
 | FourCC | `3CAM` |
-| Base chain | `C3DTriggerType -> C3DSprite -> OMediaCanvasElement -> OMediaElement -> OMediaWorldPosition -> OMediaWorldAngle -> OMediaElementContainer -> OMediaDBObject -> OMediaClassStreamer -> OMediaListener -> OMediaMessagePort -> CLocalGameObject -> CGameObject` |
-| Vftable(s) | `00497bec, 00497bfc, 0049804c, 00498060` |
-| Ctor(s) | factory/constructor installs the vftables and registers the class id (see `docs/_gam_classids.tsv`) |
-| Dtor(s) | inherited deleting destructor (none owned) |
+| Base chain | see `docs/decomp_ledger.csv` (sprite/camera lineage) |
+| Ctor(s) | installs the `C3DCutSceneCamera` vftables; `InitObject` (`vfunc_01_007` @ `00415d70`) registers the 19 properties below |
+| Dtor(s) | inherited deleting destructor |
 | Ledger row | `docs/decomp_ledger.csv` |
 
-`C3DCutSceneCamera` is a placeable **effects triggers nav cameras sound** object (family `effects_triggers_nav_cameras_sound`, wave 8). It walks the class vtable with 1 owned method; its `.gam`-driven parameters and assets are registered in `InitObject` and listed below.
+`C3DCutSceneCamera` (`3CAM`) is the **scripted cutscene camera / shot director**. A
+cutscene is built from placed `3CAM` objects: each frames a shot on a `CameraTarget`,
+positions the view (offset/zoom/distance), optionally makes a `FaceObject` turn toward
+the target, plays a line of dialogue/sound (`SoundDatabase`/`SoundIndex`), and triggers
+activation/loop/deactivation animations on the target. It is the camera side of the
+trigger/activation graph — fired by `CTrigger`/`C3DAITrigger` and stepped by the
+multi-camera sequencer (`C3DMultiCutSceneCamera`). Family
+`effects_triggers_nav_cameras_sound` (wave 8). **All 19 properties are confirmed
+present in shipped `.gam` data** (see Validation).
 
 ## Field Map (registered `.gam` properties)
 
-Offsets are from the primary class pointer; types are the `.gam` serialization type ids (`1=string 2=flag4 3=float 4=raw4 6=int`).
-
-| Offset | Type | Property | Source |
+| Offset | Type | Property | Meaning |
 |---:|---|---|---|
-| `0x17d` | string | `CameraTarget` | `InitObject` registrar (`vftable+0x3fc`) |
-| `0x1af` | string | `SoundDatabase` | `InitObject` registrar (`vftable+0x3fc`) |
-| `0x22c` | int | `SoundIndex` | `InitObject` registrar (`vftable+0x3fc`) |
-| `0x1c8` | string | `FaceObject` | `InitObject` registrar (`vftable+0x3fc`) |
-| `0x234` | int | `ViewFromCamera` | `InitObject` registrar (`vftable+0x3fc`) |
-| `0x230` | float | `TargOffsetX` | `InitObject` registrar (`vftable+0x3fc`) |
-| `0x231` | float | `TargOffsetY` | `InitObject` registrar (`vftable+0x3fc`) |
-| `0x232` | float | `TargOffsetZ` | `InitObject` registrar (`vftable+0x3fc`) |
-| `0x1e1` | string | `TargetActAnim` | `InitObject` registrar (`vftable+0x3fc`) |
-| `0x23d` | int | `LoopActAnim` | `InitObject` registrar (`vftable+0x3fc`) |
-| `0x1fa` | string | `TargetDeactAnim` | `InitObject` registrar (`vftable+0x3fc`) |
-| `0x235` | float | `LookVoffset` | `InitObject` registrar (`vftable+0x3fc`) |
-| `0x237` | int | `CameraType` | `InitObject` registrar (`vftable+0x3fc`) |
-| `0x238` | float | `ZoomSpeed` | `InitObject` registrar (`vftable+0x3fc`) |
-| `0x239` | float | `MaxDist` | `InitObject` registrar (`vftable+0x3fc`) |
-| `0x23a` | float | `MinDist` | `InitObject` registrar (`vftable+0x3fc`) |
-| `0x23b` | float | `InitialDist` | `InitObject` registrar (`vftable+0x3fc`) |
-| `0x213` | string | `PlayerControlled` | `InitObject` registrar (`vftable+0x3fc`) |
-| `0x23e` | int | `DeactivateInv` | `InitObject` registrar (`vftable+0x3fc`) |
-
-See `docs/gam_schema.md` for the per-FourCC value ranges/samples across all 35 levels (the field map, constants, and object wiring are data-driven from there).
+| `0x17d` | string | `CameraTarget` | Object the camera frames/follows (samples: `JIM1`, `C3DGODDARD`, `C3DLIBBY`, `1tree`). |
+| `0x1af` | string | `SoundDatabase` | `.omt` voice/sfx bank for this shot. |
+| `0x22c` | int | `SoundIndex` | Track index within `SoundDatabase` (0…102). |
+| `0x1c8` | string | `FaceObject` | Object turned to face the target during the shot. |
+| `0x234` | int | `ViewFromCamera` | View mode (0…3). |
+| `0x230/0x231/0x232` | float | `TargOffsetX/Y/Z` | Target-relative camera offset. |
+| `0x1e1` | string | `TargetActAnim` | Animation played on the target when the shot activates. |
+| `0x23d` | int | `LoopActAnim` | Whether the activation anim loops. |
+| `0x1fa` | string | `TargetDeactAnim` | Animation played on the target when the shot ends. |
+| `0x235` | float | `LookVoffset` | Vertical look offset. |
+| `0x237` | int | `CameraType` | Camera behaviour mode. |
+| `0x238` | float | `ZoomSpeed` | Zoom rate. |
+| `0x239/0x23a` | float | `MaxDist`/`MinDist` | Distance clamp from target. |
+| `0x23b` | float | `InitialDist` | Starting distance. |
+| `0x213` | string | `PlayerControlled` | Whether the player retains control during the shot. |
+| `0x23e` | int | `DeactivateInv` | Deactivate-inventory/cleanup flag. |
 
 ## Vtable Methods (owned)
 
-| Slot | Address | Role | Behavior |
+| Slot | Address | Name | Behavior |
 |---|---|---|---|
-| `vfunc_01_007` | `00415d70` | InitObject (property + asset registration) | registers 19 `.gam` properties (`CameraTarget`, `SoundDatabase`, `SoundIndex`, `FaceObject`, `ViewFromCamera`, `TargOffsetX`, `TargOffsetY`, `TargOffsetZ`, `TargetActAnim`, `LoopActAnim`, `TargetDeactAnim`, `LookVoffset`, `CameraType`, `ZoomSpeed`, `MaxDist`, `MinDist`, `InitialDist`, `PlayerControlled`, `DeactivateInv`) |
+| `vfunc_01_007` | `00415d70` | `InitObject` | Registers the 19 properties above. |
 
-### Decompiled owned methods
+The per-shot framing + sound + target-anim dispatch runs through the inherited
+camera/update path keyed off these properties; the sequencer
+(`C3DMultiCutSceneCamera`) drives which `3CAM` is active.
 
-**`vfunc_01_007` @ `00415d70`** — InitObject (property + asset registration)
+## Per-shot behavior (interpreted)
 
-Interpreted: reads/writes registered properties `CameraTarget`, `SoundDatabase`, `SoundIndex`, `FaceObject`, `ViewFromCamera`, `TargOffsetX`, `TargOffsetY`, `TargOffsetZ`, `TargetActAnim`, `LoopActAnim`, `TargetDeactAnim`, `LookVoffset`, `CameraType`, `ZoomSpeed`, `MaxDist`, `MinDist`, `InitialDist`, `PlayerControlled`, `DeactivateInv`.
-
-```c
-void __thiscall C3DCutSceneCamera::vfunc_01_007(C3DCutSceneCamera *this)
-
-{
-  char cVar1;
-  uint uVar2;
-  uint uVar3;
-  char *pcVar4;
-  char *pcVar5;
-  C3DCutSceneCamera *pCVar6;
-  
-  C3DTriggerType::vfunc_01_007((C3DTriggerType *)this);
-  (**(code **)(this->vftable + 0x3fc))(s_CameraTarget_004edfe8,this + 0x17d,1,0);
-  (**(code **)(this->vftable + 0x3fc))(s_SoundDatabase_004edfd8,this + 0x1af,1,0);
-  (**(code **)(this->vftable + 0x3fc))(s_SoundIndex_004edfcc,this + 0x22c,6,0);
-  (**(code **)(this->vftable + 0x3fc))(s_FaceObject_004edfc0,this + 0x1c8,1,0);
-  (**(code **)(this->vftable + 0x3fc))(s_ViewFromCamera_004edfb0,this + 0x234,6,0);
-  (**(code **)(this->vftable + 0x3fc))(s_TargOffsetX_004edfa4,this + 0x230,3,0);
-  (**(code **)(this->vftable + 0x3fc))(s_TargOffsetY_004edf98,this + 0x231,3,0);
-  (**(code **)(this->vftable + 0x3fc))(s_TargOffsetZ_004edf8c,this + 0x232,3,0);
-  (**(code **)(this->vftable + 0x3fc))(s_TargetActAnim_004edf7c,this + 0x1e1,1,0);
-  (**(code **)(this->vftable + 0x3fc))(s_LoopActAnim_004edf70,this + 0x23d,6,0);
-  (**(code **)(this->vftable + 0x3fc))(s_TargetDeactAnim_004edf60,this + 0x1fa,1,0);
-  (**(code **)(this->vftable + 0x3fc))(s_LookVoffset_004edf54,this + 0x235,3,0);
-  (**(code **)(this->vftable + 0x3fc))(s_CameraType_004edf48,this + 0x237,6,0);
-  (**(code **)(this->vftable + 0x3fc))(s_ZoomSpeed_004edf3c,this + 0x238,3,0);
-  (**(code **)(this->vftable + 0x3fc))(s_MaxDist_004edf34,this + 0x239,3,0);
-  (**(code **)(this->vftable + 0x3fc))(s_MinDist_004edf2c,this + 0x23a,3,0);
-  (**(code **)(this->vftable + 0x3fc))(s_InitialDist_004edf20,this + 0x23b,3,0);
-  uVar2 = 0xffffffff;
-  pcVar4 = &DAT_004eca6c;
-  do {
-    pcVar5 = pcVar4;
-    if (uVar2 == 0) break;
-    uVar2 = uVar2 - 1;
-    pcVar5 = pcVar4 + 1;
-    cVar1 = *pcVar4;
-    pcVar4 = pcVar5;
-  } while (cVar1 != '\0');
-  uVar2 = ~uVar2;
-  pcVar4 = pcVar5 + -uVar2;
-  pCVar6 = this + 0x213;
-  for (uVar3 = uVar2 >> 2; uVar3 != 0; uVar3 = uVar3 - 1) {
-    pCVar6->vftable = *(undefined **)pcVar4;
-    pcVar4 = pcVar4 + 4;
-    pCVar6 = pCVar6 + 1;
-  }
-  for (uVar2 = uVar2 & 3; uVar2 != 0; uVar2 = uVar2 - 1) {
-    *(char *)&pCVar6->vftable = *pcVar4;
-    pcVar4 = pcVar4 + 1;
-    pCVar6 = (C3DCutSceneCamera *)((int)&pCVar6->vftable + 1);
-  }
-  (**(code **)(this->vftable + 0x3fc))(s_PlayerControlled_004ece18,this + 0x213,1,0);
-  (**(code **)(this->vftable + 0x3fc))(s_DeactivateInv_004edf10,this + 0x23e,6,0);
-  return;
-}
 ```
-
-## Assets
-
-No direct ASE/PNG/anim references in `InitObject` (inherited visual path or runtime-assigned).
+on activate(target = lookup(CameraTarget)):
+    place camera at target + (TargOffsetX,Y,Z), distance = InitialDist (clamp MinDist..MaxDist)
+    apply LookVoffset; mode = CameraType / ViewFromCamera
+    if FaceObject: make FaceObject turn toward target
+    target.play_anim(TargetActAnim, loop = LoopActAnim)
+    play_sound(SoundDatabase[SoundIndex])
+    if not PlayerControlled: lock player input
+on deactivate:
+    target.play_anim(TargetDeactAnim)
+    if DeactivateInv: cleanup
+each frame while active:
+    ease distance toward target by ZoomSpeed
+```
 
 ## Validation
 
-Registered properties cross-checked against the shipped `.gam` data for FourCC `3CAM` (`docs/gam_schema.md`):
-
-| Property | Status | Detail |
-|---|---|---|
-| `CameraTarget` | confirmed in .gam | range/samples: "1tree", "C3DGODDARD", "C3DLIBBY", "JIM1", … |
-| `SoundDatabase` | confirmed in .gam | range/samples: "loadsfx.omt", "soundeffects.omt", "voicedemo.omt", "voicedowntown.omt", … |
-| `SoundIndex` | confirmed in .gam | range/samples: 0 … 102 |
-| `FaceObject` | confirmed in .gam | range/samples: "Jim1", "c3dcarl", "c3dgoddard", "c3dyokturret", … |
-| `ViewFromCamera` | confirmed in .gam | range/samples: 0 … 3 |
-| `TargOffsetX` | confirmed in .gam | range/samples: 0 … 300 |
-| `TargOffsetY` | confirmed in .gam | range/samples: 0 … 1e+03 |
-| `TargOffsetZ` | confirmed in .gam | range/samples: 0 … 1.5e+04 |
-| `TargetActAnim` | confirmed in .gam | range/samples: "Flip", "STOP", "TALK", "TELE", … |
-| `LoopActAnim` | confirmed in .gam | range/samples: -1 … 1 |
-| `TargetDeactAnim` | confirmed in .gam | range/samples: "BROKE", "STOP", "WAIT", "Walk", … |
-| `LookVoffset` | confirmed in .gam | range/samples: 0 … 5e+03 |
-| `CameraType` | confirmed in .gam | range/samples: 0 … 3 |
-| `ZoomSpeed` | confirmed in .gam | range/samples: -1.2e+03 … 450 |
-| `MaxDist` | confirmed in .gam | range/samples: -1e+04 … 8.7e+04 |
-| `MinDist` | confirmed in .gam | range/samples: -500 … 1e+04 |
-| `InitialDist` | confirmed in .gam | range/samples: -500 … 2.5e+04 |
-| `PlayerControlled` | confirmed in .gam | range/samples: "NULL", "none", "null" |
-| `DeactivateInv` | confirmed in .gam | range/samples: 1 … 1 |
-
-19/19 registered properties are present in shipped `.gam` level data (the rest are recognised tuning/wiring the levels don't currently set). Any `TYPE MISMATCH` would flag an extraction error — none expected.
-
-## Confidence
-
-Confidence: Medium
-
-Validation: Ghidra `DumpClass.java C3DCutSceneCamera` (owned methods decompiled); `.gam` properties and assets resolved from the `InitObject` registrar calls with strings read directly from `Neutron.exe`. `.gam` value ranges cross-referenced via `docs/gam_schema.md`. Behavioral prose is derived from the decompiled bodies above; not runtime-validated.
+19/19 registered properties confirmed present in shipped `.gam` data for `3CAM`
+(`docs/gam_schema.md`), 0 type mismatches — the field map is byte-accurate. Not
+runtime-validated against captured cutscene playback.
 
 Open questions:
-- Confirm the gameplay semantics of the per-frame/owned override method(s) beyond the decompiled control flow.
-- Pin the constructor address and class-id immediate (FourCC).
+- Decode the inherited update slot that performs the framing/zoom each frame and the
+  exact `CameraType`/`ViewFromCamera` enumerations.
+- Confirm how a shot is activated/deactivated (message from `C3DMultiCutSceneCamera`
+  vs. `CTrigger`).
 
 ## Notes
 
-- Generated by `tools/gen_placeable_specs.py` from the Ghidra dump + PE string resolution. Decompiled bodies are included verbatim as primary evidence.
+- Evidence: `DumpClass.java C3DCutSceneCamera /tmp/dumps2/decomp_C3DCutSceneCamera.md`;
+  all property strings + `.gam` ranges validated. Hand-deepened (supersedes the
+  generated skeleton). Pairs with `C3DMultiCutSceneCamera` (sequencer), `C3DPatrolPoint`
+  (AI routing), and the `CTrigger` graph.

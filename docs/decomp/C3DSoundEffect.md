@@ -6,82 +6,50 @@
 |---|---|
 | RTTI name | `C3DSoundEffect` |
 | FourCC | `3SOU` |
-| Base chain | `C3DSpriteType -> C3DSprite -> OMediaCanvasElement -> OMediaElement -> OMediaWorldPosition -> OMediaWorldAngle -> OMediaElementContainer -> OMediaDBObject -> OMediaClassStreamer -> OMediaListener -> OMediaMessagePort -> CLocalGameObject -> CGameObject` |
-| Vftable(s) | `004b59a0, 004b59b0, 004b5e00, 004b5e14` |
-| Ctor(s) | factory/constructor installs the vftables and registers the class id (see `docs/_gam_classids.tsv`) |
-| Dtor(s) | inherited deleting destructor (none owned) |
+| Base chain | see `docs/decomp_ledger.csv` |
+| Ctor(s) | installs the vftables; `InitObject` (`vfunc_01_007` @ `00441020`) registers the properties below |
+| Dtor(s) | inherited deleting destructor |
 | Ledger row | `docs/decomp_ledger.csv` |
 
-`C3DSoundEffect` is a placeable **effects triggers nav cameras sound** object (family `effects_triggers_nav_cameras_sound`, wave 8). It walks the class vtable with 1 owned method; its `.gam`-driven parameters and assets are registered in `InitObject` and listed below.
+`C3DSoundEffect` (`3SOU`) is a **positional sound emitter** — a placed point that plays
+a sound when the player is within `Radius`, either as a looping ambient bed
+(`IsAmbient`) or a one-shot triggered up to `TimesToTrigger` times. It is how levels
+place spatial audio (machinery hums, ambience, stingers). Family
+`effects_triggers_nav_cameras_sound` (wave 8). **All 5 properties confirmed in shipped
+`.gam` data.**
 
 ## Field Map (registered `.gam` properties)
 
-Offsets are from the primary class pointer; types are the `.gam` serialization type ids (`1=string 2=flag4 3=float 4=raw4 6=int`).
-
-| Offset | Type | Property | Source |
+| Offset | Type | Property | Meaning |
 |---:|---|---|---|
-| `0x148` | int | `SoundIndex` | `InitObject` registrar (`vftable+0x3fc`) |
-| `0x149` | int | `TimesToTrigger` | `InitObject` registrar (`vftable+0x3fc`) |
-| `0xd` | float | `Radius` | `InitObject` registrar (`vftable+0x3fc`) |
-| `0x14b` | int | `IsAmbient` | `InitObject` registrar (`vftable+0x3fc`) |
-| `0x14d` | int | `RequiredLevel` | `InitObject` registrar (`vftable+0x3fc`) |
-
-See `docs/gam_schema.md` for the per-FourCC value ranges/samples across all 35 levels (the field map, constants, and object wiring are data-driven from there).
+| `0x148` | int | `SoundIndex` | Index of the sound to play (in the level sound bank). |
+| `0x149` | int | `TimesToTrigger` | How many times it may fire (one-shot count; ambient = continuous). |
+| `0x0d` | float | `Radius` | Audible/trigger radius around the emitter. |
+| `0x14b` | int | `IsAmbient` | Looping ambient bed vs. one-shot trigger. |
+| `0x14d` | int | `RequiredLevel` | Progress gate. |
 
 ## Vtable Methods (owned)
 
-| Slot | Address | Role | Behavior |
+| Slot | Address | Name | Behavior |
 |---|---|---|---|
-| `vfunc_01_007` | `00441020` | InitObject (property + asset registration) | registers 5 `.gam` properties (`SoundIndex`, `TimesToTrigger`, `Radius`, `IsAmbient`, `RequiredLevel`) |
+| `vfunc_01_007` | `00441020` | `InitObject` | Registers the 5 properties. |
 
-### Decompiled owned methods
-
-**`vfunc_01_007` @ `00441020`** — InitObject (property + asset registration)
-
-Interpreted: reads/writes registered properties `SoundIndex`, `TimesToTrigger`, `Radius`, `IsAmbient`, `RequiredLevel`.
-
-```c
-void __thiscall C3DSoundEffect::vfunc_01_007(C3DSoundEffect *this)
-
-{
-  C3DSprite::vfunc_01_007((C3DSprite *)this);
-  (**(code **)(this->vftable + 0x3fc))(s_SoundIndex_004edfcc,this + 0x148,6,0);
-  (**(code **)(this->vftable + 0x3fc))(s_TimesToTrigger_004ece08,this + 0x149,6,0);
-  (**(code **)(this->vftable + 0x3fc))(s_Radius_004eccbc,this + 0xd,3,0);
-  (**(code **)(this->vftable + 0x3fc))(s_IsAmbient_004f03b0,this + 0x14b,6,0);
-  (**(code **)(this->vftable + 0x3fc))(s_RequiredLevel_004ed294,this + 0x14d,6,0);
-  return;
-}
-```
-
-## Assets
-
-No direct ASE/PNG/anim references in `InitObject` (inherited visual path or runtime-assigned).
+The emit logic runs on the inherited update/proximity path: while the player is within
+`Radius`, an ambient emitter keeps its loop alive; a non-ambient emitter fires
+`SoundIndex` on entry and decrements `TimesToTrigger`.
 
 ## Validation
 
-Registered properties cross-checked against the shipped `.gam` data for FourCC `3SOU` (`docs/gam_schema.md`):
-
-| Property | Status | Detail |
-|---|---|---|
-| `SoundIndex` | confirmed in .gam | range/samples: -1 … 241 |
-| `TimesToTrigger` | confirmed in .gam | range/samples: -1 … 99 |
-| `Radius` | confirmed in .gam | range/samples: 50 … 2.5e+04 |
-| `IsAmbient` | confirmed in .gam | range/samples: -1 … 1 |
-| `RequiredLevel` | confirmed in .gam | range/samples: 0 … 70 |
-
-5/5 registered properties are present in shipped `.gam` level data (the rest are recognised tuning/wiring the levels don't currently set). Any `TYPE MISMATCH` would flag an extraction error — none expected.
-
-## Confidence
-
-Confidence: Medium
-
-Validation: Ghidra `DumpClass.java C3DSoundEffect` (owned methods decompiled); `.gam` properties and assets resolved from the `InitObject` registrar calls with strings read directly from `Neutron.exe`. `.gam` value ranges cross-referenced via `docs/gam_schema.md`. Behavioral prose is derived from the decompiled bodies above; not runtime-validated.
+5/5 registered properties confirmed present in shipped `.gam` data for `3SOU`
+(`docs/gam_schema.md`), 0 type mismatches. Not runtime-validated.
 
 Open questions:
-- Confirm the gameplay semantics of the per-frame/owned override method(s) beyond the decompiled control flow.
-- Pin the constructor address and class-id immediate (FourCC).
+- Locate the inherited proximity/emit slot and confirm ambient-loop vs. one-shot
+  branching and the `TimesToTrigger` decrement.
+- Resolve which sound bank `SoundIndex` indexes (level default vs. a named database).
 
 ## Notes
 
-- Generated by `tools/gen_placeable_specs.py` from the Ghidra dump + PE string resolution. Decompiled bodies are included verbatim as primary evidence.
+- Evidence: `DumpClass.java C3DSoundEffect /tmp/dumps2/decomp_C3DSoundEffect.md`.
+  Hand-deepened (supersedes the generated skeleton). Spatial-audio sibling of
+  `C3DMusicTrigger`; 9 `3SOU` instances populate Level 1 alone.

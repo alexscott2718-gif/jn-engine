@@ -6,118 +6,54 @@
 |---|---|
 | RTTI name | `C3DDoorUpDown` |
 | FourCC | `3DUD` |
-| Base chain | `C3DAnimated -> C3DObject -> OMedia3DMorphAnim -> OMedia3DShapeElement -> OMediaElement -> OMediaWorldPosition -> OMediaWorldAngle -> OMediaElementContainer -> OMediaDBObject -> OMediaClassStreamer -> OMediaListener -> OMediaMessagePort -> OMediaAnim -> CLocalGameObject -> CGameObject` |
-| Vftable(s) | `0049939c, 004993ac, 004997fc, 00499838, 0049984c` |
-| Ctor(s) | factory/constructor installs the vftables and registers the class id (see `docs/_gam_classids.tsv`) |
-| Dtor(s) | inherited deleting destructor (none owned) |
+| Base chain | `C3DAnimated -> ... -> CGameObject` (see `docs/decomp_ledger.csv`) |
+| Ctor(s) | installs the vftables; `InitObject` (`vfunc_01_007` @ `004177c0`) registers the properties below |
+| Dtor(s) | inherited deleting destructor |
 | Ledger row | `docs/decomp_ledger.csv` |
 
-`C3DDoorUpDown` is a placeable **mechanisms moving parts** object (family `mechanisms_moving_parts`, wave 6). It walks the class vtable with 2 owned methods; its `.gam`-driven parameters and assets are registered in `InitObject` and listed below.
+`C3DDoorUpDown` (`3DUD`) is a **vertically sliding door** — it raises/lowers by
+`OpenAmount` at `DoorSpeed`, stays open for `OpenTime`, and can be opened by contact
+(`TouchActivated`) or by the activation graph. Each door carries its own model/texture
+(`ASEFile`/`PNGFile`) and links to a `Next` object. Family `mechanisms_moving_parts`
+(wave 6). **All 8 properties confirmed in shipped `.gam` data.**
 
 ## Field Map (registered `.gam` properties)
 
-Offsets are from the primary class pointer; types are the `.gam` serialization type ids (`1=string 2=flag4 3=float 4=raw4 6=int`).
-
-| Offset | Type | Property | Source |
+| Offset | Type | Property | Meaning |
 |---:|---|---|---|
-| `0x17f` | int | `ItemClosed` | `InitObject` registrar (`vftable+0x3fc`) |
-| `0x181` | string | `Next` | `InitObject` registrar (`vftable+0x3fc`) |
-| `0x19b` | float | `DoorSpeed` | `InitObject` registrar (`vftable+0x3fc`) |
-| `0x19c` | float | `OpenTime` | `InitObject` registrar (`vftable+0x3fc`) |
-| `0x1a0` | float | `OpenAmount` | `InitObject` registrar (`vftable+0x3fc`) |
-| `0x1a1` | string | `ASEFile` | `InitObject` registrar (`vftable+0x3fc`) |
-| `0x1ba` | string | `PNGFile` | `InitObject` registrar (`vftable+0x3fc`) |
-| `0x1d3` | int | `TouchActivated` | `InitObject` registrar (`vftable+0x3fc`) |
-
-See `docs/gam_schema.md` for the per-FourCC value ranges/samples across all 35 levels (the field map, constants, and object wiring are data-driven from there).
+| `0x17f` | int | `ItemClosed` | Current/initial closed state. |
+| `0x181` | string | `Next` | Linked object tag (chained door / target). |
+| `0x19b` | float | `DoorSpeed` | Slide rate. |
+| `0x19c` | float | `OpenTime` | How long it stays open before auto-closing. |
+| `0x1a0` | float | `OpenAmount` | Vertical slide distance (open offset). |
+| `0x1a1` | string | `ASEFile` | Per-instance door model. |
+| `0x1ba` | string | `PNGFile` | Per-instance door texture. |
+| `0x1d3` | int | `TouchActivated` | Whether contact opens it. |
 
 ## Vtable Methods (owned)
 
-| Slot | Address | Role | Behavior |
+| Slot | Address | Name | Behavior |
 |---|---|---|---|
-| `vfunc_01_007` | `004177c0` | InitObject (property + asset registration) | registers 8 `.gam` properties (`ItemClosed`, `Next`, `DoorSpeed`, `OpenTime`, `OpenAmount`, `ASEFile`, `PNGFile`, `TouchActivated`) |
-| `vfunc_01_259` | `00417c50` | owned override | see decompiled body — touches `ASEFile`, `PNGFile` |
+| `vfunc_01_007` | `004177c0` | `InitObject` | Registers the 8 properties. |
+| `vfunc_01_259` | `00417c50` | `Reset` | Loads the visual: registers `ASEFile` under anim `HIRAY`, loads `PNGFile`, assigns material, sets scale `40.0` (`0x42200000`), default anim. |
 
-### Decompiled owned methods
-
-**`vfunc_01_007` @ `004177c0`** — InitObject (property + asset registration)
-
-Interpreted: reads/writes registered properties `ItemClosed`, `Next`, `DoorSpeed`, `OpenTime`, `OpenAmount`, `ASEFile`, `PNGFile`, `TouchActivated`.
-
-```c
-void __thiscall C3DDoorUpDown::vfunc_01_007(C3DDoorUpDown *this)
-
-{
-  CGameObject *this_00;
-  
-  (**(code **)(this->vftable + 0x3f8))(this,s_InitObject___004eca2c);
-  C3DAnimated::vfunc_01_007((C3DAnimated *)this);
-  (**(code **)(this->vftable + 0x3fc))(s_ItemClosed_004ee2e0,this + 0x17f,6,0);
-  (**(code **)(this->vftable + 0x3fc))(&DAT_004edd18,this + 0x181,1,0);
-  (**(code **)(this->vftable + 0x3fc))(s_DoorSpeed_004ee2d4,this + 0x19b,3,0);
-  (**(code **)(this->vftable + 0x3fc))(s_OpenTime_004ee2c8,this + 0x19c,3,0);
-  (**(code **)(this->vftable + 0x3fc))(s_OpenAmount_004ee2bc,this + 0x1a0,3,0);
-  (**(code **)(this->vftable + 0x3fc))(s_ASEFile_004ee2b4,this + 0x1a1,1,0);
-  (**(code **)(this->vftable + 0x3fc))(s_PNGFile_004ee2ac,this + 0x1ba,1,0);
-  (**(code **)(this->vftable + 0x3fc))(s_TouchActivated_004ecdf8,this + 0x1d3,6,0);
-  CGameObject::vfunc_00_013(this_00);
-  return;
-}
-```
-
-**`vfunc_01_259` @ `00417c50`** — owned override
-
-Interpreted: reads/writes registered properties `ASEFile`, `PNGFile`.
-
-```c
-void __thiscall C3DDoorUpDown::vfunc_01_259(C3DDoorUpDown *this)
-
-{
-  C3DDoorUpDown *pCVar1;
-  
-  C3DAnimated::vfunc_01_259((C3DAnimated *)this);
-  pCVar1 = this + -0x30;
-  (**(code **)(this[-0x30].vftable + 0x108))();
-  (**(code **)(pCVar1->vftable + 0xd8))(s_HIRAY_004ee33c,this + 0x1a1);
-  (**(code **)(pCVar1->vftable + 0xf0))(this + 0x1ba,0);
-  (**(code **)(pCVar1->vftable + 0xf4))(this[0x12f].vftable,0);
-  (**(code **)(this->vftable + 0x110))(0x42200000);
-  (**(code **)(pCVar1->vftable + 0xe0))(&PTR_DAT_004ee338,1);
-  return;
-}
-```
-
-## Assets
-
-No direct ASE/PNG/anim references in `InitObject` (inherited visual path or runtime-assigned).
+The open/close vertical motion is driven by the inherited animated/door update keyed off
+`ItemClosed`/`DoorSpeed`/`OpenAmount`/`OpenTime` (the door has no owned per-frame slot —
+the motion lives in the shared base, parameterised by these fields), unlike
+`C3DSwingDoor` which owns its swing state machine.
 
 ## Validation
 
-Registered properties cross-checked against the shipped `.gam` data for FourCC `3DUD` (`docs/gam_schema.md`):
-
-| Property | Status | Detail |
-|---|---|---|
-| `ItemClosed` | confirmed in .gam | range/samples: 1 … 1 |
-| `Next` | confirmed in .gam | range/samples: "none" |
-| `DoorSpeed` | confirmed in .gam | range/samples: 5 … 5 |
-| `OpenTime` | confirmed in .gam | range/samples: 3 … 3 |
-| `OpenAmount` | confirmed in .gam | range/samples: 500 … 500 |
-| `ASEFile` | confirmed in .gam | range/samples: "bars.ase" |
-| `PNGFile` | confirmed in .gam | range/samples: "chain.png" |
-| `TouchActivated` | confirmed in .gam | range/samples: 0 … 0 |
-
-8/8 registered properties are present in shipped `.gam` level data (the rest are recognised tuning/wiring the levels don't currently set). Any `TYPE MISMATCH` would flag an extraction error — none expected.
-
-## Confidence
-
-Confidence: Medium
-
-Validation: Ghidra `DumpClass.java C3DDoorUpDown` (owned methods decompiled); `.gam` properties and assets resolved from the `InitObject` registrar calls with strings read directly from `Neutron.exe`. `.gam` value ranges cross-referenced via `docs/gam_schema.md`. Behavioral prose is derived from the decompiled bodies above; not runtime-validated.
+8/8 registered properties confirmed present in shipped `.gam` data for `3DUD`
+(`docs/gam_schema.md`), 0 type mismatches. Not runtime-validated.
 
 Open questions:
-- Confirm the gameplay semantics of the per-frame/owned override method(s) beyond the decompiled control flow.
-- Pin the constructor address and class-id immediate (FourCC).
+- Identify the inherited slide-update slot and confirm `OpenAmount`/`DoorSpeed`/
+  `OpenTime` integration (vertical translate via slot `0x318`/`0x334`?).
+- Resolve the `Next`/`ItemClosed` link semantics (chained doors, shared open state).
 
 ## Notes
 
-- Generated by `tools/gen_placeable_specs.py` from the Ghidra dump + PE string resolution. Decompiled bodies are included verbatim as primary evidence.
+- Evidence: `DumpClass.java C3DDoorUpDown /tmp/dumps2/decomp_C3DDoorUpDown.md`.
+  Hand-deepened (supersedes the generated skeleton). Door family with `C3DSwingDoor`
+  (owns its swing), `C3DSchoolDoor`, `C3DYokDoor`, `C3DGate1`.

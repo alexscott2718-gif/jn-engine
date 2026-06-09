@@ -6,120 +6,61 @@
 |---|---|
 | RTTI name | `C3DMusicTrigger` |
 | FourCC | `3MUS` |
-| Base chain | `C3DTriggerType -> C3DSprite -> OMediaCanvasElement -> OMediaElement -> OMediaWorldPosition -> OMediaWorldAngle -> OMediaElementContainer -> OMediaDBObject -> OMediaClassStreamer -> OMediaListener -> OMediaMessagePort -> CLocalGameObject -> CGameObject` |
-| Vftable(s) | `004a94c8, 004a94d8, 004a9928, 004a993c` |
-| Ctor(s) | factory/constructor installs the vftables and registers the class id (see `docs/_gam_classids.tsv`) |
-| Dtor(s) | inherited deleting destructor (none owned) |
+| Base chain | see `docs/decomp_ledger.csv` |
+| Ctor(s) | installs the vftables; `InitObject` (`vfunc_01_007` @ `00431c50`) registers the properties below |
+| Dtor(s) | inherited deleting destructor |
 | Ledger row | `docs/decomp_ledger.csv` |
 
-`C3DMusicTrigger` is a placeable **effects triggers nav cameras sound** object (family `effects_triggers_nav_cameras_sound`, wave 8). It walks the class vtable with 2 owned methods; its `.gam`-driven parameters and assets are registered in `InitObject` and listed below.
+`C3DMusicTrigger` is a **proximity music switch**: when the player enters its `Radius`
+(and the level prerequisites hold) it changes the background music to one of up to five
+indexed tracks from a `MusicDatabase`. It is a zone trigger for the audio system, the
+music counterpart to `CLoadLevel`'s level zones. Family
+`effects_triggers_nav_cameras_sound` (wave 8). **All 11 properties confirmed in shipped
+`.gam` data.**
 
 ## Field Map (registered `.gam` properties)
 
-Offsets are from the primary class pointer; types are the `.gam` serialization type ids (`1=string 2=flag4 3=float 4=raw4 6=int`).
-
-| Offset | Type | Property | Source |
+| Offset | Type | Property | Meaning |
 |---:|---|---|---|
-| `0x17d` | string | `MusicDatabase` | `InitObject` registrar (`vftable+0x3fc`) |
-| `0x196` | int | `MusicIndex0` | `InitObject` registrar (`vftable+0x3fc`) |
-| `0x197` | int | `MusicIndex1` | `InitObject` registrar (`vftable+0x3fc`) |
-| `0x198` | int | `MusicIndex2` | `InitObject` registrar (`vftable+0x3fc`) |
-| `0x199` | int | `MusicIndex3` | `InitObject` registrar (`vftable+0x3fc`) |
-| `0x19a` | int | `MusicIndex4` | `InitObject` registrar (`vftable+0x3fc`) |
-| `0x19b` | int | `TouchActivated` | `InitObject` registrar (`vftable+0x3fc`) |
-| `0xd` | float | `Radius` | `InitObject` registrar (`vftable+0x3fc`) |
-| `0x19c` | int | `RequiredLevel` | `InitObject` registrar (`vftable+0x3fc`) |
-| `0x19d` | int | `ExactLevel` | `InitObject` registrar (`vftable+0x3fc`) |
-| `0x19e` | int | `RemoveLevel` | `InitObject` registrar (`vftable+0x3fc`) |
-
-See `docs/gam_schema.md` for the per-FourCC value ranges/samples across all 35 levels (the field map, constants, and object wiring are data-driven from there).
+| `0x17d` | string | `MusicDatabase` | `.omt` music bank. |
+| `0x196`–`0x19a` | int | `MusicIndex0`…`MusicIndex4` | Up to five selectable track indices in `MusicDatabase`. |
+| `0x19b` | int | `TouchActivated` | State/mode gate (see update). |
+| `0x0d` | float | `Radius` | Proximity radius for activation. |
+| `0x19c` | int | `RequiredLevel` | Minimum progress gate. |
+| `0x19d` | int | `ExactLevel` | Exact-level gate. |
+| `0x19e` | int | `RemoveLevel` | Level at/after which the trigger is removed. |
 
 ## Vtable Methods (owned)
 
-| Slot | Address | Role | Behavior |
+| Slot | Address | Name | Behavior |
 |---|---|---|---|
-| `vfunc_01_007` | `00431c50` | InitObject (property + asset registration) | registers 11 `.gam` properties (`MusicDatabase`, `MusicIndex0`, `MusicIndex1`, `MusicIndex2`, `MusicIndex3`, `MusicIndex4`, `TouchActivated`, `Radius`, `RequiredLevel`, `ExactLevel`, `RemoveLevel`) |
-| `vfunc_01_259` | `00431d80` | owned override | see decompiled body — touches `TouchActivated` |
+| `vfunc_01_007` | `00431c50` | `InitObject` | Registers the 11 properties. |
+| `vfunc_01_259` | `00431d80` | `UpdateMusic` | Branches on `TouchActivated` (`this[0x19b]`) state `0`/`1` — arms then, on entry, switches music to the selected `MusicIndexN`. |
 
-### Decompiled owned methods
-
-**`vfunc_01_007` @ `00431c50`** — InitObject (property + asset registration)
-
-Interpreted: reads/writes registered properties `MusicDatabase`, `MusicIndex0`, `MusicIndex1`, `MusicIndex2`, `MusicIndex3`, `MusicIndex4`, `TouchActivated`, `Radius`, `RequiredLevel`, `ExactLevel`, `RemoveLevel`.
+### Behavior (interpreted)
 
 ```c
-void __thiscall C3DMusicTrigger::vfunc_01_007(C3DMusicTrigger *this)
-
-{
-  C3DTriggerType::vfunc_01_007((C3DTriggerType *)this);
-  (**(code **)(this->vftable + 0x3fc))(s_MusicDatabase_004efef8,this + 0x17d,1,0);
-  (**(code **)(this->vftable + 0x3fc))(s_MusicIndex0_004efeec,this + 0x196,6,0);
-  (**(code **)(this->vftable + 0x3fc))(s_MusicIndex1_004efee0,this + 0x197,6,0);
-  (**(code **)(this->vftable + 0x3fc))(s_MusicIndex2_004efed4,this + 0x198,6,0);
-  (**(code **)(this->vftable + 0x3fc))(s_MusicIndex3_004efec8,this + 0x199,6,0);
-  (**(code **)(this->vftable + 0x3fc))(s_MusicIndex4_004efebc,this + 0x19a,6,0);
-  (**(code **)(this->vftable + 0x3fc))(s_TouchActivated_004ecdf8,this + 0x19b,6,0);
-  (**(code **)(this->vftable + 0x3fc))(s_Radius_004eccbc,this + 0xd,3,0);
-  (**(code **)(this->vftable + 0x3fc))(s_RequiredLevel_004ed294,this + 0x19c,6,0);
-  (**(code **)(this->vftable + 0x3fc))(s_ExactLevel_004ed288,this + 0x19d,6,0);
-  (**(code **)(this->vftable + 0x3fc))(s_RemoveLevel_004ed27c,this + 0x19e,6,0);
-  return;
-}
+C3DMusicTrigger::UpdateMusic():              // vfunc_01_259 @ 00431d80
+    state = TouchActivated (this[0x19b])
+    if state == 0: ... (armed / waiting for player within Radius)
+    if state == 1: ... (player inside -> select MusicIndexN from MusicDatabase, play)
 ```
 
-**`vfunc_01_259` @ `00431d80`** — owned override
-
-Interpreted: reads/writes registered property `TouchActivated`.
-
-```c
-void __thiscall C3DMusicTrigger::vfunc_01_259(C3DMusicTrigger *this)
-
-{
-  C3DSprite::vfunc_01_259((C3DSprite *)this);
-  if (this[0x19b].vftable == (undefined *)0x0) {
-    (**(code **)(this->vftable + 0x224))(0);
-  }
-  if (this[0x19b].vftable == (undefined *)0x1) {
-    (**(code **)(this->vftable + 0x224))(1);
-  }
-  return;
-}
-```
-
-## Assets
-
-No direct ASE/PNG/anim references in `InitObject` (inherited visual path or runtime-assigned).
+The five `MusicIndex` slots let one trigger pick a track conditionally (e.g. by
+progress); `RequiredLevel`/`ExactLevel`/`RemoveLevel` gate whether the trigger is live.
 
 ## Validation
 
-Registered properties cross-checked against the shipped `.gam` data for FourCC `3MUS` (`docs/gam_schema.md`):
-
-| Property | Status | Detail |
-|---|---|---|
-| `MusicDatabase` | confirmed in .gam | range/samples: "musicarea51.omt", "musicneighborhood.omt", "musicschoolrace.omt", "musicship.om |
-| `MusicIndex0` | confirmed in .gam | range/samples: -1 … 1 |
-| `MusicIndex1` | confirmed in .gam | range/samples: -1 … -1 |
-| `MusicIndex2` | confirmed in .gam | range/samples: -1 … 2 |
-| `MusicIndex3` | confirmed in .gam | range/samples: -1 … -1 |
-| `MusicIndex4` | confirmed in .gam | range/samples: -1 … 1 |
-| `TouchActivated` | confirmed in .gam | range/samples: 0 … 1 |
-| `Radius` | confirmed in .gam | range/samples: 1 … 500 |
-| `RequiredLevel` | confirmed in .gam | range/samples: 0 … 140 |
-| `ExactLevel` | confirmed in .gam | range/samples: 0 … 231 |
-| `RemoveLevel` | confirmed in .gam | range/samples: -1044667134 … 125 |
-
-11/11 registered properties are present in shipped `.gam` level data (the rest are recognised tuning/wiring the levels don't currently set). Any `TYPE MISMATCH` would flag an extraction error — none expected.
-
-## Confidence
-
-Confidence: Medium
-
-Validation: Ghidra `DumpClass.java C3DMusicTrigger` (owned methods decompiled); `.gam` properties and assets resolved from the `InitObject` registrar calls with strings read directly from `Neutron.exe`. `.gam` value ranges cross-referenced via `docs/gam_schema.md`. Behavioral prose is derived from the decompiled bodies above; not runtime-validated.
+11/11 registered properties confirmed present in shipped `.gam` data for `3MUS`
+(`docs/gam_schema.md`), 0 type mismatches. Not runtime-validated.
 
 Open questions:
-- Confirm the gameplay semantics of the per-frame/owned override method(s) beyond the decompiled control flow.
-- Pin the constructor address and class-id immediate (FourCC).
+- Decode which of `MusicIndex0..4` is chosen and on what condition.
+- Confirm the proximity test (inherited collision vs. distance to player) and the
+  `TouchActivated` state transitions.
 
 ## Notes
 
-- Generated by `tools/gen_placeable_specs.py` from the Ghidra dump + PE string resolution. Decompiled bodies are included verbatim as primary evidence.
+- Evidence: `DumpClass.java C3DMusicTrigger /tmp/dumps2/decomp_C3DMusicTrigger.md`.
+  Hand-deepened (supersedes the generated skeleton). Audio-zone sibling of `CLoadLevel`
+  and `C3DSoundEffect`.
