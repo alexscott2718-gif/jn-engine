@@ -15,6 +15,14 @@ typedef struct {
     const char *sprite_path;
     float       sprite_size;
     float       tint_r, tint_g, tint_b, tint_a;
+    /* Re-center an absolute-positioned mesh onto the entity. The OMT->GLB
+       placement meshes under assets/glb/omt/<level>/ bake their absolute world
+       Y (and sometimes X/Z) into the vertices — correct for the static
+       placement layer, but as an *entity* mesh they would render thousands of
+       units from the object. When recenter=1 the draw path offsets the mesh by
+       its own bbox center so the mesh sits at the entity's (x,y,z). Leave 0 for
+       origin-centered meshes (the assets/glb/ase mirror, top-level glb/omt). */
+    int         recenter;
 } EntityVisual;
 
 /* Resolve an entity's visual. Returns 1 if a definite override applied

@@ -196,7 +196,10 @@ static const TypeEntry TYPE_TABLE[] = {
        off a metal atlas — it rendered as a "wood" board. Use the OMT->GLB
        pipeline's real fan mesh (228 verts, embedded textures) instead. See the
        degenerate-ASE-stub note in docs/decomp / PROJECT_HISTORY. */
-    { "3FAN", { "assets/glb/omt/level5a/fan.glb", NULL, 1.0f, 0 } },
+    /* level5a/fan.glb is an absolute-positioned placement mesh (baked level5a
+       world Y ~= -3500); recenter it onto the 3FAN entity so it renders at the
+       authored fan position and spins there. */
+    { "3FAN", { "assets/glb/omt/level5a/fan.glb", NULL, 1.0f, 0, NULL, 0.0f, 0,0,0,0, 1 } },
     { "3SAI", { "assets/ase/omt/SailBoat.ASE",  NULL, 1.0f, 0 } },
     { "3SPH", { "assets/ase/omt/Sphere01.ASE",  NULL, 1.0f, 0 } },
 
@@ -243,7 +246,9 @@ static const TypeEntry TYPE_TABLE[] = {
     { "3NUM", { "assets/glb/grn/nummeyscooterbase.glb", NULL, 1.0f, 0 } }, /* Numey */
 
     /* Props (name-matched OMT/ASE meshes). */
-    { "3TES", { "assets/glb/omt/level6/tesla.glb", NULL, 1.0f, 0 } }, /* Tesla coil (GLB; ASE was 4-vert stub) */
+    /* Tesla coil. level6/tesla.glb is an absolute-positioned placement mesh
+       (baked level6 world Y ~= 838); recenter onto the entity. */
+    { "3TES", { "assets/glb/omt/level6/tesla.glb", NULL, 1.0f, 0, NULL, 0.0f, 0,0,0,0, 1 } }, /* GLB; ASE was 4-vert stub */
     { "3MOP", { "assets/ase/omt/block.ASE",      NULL, 1.0f, 0 } },  /* MovingPlatform */
     { "3MOR", { "assets/glb/omt/Box01.glb",      NULL, 1.0f, 0 } },  /* MovableRock (GLB; ASE was 4-vert stub) */
     { "3SHU", { "assets/glb/omt/BUSH01.glb",     NULL, 1.0f, 0 } },  /* Shrubbery (GLB; ASE was 6-vert stub) */

@@ -1085,6 +1085,16 @@ int main(int argc, char **argv) {
                     if (m) {
                         unsigned int tex = v.texture_path ? tex_cache_get(v.texture_path) : 0;
                         float sc = v.scale > 0.0f ? v.scale : 1.0f;
+                        /* Absolute-positioned placement meshes used as entity
+                           meshes bake their level world position into vertices;
+                           offset by the mesh bbox center so the mesh sits at the
+                           entity (x,y,z) instead of its baked level position. */
+                        float dx = e->x, dy = e->y, dz = e->z;
+                        if (v.recenter) {
+                            dx -= (m->min[0] + m->max[0]) * 0.5f * sc;
+                            dy -= (m->min[1] + m->max[1]) * 0.5f * sc;
+                            dz -= (m->min[2] + m->max[2]) * 0.5f * sc;
+                        }
                         /* Entity props are deliberately-chosen meshes; some
                            (gems, converted GRN props) are untextured flat-color
                            meshes. The global hide-untextured flag is for OMT
@@ -1100,10 +1110,10 @@ int main(int argc, char **argv) {
                         int spins = strncmp(e->type, "3FER", 4) == 0 ||
                                     strncmp(e->type, "3PEN", 4) == 0;
                         if (spins)
-                            renderer_draw_model_euler(m, tex, e->x, e->y, e->z,
+                            renderer_draw_model_euler(m, tex, dx, dy, dz,
                                                       e->ry, 0.0f, e->rz, sc);
                         else
-                            renderer_draw_model(m, tex, e->x, e->y, e->z, e->ry, sc);
+                            renderer_draw_model(m, tex, dx, dy, dz, e->ry, sc);
                         renderer_set_hide_untextured_groups(1);
                         continue;
                     }
