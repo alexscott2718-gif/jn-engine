@@ -5,108 +5,88 @@
 | Item | Value |
 |---|---|
 | RTTI name | `C3DCheckPoint` |
-| Base chain | `C3DSpriteType -> C3DSprite -> OMediaCanvasElement -> OMediaElement -> OMediaWorldPosition -> OMediaWorldAngle -> OMediaElementContainer -> OMediaDBObject -> OMediaClassStreamer -> OMediaListener -> OMediaMessagePort -> CLocalGameObject -> CGameObject` |
-| Vftable(s) | `00495998, 004959a8, 00495df8, 00495e0c` |
-| Ctor(s) | factory/constructor installs the vftables and registers the class id (see `docs/_gam_classids.tsv`) |
+| Base chain | `C3DSpriteType -> ... -> C3DPolygon -> ... -> CGameObject` (see `docs/decomp_ledger.csv`; update calls `C3DPolygon::vfunc_01_241`) |
+| Vftable(s) | see `docs/decomp_ledger.csv` |
+| Ctor(s) | installs the `C3DCheckPoint` vftables; `InitObject` registers the properties below |
 | Dtor(s) | inherited deleting destructor (none owned) |
 | Ledger row | `docs/decomp_ledger.csv` |
 
-`C3DCheckPoint` is a placeable **effects triggers nav cameras sound** object (family `effects_triggers_nav_cameras_sound`, wave 8). It walks the class vtable with 3 owned methods; its `.gam`-driven parameters and assets are registered in `InitObject` and listed below.
+`C3DCheckPoint` is a placeable **race checkpoint / finish line**: a polygon trigger
+volume used by the racing/timed levels. When it is the `FINISHLINE` and a race timer is
+active, it ends the race and draws the finish time on the HUD; otherwise it marks
+progress. Family `effects_triggers_nav_cameras_sound` (wave 8). It derives from the
+polygon/sprite trigger hierarchy (a flat crossable volume), not an animated mesh.
 
 ## Field Map (registered `.gam` properties)
 
-Offsets are from the primary class pointer; types are the `.gam` serialization type ids (`1=string 2=flag4 3=float 4=raw4 6=int`).
+Registered by `InitObject` (`vfunc_01_007`).
 
-| Offset | Type | Property | Source |
+| Offset | Type | Property | Meaning |
 |---:|---|---|---|
-| `0x161` | int | `CheckAvail` | `InitObject` registrar (`vftable+0x3fc`) |
-| `0x148` | string | `Next` | `InitObject` registrar (`vftable+0x3fc`) |
-
-See `docs/gam_schema.md` for the per-FourCC value ranges/samples across all 35 levels (the field map, constants, and object wiring are data-driven from there).
+| `0x161` | int | `CheckAvail` | Whether this checkpoint is currently active/armed. |
+| `0x148` | string | (name) | Checkpoint name/tag (`DAT_004edd18`); compared against `FINISHLINE`. |
+| `this[0x162]` | int | `time_seconds` | Race time component drawn on the HUD (printed `/2`). |
+| `this[0x163]` | int | `time_minutes` | Race time component drawn on the HUD (printed `/2`). |
+| `this+0xe8` | string | `point_name` | Runtime name compared (`__strcmpi`) against `FINISHLINE`. |
 
 ## Vtable Methods (owned)
 
-| Slot | Address | Role | Behavior |
-|---|---|---|---|
-| `vfunc_01_007` | `00414aa0` | InitObject (property + asset registration) | registers 2 `.gam` properties (`CheckAvail`, `Next`) |
-| `vfunc_01_241` | `00414410` | owned override | see decompiled body |
-| `vfunc_01_259` | `00414b20` | owned override | see decompiled body — touches `CheckAvail` |
+| Slot | Address | Name | Behavior | Status |
+|---:|---|---|---|---|
+| vtable 1 slot 7 | `00414aa0` | `InitObject` | Registers `CheckAvail` + the checkpoint name. | non-trivial |
+| vtable 1 slot 241 | `00414410` | `UpdateCheckPoint` | If gated by `FUN_00475ca0`, runs the polygon update; if this is the `FINISHLINE` and the race timer (`DAT_004eefc8`) is running, ends the race and draws the finish time. | non-trivial |
+| vtable 1 slot 259 | `00414b20` | `Reset` | Inherited sprite reset; re-arms when `CheckAvail` is clear. | non-trivial |
 
-### Decompiled owned methods
-
-**`vfunc_01_007` @ `00414aa0`** — InitObject (property + asset registration)
+### Per-frame behavior
 
 ```c
-void __thiscall C3DCheckPoint::vfunc_01_007(C3DCheckPoint *this)
-
-{
-  (**(code **)(this->vftable + 0x3fc))(s_CheckAvail_004edd20,this + 0x161,6,0);
-  (**(code **)(this->vftable + 0x3fc))(&DAT_004edd18,this + 0x148,1,0);
-  return;
-}
+C3DCheckPoint::UpdateCheckPoint():           // vfunc_01_241 @ 00414410
+    if not FUN_00475ca0(): return            // active-frame gate
+    C3DPolygon::Update()                     // crossing/trigger volume update
+    if strcmpi(point_name, "FINISHLINE") == 0:
+        if race_timer (DAT_004eefc8) > 0:
+            FUN_004073b0(1)                  // FINISH the race
+            draw_number(0x212, 0x39, fmt, time_minutes/2)   // FUN_00468660 HUD
+            draw_number(0x212, 0x58, fmt, time_seconds/2)
+            return
+        FUN_004073b0(0)                      // race not running
 ```
 
-**`vfunc_01_241` @ `00414410`** — owned override
+So the finish-line checkpoint watches the global race timer `DAT_004eefc8`: while it is
+positive it keeps the race "running" and renders the elapsed time at HUD coords; when it
+crosses, `FUN_004073b0(1)` finishes the race. Non-finish checkpoints just run the
+polygon crossing logic for progress.
 
-```c
-void __thiscall C3DCheckPoint::vfunc_01_241(C3DCheckPoint *this)
+## Constants And Wiring
 
-{
-  char cVar1;
-  int iVar2;
-  
-  cVar1 = FUN_00475ca0();
-  if (cVar1 != '\0') {
-    C3DPolygon::vfunc_01_241((C3DPolygon *)this);
-    iVar2 = __strcmpi((char *)(this + 0xe8),s_FINISHLINE_004edca4);
-    if (iVar2 == 0) {
-      if (0.0 < DAT_004eefc8) {
-        FUN_004073b0(1);
-        FUN_00468660(0x212,0x39,&PTR_LAB_004d4544,&DAT_004ec794,(int)this[0x163].vftable / 2);
-        FUN_00468660(0x212,0x58,&PTR_LAB_004d4544,&DAT_004ec794,(int)this[0x162].vftable / 2);
-        return;
-      }
-      FUN_004073b0(0);
-    }
-  }
-  return;
-}
-```
-
-**`vfunc_01_259` @ `00414b20`** — owned override
-
-```c
-void __thiscall C3DCheckPoint::vfunc_01_259(C3DCheckPoint *this)
-
-{
-  C3DSprite::vfunc_01_259((C3DSprite *)this);
-  if (this[0x161].vftable == (undefined *)0x0) {
-    FUN_00414b00();
-  }
-  else {
-    FUN_00414ae0();
-  }
-  this[0x163].vftable = (undefined *)0x0;
-  this[0x162].vftable = (undefined *)0x0;
-  FUN_00414b70();
-  return;
-}
-```
+| Item | Source | Notes |
+|---|---|---|
+| `CheckAvail` | `.gam` int | armed/active flag |
+| `FINISHLINE` | name match | special finish-line behavior |
+| Race timer | `DAT_004eefc8` | global elapsed-time counter |
+| Finish | `FUN_004073b0(1)` | ends the race |
+| HUD time | `FUN_00468660` at `(0x212, 0x39/0x58)` | minutes/seconds readout |
 
 ## Assets
 
-No direct ASE/PNG/anim references in `InitObject` (inherited visual path or runtime-assigned).
+Inherited sprite/polygon visual; no own ASE/PNG registered.
 
 ## Confidence
 
 Confidence: Medium
 
-Validation: Ghidra `DumpClass.java C3DCheckPoint` (owned methods decompiled); `.gam` properties and assets resolved from the `InitObject` registrar calls with strings read directly from `Neutron.exe`. `.gam` value ranges cross-referenced via `docs/gam_schema.md`. Behavioral prose is derived from the decompiled bodies above; not runtime-validated.
+Validation: Ghidra `DumpClass.java C3DCheckPoint` (`owned_methods=3`); the finish-line
+branch, race-timer gate, and HUD time draw are read directly from `UpdateCheckPoint`.
+Not runtime-validated.
 
 Open questions:
-- Confirm the gameplay semantics of the per-frame/owned override method(s) beyond the decompiled control flow.
-- Pin the constructor address and class-id immediate (FourCC).
+- Why are `time_minutes`/`time_seconds` printed `/2` — is the timer stored at double
+  resolution (half-seconds)?
+- Identify `FUN_004073b0` and `DAT_004eefc8` precisely (race state machine + timer).
+- Map non-finish checkpoint progress (does crossing one arm the next / update a lap?).
 
 ## Notes
 
-- Generated by `tools/gen_placeable_specs.py` from the Ghidra dump + PE string resolution. Decompiled bodies are included verbatim as primary evidence.
+- Evidence: `DumpClass.java C3DCheckPoint /tmp/dumps2/decomp_C3DCheckPoint.md`.
+- Hand-deepened from the decompiled bodies (supersedes the generated skeleton). The
+  timed-level finish mechanism; pairs with the VR/race `CLevelVR*` controllers.

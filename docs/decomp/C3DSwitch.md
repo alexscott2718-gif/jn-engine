@@ -6,90 +6,69 @@
 |---|---|
 | RTTI name | `C3DSwitch` |
 | Base chain | `C3DAnimated -> C3DObject -> OMedia3DMorphAnim -> OMedia3DShapeElement -> OMediaElement -> OMediaWorldPosition -> OMediaWorldAngle -> OMediaElementContainer -> OMediaDBObject -> OMediaClassStreamer -> OMediaListener -> OMediaMessagePort -> OMediaAnim -> CLocalGameObject -> CGameObject` |
-| Vftable(s) | `004b9324, 004b9334, 004b9784, 004b97c0, 004b97d4` |
-| Ctor(s) | factory/constructor installs the vftables and registers the class id (see `docs/_gam_classids.tsv`) |
-| Dtor(s) | inherited deleting destructor (none owned) |
+| Vftable(s) | see `docs/decomp_ledger.csv` |
+| Ctor(s) | installs the `C3DSwitch` vftables; `InitObject` registers the properties below |
+| Dtor(s) | inherited `C3DAnimated` deleting destructor (none owned) |
 | Ledger row | `docs/decomp_ledger.csv` |
 
-`C3DSwitch` is a placeable **mechanisms moving parts** object (family `mechanisms_moving_parts`, wave 6). It walks the class vtable with 2 owned methods; its `.gam`-driven parameters and assets are registered in `InitObject` and listed below.
+`C3DSwitch` is a placeable **switch / lever**: an animated object that holds a state and
+drives a linked target object (`SwitchObject`) when flipped, optionally toggling. It is
+the simplest stateful member of the activation graph — a persistent on/off control
+distinct from the momentary `C3DButton`. Family `mechanisms_moving_parts` (wave 6).
 
 ## Field Map (registered `.gam` properties)
 
-Offsets are from the primary class pointer; types are the `.gam` serialization type ids (`1=string 2=flag4 3=float 4=raw4 6=int`).
+Registered by `InitObject` (`vfunc_01_007`); types `1=string 6=int`.
 
-| Offset | Type | Property | Source |
+| Offset | Type | Property | Meaning |
 |---:|---|---|---|
-| `0x126` | int | `MyState` | `InitObject` registrar (`vftable+0x3fc`) |
-| `0x17f` | string | `SwitchObject` | `InitObject` registrar (`vftable+0x3fc`) |
-| `0x199` | int | `Toggle` | `InitObject` registrar (`vftable+0x3fc`) |
-
-See `docs/gam_schema.md` for the per-FourCC value ranges/samples across all 35 levels (the field map, constants, and object wiring are data-driven from there).
+| `0x126` | int | `MyState` | The switch's own current state (persisted on/off position). |
+| `0x17f` | string | `SwitchObject` | Tag of the target object this switch drives. |
+| `0x199` | int | `Toggle` | Toggle vs. set-state behavior when activated. |
 
 ## Vtable Methods (owned)
 
-| Slot | Address | Role | Behavior |
-|---|---|---|---|
-| `vfunc_01_007` | `00444cb0` | InitObject (property + asset registration) | registers 3 `.gam` properties (`MyState`, `SwitchObject`, `Toggle`); loads `switch.ase`, `switch.png`, `DEFAULT` |
-| `vfunc_01_010` | `00444c90` | post-init / per-frame logic | runs inherited per-frame logic then this class's update step |
+| Slot | Address | Name | Behavior | Status |
+|---:|---|---|---|---|
+| vtable 1 slot 7 | `00444cb0` | `InitObject` | Registers `MyState`, `SwitchObject`, `Toggle`; loads `switch.ase`/`switch.png` (anim `HIDEFAULT`/`DEFAULT`). | non-trivial |
+| vtable 1 slot 10 | `00444c90` | `Update` | Inherited per-frame hook (empty body — state is event-driven, not per-frame). | trivial |
 
-### Decompiled owned methods
+The flip is event-driven (player interaction / `ActivateObject` message via the
+inherited `C3DAnimated` path): on activation it updates `MyState` and pushes the new
+state to `SwitchObject` — toggling if `Toggle` is set. The `DEFAULT`/animation reflects
+the on/off pose.
 
-**`vfunc_01_007` @ `00444cb0`** — InitObject (property + asset registration)
+## Constants And Wiring
 
-```c
-void __thiscall C3DSwitch::vfunc_01_007(C3DSwitch *this)
-
-{
-  C3DSwitch *pCVar1;
-  CGameObject *this_00;
-  
-  (**(code **)(this->vftable + 0x3f8))(this,s_InitObject___004eca2c);
-  C3DAnimated::vfunc_01_007((C3DAnimated *)this);
-  (**(code **)(this->vftable + 0x3fc))(s_MyState_004f1078,this + 0x126,6,0);
-  (**(code **)(this->vftable + 0x3fc))(s_SwitchObject_004f1068,this + 0x17f,1,0);
-  (**(code **)(this->vftable + 0x3fc))(s_Toggle_004ed9f0,this + 0x199,6,0);
-  pCVar1 = this + -0x30;
-  (**(code **)(this[-0x30].vftable + 0x108))();
-  (**(code **)(pCVar1->vftable + 0xd8))(s_HIDEFAULT_004ed8e4,s_switch_ase_004f105c);
-  (**(code **)(pCVar1->vftable + 0xf0))(s_switch_png_004ed948,0);
-  (**(code **)(pCVar1->vftable + 0xf4))(this[0x12f].vftable,0);
-  (**(code **)(this->vftable + 0x110))(0x43960000);
-  (**(code **)(pCVar1->vftable + 0xe0))(s_DEFAULT_004ee39c,1);
-  CGameObject::vfunc_00_013(this_00);
-  return;
-}
-```
-
-**`vfunc_01_010` @ `00444c90`** — post-init / per-frame logic
-
-```c
-void __thiscall C3DSwitch::vfunc_01_010(C3DSwitch *this)
-
-{
-  CLocalGameObject::vfunc_00_010((CLocalGameObject *)this);
-  (**(code **)(this->vftable + 0x110))(0x430c0000);
-  return;
-}
-```
+| Item | Source | Notes |
+|---|---|---|
+| `MyState` | `.gam` int @ `0x126` | persisted switch position |
+| `SwitchObject` | `.gam` tag @ `0x17f` | driven target object |
+| `Toggle` | `.gam` int @ `0x199` | toggle vs. set |
 
 ## Assets
 
 | Kind | Name | Notes |
 |---|---|---|
-| ASE/anim | `switch.ase` | anim tag `HIDEFAULT` |
-| PNG texture | `switch.png` |  |
-| default anim | `DEFAULT` | flag 1 |
+| ASE model | `switch.ase` | anim `HIDEFAULT`. |
+| PNG texture | `switch.png` | paired texture. |
 
 ## Confidence
 
 Confidence: Medium
 
-Validation: Ghidra `DumpClass.java C3DSwitch` (owned methods decompiled); `.gam` properties and assets resolved from the `InitObject` registrar calls with strings read directly from `Neutron.exe`. `.gam` value ranges cross-referenced via `docs/gam_schema.md`. Behavioral prose is derived from the decompiled bodies above; not runtime-validated.
+Validation: Ghidra `DumpClass.java C3DSwitch`; the 3 properties + assets resolved from
+`InitObject`. The flip handler is on an inherited collision/message slot (the owned
+update is empty), so the exact `MyState`→`SwitchObject` push is inferred from the
+property set. Not runtime-validated.
 
 Open questions:
-- Confirm the gameplay semantics of the per-frame/owned override method(s) beyond the decompiled control flow.
-- Pin the constructor address and class-id immediate (FourCC).
+- Locate the inherited activation slot that flips `MyState` and pushes to
+  `SwitchObject` (confirm `Toggle` semantics).
+- Confirm whether the switch animation pose is driven directly from `MyState`.
 
 ## Notes
 
-- Generated by `tools/gen_placeable_specs.py` from the Ghidra dump + PE string resolution. Decompiled bodies are included verbatim as primary evidence.
+- Evidence: `DumpClass.java C3DSwitch /tmp/dumps2/decomp_C3DSwitch.md`.
+- Hand-deepened from the decompiled `InitObject` + property set (supersedes the
+  generated skeleton). Stateful sibling of the momentary `C3DButton`.

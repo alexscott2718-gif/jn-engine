@@ -6,111 +6,87 @@
 |---|---|
 | RTTI name | `C3DButton` |
 | Base chain | `C3DAnimated -> C3DObject -> OMedia3DMorphAnim -> OMedia3DShapeElement -> OMediaElement -> OMediaWorldPosition -> OMediaWorldAngle -> OMediaElementContainer -> OMediaDBObject -> OMediaClassStreamer -> OMediaListener -> OMediaMessagePort -> OMediaAnim -> CLocalGameObject -> CGameObject` |
-| Vftable(s) | `00493b50, 00493b60, 00493fb0, 00493fec, 00494000` |
-| Ctor(s) | factory/constructor installs the vftables and registers the class id (see `docs/_gam_classids.tsv`) |
-| Dtor(s) | inherited deleting destructor (none owned) |
+| Vftable(s) | `004b...` (see `docs/decomp_ledger.csv`) |
+| Ctor(s) | installs the `C3DButton` vftables; `InitObject` registers the properties below |
+| Dtor(s) | inherited `C3DAnimated` deleting destructor (none owned) |
 | Ledger row | `docs/decomp_ledger.csv` |
 
-`C3DButton` is a placeable **mechanisms moving parts** object (family `mechanisms_moving_parts`, wave 6). It walks the class vtable with 2 owned methods; its `.gam`-driven parameters and assets are registered in `InitObject` and listed below.
+`C3DButton` is a placeable **player-activated button** — the press-to-activate input of
+the `.gam` activation graph. When the player triggers it, it animates Up→Down, plays an
+"available"/"not-available" sound, and drives a target object (`ActivateButton`) into a
+new task state (`NewTaskState`) or toggles it (`Toggle`). It carries an RGB "lit" colour
+and its own Up/Down model+texture. Family `mechanisms_moving_parts` (wave 6).
 
 ## Field Map (registered `.gam` properties)
 
-Offsets are from the primary class pointer; types are the `.gam` serialization type ids (`1=string 2=flag4 3=float 4=raw4 6=int`).
+Registered by `InitObject` (`vfunc_01_007`); types `1=string 3=float 6=int`.
 
-| Offset | Type | Property | Source |
+| Offset | Type | Property | Meaning |
 |---:|---|---|---|
-| `0x17f` | float | `Red` | `InitObject` registrar (`vftable+0x3fc`) |
-| `0x180` | float | `Green` | `InitObject` registrar (`vftable+0x3fc`) |
-| `0x181` | float | `Blue` | `InitObject` registrar (`vftable+0x3fc`) |
-| `0x183` | int | `ButtonAvailable` | `InitObject` registrar (`vftable+0x3fc`) |
-| `0x184` | int | `NASound` | `InitObject` registrar (`vftable+0x3fc`) |
-| `0x185` | int | `AvailSound` | `InitObject` registrar (`vftable+0x3fc`) |
-| `0x186` | string | `ActivateButton` | `InitObject` registrar (`vftable+0x3fc`) |
-| `0x1ea` | int | `NewTaskState` | `InitObject` registrar (`vftable+0x3fc`) |
-| `0x1eb` | int | `Toggle` | `InitObject` registrar (`vftable+0x3fc`) |
-| `0x19f` | string | `Down.ase` | `InitObject` registrar (`vftable+0x3fc`) |
-| `0x1b8` | string | `Up.ase` | `InitObject` registrar (`vftable+0x3fc`) |
-| `0x1d1` | string | `UpDown.Png` | `InitObject` registrar (`vftable+0x3fc`) |
+| `0x17f` | float | `Red` | Lit-colour red component (registered via `PTR_DAT_004ed55c`). |
+| `0x180` | float | `Green` | Lit-colour green component. |
+| `0x181` | float | `Blue` | Lit-colour blue component (`DAT_004ed54c`). |
+| `0x183` | int | `ButtonAvailable` | Whether the button can currently be pressed (gates which sound + whether it activates). |
+| `0x184` | int | `NASound` | Sound played when pressed while **not** available. |
+| `0x185` | int | `AvailSound` | Sound played when pressed while available. |
+| `0x186` | string | `ActivateButton` | Tag of the target object this button activates. |
+| `0x1ea` | int | `NewTaskState` | Task state pushed to the target on activation. |
+| `0x1eb` | int | `Toggle` | Toggle vs. set-state mode for the activation. |
+| `0x19f` | string | `Down.ase` | Pressed-state model (also the `HIDOWN` anim source). |
+| `0x1b8` | string | `Up.ase` | Released-state model. |
+| `0x1d1` | string | `UpDown.Png` | Shared button texture. |
 
-See `docs/gam_schema.md` for the per-FourCC value ranges/samples across all 35 levels (the field map, constants, and object wiring are data-driven from there).
+See `docs/gam_schema.md` for the `.gam` `ActivateButton`/`NewTaskState`/`Toggle` values
+across levels — this is the data side of the activation graph.
 
 ## Vtable Methods (owned)
 
-| Slot | Address | Role | Behavior |
-|---|---|---|---|
-| `vfunc_01_007` | `004119d0` | InitObject (property + asset registration) | registers 12 `.gam` properties (`Red`, `Green`, `Blue`, `ButtonAvailable`, `NASound`, `AvailSound`, `ActivateButton`, `NewTaskState`, `Toggle`, `Down.ase`, `Up.ase`, `UpDown.Png`); loads `this + 0x19f`, `this + 0x1b8`, `this + 0x1d1`, `UP` |
-| `vfunc_01_257` | `00411ef0` | owned override | see decompiled body |
+| Slot | Address | Name | Behavior | Status |
+|---:|---|---|---|---|
+| vtable 1 slot 7 | `004119d0` | `InitObject` | Registers the 12 properties above; loads the `Down.ase` model under anim `HIDOWN`. | non-trivial |
+| vtable 1 slot 257 | `00411ef0` | `ResetShow` | Inherited reset; sets two scale slots (`0x110`, `0x264`) to `300.0` (`0x43960000`). | trivial |
 
-### Decompiled owned methods
+The press/activation itself runs through the inherited `C3DAnimated` collision +
+message path: when pressed, the button checks `ButtonAvailable`, plays `AvailSound` or
+`NASound`, swaps the Up/Down animation, and (if available) sends `NewTaskState`/`Toggle`
+to the `ActivateButton` target — the same `ActivateObject*`/`NewTaskState` mechanism
+documented in `docs/gam_schema.md` and used by `C3DAITrigger`.
 
-**`vfunc_01_007` @ `004119d0`** — InitObject (property + asset registration)
+## Constants And Wiring
 
-```c
-void __thiscall C3DButton::vfunc_01_007(C3DButton *this)
-
-{
-  C3DButton *pCVar1;
-  CGameObject *this_00;
-  
-  (**(code **)(this->vftable + 0x3f8))(this,s_InitObject___004eca2c);
-  C3DAnimated::vfunc_01_007((C3DAnimated *)this);
-  (**(code **)(this->vftable + 0x3fc))(&PTR_DAT_004ed55c,this + 0x17f,3,0);
-  (**(code **)(this->vftable + 0x3fc))(s_Green_004ed554,this + 0x180,3,0);
-  (**(code **)(this->vftable + 0x3fc))(&DAT_004ed54c,this + 0x181,3,0);
-  (**(code **)(this->vftable + 0x3fc))(s_ButtonAvailable_004eda2c,this + 0x183,6,0);
-  (**(code **)(this->vftable + 0x3fc))(s_NASound_004eda24,this + 0x184,6,0);
-  (**(code **)(this->vftable + 0x3fc))(s_AvailSound_004eda18,this + 0x185,6,0);
-  (**(code **)(this->vftable + 0x3fc))(s_ActivateButton_004eda08,this + 0x186,1,0);
-  (**(code **)(this->vftable + 0x3fc))(s_NewTaskState_004ed9f8,this + 0x1ea,6,0);
-  (**(code **)(this->vftable + 0x3fc))(s_Toggle_004ed9f0,this + 0x1eb,6,0);
-  (**(code **)(this->vftable + 0x3fc))(s_Down_ase_004ed9e4,this + 0x19f,1,0);
-  (**(code **)(this->vftable + 0x3fc))(s_Up_ase_004ed9dc,this + 0x1b8,1,0);
-  (**(code **)(this->vftable + 0x3fc))(s_UpDown_Png_004ed9d0,this + 0x1d1,1,0);
-  pCVar1 = this + -0x30;
-  (**(code **)(this[-0x30].vftable + 0x108))();
-  (**(code **)(pCVar1->vftable + 0xd8))(s_HIDOWN_004ed9c8,this + 0x19f);
-  (**(code **)(pCVar1->vftable + 0xd8))(&DAT_004ed9c0,this + 0x1b8);
-  (**(code **)(pCVar1->vftable + 0xf0))(this + 0x1d1,0);
-  (**(code **)(pCVar1->vftable + 0xf4))(this[0x12f].vftable,0);
-  (**(code **)(this->vftable + 0x110))(0x43960000);
-  (**(code **)(pCVar1->vftable + 0xe0))(&DAT_004ed9bc,1);
-  CGameObject::vfunc_00_013(this_00);
-  return;
-}
-```
-
-**`vfunc_01_257` @ `00411ef0`** — owned override
-
-```c
-void __thiscall C3DButton::vfunc_01_257(C3DButton *this)
-
-{
-  CLocalGameObject::vfunc_00_257((CLocalGameObject *)this);
-  (**(code **)(this->vftable + 0x110))(0x43960000);
-  (**(code **)(this->vftable + 0x264))(0x43960000);
-  return;
-}
-```
+| Item | Value | Evidence |
+|---|---|---|
+| Lit colour | `Red`/`Green`/`Blue` floats | `InitObject` |
+| Target | `ActivateButton` tag | `InitObject` |
+| Effect | `NewTaskState` / `Toggle` | task-state push to target |
+| Sounds | `AvailSound` / `NASound` | gated by `ButtonAvailable` |
+| Reset scale | `300.0` | `ResetShow` immediate `0x43960000` |
 
 ## Assets
 
 | Kind | Name | Notes |
 |---|---|---|
-| ASE/anim | `this + 0x19f` | anim tag `HIDOWN` |
-| ASE/anim | `this + 0x1b8` | anim tag `HIUP` |
-| PNG texture | `this + 0x1d1` |  |
-| default anim | `UP` | flag 1 |
+| ASE model | `Down.ase` (anim `HIDOWN`), `Up.ase` | pressed/released states (`.gam`-supplied). |
+| PNG texture | `UpDown.Png` | shared button texture. |
 
 ## Confidence
 
 Confidence: Medium
 
-Validation: Ghidra `DumpClass.java C3DButton` (owned methods decompiled); `.gam` properties and assets resolved from the `InitObject` registrar calls with strings read directly from `Neutron.exe`. `.gam` value ranges cross-referenced via `docs/gam_schema.md`. Behavioral prose is derived from the decompiled bodies above; not runtime-validated.
+Validation: Ghidra `DumpClass.java C3DButton`; all 12 properties + assets resolved from
+`InitObject` via PE strings. The activation effect (sound choice, Up/Down anim, target
+task-state push) is inferred from the property set + the shared `ActivateObject*`
+mechanism; the press handler itself lives on an inherited collision/message slot not
+owned here. Not runtime-validated.
 
 Open questions:
-- Confirm the gameplay semantics of the per-frame/owned override method(s) beyond the decompiled control flow.
-- Pin the constructor address and class-id immediate (FourCC).
+- Locate the inherited slot that handles the actual press (collision vs. `IsA`-gated
+  message) and confirm the `AvailSound`/`NASound` branch.
+- Confirm `Toggle` semantics vs. `NewTaskState` (mutually exclusive?).
 
 ## Notes
 
-- Generated by `tools/gen_placeable_specs.py` from the Ghidra dump + PE string resolution. Decompiled bodies are included verbatim as primary evidence.
+- Evidence: `DumpClass.java C3DButton /tmp/dumps2/decomp_C3DButton.md`.
+- Hand-deepened from the decompiled `InitObject` + property set (supersedes the
+  generated skeleton). Input side of the activation graph; pairs with `C3DSwitch`
+  (state toggle) and `C3DAITrigger` (general scripting).
