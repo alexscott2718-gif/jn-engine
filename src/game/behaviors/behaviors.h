@@ -19,6 +19,9 @@ extern const EntityVTable vt_fan;         /* 3FAN — C3DFan */
 extern const EntityVTable vt_switch;      /* 3SWI — C3DSwitch */
 extern const EntityVTable vt_geyser;      /* 3GEY — C3DGeyser */
 extern const EntityVTable vt_pendulum;    /* 3PEN — C3DPendulum */
+extern const EntityVTable vt_steamvent;   /* 3STE — C3DSteamVent */
+extern const EntityVTable vt_ferris;      /* 3FER — C3DFerris */
+extern const EntityVTable vt_tractor;     /* 3TRC — C3DTractorBeam */
 
 /* The currently-controlled player; resolved at spawn. NULL until first 3JIM resolved. */
 extern Entity *g_player;

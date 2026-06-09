@@ -36,6 +36,9 @@ static const EntityTypeInfo entity_types[] = {
     { "3GEY", "Geyser",                &vt_geyser    },
     { "3PEN", "Pendulum",              &vt_pendulum  },
     { "3GAT", "Gate",                  &vt_leveldoor },  /* C3DGate1: door-like */
+    { "3STE", "Steam vent",            &vt_steamvent },
+    { "3FER", "Ferris wheel",          &vt_ferris    },
+    { "3TRC", "Tractor beam",          &vt_tractor   },
     { NULL, NULL, NULL }
 };
 
