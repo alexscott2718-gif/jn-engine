@@ -167,7 +167,13 @@ int gam_load(World *w, const char *path) {
 
                 if      (strcmp(prop_name, "PositionX") == 0) e->x = fval;
                 else if (strcmp(prop_name, "PositionY") == 0) e->y = fval;
-                else if (strcmp(prop_name, "PositionZ") == 0) e->z = fval;
+                /* Z-handedness import: .gam authors PositionZ in the original
+                   game's left-handed world; the OMT placement layer is drawn
+                   with -z to convert to GL (the "diff fix"). Mirror entities the
+                   same way at the load boundary so the entity world (player,
+                   camera, physics, NPCs) shares one convention with the scenery
+                   instead of being reflected across z=0. */
+                else if (strcmp(prop_name, "PositionZ") == 0) e->z = -fval;
                 else if (strcmp(prop_name, "RotationX") == 0) e->rx = fval;
                 else if (strcmp(prop_name, "RotationY") == 0) e->ry = fval;
                 else if (strcmp(prop_name, "RotationZ") == 0) e->rz = fval;
