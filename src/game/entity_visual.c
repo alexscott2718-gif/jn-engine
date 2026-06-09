@@ -186,7 +186,11 @@ static const TypeEntry TYPE_TABLE[] = {
     /* Tier 4 — environment defaults sourced from OMT extraction (Phase 7). */
     { "3TRE", { "assets/ase/omt/tree01.ASE",    NULL, 1.0f, 0 } },
     { "3DIN", { "assets/ase/omt/dino.ASE",      NULL, 1.0f, 0 } },
-    { "3FAN", { "assets/ase/omt/fan.ASE",       "assets/png/fan.png", 1.0f, 0 } },
+    /* 3FAN: the old OMT->ASE export produced an 8-vert stub (fan.ASE) textured
+       off a metal atlas — it rendered as a "wood" board. Use the OMT->GLB
+       pipeline's real fan mesh (228 verts, embedded textures) instead. See the
+       degenerate-ASE-stub note in docs/decomp / PROJECT_HISTORY. */
+    { "3FAN", { "assets/glb/omt/level5a/fan.glb", NULL, 1.0f, 0 } },
     { "3SAI", { "assets/ase/omt/SailBoat.ASE",  NULL, 1.0f, 0 } },
     { "3SPH", { "assets/ase/omt/Sphere01.ASE",  NULL, 1.0f, 0 } },
 
