@@ -32,6 +32,10 @@ static const EntityTypeInfo entity_types[] = {
     { "3DUD", "Door up/down",          &vt_leveldoor },
     { "3SCD", "School door",           &vt_leveldoor },
     { "3FAN", "Fan",                   &vt_fan       },
+    { "3SWI", "Switch",                &vt_switch    },
+    { "3GEY", "Geyser",                &vt_geyser    },
+    { "3PEN", "Pendulum",              &vt_pendulum  },
+    { "3GAT", "Gate",                  &vt_leveldoor },  /* C3DGate1: door-like */
     { NULL, NULL, NULL }
 };
 

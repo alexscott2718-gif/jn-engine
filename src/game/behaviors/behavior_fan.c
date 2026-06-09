@@ -18,15 +18,16 @@
 
 static void fan_on_spawn(Entity *e, World *w) {
     (void)w;
-    e->user_float = 0.0f;   /* accumulated blade angle (deg) */
+    e->user_float = 0.0f;                       /* accumulated blade angle (deg) */
+    e->user_flag  = gam_prop_i(e, "FanOn", 1);  /* runtime on-state; a C3DSwitch
+                                                   targeting this fan toggles it */
 }
 
 static void fan_on_update(Entity *e, World *w, float dt) {
     (void)w;
-    int   fan_on    = gam_prop_i(e, "FanOn", 1);
     float fan_speed = gam_prop_f(e, "FanSpeed", 0.0f);
     float fan_range = gam_prop_f(e, "FanRange", 0.0f);
-    if (!fan_on || fan_speed <= 0.0f) return;
+    if (!e->user_flag || fan_speed <= 0.0f) return;
 
     /* Spin the blades. The fan's facing is its authored RotationY; we advance a
        roll the renderer applies to the mesh. */
