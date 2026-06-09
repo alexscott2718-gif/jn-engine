@@ -5,6 +5,7 @@
 | Item | Value |
 |---|---|
 | RTTI name | `C3DSmoke` |
+| FourCC | `3SM1` |
 | Base chain | `C3DSpriteType -> C3DSprite -> OMediaCanvasElement -> OMediaElement -> OMediaWorldPosition -> OMediaWorldAngle -> OMediaElementContainer -> OMediaDBObject -> OMediaClassStreamer -> OMediaListener -> OMediaMessagePort -> CLocalGameObject -> CGameObject` |
 | Vftable(s) | `004b4ef8, 004b4f08, 004b5358, 004b536c` |
 | Ctor(s) | factory/constructor installs the vftables and registers the class id (see `docs/_gam_classids.tsv`) |
@@ -45,6 +46,10 @@ C3DSmoke * __thiscall C3DSmoke::vfunc_02_002(C3DSmoke *this)
 ## Assets
 
 No direct ASE/PNG/anim references in `InitObject` (inherited visual path or runtime-assigned).
+
+## Validation
+
+No registered `.gam` properties to cross-check (inherited property set or runtime-created object).
 
 ## Confidence
 

@@ -5,6 +5,7 @@
 | Item | Value |
 |---|---|
 | RTTI name | `C3DSphere` |
+| FourCC | `3SPH` |
 | Base chain | `C3DObject -> OMedia3DMorphAnim -> OMedia3DShapeElement -> OMediaElement -> OMediaWorldPosition -> OMediaWorldAngle -> OMediaElementContainer -> OMediaDBObject -> OMediaClassStreamer -> OMediaListener -> OMediaMessagePort -> OMediaAnim -> CLocalGameObject -> CGameObject` |
 | Vftable(s) | `004d41cc, 004d41dc, 004d462c, 004d4668, 004d467c` |
 | Ctor(s) | factory/constructor installs the vftables and registers the class id (see `docs/_gam_classids.tsv`) |
@@ -203,6 +204,10 @@ LAB_00463d6b:
 ## Assets
 
 No direct ASE/PNG/anim references in `InitObject` (inherited visual path or runtime-assigned).
+
+## Validation
+
+No registered `.gam` properties to cross-check (inherited property set or runtime-created object).
 
 ## Confidence
 

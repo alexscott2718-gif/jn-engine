@@ -5,6 +5,7 @@
 | Item | Value |
 |---|---|
 | RTTI name | `C3DYokDoor` |
+| FourCC | `3DOR` |
 | Base chain | `C3DAnimated -> C3DObject -> OMedia3DMorphAnim -> OMedia3DShapeElement -> OMediaElement -> OMediaWorldPosition -> OMediaWorldAngle -> OMediaElementContainer -> OMediaDBObject -> OMediaClassStreamer -> OMediaListener -> OMediaMessagePort -> OMediaAnim -> CLocalGameObject -> CGameObject` |
 | Vftable(s) | `004bf5e4, 004bf5f4, 004bfa44, 004bfa80, 004bfa94` |
 | Ctor(s) | factory/constructor installs the vftables and registers the class id (see `docs/_gam_classids.tsv`) |
@@ -42,6 +43,8 @@ See `docs/gam_schema.md` for the per-FourCC value ranges/samples across all 35 l
 
 **`vfunc_01_007` @ `00449f70`** — InitObject (property + asset registration)
 
+Interpreted: reads/writes registered properties `ItemClosed`, `Next`, `DoorSpeed`, `OpenTime`, `OpenAmount`, `OmtDatabase`, `OmtIndex`.
+
 ```c
 void __thiscall C3DYokDoor::vfunc_01_007(C3DYokDoor *this)
 
@@ -66,6 +69,8 @@ void __thiscall C3DYokDoor::vfunc_01_007(C3DYokDoor *this)
 
 **`vfunc_01_010` @ `00449f10`** — post-init / per-frame logic
 
+Interpreted: reads/writes registered properties `ItemClosed`, `OpenAmount`; reads its transform/world position.
+
 ```c
 void __thiscall C3DYokDoor::vfunc_01_010(C3DYokDoor *this)
 
@@ -85,6 +90,8 @@ void __thiscall C3DYokDoor::vfunc_01_010(C3DYokDoor *this)
 ```
 
 **`vfunc_01_259` @ `0044a060`** — owned override
+
+Interpreted: reads/writes registered properties `OmtDatabase`, `OmtIndex`.
 
 ```c
 void __thiscall C3DYokDoor::vfunc_01_259(C3DYokDoor *this)
@@ -108,6 +115,8 @@ void __thiscall C3DYokDoor::vfunc_01_259(C3DYokDoor *this)
 ```
 
 **`vfunc_01_266` @ `0044a2a0`** — owned override
+
+Interpreted: reads/writes registered properties `Next`, `DoorSpeed`; type-checks an object via `IsA("C3DAITRIGGER")`; type-checks an object via `IsA("C3DCUTSCENECAMERA")`.
 
 ```c
 void __thiscall C3DYokDoor::vfunc_01_266(C3DYokDoor *this)
@@ -165,6 +174,22 @@ void __thiscall C3DYokDoor::vfunc_01_266(C3DYokDoor *this)
 ## Assets
 
 No direct ASE/PNG/anim references in `InitObject` (inherited visual path or runtime-assigned).
+
+## Validation
+
+Registered properties cross-checked against the shipped `.gam` data for FourCC `3DOR` (`docs/gam_schema.md`):
+
+| Property | Status | Detail |
+|---|---|---|
+| `ItemClosed` | confirmed in .gam | range/samples: 1 … 1 |
+| `Next` | confirmed in .gam | range/samples: "none" |
+| `DoorSpeed` | confirmed in .gam | range/samples: 0.5 … 5 |
+| `OpenTime` | confirmed in .gam | range/samples: 2 … 1e+05 |
+| `OpenAmount` | confirmed in .gam | range/samples: 0 … 600 |
+| `OmtDatabase` | confirmed in .gam | range/samples: "doors.omt", "objectslevel5a.omt" |
+| `OmtIndex` | confirmed in .gam | range/samples: 0 … 3 |
+
+7/7 registered properties are present in shipped `.gam` level data (the rest are recognised tuning/wiring the levels don't currently set). Any `TYPE MISMATCH` would flag an extraction error — none expected.
 
 ## Confidence
 

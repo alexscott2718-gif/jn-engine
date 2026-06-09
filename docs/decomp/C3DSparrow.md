@@ -5,6 +5,7 @@
 | Item | Value |
 |---|---|
 | RTTI name | `C3DSparrow` |
+| FourCC | `5VEL` |
 | Base chain | `C3DAI -> C3DAnimated -> C3DObject -> OMedia3DMorphAnim -> OMedia3DShapeElement -> OMediaElement -> OMediaWorldPosition -> OMediaWorldAngle -> OMediaElementContainer -> OMediaDBObject -> OMediaClassStreamer -> OMediaListener -> OMediaMessagePort -> OMediaAnim -> CLocalGameObject -> CGameObject` |
 | Vftable(s) | `004b64d8, 004b64e8, 004b6938, 004b6974, 004b6988` |
 | Ctor(s) | factory/constructor installs the vftables and registers the class id (see `docs/_gam_classids.tsv`) |
@@ -72,17 +73,21 @@ LAB_00441897:
 
 ## Assets
 
-| Kind | Name | Notes |
-|---|---|---|
-| ASE/anim | `vulture02.ase` | anim tag `HIWALK` |
-| ASE/anim | `vulture01.ase` | anim tag `HISTOP` |
-| ASE/anim | `sparrow2.ase` | anim tag `HIWALK` |
-| ASE/anim | `sparrow.ase` | anim tag `HISTOP` |
-| ASE/anim | `batsfly.ase` | anim tag `HIWALK` |
-| ASE/anim | `batstop.ase` | anim tag `HISTOP` |
-| PNG texture | `sparrow.png` |  |
-| PNG texture | `pcVar4` |  |
-| default anim | `WALK` | flag 1 |
+| Kind | Name | Present in `assets/` | Notes |
+|---|---|---|---|
+| ASE/anim | `vulture02.ase` | ✓ `vulture02.ASE` | anim tag `HIWALK` |
+| ASE/anim | `vulture01.ase` | ✓ `vulture01.ASE` | anim tag `HISTOP` |
+| ASE/anim | `sparrow2.ase` | ✓ `sparrow2.ASE` | anim tag `HIWALK` |
+| ASE/anim | `sparrow.ase` | ✓ `sparrow.ASE` | anim tag `HISTOP` |
+| ASE/anim | `batsfly.ase` | ✓ `batsfly.ASE` | anim tag `HIWALK` |
+| ASE/anim | `batstop.ase` | ✓ `batstop.ASE` | anim tag `HISTOP` |
+| PNG texture | `sparrow.png` | ✓ `sparrow.png` |  |
+| PNG texture | `pcVar4` | n/a |  |
+| default anim | `WALK` | n/a | flag 1 |
+
+## Validation
+
+FourCC `5VEL` has no rows in the 35-level `.gam` corpus (`docs/gam_schema.md`) — this object type is not placed in any shipped level, so there is no `.gam` data to cross-check against.
 
 ## Confidence
 

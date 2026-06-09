@@ -5,6 +5,7 @@
 | Item | Value |
 |---|---|
 | RTTI name | `C3DLabScreen` |
+| FourCC | `3SCR` |
 | Base chain | `C3DAnimated -> C3DObject -> OMedia3DMorphAnim -> OMedia3DShapeElement -> OMediaElement -> OMediaWorldPosition -> OMediaWorldAngle -> OMediaElementContainer -> OMediaDBObject -> OMediaClassStreamer -> OMediaListener -> OMediaMessagePort -> OMediaAnim -> CLocalGameObject -> CGameObject` |
 | Vftable(s) | `004a4b14, 004a4b24, 004a4f74, 004a4fb0, 004a4fc4` |
 | Ctor(s) | factory/constructor installs the vftables and registers the class id (see `docs/_gam_classids.tsv`) |
@@ -54,15 +55,19 @@ void __thiscall C3DLabScreen::vfunc_01_007(C3DLabScreen *this)
 
 ## Assets
 
-| Kind | Name | Notes |
-|---|---|---|
-| ASE/anim | `screen.ase` | anim tag `HIDEFAULT` |
-| PNG texture | `screen1.png` |  |
-| PNG texture | `screen0.png` |  |
-| PNG texture | `screen2.png` |  |
-| PNG texture | `screen3.png` |  |
-| PNG texture | `screen4.png` |  |
-| default anim | `DEFAULT` | flag 1 |
+| Kind | Name | Present in `assets/` | Notes |
+|---|---|---|---|
+| ASE/anim | `screen.ase` | ✓ `screen.ASE` | anim tag `HIDEFAULT` |
+| PNG texture | `screen1.png` | ✓ `screen1.png` |  |
+| PNG texture | `screen0.png` | ✓ `screen0.png` |  |
+| PNG texture | `screen2.png` | ✓ `screen2.png` |  |
+| PNG texture | `screen3.png` | ✓ `screen3.png` |  |
+| PNG texture | `screen4.png` | ✓ `screen4.png` |  |
+| default anim | `DEFAULT` | n/a | flag 1 |
+
+## Validation
+
+No registered `.gam` properties to cross-check (inherited property set or runtime-created object).
 
 ## Confidence
 

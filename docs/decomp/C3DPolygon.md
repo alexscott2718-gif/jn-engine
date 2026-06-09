@@ -5,6 +5,7 @@
 | Item | Value |
 |---|---|
 | RTTI name | `C3DPolygon` |
+| FourCC | `3POL` |
 | Base chain | `OMediaCanvasElement -> OMediaElement -> OMediaWorldPosition -> OMediaWorldAngle -> OMediaElementContainer -> OMediaDBObject -> OMediaClassStreamer -> OMediaListener -> OMediaMessagePort -> CLocalGameObject -> CGameObject` |
 | Vftable(s) | `004d36dc, 004d36ec, 004d3b3c, 004d3b50` |
 | Ctor(s) | factory/constructor installs the vftables and registers the class id (see `docs/_gam_classids.tsv`) |
@@ -202,6 +203,10 @@ LAB_00462f5d:
 ## Assets
 
 No direct ASE/PNG/anim references in `InitObject` (inherited visual path or runtime-assigned).
+
+## Validation
+
+FourCC `3POL` has no rows in the 35-level `.gam` corpus (`docs/gam_schema.md`) — this object type is not placed in any shipped level, so there is no `.gam` data to cross-check against.
 
 ## Confidence
 

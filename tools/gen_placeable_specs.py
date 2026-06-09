@@ -30,6 +30,12 @@ DECOMP = ROOT / "docs" / "decomp"
 LEDGER = ROOT / "docs" / "decomp_ledger.csv"
 
 PROP_TYPE = {"1": "string", "2": "flag4", "3": "float", "4": "raw4", "6": "int"}
+SCHEMA_TYPE = {"str": "string", "flag4": "flag4", "float": "float",
+               "raw4": "raw4", "int": "int"}
+GAM_SCHEMA = ROOT / "docs" / "gam_schema.md"
+ASE_DIR = ROOT / "assets" / "ase"
+PNG_DIR = ROOT / "assets" / "png"
+HAND_MARKER = "Hand-"                 # "Hand-written"/"Hand-deepened" -> protected
 
 # ---- PE virtual-address -> string -------------------------------------------
 _DATA = EXE.read_bytes()
@@ -166,6 +172,145 @@ def short_behavior(role, props, assets, code, all_props):
     return base
 
 
+# ---- validation inputs: FourCC map, .gam schema, assets ---------------------
+def _load_schema():
+    """class->fourcc (from the gam_schema FourCC<->class map) and
+    fourcc->{prop:(type,range)} (from the per-FourCC tables)."""
+    cls2fcc, schema = {}, {}
+    cur = None
+    in_map = False
+    for ln in GAM_SCHEMA.read_text().splitlines():
+        if ln.startswith("## FourCC") and "class map" in ln:
+            in_map = True
+            continue
+        if in_map:
+            m = re.match(r"\|\s*`(\w+)`\s*\|\s*([A-Za-z0-9_()]+)\s*\|", ln)
+            if m:
+                fcc, c = m.group(1), m.group(2).rstrip("()")
+                cls2fcc.setdefault(c, fcc)
+            if ln.startswith("## ") and "class map" not in ln:
+                in_map = False
+        m = re.match(r"### `(\w+)`", ln)
+        if m:
+            cur = m.group(1)
+            schema[cur] = {}
+        elif cur:
+            mm = re.match(r"\|\s*[^\|]*\|\s*`([^`]+)`\s*\|\s*(\w+)\s*\|\s*\d+\s*\|\s*(.+?)\s*\|", ln)
+            if mm:
+                schema[cur][mm.group(1)] = (mm.group(2), mm.group(3))
+    return cls2fcc, schema
+
+
+CLS2FCC, SCHEMA = _load_schema()
+CLASSIDS = ROOT / "docs" / "_gam_classids.tsv"
+
+
+def _load_registrars():
+    """(fourcc, registrar_fn_addr) pairs from the class-id scan, for matching a
+    class's InitObject to the nearest preceding class-id registrar."""
+    out = []
+    for ln in CLASSIDS.read_text().splitlines()[1:]:
+        p = ln.split()
+        if len(p) >= 4 and p[3].startswith("FUN_"):
+            try:
+                out.append((p[1], int(p[3][4:], 16)))
+            except ValueError:
+                pass
+    return sorted(out, key=lambda t: t[1])
+
+
+REGISTRARS = _load_registrars()
+
+
+def fourcc_for(cls, init_code, init_addr=None):
+    """Resolve a class's FourCC: gam_schema map -> class-id immediate in
+    InitObject -> nearest preceding class-id registrar address."""
+    if cls in CLS2FCC:
+        return CLS2FCC[cls]
+    m = re.search(r"0x([0-9a-f]{8})\)", init_code or "")
+    if m:
+        b = bytes.fromhex(m.group(1))
+        if all(0x20 <= c < 0x7f for c in b):
+            return b[::-1].decode("latin-1")
+    if init_addr is not None:
+        best = None
+        for fcc, addr in REGISTRARS:
+            if addr <= init_addr and init_addr - addr < 0x800:
+                best = fcc            # nearest preceding within window
+        if best:
+            return best
+    return None
+
+
+def asset_exists(name):
+    if not name:
+        return None
+    stem = name.rsplit(".", 1)[0].lower()
+    ext = name.rsplit(".", 1)[-1].lower() if "." in name else ""
+    d = ASE_DIR if ext == "ase" else PNG_DIR if ext == "png" else None
+    if d is None or not d.exists():
+        return None
+    for f in d.iterdir():
+        if f.stem.lower() == stem:
+            return f.name
+    return False
+
+
+def validate_props(props, fourcc):
+    """Cross-check each registered property against the real .gam schema for
+    this FourCC. Returns list of (prop, status, detail)."""
+    sch = SCHEMA.get(fourcc, {})
+    out = []
+    for name, off, typ in props:
+        if not name:
+            continue
+        if name in sch:
+            stype, rng = sch[name]
+            tmatch = SCHEMA_TYPE.get(stype, stype) == typ
+            detail = f"range/samples: {rng}" + ("" if tmatch else f" — TYPE MISMATCH (schema {stype})")
+            out.append((name, "confirmed in .gam", detail))
+        else:
+            out.append((name, "registered, unused in shipped .gam", ""))
+    return out
+
+
+# ---- idiom annotation of decompiled bodies ----------------------------------
+def annotate(code):
+    """Human-readable bullets for recognised idioms in a decompiled body."""
+    bullets = []
+    for m in re.finditer(r"\+ 0x18\)\)\((s_\w+?_[0-9a-f]{6,8}|&?DAT_[0-9a-f]+)", code):
+        nm = tok_str(m.group(1))
+        bullets.append(f"type-checks an object via `IsA(\"{nm}\")`")
+    if re.search(r"\+ 0x334\)\)\(", code):
+        bullets.append("applies a rotation (world-angle slot `0x334`)")
+    if re.search(r"\+ 0x318\)\)\(", code):
+        bullets.append("sets world position (slot `0x318`)")
+    if re.search(r"\+ 0x164\)\)\(|\+ 0x310\)\)\(", code):
+        bullets.append("reads its transform/world position")
+    if re.search(r"\bFUN_00458980\(", code):
+        bullets.append("plays a sound effect (`FUN_00458980`)")
+    if re.search(r"\bFUN_00468660\(", code):
+        bullets.append("draws a HUD number/text (`FUN_00468660`)")
+    if re.search(r"\+ 0x54\)\)\(", code):
+        bullets.append("fires an enter/activate action (slot `0x54`)")
+    if re.search(r"\+ 0x58\)\)\(", code):
+        bullets.append("fires an exit/deactivate action (slot `0x58`)")
+    if re.search(r"\* in_stack_00000004|in_stack_00000004 \*", code):
+        bullets.append("scales a value by frame `dt` (per-frame integration)")
+    for m in re.finditer(r"register_object\(0x([0-9a-f]{8})", code):
+        b = bytes.fromhex(m.group(1))[::-1].decode("latin-1", "replace")
+        bullets.append(f"registers an OMT database object FourCC `{b}`")
+    for m in re.finditer(r"__strcmpi\([^,]+,\s*(s_\w+?_[0-9a-f]{6,8})", code):
+        bullets.append(f"compares a name against `{tok_str(m.group(1))}`")
+    # de-dup, preserve order
+    seen, uniq = set(), []
+    for b in bullets:
+        if b not in seen:
+            seen.add(b)
+            uniq.append(b)
+    return uniq
+
+
 def render(cls, row):
     d = parse_dump(cls)
     base = d["base"] or row["base_chain"]
@@ -175,9 +320,13 @@ def render(cls, row):
     init = next((m for m in methods if role_of(m["code"]).startswith("InitObject")), None)
     props, assets = parse_init(init["code"]) if init else ([], [])
     dtor = next((m for m in methods if role_of(m["code"]) == "scalar deleting destructor"), None)
+    fourcc = fourcc_for(cls, init["code"] if init else "",
+                        int(init["addr"], 16) if init else None)
 
     L = [f"# {cls}\n", "## Identity\n", "| Item | Value |", "|---|---|",
          f"| RTTI name | `{cls}` |",
+         (f"| FourCC | `{fourcc}` |" if fourcc else
+          "| FourCC | (not resolved; not a `.gam`-placed object or id unmapped) |"),
          f"| Base chain | `{base}` |",
          f"| Vftable(s) | {', '.join('`'+v+'`' for v in vft.split(';') if v)} |",
          "| Ctor(s) | factory/constructor installs the vftables and registers the "
@@ -227,21 +376,55 @@ def render(cls, row):
         L.append("### Decompiled owned methods\n")
         for m in methods:
             L.append(f"**`{m['vfunc']}` @ `{m['addr']}`** — {role_of(m['code'])}\n")
+            bul = annotate(m["code"])
+            tp = touched_props(m["code"], props)
+            if tp:
+                bul = [f"reads/writes registered propert"
+                       f"{'ies' if len(tp) != 1 else 'y'} "
+                       + ", ".join(f"`{t}`" for t in tp)] + bul
+            if bul:
+                L.append("Interpreted: " + "; ".join(bul) + ".\n")
             L.append("```c\n" + m["code"] + "\n```\n")
     else:
         L.append("No owned vtable methods; all behavior inherited.\n")
 
-    # Assets
+    # Assets (with existence check against the extracted asset tree)
     L.append("## Assets\n")
     if assets:
-        L.append("| Kind | Name | Notes |")
-        L.append("|---|---|---|")
+        L.append("| Kind | Name | Present in `assets/` | Notes |")
+        L.append("|---|---|---|---|")
         for kind, name, note in assets:
-            L.append(f"| {kind} | `{name}` | {note} |")
+            ex = asset_exists(name)
+            mark = "✓ `%s`" % ex if ex else ("— (not found)" if ex is False else "n/a")
+            L.append(f"| {kind} | `{name}` | {mark} | {note} |")
         L.append("")
     else:
         L.append("No direct ASE/PNG/anim references in `InitObject` "
                  "(inherited visual path or runtime-assigned).\n")
+
+    # Validation — cross-check registered props against the real .gam data
+    L.append("## Validation\n")
+    checks = validate_props(props, fourcc) if (props and fourcc) else []
+    if checks:
+        L.append(f"Registered properties cross-checked against the shipped `.gam` data "
+                 f"for FourCC `{fourcc}` (`docs/gam_schema.md`):\n")
+        L.append("| Property | Status | Detail |")
+        L.append("|---|---|---|")
+        for name, status, detail in checks:
+            L.append(f"| `{name}` | {status} | {detail} |")
+        L.append("")
+        nconf = sum(1 for _, s, _ in checks if s.startswith("confirmed"))
+        L.append(f"{nconf}/{len(checks)} registered properties are present in shipped "
+                 f"`.gam` level data (the rest are recognised tuning/wiring the levels "
+                 f"don't currently set). Any `TYPE MISMATCH` would flag an extraction "
+                 f"error — none expected.\n")
+    elif fourcc and fourcc not in SCHEMA:
+        L.append(f"FourCC `{fourcc}` has no rows in the 35-level `.gam` corpus "
+                 f"(`docs/gam_schema.md`) — this object type is not placed in any "
+                 f"shipped level, so there is no `.gam` data to cross-check against.\n")
+    else:
+        L.append("No registered `.gam` properties to cross-check (inherited property "
+                 "set or runtime-created object).\n")
 
     # Confidence
     has_behavior = any(not role_of(m["code"]).startswith(("InitObject", "scalar"))
@@ -266,24 +449,26 @@ def render(cls, row):
 
 
 def main():
-    args = sys.argv[1:]
+    args = [a for a in sys.argv[1:] if a != "--force"]
+    force = "--force" in sys.argv
     ledger = {r["class"]: r for r in csv.DictReader(open(LEDGER))}
-    if args == ["--all-todo"]:
-        classes = [c for c, r in ledger.items()
-                   if r["status"] == "todo" and (DUMPS / f"decomp_{c}.md").exists()]
+    if args == ["--all-generated"]:
+        # every placed class with a dump, EXCEPT hand-written specs.
+        classes = [c for c in ledger if (DUMPS / f"decomp_{c}.md").exists()]
     else:
         classes = args
-    n = 0
+    n = skipped = 0
     for c in classes:
-        if c not in ledger:
-            print(f"  skip {c}: not in ledger")
+        if c not in ledger or not (DUMPS / f"decomp_{c}.md").exists():
             continue
-        if not (DUMPS / f"decomp_{c}.md").exists():
-            print(f"  skip {c}: no dump")
+        out = DECOMP / f"{c}.md"
+        if not force and out.exists() and HAND_MARKER in out.read_text():
+            skipped += 1
             continue
-        (DECOMP / f"{c}.md").write_text(render(c, ledger[c]))
+        out.write_text(render(c, ledger[c]))
         n += 1
-    print(f"wrote {n} placeable specs -> {DECOMP.relative_to(ROOT)}/")
+    print(f"wrote {n} specs -> {DECOMP.relative_to(ROOT)}/"
+          f" (protected {skipped} hand-written)")
 
 
 if __name__ == "__main__":

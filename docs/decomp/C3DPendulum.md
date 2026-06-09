@@ -5,6 +5,7 @@
 | Item | Value |
 |---|---|
 | RTTI name | `C3DPendulum` |
+| FourCC | `3PEN` |
 | Base chain | `C3DAnimated -> C3DObject -> OMedia3DMorphAnim -> OMedia3DShapeElement -> OMediaElement -> OMediaWorldPosition -> OMediaWorldAngle -> OMediaElementContainer -> OMediaDBObject -> OMediaClassStreamer -> OMediaListener -> OMediaMessagePort -> OMediaAnim -> CLocalGameObject -> CGameObject` |
 | Vftable(s) | `004ad42c, 004ad43c, 004ad88c, 004ad8c8, 004ad8dc` |
 | Ctor(s) | factory/constructor installs the vftables and registers the class id (see `docs/_gam_classids.tsv`) |
@@ -33,6 +34,8 @@ See `docs/gam_schema.md` for the per-FourCC value ranges/samples across all 35 l
 
 **`vfunc_01_007` @ `00435160`** — InitObject (property + asset registration)
 
+Interpreted: reads/writes registered property `SwingHeight`.
+
 ```c
 void __thiscall C3DPendulum::vfunc_01_007(C3DPendulum *this)
 
@@ -57,11 +60,21 @@ void __thiscall C3DPendulum::vfunc_01_007(C3DPendulum *this)
 
 ## Assets
 
-| Kind | Name | Notes |
+| Kind | Name | Present in `assets/` | Notes |
+|---|---|---|---|
+| ASE/anim | `chain.ase` | ✓ `chain.ASE` | anim tag `HIDEFAULT` |
+| PNG texture | `chain.png` | ✓ `chain.png` |  |
+| default anim | `DEFAULT` | n/a | flag 1 |
+
+## Validation
+
+Registered properties cross-checked against the shipped `.gam` data for FourCC `3PEN` (`docs/gam_schema.md`):
+
+| Property | Status | Detail |
 |---|---|---|
-| ASE/anim | `chain.ase` | anim tag `HIDEFAULT` |
-| PNG texture | `chain.png` |  |
-| default anim | `DEFAULT` | flag 1 |
+| `SwingHeight` | confirmed in .gam | range/samples: 15 … 25 |
+
+1/1 registered properties are present in shipped `.gam` level data (the rest are recognised tuning/wiring the levels don't currently set). Any `TYPE MISMATCH` would flag an extraction error — none expected.
 
 ## Confidence
 

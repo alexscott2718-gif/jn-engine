@@ -5,6 +5,7 @@
 | Item | Value |
 |---|---|
 | RTTI name | `C3DArrow` |
+| FourCC | `3ARR` |
 | Base chain | `C3DSpriteType -> C3DSprite -> OMediaCanvasElement -> OMediaElement -> OMediaWorldPosition -> OMediaWorldAngle -> OMediaElementContainer -> OMediaDBObject -> OMediaClassStreamer -> OMediaListener -> OMediaMessagePort -> CLocalGameObject -> CGameObject` |
 | Vftable(s) | `00490940, 00490950, 00490da0, 00490db4` |
 | Ctor(s) | factory/constructor installs the vftables and registers the class id (see `docs/_gam_classids.tsv`) |
@@ -35,6 +36,8 @@ See `docs/gam_schema.md` for the per-FourCC value ranges/samples across all 35 l
 ### Decompiled owned methods
 
 **`vfunc_01_007` @ `0040f4f0`** — InitObject (property + asset registration)
+
+Interpreted: reads/writes registered properties `RequiredTask`, `RequiredLevel`, `ExactLevel`.
 
 ```c
 void __thiscall C3DArrow::vfunc_01_007(C3DArrow *this)
@@ -70,6 +73,18 @@ void __thiscall C3DArrow::vfunc_01_264(C3DArrow *this)
 ## Assets
 
 No direct ASE/PNG/anim references in `InitObject` (inherited visual path or runtime-assigned).
+
+## Validation
+
+Registered properties cross-checked against the shipped `.gam` data for FourCC `3ARR` (`docs/gam_schema.md`):
+
+| Property | Status | Detail |
+|---|---|---|
+| `RequiredTask` | confirmed in .gam | range/samples: "Scene", "none", "scene" |
+| `RequiredLevel` | confirmed in .gam | range/samples: 0 … 500 |
+| `ExactLevel` | confirmed in .gam | range/samples: -1 … -1 |
+
+3/3 registered properties are present in shipped `.gam` level data (the rest are recognised tuning/wiring the levels don't currently set). Any `TYPE MISMATCH` would flag an extraction error — none expected.
 
 ## Confidence
 

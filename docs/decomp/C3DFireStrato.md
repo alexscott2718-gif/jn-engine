@@ -5,6 +5,7 @@
 | Item | Value |
 |---|---|
 | RTTI name | `C3DFireStrato` |
+| FourCC | (not resolved; not a `.gam`-placed object or id unmapped) |
 | Base chain | `C3DAnimated -> C3DObject -> OMedia3DMorphAnim -> OMedia3DShapeElement -> OMediaElement -> OMediaWorldPosition -> OMediaWorldAngle -> OMediaElementContainer -> OMediaDBObject -> OMediaClassStreamer -> OMediaListener -> OMediaMessagePort -> OMediaAnim -> CLocalGameObject -> CGameObject` |
 | Vftable(s) | `0049bdc4, 0049bdd4, 0049c224, 0049c260, 0049c274` |
 | Ctor(s) | factory/constructor installs the vftables and registers the class id (see `docs/_gam_classids.tsv`) |
@@ -27,6 +28,8 @@ No own `.gam` properties registered in `InitObject` (inherits its parent's prope
 
 **`vfunc_01_010` @ `004194d0`** — post-init / per-frame logic
 
+Interpreted: fires an exit/deactivate action (slot `0x58`).
+
 ```c
 void __thiscall C3DFireStrato::vfunc_01_010(C3DFireStrato *this)
 
@@ -40,6 +43,10 @@ void __thiscall C3DFireStrato::vfunc_01_010(C3DFireStrato *this)
 ## Assets
 
 No direct ASE/PNG/anim references in `InitObject` (inherited visual path or runtime-assigned).
+
+## Validation
+
+No registered `.gam` properties to cross-check (inherited property set or runtime-created object).
 
 ## Confidence
 

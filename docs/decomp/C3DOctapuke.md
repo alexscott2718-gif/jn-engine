@@ -5,6 +5,7 @@
 | Item | Value |
 |---|---|
 | RTTI name | `C3DOctapuke` |
+| FourCC | `3OCT` |
 | Base chain | `C3DAnimated -> C3DObject -> OMedia3DMorphAnim -> OMedia3DShapeElement -> OMediaElement -> OMediaWorldPosition -> OMediaWorldAngle -> OMediaElementContainer -> OMediaDBObject -> OMediaClassStreamer -> OMediaListener -> OMediaMessagePort -> OMediaAnim -> CLocalGameObject -> CGameObject` |
 | Vftable(s) | `004abdc8, 004abdd8, 004ac228, 004ac264, 004ac278` |
 | Ctor(s) | factory/constructor installs the vftables and registers the class id (see `docs/_gam_classids.tsv`) |
@@ -35,6 +36,8 @@ See `docs/gam_schema.md` for the per-FourCC value ranges/samples across all 35 l
 
 **`vfunc_01_007` @ `00434050`** — InitObject (property + asset registration)
 
+Interpreted: reads/writes registered property `StartPoint`.
+
 ```c
 void __thiscall C3DOctapuke::vfunc_01_007(C3DOctapuke *this)
 
@@ -59,6 +62,8 @@ void __thiscall C3DOctapuke::vfunc_01_007(C3DOctapuke *this)
 ```
 
 **`vfunc_01_016` @ `004343a0`** — owned override
+
+Interpreted: type-checks an object via `IsA("C3DJIMMY")`.
 
 ```c
 void __thiscall C3DOctapuke::vfunc_01_016(C3DOctapuke *this)
@@ -136,12 +141,22 @@ C3DOctapuke * __thiscall C3DOctapuke::vfunc_03_002(C3DOctapuke *this)
 
 ## Assets
 
-| Kind | Name | Notes |
+| Kind | Name | Present in `assets/` | Notes |
+|---|---|---|---|
+| ASE/anim | `octo.ase` | ✓ `octo.ASE` | anim tag `HIDEFAULT` |
+| ASE/anim | `octostop.ase` | ✓ `octostop.ASE` | anim tag `HISTOP` |
+| PNG texture | `octapuke1.png` | ✓ `octapuke1.png` |  |
+| default anim | `DEFAULT` | n/a | flag 1 |
+
+## Validation
+
+Registered properties cross-checked against the shipped `.gam` data for FourCC `3OCT` (`docs/gam_schema.md`):
+
+| Property | Status | Detail |
 |---|---|---|
-| ASE/anim | `octo.ase` | anim tag `HIDEFAULT` |
-| ASE/anim | `octostop.ase` | anim tag `HISTOP` |
-| PNG texture | `octapuke1.png` |  |
-| default anim | `DEFAULT` | flag 1 |
+| `StartPoint` | confirmed in .gam | range/samples: "octaexit" |
+
+1/1 registered properties are present in shipped `.gam` level data (the rest are recognised tuning/wiring the levels don't currently set). Any `TYPE MISMATCH` would flag an extraction error — none expected.
 
 ## Confidence
 

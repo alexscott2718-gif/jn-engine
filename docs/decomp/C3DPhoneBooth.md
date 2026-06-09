@@ -5,6 +5,7 @@
 | Item | Value |
 |---|---|
 | RTTI name | `C3DPhoneBooth` |
+| FourCC | `3PHO` |
 | Base chain | `C3DAnimated -> C3DObject -> OMedia3DMorphAnim -> OMedia3DShapeElement -> OMediaElement -> OMediaWorldPosition -> OMediaWorldAngle -> OMediaElementContainer -> OMediaDBObject -> OMediaClassStreamer -> OMediaListener -> OMediaMessagePort -> OMediaAnim -> CLocalGameObject -> CGameObject` |
 | Vftable(s) | `004adf5c, 004adf6c, 004ae3bc, 004ae3f8, 004ae40c` |
 | Ctor(s) | factory/constructor installs the vftables and registers the class id (see `docs/_gam_classids.tsv`) |
@@ -68,6 +69,8 @@ void __thiscall C3DPhoneBooth::vfunc_01_010(C3DPhoneBooth *this)
 
 **`vfunc_01_016` @ `00435800`** — owned override
 
+Interpreted: type-checks an object via `IsA("C3DJIMMY")`.
+
 ```c
 void __thiscall C3DPhoneBooth::vfunc_01_016(C3DPhoneBooth *this)
 
@@ -108,6 +111,10 @@ C3DPhoneBooth * __thiscall C3DPhoneBooth::vfunc_03_002(C3DPhoneBooth *this)
 ## Assets
 
 No direct ASE/PNG/anim references in `InitObject` (inherited visual path or runtime-assigned).
+
+## Validation
+
+No registered `.gam` properties to cross-check (inherited property set or runtime-created object).
 
 ## Confidence
 

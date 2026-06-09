@@ -5,6 +5,7 @@
 | Item | Value |
 |---|---|
 | RTTI name | `C3DFan` |
+| FourCC | `3FAN` |
 | Base chain | `C3DAnimated -> C3DObject -> OMedia3DMorphAnim -> OMedia3DShapeElement -> OMediaElement -> OMediaWorldPosition -> OMediaWorldAngle -> OMediaElementContainer -> OMediaDBObject -> OMediaClassStreamer -> OMediaListener -> OMediaMessagePort -> OMediaAnim -> CLocalGameObject -> CGameObject` |
 | Vftable(s) | `0049ac20, 0049ac30, 0049b080, 0049b0bc, 0049b0d0` |
 | Ctor(s) | factory/constructor installs the vftables and registers the class id (see `docs/_gam_classids.tsv`) |
@@ -37,6 +38,8 @@ See `docs/gam_schema.md` for the per-FourCC value ranges/samples across all 35 l
 
 **`vfunc_01_007` @ `00418540`** — InitObject (property + asset registration)
 
+Interpreted: reads/writes registered properties `FanSpeed`, `FanRange`, `FanOn`.
+
 ```c
 void __thiscall C3DFan::vfunc_01_007(C3DFan *this)
 
@@ -61,6 +64,8 @@ void __thiscall C3DFan::vfunc_01_007(C3DFan *this)
 ```
 
 **`vfunc_01_010` @ `00418920`** — post-init / per-frame logic
+
+Interpreted: reads/writes registered properties `FanSpeed`, `FanOn`.
 
 ```c
 void __thiscall C3DFan::vfunc_01_010(C3DFan *this)
@@ -95,11 +100,23 @@ C3DFan * __thiscall C3DFan::vfunc_03_002(C3DFan *this)
 
 ## Assets
 
-| Kind | Name | Notes |
+| Kind | Name | Present in `assets/` | Notes |
+|---|---|---|---|
+| ASE/anim | `fan.ase` | ✓ `fan.ASE` | anim tag `HIDEFAULT` |
+| PNG texture | `fan.png` | ✓ `fan.png` |  |
+| default anim | `DEFAULT` | n/a | flag 1 |
+
+## Validation
+
+Registered properties cross-checked against the shipped `.gam` data for FourCC `3FAN` (`docs/gam_schema.md`):
+
+| Property | Status | Detail |
 |---|---|---|
-| ASE/anim | `fan.ase` | anim tag `HIDEFAULT` |
-| PNG texture | `fan.png` |  |
-| default anim | `DEFAULT` | flag 1 |
+| `FanSpeed` | confirmed in .gam | range/samples: 800 … 2.7e+03 |
+| `FanRange` | confirmed in .gam | range/samples: 1e+03 … 3.5e+03 |
+| `FanOn` | confirmed in .gam | range/samples: 1 … 1 |
+
+3/3 registered properties are present in shipped `.gam` level data (the rest are recognised tuning/wiring the levels don't currently set). Any `TYPE MISMATCH` would flag an extraction error — none expected.
 
 ## Confidence
 

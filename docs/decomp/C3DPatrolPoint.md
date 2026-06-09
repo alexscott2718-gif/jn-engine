@@ -5,6 +5,7 @@
 | Item | Value |
 |---|---|
 | RTTI name | `C3DPatrolPoint` |
+| FourCC | `3PAT` |
 | Base chain | `C3DSprite -> OMediaCanvasElement -> OMediaElement -> OMediaWorldPosition -> OMediaWorldAngle -> OMediaElementContainer -> OMediaDBObject -> OMediaClassStreamer -> OMediaListener -> OMediaMessagePort -> CLocalGameObject -> CGameObject` |
 | Vftable(s) | `004aced4, 004acee4, 004ad334, 004ad348` |
 | Ctor(s) | factory/constructor installs the vftables and registers the class id (see `docs/_gam_classids.tsv`) |
@@ -41,6 +42,8 @@ See `docs/gam_schema.md` for the per-FourCC value ranges/samples across all 35 l
 
 **`vfunc_01_007` @ `00434de0`** — InitObject (property + asset registration)
 
+Interpreted: reads/writes registered properties `CallObjectTag`, `ActivateAnim`, `SoundDatabase`, `SoundIndex`, `NextPatrolPoint`, `WaitAnim`, `WaitTime`.
+
 ```c
 void __thiscall C3DPatrolPoint::vfunc_01_007(C3DPatrolPoint *this)
 
@@ -58,6 +61,8 @@ void __thiscall C3DPatrolPoint::vfunc_01_007(C3DPatrolPoint *this)
 ```
 
 **`vfunc_01_016` @ `00434ea0`** — reset / reinit
+
+Interpreted: type-checks an object via `IsA("C3DAI")`.
 
 ```c
 void __thiscall C3DPatrolPoint::vfunc_01_016(C3DPatrolPoint *this)
@@ -105,6 +110,22 @@ C3DPatrolPoint * __thiscall C3DPatrolPoint::vfunc_02_002(C3DPatrolPoint *this)
 ## Assets
 
 No direct ASE/PNG/anim references in `InitObject` (inherited visual path or runtime-assigned).
+
+## Validation
+
+Registered properties cross-checked against the shipped `.gam` data for FourCC `3PAT` (`docs/gam_schema.md`):
+
+| Property | Status | Detail |
+|---|---|---|
+| `CallObjectTag` | confirmed in .gam | range/samples: "none" |
+| `ActivateAnim` | confirmed in .gam | range/samples: "none", "stop" |
+| `SoundDatabase` | confirmed in .gam | range/samples: "none", "soundeffects.omt" |
+| `SoundIndex` | confirmed in .gam | range/samples: -1 … 192 |
+| `NextPatrolPoint` | confirmed in .gam | range/samples: "CAM1", "CAM10", "CAM11", "CAM12", … |
+| `WaitAnim` | confirmed in .gam | range/samples: "1", "COUNT", "FIX", "STOP", … |
+| `WaitTime` | confirmed in .gam | range/samples: -1 … 1e+04 |
+
+7/7 registered properties are present in shipped `.gam` level data (the rest are recognised tuning/wiring the levels don't currently set). Any `TYPE MISMATCH` would flag an extraction error — none expected.
 
 ## Confidence
 

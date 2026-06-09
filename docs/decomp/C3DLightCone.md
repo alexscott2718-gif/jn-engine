@@ -5,6 +5,7 @@
 | Item | Value |
 |---|---|
 | RTTI name | `C3DLightCone` |
+| FourCC | `3LCO` |
 | Base chain | `C3DAnimated -> C3DObject -> OMedia3DMorphAnim -> OMedia3DShapeElement -> OMediaElement -> OMediaWorldPosition -> OMediaWorldAngle -> OMediaElementContainer -> OMediaDBObject -> OMediaClassStreamer -> OMediaListener -> OMediaMessagePort -> OMediaAnim -> CLocalGameObject -> CGameObject` |
 | Vftable(s) | `004a626c, 004a627c, 004a66cc, 004a6708, 004a671c` |
 | Ctor(s) | factory/constructor installs the vftables and registers the class id (see `docs/_gam_classids.tsv`) |
@@ -36,6 +37,8 @@ See `docs/gam_schema.md` for the per-FourCC value ranges/samples across all 35 l
 ### Decompiled owned methods
 
 **`vfunc_01_007` @ `0042d620`** — InitObject (property + asset registration)
+
+Interpreted: reads/writes registered properties `RotSpeed`, `Red`, `Green`, `Blue`.
 
 ```c
 void __thiscall C3DLightCone::vfunc_01_007(C3DLightCone *this)
@@ -78,11 +81,24 @@ void __thiscall C3DLightCone::vfunc_01_259(C3DLightCone *this)
 
 ## Assets
 
-| Kind | Name | Notes |
+| Kind | Name | Present in `assets/` | Notes |
+|---|---|---|---|
+| ASE/anim | `lightcone.ase` | ✓ `lightcone.ASE` | anim tag `HIDEFAULT` |
+| PNG texture | `lightcone.png` | ✓ `lightcone.png` |  |
+| default anim | `DEFAULT` | n/a | flag 1 |
+
+## Validation
+
+Registered properties cross-checked against the shipped `.gam` data for FourCC `3LCO` (`docs/gam_schema.md`):
+
+| Property | Status | Detail |
 |---|---|---|
-| ASE/anim | `lightcone.ase` | anim tag `HIDEFAULT` |
-| PNG texture | `lightcone.png` |  |
-| default anim | `DEFAULT` | flag 1 |
+| `RotSpeed` | registered, unused in shipped .gam |  |
+| `Red` | registered, unused in shipped .gam |  |
+| `Green` | registered, unused in shipped .gam |  |
+| `Blue` | registered, unused in shipped .gam |  |
+
+0/4 registered properties are present in shipped `.gam` level data (the rest are recognised tuning/wiring the levels don't currently set). Any `TYPE MISMATCH` would flag an extraction error — none expected.
 
 ## Confidence
 

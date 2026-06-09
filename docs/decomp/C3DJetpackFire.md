@@ -5,6 +5,7 @@
 | Item | Value |
 |---|---|
 | RTTI name | `C3DJetpackFire` |
+| FourCC | `3JFI` |
 | Base chain | `C3DAnimated -> C3DObject -> OMedia3DMorphAnim -> OMedia3DShapeElement -> OMediaElement -> OMediaWorldPosition -> OMediaWorldAngle -> OMediaElementContainer -> OMediaDBObject -> OMediaClassStreamer -> OMediaListener -> OMediaMessagePort -> OMediaAnim -> CLocalGameObject -> CGameObject` |
 | Vftable(s) | `004a3150, 004a3160, 004a35b0, 004a35ec, 004a3600` |
 | Ctor(s) | factory/constructor installs the vftables and registers the class id (see `docs/_gam_classids.tsv`) |
@@ -51,12 +52,16 @@ void __thiscall C3DJetpackFire::vfunc_01_007(C3DJetpackFire *this)
 
 ## Assets
 
-| Kind | Name | Notes |
-|---|---|---|
-| ASE/anim | `fire.ase` | anim tag `HIDEFAULT` |
-| ASE/anim | `fire2.ase` | anim tag `HINONE` |
-| PNG texture | `fire.png` |  |
-| default anim | `DEFAULT` | flag 1 |
+| Kind | Name | Present in `assets/` | Notes |
+|---|---|---|---|
+| ASE/anim | `fire.ase` | ✓ `fire.ASE` | anim tag `HIDEFAULT` |
+| ASE/anim | `fire2.ase` | ✓ `fire2.ASE` | anim tag `HINONE` |
+| PNG texture | `fire.png` | ✓ `fire.png` |  |
+| default anim | `DEFAULT` | n/a | flag 1 |
+
+## Validation
+
+FourCC `3JFI` has no rows in the 35-level `.gam` corpus (`docs/gam_schema.md`) — this object type is not placed in any shipped level, so there is no `.gam` data to cross-check against.
 
 ## Confidence
 

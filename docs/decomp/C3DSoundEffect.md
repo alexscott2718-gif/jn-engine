@@ -5,6 +5,7 @@
 | Item | Value |
 |---|---|
 | RTTI name | `C3DSoundEffect` |
+| FourCC | `3SOU` |
 | Base chain | `C3DSpriteType -> C3DSprite -> OMediaCanvasElement -> OMediaElement -> OMediaWorldPosition -> OMediaWorldAngle -> OMediaElementContainer -> OMediaDBObject -> OMediaClassStreamer -> OMediaListener -> OMediaMessagePort -> CLocalGameObject -> CGameObject` |
 | Vftable(s) | `004b59a0, 004b59b0, 004b5e00, 004b5e14` |
 | Ctor(s) | factory/constructor installs the vftables and registers the class id (see `docs/_gam_classids.tsv`) |
@@ -37,6 +38,8 @@ See `docs/gam_schema.md` for the per-FourCC value ranges/samples across all 35 l
 
 **`vfunc_01_007` @ `00441020`** — InitObject (property + asset registration)
 
+Interpreted: reads/writes registered properties `SoundIndex`, `TimesToTrigger`, `Radius`, `IsAmbient`, `RequiredLevel`.
+
 ```c
 void __thiscall C3DSoundEffect::vfunc_01_007(C3DSoundEffect *this)
 
@@ -54,6 +57,20 @@ void __thiscall C3DSoundEffect::vfunc_01_007(C3DSoundEffect *this)
 ## Assets
 
 No direct ASE/PNG/anim references in `InitObject` (inherited visual path or runtime-assigned).
+
+## Validation
+
+Registered properties cross-checked against the shipped `.gam` data for FourCC `3SOU` (`docs/gam_schema.md`):
+
+| Property | Status | Detail |
+|---|---|---|
+| `SoundIndex` | confirmed in .gam | range/samples: -1 … 241 |
+| `TimesToTrigger` | confirmed in .gam | range/samples: -1 … 99 |
+| `Radius` | confirmed in .gam | range/samples: 50 … 2.5e+04 |
+| `IsAmbient` | confirmed in .gam | range/samples: -1 … 1 |
+| `RequiredLevel` | confirmed in .gam | range/samples: 0 … 70 |
+
+5/5 registered properties are present in shipped `.gam` level data (the rest are recognised tuning/wiring the levels don't currently set). Any `TYPE MISMATCH` would flag an extraction error — none expected.
 
 ## Confidence
 

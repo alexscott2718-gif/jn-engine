@@ -5,6 +5,7 @@
 | Item | Value |
 |---|---|
 | RTTI name | `CTriggerTimer` |
+| FourCC | (not resolved; not a `.gam`-placed object or id unmapped) |
 | Base chain | `CTrigger -> C3DLight -> OMediaLight -> OMediaElement -> OMediaWorldPosition -> OMediaWorldAngle -> OMediaElementContainer -> OMediaDBObject -> OMediaClassStreamer -> OMediaListener -> OMediaMessagePort -> CLocalGameObject -> CGameObject` |
 | Vftable(s) | `004d6f54, 004d6f64, 004d73b4, 004d73c8` |
 | Ctor(s) | factory/constructor installs the vftables and registers the class id (see `docs/_gam_classids.tsv`) |
@@ -45,6 +46,10 @@ CTriggerTimer * __thiscall CTriggerTimer::vfunc_02_002(CTriggerTimer *this)
 ## Assets
 
 No direct ASE/PNG/anim references in `InitObject` (inherited visual path or runtime-assigned).
+
+## Validation
+
+No registered `.gam` properties to cross-check (inherited property set or runtime-created object).
 
 ## Confidence
 

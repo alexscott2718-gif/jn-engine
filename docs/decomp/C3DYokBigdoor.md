@@ -5,6 +5,7 @@
 | Item | Value |
 |---|---|
 | RTTI name | `C3DYokBigdoor` |
+| FourCC | `3BIG` |
 | Base chain | `C3DYokDoor -> C3DAnimated -> C3DObject -> OMedia3DMorphAnim -> OMedia3DShapeElement -> OMediaElement -> OMediaWorldPosition -> OMediaWorldAngle -> OMediaElementContainer -> OMediaDBObject -> OMediaClassStreamer -> OMediaListener -> OMediaMessagePort -> OMediaAnim -> CLocalGameObject -> CGameObject` |
 | Vftable(s) | `004be9d0, 004be9e0, 004bee30, 004bee6c, 004bee80` |
 | Ctor(s) | factory/constructor installs the vftables and registers the class id (see `docs/_gam_classids.tsv`) |
@@ -35,6 +36,8 @@ See `docs/gam_schema.md` for the per-FourCC value ranges/samples across all 35 l
 ### Decompiled owned methods
 
 **`vfunc_01_007` @ `00449210`** — InitObject (property + asset registration)
+
+Interpreted: reads/writes registered properties `ItemClosed`, `Next`, `DoorSpeed`, `OpenTime`.
 
 ```c
 void __thiscall C3DYokBigdoor::vfunc_01_007(C3DYokBigdoor *this)
@@ -68,6 +71,19 @@ void __thiscall C3DYokBigdoor::vfunc_01_007(C3DYokBigdoor *this)
 ## Assets
 
 No direct ASE/PNG/anim references in `InitObject` (inherited visual path or runtime-assigned).
+
+## Validation
+
+Registered properties cross-checked against the shipped `.gam` data for FourCC `3BIG` (`docs/gam_schema.md`):
+
+| Property | Status | Detail |
+|---|---|---|
+| `ItemClosed` | registered, unused in shipped .gam |  |
+| `Next` | registered, unused in shipped .gam |  |
+| `DoorSpeed` | registered, unused in shipped .gam |  |
+| `OpenTime` | registered, unused in shipped .gam |  |
+
+0/4 registered properties are present in shipped `.gam` level data (the rest are recognised tuning/wiring the levels don't currently set). Any `TYPE MISMATCH` would flag an extraction error — none expected.
 
 ## Confidence
 

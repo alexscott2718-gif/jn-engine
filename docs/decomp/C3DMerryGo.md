@@ -5,6 +5,7 @@
 | Item | Value |
 |---|---|
 | RTTI name | `C3DMerryGo` |
+| FourCC | (not resolved; not a `.gam`-placed object or id unmapped) |
 | Base chain | `C3DAnimated -> C3DObject -> OMedia3DMorphAnim -> OMedia3DShapeElement -> OMediaElement -> OMediaWorldPosition -> OMediaWorldAngle -> OMediaElementContainer -> OMediaDBObject -> OMediaClassStreamer -> OMediaListener -> OMediaMessagePort -> OMediaAnim -> CLocalGameObject -> CGameObject` |
 | Vftable(s) | `004a6db0, 004a6dc0, 004a7210, 004a724c, 004a7260` |
 | Ctor(s) | factory/constructor installs the vftables and registers the class id (see `docs/_gam_classids.tsv`) |
@@ -27,6 +28,8 @@ No own `.gam` properties registered in `InitObject` (inherits its parent's prope
 ### Decompiled owned methods
 
 **`vfunc_01_016` @ `0042e760`** — owned override
+
+Interpreted: type-checks an object via `IsA("C3DJIMMY")`.
 
 ```c
 void __thiscall C3DMerryGo::vfunc_01_016(C3DMerryGo *this)
@@ -119,6 +122,10 @@ C3DMerryGo * __thiscall C3DMerryGo::vfunc_03_002(C3DMerryGo *this)
 ## Assets
 
 No direct ASE/PNG/anim references in `InitObject` (inherited visual path or runtime-assigned).
+
+## Validation
+
+No registered `.gam` properties to cross-check (inherited property set or runtime-created object).
 
 ## Confidence
 

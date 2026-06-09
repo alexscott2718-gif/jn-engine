@@ -5,6 +5,7 @@
 | Item | Value |
 |---|---|
 | RTTI name | `C3DMusicTrigger` |
+| FourCC | `3MUS` |
 | Base chain | `C3DTriggerType -> C3DSprite -> OMediaCanvasElement -> OMediaElement -> OMediaWorldPosition -> OMediaWorldAngle -> OMediaElementContainer -> OMediaDBObject -> OMediaClassStreamer -> OMediaListener -> OMediaMessagePort -> CLocalGameObject -> CGameObject` |
 | Vftable(s) | `004a94c8, 004a94d8, 004a9928, 004a993c` |
 | Ctor(s) | factory/constructor installs the vftables and registers the class id (see `docs/_gam_classids.tsv`) |
@@ -44,6 +45,8 @@ See `docs/gam_schema.md` for the per-FourCC value ranges/samples across all 35 l
 
 **`vfunc_01_007` @ `00431c50`** — InitObject (property + asset registration)
 
+Interpreted: reads/writes registered properties `MusicDatabase`, `MusicIndex0`, `MusicIndex1`, `MusicIndex2`, `MusicIndex3`, `MusicIndex4`, `TouchActivated`, `Radius`, `RequiredLevel`, `ExactLevel`, `RemoveLevel`.
+
 ```c
 void __thiscall C3DMusicTrigger::vfunc_01_007(C3DMusicTrigger *this)
 
@@ -66,6 +69,8 @@ void __thiscall C3DMusicTrigger::vfunc_01_007(C3DMusicTrigger *this)
 
 **`vfunc_01_259` @ `00431d80`** — owned override
 
+Interpreted: reads/writes registered property `TouchActivated`.
+
 ```c
 void __thiscall C3DMusicTrigger::vfunc_01_259(C3DMusicTrigger *this)
 
@@ -84,6 +89,26 @@ void __thiscall C3DMusicTrigger::vfunc_01_259(C3DMusicTrigger *this)
 ## Assets
 
 No direct ASE/PNG/anim references in `InitObject` (inherited visual path or runtime-assigned).
+
+## Validation
+
+Registered properties cross-checked against the shipped `.gam` data for FourCC `3MUS` (`docs/gam_schema.md`):
+
+| Property | Status | Detail |
+|---|---|---|
+| `MusicDatabase` | confirmed in .gam | range/samples: "musicarea51.omt", "musicneighborhood.omt", "musicschoolrace.omt", "musicship.om |
+| `MusicIndex0` | confirmed in .gam | range/samples: -1 … 1 |
+| `MusicIndex1` | confirmed in .gam | range/samples: -1 … -1 |
+| `MusicIndex2` | confirmed in .gam | range/samples: -1 … 2 |
+| `MusicIndex3` | confirmed in .gam | range/samples: -1 … -1 |
+| `MusicIndex4` | confirmed in .gam | range/samples: -1 … 1 |
+| `TouchActivated` | confirmed in .gam | range/samples: 0 … 1 |
+| `Radius` | confirmed in .gam | range/samples: 1 … 500 |
+| `RequiredLevel` | confirmed in .gam | range/samples: 0 … 140 |
+| `ExactLevel` | confirmed in .gam | range/samples: 0 … 231 |
+| `RemoveLevel` | confirmed in .gam | range/samples: -1044667134 … 125 |
+
+11/11 registered properties are present in shipped `.gam` level data (the rest are recognised tuning/wiring the levels don't currently set). Any `TYPE MISMATCH` would flag an extraction error — none expected.
 
 ## Confidence
 

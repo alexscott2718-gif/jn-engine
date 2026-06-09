@@ -5,6 +5,7 @@
 | Item | Value |
 |---|---|
 | RTTI name | `C3DYokHelmet` |
+| FourCC | `3YHE` |
 | Base chain | `C3DAnimated -> C3DObject -> OMedia3DMorphAnim -> OMedia3DShapeElement -> OMediaElement -> OMediaWorldPosition -> OMediaWorldAngle -> OMediaElementContainer -> OMediaDBObject -> OMediaClassStreamer -> OMediaListener -> OMediaMessagePort -> OMediaAnim -> CLocalGameObject -> CGameObject` |
 | Vftable(s) | `004bfbc0, 004bfbd0, 004c0020, 004c005c, 004c0070` |
 | Ctor(s) | factory/constructor installs the vftables and registers the class id (see `docs/_gam_classids.tsv`) |
@@ -27,6 +28,8 @@ No own `.gam` properties registered in `InitObject` (inherits its parent's prope
 ### Decompiled owned methods
 
 **`vfunc_01_007` @ `0044a640`** — InitObject (property + asset registration)
+
+Interpreted: fires an exit/deactivate action (slot `0x58`).
 
 ```c
 void __thiscall C3DYokHelmet::vfunc_01_007(C3DYokHelmet *this)
@@ -84,6 +87,10 @@ void __thiscall C3DYokHelmet::vfunc_04_067(C3DYokHelmet *this)
 ## Assets
 
 No direct ASE/PNG/anim references in `InitObject` (inherited visual path or runtime-assigned).
+
+## Validation
+
+FourCC `3YHE` has no rows in the 35-level `.gam` corpus (`docs/gam_schema.md`) — this object type is not placed in any shipped level, so there is no `.gam` data to cross-check against.
 
 ## Confidence
 

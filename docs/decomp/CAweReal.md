@@ -5,6 +5,7 @@
 | Item | Value |
 |---|---|
 | RTTI name | `CAweReal` |
+| FourCC | (not resolved; not a `.gam`-placed object or id unmapped) |
 | Base chain | `OMediaApplication -> OMediaSupervisor -> OMediaMessagePort -> OMediaListener` |
 | Vftable(s) | `004d5e4c, 004d5e60` |
 | Ctor(s) | factory/constructor installs the vftables and registers the class id (see `docs/_gam_classids.tsv`) |
@@ -44,6 +45,10 @@ CAweReal * __thiscall CAweReal::vfunc_01_002(CAweReal *this)
 ## Assets
 
 No direct ASE/PNG/anim references in `InitObject` (inherited visual path or runtime-assigned).
+
+## Validation
+
+No registered `.gam` properties to cross-check (inherited property set or runtime-created object).
 
 ## Confidence
 

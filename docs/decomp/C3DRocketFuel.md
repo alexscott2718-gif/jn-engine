@@ -5,6 +5,7 @@
 | Item | Value |
 |---|---|
 | RTTI name | `C3DRocketFuel` |
+| FourCC | (not resolved; not a `.gam`-placed object or id unmapped) |
 | Base chain | `C3DSpriteType -> C3DSprite -> OMediaCanvasElement -> OMediaElement -> OMediaWorldPosition -> OMediaWorldAngle -> OMediaElementContainer -> OMediaDBObject -> OMediaClassStreamer -> OMediaListener -> OMediaMessagePort -> CLocalGameObject -> CGameObject` |
 | Vftable(s) | `004b2048, 004b2058, 004b24a8, 004b24bc` |
 | Ctor(s) | factory/constructor installs the vftables and registers the class id (see `docs/_gam_classids.tsv`) |
@@ -27,6 +28,8 @@ No own `.gam` properties registered in `InitObject` (inherits its parent's prope
 ### Decompiled owned methods
 
 **`vfunc_01_016` @ `0043d700`** — owned override
+
+Interpreted: type-checks an object via `IsA("C3DJIMMY")`; fires an exit/deactivate action (slot `0x58`).
 
 ```c
 void __thiscall C3DRocketFuel::vfunc_01_016(C3DRocketFuel *this)
@@ -60,6 +63,8 @@ void __thiscall C3DRocketFuel::vfunc_01_016(C3DRocketFuel *this)
 
 **`vfunc_01_264` @ `0043d7b0`** — owned override
 
+Interpreted: fires an exit/deactivate action (slot `0x58`).
+
 ```c
 void __thiscall C3DRocketFuel::vfunc_01_264(C3DRocketFuel *this)
 
@@ -77,6 +82,10 @@ void __thiscall C3DRocketFuel::vfunc_01_264(C3DRocketFuel *this)
 ## Assets
 
 No direct ASE/PNG/anim references in `InitObject` (inherited visual path or runtime-assigned).
+
+## Validation
+
+No registered `.gam` properties to cross-check (inherited property set or runtime-created object).
 
 ## Confidence
 

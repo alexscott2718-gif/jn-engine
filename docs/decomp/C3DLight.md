@@ -5,6 +5,7 @@
 | Item | Value |
 |---|---|
 | RTTI name | `C3DLight` |
+| FourCC | `3LIG` |
 | Base chain | `OMediaLight -> OMediaElement -> OMediaWorldPosition -> OMediaWorldAngle -> OMediaElementContainer -> OMediaDBObject -> OMediaClassStreamer -> OMediaListener -> OMediaMessagePort -> CLocalGameObject -> CGameObject` |
 | Vftable(s) | `004d2c10, 004d2c20, 004d3070, 004d3084` |
 | Ctor(s) | factory/constructor installs the vftables and registers the class id (see `docs/_gam_classids.tsv`) |
@@ -44,6 +45,8 @@ See `docs/gam_schema.md` for the per-FourCC value ranges/samples across all 35 l
 ### Decompiled owned methods
 
 **`vfunc_01_007` @ `00461bb0`** — InitObject (property + asset registration)
+
+Interpreted: reads/writes registered properties `LightType`, `LightRange`, `CAttenuation`, `DifRed`, `DifGreen`, `DifBlue`, `SpecRed`, `SpecGreen`, `SpecBlue`, `AmbRed`, `AmbGreen`, `AmbBlue`.
 
 ```c
 void __thiscall C3DLight::vfunc_01_007(C3DLight *this)
@@ -92,6 +95,27 @@ void __thiscall C3DLight::vfunc_03_043(C3DLight *this)
 ## Assets
 
 No direct ASE/PNG/anim references in `InitObject` (inherited visual path or runtime-assigned).
+
+## Validation
+
+Registered properties cross-checked against the shipped `.gam` data for FourCC `3LIG` (`docs/gam_schema.md`):
+
+| Property | Status | Detail |
+|---|---|---|
+| `LightType` | confirmed in .gam | range/samples: 00000000 |
+| `LightRange` | confirmed in .gam | range/samples: 1e+04 … 1e+04 |
+| `CAttenuation` | confirmed in .gam | range/samples: 1 … 1 |
+| `DifRed` | confirmed in .gam | range/samples: 1 … 1 |
+| `DifGreen` | confirmed in .gam | range/samples: 1 … 1 |
+| `DifBlue` | confirmed in .gam | range/samples: 1 … 1 |
+| `SpecRed` | confirmed in .gam | range/samples: 1 … 1 |
+| `SpecGreen` | confirmed in .gam | range/samples: 1 … 1 |
+| `SpecBlue` | confirmed in .gam | range/samples: 1 … 1 |
+| `AmbRed` | confirmed in .gam | range/samples: 0 … 0 |
+| `AmbGreen` | confirmed in .gam | range/samples: 0 … 0 |
+| `AmbBlue` | confirmed in .gam | range/samples: 0 … 0 |
+
+12/12 registered properties are present in shipped `.gam` level data (the rest are recognised tuning/wiring the levels don't currently set). Any `TYPE MISMATCH` would flag an extraction error — none expected.
 
 ## Confidence
 

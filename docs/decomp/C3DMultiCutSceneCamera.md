@@ -5,6 +5,7 @@
 | Item | Value |
 |---|---|
 | RTTI name | `C3DMultiCutSceneCamera` |
+| FourCC | `3MCA` |
 | Base chain | `C3DTriggerType -> C3DSprite -> OMediaCanvasElement -> OMediaElement -> OMediaWorldPosition -> OMediaWorldAngle -> OMediaElementContainer -> OMediaDBObject -> OMediaClassStreamer -> OMediaListener -> OMediaMessagePort -> CLocalGameObject -> CGameObject` |
 | Vftable(s) | `004a8f54, 004a8f64, 004a93b4, 004a93c8` |
 | Ctor(s) | factory/constructor installs the vftables and registers the class id (see `docs/_gam_classids.tsv`) |
@@ -252,6 +253,8 @@ void __thiscall C3DMultiCutSceneCamera::vfunc_01_007(C3DMultiCutSceneCamera *thi
 
 **`vfunc_03_056` @ `00431750`** — reset / reinit
 
+Interpreted: type-checks an object via `IsA("C3DAI")`; type-checks an object via `IsA("C3DANIMATED")`.
+
 ```c
 undefined4 __thiscall C3DMultiCutSceneCamera::vfunc_03_056(C3DMultiCutSceneCamera *this)
 
@@ -347,6 +350,8 @@ undefined4 __thiscall C3DMultiCutSceneCamera::vfunc_03_056(C3DMultiCutSceneCamer
 
 **`vfunc_03_057` @ `004311f0`** — owned override
 
+Interpreted: type-checks an object via `IsA("C3DAI")`.
+
 ```c
 void __thiscall C3DMultiCutSceneCamera::vfunc_03_057(C3DMultiCutSceneCamera *this)
 
@@ -383,6 +388,10 @@ void __thiscall C3DMultiCutSceneCamera::vfunc_03_057(C3DMultiCutSceneCamera *thi
 ## Assets
 
 No direct ASE/PNG/anim references in `InitObject` (inherited visual path or runtime-assigned).
+
+## Validation
+
+No registered `.gam` properties to cross-check (inherited property set or runtime-created object).
 
 ## Confidence
 

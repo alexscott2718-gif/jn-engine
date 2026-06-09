@@ -5,6 +5,7 @@
 | Item | Value |
 |---|---|
 | RTTI name | `C3DHydrant` |
+| FourCC | `3HYD` |
 | Base chain | `C3DAnimated -> C3DObject -> OMedia3DMorphAnim -> OMedia3DShapeElement -> OMediaElement -> OMediaWorldPosition -> OMediaWorldAngle -> OMediaElementContainer -> OMediaDBObject -> OMediaClassStreamer -> OMediaListener -> OMediaMessagePort -> OMediaAnim -> CLocalGameObject -> CGameObject` |
 | Vftable(s) | `004a24f8, 004a2508, 004a2958, 004a2994, 004a29a8` |
 | Ctor(s) | factory/constructor installs the vftables and registers the class id (see `docs/_gam_classids.tsv`) |
@@ -61,14 +62,18 @@ void __thiscall C3DHydrant::vfunc_01_007(C3DHydrant *this)
 
 ## Assets
 
-| Kind | Name | Notes |
-|---|---|---|
-| ASE/anim | `waterhydrant.ase` | anim tag `HIDEFAULT` |
-| PNG texture | `whydrant0000.png` |  |
-| PNG texture | `whydrant0001.png` |  |
-| PNG texture | `whydrant0002.png` |  |
-| PNG texture | `whydrant0003.png` |  |
-| default anim | `DEFAULT` | flag 1 |
+| Kind | Name | Present in `assets/` | Notes |
+|---|---|---|---|
+| ASE/anim | `waterhydrant.ase` | ✓ `waterhydrant.ASE` | anim tag `HIDEFAULT` |
+| PNG texture | `whydrant0000.png` | ✓ `whydrant0000.png` |  |
+| PNG texture | `whydrant0001.png` | ✓ `whydrant0001.png` |  |
+| PNG texture | `whydrant0002.png` | ✓ `whydrant0002.png` |  |
+| PNG texture | `whydrant0003.png` | ✓ `whydrant0003.png` |  |
+| default anim | `DEFAULT` | n/a | flag 1 |
+
+## Validation
+
+No registered `.gam` properties to cross-check (inherited property set or runtime-created object).
 
 ## Confidence
 

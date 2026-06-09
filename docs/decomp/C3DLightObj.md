@@ -5,6 +5,7 @@
 | Item | Value |
 |---|---|
 | RTTI name | `C3DLightObj` |
+| FourCC | `3LIO` |
 | Base chain | `C3DSpriteType -> C3DSprite -> OMediaCanvasElement -> OMediaElement -> OMediaWorldPosition -> OMediaWorldAngle -> OMediaElementContainer -> OMediaDBObject -> OMediaClassStreamer -> OMediaListener -> OMediaMessagePort -> CLocalGameObject -> CGameObject` |
 | Vftable(s) | `004a685c, 004a686c, 004a6cbc, 004a6cd0` |
 | Ctor(s) | factory/constructor installs the vftables and registers the class id (see `docs/_gam_classids.tsv`) |
@@ -42,6 +43,8 @@ See `docs/gam_schema.md` for the per-FourCC value ranges/samples across all 35 l
 
 **`vfunc_01_007` @ `0042ddc0`** — InitObject (property + asset registration)
 
+Interpreted: reads/writes registered properties `Alpha`, `Red`, `Green`, `Blue`, `Activated`, `Pulsate`, `Period`, `OffsetTime`, `OnSoundIndex`, `OffSoundIndex`.
+
 ```c
 void __thiscall C3DLightObj::vfunc_01_007(C3DLightObj *this)
 
@@ -69,6 +72,25 @@ void __thiscall C3DLightObj::vfunc_01_007(C3DLightObj *this)
 ## Assets
 
 No direct ASE/PNG/anim references in `InitObject` (inherited visual path or runtime-assigned).
+
+## Validation
+
+Registered properties cross-checked against the shipped `.gam` data for FourCC `3LIO` (`docs/gam_schema.md`):
+
+| Property | Status | Detail |
+|---|---|---|
+| `Alpha` | confirmed in .gam | range/samples: 0 … 1 |
+| `Red` | confirmed in .gam | range/samples: 0 … 1 |
+| `Green` | confirmed in .gam | range/samples: 0 … 1 |
+| `Blue` | confirmed in .gam | range/samples: 0 … 1 |
+| `Activated` | confirmed in .gam | range/samples: 1 … 1 |
+| `Pulsate` | confirmed in .gam | range/samples: 0 … 1 |
+| `Period` | confirmed in .gam | range/samples: 0.3 … 3 |
+| `OffsetTime` | confirmed in .gam | range/samples: 0 … 0.5 |
+| `OnSoundIndex` | confirmed in .gam | range/samples: -1 … -1 |
+| `OffSoundIndex` | confirmed in .gam | range/samples: -1 … -1 |
+
+10/10 registered properties are present in shipped `.gam` level data (the rest are recognised tuning/wiring the levels don't currently set). Any `TYPE MISMATCH` would flag an extraction error — none expected.
 
 ## Confidence
 

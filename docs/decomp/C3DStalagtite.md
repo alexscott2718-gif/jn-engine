@@ -5,6 +5,7 @@
 | Item | Value |
 |---|---|
 | RTTI name | `C3DStalagtite` |
+| FourCC | (not resolved; not a `.gam`-placed object or id unmapped) |
 | Base chain | `C3DAnimated -> C3DObject -> OMedia3DMorphAnim -> OMedia3DShapeElement -> OMediaElement -> OMediaWorldPosition -> OMediaWorldAngle -> OMediaElementContainer -> OMediaDBObject -> OMediaClassStreamer -> OMediaListener -> OMediaMessagePort -> OMediaAnim -> CLocalGameObject -> CGameObject` |
 | Vftable(s) | `004b7064, 004b7074, 004b74c4, 004b7500, 004b7514` |
 | Ctor(s) | factory/constructor installs the vftables and registers the class id (see `docs/_gam_classids.tsv`) |
@@ -28,6 +29,8 @@ No own `.gam` properties registered in `InitObject` (inherits its parent's prope
 
 **`vfunc_01_010` @ `00441fb0`** — post-init / per-frame logic
 
+Interpreted: fires an exit/deactivate action (slot `0x58`).
+
 ```c
 void __thiscall C3DStalagtite::vfunc_01_010(C3DStalagtite *this)
 
@@ -43,6 +46,8 @@ void __thiscall C3DStalagtite::vfunc_01_010(C3DStalagtite *this)
 ```
 
 **`vfunc_04_072` @ `00441ee0`** — owned override
+
+Interpreted: plays a sound effect (`FUN_00458980`).
 
 ```c
 void __thiscall C3DStalagtite::vfunc_04_072(C3DStalagtite *this)
@@ -67,6 +72,10 @@ void __thiscall C3DStalagtite::vfunc_04_072(C3DStalagtite *this)
 ## Assets
 
 No direct ASE/PNG/anim references in `InitObject` (inherited visual path or runtime-assigned).
+
+## Validation
+
+No registered `.gam` properties to cross-check (inherited property set or runtime-created object).
 
 ## Confidence
 

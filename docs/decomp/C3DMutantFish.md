@@ -5,6 +5,7 @@
 | Item | Value |
 |---|---|
 | RTTI name | `C3DMutantFish` |
+| FourCC | `3MUT` |
 | Base chain | `C3DEnemy -> C3DPickupType -> C3DAI -> C3DAnimated -> C3DObject -> OMedia3DMorphAnim -> OMedia3DShapeElement -> OMediaElement -> OMediaWorldPosition -> OMediaWorldAngle -> OMediaElementContainer -> OMediaDBObject -> OMediaClassStreamer -> OMediaListener -> OMediaMessagePort -> OMediaAnim -> CLocalGameObject -> CGameObject` |
 | Vftable(s) | `004a9a24, 004a9a34, 004a9e84, 004a9ec0, 004a9ed4` |
 | Ctor(s) | factory/constructor installs the vftables and registers the class id (see `docs/_gam_classids.tsv`) |
@@ -50,11 +51,15 @@ void __thiscall C3DMutantFish::vfunc_01_007(C3DMutantFish *this)
 
 ## Assets
 
-| Kind | Name | Notes |
-|---|---|---|
-| ASE/anim | `fish1r.ase` | anim tag `HIWALK` |
-| PNG texture | `fish3.png` |  |
-| default anim | `WALK` | flag 1 |
+| Kind | Name | Present in `assets/` | Notes |
+|---|---|---|---|
+| ASE/anim | `fish1r.ase` | ✓ `fish1r.ASE` | anim tag `HIWALK` |
+| PNG texture | `fish3.png` | ✓ `fish3.png` |  |
+| default anim | `WALK` | n/a | flag 1 |
+
+## Validation
+
+FourCC `3MUT` has no rows in the 35-level `.gam` corpus (`docs/gam_schema.md`) — this object type is not placed in any shipped level, so there is no `.gam` data to cross-check against.
 
 ## Confidence
 

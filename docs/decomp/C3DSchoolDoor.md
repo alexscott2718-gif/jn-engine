@@ -5,6 +5,7 @@
 | Item | Value |
 |---|---|
 | RTTI name | `C3DSchoolDoor` |
+| FourCC | `3SCD` |
 | Base chain | `C3DAnimated -> C3DObject -> OMedia3DMorphAnim -> OMedia3DShapeElement -> OMediaElement -> OMediaWorldPosition -> OMediaWorldAngle -> OMediaElementContainer -> OMediaDBObject -> OMediaClassStreamer -> OMediaListener -> OMediaMessagePort -> OMediaAnim -> CLocalGameObject -> CGameObject` |
 | Vftable(s) | `004b31cc, 004b31dc, 004b362c, 004b3668, 004b367c` |
 | Ctor(s) | factory/constructor installs the vftables and registers the class id (see `docs/_gam_classids.tsv`) |
@@ -48,6 +49,8 @@ void __thiscall C3DSchoolDoor::vfunc_01_007(C3DSchoolDoor *this)
 ```
 
 **`vfunc_01_016` @ `0043f2e0`** — owned override
+
+Interpreted: compares a name against `SHOWMEDOOR`.
 
 ```c
 void __thiscall C3DSchoolDoor::vfunc_01_016(C3DSchoolDoor *this)
@@ -109,6 +112,8 @@ void __thiscall C3DSchoolDoor::vfunc_01_016(C3DSchoolDoor *this)
 
 **`vfunc_01_241` @ `0043f480`** — owned override
 
+Interpreted: applies a rotation (world-angle slot `0x334`); scales a value by frame `dt` (per-frame integration).
+
 ```c
 void __thiscall C3DSchoolDoor::vfunc_01_241(C3DSchoolDoor *this)
 
@@ -163,6 +168,10 @@ void __thiscall C3DSchoolDoor::vfunc_01_259(C3DSchoolDoor *this)
 ## Assets
 
 No direct ASE/PNG/anim references in `InitObject` (inherited visual path or runtime-assigned).
+
+## Validation
+
+No registered `.gam` properties to cross-check (inherited property set or runtime-created object).
 
 ## Confidence
 

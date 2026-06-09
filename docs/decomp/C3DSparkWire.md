@@ -5,6 +5,7 @@
 | Item | Value |
 |---|---|
 | RTTI name | `C3DSparkWire` |
+| FourCC | `3SPA` |
 | Base chain | `C3DTesla -> C3DAnimated -> C3DObject -> OMedia3DMorphAnim -> OMedia3DShapeElement -> OMediaElement -> OMediaWorldPosition -> OMediaWorldAngle -> OMediaElementContainer -> OMediaDBObject -> OMediaClassStreamer -> OMediaListener -> OMediaMessagePort -> OMediaAnim -> CLocalGameObject -> CGameObject` |
 | Vftable(s) | `004b5ef4, 004b5f04, 004b6354, 004b6390, 004b63a4` |
 | Ctor(s) | factory/constructor installs the vftables and registers the class id (see `docs/_gam_classids.tsv`) |
@@ -33,6 +34,8 @@ See `docs/gam_schema.md` for the per-FourCC value ranges/samples across all 35 l
 ### Decompiled owned methods
 
 **`vfunc_01_007` @ `00441440`** — InitObject (property + asset registration)
+
+Interpreted: reads/writes registered property `ItemActive`.
 
 ```c
 void __thiscall C3DSparkWire::vfunc_01_007(C3DSparkWire *this)
@@ -65,6 +68,8 @@ void __thiscall C3DSparkWire::vfunc_01_007(C3DSparkWire *this)
 
 **`vfunc_01_010` @ `00441400`** — owned override
 
+Interpreted: fires an exit/deactivate action (slot `0x58`).
+
 ```c
 void __thiscall C3DSparkWire::vfunc_01_010(C3DSparkWire *this)
 
@@ -84,15 +89,25 @@ void __thiscall C3DSparkWire::vfunc_01_010(C3DSparkWire *this)
 
 ## Assets
 
-| Kind | Name | Notes |
+| Kind | Name | Present in `assets/` | Notes |
+|---|---|---|---|
+| ASE/anim | `powerline.ase` | ✓ `powerline.ASE` | anim tag `HIWALK` |
+| ASE/anim | `powerlinestop.ase` | ✓ `powerlinestop.ASE` | anim tag `HISTOP` |
+| PNG texture | `powerline01.png` | ✓ `powerline01.png` |  |
+| PNG texture | `powerline02.png` | ✓ `powerline02.png` |  |
+| PNG texture | `powerline01.png` | ✓ `powerline01.png` |  |
+| PNG texture | `powerline02.png` | ✓ `powerline02.png` |  |
+| default anim | `WALK` | n/a | flag 1 |
+
+## Validation
+
+Registered properties cross-checked against the shipped `.gam` data for FourCC `3SPA` (`docs/gam_schema.md`):
+
+| Property | Status | Detail |
 |---|---|---|
-| ASE/anim | `powerline.ase` | anim tag `HIWALK` |
-| ASE/anim | `powerlinestop.ase` | anim tag `HISTOP` |
-| PNG texture | `powerline01.png` |  |
-| PNG texture | `powerline02.png` |  |
-| PNG texture | `powerline01.png` |  |
-| PNG texture | `powerline02.png` |  |
-| default anim | `WALK` | flag 1 |
+| `ItemActive` | confirmed in .gam | range/samples: 1 … 1 |
+
+1/1 registered properties are present in shipped `.gam` level data (the rest are recognised tuning/wiring the levels don't currently set). Any `TYPE MISMATCH` would flag an extraction error — none expected.
 
 ## Confidence
 

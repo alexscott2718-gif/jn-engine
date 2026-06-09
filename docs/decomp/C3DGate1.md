@@ -5,6 +5,7 @@
 | Item | Value |
 |---|---|
 | RTTI name | `C3DGate1` |
+| FourCC | `3GAT` |
 | Base chain | `C3DYokDoor -> C3DAnimated -> C3DObject -> OMedia3DMorphAnim -> OMedia3DShapeElement -> OMediaElement -> OMediaWorldPosition -> OMediaWorldAngle -> OMediaElementContainer -> OMediaDBObject -> OMediaClassStreamer -> OMediaListener -> OMediaMessagePort -> OMediaAnim -> CLocalGameObject -> CGameObject` |
 | Vftable(s) | `0049e278, 0049e288, 0049e6d8, 0049e714, 0049e728` |
 | Ctor(s) | factory/constructor installs the vftables and registers the class id (see `docs/_gam_classids.tsv`) |
@@ -37,6 +38,8 @@ See `docs/gam_schema.md` for the per-FourCC value ranges/samples across all 35 l
 
 **`vfunc_01_007` @ `0041be00`** — InitObject (property + asset registration)
 
+Interpreted: reads/writes registered properties `ItemClosed`, `Next`, `DoorSpeed`, `OpenTime`.
+
 ```c
 void __thiscall C3DGate1::vfunc_01_007(C3DGate1 *this)
 
@@ -68,6 +71,8 @@ void __thiscall C3DGate1::vfunc_01_007(C3DGate1 *this)
 
 **`vfunc_01_266` @ `0041bef0`** — owned override
 
+Interpreted: plays a sound effect (`FUN_00458980`).
+
 ```c
 void __thiscall C3DGate1::vfunc_01_266(C3DGate1 *this)
 
@@ -90,6 +95,19 @@ void __thiscall C3DGate1::vfunc_01_266(C3DGate1 *this)
 ## Assets
 
 No direct ASE/PNG/anim references in `InitObject` (inherited visual path or runtime-assigned).
+
+## Validation
+
+Registered properties cross-checked against the shipped `.gam` data for FourCC `3GAT` (`docs/gam_schema.md`):
+
+| Property | Status | Detail |
+|---|---|---|
+| `ItemClosed` | registered, unused in shipped .gam |  |
+| `Next` | registered, unused in shipped .gam |  |
+| `DoorSpeed` | registered, unused in shipped .gam |  |
+| `OpenTime` | registered, unused in shipped .gam |  |
+
+0/4 registered properties are present in shipped `.gam` level data (the rest are recognised tuning/wiring the levels don't currently set). Any `TYPE MISMATCH` would flag an extraction error — none expected.
 
 ## Confidence
 

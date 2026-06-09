@@ -5,6 +5,7 @@
 | Item | Value |
 |---|---|
 | RTTI name | `C3DDoorUpDown` |
+| FourCC | `3DUD` |
 | Base chain | `C3DAnimated -> C3DObject -> OMedia3DMorphAnim -> OMedia3DShapeElement -> OMediaElement -> OMediaWorldPosition -> OMediaWorldAngle -> OMediaElementContainer -> OMediaDBObject -> OMediaClassStreamer -> OMediaListener -> OMediaMessagePort -> OMediaAnim -> CLocalGameObject -> CGameObject` |
 | Vftable(s) | `0049939c, 004993ac, 004997fc, 00499838, 0049984c` |
 | Ctor(s) | factory/constructor installs the vftables and registers the class id (see `docs/_gam_classids.tsv`) |
@@ -41,6 +42,8 @@ See `docs/gam_schema.md` for the per-FourCC value ranges/samples across all 35 l
 
 **`vfunc_01_007` @ `004177c0`** — InitObject (property + asset registration)
 
+Interpreted: reads/writes registered properties `ItemClosed`, `Next`, `DoorSpeed`, `OpenTime`, `OpenAmount`, `ASEFile`, `PNGFile`, `TouchActivated`.
+
 ```c
 void __thiscall C3DDoorUpDown::vfunc_01_007(C3DDoorUpDown *this)
 
@@ -64,6 +67,8 @@ void __thiscall C3DDoorUpDown::vfunc_01_007(C3DDoorUpDown *this)
 
 **`vfunc_01_259` @ `00417c50`** — owned override
 
+Interpreted: reads/writes registered properties `ASEFile`, `PNGFile`.
+
 ```c
 void __thiscall C3DDoorUpDown::vfunc_01_259(C3DDoorUpDown *this)
 
@@ -85,6 +90,23 @@ void __thiscall C3DDoorUpDown::vfunc_01_259(C3DDoorUpDown *this)
 ## Assets
 
 No direct ASE/PNG/anim references in `InitObject` (inherited visual path or runtime-assigned).
+
+## Validation
+
+Registered properties cross-checked against the shipped `.gam` data for FourCC `3DUD` (`docs/gam_schema.md`):
+
+| Property | Status | Detail |
+|---|---|---|
+| `ItemClosed` | confirmed in .gam | range/samples: 1 … 1 |
+| `Next` | confirmed in .gam | range/samples: "none" |
+| `DoorSpeed` | confirmed in .gam | range/samples: 5 … 5 |
+| `OpenTime` | confirmed in .gam | range/samples: 3 … 3 |
+| `OpenAmount` | confirmed in .gam | range/samples: 500 … 500 |
+| `ASEFile` | confirmed in .gam | range/samples: "bars.ase" |
+| `PNGFile` | confirmed in .gam | range/samples: "chain.png" |
+| `TouchActivated` | confirmed in .gam | range/samples: 0 … 0 |
+
+8/8 registered properties are present in shipped `.gam` level data (the rest are recognised tuning/wiring the levels don't currently set). Any `TYPE MISMATCH` would flag an extraction error — none expected.
 
 ## Confidence
 

@@ -5,6 +5,7 @@
 | Item | Value |
 |---|---|
 | RTTI name | `C3DFerChair` |
+| FourCC | `3CHA` |
 | Base chain | `C3DAnimated -> C3DObject -> OMedia3DMorphAnim -> OMedia3DShapeElement -> OMediaElement -> OMediaWorldPosition -> OMediaWorldAngle -> OMediaElementContainer -> OMediaDBObject -> OMediaClassStreamer -> OMediaListener -> OMediaMessagePort -> OMediaAnim -> CLocalGameObject -> CGameObject` |
 | Vftable(s) | `0049b20c, 0049b21c, 0049b66c, 0049b6a8, 0049b6bc` |
 | Ctor(s) | factory/constructor installs the vftables and registers the class id (see `docs/_gam_classids.tsv`) |
@@ -50,11 +51,15 @@ void __thiscall C3DFerChair::vfunc_01_007(C3DFerChair *this)
 
 ## Assets
 
-| Kind | Name | Notes |
-|---|---|---|
-| ASE/anim | `chair.ase` | anim tag `HIDEFAULT` |
-| PNG texture | `wheel.png` |  |
-| default anim | `DEFAULT` | flag 1 |
+| Kind | Name | Present in `assets/` | Notes |
+|---|---|---|---|
+| ASE/anim | `chair.ase` | ✓ `chair.ASE` | anim tag `HIDEFAULT` |
+| PNG texture | `wheel.png` | ✓ `wheel.png` |  |
+| default anim | `DEFAULT` | n/a | flag 1 |
+
+## Validation
+
+FourCC `3CHA` has no rows in the 35-level `.gam` corpus (`docs/gam_schema.md`) — this object type is not placed in any shipped level, so there is no `.gam` data to cross-check against.
 
 ## Confidence
 

@@ -5,6 +5,7 @@
 | Item | Value |
 |---|---|
 | RTTI name | `C3DVRTrophy` |
+| FourCC | `3TRO` |
 | Base chain | `C3DAnimated -> C3DObject -> OMedia3DMorphAnim -> OMedia3DShapeElement -> OMediaElement -> OMediaWorldPosition -> OMediaWorldAngle -> OMediaElementContainer -> OMediaDBObject -> OMediaClassStreamer -> OMediaListener -> OMediaMessagePort -> OMediaAnim -> CLocalGameObject -> CGameObject` |
 | Vftable(s) | `004be3f4, 004be404, 004be854, 004be890, 004be8a4` |
 | Ctor(s) | factory/constructor installs the vftables and registers the class id (see `docs/_gam_classids.tsv`) |
@@ -46,6 +47,8 @@ void __thiscall C3DVRTrophy::vfunc_01_007(C3DVRTrophy *this)
 
 **`vfunc_01_010` @ `00448ef0`** — post-init / per-frame logic
 
+Interpreted: fires an exit/deactivate action (slot `0x58`).
+
 ```c
 void __thiscall C3DVRTrophy::vfunc_01_010(C3DVRTrophy *this)
 
@@ -82,6 +85,10 @@ void __thiscall C3DVRTrophy::vfunc_04_067(C3DVRTrophy *this)
 ## Assets
 
 No direct ASE/PNG/anim references in `InitObject` (inherited visual path or runtime-assigned).
+
+## Validation
+
+No registered `.gam` properties to cross-check (inherited property set or runtime-created object).
 
 ## Confidence
 

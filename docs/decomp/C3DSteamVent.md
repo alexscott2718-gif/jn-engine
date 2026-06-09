@@ -5,6 +5,7 @@
 | Item | Value |
 |---|---|
 | RTTI name | `C3DSteamVent` |
+| FourCC | `3STE` |
 | Base chain | `C3DAnimated -> C3DObject -> OMedia3DMorphAnim -> OMedia3DShapeElement -> OMediaElement -> OMediaWorldPosition -> OMediaWorldAngle -> OMediaElementContainer -> OMediaDBObject -> OMediaClassStreamer -> OMediaListener -> OMediaMessagePort -> OMediaAnim -> CLocalGameObject -> CGameObject` |
 | Vftable(s) | `004b7b98, 004b7ba8, 004b7ff8, 004b8034, 004b8048` |
 | Ctor(s) | factory/constructor installs the vftables and registers the class id (see `docs/_gam_classids.tsv`) |
@@ -39,6 +40,8 @@ See `docs/gam_schema.md` for the per-FourCC value ranges/samples across all 35 l
 ### Decompiled owned methods
 
 **`vfunc_01_007` @ `00442b70`** — InitObject (property + asset registration)
+
+Interpreted: reads/writes registered properties `Red`, `Green`, `Blue`, `ButtonAvailable`, `NASound`, `AvailSound`, `NextButton`.
 
 ```c
 void __thiscall C3DSteamVent::vfunc_01_007(C3DSteamVent *this)
@@ -84,12 +87,28 @@ void __thiscall C3DSteamVent::vfunc_01_259(C3DSteamVent *this)
 
 ## Assets
 
-| Kind | Name | Notes |
+| Kind | Name | Present in `assets/` | Notes |
+|---|---|---|---|
+| ASE/anim | `buttondown.ase` | ✓ `buttondown.ASE` | anim tag `HIDOWN` |
+| ASE/anim | `buttonup.ase` | ✓ `buttonup.ASE` | anim tag `HIUP` |
+| PNG texture | `switch.png` | ✓ `switch.png` |  |
+| default anim | `UP` | n/a | flag 1 |
+
+## Validation
+
+Registered properties cross-checked against the shipped `.gam` data for FourCC `3STE` (`docs/gam_schema.md`):
+
+| Property | Status | Detail |
 |---|---|---|
-| ASE/anim | `buttondown.ase` | anim tag `HIDOWN` |
-| ASE/anim | `buttonup.ase` | anim tag `HIUP` |
-| PNG texture | `switch.png` |  |
-| default anim | `UP` | flag 1 |
+| `Red` | confirmed in .gam | range/samples: 1 … 1 |
+| `Green` | confirmed in .gam | range/samples: 0.1 … 0.1 |
+| `Blue` | confirmed in .gam | range/samples: 0.1 … 0.1 |
+| `ButtonAvailable` | confirmed in .gam | range/samples: 0 … 1 |
+| `NASound` | confirmed in .gam | range/samples: -1 … -1 |
+| `AvailSound` | confirmed in .gam | range/samples: 81 … 81 |
+| `NextButton` | confirmed in .gam | range/samples: "VENT10", "VENT11", "VENT12", "VENT13", … |
+
+7/7 registered properties are present in shipped `.gam` level data (the rest are recognised tuning/wiring the levels don't currently set). Any `TYPE MISMATCH` would flag an extraction error — none expected.
 
 ## Confidence
 

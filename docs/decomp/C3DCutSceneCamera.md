@@ -5,6 +5,7 @@
 | Item | Value |
 |---|---|
 | RTTI name | `C3DCutSceneCamera` |
+| FourCC | `3CAM` |
 | Base chain | `C3DTriggerType -> C3DSprite -> OMediaCanvasElement -> OMediaElement -> OMediaWorldPosition -> OMediaWorldAngle -> OMediaElementContainer -> OMediaDBObject -> OMediaClassStreamer -> OMediaListener -> OMediaMessagePort -> CLocalGameObject -> CGameObject` |
 | Vftable(s) | `00497bec, 00497bfc, 0049804c, 00498060` |
 | Ctor(s) | factory/constructor installs the vftables and registers the class id (see `docs/_gam_classids.tsv`) |
@@ -50,6 +51,8 @@ See `docs/gam_schema.md` for the per-FourCC value ranges/samples across all 35 l
 ### Decompiled owned methods
 
 **`vfunc_01_007` @ `00415d70`** — InitObject (property + asset registration)
+
+Interpreted: reads/writes registered properties `CameraTarget`, `SoundDatabase`, `SoundIndex`, `FaceObject`, `ViewFromCamera`, `TargOffsetX`, `TargOffsetY`, `TargOffsetZ`, `TargetActAnim`, `LoopActAnim`, `TargetDeactAnim`, `LookVoffset`, `CameraType`, `ZoomSpeed`, `MaxDist`, `MinDist`, `InitialDist`, `PlayerControlled`, `DeactivateInv`.
 
 ```c
 void __thiscall C3DCutSceneCamera::vfunc_01_007(C3DCutSceneCamera *this)
@@ -112,6 +115,34 @@ void __thiscall C3DCutSceneCamera::vfunc_01_007(C3DCutSceneCamera *this)
 ## Assets
 
 No direct ASE/PNG/anim references in `InitObject` (inherited visual path or runtime-assigned).
+
+## Validation
+
+Registered properties cross-checked against the shipped `.gam` data for FourCC `3CAM` (`docs/gam_schema.md`):
+
+| Property | Status | Detail |
+|---|---|---|
+| `CameraTarget` | confirmed in .gam | range/samples: "1tree", "C3DGODDARD", "C3DLIBBY", "JIM1", … |
+| `SoundDatabase` | confirmed in .gam | range/samples: "loadsfx.omt", "soundeffects.omt", "voicedemo.omt", "voicedowntown.omt", … |
+| `SoundIndex` | confirmed in .gam | range/samples: 0 … 102 |
+| `FaceObject` | confirmed in .gam | range/samples: "Jim1", "c3dcarl", "c3dgoddard", "c3dyokturret", … |
+| `ViewFromCamera` | confirmed in .gam | range/samples: 0 … 3 |
+| `TargOffsetX` | confirmed in .gam | range/samples: 0 … 300 |
+| `TargOffsetY` | confirmed in .gam | range/samples: 0 … 1e+03 |
+| `TargOffsetZ` | confirmed in .gam | range/samples: 0 … 1.5e+04 |
+| `TargetActAnim` | confirmed in .gam | range/samples: "Flip", "STOP", "TALK", "TELE", … |
+| `LoopActAnim` | confirmed in .gam | range/samples: -1 … 1 |
+| `TargetDeactAnim` | confirmed in .gam | range/samples: "BROKE", "STOP", "WAIT", "Walk", … |
+| `LookVoffset` | confirmed in .gam | range/samples: 0 … 5e+03 |
+| `CameraType` | confirmed in .gam | range/samples: 0 … 3 |
+| `ZoomSpeed` | confirmed in .gam | range/samples: -1.2e+03 … 450 |
+| `MaxDist` | confirmed in .gam | range/samples: -1e+04 … 8.7e+04 |
+| `MinDist` | confirmed in .gam | range/samples: -500 … 1e+04 |
+| `InitialDist` | confirmed in .gam | range/samples: -500 … 2.5e+04 |
+| `PlayerControlled` | confirmed in .gam | range/samples: "NULL", "none", "null" |
+| `DeactivateInv` | confirmed in .gam | range/samples: 1 … 1 |
+
+19/19 registered properties are present in shipped `.gam` level data (the rest are recognised tuning/wiring the levels don't currently set). Any `TYPE MISMATCH` would flag an extraction error — none expected.
 
 ## Confidence
 

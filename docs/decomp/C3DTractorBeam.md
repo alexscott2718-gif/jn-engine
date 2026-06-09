@@ -5,6 +5,7 @@
 | Item | Value |
 |---|---|
 | RTTI name | `C3DTractorBeam` |
+| FourCC | `3TRC` |
 | Base chain | `C3DAnimated -> C3DObject -> OMedia3DMorphAnim -> OMedia3DShapeElement -> OMediaElement -> OMediaWorldPosition -> OMediaWorldAngle -> OMediaElementContainer -> OMediaDBObject -> OMediaClassStreamer -> OMediaListener -> OMediaMessagePort -> OMediaAnim -> CLocalGameObject -> CGameObject` |
 | Vftable(s) | `004bb628, 004bb638, 004bba88, 004bbac4, 004bbad8` |
 | Ctor(s) | factory/constructor installs the vftables and registers the class id (see `docs/_gam_classids.tsv`) |
@@ -53,13 +54,17 @@ void __thiscall C3DTractorBeam::vfunc_01_007(C3DTractorBeam *this)
 
 ## Assets
 
-| Kind | Name | Notes |
-|---|---|---|
-| ASE/anim | `yrayupdown.ASE` | anim tag `HIUP` |
-| ASE/anim | `yraystop.ASE` | anim tag `HISTOP` |
-| PNG texture | `yray1.png` |  |
-| PNG texture | `yray2.png` |  |
-| default anim | `STOP` | flag 1 |
+| Kind | Name | Present in `assets/` | Notes |
+|---|---|---|---|
+| ASE/anim | `yrayupdown.ASE` | ✓ `yrayupdown.ASE` | anim tag `HIUP` |
+| ASE/anim | `yraystop.ASE` | ✓ `yraystop.ASE` | anim tag `HISTOP` |
+| PNG texture | `yray1.png` | ✓ `yray1.png` |  |
+| PNG texture | `yray2.png` | ✓ `yray2.png` |  |
+| default anim | `STOP` | n/a | flag 1 |
+
+## Validation
+
+No registered `.gam` properties to cross-check (inherited property set or runtime-created object).
 
 ## Confidence
 

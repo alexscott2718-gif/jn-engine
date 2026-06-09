@@ -5,6 +5,7 @@
 | Item | Value |
 |---|---|
 | RTTI name | `C3DMovingTarget` |
+| FourCC | (not resolved; not a `.gam`-placed object or id unmapped) |
 | Base chain | `C3DSpriteType -> C3DSprite -> OMediaCanvasElement -> OMediaElement -> OMediaWorldPosition -> OMediaWorldAngle -> OMediaElementContainer -> OMediaDBObject -> OMediaClassStreamer -> OMediaListener -> OMediaMessagePort -> CLocalGameObject -> CGameObject` |
 | Vftable(s) | `004a8a00, 004a8a10, 004a8e60, 004a8e74` |
 | Ctor(s) | factory/constructor installs the vftables and registers the class id (see `docs/_gam_classids.tsv`) |
@@ -27,6 +28,8 @@ No own `.gam` properties registered in `InitObject` (inherits its parent's prope
 ### Decompiled owned methods
 
 **`vfunc_01_016` @ `00430570`** — owned override
+
+Interpreted: type-checks an object via `IsA("C3DBASEBALL")`; type-checks an object via `IsA("C3DTROPHY")`; type-checks an object via `IsA("C3DPICKUPITEM")`; plays a sound effect (`FUN_00458980`); fires an exit/deactivate action (slot `0x58`).
 
 ```c
 void __thiscall C3DMovingTarget::vfunc_01_016(C3DMovingTarget *this)
@@ -89,6 +92,10 @@ C3DMovingTarget * __thiscall C3DMovingTarget::vfunc_02_002(C3DMovingTarget *this
 ## Assets
 
 No direct ASE/PNG/anim references in `InitObject` (inherited visual path or runtime-assigned).
+
+## Validation
+
+No registered `.gam` properties to cross-check (inherited property set or runtime-created object).
 
 ## Confidence
 

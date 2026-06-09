@@ -5,6 +5,7 @@
 | Item | Value |
 |---|---|
 | RTTI name | `C3DMover` |
+| FourCC | `3MOV` |
 | Base chain | `C3DAnimated -> C3DObject -> OMedia3DMorphAnim -> OMedia3DShapeElement -> OMediaElement -> OMediaWorldPosition -> OMediaWorldAngle -> OMediaElementContainer -> OMediaDBObject -> OMediaClassStreamer -> OMediaListener -> OMediaMessagePort -> OMediaAnim -> CLocalGameObject -> CGameObject` |
 | Vftable(s) | `004a8424, 004a8434, 004a8884, 004a88c0, 004a88d4` |
 | Ctor(s) | factory/constructor installs the vftables and registers the class id (see `docs/_gam_classids.tsv`) |
@@ -36,6 +37,8 @@ See `docs/gam_schema.md` for the per-FourCC value ranges/samples across all 35 l
 ### Decompiled owned methods
 
 **`vfunc_01_007` @ `0042fc70`** — InitObject (property + asset registration)
+
+Interpreted: reads/writes registered properties `ItemClosed`, `Next`, `DoorSpeed`, `OpenTime`; registers an OMT database object FourCC `vnaC`; registers an OMT database object FourCC `hSD3`; registers an OMT database object FourCC `aMD3`; registers an OMT database object FourCC `md3A`.
 
 ```c
 void __thiscall C3DMover::vfunc_01_007(C3DMover *this)
@@ -75,6 +78,8 @@ void __thiscall C3DMover::vfunc_01_007(C3DMover *this)
 
 **`vfunc_01_017` @ `0042fea0`** — owned override
 
+Interpreted: type-checks an object via `IsA("C3DJIMMY")`.
+
 ```c
 void __thiscall C3DMover::vfunc_01_017(C3DMover *this)
 
@@ -95,6 +100,19 @@ void __thiscall C3DMover::vfunc_01_017(C3DMover *this)
 ## Assets
 
 No direct ASE/PNG/anim references in `InitObject` (inherited visual path or runtime-assigned).
+
+## Validation
+
+Registered properties cross-checked against the shipped `.gam` data for FourCC `3MOV` (`docs/gam_schema.md`):
+
+| Property | Status | Detail |
+|---|---|---|
+| `ItemClosed` | registered, unused in shipped .gam |  |
+| `Next` | registered, unused in shipped .gam |  |
+| `DoorSpeed` | registered, unused in shipped .gam |  |
+| `OpenTime` | registered, unused in shipped .gam |  |
+
+0/4 registered properties are present in shipped `.gam` level data (the rest are recognised tuning/wiring the levels don't currently set). Any `TYPE MISMATCH` would flag an extraction error — none expected.
 
 ## Confidence
 
