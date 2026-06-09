@@ -98,6 +98,33 @@ wrong/tiny vertex count at byte 48 and drop almost all geometry → the ≤12-ve
 "stubs". The OMT→GLB pipeline parses the full format correctly, which is why the
 GLB twins have real geometry (and is why it is the authoritative source).
 
+## Hazard: absolute-Y placement meshes used as entity meshes (2026-06-09)
+
+Surfaced during level1b QA — the `3FAN` "labfan" (authored Y=479, overhead)
+rendered underground and appeared not to spin. The resolver pointed it at
+`assets/glb/omt/level5a/fan.glb`, whose vertices **bake level5a's absolute world
+Y (~-3500)**. The entity draw path translates the mesh by the entity `(x,y,z)`,
+so the baked level Y stacked on top → the fan rendered at Y≈-1500..-4700.
+
+**Two mesh conventions, by directory:**
+- `assets/glb/omt/<level>/*.glb` — **absolute-positioned** placement meshes
+  (X/Z localized around the chunk center, **Y baked absolute**). Correct for the
+  static placement layer (drawn at `(pl->x, 0, -pl->z)`); **wrong** as entity
+  meshes. Verified: across all of level1b, mesh bbox-center Y == placement Y.
+- `assets/glb/ase/*.glb` and top-level `assets/glb/omt/*.glb` — **origin-centered**
+  (base ≈ Y0). Correct as entity meshes.
+
+**Fix:** `EntityVisual.recenter` (entity_visual.h). When set, the entity draw
+path offsets the mesh by its own (scaled) bbox center so it sits at the entity
+position. Set on `3FAN` (level5a/fan.glb) and `3TES` (level6/tesla.glb) — the two
+resolver rows that point at absolute-positioned level-subdir meshes. The glTF
+loader stores **raw** vertex positions (no node-transform, no centering), so the
+model's min/max are the true baked extents and the recenter offset is exact.
+
+Side note: the level1b `blockfan*.glb` static placements are themselves
+degenerate (3–6 verts, no texture) and are skipped by the untextured-placement
+cull, so the overhead fan now comes solely from the recentered `3FAN` entity.
+
 ## Open architectural question
 
 For animated gameplay props (the spinning `3FAN` blade), the *housing* is already in
