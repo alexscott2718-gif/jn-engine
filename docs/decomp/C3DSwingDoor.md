@@ -6,126 +6,99 @@
 |---|---|
 | RTTI name | `C3DSwingDoor` |
 | Base chain | `C3DAnimated -> C3DObject -> OMedia3DMorphAnim -> OMedia3DShapeElement -> OMediaElement -> OMediaWorldPosition -> OMediaWorldAngle -> OMediaElementContainer -> OMediaDBObject -> OMediaClassStreamer -> OMediaListener -> OMediaMessagePort -> OMediaAnim -> CLocalGameObject -> CGameObject` |
-| Vftable(s) | `004b8d48, 004b8d58, 004b91a8, 004b91e4, 004b91f8` |
-| Ctor(s) | factory/constructor installs the vftables and registers the class id (see `docs/_gam_classids.tsv`) |
-| Dtor(s) | inherited deleting destructor (none owned) |
+| Vftable(s) | `004b8d48`, `004b8d58`, `004b91a8`, `004b91e4`, `004b91f8` |
+| Ctor(s) | installs the `C3DSwingDoor` vftables |
+| Dtor(s) | inherited `C3DAnimated` deleting destructor (none owned) |
 | Ledger row | `docs/decomp_ledger.csv` |
 
-`C3DSwingDoor` is a placeable **mechanisms moving parts** object (family `mechanisms_moving_parts`, wave 6). It walks the class vtable with 3 owned methods; its `.gam`-driven parameters and assets are registered in `InitObject` and listed below.
+`C3DSwingDoor` is a placeable **swinging door** mechanism: a timed-rotation door that
+opens for a configured duration then swings back. It uses a small two-phase state
+machine driven by a countdown timer; each frame it rotates the door about its yaw by
+`OpenSpeed × dt`, forward while opening and backward while closing. Family
+`mechanisms_moving_parts` (wave 6). (`InitObject` borrows the `C3DShrinkRay`
+trace/asset strings, so it shares the "ray" visual setup — `HIRAY` anim.)
 
-## Field Map (registered `.gam` properties)
+## Field Map
 
-Offsets are from the primary class pointer; types are the `.gam` serialization type ids (`1=string 2=flag4 3=float 4=raw4 6=int`).
+Offsets from the primary `C3DSwingDoor` pointer. `ASEFile`/`PNGFile` are stored as the
+high byte of a slot (`(&this[N].vftable)+1`) — string properties packed into the
+struct.
 
-| Offset | Type | Property | Source |
-|---:|---|---|---|
-| `0x1b5` | float | `TimeToOpen` | `InitObject` registrar (`vftable+0x3fc`) |
-| `0x1b4` | float | `OpenSpeed` | `InitObject` registrar (`vftable+0x3fc`) |
-| `0x1b6` | int | `TouchActivated` | `InitObject` registrar (`vftable+0x3fc`) |
-
-See `docs/gam_schema.md` for the per-FourCC value ranges/samples across all 35 levels (the field map, constants, and object wiring are data-driven from there).
+| Offset | Type | Name | Source | Meaning |
+|---:|---|---|---|---|
+| `0x1b5` | float | `TimeToOpen` | `InitObject` registrar | How long the door stays in motion / open. |
+| `0x1b4` | float | `OpenSpeed` | `InitObject` registrar | Yaw rotation rate (× dt per frame). |
+| `0x1b6` | int | `TouchActivated` | `InitObject` registrar | Whether contact opens the door. |
+| `0x181`+1 | string | `ASEFile` | `InitObject` registrar | Override model file. |
+| `0x19a`+1 | string | `PNGFile` | `InitObject` registrar | Override texture file. |
+| `this[0x17f]` (byte) | bool | `is_moving` | `vfunc_01_241` | Master gate: the per-frame swing only runs while set. |
+| `this[0x180]` | float | `motion_timer` | `vfunc_01_241` | Counts down by `dt`; reaching `<= 0` ends the current phase. |
+| `this[0x181]` (byte) | bool | `closing` | `vfunc_01_241` | `0` = opening (rotate +), `1` = closing (rotate −). |
 
 ## Vtable Methods (owned)
 
-| Slot | Address | Role | Behavior |
-|---|---|---|---|
-| `vfunc_01_007` | `004446a0` | InitObject (property + asset registration) | registers 3 `.gam` properties (`TimeToOpen`, `OpenSpeed`, `TouchActivated`) |
-| `vfunc_01_241` | `004447e0` | owned override | see decompiled body — touches `OpenSpeed` |
-| `vfunc_01_259` | `004448a0` | owned override | see decompiled body |
+| Slot | Address | Name | Behavior | Status |
+|---:|---|---|---|---|
+| vtable 1 slot 7 | `004446a0` | `InitObject` | Registers `ASEFile`, `PNGFile`, `TimeToOpen`, `OpenSpeed`, `TouchActivated`. | non-trivial |
+| vtable 1 slot 241 | `004447e0` | `UpdateDoor` | Two-phase open/close swing state machine (below). | non-trivial |
+| vtable 1 slot 259 | `004448a0` | `Reset` | Loads the visual (`HIRAY` anim from `ASEFile`, `PNGFile`), sets scale `40.0` (`0x42200000`), enables collision (slots `0xa8`/`0xa0`). | non-trivial |
 
-### Decompiled owned methods
-
-**`vfunc_01_007` @ `004446a0`** — InitObject (property + asset registration)
+### Per-frame behavior
 
 ```c
-void __thiscall C3DSwingDoor::vfunc_01_007(C3DSwingDoor *this)
-
-{
-  CGameObject *this_00;
-  
-  (**(code **)(this->vftable + 0x3f8))(this,s_C3DShrinkRay__InitObject___004f09fc);
-  C3DAnimated::vfunc_01_007((C3DAnimated *)this);
-  (**(code **)(this->vftable + 0x3fc))
-            (s_ASEFile_004ee2b4,(undefined1 *)((int)&this[0x181].vftable + 1),1,0);
-  (**(code **)(this->vftable + 0x3fc))
-            (s_PNGFile_004ee2ac,(undefined1 *)((int)&this[0x19a].vftable + 1),1,0);
-  (**(code **)(this->vftable + 0x3fc))(s_TimeToOpen_004f1028,this + 0x1b5,3,0);
-  (**(code **)(this->vftable + 0x3fc))(s_OpenSpeed_004f101c,this + 0x1b4,3,0);
-  (**(code **)(this->vftable + 0x3fc))(s_TouchActivated_004ecdf8,this + 0x1b6,6,0);
-  CGameObject::vfunc_00_013(this_00);
-  return;
-}
+C3DSwingDoor::UpdateDoor(dt):                // vfunc_01_241 @ 004447e0
+    if not is_moving: return                 // this[0x17f]
+    motion_timer -= dt                        // this[0x180]
+    if not closing:                           // this[0x181] == 0  -> opening
+        rotate_yaw(+OpenSpeed * dt)           // slot 0x334 (0, +speed*dt, 0)
+        if motion_timer <= 0:
+            is_moving = 0; closing = 1; motion_timer = 0   // pause, next push closes
+    else:                                     // closing
+        rotate_yaw(-OpenSpeed * dt)           // slot 0x334 (0, -speed*dt, 0)
+        if motion_timer <= 0:
+            is_moving = 0; closing = 0; motion_timer = 0   // fully closed, reset
 ```
 
-**`vfunc_01_241` @ `004447e0`** — owned override
+The door is an edge-triggered swing: an activation (touch / `ActivateObject` wiring)
+sets `is_moving` and seeds `motion_timer` (from `TimeToOpen`); the update rotates it at
+`OpenSpeed` until the timer expires, latching `closing` so the *next* activation swings
+it the other way. Rotation is applied through the world-angle slot `0x334` about yaw.
 
-```c
-void __thiscall C3DSwingDoor::vfunc_01_241(C3DSwingDoor *this)
+## Constants And Wiring
 
-{
-  float in_stack_00000004;
-  
-  if (*(char *)&this[0x17f].vftable != '\0') {
-    this[0x180].vftable = (undefined *)((float)this[0x180].vftable - in_stack_00000004);
-    if (*(char *)&this[0x181].vftable == '\0') {
-      (**(code **)(this->vftable + 0x334))(0,in_stack_00000004 * (float)this[0x1b4].vftable,0);
-      if ((float)this[0x180].vftable <= 0.0) {
-        *(undefined1 *)&this[0x17f].vftable = 0;
-        *(undefined1 *)&this[0x181].vftable = 1;
-        this[0x180].vftable = (undefined *)0x0;
-        return;
-      }
-    }
-    else {
-      (**(code **)(this->vftable + 0x334))(0,-(in_stack_00000004 * (float)this[0x1b4].vftable),0);
-      if ((float)this[0x180].vftable <= 0.0) {
-        *(undefined1 *)&this[0x17f].vftable = 0;
-        *(undefined1 *)&this[0x181].vftable = 0;
-        this[0x180].vftable = (undefined *)0x0;
-      }
-    }
-  }
-  return;
-}
-```
-
-**`vfunc_01_259` @ `004448a0`** — owned override
-
-```c
-void __thiscall C3DSwingDoor::vfunc_01_259(C3DSwingDoor *this)
-
-{
-  C3DSwingDoor *pCVar1;
-  
-  C3DAnimated::vfunc_01_259((C3DAnimated *)this);
-  pCVar1 = this + -0x30;
-  (**(code **)(this[-0x30].vftable + 0x108))();
-  (**(code **)(pCVar1->vftable + 0xd8))
-            (s_HIRAY_004ee33c,(undefined1 *)((int)&this[0x181].vftable + 1));
-  (**(code **)(pCVar1->vftable + 0xf0))((undefined1 *)((int)&this[0x19a].vftable + 1),0);
-  (**(code **)(pCVar1->vftable + 0xf4))(this[0x12f].vftable,0);
-  (**(code **)(this->vftable + 0x110))(0x42200000);
-  (**(code **)(pCVar1->vftable + 0xe0))(&PTR_DAT_004ee338,1);
-  (**(code **)(this->vftable + 0xa8))(0);
-  (**(code **)(this->vftable + 0xa0))(0);
-  return;
-}
-```
+| Item | Value | Evidence |
+|---|---|---|
+| `TimeToOpen` | `.gam` float @ `0x1b5` | open/motion duration |
+| `OpenSpeed` | `.gam` float @ `0x1b4` | yaw rate × dt |
+| `TouchActivated` | `.gam` int @ `0x1b6` | contact opens door |
+| Reset scale | `40.0` | `Reset` immediate `0x42200000` |
+| Activation | `ActivateObject*` / touch | sets `is_moving`, seeds `motion_timer` |
 
 ## Assets
 
-No direct ASE/PNG/anim references in `InitObject` (inherited visual path or runtime-assigned).
+| Kind | Name | Notes |
+|---|---|---|
+| ASE model | `ASEFile` (`.gam`-supplied; anim `HIRAY`) | per-instance model from the `.gam` row. |
+| PNG texture | `PNGFile` (`.gam`-supplied) | per-instance texture. |
 
 ## Confidence
 
 Confidence: Medium
 
-Validation: Ghidra `DumpClass.java C3DSwingDoor` (owned methods decompiled); `.gam` properties and assets resolved from the `InitObject` registrar calls with strings read directly from `Neutron.exe`. `.gam` value ranges cross-referenced via `docs/gam_schema.md`. Behavioral prose is derived from the decompiled bodies above; not runtime-validated.
+Validation: Ghidra `DumpClass.java C3DSwingDoor` (`slots=368`, `owned_methods=3`); the
+two-phase swing state machine and the `OpenSpeed × dt` yaw integration are read
+directly from `UpdateDoor`; properties/assets resolved via PE strings. Not
+runtime-validated.
 
 Open questions:
-- Confirm the gameplay semantics of the per-frame/owned override method(s) beyond the decompiled control flow.
-- Pin the constructor address and class-id immediate (FourCC).
+- Confirm the activation entry point that sets `is_moving` / seeds `motion_timer` from
+  `TimeToOpen` (touch-collision slot vs. `ActivateObject` message).
+- Verify the yaw axis/sign of slot `0x334` against the world basis.
+- Explain why `InitObject` reuses the `C3DShrinkRay` / `HIRAY` strings (shared rig vs.
+  copy-paste in the original source).
 
 ## Notes
 
-- Generated by `tools/gen_placeable_specs.py` from the Ghidra dump + PE string resolution. Decompiled bodies are included verbatim as primary evidence.
+- Evidence: `DumpClass.java C3DSwingDoor /tmp/dumps2/decomp_C3DSwingDoor.md`.
+- Hand-written from the decompiled bodies (supersedes the generated skeleton). Sibling
+  door mechanisms: `C3DDoorUpDown`, `C3DSchoolDoor`, `C3DYokDoor`, `C3DYokBigdoor`.
