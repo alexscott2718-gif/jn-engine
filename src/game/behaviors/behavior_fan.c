@@ -15,6 +15,9 @@
 #include <stddef.h>
 
 #define FAN_DEG2RAD 0.017453292519943295f
+/* FanSpeed (~800..2700) is the airflow magnitude, not a screen-friendly blade
+   RPM; scale it to a clear, non-strobing visual spin (deg/s ~= 80..270). */
+#define FAN_VIS_SCALE 0.10f
 
 static void fan_on_spawn(Entity *e, World *w) {
     (void)w;
@@ -29,9 +32,11 @@ static void fan_on_update(Entity *e, World *w, float dt) {
     float fan_range = gam_prop_f(e, "FanRange", 0.0f);
     if (!e->user_flag || fan_speed <= 0.0f) return;
 
-    /* Spin the blades. The fan's facing is its authored RotationY; we advance a
-       roll the renderer applies to the mesh. */
-    e->user_float = fmodf(e->user_float + fan_speed * dt, 360.0f);
+    /* Spin the blades about the fan's local forward axis (roll). The renderer's
+       euler path applies rz after the authored yaw, so the blades spin no matter
+       which way the fan faces. Angle in radians. */
+    e->user_float = fmodf(e->user_float + fan_speed * FAN_VIS_SCALE * FAN_DEG2RAD * dt,
+                          6.2831853f);
     e->rz = e->user_float;
 
     /* Airflow: push the player along the fan's forward (-Z rotated by ry) with a

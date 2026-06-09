@@ -14,7 +14,7 @@
 #include <stddef.h>
 
 #define PEN_FREQ     1.4f     /* swing rate (rad/sec) */
-#define PEN_AMP_DEG  3.0f     /* degrees of roll per SwingHeight unit */
+#define PEN_AMP_RAD  0.0349f  /* radians of roll per SwingHeight unit (~2 deg) */
 #define PEN_RADIUS   140.0f   /* horizontal reach of the bob (units) */
 #define PEN_SHOVE    320.0f   /* peak shove velocity (units/sec) */
 
@@ -26,12 +26,12 @@ static void pendulum_on_spawn(Entity *e, World *w) {
 static void pendulum_on_update(Entity *e, World *w, float dt) {
     (void)w;
     float swing_height = gam_prop_f(e, "SwingHeight", 20.0f);
-    float amp = swing_height * PEN_AMP_DEG;            /* degrees */
+    float amp = swing_height * PEN_AMP_RAD;            /* radians */
 
     e->user_float += dt;
     float s  = sinf(e->user_float * PEN_FREQ);          /* -1..1 position */
     float ds = cosf(e->user_float * PEN_FREQ);          /* swing velocity sign */
-    e->rz = amp * s;
+    e->rz = amp * s;                                    /* roll, radians */
 
     /* Shove the player when the bob sweeps past them near the low point. */
     if (g_player && fabsf(s) < 0.6f) {                  /* near bottom of arc */

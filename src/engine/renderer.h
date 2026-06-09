@@ -25,6 +25,10 @@ void renderer_draw_model(const AseModel *m, unsigned int texture_id_override,
                          float tx, float ty, float tz, float yaw, float scale);
 void renderer_draw_model_matrix(const AseModel *m, unsigned int texture_id_override,
                                 const float model[16]);
+/* Static draw with yaw + pitch/roll (radians) for spinning/swinging props. */
+void renderer_draw_model_euler(const AseModel *m, unsigned int texture_id_override,
+                               float tx, float ty, float tz,
+                               float yaw, float pitch, float roll, float scale);
 void renderer_draw_model_anim(const AseModel *m, unsigned int texture_id_override,
                               float tx, float ty, float tz, float yaw, float scale,
                               int frame_a, int frame_b, float lerp);

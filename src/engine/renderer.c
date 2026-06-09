@@ -837,6 +837,29 @@ void renderer_draw_model(const AseModel *m, unsigned int texture_id_override,
     renderer_draw_model_matrix(m, texture_id_override, model);
 }
 
+/* Static full-euler draw: yaw (about Y), then pitch (X) and roll (Z) applied in
+   the yawed frame — rot = Ry * Rx * Rz. Used for spinning/swinging props whose
+   behavior drives rx/rz (fan blades, Ferris wheel, pendulum). All angles radians. */
+void renderer_draw_model_euler(const AseModel *m, unsigned int texture_id_override,
+                               float tx, float ty, float tz,
+                               float yaw, float pitch, float roll, float scale) {
+    Mat4 Ry, Rx, Rz, tmp, rot, model;
+    float cy = cosf(yaw),   sy = sinf(yaw);
+    float cx = cosf(pitch), sx = sinf(pitch);
+    float cz = cosf(roll),  sz = sinf(roll);
+    mat4_identity(Ry); Ry[0]=cy; Ry[2]=-sy; Ry[8]=sy;  Ry[10]=cy;
+    mat4_identity(Rx); Rx[5]=cx; Rx[6]=sx;  Rx[9]=-sx;  Rx[10]=cx;
+    mat4_identity(Rz); Rz[0]=cz; Rz[1]=sz;  Rz[4]=-sz;  Rz[5]=cz;
+    mat4_mul(tmp, Ry, Rx);
+    mat4_mul(rot, tmp, Rz);
+    for (int i = 0; i < 16; i++) model[i] = rot[i];
+    model[0]*=scale; model[1]*=scale; model[2]*=scale;
+    model[4]*=scale; model[5]*=scale; model[6]*=scale;
+    model[8]*=scale; model[9]*=scale; model[10]*=scale;
+    model[12]=tx; model[13]=ty; model[14]=tz; model[15]=1;
+    renderer_draw_model_matrix(m, texture_id_override, model);
+}
+
 void renderer_draw_model_anim(const AseModel *m, unsigned int texture_id_override,
                               float tx, float ty, float tz, float yaw, float scale,
                               int frame_a, int frame_b, float lerp) {

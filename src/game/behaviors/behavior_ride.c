@@ -11,11 +11,12 @@
 #include <math.h>
 #include <stddef.h>
 
-#define FERRIS_DEG_PER_SEC  12.0f   /* slow, stately wheel */
+#define FERRIS_RAD_PER_SEC  0.21f   /* ~12 deg/s — slow, stately wheel (radians) */
 
 static void ferris_on_update(Entity *e, World *w, float dt) {
     (void)w;
-    e->rz = fmodf(e->rz + FERRIS_DEG_PER_SEC * dt, 360.0f);
+    /* Roll about the wheel's local forward axis; renderer euler path applies rz. */
+    e->rz = fmodf(e->rz + FERRIS_RAD_PER_SEC * dt, 6.2831853f);
 }
 
 const EntityVTable vt_ferris = {

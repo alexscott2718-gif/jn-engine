@@ -1090,7 +1090,20 @@ int main(int argc, char **argv) {
                            meshes. The global hide-untextured flag is for OMT
                            collision slabs, not these — render them regardless. */
                         renderer_set_hide_untextured_groups(0);
-                        renderer_draw_model(m, tex, e->x, e->y, e->z, e->ry, sc);
+                        /* Props whose behavior drives a spin/swing roll (fan
+                           blades 3FAN, Ferris wheel 3FER, pendulum 3PEN) author
+                           rz in radians at runtime; draw them with full euler so
+                           the motion shows. Only these types opt in — authored
+                           .gam RotationX/Z (degrees, ~1% of objects) stays on the
+                           cheap yaw-only path to avoid wrong-unit tilts. */
+                        int spins = strncmp(e->type, "3FAN", 4) == 0 ||
+                                    strncmp(e->type, "3FER", 4) == 0 ||
+                                    strncmp(e->type, "3PEN", 4) == 0;
+                        if (spins)
+                            renderer_draw_model_euler(m, tex, e->x, e->y, e->z,
+                                                      e->ry, 0.0f, e->rz, sc);
+                        else
+                            renderer_draw_model(m, tex, e->x, e->y, e->z, e->ry, sc);
                         renderer_set_hide_untextured_groups(1);
                         continue;
                     }
