@@ -196,10 +196,18 @@ static const TypeEntry TYPE_TABLE[] = {
        off a metal atlas — it rendered as a "wood" board. Use the OMT->GLB
        pipeline's real fan mesh (228 verts, embedded textures) instead. See the
        degenerate-ASE-stub note in docs/decomp / PROJECT_HISTORY. */
-    /* level5a/fan.glb is an absolute-positioned placement mesh (baked level5a
-       world Y ~= -3500); recenter it onto the 3FAN entity so it renders at the
-       authored fan position and spins there. */
-    { "3FAN", { "assets/glb/omt/level5a/fan.glb", NULL, 1.0f, 0, NULL, 0.0f, 0,0,0,0, 1 } },
+    /* 3FAN renders the rotating *blades*, not the barrier. C3DFan::InitObject
+       loads fan.ase + fan.png + a DEFAULT spin anim (docs/decomp/C3DFan.md):
+       fan.ASE is the real 16-vert blade disc (flat in X/Z, ~1011 across),
+       textured by fan.png (the ASE's own "hook.bmp" material is overridden by
+       the class, so we point texture_path at fan.png). vt_fan spins it about Y,
+       approximating the DEFAULT animation. The static barrier/frame around it is
+       separate level geometry (assets/glb/omt/level5a/fan.glb) drawn by the
+       placement layer when level5a loads — it is NOT the entity mesh.
+       (The previous session mistook the 8-vert assets/ase/omt/fan.ASE *stub* for
+       the only fan source and substituted the barrier GLB; the authentic blade
+       mesh assets/ase/fan.ASE was overlooked.) */
+    { "3FAN", { "assets/ase/fan.ASE", "assets/png/fan.png", 1.0f, 0 } },
     { "3SAI", { "assets/ase/omt/SailBoat.ASE",  NULL, 1.0f, 0 } },
     { "3SPH", { "assets/ase/omt/Sphere01.ASE",  NULL, 1.0f, 0 } },
 

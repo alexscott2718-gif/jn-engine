@@ -56,7 +56,7 @@ All 15 stub references in `entity_visual.c` now resolve to GLB meshes:
 
 | FourCC / tag | was (ASE stub) | now (GLB) | verts / imgs |
 |---|---|---|---:|
-| `3FAN` | `omt/fan.ASE` | `assets/glb/omt/level5a/fan.glb` | 228 / 2 |
+| `3FAN` | `omt/fan.ASE` (8-vert stub) | `assets/ase/fan.ASE` + `fan.png` (real 16-vert blade disc) | 16 |
 | `3TRE` | `omt/tree01.ASE` | `assets/glb/omt/tree01.glb` | 24 / 1 |
 | `3SHU` | `omt/BUSH01.ASE` | `assets/glb/omt/BUSH01.glb` | 96 / 2 |
 | `3MOR` | `omt/Box01.ASE` | `assets/glb/omt/Box01.glb` | 30 / 0 |
@@ -116,10 +116,18 @@ so the baked level Y stacked on top → the fan rendered at Y≈-1500..-4700.
 
 **Fix:** `EntityVisual.recenter` (entity_visual.h). When set, the entity draw
 path offsets the mesh by its own (scaled) bbox center so it sits at the entity
-position. Set on `3FAN` (level5a/fan.glb) and `3TES` (level6/tesla.glb) — the two
-resolver rows that point at absolute-positioned level-subdir meshes. The glTF
-loader stores **raw** vertex positions (no node-transform, no centering), so the
-model's min/max are the true baked extents and the recenter offset is exact.
+position. Set on `3TES` (level6/tesla.glb). The glTF loader stores **raw** vertex
+positions (no node-transform, no centering), so the model's min/max are the true
+baked extents and the recenter offset is exact.
+
+**`3FAN` correction (later in the same session):** 3FAN was *first* pointed at
+the recentered level5a/fan.glb — but that mesh is the static **barrier/frame**,
+not the blades. Per `docs/decomp/C3DFan.md`, `C3DFan::InitObject` loads
+`fan.ase` + `fan.png` + a `DEFAULT` spin anim. The authentic blade mesh is
+`assets/ase/fan.ASE` (16-vert flat disc, identical to the original install),
+overlooked earlier because the OMT→ASE *stub* shares the name under `ase/omt/`.
+3FAN now uses `assets/ase/fan.ASE` + `assets/png/fan.png` (origin-centered, no
+recenter) and vt_fan spins it; the barrier stays in the level5a placement layer.
 
 Side note: the level1b `blockfan*.glb` static placements are themselves
 degenerate (3–6 verts, no texture) and are skipped by the untextured-placement
