@@ -41,6 +41,8 @@ static const EntityTypeInfo entity_types[] = {
     { "3TRC", "Tractor beam",          &vt_tractor   },
     { "3SOU", "Sound emitter",         &vt_soundfx   },
     { "3MUS", "Music trigger",         &vt_music     },
+    { "3PAT", "Patrol point",          &vt_patrolpoint },
+    { "3CAR", "Carl (patrol walker)",  &vt_walker    },
     { NULL, NULL, NULL }
 };
 

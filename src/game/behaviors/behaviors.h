@@ -24,6 +24,8 @@ extern const EntityVTable vt_ferris;      /* 3FER — C3DFerris */
 extern const EntityVTable vt_tractor;     /* 3TRC — C3DTractorBeam */
 extern const EntityVTable vt_soundfx;     /* 3SOU — C3DSoundEffect */
 extern const EntityVTable vt_music;       /* 3MUS — C3DMusicTrigger */
+extern const EntityVTable vt_walker;      /* 3CAR — C3DAI patrol walker (Carl) */
+extern const EntityVTable vt_patrolpoint; /* 3PAT — C3DPatrolPoint (nav node) */
 
 /* The currently-controlled player; resolved at spawn. NULL until first 3JIM resolved. */
 extern Entity *g_player;

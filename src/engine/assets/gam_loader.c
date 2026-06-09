@@ -148,6 +148,9 @@ int gam_load(World *w, const char *path) {
                 else if (strcmp(prop_name, "PatrolPoint") == 0) {
                     if (str_val[0] && strcasecmp(str_val, "none") != 0)
                         copy_string(e->patrol_point, sizeof(e->patrol_point), str_val);
+                } else if (strcmp(prop_name, "NextPatrolPoint") == 0) {
+                    if (str_val[0] && strcasecmp(str_val, "none") != 0)
+                        copy_string(e->next_patrol, sizeof(e->next_patrol), str_val);
                 } else if (strcmp(prop_name, "ActivateButton") == 0 ||
                            strcmp(prop_name, "SwitchObject") == 0) {
                     /* Both name the ObjectTag this control drives (C3DButton /

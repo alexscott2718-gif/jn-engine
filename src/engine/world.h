@@ -47,6 +47,7 @@ typedef struct Entity {
     char  ase_file[64];          /* 3ASE: ASEStop/ASEWalk mesh filename */
     char  png_file[64];          /* 3ASE: PNGFile texture filename */
     char  patrol_point[32];      /* 3MOP/AI: PatrolPoint target marker tag */
+    char  next_patrol[32];       /* 3PAT: NextPatrolPoint — next waypoint tag (graph edge) */
     char  activate_target[32];   /* 3BUT/3WAB: ActivateButton -> target ObjectTag */
     float home[3];               /* behavior scratch: captured spawn position */
     float patrol_to[3];          /* behavior scratch: resolved patrol target */
