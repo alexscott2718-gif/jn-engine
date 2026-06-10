@@ -30,4 +30,18 @@ typedef struct {
    and caller should fall back to placeholder rendering. */
 int entity_visual_resolve(const Entity *e, EntityVisual *out);
 
+/* Game selector for the per-instance sprite tier. The C3DSprite family reads
+   SpriteDatabase ("sprites.omt") + SpriteIndex from the .gam, but each game
+   ships its *own* sprites.omt — JNBG indices resolve through the generated
+   chunk map, JNvsJN through assets/parsed/sprites/jnvsjn/spr_<id>.png.
+   main.c calls this once at boot from JN_GAM_ROOT (default root = JNBG). */
+void entity_visual_set_jnbg(int is_jnbg);
+int  entity_visual_is_jnbg(void);
+
+/* JNBG sprite-database lookups: (.gam SpriteDatabase, SpriteIndex=chunk id)
+   -> extracted PNG path, NULL if unknown. sprite_chunk_path is the
+   sprites.omt shorthand used by the pickup draw path. */
+const char *sprite_db_path(const char *db, int chunk_id);
+const char *sprite_chunk_path(int chunk_id);
+
 #endif

@@ -1,12 +1,37 @@
 #include "entity_visual.h"
+#include "sprite_chunk_map_generated.h"
 #include <string.h>
 #include <strings.h>
 
 /* Lookup tiers:
    1) per-(FourCC, tag) override
-   2) per-FourCC default
-   3) FourCC marked invisible
+   2) GRN-stem mesh (JNvsJN props)
+   3) per-FourCC default (incl. FourCC marked invisible)
+   4) per-instance sprite reference: the C3DSprite family authors
+      SpriteDatabase ("sprites.omt") + SpriteIndex (canvas chunk id) +
+      SpriteSize in the .gam — resolve to a billboard via the generated
+      chunk map (JNBG only; JNvsJN keeps its spr_<id> draw path in main.c).
+      Ordered after the tables so curated rows (3NEU tint, tuned sizes)
+      keep priority; this tier is the generic gap-filler.
    No entry  -> resolver returns 0, caller draws the placeholder box. */
+
+static int g_is_jnbg = 1;
+
+void entity_visual_set_jnbg(int is_jnbg) { g_is_jnbg = is_jnbg; }
+int  entity_visual_is_jnbg(void)         { return g_is_jnbg; }
+
+const char *sprite_db_path(const char *db, int chunk_id) {
+    if (!db || !db[0]) return NULL;
+    for (int i = 0; i < SPRITE_CHUNK_MAP_N; i++)
+        if (SPRITE_CHUNK_MAP[i].chunk_id == chunk_id &&
+            strcasecmp(SPRITE_CHUNK_MAP[i].db, db) == 0)
+            return SPRITE_CHUNK_MAP[i].path;
+    return NULL;
+}
+
+const char *sprite_chunk_path(int chunk_id) {
+    return sprite_db_path("sprites.omt", chunk_id);
+}
 
 typedef struct {
     const char  *fourcc;
@@ -284,6 +309,53 @@ static const TypeEntry TYPE_TABLE[] = {
     { "3VRT", { "assets/ase/jnvsjn/tankstop.ase",       NULL, 1.0f, 0 } },  /* VRTank */
     { "3LUN", { "assets/ase/jnvsjn/lunerlanderstop.ase", NULL, 1.0f, 0 } }, /* LunarLander */
 
+    /* ---- Decomp-campaign wave (2026-06-09): class-constant assets measured
+       from each class's InitObject in docs/decomp/C3D*.md (see
+       docs/notes_box_fallback.md). Where the class overrides the ASE's own
+       material texture (the 3FAN pattern), texture_path is set explicitly;
+       otherwise the ASE's bitmap resolves through the normal material path. */
+    { "3STE", { "assets/ase/buttonup.ASE",      NULL, 1.0f, 0 } },  /* C3DSteamVent: buttonup/down.ase + switch.png (default UP) */
+    { "3SPA", { "assets/ase/powerline.ASE",     "assets/png/powerline01.png", 1.0f, 0 } },  /* C3DSparkWire (default WALK) */
+    /* C3DTractorBeam (3TRC): the Yokian abduction beam — a 5400-unit green
+       column (yraystop/yrayupdown.ase). Every instance is cutscene-driven
+       (TaskName="scene" or IV=0); drawing the STOP pose statically floods the
+       Level3 spawn in green. Invisible until the task system can fire it;
+       mesh exported and ready at assets/ase/yraystop.ASE. */
+    { "3TRC", { NULL, NULL, 0.0f, 1 } },
+    { "3SWI", { "assets/ase/switch.ASE",        "assets/png/switch.png", 1.0f, 0 } },  /* C3DSwitch: switch.ase + switch.png */
+    { "3OCT", { "assets/ase/octo.ASE",          "assets/png/octapuke1.png", 1.0f, 0 } },  /* C3DOctapuke (default DEFAULT) */
+    { "3DIG", { "assets/ase/drill.ASE",         "assets/png/drill.png", 1.0f, 0 } },  /* C3DDigger */
+    /* RTTI-name-evident original meshes (class spec says "inherited visual
+       path"; the install ships exactly one matching ASE). */
+    { "3EYE", { "assets/ase/eye.ASE",           "assets/png/eyemap.png", 1.0f, 0 } },  /* C3DEye (Retroland ride; ASE refs eye.bmp, install ships eyemap.png) */
+    { "3FER", { "assets/ase/wheel.ASE",         NULL, 1.0f, 0 } },  /* C3DFerris: ferris wheel */
+    { "3SUM", { "assets/ase/sumo.ASE",          NULL, 1.0f, 0 } },  /* C3DSumo */
+    { "3HOO", { "assets/ase/hook.ASE",          NULL, 1.0f, 0 } },  /* C3DHook (power plant) */
+    { "3TOL", { "assets/ase/toolchestclosed.ASE", NULL, 1.0f, 0 } },/* C3DToolChest */
+    { "3TRO", { "assets/ase/trophy.ASE",        NULL, 1.0f, 0 } },  /* C3DTrophy (VR levels) */
+    { "3SPY", { "assets/ase/yokspy0.ASE",       NULL, 1.0f, 0 } },  /* C3DYokianSpy */
+    { "3FLE", { "assets/ase/yokcaptnstop.ASE",  NULL, 1.0f, 0 } },  /* C3DFleetCommander ("captain") */
+    { "3SPW", { "assets/ase/vulture01.ASE",     NULL, 1.0f, 0 } },  /* level5 vulture (tag "vulta"; class name pending Phase 0) */
+    { "3TEL", { "assets/ase/sfxteleport.ASE",   NULL, 1.0f, 0 } },  /* C3DTeleportFX (cutscene teleport ray) */
+    /* OMT-container meshes exported via tools/omt_mesh_export.py (the 3DIN/
+       dino.ASE precedent); textures embedded as parsed-image paths. */
+    { "3CML", { "assets/ase/omt/camel/Box01.ASE",                    NULL, 1.0f, 0 } },  /* C3DCamel <- camel.omt */
+    { "3YSH", { "assets/ase/omt/yokianship/yokianship.ASE",          NULL, 1.0f, 0 } },  /* C3DYokianShip <- yokianship.omt */
+    { "3YCA", { "assets/ase/omt/objectslevel5a/cargo_ship[.ASE",     NULL, 1.0f, 0 } },  /* C3DYokCargo <- objectslevel5a.omt */
+    { "3TUR", { "assets/ase/omt/objectslevel5a/canon.ASE",           NULL, 1.0f, 0 } },  /* C3DYokTurret <- objectslevel5a.omt */
+    { "3STA", { "assets/ase/omt/objectslevel5a/stalactite.ASE",      NULL, 1.0f, 0 } },  /* C3DStalagtite <- objectslevel5a.omt */
+    { "3GEY", { "assets/ase/omt/objectslevel5a/lavasteam.ASE",       NULL, 1.0f, 0 } },  /* C3DGeyser plume <- objectslevel5a.omt (vt_geyser bobs it) */
+    /* Runtime-positioned pools: every authored instance sits at exactly
+       (0,0,0) and is placed by class logic at runtime — the original never
+       draws them at origin (same shape as the 3RCK HIDDEN precedent).
+       Meshes are ready when the behaviors land (rock02.ASE exported). */
+    { "3ROK", { NULL, NULL, 0.0f, 1 } },  /* C3DRock — 99-instance pool at origin (Level5b) */
+    { "3CUB", { NULL, NULL, 0.0f, 1 } },  /* C3DCube — runtime helper at origin */
+    { "3LIG", { NULL, NULL, 0.0f, 1 } },  /* C3DLight — light source, not a visual */
+    /* C3DPirate::InitObjectPirate registers HIDEFAULT -> viking.ase and
+       attaches viking.png (docs/decomp/C3DPirate.md, measured). */
+    { "3PIR", { "assets/ase/viking.ASE", "assets/png/viking.png", 1.0f, 0 } },
+
     /* Pure triggers / effects / not-data-drivable -> invisible (no box). */
     { "3TEX", { NULL, NULL, 0.0f, 1 } },  /* text trigger */
     { "3COR", { NULL, NULL, 0.0f, 1 } },  /* corona glow fx */
@@ -351,6 +423,24 @@ static int resolve_grn_asset(const Entity *e, EntityVisual *out) {
     return 0;
 }
 
+/* Tier 4: per-instance sprite reference (see header comment). */
+static int resolve_sprite_db(const Entity *e, EntityVisual *out) {
+    if (!g_is_jnbg) return 0;                    /* JNvsJN: main.c spr_<id> path */
+    if (e->sprite_index < 0 || !e->sprite_database[0]) return 0;
+    /* chunk id 0 is valid when an explicit database is authored (3TRI icons);
+       sprites.omt id 0 is bneu0000, never authored by a .gam. */
+    if (e->sprite_index == 0 &&
+        strcasecmp(e->sprite_database, "icons.omt") != 0) return 0;
+    const char *path = sprite_db_path(e->sprite_database, e->sprite_index);
+    if (!path) return 0;
+    memset(out, 0, sizeof(*out));
+    out->sprite_path = path;
+    /* .gam SpriteSize is the world-space quad size (matches the existing
+       sprite draw convention); 0/unset falls back in the draw path. */
+    out->sprite_size = e->sprite_size;
+    return 1;
+}
+
 int entity_visual_resolve(const Entity *e, EntityVisual *out) {
     if (!e || !out) return 0;
 
@@ -366,5 +456,6 @@ int entity_visual_resolve(const Entity *e, EntityVisual *out) {
         *out = TYPE_TABLE[i].v;
         return 1;
     }
+    if (resolve_sprite_db(e, out)) return 1;
     return 0;
 }

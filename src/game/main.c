@@ -632,6 +632,12 @@ int main(int argc, char **argv) {
     int hud_enabled = !renderer_camera_override_active() && !env_enabled("JN_DISABLE_HUD");
     if (hud_enabled) hud_init();
 
+    /* Game selector for the per-instance sprite tier: each game ships its own
+       sprites.omt, so SpriteIndex must resolve against the right extraction.
+       The default GAM root is JNBG; a root naming jnvsjn selects the sequel. */
+    entity_visual_set_jnbg(
+        strstr(env_root_default("JN_GAM_ROOT", "assets/gam"), "jnvsjn") == NULL);
+
     int n = load_level(&current_desc, &world);
     if (n < 0) {
         fprintf(stderr, "Failed to load %s\n", current_desc.gam_path);
@@ -820,6 +826,9 @@ int main(int argc, char **argv) {
             /* 3ASE is drawn by the dedicated per-object branch (ASEStop mesh),
                not the resolver, so it's not a placeholder when it has a mesh. */
             if (strcmp(e->type, "3ASE") == 0 && e->ase_file[0]) continue;
+            /* Authored InitiallyVisible=0 never drew at boot in the original;
+               an unresolved one renders nothing (no box), so don't count it. */
+            if (e->has_initially_visible && e->initially_visible == 0) continue;
             /* Check if we already noted this FourCC. */
             int found = 0;
             for (int k = 0; k < nseen; k++) {
@@ -1069,6 +1078,12 @@ int main(int argc, char **argv) {
         for (Entity *e = world.head; e; e = e->next) {
             if (!e->alive) continue;
 
+            /* Authored InitiallyVisible=0: the original hides these at boot
+               until scripting shows them (phone booth, hydrant, teleport FX,
+               rockets...). No native show-scripting exists yet, so they stay
+               hidden — strictly more faithful than drawing them. */
+            if (e->has_initially_visible && e->initially_visible == 0) continue;
+
             /* Player: dedicated anim path. */
             if (jim_model_ok && strcmp(e->type, "3JIM") == 0) {
                 PlayerAnimSample sample = player_anim_sample((PlayerAnim)e->user_flag);
@@ -1105,14 +1120,23 @@ int main(int argc, char **argv) {
                sprites from sprites.omt (chunk id == SpriteIndex), NOT meshes.
                Render the real sprite as a camera-facing billboard instead of a
                placeholder. (sprite_index 0 falls through so game-1 3PIC, which
-               predates SpriteIndex, keep their ASE props.) */
+               predates SpriteIndex, keep their ASE props.) Each game ships its
+               own sprites.omt: JNBG resolves through the generated chunk map,
+               JNvsJN through its spr_<id> extraction — previously JNBG levels
+               wrongly loaded the sequel's sprites where indices collide. */
             if ((strcmp(e->type, "3PIC") == 0 || strcmp(e->type, "3SRO") == 0 ||
                  strcmp(e->type, "3SPR") == 0 || strcmp(e->type, "3ANI") == 0)
                 && e->sprite_index > 0) {
                 char spath[96];
-                snprintf(spath, sizeof(spath),
-                         "assets/parsed/sprites/jnvsjn/spr_%d.png", e->sprite_index);
-                unsigned int stex = tex_cache_get(spath);
+                unsigned int stex = 0;
+                if (entity_visual_is_jnbg()) {
+                    const char *cp = sprite_chunk_path(e->sprite_index);
+                    if (cp) stex = tex_cache_get(cp);
+                } else {
+                    snprintf(spath, sizeof(spath),
+                             "assets/parsed/sprites/jnvsjn/spr_%d.png", e->sprite_index);
+                    stex = tex_cache_get(spath);
+                }
                 if (stex) {
                     float sz = e->sprite_size > 1.0f ? e->sprite_size : 110.0f;
                     /* Lift the quad so its bottom edge sits at the pickup's Y

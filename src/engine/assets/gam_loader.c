@@ -208,6 +208,10 @@ int gam_load(World *w, const char *path) {
                 if (strcmp(prop_name, "InitiallyVisible") == 0) {
                     e->has_initially_visible = 1;
                     e->initially_visible = ival;
+                } else if (strcmp(prop_name, "SpriteSize") == 0) {
+                    /* Some classes author SpriteSize as int (3SM1/3FUE),
+                       others as float — accept both into the same field. */
+                    e->sprite_size = (float)ival;
                 } else if (strcmp(prop_name, "SpriteIndex") == 0) {
                     e->sprite_index = ival;
                 } else if (strcmp(prop_name, "EffectType") == 0) {
