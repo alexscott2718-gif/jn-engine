@@ -1,0 +1,4 @@
+# OMT mesh placements emitted by tools/omt_mesh_export.py
+# format: <name>\t<ase_path>\t<center_x>\t<center_y>\t<center_z>
+# native GL translation = (center_x, 0, -center_z); height is baked into the mesh
+yokianship	assets/ase/omt/yokianship/yokianship.ASE	-0.0576	-10.2579	-518.2695

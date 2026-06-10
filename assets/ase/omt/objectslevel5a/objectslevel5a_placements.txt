@@ -1,0 +1,9 @@
+# OMT mesh placements emitted by tools/omt_mesh_export.py
+# format: <name>\t<ase_path>\t<center_x>\t<center_y>\t<center_z>
+# native GL translation = (center_x, 0, -center_z); height is baked into the mesh
+lavasteam	assets/ase/omt/objectslevel5a/lavasteam.ASE	0.3582	24.6884	17.3580
+rock02	assets/ase/omt/objectslevel5a/rock02.ASE	21.7208	138.4100	6.4693
+laser	assets/ase/omt/objectslevel5a/laser.ASE	-0.4095	-0.1757	6.6144
+cargo_ship[	assets/ase/omt/objectslevel5a/cargo_ship[.ASE	1.1667	225.6311	217.2098
+stalactite	assets/ase/omt/objectslevel5a/stalactite.ASE	29.8209	-125.5550	56.0191
+canon	assets/ase/omt/objectslevel5a/canon.ASE	0.0002	83.4301	178.3251

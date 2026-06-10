@@ -1,0 +1,18 @@
+{
+  "omt": "/home/scotty/xp-jnbg-original/omt/camel.omt",
+  "mesh_count": 1,
+  "mat_count": 1,
+  "meshes": [
+    {
+      "name": "Box01",
+      "id": 0,
+      "verts": 146,
+      "faces": 175,
+      "bitmap": "assets/parsed/camel/camel_images/0000_256x256d32.png",
+      "file": "assets/ase/omt/camel/Box01.ASE",
+      "world_x": -0.44659996032714844,
+      "world_y": 78.6428451538086,
+      "world_z": 7.933246612548828
+    }
+  ]
+}

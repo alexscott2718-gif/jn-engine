@@ -1,0 +1,18 @@
+{
+  "omt": "/home/scotty/xp-jnbg-original/omt/yokianship.omt",
+  "mesh_count": 1,
+  "mat_count": 3,
+  "meshes": [
+    {
+      "name": "yokianship",
+      "id": 0,
+      "verts": 335,
+      "faces": 650,
+      "bitmap": "assets/parsed/yokianship/yokianship_images/0002_256x256d16.png",
+      "file": "assets/ase/omt/yokianship/yokianship.ASE",
+      "world_x": -0.057647705078125,
+      "world_y": -10.257949829101562,
+      "world_z": -518.26953125
+    }
+  ]
+}
