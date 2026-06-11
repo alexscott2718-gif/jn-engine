@@ -6,6 +6,8 @@
   "images": [
     {
       "index": 0,
+      "chunk_id": 0,
+      "name": "scooterwheel2",
       "width": 32,
       "height": 32,
       "depth": 32,
@@ -15,11 +17,13 @@
       "transp_packed": 0,
       "dopalette": false,
       "bufsize": 3936,
-      "file": "/home/scotty/jn-engine/assets/parsed/scooter/scooter_images/0000_32x32d32.png",
+      "file": "assets/parsed/scooter/scooter_images/0000_32x32d32.png",
       "status": "ok"
     },
     {
       "index": 1,
+      "chunk_id": 1,
+      "name": "goddard128",
       "width": 128,
       "height": 128,
       "depth": 32,
@@ -29,7 +33,7 @@
       "transp_packed": 0,
       "dopalette": false,
       "bufsize": 65740,
-      "file": "/home/scotty/jn-engine/assets/parsed/scooter/scooter_images/0001_128x128d32.png",
+      "file": "assets/parsed/scooter/scooter_images/0001_128x128d32.png",
       "status": "ok"
     }
   ]

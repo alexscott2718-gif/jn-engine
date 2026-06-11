@@ -6,6 +6,8 @@
   "images": [
     {
       "index": 0,
+      "chunk_id": 0,
+      "name": "black",
       "width": 32,
       "height": 32,
       "depth": 32,
@@ -15,11 +17,13 @@
       "transp_packed": 0,
       "dopalette": false,
       "bufsize": 320,
-      "file": "/home/scotty/jn-engine/assets/parsed/nightlevel5/nightlevel5_images/0000_32x32d32.png",
+      "file": "assets/parsed/nightlevel5/nightlevel5_images/0000_32x32d32.png",
       "status": "ok"
     },
     {
       "index": 1,
+      "chunk_id": 1,
+      "name": "nightsky1",
       "width": 128,
       "height": 128,
       "depth": 32,
@@ -29,11 +33,13 @@
       "transp_packed": 0,
       "dopalette": false,
       "bufsize": 3472,
-      "file": "/home/scotty/jn-engine/assets/parsed/nightlevel5/nightlevel5_images/0001_128x128d32.png",
+      "file": "assets/parsed/nightlevel5/nightlevel5_images/0001_128x128d32.png",
       "status": "ok"
     },
     {
       "index": 2,
+      "chunk_id": 2,
+      "name": "nightarea51",
       "width": 256,
       "height": 256,
       "depth": 32,
@@ -43,7 +49,7 @@
       "transp_packed": 0,
       "dopalette": false,
       "bufsize": 190080,
-      "file": "/home/scotty/jn-engine/assets/parsed/nightlevel5/nightlevel5_images/0002_256x256d32.png",
+      "file": "assets/parsed/nightlevel5/nightlevel5_images/0002_256x256d32.png",
       "status": "ok"
     }
   ]

@@ -1,11 +1,13 @@
 {
-  "file": "/home/scotty/jnvsjn-original/omt/level5b1.omt",
+  "file": "/home/scotty/jnvsjn-original/_installshield/Program_Executable_Files/omt/level5b1.omt",
   "total_size": 3951042,
   "has_images": true,
   "has_audio": false,
   "images": [
     {
       "index": 0,
+      "chunk_id": 45,
+      "name": "a-1Flamewall",
       "width": 128,
       "height": 128,
       "depth": 32,
@@ -20,6 +22,8 @@
     },
     {
       "index": 1,
+      "chunk_id": 51,
+      "name": "a-0Flamewall3",
       "width": 64,
       "height": 64,
       "depth": 32,
@@ -34,6 +38,8 @@
     },
     {
       "index": 2,
+      "chunk_id": 28,
+      "name": "green beam",
       "width": 4,
       "height": 4,
       "depth": 32,
@@ -48,6 +54,8 @@
     },
     {
       "index": 3,
+      "chunk_id": 32,
+      "name": "slider",
       "width": 32,
       "height": 32,
       "depth": 32,
@@ -62,6 +70,8 @@
     },
     {
       "index": 4,
+      "chunk_id": 7,
+      "name": "Black",
       "width": 4,
       "height": 4,
       "depth": 32,
@@ -76,6 +86,8 @@
     },
     {
       "index": 5,
+      "chunk_id": 4,
+      "name": "purpleLight",
       "width": 64,
       "height": 64,
       "depth": 32,
@@ -90,6 +102,8 @@
     },
     {
       "index": 6,
+      "chunk_id": 34,
+      "name": "Pirablock Dark64",
       "width": 64,
       "height": 64,
       "depth": 32,
@@ -104,6 +118,8 @@
     },
     {
       "index": 7,
+      "chunk_id": 46,
+      "name": "a-0Flamewall",
       "width": 128,
       "height": 128,
       "depth": 32,
@@ -118,6 +134,8 @@
     },
     {
       "index": 8,
+      "chunk_id": 35,
+      "name": "Pirablock64",
       "width": 64,
       "height": 64,
       "depth": 32,
@@ -132,6 +150,8 @@
     },
     {
       "index": 9,
+      "chunk_id": 48,
+      "name": "Flamewalldark",
       "width": 128,
       "height": 128,
       "depth": 32,
@@ -146,6 +166,8 @@
     },
     {
       "index": 10,
+      "chunk_id": 49,
+      "name": "Sconce",
       "width": 128,
       "height": 128,
       "depth": 32,
@@ -160,6 +182,8 @@
     },
     {
       "index": 11,
+      "chunk_id": 900,
+      "name": "sandstorm",
       "width": 64,
       "height": 64,
       "depth": 32,
@@ -174,6 +198,8 @@
     },
     {
       "index": 12,
+      "chunk_id": 55,
+      "name": "a-1Flamewall3",
       "width": 64,
       "height": 64,
       "depth": 32,
@@ -188,6 +214,8 @@
     },
     {
       "index": 13,
+      "chunk_id": 43,
+      "name": "Floor tile3",
       "width": 64,
       "height": 64,
       "depth": 32,
@@ -202,6 +230,8 @@
     },
     {
       "index": 14,
+      "chunk_id": 24,
+      "name": "GeneralLight",
       "width": 64,
       "height": 64,
       "depth": 32,
@@ -216,6 +246,8 @@
     },
     {
       "index": 15,
+      "chunk_id": 47,
+      "name": "darkwall",
       "width": 64,
       "height": 64,
       "depth": 32,
@@ -230,6 +262,8 @@
     },
     {
       "index": 16,
+      "chunk_id": 0,
+      "name": "hitboxside",
       "width": 128,
       "height": 128,
       "depth": 32,
@@ -244,6 +278,8 @@
     },
     {
       "index": 17,
+      "chunk_id": 3,
+      "name": "Stonedoor2",
       "width": 128,
       "height": 128,
       "depth": 32,
@@ -258,6 +294,8 @@
     },
     {
       "index": 18,
+      "chunk_id": 17,
+      "name": "Floorshadow",
       "width": 128,
       "height": 128,
       "depth": 32,
@@ -272,6 +310,8 @@
     },
     {
       "index": 19,
+      "chunk_id": 23,
+      "name": "mud",
       "width": 64,
       "height": 64,
       "depth": 32,
@@ -286,6 +326,8 @@
     },
     {
       "index": 20,
+      "chunk_id": 2,
+      "name": "Walscrab",
       "width": 64,
       "height": 64,
       "depth": 32,
@@ -300,6 +342,8 @@
     },
     {
       "index": 21,
+      "chunk_id": 22,
+      "name": "SandPath",
       "width": 64,
       "height": 64,
       "depth": 32,
@@ -314,6 +358,8 @@
     },
     {
       "index": 22,
+      "chunk_id": 54,
+      "name": "a-1Flamewall2",
       "width": 64,
       "height": 64,
       "depth": 32,
@@ -328,6 +374,8 @@
     },
     {
       "index": 23,
+      "chunk_id": 53,
+      "name": "a-0Flamewall5",
       "width": 64,
       "height": 64,
       "depth": 32,
@@ -342,6 +390,8 @@
     },
     {
       "index": 24,
+      "chunk_id": 52,
+      "name": "a-0Flamewall4",
       "width": 64,
       "height": 64,
       "depth": 32,
@@ -356,6 +406,8 @@
     },
     {
       "index": 25,
+      "chunk_id": 29,
+      "name": "Scrab Key",
       "width": 128,
       "height": 128,
       "depth": 32,
@@ -370,6 +422,8 @@
     },
     {
       "index": 26,
+      "chunk_id": 1,
+      "name": "Cieling",
       "width": 64,
       "height": 64,
       "depth": 32,
@@ -384,6 +438,8 @@
     },
     {
       "index": 27,
+      "chunk_id": 26,
+      "name": "underwaterockdark",
       "width": 128,
       "height": 128,
       "depth": 32,
@@ -398,6 +454,8 @@
     },
     {
       "index": 28,
+      "chunk_id": 37,
+      "name": "Speedrock",
       "width": 128,
       "height": 128,
       "depth": 32,
@@ -412,6 +470,8 @@
     },
     {
       "index": 29,
+      "chunk_id": 6,
+      "name": "vulturepaint",
       "width": 128,
       "height": 128,
       "depth": 32,
@@ -426,6 +486,8 @@
     },
     {
       "index": 30,
+      "chunk_id": 25,
+      "name": "underwaterock",
       "width": 128,
       "height": 128,
       "depth": 32,
@@ -440,6 +502,8 @@
     },
     {
       "index": 31,
+      "chunk_id": 50,
+      "name": "a-0Flamewall2",
       "width": 64,
       "height": 64,
       "depth": 32,
@@ -454,6 +518,8 @@
     },
     {
       "index": 32,
+      "chunk_id": 57,
+      "name": "a-1Flamewall5",
       "width": 64,
       "height": 64,
       "depth": 32,
@@ -468,6 +534,8 @@
     },
     {
       "index": 33,
+      "chunk_id": 5,
+      "name": "MummyKeyIn",
       "width": 256,
       "height": 256,
       "depth": 32,
@@ -482,6 +550,8 @@
     },
     {
       "index": 34,
+      "chunk_id": 56,
+      "name": "a-1Flamewall4",
       "width": 64,
       "height": 64,
       "depth": 32,
@@ -496,6 +566,8 @@
     },
     {
       "index": 35,
+      "chunk_id": 9,
+      "name": "Statue legs",
       "width": 128,
       "height": 128,
       "depth": 32,
@@ -510,6 +582,8 @@
     },
     {
       "index": 36,
+      "chunk_id": 38,
+      "name": "Boulder",
       "width": 128,
       "height": 128,
       "depth": 32,
@@ -524,6 +598,8 @@
     },
     {
       "index": 37,
+      "chunk_id": 14,
+      "name": "Speedrockup",
       "width": 128,
       "height": 128,
       "depth": 32,
@@ -538,6 +614,8 @@
     },
     {
       "index": 38,
+      "chunk_id": 19,
+      "name": "tut Statue legs",
       "width": 64,
       "height": 64,
       "depth": 32,
@@ -552,6 +630,8 @@
     },
     {
       "index": 39,
+      "chunk_id": 8,
+      "name": "Statue Top",
       "width": 128,
       "height": 128,
       "depth": 32,
@@ -566,6 +646,8 @@
     },
     {
       "index": 40,
+      "chunk_id": 18,
+      "name": "Trims",
       "width": 64,
       "height": 64,
       "depth": 32,
@@ -580,6 +662,8 @@
     },
     {
       "index": 41,
+      "chunk_id": 13,
+      "name": "underwatemud",
       "width": 128,
       "height": 128,
       "depth": 32,
@@ -594,6 +678,8 @@
     },
     {
       "index": 42,
+      "chunk_id": 16,
+      "name": "hitboxfront",
       "width": 128,
       "height": 128,
       "depth": 32,
@@ -608,6 +694,8 @@
     },
     {
       "index": 43,
+      "chunk_id": 816,
+      "name": "sky",
       "width": 128,
       "height": 128,
       "depth": 32,
@@ -622,6 +710,8 @@
     },
     {
       "index": 44,
+      "chunk_id": 15,
+      "name": "Sandstone wall tile",
       "width": 128,
       "height": 128,
       "depth": 32,
@@ -636,6 +726,8 @@
     },
     {
       "index": 45,
+      "chunk_id": 20,
+      "name": "Exit",
       "width": 128,
       "height": 128,
       "depth": 32,
@@ -650,6 +742,8 @@
     },
     {
       "index": 46,
+      "chunk_id": 27,
+      "name": "underwaterocklight",
       "width": 128,
       "height": 128,
       "depth": 32,
@@ -664,6 +758,8 @@
     },
     {
       "index": 47,
+      "chunk_id": 12,
+      "name": "BothKeysIn",
       "width": 256,
       "height": 256,
       "depth": 32,
@@ -678,6 +774,8 @@
     },
     {
       "index": 48,
+      "chunk_id": 11,
+      "name": "toprock",
       "width": 128,
       "height": 128,
       "depth": 32,
@@ -692,6 +790,8 @@
     },
     {
       "index": 49,
+      "chunk_id": 21,
+      "name": "NewFloorshadow",
       "width": 128,
       "height": 128,
       "depth": 32,
@@ -706,6 +806,8 @@
     },
     {
       "index": 50,
+      "chunk_id": 10,
+      "name": "sandtop",
       "width": 128,
       "height": 128,
       "depth": 32,
@@ -720,6 +822,8 @@
     },
     {
       "index": 51,
+      "chunk_id": 30,
+      "name": "jumpplat",
       "width": 128,
       "height": 128,
       "depth": 32,

@@ -6,6 +6,8 @@
   "images": [
     {
       "index": 0,
+      "chunk_id": 1,
+      "name": "checker",
       "width": 64,
       "height": 64,
       "depth": 32,
@@ -15,11 +17,13 @@
       "transp_packed": 0,
       "dopalette": false,
       "bufsize": 5444,
-      "file": "/home/scotty/jn-engine/assets/parsed/level4d/level4d_images/0000_64x64d32.png",
+      "file": "assets/parsed/level4d/level4d_images/0000_64x64d32.png",
       "status": "ok"
     },
     {
       "index": 1,
+      "chunk_id": 6,
+      "name": "table",
       "width": 256,
       "height": 256,
       "depth": 32,
@@ -29,11 +33,13 @@
       "transp_packed": 0,
       "dopalette": false,
       "bufsize": 33488,
-      "file": "/home/scotty/jn-engine/assets/parsed/level4d/level4d_images/0001_256x256d32.png",
+      "file": "assets/parsed/level4d/level4d_images/0001_256x256d32.png",
       "status": "ok"
     },
     {
       "index": 2,
+      "chunk_id": 4,
+      "name": "lights",
       "width": 256,
       "height": 256,
       "depth": 32,
@@ -43,11 +49,13 @@
       "transp_packed": 0,
       "dopalette": false,
       "bufsize": 52340,
-      "file": "/home/scotty/jn-engine/assets/parsed/level4d/level4d_images/0002_256x256d32.png",
+      "file": "assets/parsed/level4d/level4d_images/0002_256x256d32.png",
       "status": "ok"
     },
     {
       "index": 3,
+      "chunk_id": 10,
+      "name": "banner01",
       "width": 128,
       "height": 128,
       "depth": 32,
@@ -57,11 +65,13 @@
       "transp_packed": 0,
       "dopalette": false,
       "bufsize": 60124,
-      "file": "/home/scotty/jn-engine/assets/parsed/level4d/level4d_images/0003_128x128d32.png",
+      "file": "assets/parsed/level4d/level4d_images/0003_128x128d32.png",
       "status": "ok"
     },
     {
       "index": 4,
+      "chunk_id": 5,
+      "name": "seats",
       "width": 256,
       "height": 256,
       "depth": 32,
@@ -71,11 +81,13 @@
       "transp_packed": 0,
       "dopalette": false,
       "bufsize": 118528,
-      "file": "/home/scotty/jn-engine/assets/parsed/level4d/level4d_images/0004_256x256d32.png",
+      "file": "assets/parsed/level4d/level4d_images/0004_256x256d32.png",
       "status": "ok"
     },
     {
       "index": 5,
+      "chunk_id": 2,
+      "name": "door",
       "width": 256,
       "height": 256,
       "depth": 32,
@@ -85,11 +97,13 @@
       "transp_packed": 0,
       "dopalette": false,
       "bufsize": 201252,
-      "file": "/home/scotty/jn-engine/assets/parsed/level4d/level4d_images/0005_256x256d32.png",
+      "file": "assets/parsed/level4d/level4d_images/0005_256x256d32.png",
       "status": "ok"
     },
     {
       "index": 6,
+      "chunk_id": 3,
+      "name": "jars",
       "width": 256,
       "height": 256,
       "depth": 32,
@@ -99,11 +113,13 @@
       "transp_packed": 0,
       "dopalette": false,
       "bufsize": 244896,
-      "file": "/home/scotty/jn-engine/assets/parsed/level4d/level4d_images/0006_256x256d32.png",
+      "file": "assets/parsed/level4d/level4d_images/0006_256x256d32.png",
       "status": "ok"
     },
     {
       "index": 7,
+      "chunk_id": 7,
+      "name": "walls",
       "width": 256,
       "height": 256,
       "depth": 32,
@@ -113,11 +129,13 @@
       "transp_packed": 0,
       "dopalette": false,
       "bufsize": 262328,
-      "file": "/home/scotty/jn-engine/assets/parsed/level4d/level4d_images/0007_256x256d32.png",
+      "file": "assets/parsed/level4d/level4d_images/0007_256x256d32.png",
       "status": "ok"
     },
     {
       "index": 8,
+      "chunk_id": 8,
+      "name": "ceeling",
       "width": 256,
       "height": 256,
       "depth": 32,
@@ -127,11 +145,13 @@
       "transp_packed": 0,
       "dopalette": false,
       "bufsize": 260476,
-      "file": "/home/scotty/jn-engine/assets/parsed/level4d/level4d_images/0008_256x256d32.png",
+      "file": "assets/parsed/level4d/level4d_images/0008_256x256d32.png",
       "status": "ok"
     },
     {
       "index": 9,
+      "chunk_id": 9,
+      "name": "glass",
       "width": 256,
       "height": 256,
       "depth": 32,
@@ -141,11 +161,13 @@
       "transp_packed": 0,
       "dopalette": false,
       "bufsize": 247728,
-      "file": "/home/scotty/jn-engine/assets/parsed/level4d/level4d_images/0009_256x256d32.png",
+      "file": "assets/parsed/level4d/level4d_images/0009_256x256d32.png",
       "status": "ok"
     },
     {
       "index": 10,
+      "chunk_id": 0,
+      "name": "window",
       "width": 256,
       "height": 256,
       "depth": 32,
@@ -155,7 +177,7 @@
       "transp_packed": 0,
       "dopalette": false,
       "bufsize": 144504,
-      "file": "/home/scotty/jn-engine/assets/parsed/level4d/level4d_images/0010_256x256d32.png",
+      "file": "assets/parsed/level4d/level4d_images/0010_256x256d32.png",
       "status": "ok"
     }
   ]

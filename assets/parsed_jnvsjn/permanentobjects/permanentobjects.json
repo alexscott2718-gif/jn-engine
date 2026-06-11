@@ -1,11 +1,13 @@
 {
-  "file": "/home/scotty/jnvsjn-original/omt/permanentobjects.omt",
+  "file": "/home/scotty/jnvsjn-original/_installshield/Program_Executable_Files/omt/permanentobjects.omt",
   "total_size": 15889,
   "has_images": true,
   "has_audio": false,
   "images": [
     {
       "index": 0,
+      "chunk_id": 0,
+      "name": "wrench",
       "width": 128,
       "height": 128,
       "depth": 32,

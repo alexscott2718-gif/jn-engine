@@ -1,11 +1,13 @@
 {
-  "file": "/home/scotty/jnvsjn-original/omt/level3d.omt",
+  "file": "/home/scotty/jnvsjn-original/_installshield/Program_Executable_Files/omt/level3d.omt",
   "total_size": 1728369,
   "has_images": true,
   "has_audio": false,
   "images": [
     {
       "index": 0,
+      "chunk_id": 6,
+      "name": "m-0ncwater",
       "width": 64,
       "height": 64,
       "depth": 32,
@@ -20,6 +22,8 @@
     },
     {
       "index": 1,
+      "chunk_id": 23,
+      "name": "m-0sky",
       "width": 64,
       "height": 64,
       "depth": 32,
@@ -34,6 +38,8 @@
     },
     {
       "index": 2,
+      "chunk_id": 62,
+      "name": "blueprint",
       "width": 128,
       "height": 128,
       "depth": 32,
@@ -48,6 +54,8 @@
     },
     {
       "index": 3,
+      "chunk_id": 29,
+      "name": "m-0wooddock",
       "width": 128,
       "height": 128,
       "depth": 32,
@@ -62,6 +70,8 @@
     },
     {
       "index": 4,
+      "chunk_id": 30,
+      "name": "m-1shipdoor",
       "width": 128,
       "height": 128,
       "depth": 32,
@@ -76,6 +86,8 @@
     },
     {
       "index": 5,
+      "chunk_id": 57,
+      "name": "grillship",
       "width": 64,
       "height": 64,
       "depth": 32,
@@ -90,6 +102,8 @@
     },
     {
       "index": 6,
+      "chunk_id": 28,
+      "name": "m-0woodcrate",
       "width": 64,
       "height": 64,
       "depth": 32,
@@ -104,6 +118,8 @@
     },
     {
       "index": 7,
+      "chunk_id": 61,
+      "name": "wetfloor",
       "width": 64,
       "height": 64,
       "depth": 32,
@@ -118,6 +134,8 @@
     },
     {
       "index": 8,
+      "chunk_id": 4,
+      "name": "m-0fence",
       "width": 32,
       "height": 32,
       "depth": 32,
@@ -132,6 +150,8 @@
     },
     {
       "index": 9,
+      "chunk_id": 32,
+      "name": "m-0concwater",
       "width": 64,
       "height": 64,
       "depth": 32,
@@ -146,6 +166,8 @@
     },
     {
       "index": 10,
+      "chunk_id": 871,
+      "name": "m-1water",
       "width": 128,
       "height": 128,
       "depth": 32,
@@ -160,6 +182,8 @@
     },
     {
       "index": 11,
+      "chunk_id": 27,
+      "name": "m-0whwind",
       "width": 64,
       "height": 64,
       "depth": 32,
@@ -174,6 +198,8 @@
     },
     {
       "index": 12,
+      "chunk_id": 25,
+      "name": "m-0whside",
       "width": 64,
       "height": 64,
       "depth": 32,
@@ -188,6 +214,8 @@
     },
     {
       "index": 13,
+      "chunk_id": 24,
+      "name": "m-0watercave",
       "width": 64,
       "height": 64,
       "depth": 32,
@@ -202,6 +230,8 @@
     },
     {
       "index": 14,
+      "chunk_id": 35,
+      "name": "m-0cranedoor",
       "width": 64,
       "height": 64,
       "depth": 32,
@@ -216,6 +246,8 @@
     },
     {
       "index": 15,
+      "chunk_id": 22,
+      "name": "m-0shipside",
       "width": 64,
       "height": 64,
       "depth": 32,
@@ -230,6 +262,8 @@
     },
     {
       "index": 16,
+      "chunk_id": 18,
+      "name": "m-0shipmisc1",
       "width": 64,
       "height": 64,
       "depth": 32,
@@ -244,6 +278,8 @@
     },
     {
       "index": 17,
+      "chunk_id": 0,
+      "name": "m-0concrete",
       "width": 64,
       "height": 64,
       "depth": 32,
@@ -258,6 +294,8 @@
     },
     {
       "index": 18,
+      "chunk_id": 1,
+      "name": "m-0container01",
       "width": 64,
       "height": 64,
       "depth": 32,
@@ -272,6 +310,8 @@
     },
     {
       "index": 19,
+      "chunk_id": 2,
+      "name": "m-0crane",
       "width": 64,
       "height": 64,
       "depth": 32,
@@ -286,6 +326,8 @@
     },
     {
       "index": 20,
+      "chunk_id": 3,
+      "name": "m-0door",
       "width": 64,
       "height": 64,
       "depth": 32,
@@ -300,6 +342,8 @@
     },
     {
       "index": 21,
+      "chunk_id": 21,
+      "name": "m-0shiprail",
       "width": 64,
       "height": 64,
       "depth": 32,
@@ -314,6 +358,8 @@
     },
     {
       "index": 22,
+      "chunk_id": 5,
+      "name": "m-0hook",
       "width": 64,
       "height": 64,
       "depth": 32,
@@ -328,6 +374,8 @@
     },
     {
       "index": 23,
+      "chunk_id": 7,
+      "name": "m-0rockcave",
       "width": 64,
       "height": 64,
       "depth": 32,
@@ -342,6 +390,8 @@
     },
     {
       "index": 24,
+      "chunk_id": 8,
+      "name": "m-0rockwall",
       "width": 64,
       "height": 64,
       "depth": 32,
@@ -356,6 +406,8 @@
     },
     {
       "index": 25,
+      "chunk_id": 9,
+      "name": "m-0rockwall2",
       "width": 64,
       "height": 64,
       "depth": 32,
@@ -370,6 +422,8 @@
     },
     {
       "index": 26,
+      "chunk_id": 10,
+      "name": "m-0ropenetcrate",
       "width": 64,
       "height": 64,
       "depth": 32,
@@ -384,6 +438,8 @@
     },
     {
       "index": 27,
+      "chunk_id": 11,
+      "name": "m-0sand",
       "width": 64,
       "height": 64,
       "depth": 32,
@@ -398,6 +454,8 @@
     },
     {
       "index": 28,
+      "chunk_id": 12,
+      "name": "m-0sandwater",
       "width": 64,
       "height": 64,
       "depth": 32,
@@ -412,6 +470,8 @@
     },
     {
       "index": 29,
+      "chunk_id": 13,
+      "name": "m-0shipdeck",
       "width": 64,
       "height": 64,
       "depth": 32,
@@ -426,6 +486,8 @@
     },
     {
       "index": 30,
+      "chunk_id": 14,
+      "name": "m-0shipdoor",
       "width": 64,
       "height": 64,
       "depth": 32,
@@ -440,6 +502,8 @@
     },
     {
       "index": 31,
+      "chunk_id": 15,
+      "name": "m-0shipfront",
       "width": 64,
       "height": 64,
       "depth": 32,
@@ -454,6 +518,8 @@
     },
     {
       "index": 32,
+      "chunk_id": 16,
+      "name": "m-0shipit",
       "width": 64,
       "height": 64,
       "depth": 32,
@@ -468,6 +534,8 @@
     },
     {
       "index": 33,
+      "chunk_id": 17,
+      "name": "m-0shipladder",
       "width": 64,
       "height": 64,
       "depth": 32,
@@ -482,6 +550,8 @@
     },
     {
       "index": 34,
+      "chunk_id": 20,
+      "name": "m-0shipportal2",
       "width": 64,
       "height": 64,
       "depth": 32,
@@ -496,6 +566,8 @@
     },
     {
       "index": 35,
+      "chunk_id": 19,
+      "name": "m-0shipportal",
       "width": 64,
       "height": 64,
       "depth": 32,
@@ -510,6 +582,8 @@
     },
     {
       "index": 36,
+      "chunk_id": 26,
+      "name": "warehouse sign",
       "width": 128,
       "height": 128,
       "depth": 32,
@@ -524,6 +598,8 @@
     },
     {
       "index": 37,
+      "chunk_id": 31,
+      "name": "jump",
       "width": 64,
       "height": 64,
       "depth": 32,
@@ -538,6 +614,8 @@
     },
     {
       "index": 38,
+      "chunk_id": 33,
+      "name": "lightcrane",
       "width": 64,
       "height": 64,
       "depth": 32,
@@ -552,6 +630,8 @@
     },
     {
       "index": 39,
+      "chunk_id": 34,
+      "name": "darkwooddock",
       "width": 64,
       "height": 64,
       "depth": 32,

@@ -6,6 +6,8 @@
   "images": [
     {
       "index": 0,
+      "chunk_id": 2,
+      "name": "hoodfar",
       "width": 256,
       "height": 256,
       "depth": 16,
@@ -15,11 +17,13 @@
       "transp_packed": 0,
       "dopalette": false,
       "bufsize": 125938,
-      "file": "/home/scotty/jn-engine/assets/parsed/dusksky/dusksky_images/0000_256x256d16.png",
+      "file": "assets/parsed/dusksky/dusksky_images/0000_256x256d16.png",
       "status": "ok"
     },
     {
       "index": 1,
+      "chunk_id": 0,
+      "name": "sky",
       "width": 256,
       "height": 256,
       "depth": 16,
@@ -29,11 +33,13 @@
       "transp_packed": 0,
       "dopalette": false,
       "bufsize": 19652,
-      "file": "/home/scotty/jn-engine/assets/parsed/dusksky/dusksky_images/0001_256x256d16.png",
+      "file": "assets/parsed/dusksky/dusksky_images/0001_256x256d16.png",
       "status": "ok"
     },
     {
       "index": 2,
+      "chunk_id": 1,
+      "name": "duskretroville",
       "width": 256,
       "height": 256,
       "depth": 16,
@@ -43,11 +49,13 @@
       "transp_packed": 0,
       "dopalette": false,
       "bufsize": 82970,
-      "file": "/home/scotty/jn-engine/assets/parsed/dusksky/dusksky_images/0002_256x256d16.png",
+      "file": "assets/parsed/dusksky/dusksky_images/0002_256x256d16.png",
       "status": "ok"
     },
     {
       "index": 3,
+      "chunk_id": 3,
+      "name": "hoodfardusk1",
       "width": 128,
       "height": 128,
       "depth": 16,
@@ -57,11 +65,13 @@
       "transp_packed": 0,
       "dopalette": false,
       "bufsize": 29098,
-      "file": "/home/scotty/jn-engine/assets/parsed/dusksky/dusksky_images/0003_128x128d16.png",
+      "file": "assets/parsed/dusksky/dusksky_images/0003_128x128d16.png",
       "status": "ok"
     },
     {
       "index": 4,
+      "chunk_id": 4,
+      "name": "hoodfardusk2",
       "width": 128,
       "height": 128,
       "depth": 16,
@@ -71,11 +81,13 @@
       "transp_packed": 0,
       "dopalette": false,
       "bufsize": 24314,
-      "file": "/home/scotty/jn-engine/assets/parsed/dusksky/dusksky_images/0004_128x128d16.png",
+      "file": "assets/parsed/dusksky/dusksky_images/0004_128x128d16.png",
       "status": "ok"
     },
     {
       "index": 5,
+      "chunk_id": 5,
+      "name": "black",
       "width": 8,
       "height": 8,
       "depth": 16,
@@ -85,7 +97,7 @@
       "transp_packed": 0,
       "dopalette": false,
       "bufsize": 48,
-      "file": "/home/scotty/jn-engine/assets/parsed/dusksky/dusksky_images/0005_8x8d16.png",
+      "file": "assets/parsed/dusksky/dusksky_images/0005_8x8d16.png",
       "status": "ok"
     }
   ]

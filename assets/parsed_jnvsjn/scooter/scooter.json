@@ -1,11 +1,45 @@
 {
-  "file": "/home/scotty/jnvsjn-original/omt/scooter.omt",
+  "file": "/home/scotty/jnvsjn-original/_installshield/Program_Executable_Files/omt/scooter.omt",
   "total_size": 384386,
   "has_images": true,
   "has_audio": false,
   "images": [
     {
       "index": 0,
+      "chunk_id": 0,
+      "name": "scooterwheel2",
+      "width": 32,
+      "height": 32,
+      "depth": 32,
+      "compression": 2,
+      "stride": 128,
+      "dotransparent": false,
+      "transp_packed": 0,
+      "dopalette": false,
+      "bufsize": 3936,
+      "file": "assets/parsed_jnvsjn/scooter/scooter_images/0000_32x32d32.png",
+      "status": "ok"
+    },
+    {
+      "index": 1,
+      "chunk_id": 1,
+      "name": "goddard128",
+      "width": 128,
+      "height": 128,
+      "depth": 32,
+      "compression": 2,
+      "stride": 512,
+      "dotransparent": false,
+      "transp_packed": 0,
+      "dopalette": false,
+      "bufsize": 65740,
+      "file": "assets/parsed_jnvsjn/scooter/scooter_images/0001_128x128d32.png",
+      "status": "ok"
+    },
+    {
+      "index": 2,
+      "chunk_id": 2,
+      "name": "goof",
       "width": 256,
       "height": 256,
       "depth": 32,
@@ -15,7 +49,7 @@
       "transp_packed": 0,
       "dopalette": false,
       "bufsize": 255580,
-      "file": "assets/parsed_jnvsjn/scooter/scooter_images/0000_256x256d32.png",
+      "file": "assets/parsed_jnvsjn/scooter/scooter_images/0002_256x256d32.png",
       "status": "ok"
     }
   ]

@@ -6,6 +6,8 @@
   "images": [
     {
       "index": 0,
+      "chunk_id": 2,
+      "name": "greengrid1",
       "width": 32,
       "height": 32,
       "depth": 16,
@@ -15,11 +17,13 @@
       "transp_packed": 0,
       "dopalette": false,
       "bufsize": 1170,
-      "file": "/home/scotty/jn-engine/assets/parsed/VR03/VR03_images/0000_32x32d16.png",
+      "file": "assets/parsed/VR03/VR03_images/0000_32x32d16.png",
       "status": "ok"
     },
     {
       "index": 1,
+      "chunk_id": 1,
+      "name": "bluegrid1",
       "width": 32,
       "height": 32,
       "depth": 16,
@@ -29,11 +33,13 @@
       "transp_packed": 0,
       "dopalette": false,
       "bufsize": 1012,
-      "file": "/home/scotty/jn-engine/assets/parsed/VR03/VR03_images/0001_32x32d16.png",
+      "file": "assets/parsed/VR03/VR03_images/0001_32x32d16.png",
       "status": "ok"
     },
     {
       "index": 2,
+      "chunk_id": 0,
+      "name": "redgrid1",
       "width": 32,
       "height": 32,
       "depth": 16,
@@ -43,11 +49,13 @@
       "transp_packed": 0,
       "dopalette": false,
       "bufsize": 976,
-      "file": "/home/scotty/jn-engine/assets/parsed/VR03/VR03_images/0002_32x32d16.png",
+      "file": "assets/parsed/VR03/VR03_images/0002_32x32d16.png",
       "status": "ok"
     },
     {
       "index": 3,
+      "chunk_id": 4,
+      "name": "yellowgrid1",
       "width": 32,
       "height": 32,
       "depth": 16,
@@ -57,11 +65,13 @@
       "transp_packed": 0,
       "dopalette": false,
       "bufsize": 1030,
-      "file": "/home/scotty/jn-engine/assets/parsed/VR03/VR03_images/0003_32x32d16.png",
+      "file": "assets/parsed/VR03/VR03_images/0003_32x32d16.png",
       "status": "ok"
     },
     {
       "index": 4,
+      "chunk_id": 3,
+      "name": "bluegrid",
       "width": 256,
       "height": 256,
       "depth": 16,
@@ -70,12 +80,14 @@
       "dotransparent": false,
       "transp_packed": 0,
       "dopalette": false,
-      "bufsize": 71460,
-      "file": "/home/scotty/jn-engine/assets/parsed/VR03/VR03_images/0004_256x256d16.png",
+      "bufsize": 69546,
+      "file": "assets/parsed/VR03/VR03_images/0004_256x256d16.png",
       "status": "ok"
     },
     {
       "index": 5,
+      "chunk_id": 5,
+      "name": "greengrid",
       "width": 256,
       "height": 256,
       "depth": 16,
@@ -85,11 +97,13 @@
       "transp_packed": 0,
       "dopalette": false,
       "bufsize": 75606,
-      "file": "/home/scotty/jn-engine/assets/parsed/VR03/VR03_images/0005_256x256d16.png",
+      "file": "assets/parsed/VR03/VR03_images/0005_256x256d16.png",
       "status": "ok"
     },
     {
       "index": 6,
+      "chunk_id": 6,
+      "name": "redgrid",
       "width": 256,
       "height": 256,
       "depth": 16,
@@ -99,7 +113,7 @@
       "transp_packed": 0,
       "dopalette": false,
       "bufsize": 71460,
-      "file": "/home/scotty/jn-engine/assets/parsed/VR03/VR03_images/0006_256x256d16.png",
+      "file": "assets/parsed/VR03/VR03_images/0006_256x256d16.png",
       "status": "ok"
     }
   ]

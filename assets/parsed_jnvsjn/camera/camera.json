@@ -1,11 +1,13 @@
 {
-  "file": "/home/scotty/jnvsjn-original/omt/camera.omt",
+  "file": "/home/scotty/jnvsjn-original/_installshield/Program_Executable_Files/omt/camera.omt",
   "total_size": 7093,
   "has_images": true,
   "has_audio": false,
   "images": [
     {
       "index": 0,
+      "chunk_id": 0,
+      "name": "camera",
       "width": 64,
       "height": 64,
       "depth": 32,

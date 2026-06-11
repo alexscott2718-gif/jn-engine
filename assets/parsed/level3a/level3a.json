@@ -6,6 +6,8 @@
   "images": [
     {
       "index": 0,
+      "chunk_id": 11,
+      "name": "cave1",
       "width": 128,
       "height": 128,
       "depth": 16,
@@ -15,11 +17,13 @@
       "transp_packed": 0,
       "dopalette": false,
       "bufsize": 25388,
-      "file": "/home/scotty/jn-engine/assets/parsed/level3a/level3a_images/0000_128x128d16.png",
+      "file": "assets/parsed/level3a/level3a_images/0000_128x128d16.png",
       "status": "ok"
     },
     {
       "index": 1,
+      "chunk_id": 10,
+      "name": "trees01",
       "width": 128,
       "height": 128,
       "depth": 16,
@@ -29,11 +33,13 @@
       "transp_packed": 0,
       "dopalette": false,
       "bufsize": 28848,
-      "file": "/home/scotty/jn-engine/assets/parsed/level3a/level3a_images/0001_128x128d16.png",
+      "file": "assets/parsed/level3a/level3a_images/0001_128x128d16.png",
       "status": "ok"
     },
     {
       "index": 2,
+      "chunk_id": 12,
+      "name": "chain",
       "width": 64,
       "height": 64,
       "depth": 16,
@@ -43,11 +49,13 @@
       "transp_packed": 0,
       "dopalette": false,
       "bufsize": 6596,
-      "file": "/home/scotty/jn-engine/assets/parsed/level3a/level3a_images/0002_64x64d16.png",
+      "file": "assets/parsed/level3a/level3a_images/0002_64x64d16.png",
       "status": "ok"
     },
     {
       "index": 3,
+      "chunk_id": 13,
+      "name": "railings",
       "width": 128,
       "height": 128,
       "depth": 16,
@@ -57,11 +65,13 @@
       "transp_packed": 0,
       "dopalette": false,
       "bufsize": 31396,
-      "file": "/home/scotty/jn-engine/assets/parsed/level3a/level3a_images/0003_128x128d16.png",
+      "file": "assets/parsed/level3a/level3a_images/0003_128x128d16.png",
       "status": "ok"
     },
     {
       "index": 4,
+      "chunk_id": 6,
+      "name": "Hyro2",
       "width": 128,
       "height": 128,
       "depth": 16,
@@ -71,11 +81,13 @@
       "transp_packed": 0,
       "dopalette": false,
       "bufsize": 33168,
-      "file": "/home/scotty/jn-engine/assets/parsed/level3a/level3a_images/0004_128x128d16.png",
+      "file": "assets/parsed/level3a/level3a_images/0004_128x128d16.png",
       "status": "ok"
     },
     {
       "index": 5,
+      "chunk_id": 7,
+      "name": "Pyramid",
       "width": 256,
       "height": 256,
       "depth": 16,
@@ -85,11 +97,13 @@
       "transp_packed": 0,
       "dopalette": false,
       "bufsize": 83718,
-      "file": "/home/scotty/jn-engine/assets/parsed/level3a/level3a_images/0005_256x256d16.png",
+      "file": "assets/parsed/level3a/level3a_images/0005_256x256d16.png",
       "status": "ok"
     },
     {
       "index": 6,
+      "chunk_id": 0,
+      "name": "wallcolum",
       "width": 128,
       "height": 128,
       "depth": 16,
@@ -99,11 +113,13 @@
       "transp_packed": 0,
       "dopalette": false,
       "bufsize": 28444,
-      "file": "/home/scotty/jn-engine/assets/parsed/level3a/level3a_images/0006_128x128d16.png",
+      "file": "assets/parsed/level3a/level3a_images/0006_128x128d16.png",
       "status": "ok"
     },
     {
       "index": 7,
+      "chunk_id": 1,
+      "name": "dirtsand",
       "width": 128,
       "height": 128,
       "depth": 16,
@@ -113,11 +129,13 @@
       "transp_packed": 0,
       "dopalette": false,
       "bufsize": 33212,
-      "file": "/home/scotty/jn-engine/assets/parsed/level3a/level3a_images/0007_128x128d16.png",
+      "file": "assets/parsed/level3a/level3a_images/0007_128x128d16.png",
       "status": "ok"
     },
     {
       "index": 8,
+      "chunk_id": 5,
+      "name": "hoodfar",
       "width": 128,
       "height": 128,
       "depth": 16,
@@ -127,11 +145,13 @@
       "transp_packed": 0,
       "dopalette": false,
       "bufsize": 28032,
-      "file": "/home/scotty/jn-engine/assets/parsed/level3a/level3a_images/0008_128x128d16.png",
+      "file": "assets/parsed/level3a/level3a_images/0008_128x128d16.png",
       "status": "ok"
     },
     {
       "index": 9,
+      "chunk_id": 3,
+      "name": "flowers02",
       "width": 128,
       "height": 128,
       "depth": 16,
@@ -141,11 +161,13 @@
       "transp_packed": 0,
       "dopalette": false,
       "bufsize": 32326,
-      "file": "/home/scotty/jn-engine/assets/parsed/level3a/level3a_images/0009_128x128d16.png",
+      "file": "assets/parsed/level3a/level3a_images/0009_128x128d16.png",
       "status": "ok"
     },
     {
       "index": 10,
+      "chunk_id": 4,
+      "name": "ground2",
       "width": 128,
       "height": 128,
       "depth": 16,
@@ -155,11 +177,13 @@
       "transp_packed": 0,
       "dopalette": false,
       "bufsize": 23738,
-      "file": "/home/scotty/jn-engine/assets/parsed/level3a/level3a_images/0010_128x128d16.png",
+      "file": "assets/parsed/level3a/level3a_images/0010_128x128d16.png",
       "status": "ok"
     },
     {
       "index": 11,
+      "chunk_id": 2,
+      "name": "fence01",
       "width": 128,
       "height": 128,
       "depth": 16,
@@ -169,11 +193,13 @@
       "transp_packed": 0,
       "dopalette": false,
       "bufsize": 32330,
-      "file": "/home/scotty/jn-engine/assets/parsed/level3a/level3a_images/0011_128x128d16.png",
+      "file": "assets/parsed/level3a/level3a_images/0011_128x128d16.png",
       "status": "ok"
     },
     {
       "index": 12,
+      "chunk_id": 14,
+      "name": "stairs",
       "width": 128,
       "height": 128,
       "depth": 16,
@@ -183,11 +209,13 @@
       "transp_packed": 0,
       "dopalette": false,
       "bufsize": 32612,
-      "file": "/home/scotty/jn-engine/assets/parsed/level3a/level3a_images/0012_128x128d16.png",
+      "file": "assets/parsed/level3a/level3a_images/0012_128x128d16.png",
       "status": "ok"
     },
     {
       "index": 13,
+      "chunk_id": 8,
+      "name": "sphinx",
       "width": 256,
       "height": 256,
       "depth": 16,
@@ -197,11 +225,13 @@
       "transp_packed": 0,
       "dopalette": false,
       "bufsize": 99426,
-      "file": "/home/scotty/jn-engine/assets/parsed/level3a/level3a_images/0013_256x256d16.png",
+      "file": "assets/parsed/level3a/level3a_images/0013_256x256d16.png",
       "status": "ok"
     },
     {
       "index": 14,
+      "chunk_id": 9,
+      "name": "track",
       "width": 256,
       "height": 256,
       "depth": 16,
@@ -211,7 +241,7 @@
       "transp_packed": 0,
       "dopalette": false,
       "bufsize": 93894,
-      "file": "/home/scotty/jn-engine/assets/parsed/level3a/level3a_images/0014_256x256d16.png",
+      "file": "assets/parsed/level3a/level3a_images/0014_256x256d16.png",
       "status": "ok"
     }
   ]

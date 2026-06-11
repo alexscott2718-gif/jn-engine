@@ -6,6 +6,8 @@
   "images": [
     {
       "index": 0,
+      "chunk_id": 1,
+      "name": "Bridge1",
       "width": 128,
       "height": 128,
       "depth": 32,
@@ -15,11 +17,13 @@
       "transp_packed": 0,
       "dopalette": false,
       "bufsize": 61364,
-      "file": "/home/scotty/jn-engine/assets/parsed/level5b/level5b_images/0000_128x128d32.png",
+      "file": "assets/parsed/level5b/level5b_images/0000_128x128d32.png",
       "status": "ok"
     },
     {
       "index": 1,
+      "chunk_id": 0,
+      "name": "YokianC",
       "width": 256,
       "height": 256,
       "depth": 32,
@@ -29,11 +33,13 @@
       "transp_packed": 0,
       "dopalette": false,
       "bufsize": 262068,
-      "file": "/home/scotty/jn-engine/assets/parsed/level5b/level5b_images/0001_256x256d32.png",
+      "file": "assets/parsed/level5b/level5b_images/0001_256x256d32.png",
       "status": "ok"
     },
     {
       "index": 2,
+      "chunk_id": 17,
+      "name": "metal01",
       "width": 64,
       "height": 64,
       "depth": 32,
@@ -43,11 +49,13 @@
       "transp_packed": 0,
       "dopalette": false,
       "bufsize": 16756,
-      "file": "/home/scotty/jn-engine/assets/parsed/level5b/level5b_images/0002_64x64d32.png",
+      "file": "assets/parsed/level5b/level5b_images/0002_64x64d32.png",
       "status": "ok"
     },
     {
       "index": 3,
+      "chunk_id": 19,
+      "name": "crate",
       "width": 64,
       "height": 64,
       "depth": 32,
@@ -57,11 +65,13 @@
       "transp_packed": 0,
       "dopalette": false,
       "bufsize": 16768,
-      "file": "/home/scotty/jn-engine/assets/parsed/level5b/level5b_images/0003_64x64d32.png",
+      "file": "assets/parsed/level5b/level5b_images/0003_64x64d32.png",
       "status": "ok"
     },
     {
       "index": 4,
+      "chunk_id": 3,
+      "name": "dirt01",
       "width": 128,
       "height": 128,
       "depth": 32,
@@ -71,11 +81,13 @@
       "transp_packed": 0,
       "dopalette": false,
       "bufsize": 66304,
-      "file": "/home/scotty/jn-engine/assets/parsed/level5b/level5b_images/0004_128x128d32.png",
+      "file": "assets/parsed/level5b/level5b_images/0004_128x128d32.png",
       "status": "ok"
     },
     {
       "index": 5,
+      "chunk_id": 4,
+      "name": "dirt02",
       "width": 128,
       "height": 128,
       "depth": 32,
@@ -85,11 +97,13 @@
       "transp_packed": 0,
       "dopalette": false,
       "bufsize": 66304,
-      "file": "/home/scotty/jn-engine/assets/parsed/level5b/level5b_images/0005_128x128d32.png",
+      "file": "assets/parsed/level5b/level5b_images/0005_128x128d32.png",
       "status": "ok"
     },
     {
       "index": 6,
+      "chunk_id": 5,
+      "name": "dirt03",
       "width": 128,
       "height": 128,
       "depth": 32,
@@ -99,11 +113,13 @@
       "transp_packed": 0,
       "dopalette": false,
       "bufsize": 66304,
-      "file": "/home/scotty/jn-engine/assets/parsed/level5b/level5b_images/0006_128x128d32.png",
+      "file": "assets/parsed/level5b/level5b_images/0006_128x128d32.png",
       "status": "ok"
     },
     {
       "index": 7,
+      "chunk_id": 14,
+      "name": "BLOCK01",
       "width": 128,
       "height": 128,
       "depth": 32,
@@ -113,11 +129,13 @@
       "transp_packed": 0,
       "dopalette": false,
       "bufsize": 57120,
-      "file": "/home/scotty/jn-engine/assets/parsed/level5b/level5b_images/0007_128x128d32.png",
+      "file": "assets/parsed/level5b/level5b_images/0007_128x128d32.png",
       "status": "ok"
     },
     {
       "index": 8,
+      "chunk_id": 7,
+      "name": "ground01",
       "width": 128,
       "height": 128,
       "depth": 32,
@@ -127,11 +145,13 @@
       "transp_packed": 0,
       "dopalette": false,
       "bufsize": 66304,
-      "file": "/home/scotty/jn-engine/assets/parsed/level5b/level5b_images/0008_128x128d32.png",
+      "file": "assets/parsed/level5b/level5b_images/0008_128x128d32.png",
       "status": "ok"
     },
     {
       "index": 9,
+      "chunk_id": 8,
+      "name": "river",
       "width": 128,
       "height": 128,
       "depth": 32,
@@ -141,11 +161,13 @@
       "transp_packed": 0,
       "dopalette": false,
       "bufsize": 66304,
-      "file": "/home/scotty/jn-engine/assets/parsed/level5b/level5b_images/0009_128x128d32.png",
+      "file": "assets/parsed/level5b/level5b_images/0009_128x128d32.png",
       "status": "ok"
     },
     {
       "index": 10,
+      "chunk_id": 9,
+      "name": "rocks01",
       "width": 128,
       "height": 128,
       "depth": 32,
@@ -155,11 +177,13 @@
       "transp_packed": 0,
       "dopalette": false,
       "bufsize": 66064,
-      "file": "/home/scotty/jn-engine/assets/parsed/level5b/level5b_images/0010_128x128d32.png",
+      "file": "assets/parsed/level5b/level5b_images/0010_128x128d32.png",
       "status": "ok"
     },
     {
       "index": 11,
+      "chunk_id": 10,
+      "name": "rocks02",
       "width": 128,
       "height": 128,
       "depth": 32,
@@ -169,11 +193,13 @@
       "transp_packed": 0,
       "dopalette": false,
       "bufsize": 66304,
-      "file": "/home/scotty/jn-engine/assets/parsed/level5b/level5b_images/0011_128x128d32.png",
+      "file": "assets/parsed/level5b/level5b_images/0011_128x128d32.png",
       "status": "ok"
     },
     {
       "index": 12,
+      "chunk_id": 11,
+      "name": "rocks03",
       "width": 128,
       "height": 128,
       "depth": 32,
@@ -183,11 +209,13 @@
       "transp_packed": 0,
       "dopalette": false,
       "bufsize": 66156,
-      "file": "/home/scotty/jn-engine/assets/parsed/level5b/level5b_images/0012_128x128d32.png",
+      "file": "assets/parsed/level5b/level5b_images/0012_128x128d32.png",
       "status": "ok"
     },
     {
       "index": 13,
+      "chunk_id": 12,
+      "name": "stalactites",
       "width": 128,
       "height": 128,
       "depth": 32,
@@ -197,11 +225,13 @@
       "transp_packed": 0,
       "dopalette": false,
       "bufsize": 66192,
-      "file": "/home/scotty/jn-engine/assets/parsed/level5b/level5b_images/0013_128x128d32.png",
+      "file": "assets/parsed/level5b/level5b_images/0013_128x128d32.png",
       "status": "ok"
     },
     {
       "index": 14,
+      "chunk_id": 13,
+      "name": "walls01",
       "width": 128,
       "height": 128,
       "depth": 32,
@@ -211,11 +241,13 @@
       "transp_packed": 0,
       "dopalette": false,
       "bufsize": 66304,
-      "file": "/home/scotty/jn-engine/assets/parsed/level5b/level5b_images/0014_128x128d32.png",
+      "file": "assets/parsed/level5b/level5b_images/0014_128x128d32.png",
       "status": "ok"
     },
     {
       "index": 15,
+      "chunk_id": 20,
+      "name": "barrel",
       "width": 64,
       "height": 64,
       "depth": 32,
@@ -225,11 +257,13 @@
       "transp_packed": 0,
       "dopalette": false,
       "bufsize": 16768,
-      "file": "/home/scotty/jn-engine/assets/parsed/level5b/level5b_images/0015_64x64d32.png",
+      "file": "assets/parsed/level5b/level5b_images/0015_64x64d32.png",
       "status": "ok"
     },
     {
       "index": 16,
+      "chunk_id": 28,
+      "name": "pipi2",
       "width": 64,
       "height": 64,
       "depth": 32,
@@ -239,11 +273,13 @@
       "transp_packed": 0,
       "dopalette": false,
       "bufsize": 16684,
-      "file": "/home/scotty/jn-engine/assets/parsed/level5b/level5b_images/0016_64x64d32.png",
+      "file": "assets/parsed/level5b/level5b_images/0016_64x64d32.png",
       "status": "ok"
     },
     {
       "index": 17,
+      "chunk_id": 27,
+      "name": "pipi",
       "width": 64,
       "height": 64,
       "depth": 32,
@@ -253,11 +289,13 @@
       "transp_packed": 0,
       "dopalette": false,
       "bufsize": 16564,
-      "file": "/home/scotty/jn-engine/assets/parsed/level5b/level5b_images/0017_64x64d32.png",
+      "file": "assets/parsed/level5b/level5b_images/0017_64x64d32.png",
       "status": "ok"
     },
     {
       "index": 18,
+      "chunk_id": 15,
+      "name": "rocks04",
       "width": 256,
       "height": 256,
       "depth": 32,
@@ -267,11 +305,13 @@
       "transp_packed": 0,
       "dopalette": false,
       "bufsize": 264704,
-      "file": "/home/scotty/jn-engine/assets/parsed/level5b/level5b_images/0018_256x256d32.png",
+      "file": "assets/parsed/level5b/level5b_images/0018_256x256d32.png",
       "status": "ok"
     },
     {
       "index": 19,
+      "chunk_id": 6,
+      "name": "door01",
       "width": 128,
       "height": 128,
       "depth": 32,
@@ -281,11 +321,13 @@
       "transp_packed": 0,
       "dopalette": false,
       "bufsize": 65068,
-      "file": "/home/scotty/jn-engine/assets/parsed/level5b/level5b_images/0019_128x128d32.png",
+      "file": "assets/parsed/level5b/level5b_images/0019_128x128d32.png",
       "status": "ok"
     },
     {
       "index": 20,
+      "chunk_id": 23,
+      "name": "landing",
       "width": 256,
       "height": 256,
       "depth": 32,
@@ -295,11 +337,13 @@
       "transp_packed": 0,
       "dopalette": false,
       "bufsize": 246292,
-      "file": "/home/scotty/jn-engine/assets/parsed/level5b/level5b_images/0020_256x256d32.png",
+      "file": "assets/parsed/level5b/level5b_images/0020_256x256d32.png",
       "status": "ok"
     },
     {
       "index": 21,
+      "chunk_id": 25,
+      "name": "bones",
       "width": 128,
       "height": 128,
       "depth": 32,
@@ -309,11 +353,13 @@
       "transp_packed": 0,
       "dopalette": false,
       "bufsize": 60376,
-      "file": "/home/scotty/jn-engine/assets/parsed/level5b/level5b_images/0021_128x128d32.png",
+      "file": "assets/parsed/level5b/level5b_images/0021_128x128d32.png",
       "status": "ok"
     },
     {
       "index": 22,
+      "chunk_id": 16,
+      "name": "road02",
       "width": 256,
       "height": 256,
       "depth": 32,
@@ -323,11 +369,13 @@
       "transp_packed": 0,
       "dopalette": false,
       "bufsize": 264668,
-      "file": "/home/scotty/jn-engine/assets/parsed/level5b/level5b_images/0022_256x256d32.png",
+      "file": "assets/parsed/level5b/level5b_images/0022_256x256d32.png",
       "status": "ok"
     },
     {
       "index": 23,
+      "chunk_id": 18,
+      "name": "ctrltower",
       "width": 256,
       "height": 256,
       "depth": 32,
@@ -337,11 +385,13 @@
       "transp_packed": 0,
       "dopalette": false,
       "bufsize": 262224,
-      "file": "/home/scotty/jn-engine/assets/parsed/level5b/level5b_images/0023_256x256d32.png",
+      "file": "assets/parsed/level5b/level5b_images/0023_256x256d32.png",
       "status": "ok"
     },
     {
       "index": 24,
+      "chunk_id": 21,
+      "name": "pilar",
       "width": 128,
       "height": 128,
       "depth": 32,
@@ -351,11 +401,13 @@
       "transp_packed": 0,
       "dopalette": false,
       "bufsize": 62540,
-      "file": "/home/scotty/jn-engine/assets/parsed/level5b/level5b_images/0024_128x128d32.png",
+      "file": "assets/parsed/level5b/level5b_images/0024_128x128d32.png",
       "status": "ok"
     },
     {
       "index": 25,
+      "chunk_id": 29,
+      "name": "chicken",
       "width": 128,
       "height": 128,
       "depth": 32,
@@ -365,11 +417,13 @@
       "transp_packed": 0,
       "dopalette": false,
       "bufsize": 55104,
-      "file": "/home/scotty/jn-engine/assets/parsed/level5b/level5b_images/0025_128x128d32.png",
+      "file": "assets/parsed/level5b/level5b_images/0025_128x128d32.png",
       "status": "ok"
     },
     {
       "index": 26,
+      "chunk_id": 30,
+      "name": "vault01",
       "width": 256,
       "height": 256,
       "depth": 32,
@@ -379,11 +433,13 @@
       "transp_packed": 0,
       "dopalette": false,
       "bufsize": 263876,
-      "file": "/home/scotty/jn-engine/assets/parsed/level5b/level5b_images/0026_256x256d32.png",
+      "file": "assets/parsed/level5b/level5b_images/0026_256x256d32.png",
       "status": "ok"
     },
     {
       "index": 27,
+      "chunk_id": 2,
+      "name": "cementbkp",
       "width": 256,
       "height": 256,
       "depth": 32,
@@ -393,11 +449,13 @@
       "transp_packed": 0,
       "dopalette": false,
       "bufsize": 261428,
-      "file": "/home/scotty/jn-engine/assets/parsed/level5b/level5b_images/0027_256x256d32.png",
+      "file": "assets/parsed/level5b/level5b_images/0027_256x256d32.png",
       "status": "ok"
     },
     {
       "index": 28,
+      "chunk_id": 24,
+      "name": "lava1",
       "width": 256,
       "height": 256,
       "depth": 32,
@@ -407,11 +465,13 @@
       "transp_packed": 0,
       "dopalette": false,
       "bufsize": 264704,
-      "file": "/home/scotty/jn-engine/assets/parsed/level5b/level5b_images/0028_256x256d32.png",
+      "file": "assets/parsed/level5b/level5b_images/0028_256x256d32.png",
       "status": "ok"
     },
     {
       "index": 29,
+      "chunk_id": 26,
+      "name": "wallgrid",
       "width": 256,
       "height": 256,
       "depth": 32,
@@ -421,11 +481,13 @@
       "transp_packed": 0,
       "dopalette": false,
       "bufsize": 263680,
-      "file": "/home/scotty/jn-engine/assets/parsed/level5b/level5b_images/0029_256x256d32.png",
+      "file": "assets/parsed/level5b/level5b_images/0029_256x256d32.png",
       "status": "ok"
     },
     {
       "index": 30,
+      "chunk_id": 22,
+      "name": "bathroom01",
       "width": 128,
       "height": 128,
       "depth": 32,
@@ -435,11 +497,13 @@
       "transp_packed": 0,
       "dopalette": false,
       "bufsize": 65564,
-      "file": "/home/scotty/jn-engine/assets/parsed/level5b/level5b_images/0030_128x128d32.png",
+      "file": "assets/parsed/level5b/level5b_images/0030_128x128d32.png",
       "status": "ok"
     },
     {
       "index": 31,
+      "chunk_id": 811,
+      "name": "ncriver",
       "width": 128,
       "height": 128,
       "depth": 32,
@@ -449,11 +513,13 @@
       "transp_packed": 0,
       "dopalette": false,
       "bufsize": 66304,
-      "file": "/home/scotty/jn-engine/assets/parsed/level5b/level5b_images/0031_128x128d32.png",
+      "file": "assets/parsed/level5b/level5b_images/0031_128x128d32.png",
       "status": "ok"
     },
     {
       "index": 32,
+      "chunk_id": 812,
+      "name": "magma",
       "width": 128,
       "height": 128,
       "depth": 32,
@@ -463,7 +529,7 @@
       "transp_packed": 0,
       "dopalette": false,
       "bufsize": 66304,
-      "file": "/home/scotty/jn-engine/assets/parsed/level5b/level5b_images/0032_128x128d32.png",
+      "file": "assets/parsed/level5b/level5b_images/0032_128x128d32.png",
       "status": "ok"
     }
   ]

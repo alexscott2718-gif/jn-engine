@@ -6,6 +6,8 @@
   "images": [
     {
       "index": 0,
+      "chunk_id": 2,
+      "name": "none",
       "width": 8,
       "height": 8,
       "depth": 16,
@@ -15,11 +17,13 @@
       "transp_packed": 0,
       "dopalette": false,
       "bufsize": 48,
-      "file": "/home/scotty/jn-engine/assets/parsed/splash/splash_images/0000_8x8d16.png",
+      "file": "assets/parsed/splash/splash_images/0000_8x8d16.png",
       "status": "ok"
     },
     {
       "index": 1,
+      "chunk_id": 4,
+      "name": "none",
       "width": 8,
       "height": 8,
       "depth": 16,
@@ -29,11 +33,13 @@
       "transp_packed": 0,
       "dopalette": false,
       "bufsize": 48,
-      "file": "/home/scotty/jn-engine/assets/parsed/splash/splash_images/0001_8x8d16.png",
+      "file": "assets/parsed/splash/splash_images/0001_8x8d16.png",
       "status": "ok"
     },
     {
       "index": 2,
+      "chunk_id": 3,
+      "name": "THQ",
       "width": 640,
       "height": 480,
       "depth": 16,
@@ -43,11 +49,13 @@
       "transp_packed": 0,
       "dopalette": false,
       "bufsize": 81844,
-      "file": "/home/scotty/jn-engine/assets/parsed/splash/splash_images/0002_640x480d16.png",
+      "file": "assets/parsed/splash/splash_images/0002_640x480d16.png",
       "status": "ok"
     },
     {
       "index": 3,
+      "chunk_id": 1,
+      "name": "Jimmy_Logo_Final",
       "width": 640,
       "height": 480,
       "depth": 16,
@@ -57,11 +65,13 @@
       "transp_packed": 0,
       "dopalette": false,
       "bufsize": 127178,
-      "file": "/home/scotty/jn-engine/assets/parsed/splash/splash_images/0003_640x480d16.png",
+      "file": "assets/parsed/splash/splash_images/0003_640x480d16.png",
       "status": "ok"
     },
     {
       "index": 4,
+      "chunk_id": 0,
+      "name": "AWEGames",
       "width": 640,
       "height": 480,
       "depth": 16,
@@ -71,7 +81,7 @@
       "transp_packed": 0,
       "dopalette": false,
       "bufsize": 83520,
-      "file": "/home/scotty/jn-engine/assets/parsed/splash/splash_images/0004_640x480d16.png",
+      "file": "assets/parsed/splash/splash_images/0004_640x480d16.png",
       "status": "ok"
     }
   ]

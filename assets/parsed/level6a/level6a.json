@@ -6,6 +6,8 @@
   "images": [
     {
       "index": 0,
+      "chunk_id": 9,
+      "name": "stairs",
       "width": 128,
       "height": 128,
       "depth": 32,
@@ -15,11 +17,13 @@
       "transp_packed": 0,
       "dopalette": false,
       "bufsize": 16460,
-      "file": "/home/scotty/jn-engine/assets/parsed/level6a/level6a_images/0000_128x128d32.png",
+      "file": "assets/parsed/level6a/level6a_images/0000_128x128d32.png",
       "status": "ok"
     },
     {
       "index": 1,
+      "chunk_id": 14,
+      "name": "dungeon",
       "width": 128,
       "height": 128,
       "depth": 32,
@@ -29,11 +33,13 @@
       "transp_packed": 0,
       "dopalette": false,
       "bufsize": 36968,
-      "file": "/home/scotty/jn-engine/assets/parsed/level6a/level6a_images/0001_128x128d32.png",
+      "file": "assets/parsed/level6a/level6a_images/0001_128x128d32.png",
       "status": "ok"
     },
     {
       "index": 2,
+      "chunk_id": 18,
+      "name": "keyboard",
       "width": 128,
       "height": 128,
       "depth": 32,
@@ -43,11 +49,13 @@
       "transp_packed": 0,
       "dopalette": false,
       "bufsize": 48628,
-      "file": "/home/scotty/jn-engine/assets/parsed/level6a/level6a_images/0002_128x128d32.png",
+      "file": "assets/parsed/level6a/level6a_images/0002_128x128d32.png",
       "status": "ok"
     },
     {
       "index": 3,
+      "chunk_id": 13,
+      "name": "buttonplate",
       "width": 128,
       "height": 128,
       "depth": 32,
@@ -57,11 +65,13 @@
       "transp_packed": 0,
       "dopalette": false,
       "bufsize": 51960,
-      "file": "/home/scotty/jn-engine/assets/parsed/level6a/level6a_images/0003_128x128d32.png",
+      "file": "assets/parsed/level6a/level6a_images/0003_128x128d32.png",
       "status": "ok"
     },
     {
       "index": 4,
+      "chunk_id": 7,
+      "name": "orange",
       "width": 128,
       "height": 128,
       "depth": 32,
@@ -71,11 +81,13 @@
       "transp_packed": 0,
       "dopalette": false,
       "bufsize": 53680,
-      "file": "/home/scotty/jn-engine/assets/parsed/level6a/level6a_images/0004_128x128d32.png",
+      "file": "assets/parsed/level6a/level6a_images/0004_128x128d32.png",
       "status": "ok"
     },
     {
       "index": 5,
+      "chunk_id": 21,
+      "name": "earth",
       "width": 128,
       "height": 128,
       "depth": 32,
@@ -85,11 +97,13 @@
       "transp_packed": 0,
       "dopalette": false,
       "bufsize": 58640,
-      "file": "/home/scotty/jn-engine/assets/parsed/level6a/level6a_images/0005_128x128d32.png",
+      "file": "assets/parsed/level6a/level6a_images/0005_128x128d32.png",
       "status": "ok"
     },
     {
       "index": 6,
+      "chunk_id": 20,
+      "name": "table01",
       "width": 128,
       "height": 128,
       "depth": 32,
@@ -99,11 +113,13 @@
       "transp_packed": 0,
       "dopalette": false,
       "bufsize": 58904,
-      "file": "/home/scotty/jn-engine/assets/parsed/level6a/level6a_images/0006_128x128d32.png",
+      "file": "assets/parsed/level6a/level6a_images/0006_128x128d32.png",
       "status": "ok"
     },
     {
       "index": 7,
+      "chunk_id": 6,
+      "name": "lights",
       "width": 128,
       "height": 128,
       "depth": 32,
@@ -113,11 +129,13 @@
       "transp_packed": 0,
       "dopalette": false,
       "bufsize": 61432,
-      "file": "/home/scotty/jn-engine/assets/parsed/level6a/level6a_images/0007_128x128d32.png",
+      "file": "assets/parsed/level6a/level6a_images/0007_128x128d32.png",
       "status": "ok"
     },
     {
       "index": 8,
+      "chunk_id": 19,
+      "name": "neighb",
       "width": 128,
       "height": 128,
       "depth": 32,
@@ -127,11 +145,13 @@
       "transp_packed": 0,
       "dopalette": false,
       "bufsize": 61636,
-      "file": "/home/scotty/jn-engine/assets/parsed/level6a/level6a_images/0008_128x128d32.png",
+      "file": "assets/parsed/level6a/level6a_images/0008_128x128d32.png",
       "status": "ok"
     },
     {
       "index": 9,
+      "chunk_id": 23,
+      "name": "jimmy",
       "width": 128,
       "height": 128,
       "depth": 32,
@@ -141,11 +161,13 @@
       "transp_packed": 0,
       "dopalette": false,
       "bufsize": 62256,
-      "file": "/home/scotty/jn-engine/assets/parsed/level6a/level6a_images/0009_128x128d32.png",
+      "file": "assets/parsed/level6a/level6a_images/0009_128x128d32.png",
       "status": "ok"
     },
     {
       "index": 10,
+      "chunk_id": 0,
+      "name": "YokianF",
       "width": 128,
       "height": 128,
       "depth": 32,
@@ -155,11 +177,13 @@
       "transp_packed": 0,
       "dopalette": false,
       "bufsize": 65760,
-      "file": "/home/scotty/jn-engine/assets/parsed/level6a/level6a_images/0010_128x128d32.png",
+      "file": "assets/parsed/level6a/level6a_images/0010_128x128d32.png",
       "status": "ok"
     },
     {
       "index": 11,
+      "chunk_id": 10,
+      "name": "testtube",
       "width": 128,
       "height": 128,
       "depth": 32,
@@ -169,11 +193,13 @@
       "transp_packed": 0,
       "dopalette": false,
       "bufsize": 66076,
-      "file": "/home/scotty/jn-engine/assets/parsed/level6a/level6a_images/0011_128x128d32.png",
+      "file": "assets/parsed/level6a/level6a_images/0011_128x128d32.png",
       "status": "ok"
     },
     {
       "index": 12,
+      "chunk_id": 17,
+      "name": "wanted2",
       "width": 128,
       "height": 128,
       "depth": 32,
@@ -183,11 +209,13 @@
       "transp_packed": 0,
       "dopalette": false,
       "bufsize": 66108,
-      "file": "/home/scotty/jn-engine/assets/parsed/level6a/level6a_images/0012_128x128d32.png",
+      "file": "assets/parsed/level6a/level6a_images/0012_128x128d32.png",
       "status": "ok"
     },
     {
       "index": 13,
+      "chunk_id": 12,
+      "name": "wall2",
       "width": 128,
       "height": 128,
       "depth": 32,
@@ -197,11 +225,13 @@
       "transp_packed": 0,
       "dopalette": false,
       "bufsize": 66172,
-      "file": "/home/scotty/jn-engine/assets/parsed/level6a/level6a_images/0013_128x128d32.png",
+      "file": "assets/parsed/level6a/level6a_images/0013_128x128d32.png",
       "status": "ok"
     },
     {
       "index": 14,
+      "chunk_id": 15,
+      "name": "window",
       "width": 128,
       "height": 128,
       "depth": 32,
@@ -211,11 +241,13 @@
       "transp_packed": 0,
       "dopalette": false,
       "bufsize": 66236,
-      "file": "/home/scotty/jn-engine/assets/parsed/level6a/level6a_images/0014_128x128d32.png",
+      "file": "assets/parsed/level6a/level6a_images/0014_128x128d32.png",
       "status": "ok"
     },
     {
       "index": 15,
+      "chunk_id": 5,
+      "name": "ladder",
       "width": 64,
       "height": 64,
       "depth": 32,
@@ -225,11 +257,13 @@
       "transp_packed": 0,
       "dopalette": false,
       "bufsize": 16708,
-      "file": "/home/scotty/jn-engine/assets/parsed/level6a/level6a_images/0015_64x64d32.png",
+      "file": "assets/parsed/level6a/level6a_images/0015_64x64d32.png",
       "status": "ok"
     },
     {
       "index": 16,
+      "chunk_id": 25,
+      "name": "birdcage",
       "width": 128,
       "height": 128,
       "depth": 32,
@@ -239,11 +273,13 @@
       "transp_packed": 0,
       "dopalette": false,
       "bufsize": 66280,
-      "file": "/home/scotty/jn-engine/assets/parsed/level6a/level6a_images/0016_128x128d32.png",
+      "file": "assets/parsed/level6a/level6a_images/0016_128x128d32.png",
       "status": "ok"
     },
     {
       "index": 17,
+      "chunk_id": 2,
+      "name": "cell",
       "width": 128,
       "height": 128,
       "depth": 32,
@@ -253,11 +289,13 @@
       "transp_packed": 0,
       "dopalette": false,
       "bufsize": 66304,
-      "file": "/home/scotty/jn-engine/assets/parsed/level6a/level6a_images/0017_128x128d32.png",
+      "file": "assets/parsed/level6a/level6a_images/0017_128x128d32.png",
       "status": "ok"
     },
     {
       "index": 18,
+      "chunk_id": 8,
+      "name": "pipe",
       "width": 128,
       "height": 128,
       "depth": 32,
@@ -267,11 +305,13 @@
       "transp_packed": 0,
       "dopalette": false,
       "bufsize": 66304,
-      "file": "/home/scotty/jn-engine/assets/parsed/level6a/level6a_images/0018_128x128d32.png",
+      "file": "assets/parsed/level6a/level6a_images/0018_128x128d32.png",
       "status": "ok"
     },
     {
       "index": 19,
+      "chunk_id": 1,
+      "name": "floor01",
       "width": 128,
       "height": 128,
       "depth": 32,
@@ -281,11 +321,13 @@
       "transp_packed": 0,
       "dopalette": false,
       "bufsize": 65012,
-      "file": "/home/scotty/jn-engine/assets/parsed/level6a/level6a_images/0019_128x128d32.png",
+      "file": "assets/parsed/level6a/level6a_images/0019_128x128d32.png",
       "status": "ok"
     },
     {
       "index": 20,
+      "chunk_id": 16,
+      "name": "carl04",
       "width": 256,
       "height": 256,
       "depth": 32,
@@ -295,11 +337,13 @@
       "transp_packed": 0,
       "dopalette": false,
       "bufsize": 219596,
-      "file": "/home/scotty/jn-engine/assets/parsed/level6a/level6a_images/0020_256x256d32.png",
+      "file": "assets/parsed/level6a/level6a_images/0020_256x256d32.png",
       "status": "ok"
     },
     {
       "index": 21,
+      "chunk_id": 22,
+      "name": "windowpipe",
       "width": 256,
       "height": 256,
       "depth": 32,
@@ -309,11 +353,13 @@
       "transp_packed": 0,
       "dopalette": false,
       "bufsize": 264164,
-      "file": "/home/scotty/jn-engine/assets/parsed/level6a/level6a_images/0021_256x256d32.png",
+      "file": "assets/parsed/level6a/level6a_images/0021_256x256d32.png",
       "status": "ok"
     },
     {
       "index": 22,
+      "chunk_id": 3,
+      "name": "catwalk01",
       "width": 128,
       "height": 128,
       "depth": 32,
@@ -323,11 +369,13 @@
       "transp_packed": 0,
       "dopalette": false,
       "bufsize": 66256,
-      "file": "/home/scotty/jn-engine/assets/parsed/level6a/level6a_images/0022_128x128d32.png",
+      "file": "assets/parsed/level6a/level6a_images/0022_128x128d32.png",
       "status": "ok"
     },
     {
       "index": 23,
+      "chunk_id": 26,
+      "name": "newall02",
       "width": 128,
       "height": 128,
       "depth": 32,
@@ -337,11 +385,13 @@
       "transp_packed": 0,
       "dopalette": false,
       "bufsize": 66304,
-      "file": "/home/scotty/jn-engine/assets/parsed/level6a/level6a_images/0023_128x128d32.png",
+      "file": "assets/parsed/level6a/level6a_images/0023_128x128d32.png",
       "status": "ok"
     },
     {
       "index": 24,
+      "chunk_id": 4,
+      "name": "floor03",
       "width": 128,
       "height": 128,
       "depth": 32,
@@ -351,11 +401,13 @@
       "transp_packed": 0,
       "dopalette": false,
       "bufsize": 66168,
-      "file": "/home/scotty/jn-engine/assets/parsed/level6a/level6a_images/0024_128x128d32.png",
+      "file": "assets/parsed/level6a/level6a_images/0024_128x128d32.png",
       "status": "ok"
     },
     {
       "index": 25,
+      "chunk_id": 11,
+      "name": "newall01",
       "width": 128,
       "height": 128,
       "depth": 32,
@@ -365,11 +417,13 @@
       "transp_packed": 0,
       "dopalette": false,
       "bufsize": 66304,
-      "file": "/home/scotty/jn-engine/assets/parsed/level6a/level6a_images/0025_128x128d32.png",
+      "file": "assets/parsed/level6a/level6a_images/0025_128x128d32.png",
       "status": "ok"
     },
     {
       "index": 26,
+      "chunk_id": 24,
+      "name": "wall01",
       "width": 128,
       "height": 128,
       "depth": 32,
@@ -379,7 +433,7 @@
       "transp_packed": 0,
       "dopalette": false,
       "bufsize": 66304,
-      "file": "/home/scotty/jn-engine/assets/parsed/level6a/level6a_images/0026_128x128d32.png",
+      "file": "assets/parsed/level6a/level6a_images/0026_128x128d32.png",
       "status": "ok"
     }
   ]

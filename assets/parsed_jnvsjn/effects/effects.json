@@ -1,11 +1,13 @@
 {
-  "file": "/home/scotty/jnvsjn-original/omt/effects.omt",
+  "file": "/home/scotty/jnvsjn-original/_installshield/Program_Executable_Files/omt/effects.omt",
   "total_size": 447629,
   "has_images": true,
   "has_audio": false,
   "images": [
     {
       "index": 0,
+      "chunk_id": 2,
+      "name": "fglow_a02",
       "width": 64,
       "height": 64,
       "depth": 32,
@@ -20,6 +22,8 @@
     },
     {
       "index": 1,
+      "chunk_id": 3,
+      "name": "fglow_a03",
       "width": 64,
       "height": 64,
       "depth": 32,
@@ -34,6 +38,8 @@
     },
     {
       "index": 2,
+      "chunk_id": 5,
+      "name": "fglow_a05",
       "width": 64,
       "height": 64,
       "depth": 32,
@@ -48,6 +54,8 @@
     },
     {
       "index": 3,
+      "chunk_id": 6,
+      "name": "fglow_a06",
       "width": 64,
       "height": 64,
       "depth": 32,
@@ -62,6 +70,8 @@
     },
     {
       "index": 4,
+      "chunk_id": 7,
+      "name": "fglow_a07",
       "width": 64,
       "height": 64,
       "depth": 32,
@@ -76,6 +86,8 @@
     },
     {
       "index": 5,
+      "chunk_id": 8,
+      "name": "fglow_a08",
       "width": 64,
       "height": 64,
       "depth": 32,
@@ -90,6 +102,8 @@
     },
     {
       "index": 6,
+      "chunk_id": 10,
+      "name": "fglow_a10",
       "width": 64,
       "height": 64,
       "depth": 32,
@@ -104,6 +118,8 @@
     },
     {
       "index": 7,
+      "chunk_id": 12,
+      "name": "skj_a01",
       "width": 64,
       "height": 64,
       "depth": 32,
@@ -118,6 +134,8 @@
     },
     {
       "index": 8,
+      "chunk_id": 13,
+      "name": "skj_a02",
       "width": 64,
       "height": 64,
       "depth": 32,
@@ -132,6 +150,8 @@
     },
     {
       "index": 9,
+      "chunk_id": 15,
+      "name": "skj_a04",
       "width": 64,
       "height": 64,
       "depth": 32,
@@ -146,6 +166,8 @@
     },
     {
       "index": 10,
+      "chunk_id": 17,
+      "name": "skj_a06",
       "width": 64,
       "height": 64,
       "depth": 32,
@@ -160,6 +182,8 @@
     },
     {
       "index": 11,
+      "chunk_id": 14,
+      "name": "skj_a03",
       "width": 64,
       "height": 64,
       "depth": 32,
@@ -174,6 +198,8 @@
     },
     {
       "index": 12,
+      "chunk_id": 9,
+      "name": "fglow_a09",
       "width": 64,
       "height": 64,
       "depth": 32,
@@ -188,6 +214,8 @@
     },
     {
       "index": 13,
+      "chunk_id": 16,
+      "name": "skj_a05",
       "width": 64,
       "height": 64,
       "depth": 32,
@@ -202,6 +230,8 @@
     },
     {
       "index": 14,
+      "chunk_id": 18,
+      "name": "skj_a07",
       "width": 64,
       "height": 64,
       "depth": 32,
@@ -216,6 +246,8 @@
     },
     {
       "index": 15,
+      "chunk_id": 19,
+      "name": "skj_a08",
       "width": 64,
       "height": 64,
       "depth": 32,
@@ -230,6 +262,8 @@
     },
     {
       "index": 16,
+      "chunk_id": 20,
+      "name": "skj_a09",
       "width": 64,
       "height": 64,
       "depth": 32,
@@ -244,6 +278,8 @@
     },
     {
       "index": 17,
+      "chunk_id": 11,
+      "name": "skj_a00",
       "width": 64,
       "height": 64,
       "depth": 32,
@@ -258,20 +294,8 @@
     },
     {
       "index": 18,
-      "width": 64,
-      "height": 64,
-      "depth": 32,
-      "compression": 2,
-      "stride": 256,
-      "dotransparent": false,
-      "transp_packed": 0,
-      "dopalette": false,
-      "bufsize": 4480,
-      "file": "assets/parsed_jnvsjn/effects/effects_images/0018_64x64d32.png",
-      "status": "ok"
-    },
-    {
-      "index": 19,
+      "chunk_id": 21,
+      "name": "utflare1",
       "width": 128,
       "height": 128,
       "depth": 32,
@@ -281,11 +305,13 @@
       "transp_packed": 0,
       "dopalette": false,
       "bufsize": 12080,
-      "file": "assets/parsed_jnvsjn/effects/effects_images/0019_128x128d32.png",
+      "file": "assets/parsed_jnvsjn/effects/effects_images/0018_128x128d32.png",
       "status": "ok"
     },
     {
-      "index": 20,
+      "index": 19,
+      "chunk_id": 24,
+      "name": "utflare4",
       "width": 128,
       "height": 128,
       "depth": 32,
@@ -295,11 +321,13 @@
       "transp_packed": 0,
       "dopalette": false,
       "bufsize": 17880,
-      "file": "assets/parsed_jnvsjn/effects/effects_images/0020_128x128d32.png",
+      "file": "assets/parsed_jnvsjn/effects/effects_images/0019_128x128d32.png",
       "status": "ok"
     },
     {
-      "index": 21,
+      "index": 20,
+      "chunk_id": 1,
+      "name": "fglow_a01",
       "width": 64,
       "height": 64,
       "depth": 32,
@@ -309,11 +337,13 @@
       "transp_packed": 0,
       "dopalette": false,
       "bufsize": 12900,
-      "file": "assets/parsed_jnvsjn/effects/effects_images/0021_64x64d32.png",
+      "file": "assets/parsed_jnvsjn/effects/effects_images/0020_64x64d32.png",
       "status": "ok"
     },
     {
-      "index": 22,
+      "index": 21,
+      "chunk_id": 25,
+      "name": "utflare5",
       "width": 128,
       "height": 128,
       "depth": 32,
@@ -323,11 +353,13 @@
       "transp_packed": 0,
       "dopalette": false,
       "bufsize": 27832,
-      "file": "assets/parsed_jnvsjn/effects/effects_images/0022_128x128d32.png",
+      "file": "assets/parsed_jnvsjn/effects/effects_images/0021_128x128d32.png",
       "status": "ok"
     },
     {
-      "index": 23,
+      "index": 22,
+      "chunk_id": 4,
+      "name": "fglow_a04",
       "width": 64,
       "height": 64,
       "depth": 32,
@@ -337,25 +369,13 @@
       "transp_packed": 0,
       "dopalette": false,
       "bufsize": 12900,
-      "file": "assets/parsed_jnvsjn/effects/effects_images/0023_64x64d32.png",
+      "file": "assets/parsed_jnvsjn/effects/effects_images/0022_64x64d32.png",
       "status": "ok"
     },
     {
-      "index": 24,
-      "width": 64,
-      "height": 64,
-      "depth": 32,
-      "compression": 2,
-      "stride": 256,
-      "dotransparent": false,
-      "transp_packed": 0,
-      "dopalette": false,
-      "bufsize": 7472,
-      "file": "assets/parsed_jnvsjn/effects/effects_images/0024_64x64d32.png",
-      "status": "ok"
-    },
-    {
-      "index": 25,
+      "index": 23,
+      "chunk_id": 28,
+      "name": "fglow_a00",
       "width": 64,
       "height": 64,
       "depth": 32,
@@ -365,11 +385,13 @@
       "transp_packed": 0,
       "dopalette": false,
       "bufsize": 12876,
-      "file": "assets/parsed_jnvsjn/effects/effects_images/0025_64x64d32.png",
+      "file": "assets/parsed_jnvsjn/effects/effects_images/0023_64x64d32.png",
       "status": "ok"
     },
     {
-      "index": 26,
+      "index": 24,
+      "chunk_id": 0,
+      "name": "utflare8",
       "width": 128,
       "height": 128,
       "depth": 32,
@@ -379,11 +401,13 @@
       "transp_packed": 0,
       "dopalette": false,
       "bufsize": 38232,
-      "file": "assets/parsed_jnvsjn/effects/effects_images/0026_128x128d32.png",
+      "file": "assets/parsed_jnvsjn/effects/effects_images/0024_128x128d32.png",
       "status": "ok"
     },
     {
-      "index": 27,
+      "index": 25,
+      "chunk_id": 23,
+      "name": "utflare3",
       "width": 128,
       "height": 128,
       "depth": 32,
@@ -393,11 +417,13 @@
       "transp_packed": 0,
       "dopalette": false,
       "bufsize": 25936,
-      "file": "assets/parsed_jnvsjn/effects/effects_images/0027_128x128d32.png",
+      "file": "assets/parsed_jnvsjn/effects/effects_images/0025_128x128d32.png",
       "status": "ok"
     },
     {
-      "index": 28,
+      "index": 26,
+      "chunk_id": 22,
+      "name": "utflare2",
       "width": 128,
       "height": 128,
       "depth": 32,
@@ -407,25 +433,13 @@
       "transp_packed": 0,
       "dopalette": false,
       "bufsize": 21752,
-      "file": "assets/parsed_jnvsjn/effects/effects_images/0028_128x128d32.png",
+      "file": "assets/parsed_jnvsjn/effects/effects_images/0026_128x128d32.png",
       "status": "ok"
     },
     {
-      "index": 29,
-      "width": 128,
-      "height": 128,
-      "depth": 32,
-      "compression": 2,
-      "stride": 512,
-      "dotransparent": false,
-      "transp_packed": 0,
-      "dopalette": false,
-      "bufsize": 25936,
-      "file": "assets/parsed_jnvsjn/effects/effects_images/0029_128x128d32.png",
-      "status": "ok"
-    },
-    {
-      "index": 30,
+      "index": 27,
+      "chunk_id": 26,
+      "name": "utflare6",
       "width": 128,
       "height": 128,
       "depth": 32,
@@ -435,11 +449,13 @@
       "transp_packed": 0,
       "dopalette": false,
       "bufsize": 38220,
-      "file": "assets/parsed_jnvsjn/effects/effects_images/0030_128x128d32.png",
+      "file": "assets/parsed_jnvsjn/effects/effects_images/0027_128x128d32.png",
       "status": "ok"
     },
     {
-      "index": 31,
+      "index": 28,
+      "chunk_id": 27,
+      "name": "utflare7",
       "width": 128,
       "height": 128,
       "depth": 32,
@@ -449,7 +465,7 @@
       "transp_packed": 0,
       "dopalette": false,
       "bufsize": 32940,
-      "file": "assets/parsed_jnvsjn/effects/effects_images/0031_128x128d32.png",
+      "file": "assets/parsed_jnvsjn/effects/effects_images/0028_128x128d32.png",
       "status": "ok"
     }
   ]

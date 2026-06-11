@@ -6,6 +6,8 @@
   "images": [
     {
       "index": 0,
+      "chunk_id": 0,
+      "name": "water",
       "width": 256,
       "height": 256,
       "depth": 16,
@@ -15,7 +17,7 @@
       "transp_packed": 0,
       "dopalette": false,
       "bufsize": 107264,
-      "file": "/home/scotty/jn-engine/assets/parsed/water/water_images/0000_256x256d16.png",
+      "file": "assets/parsed/water/water_images/0000_256x256d16.png",
       "status": "ok"
     }
   ]

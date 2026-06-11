@@ -1,11 +1,13 @@
 {
-  "file": "/home/scotty/jnvsjn-original/omt/Editor.omt",
+  "file": "/home/scotty/jnvsjn-original/_installshield/Program_Executable_Files/omt/Editor.omt",
   "total_size": 1232079,
   "has_images": true,
   "has_audio": false,
   "images": [
     {
       "index": 0,
+      "chunk_id": 5,
+      "name": "editmm",
       "width": 120,
       "height": 480,
       "depth": 16,
@@ -20,6 +22,8 @@
     },
     {
       "index": 1,
+      "chunk_id": 4,
+      "name": "none",
       "width": 8,
       "height": 8,
       "depth": 16,
@@ -34,6 +38,8 @@
     },
     {
       "index": 2,
+      "chunk_id": 2,
+      "name": "none",
       "width": 8,
       "height": 8,
       "depth": 16,
@@ -48,6 +54,8 @@
     },
     {
       "index": 3,
+      "chunk_id": 3,
+      "name": "THQ",
       "width": 640,
       "height": 480,
       "depth": 16,
@@ -62,6 +70,56 @@
     },
     {
       "index": 4,
+      "chunk_id": 0,
+      "name": "AWEGames",
+      "width": 640,
+      "height": 480,
+      "depth": 16,
+      "compression": 1,
+      "stride": 1280,
+      "dotransparent": false,
+      "transp_packed": 0,
+      "dopalette": false,
+      "bufsize": 83520,
+      "file": "assets/parsed_jnvsjn/Editor/Editor_images/0004_640x480d16.png",
+      "status": "ok"
+    },
+    {
+      "index": 5,
+      "chunk_id": 6,
+      "name": "editSm",
+      "width": 175,
+      "height": 480,
+      "depth": 16,
+      "compression": 1,
+      "stride": 350,
+      "dotransparent": false,
+      "transp_packed": 0,
+      "dopalette": false,
+      "bufsize": 165390,
+      "file": "assets/parsed_jnvsjn/Editor/Editor_images/0005_175x480d16.png",
+      "status": "ok"
+    },
+    {
+      "index": 6,
+      "chunk_id": 7,
+      "name": "editom",
+      "width": 205,
+      "height": 480,
+      "depth": 16,
+      "compression": 1,
+      "stride": 410,
+      "dotransparent": false,
+      "transp_packed": 0,
+      "dopalette": false,
+      "bufsize": 182772,
+      "file": "assets/parsed_jnvsjn/Editor/Editor_images/0006_205x480d16.png",
+      "status": "ok"
+    },
+    {
+      "index": 7,
+      "chunk_id": 1,
+      "name": "THQ_LogoTM & Legal (jIMMY) copy",
       "width": 640,
       "height": 480,
       "depth": 32,
@@ -71,7 +129,7 @@
       "transp_packed": 0,
       "dopalette": false,
       "bufsize": 634272,
-      "file": "assets/parsed_jnvsjn/Editor/Editor_images/0004_640x480d32.png",
+      "file": "assets/parsed_jnvsjn/Editor/Editor_images/0007_640x480d32.png",
       "status": "ok"
     }
   ]

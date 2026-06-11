@@ -1,11 +1,13 @@
 {
-  "file": "/home/scotty/jnvsjn-original/omt/objects.omt",
+  "file": "/home/scotty/jnvsjn-original/_installshield/Program_Executable_Files/omt/objects.omt",
   "total_size": 10923439,
   "has_images": true,
   "has_audio": false,
   "images": [
     {
       "index": 0,
+      "chunk_id": 44,
+      "name": "subext",
       "width": 128,
       "height": 128,
       "depth": 32,
@@ -20,6 +22,8 @@
     },
     {
       "index": 1,
+      "chunk_id": 43,
+      "name": "sarcophagusmom",
       "width": 128,
       "height": 128,
       "depth": 16,
@@ -34,6 +38,8 @@
     },
     {
       "index": 2,
+      "chunk_id": 42,
+      "name": "sarcophagusDAD",
       "width": 128,
       "height": 128,
       "depth": 16,
@@ -48,6 +54,8 @@
     },
     {
       "index": 3,
+      "chunk_id": 32,
+      "name": "slide",
       "width": 128,
       "height": 128,
       "depth": 32,
@@ -62,6 +70,8 @@
     },
     {
       "index": 4,
+      "chunk_id": 30,
+      "name": "metal01",
       "width": 64,
       "height": 64,
       "depth": 32,
@@ -76,6 +86,8 @@
     },
     {
       "index": 5,
+      "chunk_id": 29,
+      "name": "roadclosed",
       "width": 128,
       "height": 128,
       "depth": 32,
@@ -90,6 +102,8 @@
     },
     {
       "index": 6,
+      "chunk_id": 50,
+      "name": "metal piping",
       "width": 64,
       "height": 64,
       "depth": 32,
@@ -104,6 +118,8 @@
     },
     {
       "index": 7,
+      "chunk_id": 49,
+      "name": "rope",
       "width": 32,
       "height": 32,
       "depth": 32,
@@ -118,6 +134,8 @@
     },
     {
       "index": 8,
+      "chunk_id": 47,
+      "name": "bluebarral",
       "width": 64,
       "height": 64,
       "depth": 32,
@@ -132,6 +150,8 @@
     },
     {
       "index": 9,
+      "chunk_id": 46,
+      "name": "Redbarral",
       "width": 64,
       "height": 64,
       "depth": 32,
@@ -146,6 +166,8 @@
     },
     {
       "index": 10,
+      "chunk_id": 45,
+      "name": "barral",
       "width": 64,
       "height": 64,
       "depth": 32,
@@ -160,6 +182,8 @@
     },
     {
       "index": 11,
+      "chunk_id": 38,
+      "name": "lightdust",
       "width": 32,
       "height": 32,
       "depth": 32,
@@ -174,6 +198,8 @@
     },
     {
       "index": 12,
+      "chunk_id": 35,
+      "name": "collision",
       "width": 128,
       "height": 128,
       "depth": 32,
@@ -188,6 +214,8 @@
     },
     {
       "index": 13,
+      "chunk_id": 28,
+      "name": "Damcrate",
       "width": 64,
       "height": 64,
       "depth": 32,
@@ -202,6 +230,8 @@
     },
     {
       "index": 14,
+      "chunk_id": 4,
+      "name": "dump",
       "width": 128,
       "height": 128,
       "depth": 32,
@@ -216,6 +246,8 @@
     },
     {
       "index": 15,
+      "chunk_id": 59,
+      "name": "target",
       "width": 64,
       "height": 64,
       "depth": 32,
@@ -230,6 +262,8 @@
     },
     {
       "index": 16,
+      "chunk_id": 8,
+      "name": "fireplacedoors",
       "width": 128,
       "height": 128,
       "depth": 16,
@@ -244,6 +278,8 @@
     },
     {
       "index": 17,
+      "chunk_id": 7,
+      "name": "housefan",
       "width": 128,
       "height": 128,
       "depth": 16,
@@ -258,6 +294,8 @@
     },
     {
       "index": 18,
+      "chunk_id": 33,
+      "name": "Pirablock2",
       "width": 128,
       "height": 128,
       "depth": 32,
@@ -272,6 +310,8 @@
     },
     {
       "index": 19,
+      "chunk_id": 41,
+      "name": "Eye tile",
       "width": 128,
       "height": 128,
       "depth": 32,
@@ -286,6 +326,8 @@
     },
     {
       "index": 20,
+      "chunk_id": 17,
+      "name": "stratofire",
       "width": 128,
       "height": 128,
       "depth": 32,
@@ -300,6 +342,8 @@
     },
     {
       "index": 21,
+      "chunk_id": 39,
+      "name": "sarcophagus",
       "width": 128,
       "height": 128,
       "depth": 32,
@@ -314,6 +358,8 @@
     },
     {
       "index": 22,
+      "chunk_id": 37,
+      "name": "Boulder",
       "width": 128,
       "height": 128,
       "depth": 32,
@@ -328,6 +374,8 @@
     },
     {
       "index": 23,
+      "chunk_id": 34,
+      "name": "Reed platform2",
       "width": 128,
       "height": 128,
       "depth": 32,
@@ -342,6 +390,8 @@
     },
     {
       "index": 24,
+      "chunk_id": 2,
+      "name": "coral01",
       "width": 128,
       "height": 128,
       "depth": 32,
@@ -356,6 +406,8 @@
     },
     {
       "index": 25,
+      "chunk_id": 66,
+      "name": "coundwall",
       "width": 64,
       "height": 64,
       "depth": 32,
@@ -370,6 +422,8 @@
     },
     {
       "index": 26,
+      "chunk_id": 36,
+      "name": "musweum",
       "width": 128,
       "height": 128,
       "depth": 32,
@@ -384,6 +438,8 @@
     },
     {
       "index": 27,
+      "chunk_id": 811,
+      "name": "bareer",
       "width": 128,
       "height": 128,
       "depth": 32,
@@ -398,6 +454,8 @@
     },
     {
       "index": 28,
+      "chunk_id": 6,
+      "name": "cranecontrol",
       "width": 128,
       "height": 128,
       "depth": 32,
@@ -412,20 +470,24 @@
     },
     {
       "index": 29,
-      "width": 64,
-      "height": 64,
+      "chunk_id": 18,
+      "name": "crate",
+      "width": 128,
+      "height": 128,
       "depth": 32,
       "compression": 2,
-      "stride": 256,
+      "stride": 512,
       "dotransparent": false,
       "transp_packed": 0,
       "dopalette": false,
-      "bufsize": 16404,
-      "file": "assets/parsed_jnvsjn/objects/objects_images/0029_64x64d32.png",
+      "bufsize": 66304,
+      "file": "assets/parsed_jnvsjn/objects/objects_images/0029_128x128d32.png",
       "status": "ok"
     },
     {
       "index": 30,
+      "chunk_id": 19,
+      "name": "subsphere",
       "width": 256,
       "height": 256,
       "depth": 32,
@@ -440,6 +502,8 @@
     },
     {
       "index": 31,
+      "chunk_id": 21,
+      "name": "sub",
       "width": 256,
       "height": 256,
       "depth": 32,
@@ -454,6 +518,8 @@
     },
     {
       "index": 32,
+      "chunk_id": 23,
+      "name": "m-1woodcrate",
       "width": 128,
       "height": 128,
       "depth": 32,
@@ -468,6 +534,8 @@
     },
     {
       "index": 33,
+      "chunk_id": 25,
+      "name": "subplatform",
       "width": 128,
       "height": 128,
       "depth": 32,
@@ -482,6 +550,8 @@
     },
     {
       "index": 34,
+      "chunk_id": 31,
+      "name": "tornado",
       "width": 128,
       "height": 128,
       "depth": 32,
@@ -496,6 +566,8 @@
     },
     {
       "index": 35,
+      "chunk_id": 0,
+      "name": "m-1whside",
       "width": 128,
       "height": 128,
       "depth": 32,
@@ -510,6 +582,8 @@
     },
     {
       "index": 36,
+      "chunk_id": 1,
+      "name": "fallrocks",
       "width": 128,
       "height": 128,
       "depth": 32,
@@ -524,6 +598,8 @@
     },
     {
       "index": 37,
+      "chunk_id": 48,
+      "name": "Minecar",
       "width": 256,
       "height": 256,
       "depth": 32,
@@ -538,6 +614,8 @@
     },
     {
       "index": 38,
+      "chunk_id": 54,
+      "name": "lightbulb",
       "width": 128,
       "height": 128,
       "depth": 32,
@@ -552,6 +630,8 @@
     },
     {
       "index": 39,
+      "chunk_id": 40,
+      "name": "lightkey",
       "width": 256,
       "height": 256,
       "depth": 32,
@@ -566,6 +646,8 @@
     },
     {
       "index": 40,
+      "chunk_id": 3,
+      "name": "genius",
       "width": 512,
       "height": 512,
       "depth": 32,
@@ -580,6 +662,8 @@
     },
     {
       "index": 41,
+      "chunk_id": 55,
+      "name": "Milk",
       "width": 128,
       "height": 128,
       "depth": 32,
@@ -594,6 +678,8 @@
     },
     {
       "index": 42,
+      "chunk_id": 9,
+      "name": "jrsci",
       "width": 512,
       "height": 512,
       "depth": 32,
@@ -608,6 +694,8 @@
     },
     {
       "index": 43,
+      "chunk_id": 10,
+      "name": "lab tech",
       "width": 512,
       "height": 512,
       "depth": 32,
@@ -622,6 +710,8 @@
     },
     {
       "index": 44,
+      "chunk_id": 11,
+      "name": "labass",
       "width": 512,
       "height": 512,
       "depth": 32,
@@ -636,6 +726,8 @@
     },
     {
       "index": 45,
+      "chunk_id": 12,
+      "name": "resci",
       "width": 512,
       "height": 512,
       "depth": 32,
@@ -650,6 +742,8 @@
     },
     {
       "index": 46,
+      "chunk_id": 24,
+      "name": "cap",
       "width": 128,
       "height": 128,
       "depth": 32,
@@ -664,6 +758,8 @@
     },
     {
       "index": 47,
+      "chunk_id": 27,
+      "name": "eyedropper",
       "width": 128,
       "height": 128,
       "depth": 32,
@@ -678,6 +774,8 @@
     },
     {
       "index": 48,
+      "chunk_id": 14,
+      "name": "sciprof",
       "width": 512,
       "height": 512,
       "depth": 32,
@@ -692,6 +790,8 @@
     },
     {
       "index": 49,
+      "chunk_id": 15,
+      "name": "scistud",
       "width": 512,
       "height": 512,
       "depth": 32,
@@ -706,6 +806,8 @@
     },
     {
       "index": 50,
+      "chunk_id": 16,
+      "name": "supergen",
       "width": 512,
       "height": 512,
       "depth": 32,
@@ -720,6 +822,8 @@
     },
     {
       "index": 51,
+      "chunk_id": 20,
+      "name": "testsub",
       "width": 512,
       "height": 512,
       "depth": 32,
@@ -734,6 +838,8 @@
     },
     {
       "index": 52,
+      "chunk_id": 58,
+      "name": "testtube",
       "width": 128,
       "height": 128,
       "depth": 32,
@@ -748,6 +854,8 @@
     },
     {
       "index": 53,
+      "chunk_id": 57,
+      "name": "sciencebook",
       "width": 128,
       "height": 128,
       "depth": 32,
@@ -762,6 +870,8 @@
     },
     {
       "index": 54,
+      "chunk_id": 5,
+      "name": "researchbeaker",
       "width": 128,
       "height": 128,
       "depth": 32,
@@ -776,6 +886,8 @@
     },
     {
       "index": 55,
+      "chunk_id": 22,
+      "name": "brain",
       "width": 256,
       "height": 256,
       "depth": 32,
@@ -790,6 +902,8 @@
     },
     {
       "index": 56,
+      "chunk_id": 26,
+      "name": "cookie",
       "width": 128,
       "height": 128,
       "depth": 32,
@@ -804,6 +918,8 @@
     },
     {
       "index": 57,
+      "chunk_id": 13,
+      "name": "scifair",
       "width": 512,
       "height": 512,
       "depth": 32,
@@ -818,6 +934,8 @@
     },
     {
       "index": 58,
+      "chunk_id": 52,
+      "name": "jimcoin",
       "width": 256,
       "height": 256,
       "depth": 32,
@@ -832,6 +950,8 @@
     },
     {
       "index": 59,
+      "chunk_id": 53,
+      "name": "Juniorbeaker",
       "width": 128,
       "height": 128,
       "depth": 32,
@@ -846,6 +966,8 @@
     },
     {
       "index": 60,
+      "chunk_id": 56,
+      "name": "blueribbon",
       "width": 128,
       "height": 128,
       "depth": 32,
@@ -860,6 +982,8 @@
     },
     {
       "index": 61,
+      "chunk_id": 51,
+      "name": "warehousedoor",
       "width": 128,
       "height": 128,
       "depth": 32,
@@ -874,6 +998,8 @@
     },
     {
       "index": 62,
+      "chunk_id": 60,
+      "name": "Sandstone wall tile",
       "width": 128,
       "height": 128,
       "depth": 32,
@@ -888,6 +1014,8 @@
     },
     {
       "index": 63,
+      "chunk_id": 61,
+      "name": "Eye of Ra",
       "width": 128,
       "height": 128,
       "depth": 32,
@@ -902,6 +1030,8 @@
     },
     {
       "index": 64,
+      "chunk_id": 62,
+      "name": "whitepaint",
       "width": 128,
       "height": 128,
       "depth": 32,
@@ -916,6 +1046,8 @@
     },
     {
       "index": 65,
+      "chunk_id": 63,
+      "name": "Floor tile3",
       "width": 64,
       "height": 64,
       "depth": 32,
@@ -930,6 +1062,8 @@
     },
     {
       "index": 66,
+      "chunk_id": 64,
+      "name": "underwaterock",
       "width": 128,
       "height": 128,
       "depth": 32,
@@ -944,6 +1078,8 @@
     },
     {
       "index": 67,
+      "chunk_id": 65,
+      "name": "purpwallAwn",
       "width": 128,
       "height": 128,
       "depth": 32,
@@ -958,6 +1094,8 @@
     },
     {
       "index": 68,
+      "chunk_id": 67,
+      "name": "brickwall",
       "width": 128,
       "height": 128,
       "depth": 32,
@@ -972,6 +1110,8 @@
     },
     {
       "index": 69,
+      "chunk_id": 68,
+      "name": "Blocks",
       "width": 128,
       "height": 128,
       "depth": 32,
@@ -986,6 +1126,8 @@
     },
     {
       "index": 70,
+      "chunk_id": 69,
+      "name": "winter brickwall",
       "width": 128,
       "height": 128,
       "depth": 32,

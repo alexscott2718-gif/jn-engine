@@ -1,11 +1,13 @@
 {
-  "file": "/home/scotty/jnvsjn-original/omt/level3a.omt",
+  "file": "/home/scotty/jnvsjn-original/_installshield/Program_Executable_Files/omt/level3a.omt",
   "total_size": 4650192,
   "has_images": true,
   "has_audio": false,
   "images": [
     {
       "index": 0,
+      "chunk_id": 16,
+      "name": "lighthousu01",
       "width": 64,
       "height": 64,
       "depth": 32,
@@ -20,6 +22,8 @@
     },
     {
       "index": 1,
+      "chunk_id": 17,
+      "name": "lighthouse2",
       "width": 64,
       "height": 32,
       "depth": 32,
@@ -34,6 +38,8 @@
     },
     {
       "index": 2,
+      "chunk_id": 21,
+      "name": "light",
       "width": 64,
       "height": 64,
       "depth": 32,
@@ -48,6 +54,8 @@
     },
     {
       "index": 3,
+      "chunk_id": 35,
+      "name": "m-0whside",
       "width": 64,
       "height": 64,
       "depth": 32,
@@ -62,6 +70,8 @@
     },
     {
       "index": 4,
+      "chunk_id": 812,
+      "name": "lava",
       "width": 128,
       "height": 128,
       "depth": 32,
@@ -76,6 +86,8 @@
     },
     {
       "index": 5,
+      "chunk_id": 0,
+      "name": "rocklava",
       "width": 128,
       "height": 128,
       "depth": 32,
@@ -90,6 +102,8 @@
     },
     {
       "index": 6,
+      "chunk_id": 18,
+      "name": "newcoral01",
       "width": 128,
       "height": 128,
       "depth": 32,
@@ -104,6 +118,8 @@
     },
     {
       "index": 7,
+      "chunk_id": 10,
+      "name": "newcoral02",
       "width": 128,
       "height": 128,
       "depth": 32,
@@ -118,6 +134,8 @@
     },
     {
       "index": 8,
+      "chunk_id": 1,
+      "name": "atlantis01",
       "width": 128,
       "height": 128,
       "depth": 32,
@@ -132,6 +150,8 @@
     },
     {
       "index": 9,
+      "chunk_id": 2,
+      "name": "atlantis01dark",
       "width": 128,
       "height": 128,
       "depth": 32,
@@ -146,6 +166,8 @@
     },
     {
       "index": 10,
+      "chunk_id": 3,
+      "name": "atlantistemple",
       "width": 128,
       "height": 128,
       "depth": 32,
@@ -160,6 +182,8 @@
     },
     {
       "index": 11,
+      "chunk_id": 4,
+      "name": "grillship",
       "width": 128,
       "height": 128,
       "depth": 32,
@@ -174,6 +198,8 @@
     },
     {
       "index": 12,
+      "chunk_id": 6,
+      "name": "pilar",
       "width": 128,
       "height": 128,
       "depth": 32,
@@ -188,6 +214,8 @@
     },
     {
       "index": 13,
+      "chunk_id": 7,
+      "name": "antantistairs",
       "width": 128,
       "height": 128,
       "depth": 32,
@@ -202,6 +230,8 @@
     },
     {
       "index": 14,
+      "chunk_id": 5,
+      "name": "rocks03",
       "width": 128,
       "height": 128,
       "depth": 32,
@@ -216,6 +246,8 @@
     },
     {
       "index": 15,
+      "chunk_id": 9,
+      "name": "SAND",
       "width": 128,
       "height": 128,
       "depth": 32,
@@ -230,6 +262,8 @@
     },
     {
       "index": 16,
+      "chunk_id": 11,
+      "name": "shipwood",
       "width": 128,
       "height": 128,
       "depth": 32,
@@ -244,6 +278,8 @@
     },
     {
       "index": 17,
+      "chunk_id": 12,
+      "name": "shipwoodbright",
       "width": 128,
       "height": 128,
       "depth": 32,
@@ -258,6 +294,8 @@
     },
     {
       "index": 18,
+      "chunk_id": 13,
+      "name": "shipwoodlit",
       "width": 128,
       "height": 128,
       "depth": 32,
@@ -272,6 +310,8 @@
     },
     {
       "index": 19,
+      "chunk_id": 14,
+      "name": "stairs",
       "width": 128,
       "height": 128,
       "depth": 32,
@@ -286,6 +326,8 @@
     },
     {
       "index": 20,
+      "chunk_id": 8,
+      "name": "rocks04",
       "width": 128,
       "height": 128,
       "depth": 32,
@@ -300,6 +342,8 @@
     },
     {
       "index": 21,
+      "chunk_id": 19,
+      "name": "rocksurface",
       "width": 128,
       "height": 128,
       "depth": 32,
@@ -314,6 +358,8 @@
     },
     {
       "index": 22,
+      "chunk_id": 813,
+      "name": "vortex",
       "width": 64,
       "height": 64,
       "depth": 32,
@@ -328,6 +374,8 @@
     },
     {
       "index": 23,
+      "chunk_id": 870,
+      "name": "water",
       "width": 64,
       "height": 64,
       "depth": 32,
@@ -342,6 +390,8 @@
     },
     {
       "index": 24,
+      "chunk_id": 15,
+      "name": "rocksdark01",
       "width": 128,
       "height": 128,
       "depth": 32,
@@ -356,6 +406,8 @@
     },
     {
       "index": 25,
+      "chunk_id": 20,
+      "name": "rocksdark02",
       "width": 128,
       "height": 128,
       "depth": 32,
@@ -370,6 +422,8 @@
     },
     {
       "index": 26,
+      "chunk_id": 815,
+      "name": "watermove",
       "width": 128,
       "height": 128,
       "depth": 32,
@@ -384,6 +438,8 @@
     },
     {
       "index": 27,
+      "chunk_id": 41,
+      "name": "Palm trunk",
       "width": 64,
       "height": 64,
       "depth": 32,
@@ -398,6 +454,8 @@
     },
     {
       "index": 28,
+      "chunk_id": 814,
+      "name": "light2",
       "width": 128,
       "height": 128,
       "depth": 32,
@@ -412,6 +470,8 @@
     },
     {
       "index": 29,
+      "chunk_id": 44,
+      "name": "rightway",
       "width": 128,
       "height": 128,
       "depth": 32,
@@ -426,6 +486,8 @@
     },
     {
       "index": 30,
+      "chunk_id": 25,
+      "name": "sandsurface",
       "width": 128,
       "height": 128,
       "depth": 32,
@@ -440,6 +502,8 @@
     },
     {
       "index": 31,
+      "chunk_id": 27,
+      "name": "redcoral",
       "width": 128,
       "height": 128,
       "depth": 32,
@@ -454,6 +518,8 @@
     },
     {
       "index": 32,
+      "chunk_id": 40,
+      "name": "palmtree2",
       "width": 128,
       "height": 128,
       "depth": 32,
@@ -468,6 +534,8 @@
     },
     {
       "index": 33,
+      "chunk_id": 45,
+      "name": "greencoral",
       "width": 128,
       "height": 128,
       "depth": 32,
@@ -482,6 +550,8 @@
     },
     {
       "index": 34,
+      "chunk_id": 28,
+      "name": "statue",
       "width": 256,
       "height": 256,
       "depth": 32,
@@ -496,6 +566,8 @@
     },
     {
       "index": 35,
+      "chunk_id": 36,
+      "name": "m-0whwind",
       "width": 64,
       "height": 64,
       "depth": 32,
@@ -510,6 +582,8 @@
     },
     {
       "index": 36,
+      "chunk_id": 37,
+      "name": "m-0woodcrate",
       "width": 64,
       "height": 64,
       "depth": 32,
@@ -524,6 +598,8 @@
     },
     {
       "index": 37,
+      "chunk_id": 38,
+      "name": "m-1concwater",
       "width": 64,
       "height": 64,
       "depth": 32,
@@ -538,6 +614,8 @@
     },
     {
       "index": 38,
+      "chunk_id": 29,
+      "name": "fish",
       "width": 128,
       "height": 128,
       "depth": 32,
@@ -552,6 +630,8 @@
     },
     {
       "index": 39,
+      "chunk_id": 30,
+      "name": "coral01",
       "width": 256,
       "height": 256,
       "depth": 32,
@@ -566,6 +646,8 @@
     },
     {
       "index": 40,
+      "chunk_id": 32,
+      "name": "coraltube",
       "width": 128,
       "height": 128,
       "depth": 32,
@@ -580,6 +662,8 @@
     },
     {
       "index": 41,
+      "chunk_id": 26,
+      "name": "tube",
       "width": 128,
       "height": 128,
       "depth": 32,
@@ -594,6 +678,8 @@
     },
     {
       "index": 42,
+      "chunk_id": 33,
+      "name": "rocksdarktube",
       "width": 128,
       "height": 128,
       "depth": 32,
@@ -608,6 +694,8 @@
     },
     {
       "index": 43,
+      "chunk_id": 39,
+      "name": "m-0crane",
       "width": 64,
       "height": 64,
       "depth": 32,
@@ -622,6 +710,8 @@
     },
     {
       "index": 44,
+      "chunk_id": 34,
+      "name": "128treasure",
       "width": 128,
       "height": 128,
       "depth": 32,
@@ -636,6 +726,8 @@
     },
     {
       "index": 45,
+      "chunk_id": 23,
+      "name": "a-1sign",
       "width": 128,
       "height": 128,
       "depth": 32,
@@ -650,6 +742,8 @@
     },
     {
       "index": 46,
+      "chunk_id": 24,
+      "name": "a-0sign",
       "width": 128,
       "height": 128,
       "depth": 32,
@@ -664,6 +758,8 @@
     },
     {
       "index": 47,
+      "chunk_id": 22,
+      "name": "numeydoor",
       "width": 128,
       "height": 128,
       "depth": 32,
@@ -678,6 +774,8 @@
     },
     {
       "index": 48,
+      "chunk_id": 42,
+      "name": "bgtrees2",
       "width": 256,
       "height": 256,
       "depth": 32,
@@ -692,6 +790,8 @@
     },
     {
       "index": 49,
+      "chunk_id": 43,
+      "name": "bgtrees",
       "width": 256,
       "height": 256,
       "depth": 32,
@@ -706,6 +806,8 @@
     },
     {
       "index": 50,
+      "chunk_id": 46,
+      "name": "buoy",
       "width": 64,
       "height": 64,
       "depth": 32,
@@ -720,6 +822,8 @@
     },
     {
       "index": 51,
+      "chunk_id": 31,
+      "name": "flatcoral01",
       "width": 128,
       "height": 128,
       "depth": 32,

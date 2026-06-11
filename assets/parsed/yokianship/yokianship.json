@@ -6,6 +6,8 @@
   "images": [
     {
       "index": 0,
+      "chunk_id": 2,
+      "name": "a-1ship",
       "width": 32,
       "height": 32,
       "depth": 16,
@@ -15,11 +17,13 @@
       "transp_packed": 0,
       "dopalette": false,
       "bufsize": 2024,
-      "file": "/home/scotty/jn-engine/assets/parsed/yokianship/yokianship_images/0000_32x32d16.png",
+      "file": "assets/parsed/yokianship/yokianship_images/0000_32x32d16.png",
       "status": "ok"
     },
     {
       "index": 1,
+      "chunk_id": 1,
+      "name": "a-0ship",
       "width": 32,
       "height": 32,
       "depth": 16,
@@ -29,39 +33,13 @@
       "transp_packed": 0,
       "dopalette": false,
       "bufsize": 2140,
-      "file": "/home/scotty/jn-engine/assets/parsed/yokianship/yokianship_images/0001_32x32d16.png",
+      "file": "assets/parsed/yokianship/yokianship_images/0001_32x32d16.png",
       "status": "ok"
     },
     {
       "index": 2,
-      "width": 32,
-      "height": 32,
-      "depth": 16,
-      "compression": 1,
-      "stride": 64,
-      "dotransparent": false,
-      "transp_packed": 0,
-      "dopalette": false,
-      "bufsize": 2140,
-      "file": "/home/scotty/jn-engine/assets/parsed/yokianship/yokianship_images/0002_32x32d16.png",
-      "status": "ok"
-    },
-    {
-      "index": 3,
-      "width": 32,
-      "height": 32,
-      "depth": 16,
-      "compression": 1,
-      "stride": 64,
-      "dotransparent": false,
-      "transp_packed": 0,
-      "dopalette": false,
-      "bufsize": 2024,
-      "file": "/home/scotty/jn-engine/assets/parsed/yokianship/yokianship_images/0003_32x32d16.png",
-      "status": "ok"
-    },
-    {
-      "index": 4,
+      "chunk_id": 0,
+      "name": "yokianship",
       "width": 256,
       "height": 256,
       "depth": 16,
@@ -71,7 +49,7 @@
       "transp_packed": 0,
       "dopalette": false,
       "bufsize": 102090,
-      "file": "/home/scotty/jn-engine/assets/parsed/yokianship/yokianship_images/0004_256x256d16.png",
+      "file": "assets/parsed/yokianship/yokianship_images/0002_256x256d16.png",
       "status": "ok"
     }
   ]

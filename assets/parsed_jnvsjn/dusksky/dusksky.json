@@ -1,11 +1,13 @@
 {
-  "file": "/home/scotty/jnvsjn-original/omt/dusksky.omt",
+  "file": "/home/scotty/jnvsjn-original/_installshield/Program_Executable_Files/omt/dusksky.omt",
   "total_size": 242573,
   "has_images": true,
   "has_audio": false,
   "images": [
     {
       "index": 0,
+      "chunk_id": 5,
+      "name": "black",
       "width": 8,
       "height": 8,
       "depth": 16,
@@ -20,6 +22,8 @@
     },
     {
       "index": 1,
+      "chunk_id": 2,
+      "name": "orange",
       "width": 64,
       "height": 64,
       "depth": 32,
@@ -34,6 +38,8 @@
     },
     {
       "index": 2,
+      "chunk_id": 0,
+      "name": "sky",
       "width": 256,
       "height": 256,
       "depth": 16,
@@ -48,6 +54,8 @@
     },
     {
       "index": 3,
+      "chunk_id": 1,
+      "name": "duskretroville",
       "width": 256,
       "height": 256,
       "depth": 32,

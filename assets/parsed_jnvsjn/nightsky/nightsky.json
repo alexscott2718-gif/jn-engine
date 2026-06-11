@@ -1,11 +1,13 @@
 {
-  "file": "/home/scotty/jnvsjn-original/omt/nightsky.omt",
+  "file": "/home/scotty/jnvsjn-original/_installshield/Program_Executable_Files/omt/nightsky.omt",
   "total_size": 178747,
   "has_images": true,
   "has_audio": false,
   "images": [
     {
       "index": 0,
+      "chunk_id": 0,
+      "name": "hoodfarnite2",
       "width": 128,
       "height": 128,
       "depth": 16,
@@ -20,6 +22,8 @@
     },
     {
       "index": 1,
+      "chunk_id": 1,
+      "name": "hoodfarnite1",
       "width": 128,
       "height": 128,
       "depth": 16,
@@ -34,6 +38,8 @@
     },
     {
       "index": 2,
+      "chunk_id": 2,
+      "name": "hoodfar",
       "width": 256,
       "height": 256,
       "depth": 16,
@@ -48,6 +54,8 @@
     },
     {
       "index": 3,
+      "chunk_id": 3,
+      "name": "nightsky1",
       "width": 256,
       "height": 256,
       "depth": 16,
@@ -62,6 +70,8 @@
     },
     {
       "index": 4,
+      "chunk_id": 4,
+      "name": "nightsky2",
       "width": 256,
       "height": 256,
       "depth": 16,

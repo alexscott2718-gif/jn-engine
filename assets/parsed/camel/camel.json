@@ -6,6 +6,8 @@
   "images": [
     {
       "index": 0,
+      "chunk_id": 1,
+      "name": "camel",
       "width": 256,
       "height": 256,
       "depth": 32,
@@ -15,7 +17,7 @@
       "transp_packed": 0,
       "dopalette": false,
       "bufsize": 264556,
-      "file": "/home/scotty/jn-engine/assets/parsed/camel/camel_images/0000_256x256d32.png",
+      "file": "assets/parsed/camel/camel_images/0000_256x256d32.png",
       "status": "ok"
     }
   ]

@@ -6,6 +6,8 @@
   "images": [
     {
       "index": 0,
+      "chunk_id": 7,
+      "name": "temp",
       "width": 32,
       "height": 32,
       "depth": 32,
@@ -15,11 +17,13 @@
       "transp_packed": 0,
       "dopalette": false,
       "bufsize": 2308,
-      "file": "/home/scotty/jn-engine/assets/parsed/level1d/level1d_images/0000_32x32d32.png",
+      "file": "assets/parsed/level1d/level1d_images/0000_32x32d32.png",
       "status": "ok"
     },
     {
       "index": 1,
+      "chunk_id": 0,
+      "name": "hoodfar",
       "width": 256,
       "height": 256,
       "depth": 32,
@@ -29,11 +33,13 @@
       "transp_packed": 0,
       "dopalette": false,
       "bufsize": 254796,
-      "file": "/home/scotty/jn-engine/assets/parsed/level1d/level1d_images/0001_256x256d32.png",
+      "file": "assets/parsed/level1d/level1d_images/0001_256x256d32.png",
       "status": "ok"
     },
     {
       "index": 2,
+      "chunk_id": 1,
+      "name": "windowpipe",
       "width": 256,
       "height": 256,
       "depth": 32,
@@ -43,11 +49,13 @@
       "transp_packed": 0,
       "dopalette": false,
       "bufsize": 263596,
-      "file": "/home/scotty/jn-engine/assets/parsed/level1d/level1d_images/0002_256x256d32.png",
+      "file": "assets/parsed/level1d/level1d_images/0002_256x256d32.png",
       "status": "ok"
     },
     {
       "index": 3,
+      "chunk_id": 2,
+      "name": "orange",
       "width": 256,
       "height": 256,
       "depth": 32,
@@ -57,11 +65,13 @@
       "transp_packed": 0,
       "dopalette": false,
       "bufsize": 170976,
-      "file": "/home/scotty/jn-engine/assets/parsed/level1d/level1d_images/0003_256x256d32.png",
+      "file": "assets/parsed/level1d/level1d_images/0003_256x256d32.png",
       "status": "ok"
     },
     {
       "index": 4,
+      "chunk_id": 3,
+      "name": "screens",
       "width": 128,
       "height": 128,
       "depth": 32,
@@ -71,11 +81,13 @@
       "transp_packed": 0,
       "dopalette": false,
       "bufsize": 34696,
-      "file": "/home/scotty/jn-engine/assets/parsed/level1d/level1d_images/0004_128x128d32.png",
+      "file": "assets/parsed/level1d/level1d_images/0004_128x128d32.png",
       "status": "ok"
     },
     {
       "index": 5,
+      "chunk_id": 4,
+      "name": "table01",
       "width": 128,
       "height": 128,
       "depth": 32,
@@ -85,11 +97,13 @@
       "transp_packed": 0,
       "dopalette": false,
       "bufsize": 58904,
-      "file": "/home/scotty/jn-engine/assets/parsed/level1d/level1d_images/0005_128x128d32.png",
+      "file": "assets/parsed/level1d/level1d_images/0005_128x128d32.png",
       "status": "ok"
     },
     {
       "index": 6,
+      "chunk_id": 5,
+      "name": "wall2",
       "width": 256,
       "height": 256,
       "depth": 32,
@@ -99,11 +113,13 @@
       "transp_packed": 0,
       "dopalette": false,
       "bufsize": 262200,
-      "file": "/home/scotty/jn-engine/assets/parsed/level1d/level1d_images/0006_256x256d32.png",
+      "file": "assets/parsed/level1d/level1d_images/0006_256x256d32.png",
       "status": "ok"
     },
     {
       "index": 7,
+      "chunk_id": 6,
+      "name": "floor02",
       "width": 128,
       "height": 128,
       "depth": 32,
@@ -113,25 +129,29 @@
       "transp_packed": 0,
       "dopalette": false,
       "bufsize": 66268,
-      "file": "/home/scotty/jn-engine/assets/parsed/level1d/level1d_images/0007_128x128d32.png",
+      "file": "assets/parsed/level1d/level1d_images/0007_128x128d32.png",
       "status": "ok"
     },
     {
       "index": 8,
-      "width": 128,
-      "height": 128,
+      "chunk_id": 8,
+      "name": "lights",
+      "width": 256,
+      "height": 256,
       "depth": 32,
       "compression": 2,
-      "stride": 512,
+      "stride": 1024,
       "dotransparent": false,
       "transp_packed": 0,
       "dopalette": false,
-      "bufsize": 66108,
-      "file": "/home/scotty/jn-engine/assets/parsed/level1d/level1d_images/0008_128x128d32.png",
+      "bufsize": 237488,
+      "file": "assets/parsed/level1d/level1d_images/0008_256x256d32.png",
       "status": "ok"
     },
     {
       "index": 9,
+      "chunk_id": 9,
+      "name": "catwalk01",
       "width": 256,
       "height": 256,
       "depth": 32,
@@ -141,11 +161,13 @@
       "transp_packed": 0,
       "dopalette": false,
       "bufsize": 200792,
-      "file": "/home/scotty/jn-engine/assets/parsed/level1d/level1d_images/0009_256x256d32.png",
+      "file": "assets/parsed/level1d/level1d_images/0009_256x256d32.png",
       "status": "ok"
     },
     {
       "index": 10,
+      "chunk_id": 10,
+      "name": "floor01",
       "width": 128,
       "height": 128,
       "depth": 32,
@@ -155,11 +177,13 @@
       "transp_packed": 0,
       "dopalette": false,
       "bufsize": 58488,
-      "file": "/home/scotty/jn-engine/assets/parsed/level1d/level1d_images/0010_128x128d32.png",
+      "file": "assets/parsed/level1d/level1d_images/0010_128x128d32.png",
       "status": "ok"
     },
     {
       "index": 11,
+      "chunk_id": 11,
+      "name": "keyboard",
       "width": 128,
       "height": 128,
       "depth": 32,
@@ -169,11 +193,13 @@
       "transp_packed": 0,
       "dopalette": false,
       "bufsize": 48628,
-      "file": "/home/scotty/jn-engine/assets/parsed/level1d/level1d_images/0011_128x128d32.png",
+      "file": "assets/parsed/level1d/level1d_images/0011_128x128d32.png",
       "status": "ok"
     },
     {
       "index": 12,
+      "chunk_id": 12,
+      "name": "earth",
       "width": 128,
       "height": 128,
       "depth": 32,
@@ -182,12 +208,14 @@
       "dotransparent": false,
       "transp_packed": 0,
       "dopalette": false,
-      "bufsize": 66292,
-      "file": "/home/scotty/jn-engine/assets/parsed/level1d/level1d_images/0012_128x128d32.png",
+      "bufsize": 58640,
+      "file": "assets/parsed/level1d/level1d_images/0012_128x128d32.png",
       "status": "ok"
     },
     {
       "index": 13,
+      "chunk_id": 13,
+      "name": "jimmy",
       "width": 128,
       "height": 128,
       "depth": 32,
@@ -197,11 +225,13 @@
       "transp_packed": 0,
       "dopalette": false,
       "bufsize": 62256,
-      "file": "/home/scotty/jn-engine/assets/parsed/level1d/level1d_images/0013_128x128d32.png",
+      "file": "assets/parsed/level1d/level1d_images/0013_128x128d32.png",
       "status": "ok"
     },
     {
       "index": 14,
+      "chunk_id": 14,
+      "name": "neighb",
       "width": 128,
       "height": 128,
       "depth": 32,
@@ -211,11 +241,13 @@
       "transp_packed": 0,
       "dopalette": false,
       "bufsize": 61636,
-      "file": "/home/scotty/jn-engine/assets/parsed/level1d/level1d_images/0014_128x128d32.png",
+      "file": "assets/parsed/level1d/level1d_images/0014_128x128d32.png",
       "status": "ok"
     },
     {
       "index": 15,
+      "chunk_id": 15,
+      "name": "wanted2",
       "width": 128,
       "height": 128,
       "depth": 32,
@@ -225,11 +257,13 @@
       "transp_packed": 0,
       "dopalette": false,
       "bufsize": 66108,
-      "file": "/home/scotty/jn-engine/assets/parsed/level1d/level1d_images/0015_128x128d32.png",
+      "file": "assets/parsed/level1d/level1d_images/0015_128x128d32.png",
       "status": "ok"
     },
     {
       "index": 16,
+      "chunk_id": 16,
+      "name": "door",
       "width": 128,
       "height": 128,
       "depth": 32,
@@ -239,7 +273,7 @@
       "transp_packed": 0,
       "dopalette": false,
       "bufsize": 66292,
-      "file": "/home/scotty/jn-engine/assets/parsed/level1d/level1d_images/0016_128x128d32.png",
+      "file": "assets/parsed/level1d/level1d_images/0016_128x128d32.png",
       "status": "ok"
     }
   ]

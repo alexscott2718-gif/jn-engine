@@ -1,11 +1,13 @@
 {
-  "file": "/home/scotty/jnvsjn-original/omt/skyvr01.omt",
+  "file": "/home/scotty/jnvsjn-original/_installshield/Program_Executable_Files/omt/skyvr01.omt",
   "total_size": 264811,
   "has_images": true,
   "has_audio": false,
   "images": [
     {
       "index": 0,
+      "chunk_id": 0,
+      "name": "vrsky",
       "width": 256,
       "height": 256,
       "depth": 32,
@@ -20,6 +22,8 @@
     },
     {
       "index": 1,
+      "chunk_id": 1,
+      "name": "vox",
       "width": 128,
       "height": 128,
       "depth": 32,

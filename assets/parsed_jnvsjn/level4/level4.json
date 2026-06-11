@@ -1,11 +1,13 @@
 {
-  "file": "/home/scotty/jnvsjn-original/omt/level4.omt",
+  "file": "/home/scotty/jnvsjn-original/_installshield/Program_Executable_Files/omt/level4.omt",
   "total_size": 3163304,
   "has_images": true,
   "has_audio": false,
   "images": [
     {
       "index": 0,
+      "chunk_id": 7,
+      "name": "river",
       "width": 128,
       "height": 128,
       "depth": 32,
@@ -20,6 +22,8 @@
     },
     {
       "index": 1,
+      "chunk_id": 11,
+      "name": "buildm6",
       "width": 128,
       "height": 128,
       "depth": 32,
@@ -34,6 +38,8 @@
     },
     {
       "index": 2,
+      "chunk_id": 2,
+      "name": "build01",
       "width": 128,
       "height": 128,
       "depth": 32,
@@ -48,6 +54,8 @@
     },
     {
       "index": 3,
+      "chunk_id": 32,
+      "name": "powerplant01",
       "width": 128,
       "height": 128,
       "depth": 32,
@@ -62,6 +70,8 @@
     },
     {
       "index": 4,
+      "chunk_id": 8,
+      "name": "brk3",
       "width": 64,
       "height": 64,
       "depth": 32,
@@ -76,6 +86,8 @@
     },
     {
       "index": 5,
+      "chunk_id": 29,
+      "name": "bgtrees",
       "width": 128,
       "height": 128,
       "depth": 32,
@@ -90,6 +102,8 @@
     },
     {
       "index": 6,
+      "chunk_id": 26,
+      "name": "bgtrees3",
       "width": 128,
       "height": 128,
       "depth": 32,
@@ -104,6 +118,8 @@
     },
     {
       "index": 7,
+      "chunk_id": 1,
+      "name": "brick",
       "width": 64,
       "height": 64,
       "depth": 32,
@@ -118,6 +134,8 @@
     },
     {
       "index": 8,
+      "chunk_id": 6,
+      "name": "buildm2",
       "width": 128,
       "height": 128,
       "depth": 32,
@@ -132,6 +150,8 @@
     },
     {
       "index": 9,
+      "chunk_id": 27,
+      "name": "hood",
       "width": 128,
       "height": 128,
       "depth": 32,
@@ -146,6 +166,8 @@
     },
     {
       "index": 10,
+      "chunk_id": 5,
+      "name": "buildm11",
       "width": 128,
       "height": 128,
       "depth": 32,
@@ -160,6 +182,8 @@
     },
     {
       "index": 11,
+      "chunk_id": 30,
+      "name": "parking",
       "width": 128,
       "height": 128,
       "depth": 32,
@@ -174,6 +198,8 @@
     },
     {
       "index": 12,
+      "chunk_id": 17,
+      "name": "mounts",
       "width": 128,
       "height": 128,
       "depth": 32,
@@ -188,6 +214,8 @@
     },
     {
       "index": 13,
+      "chunk_id": 15,
+      "name": "candy",
       "width": 256,
       "height": 256,
       "depth": 32,
@@ -202,6 +230,8 @@
     },
     {
       "index": 14,
+      "chunk_id": 23,
+      "name": "blockwall",
       "width": 128,
       "height": 128,
       "depth": 32,
@@ -216,6 +246,8 @@
     },
     {
       "index": 15,
+      "chunk_id": 34,
+      "name": "vendmach2",
       "width": 128,
       "height": 128,
       "depth": 32,
@@ -230,6 +262,8 @@
     },
     {
       "index": 16,
+      "chunk_id": 41,
+      "name": "rocketpad",
       "width": 64,
       "height": 64,
       "depth": 32,
@@ -244,6 +278,8 @@
     },
     {
       "index": 17,
+      "chunk_id": 28,
+      "name": "metal01",
       "width": 64,
       "height": 64,
       "depth": 32,
@@ -258,6 +294,8 @@
     },
     {
       "index": 18,
+      "chunk_id": 4,
+      "name": "buildm1",
       "width": 128,
       "height": 128,
       "depth": 32,
@@ -272,6 +310,8 @@
     },
     {
       "index": 19,
+      "chunk_id": 9,
+      "name": "buildm4_side",
       "width": 128,
       "height": 128,
       "depth": 32,
@@ -286,6 +326,8 @@
     },
     {
       "index": 20,
+      "chunk_id": 10,
+      "name": "buildm5",
       "width": 128,
       "height": 128,
       "depth": 32,
@@ -300,6 +342,8 @@
     },
     {
       "index": 21,
+      "chunk_id": 12,
+      "name": "buildm7",
       "width": 128,
       "height": 128,
       "depth": 32,
@@ -314,6 +358,8 @@
     },
     {
       "index": 22,
+      "chunk_id": 13,
+      "name": "buildm8",
       "width": 128,
       "height": 128,
       "depth": 32,
@@ -328,6 +374,8 @@
     },
     {
       "index": 23,
+      "chunk_id": 14,
+      "name": "buildm9",
       "width": 128,
       "height": 128,
       "depth": 32,
@@ -342,6 +390,8 @@
     },
     {
       "index": 24,
+      "chunk_id": 16,
+      "name": "candy2",
       "width": 128,
       "height": 128,
       "depth": 32,
@@ -356,6 +406,8 @@
     },
     {
       "index": 25,
+      "chunk_id": 18,
+      "name": "checker",
       "width": 128,
       "height": 128,
       "depth": 32,
@@ -370,6 +422,8 @@
     },
     {
       "index": 26,
+      "chunk_id": 19,
+      "name": "concrete",
       "width": 128,
       "height": 128,
       "depth": 32,
@@ -384,6 +438,8 @@
     },
     {
       "index": 27,
+      "chunk_id": 20,
+      "name": "dirt0",
       "width": 128,
       "height": 128,
       "depth": 32,
@@ -398,6 +454,8 @@
     },
     {
       "index": 28,
+      "chunk_id": 21,
+      "name": "dump",
       "width": 128,
       "height": 128,
       "depth": 32,
@@ -412,6 +470,8 @@
     },
     {
       "index": 29,
+      "chunk_id": 22,
+      "name": "fence1",
       "width": 128,
       "height": 128,
       "depth": 32,
@@ -426,6 +486,8 @@
     },
     {
       "index": 30,
+      "chunk_id": 24,
+      "name": "glass",
       "width": 128,
       "height": 128,
       "depth": 32,
@@ -440,6 +502,8 @@
     },
     {
       "index": 31,
+      "chunk_id": 25,
+      "name": "grass",
       "width": 128,
       "height": 128,
       "depth": 32,
@@ -454,6 +518,8 @@
     },
     {
       "index": 32,
+      "chunk_id": 44,
+      "name": "underbridge01",
       "width": 128,
       "height": 128,
       "depth": 32,
@@ -468,6 +534,8 @@
     },
     {
       "index": 33,
+      "chunk_id": 31,
+      "name": "powerlines",
       "width": 128,
       "height": 128,
       "depth": 32,
@@ -482,6 +550,8 @@
     },
     {
       "index": 34,
+      "chunk_id": 33,
+      "name": "Retroland",
       "width": 128,
       "height": 128,
       "depth": 32,
@@ -496,6 +566,8 @@
     },
     {
       "index": 35,
+      "chunk_id": 35,
+      "name": "sidewlk03",
       "width": 128,
       "height": 128,
       "depth": 32,
@@ -510,6 +582,8 @@
     },
     {
       "index": 36,
+      "chunk_id": 36,
+      "name": "signs",
       "width": 128,
       "height": 128,
       "depth": 32,
@@ -524,6 +598,8 @@
     },
     {
       "index": 37,
+      "chunk_id": 37,
+      "name": "signs2",
       "width": 128,
       "height": 128,
       "depth": 32,
@@ -538,6 +614,8 @@
     },
     {
       "index": 38,
+      "chunk_id": 38,
+      "name": "street",
       "width": 128,
       "height": 128,
       "depth": 32,
@@ -552,6 +630,8 @@
     },
     {
       "index": 39,
+      "chunk_id": 39,
+      "name": "street02",
       "width": 128,
       "height": 128,
       "depth": 32,
@@ -566,6 +646,8 @@
     },
     {
       "index": 40,
+      "chunk_id": 40,
+      "name": "tiles",
       "width": 128,
       "height": 128,
       "depth": 32,
@@ -580,6 +662,8 @@
     },
     {
       "index": 41,
+      "chunk_id": 43,
+      "name": "tunnel3",
       "width": 128,
       "height": 128,
       "depth": 32,
@@ -594,6 +678,8 @@
     },
     {
       "index": 42,
+      "chunk_id": 45,
+      "name": "alley128",
       "width": 128,
       "height": 128,
       "depth": 32,
@@ -608,6 +694,8 @@
     },
     {
       "index": 43,
+      "chunk_id": 46,
+      "name": "tinroof",
       "width": 64,
       "height": 64,
       "depth": 32,
@@ -622,6 +710,8 @@
     },
     {
       "index": 44,
+      "chunk_id": 0,
+      "name": "water",
       "width": 64,
       "height": 64,
       "depth": 32,
@@ -636,6 +726,8 @@
     },
     {
       "index": 45,
+      "chunk_id": 47,
+      "name": "brick2",
       "width": 64,
       "height": 64,
       "depth": 32,
@@ -650,6 +742,8 @@
     },
     {
       "index": 46,
+      "chunk_id": 42,
+      "name": "window2",
       "width": 128,
       "height": 128,
       "depth": 32,
@@ -664,6 +758,8 @@
     },
     {
       "index": 47,
+      "chunk_id": 3,
+      "name": "window",
       "width": 128,
       "height": 128,
       "depth": 32,
@@ -678,6 +774,8 @@
     },
     {
       "index": 48,
+      "chunk_id": 811,
+      "name": "ncriver2",
       "width": 128,
       "height": 128,
       "depth": 32,

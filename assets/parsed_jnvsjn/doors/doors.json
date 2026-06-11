@@ -1,11 +1,13 @@
 {
-  "file": "/home/scotty/jnvsjn-original/omt/doors.omt",
+  "file": "/home/scotty/jnvsjn-original/_installshield/Program_Executable_Files/omt/doors.omt",
   "total_size": 2051153,
   "has_images": true,
   "has_audio": false,
   "images": [
     {
       "index": 0,
+      "chunk_id": 2,
+      "name": "invisible",
       "width": 32,
       "height": 32,
       "depth": 32,
@@ -20,6 +22,8 @@
     },
     {
       "index": 1,
+      "chunk_id": 4,
+      "name": "grill2",
       "width": 64,
       "height": 64,
       "depth": 16,
@@ -34,6 +38,8 @@
     },
     {
       "index": 2,
+      "chunk_id": 1,
+      "name": "doorcave",
       "width": 128,
       "height": 128,
       "depth": 16,
@@ -48,6 +54,8 @@
     },
     {
       "index": 3,
+      "chunk_id": 7,
+      "name": "door",
       "width": 128,
       "height": 128,
       "depth": 16,
@@ -62,6 +70,8 @@
     },
     {
       "index": 4,
+      "chunk_id": 0,
+      "name": "dt_secretdoor",
       "width": 128,
       "height": 128,
       "depth": 32,
@@ -76,6 +86,8 @@
     },
     {
       "index": 5,
+      "chunk_id": 3,
+      "name": "DoorPP1",
       "width": 128,
       "height": 128,
       "depth": 16,
@@ -90,6 +102,8 @@
     },
     {
       "index": 6,
+      "chunk_id": 5,
+      "name": "door01",
       "width": 128,
       "height": 128,
       "depth": 32,
@@ -104,6 +118,8 @@
     },
     {
       "index": 7,
+      "chunk_id": 6,
+      "name": "window02",
       "width": 128,
       "height": 128,
       "depth": 32,
@@ -118,6 +134,8 @@
     },
     {
       "index": 8,
+      "chunk_id": 15,
+      "name": "Flurpdoor",
       "width": 64,
       "height": 64,
       "depth": 32,
@@ -132,6 +150,8 @@
     },
     {
       "index": 9,
+      "chunk_id": 14,
+      "name": "bardoor",
       "width": 64,
       "height": 64,
       "depth": 32,
@@ -146,20 +166,24 @@
     },
     {
       "index": 10,
-      "width": 64,
-      "height": 64,
+      "chunk_id": 9,
+      "name": "orangedoor",
+      "width": 256,
+      "height": 256,
       "depth": 32,
       "compression": 2,
-      "stride": 256,
+      "stride": 1024,
       "dotransparent": false,
       "transp_packed": 0,
       "dopalette": false,
-      "bufsize": 16768,
-      "file": "assets/parsed_jnvsjn/doors/doors_images/0010_64x64d32.png",
+      "bufsize": 264700,
+      "file": "assets/parsed_jnvsjn/doors/doors_images/0010_256x256d32.png",
       "status": "ok"
     },
     {
       "index": 11,
+      "chunk_id": 10,
+      "name": "greendoor",
       "width": 256,
       "height": 256,
       "depth": 32,
@@ -174,6 +198,8 @@
     },
     {
       "index": 12,
+      "chunk_id": 11,
+      "name": "purpledoor",
       "width": 256,
       "height": 256,
       "depth": 32,
@@ -188,6 +214,8 @@
     },
     {
       "index": 13,
+      "chunk_id": 12,
+      "name": "Door Panel",
       "width": 256,
       "height": 256,
       "depth": 32,
@@ -202,6 +230,8 @@
     },
     {
       "index": 14,
+      "chunk_id": 13,
+      "name": "mumdoor",
       "width": 256,
       "height": 256,
       "depth": 32,
@@ -216,20 +246,24 @@
     },
     {
       "index": 15,
-      "width": 128,
-      "height": 128,
+      "chunk_id": 8,
+      "name": "Stonedoor",
+      "width": 256,
+      "height": 256,
       "depth": 32,
       "compression": 2,
-      "stride": 512,
+      "stride": 1024,
       "dotransparent": false,
       "transp_packed": 0,
       "dopalette": false,
-      "bufsize": 66304,
-      "file": "assets/parsed_jnvsjn/doors/doors_images/0015_128x128d32.png",
+      "bufsize": 264680,
+      "file": "assets/parsed_jnvsjn/doors/doors_images/0015_256x256d32.png",
       "status": "ok"
     },
     {
       "index": 16,
+      "chunk_id": 16,
+      "name": "wall releefDark",
       "width": 128,
       "height": 128,
       "depth": 32,

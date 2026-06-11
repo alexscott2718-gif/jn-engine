@@ -6,6 +6,8 @@
   "images": [
     {
       "index": 0,
+      "chunk_id": 0,
+      "name": "Stomach",
       "width": 256,
       "height": 256,
       "depth": 32,
@@ -15,11 +17,13 @@
       "transp_packed": 0,
       "dopalette": false,
       "bufsize": 228096,
-      "file": "/home/scotty/jn-engine/assets/parsed/level3d/level3d_images/0000_256x256d32.png",
+      "file": "assets/parsed/level3d/level3d_images/0000_256x256d32.png",
       "status": "ok"
     },
     {
       "index": 1,
+      "chunk_id": 1,
+      "name": "octawater",
       "width": 256,
       "height": 256,
       "depth": 32,
@@ -29,11 +33,13 @@
       "transp_packed": 0,
       "dopalette": false,
       "bufsize": 135864,
-      "file": "/home/scotty/jn-engine/assets/parsed/level3d/level3d_images/0001_256x256d32.png",
+      "file": "assets/parsed/level3d/level3d_images/0001_256x256d32.png",
       "status": "ok"
     },
     {
       "index": 2,
+      "chunk_id": 2,
+      "name": "octawater2",
       "width": 256,
       "height": 256,
       "depth": 32,
@@ -43,11 +49,13 @@
       "transp_packed": 0,
       "dopalette": false,
       "bufsize": 235812,
-      "file": "/home/scotty/jn-engine/assets/parsed/level3d/level3d_images/0002_256x256d32.png",
+      "file": "assets/parsed/level3d/level3d_images/0002_256x256d32.png",
       "status": "ok"
     },
     {
       "index": 3,
+      "chunk_id": 3,
+      "name": "octapuke1",
       "width": 256,
       "height": 256,
       "depth": 32,
@@ -57,11 +65,13 @@
       "transp_packed": 0,
       "dopalette": false,
       "bufsize": 219344,
-      "file": "/home/scotty/jn-engine/assets/parsed/level3d/level3d_images/0003_256x256d32.png",
+      "file": "assets/parsed/level3d/level3d_images/0003_256x256d32.png",
       "status": "ok"
     },
     {
       "index": 4,
+      "chunk_id": 4,
+      "name": "viking",
       "width": 256,
       "height": 256,
       "depth": 32,
@@ -71,11 +81,13 @@
       "transp_packed": 0,
       "dopalette": false,
       "bufsize": 198660,
-      "file": "/home/scotty/jn-engine/assets/parsed/level3d/level3d_images/0004_256x256d32.png",
+      "file": "assets/parsed/level3d/level3d_images/0004_256x256d32.png",
       "status": "ok"
     },
     {
       "index": 5,
+      "chunk_id": 6,
+      "name": "bushes01",
       "width": 128,
       "height": 128,
       "depth": 32,
@@ -85,11 +97,13 @@
       "transp_packed": 0,
       "dopalette": false,
       "bufsize": 66264,
-      "file": "/home/scotty/jn-engine/assets/parsed/level3d/level3d_images/0005_128x128d32.png",
+      "file": "assets/parsed/level3d/level3d_images/0005_128x128d32.png",
       "status": "ok"
     },
     {
       "index": 6,
+      "chunk_id": 7,
+      "name": "grass",
       "width": 128,
       "height": 128,
       "depth": 32,
@@ -99,11 +113,13 @@
       "transp_packed": 0,
       "dopalette": false,
       "bufsize": 66292,
-      "file": "/home/scotty/jn-engine/assets/parsed/level3d/level3d_images/0006_128x128d32.png",
+      "file": "assets/parsed/level3d/level3d_images/0006_128x128d32.png",
       "status": "ok"
     },
     {
       "index": 7,
+      "chunk_id": 8,
+      "name": "ground",
       "width": 128,
       "height": 128,
       "depth": 32,
@@ -113,11 +129,13 @@
       "transp_packed": 0,
       "dopalette": false,
       "bufsize": 66056,
-      "file": "/home/scotty/jn-engine/assets/parsed/level3d/level3d_images/0007_128x128d32.png",
+      "file": "assets/parsed/level3d/level3d_images/0007_128x128d32.png",
       "status": "ok"
     },
     {
       "index": 8,
+      "chunk_id": 9,
+      "name": "ground2",
       "width": 128,
       "height": 128,
       "depth": 32,
@@ -127,11 +145,13 @@
       "transp_packed": 0,
       "dopalette": false,
       "bufsize": 53004,
-      "file": "/home/scotty/jn-engine/assets/parsed/level3d/level3d_images/0008_128x128d32.png",
+      "file": "assets/parsed/level3d/level3d_images/0008_128x128d32.png",
       "status": "ok"
     },
     {
       "index": 9,
+      "chunk_id": 10,
+      "name": "trees01",
       "width": 128,
       "height": 128,
       "depth": 32,
@@ -141,11 +161,13 @@
       "transp_packed": 0,
       "dopalette": false,
       "bufsize": 60420,
-      "file": "/home/scotty/jn-engine/assets/parsed/level3d/level3d_images/0009_128x128d32.png",
+      "file": "assets/parsed/level3d/level3d_images/0009_128x128d32.png",
       "status": "ok"
     },
     {
       "index": 10,
+      "chunk_id": 11,
+      "name": "wall",
       "width": 128,
       "height": 128,
       "depth": 32,
@@ -155,11 +177,13 @@
       "transp_packed": 0,
       "dopalette": false,
       "bufsize": 54624,
-      "file": "/home/scotty/jn-engine/assets/parsed/level3d/level3d_images/0010_128x128d32.png",
+      "file": "assets/parsed/level3d/level3d_images/0010_128x128d32.png",
       "status": "ok"
     },
     {
       "index": 11,
+      "chunk_id": 12,
+      "name": "wall2",
       "width": 128,
       "height": 128,
       "depth": 32,
@@ -169,11 +193,13 @@
       "transp_packed": 0,
       "dopalette": false,
       "bufsize": 63436,
-      "file": "/home/scotty/jn-engine/assets/parsed/level3d/level3d_images/0011_128x128d32.png",
+      "file": "assets/parsed/level3d/level3d_images/0011_128x128d32.png",
       "status": "ok"
     },
     {
       "index": 12,
+      "chunk_id": 13,
+      "name": "wall3",
       "width": 128,
       "height": 128,
       "depth": 32,
@@ -183,11 +209,13 @@
       "transp_packed": 0,
       "dopalette": false,
       "bufsize": 61948,
-      "file": "/home/scotty/jn-engine/assets/parsed/level3d/level3d_images/0012_128x128d32.png",
+      "file": "assets/parsed/level3d/level3d_images/0012_128x128d32.png",
       "status": "ok"
     },
     {
       "index": 13,
+      "chunk_id": 14,
+      "name": "water",
       "width": 256,
       "height": 256,
       "depth": 32,
@@ -197,11 +225,13 @@
       "transp_packed": 0,
       "dopalette": false,
       "bufsize": 263864,
-      "file": "/home/scotty/jn-engine/assets/parsed/level3d/level3d_images/0013_256x256d32.png",
+      "file": "assets/parsed/level3d/level3d_images/0013_256x256d32.png",
       "status": "ok"
     },
     {
       "index": 14,
+      "chunk_id": 5,
+      "name": "bench",
       "width": 128,
       "height": 128,
       "depth": 32,
@@ -211,11 +241,13 @@
       "transp_packed": 0,
       "dopalette": false,
       "bufsize": 51180,
-      "file": "/home/scotty/jn-engine/assets/parsed/level3d/level3d_images/0014_128x128d32.png",
+      "file": "assets/parsed/level3d/level3d_images/0014_128x128d32.png",
       "status": "ok"
     },
     {
       "index": 15,
+      "chunk_id": 15,
+      "name": "eyesky",
       "width": 256,
       "height": 256,
       "depth": 32,
@@ -225,11 +257,13 @@
       "transp_packed": 0,
       "dopalette": false,
       "bufsize": 210868,
-      "file": "/home/scotty/jn-engine/assets/parsed/level3d/level3d_images/0015_256x256d32.png",
+      "file": "assets/parsed/level3d/level3d_images/0015_256x256d32.png",
       "status": "ok"
     },
     {
       "index": 16,
+      "chunk_id": 18,
+      "name": "hoodfar",
       "width": 128,
       "height": 128,
       "depth": 32,
@@ -239,11 +273,13 @@
       "transp_packed": 0,
       "dopalette": false,
       "bufsize": 65012,
-      "file": "/home/scotty/jn-engine/assets/parsed/level3d/level3d_images/0016_128x128d32.png",
+      "file": "assets/parsed/level3d/level3d_images/0016_128x128d32.png",
       "status": "ok"
     },
     {
       "index": 17,
+      "chunk_id": 16,
+      "name": "ulordpostr",
       "width": 128,
       "height": 128,
       "depth": 32,
@@ -252,12 +288,14 @@
       "dotransparent": false,
       "transp_packed": 0,
       "dopalette": false,
-      "bufsize": 63168,
-      "file": "/home/scotty/jn-engine/assets/parsed/level3d/level3d_images/0017_128x128d32.png",
+      "bufsize": 65736,
+      "file": "assets/parsed/level3d/level3d_images/0017_128x128d32.png",
       "status": "ok"
     },
     {
       "index": 18,
+      "chunk_id": 17,
+      "name": "retrolandmap",
       "width": 128,
       "height": 128,
       "depth": 32,
@@ -267,11 +305,13 @@
       "transp_packed": 0,
       "dopalette": false,
       "bufsize": 63708,
-      "file": "/home/scotty/jn-engine/assets/parsed/level3d/level3d_images/0018_128x128d32.png",
+      "file": "assets/parsed/level3d/level3d_images/0018_128x128d32.png",
       "status": "ok"
     },
     {
       "index": 19,
+      "chunk_id": 19,
+      "name": "tickets",
       "width": 128,
       "height": 128,
       "depth": 32,
@@ -281,11 +321,13 @@
       "transp_packed": 0,
       "dopalette": false,
       "bufsize": 63168,
-      "file": "/home/scotty/jn-engine/assets/parsed/level3d/level3d_images/0019_128x128d32.png",
+      "file": "assets/parsed/level3d/level3d_images/0019_128x128d32.png",
       "status": "ok"
     },
     {
       "index": 20,
+      "chunk_id": 20,
+      "name": "signs",
       "width": 128,
       "height": 128,
       "depth": 32,
@@ -295,7 +337,7 @@
       "transp_packed": 0,
       "dopalette": false,
       "bufsize": 57824,
-      "file": "/home/scotty/jn-engine/assets/parsed/level3d/level3d_images/0020_128x128d32.png",
+      "file": "assets/parsed/level3d/level3d_images/0020_128x128d32.png",
       "status": "ok"
     }
   ]

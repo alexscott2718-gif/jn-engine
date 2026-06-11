@@ -6,6 +6,8 @@
   "images": [
     {
       "index": 0,
+      "chunk_id": 2,
+      "name": "invisible",
       "width": 32,
       "height": 32,
       "depth": 32,
@@ -15,11 +17,13 @@
       "transp_packed": 0,
       "dopalette": false,
       "bufsize": 320,
-      "file": "/home/scotty/jn-engine/assets/parsed/objectslevel5a/objectslevel5a_images/0000_32x32d32.png",
+      "file": "assets/parsed/objectslevel5a/objectslevel5a_images/0000_32x32d32.png",
       "status": "ok"
     },
     {
       "index": 1,
+      "chunk_id": 6,
+      "name": "goo",
       "width": 64,
       "height": 64,
       "depth": 16,
@@ -29,11 +33,13 @@
       "transp_packed": 0,
       "dopalette": false,
       "bufsize": 6042,
-      "file": "/home/scotty/jn-engine/assets/parsed/objectslevel5a/objectslevel5a_images/0001_64x64d16.png",
+      "file": "assets/parsed/objectslevel5a/objectslevel5a_images/0001_64x64d16.png",
       "status": "ok"
     },
     {
       "index": 2,
+      "chunk_id": 8,
+      "name": "laser02",
       "width": 64,
       "height": 64,
       "depth": 16,
@@ -43,11 +49,13 @@
       "transp_packed": 0,
       "dopalette": false,
       "bufsize": 5090,
-      "file": "/home/scotty/jn-engine/assets/parsed/objectslevel5a/objectslevel5a_images/0002_64x64d16.png",
+      "file": "assets/parsed/objectslevel5a/objectslevel5a_images/0002_64x64d16.png",
       "status": "ok"
     },
     {
       "index": 3,
+      "chunk_id": 3,
+      "name": "YokianF",
       "width": 128,
       "height": 128,
       "depth": 16,
@@ -57,11 +65,13 @@
       "transp_packed": 0,
       "dopalette": false,
       "bufsize": 29516,
-      "file": "/home/scotty/jn-engine/assets/parsed/objectslevel5a/objectslevel5a_images/0003_128x128d16.png",
+      "file": "assets/parsed/objectslevel5a/objectslevel5a_images/0003_128x128d16.png",
       "status": "ok"
     },
     {
       "index": 4,
+      "chunk_id": 7,
+      "name": "door",
       "width": 128,
       "height": 128,
       "depth": 16,
@@ -71,11 +81,13 @@
       "transp_packed": 0,
       "dopalette": false,
       "bufsize": 32522,
-      "file": "/home/scotty/jn-engine/assets/parsed/objectslevel5a/objectslevel5a_images/0004_128x128d16.png",
+      "file": "assets/parsed/objectslevel5a/objectslevel5a_images/0004_128x128d16.png",
       "status": "ok"
     },
     {
       "index": 5,
+      "chunk_id": 1,
+      "name": "doorcave",
       "width": 128,
       "height": 128,
       "depth": 16,
@@ -85,11 +97,13 @@
       "transp_packed": 0,
       "dopalette": false,
       "bufsize": 31730,
-      "file": "/home/scotty/jn-engine/assets/parsed/objectslevel5a/objectslevel5a_images/0005_128x128d16.png",
+      "file": "assets/parsed/objectslevel5a/objectslevel5a_images/0005_128x128d16.png",
       "status": "ok"
     },
     {
       "index": 6,
+      "chunk_id": 4,
+      "name": "fallrocks",
       "width": 128,
       "height": 128,
       "depth": 16,
@@ -99,11 +113,13 @@
       "transp_packed": 0,
       "dopalette": false,
       "bufsize": 32612,
-      "file": "/home/scotty/jn-engine/assets/parsed/objectslevel5a/objectslevel5a_images/0006_128x128d16.png",
+      "file": "assets/parsed/objectslevel5a/objectslevel5a_images/0006_128x128d16.png",
       "status": "ok"
     },
     {
       "index": 7,
+      "chunk_id": 0,
+      "name": "torret",
       "width": 128,
       "height": 128,
       "depth": 32,
@@ -113,11 +129,13 @@
       "transp_packed": 0,
       "dopalette": false,
       "bufsize": 60400,
-      "file": "/home/scotty/jn-engine/assets/parsed/objectslevel5a/objectslevel5a_images/0007_128x128d32.png",
+      "file": "assets/parsed/objectslevel5a/objectslevel5a_images/0007_128x128d32.png",
       "status": "ok"
     },
     {
       "index": 8,
+      "chunk_id": 9,
+      "name": "door01",
       "width": 128,
       "height": 128,
       "depth": 32,
@@ -127,7 +145,7 @@
       "transp_packed": 0,
       "dopalette": false,
       "bufsize": 64732,
-      "file": "/home/scotty/jn-engine/assets/parsed/objectslevel5a/objectslevel5a_images/0008_128x128d32.png",
+      "file": "assets/parsed/objectslevel5a/objectslevel5a_images/0008_128x128d32.png",
       "status": "ok"
     }
   ]

@@ -6,6 +6,8 @@
   "images": [
     {
       "index": 0,
+      "chunk_id": 0,
+      "name": "hoodfarnite2",
       "width": 128,
       "height": 128,
       "depth": 16,
@@ -15,11 +17,13 @@
       "transp_packed": 0,
       "dopalette": false,
       "bufsize": 9480,
-      "file": "/home/scotty/jn-engine/assets/parsed/nightsky/nightsky_images/0000_128x128d16.png",
+      "file": "assets/parsed/nightsky/nightsky_images/0000_128x128d16.png",
       "status": "ok"
     },
     {
       "index": 1,
+      "chunk_id": 1,
+      "name": "hoodfarnite1",
       "width": 128,
       "height": 128,
       "depth": 16,
@@ -29,11 +33,13 @@
       "transp_packed": 0,
       "dopalette": false,
       "bufsize": 17236,
-      "file": "/home/scotty/jn-engine/assets/parsed/nightsky/nightsky_images/0001_128x128d16.png",
+      "file": "assets/parsed/nightsky/nightsky_images/0001_128x128d16.png",
       "status": "ok"
     },
     {
       "index": 2,
+      "chunk_id": 2,
+      "name": "hoodfar",
       "width": 256,
       "height": 256,
       "depth": 16,
@@ -43,11 +49,13 @@
       "transp_packed": 0,
       "dopalette": false,
       "bufsize": 100006,
-      "file": "/home/scotty/jn-engine/assets/parsed/nightsky/nightsky_images/0002_256x256d16.png",
+      "file": "assets/parsed/nightsky/nightsky_images/0002_256x256d16.png",
       "status": "ok"
     },
     {
       "index": 3,
+      "chunk_id": 3,
+      "name": "nightsky1",
       "width": 256,
       "height": 256,
       "depth": 16,
@@ -57,11 +65,13 @@
       "transp_packed": 0,
       "dopalette": false,
       "bufsize": 3884,
-      "file": "/home/scotty/jn-engine/assets/parsed/nightsky/nightsky_images/0003_256x256d16.png",
+      "file": "assets/parsed/nightsky/nightsky_images/0003_256x256d16.png",
       "status": "ok"
     },
     {
       "index": 4,
+      "chunk_id": 4,
+      "name": "nightsky2",
       "width": 256,
       "height": 256,
       "depth": 16,
@@ -71,7 +81,7 @@
       "transp_packed": 0,
       "dopalette": false,
       "bufsize": 38754,
-      "file": "/home/scotty/jn-engine/assets/parsed/nightsky/nightsky_images/0004_256x256d16.png",
+      "file": "assets/parsed/nightsky/nightsky_images/0004_256x256d16.png",
       "status": "ok"
     }
   ]

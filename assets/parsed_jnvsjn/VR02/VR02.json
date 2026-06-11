@@ -1,11 +1,13 @@
 {
-  "file": "/home/scotty/jnvsjn-original/omt/VR02.omt",
+  "file": "/home/scotty/jnvsjn-original/_installshield/Program_Executable_Files/omt/VR02.omt",
   "total_size": 807009,
   "has_images": true,
   "has_audio": false,
   "images": [
     {
       "index": 0,
+      "chunk_id": 820,
+      "name": "flow",
       "width": 256,
       "height": 256,
       "depth": 32,
@@ -20,6 +22,8 @@
     },
     {
       "index": 1,
+      "chunk_id": 1,
+      "name": "green",
       "width": 256,
       "height": 256,
       "depth": 32,
@@ -34,6 +38,8 @@
     },
     {
       "index": 2,
+      "chunk_id": 2,
+      "name": "red",
       "width": 256,
       "height": 256,
       "depth": 32,
@@ -48,6 +54,8 @@
     },
     {
       "index": 3,
+      "chunk_id": 0,
+      "name": "goal",
       "width": 128,
       "height": 128,
       "depth": 32,

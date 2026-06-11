@@ -6,6 +6,8 @@
   "images": [
     {
       "index": 0,
+      "chunk_id": 0,
+      "name": "mib",
       "width": 256,
       "height": 256,
       "depth": 32,
@@ -15,11 +17,13 @@
       "transp_packed": 0,
       "dopalette": false,
       "bufsize": 210540,
-      "file": "/home/scotty/jn-engine/assets/parsed/jeep/jeep_images/0000_256x256d32.png",
+      "file": "assets/parsed/jeep/jeep_images/0000_256x256d32.png",
       "status": "ok"
     },
     {
       "index": 1,
+      "chunk_id": 5,
+      "name": "lawnmower",
       "width": 256,
       "height": 256,
       "depth": 32,
@@ -29,7 +33,7 @@
       "transp_packed": 0,
       "dopalette": false,
       "bufsize": 213020,
-      "file": "/home/scotty/jn-engine/assets/parsed/jeep/jeep_images/0001_256x256d32.png",
+      "file": "assets/parsed/jeep/jeep_images/0001_256x256d32.png",
       "status": "ok"
     }
   ]

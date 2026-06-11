@@ -6,6 +6,8 @@
   "images": [
     {
       "index": 0,
+      "chunk_id": 0,
+      "name": "Phone2",
       "width": 256,
       "height": 256,
       "depth": 16,
@@ -15,11 +17,13 @@
       "transp_packed": 0,
       "dopalette": false,
       "bufsize": 66034,
-      "file": "/home/scotty/jn-engine/assets/parsed/phone/phone_images/0000_256x256d16.png",
+      "file": "assets/parsed/phone/phone_images/0000_256x256d16.png",
       "status": "ok"
     },
     {
       "index": 1,
+      "chunk_id": 2,
+      "name": "PhoneFloor",
       "width": 128,
       "height": 128,
       "depth": 16,
@@ -29,11 +33,13 @@
       "transp_packed": 0,
       "dopalette": false,
       "bufsize": 30966,
-      "file": "/home/scotty/jn-engine/assets/parsed/phone/phone_images/0001_128x128d16.png",
+      "file": "assets/parsed/phone/phone_images/0001_128x128d16.png",
       "status": "ok"
     },
     {
       "index": 2,
+      "chunk_id": 1,
+      "name": "phone",
       "width": 256,
       "height": 256,
       "depth": 16,
@@ -43,7 +49,7 @@
       "transp_packed": 0,
       "dopalette": false,
       "bufsize": 105442,
-      "file": "/home/scotty/jn-engine/assets/parsed/phone/phone_images/0002_256x256d16.png",
+      "file": "assets/parsed/phone/phone_images/0002_256x256d16.png",
       "status": "ok"
     }
   ]

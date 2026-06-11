@@ -6,6 +6,8 @@
   "images": [
     {
       "index": 0,
+      "chunk_id": 0,
+      "name": "stones",
       "width": 128,
       "height": 128,
       "depth": 16,
@@ -15,11 +17,13 @@
       "transp_packed": 0,
       "dopalette": false,
       "bufsize": 30844,
-      "file": "/home/scotty/jn-engine/assets/parsed/VR05/VR05_images/0000_128x128d16.png",
+      "file": "assets/parsed/VR05/VR05_images/0000_128x128d16.png",
       "status": "ok"
     },
     {
       "index": 1,
+      "chunk_id": 1,
+      "name": "block2",
       "width": 32,
       "height": 32,
       "depth": 16,
@@ -29,11 +33,13 @@
       "transp_packed": 0,
       "dopalette": false,
       "bufsize": 1932,
-      "file": "/home/scotty/jn-engine/assets/parsed/VR05/VR05_images/0001_32x32d16.png",
+      "file": "assets/parsed/VR05/VR05_images/0001_32x32d16.png",
       "status": "ok"
     },
     {
       "index": 2,
+      "chunk_id": 2,
+      "name": "bluegrid",
       "width": 256,
       "height": 256,
       "depth": 16,
@@ -43,11 +49,13 @@
       "transp_packed": 0,
       "dopalette": false,
       "bufsize": 69546,
-      "file": "/home/scotty/jn-engine/assets/parsed/VR05/VR05_images/0002_256x256d16.png",
+      "file": "assets/parsed/VR05/VR05_images/0002_256x256d16.png",
       "status": "ok"
     },
     {
       "index": 3,
+      "chunk_id": 3,
+      "name": "dirt",
       "width": 64,
       "height": 64,
       "depth": 16,
@@ -57,11 +65,13 @@
       "transp_packed": 0,
       "dopalette": false,
       "bufsize": 7474,
-      "file": "/home/scotty/jn-engine/assets/parsed/VR05/VR05_images/0003_64x64d16.png",
+      "file": "assets/parsed/VR05/VR05_images/0003_64x64d16.png",
       "status": "ok"
     },
     {
       "index": 4,
+      "chunk_id": 4,
+      "name": "dirt2",
       "width": 64,
       "height": 64,
       "depth": 16,
@@ -71,11 +81,13 @@
       "transp_packed": 0,
       "dopalette": false,
       "bufsize": 7488,
-      "file": "/home/scotty/jn-engine/assets/parsed/VR05/VR05_images/0004_64x64d16.png",
+      "file": "assets/parsed/VR05/VR05_images/0004_64x64d16.png",
       "status": "ok"
     },
     {
       "index": 5,
+      "chunk_id": 5,
+      "name": "dirt3",
       "width": 64,
       "height": 64,
       "depth": 16,
@@ -85,11 +97,13 @@
       "transp_packed": 0,
       "dopalette": false,
       "bufsize": 7472,
-      "file": "/home/scotty/jn-engine/assets/parsed/VR05/VR05_images/0005_64x64d16.png",
+      "file": "assets/parsed/VR05/VR05_images/0005_64x64d16.png",
       "status": "ok"
     },
     {
       "index": 6,
+      "chunk_id": 6,
+      "name": "dirt4",
       "width": 64,
       "height": 64,
       "depth": 16,
@@ -99,11 +113,13 @@
       "transp_packed": 0,
       "dopalette": false,
       "bufsize": 7446,
-      "file": "/home/scotty/jn-engine/assets/parsed/VR05/VR05_images/0006_64x64d16.png",
+      "file": "assets/parsed/VR05/VR05_images/0006_64x64d16.png",
       "status": "ok"
     },
     {
       "index": 7,
+      "chunk_id": 7,
+      "name": "dirt5",
       "width": 64,
       "height": 64,
       "depth": 16,
@@ -113,11 +129,13 @@
       "transp_packed": 0,
       "dopalette": false,
       "bufsize": 7456,
-      "file": "/home/scotty/jn-engine/assets/parsed/VR05/VR05_images/0007_64x64d16.png",
+      "file": "assets/parsed/VR05/VR05_images/0007_64x64d16.png",
       "status": "ok"
     },
     {
       "index": 8,
+      "chunk_id": 8,
+      "name": "dirtarrow",
       "width": 64,
       "height": 64,
       "depth": 16,
@@ -127,11 +145,13 @@
       "transp_packed": 0,
       "dopalette": false,
       "bufsize": 7512,
-      "file": "/home/scotty/jn-engine/assets/parsed/VR05/VR05_images/0008_64x64d16.png",
+      "file": "assets/parsed/VR05/VR05_images/0008_64x64d16.png",
       "status": "ok"
     },
     {
       "index": 9,
+      "chunk_id": 9,
+      "name": "dirtgrass",
       "width": 64,
       "height": 64,
       "depth": 16,
@@ -141,11 +161,13 @@
       "transp_packed": 0,
       "dopalette": false,
       "bufsize": 7390,
-      "file": "/home/scotty/jn-engine/assets/parsed/VR05/VR05_images/0009_64x64d16.png",
+      "file": "assets/parsed/VR05/VR05_images/0009_64x64d16.png",
       "status": "ok"
     },
     {
       "index": 10,
+      "chunk_id": 10,
+      "name": "fence4",
       "width": 128,
       "height": 128,
       "depth": 16,
@@ -155,11 +177,13 @@
       "transp_packed": 0,
       "dopalette": false,
       "bufsize": 30824,
-      "file": "/home/scotty/jn-engine/assets/parsed/VR05/VR05_images/0010_128x128d16.png",
+      "file": "assets/parsed/VR05/VR05_images/0010_128x128d16.png",
       "status": "ok"
     },
     {
       "index": 11,
+      "chunk_id": 11,
+      "name": "finish",
       "width": 128,
       "height": 128,
       "depth": 16,
@@ -169,11 +193,13 @@
       "transp_packed": 0,
       "dopalette": false,
       "bufsize": 30526,
-      "file": "/home/scotty/jn-engine/assets/parsed/VR05/VR05_images/0011_128x128d16.png",
+      "file": "assets/parsed/VR05/VR05_images/0011_128x128d16.png",
       "status": "ok"
     },
     {
       "index": 12,
+      "chunk_id": 12,
+      "name": "grassdirt2",
       "width": 64,
       "height": 64,
       "depth": 16,
@@ -183,11 +209,13 @@
       "transp_packed": 0,
       "dopalette": false,
       "bufsize": 7482,
-      "file": "/home/scotty/jn-engine/assets/parsed/VR05/VR05_images/0012_64x64d16.png",
+      "file": "assets/parsed/VR05/VR05_images/0012_64x64d16.png",
       "status": "ok"
     },
     {
       "index": 13,
+      "chunk_id": 13,
+      "name": "signs",
       "width": 128,
       "height": 128,
       "depth": 16,
@@ -197,11 +225,13 @@
       "transp_packed": 0,
       "dopalette": false,
       "bufsize": 25048,
-      "file": "/home/scotty/jn-engine/assets/parsed/VR05/VR05_images/0013_128x128d16.png",
+      "file": "assets/parsed/VR05/VR05_images/0013_128x128d16.png",
       "status": "ok"
     },
     {
       "index": 14,
+      "chunk_id": 14,
+      "name": "block1",
       "width": 32,
       "height": 32,
       "depth": 16,
@@ -211,11 +241,13 @@
       "transp_packed": 0,
       "dopalette": false,
       "bufsize": 1996,
-      "file": "/home/scotty/jn-engine/assets/parsed/VR05/VR05_images/0014_32x32d16.png",
+      "file": "assets/parsed/VR05/VR05_images/0014_32x32d16.png",
       "status": "ok"
     },
     {
       "index": 15,
+      "chunk_id": 18,
+      "name": "greengrid1",
       "width": 32,
       "height": 32,
       "depth": 16,
@@ -225,11 +257,13 @@
       "transp_packed": 0,
       "dopalette": false,
       "bufsize": 1170,
-      "file": "/home/scotty/jn-engine/assets/parsed/VR05/VR05_images/0015_32x32d16.png",
+      "file": "assets/parsed/VR05/VR05_images/0015_32x32d16.png",
       "status": "ok"
     },
     {
       "index": 16,
+      "chunk_id": 15,
+      "name": "wood",
       "width": 128,
       "height": 128,
       "depth": 16,
@@ -239,11 +273,13 @@
       "transp_packed": 0,
       "dopalette": false,
       "bufsize": 28196,
-      "file": "/home/scotty/jn-engine/assets/parsed/VR05/VR05_images/0016_128x128d16.png",
+      "file": "assets/parsed/VR05/VR05_images/0016_128x128d16.png",
       "status": "ok"
     },
     {
       "index": 17,
+      "chunk_id": 16,
+      "name": "concrete",
       "width": 128,
       "height": 128,
       "depth": 16,
@@ -253,11 +289,13 @@
       "transp_packed": 0,
       "dopalette": false,
       "bufsize": 25412,
-      "file": "/home/scotty/jn-engine/assets/parsed/VR05/VR05_images/0017_128x128d16.png",
+      "file": "assets/parsed/VR05/VR05_images/0017_128x128d16.png",
       "status": "ok"
     },
     {
       "index": 18,
+      "chunk_id": 20,
+      "name": "yellowgrid1",
       "width": 32,
       "height": 32,
       "depth": 16,
@@ -267,11 +305,13 @@
       "transp_packed": 0,
       "dopalette": false,
       "bufsize": 1030,
-      "file": "/home/scotty/jn-engine/assets/parsed/VR05/VR05_images/0018_32x32d16.png",
+      "file": "assets/parsed/VR05/VR05_images/0018_32x32d16.png",
       "status": "ok"
     },
     {
       "index": 19,
+      "chunk_id": 19,
+      "name": "redgrid1",
       "width": 32,
       "height": 32,
       "depth": 16,
@@ -281,11 +321,13 @@
       "transp_packed": 0,
       "dopalette": false,
       "bufsize": 976,
-      "file": "/home/scotty/jn-engine/assets/parsed/VR05/VR05_images/0019_32x32d16.png",
+      "file": "assets/parsed/VR05/VR05_images/0019_32x32d16.png",
       "status": "ok"
     },
     {
       "index": 20,
+      "chunk_id": 17,
+      "name": "bluegrid1",
       "width": 32,
       "height": 32,
       "depth": 16,
@@ -295,11 +337,13 @@
       "transp_packed": 0,
       "dopalette": false,
       "bufsize": 1012,
-      "file": "/home/scotty/jn-engine/assets/parsed/VR05/VR05_images/0020_32x32d16.png",
+      "file": "assets/parsed/VR05/VR05_images/0020_32x32d16.png",
       "status": "ok"
     },
     {
       "index": 21,
+      "chunk_id": 21,
+      "name": "Truss",
       "width": 128,
       "height": 128,
       "depth": 16,
@@ -309,7 +353,7 @@
       "transp_packed": 0,
       "dopalette": false,
       "bufsize": 9242,
-      "file": "/home/scotty/jn-engine/assets/parsed/VR05/VR05_images/0021_128x128d16.png",
+      "file": "assets/parsed/VR05/VR05_images/0021_128x128d16.png",
       "status": "ok"
     }
   ]
