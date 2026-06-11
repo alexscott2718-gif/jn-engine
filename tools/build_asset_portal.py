@@ -17,12 +17,17 @@ Outputs into --out (default build/portal):
 
 Re-runnable. Deploy by syncing --out to the web root (/var/www/JN-assets).
 """
-import argparse, json, os, shutil, zipfile
+import argparse, hashlib, json, os, shutil, zipfile
 from pathlib import Path
+from urllib.parse import quote
+import re
 
 REPO = Path(__file__).resolve().parent.parent
 ASSETS = REPO / "assets"
 THUMB_MAX = 160
+# GL-rendered per-mesh thumbnails (omt-thumbs --backend gl), keyed by <cat>/thumb/<name>.png.
+# Read at build time and baked into the portal output so the deploy stays self-contained.
+MESH_THUMB_SRC = Path("/var/www/jn-engine/catalog/full")
 
 
 def _thumb(src, dst):
@@ -73,32 +78,80 @@ def collect_meshes(out, mesh_catalog):
     deployed /JN-assets root (<cat>/models/*.glb, <cat>/thumb/*.png, _viewer/)."""
     items = []
     cat_root = Path(mesh_catalog)
-    ase_index = {p.stem.lower(): p for p in (ASSETS / "ase").glob("*.ASE")}
+    ase_index = {}
+    for pat in ("*.ASE", "*.ase"):
+        ase_index.update({p.stem.lower(): p for p in (ASSETS / "ase").glob(pat)})
     (out / "files/mesh-ase").mkdir(parents=True, exist_ok=True)
     ase_copied = {}
-    if not cat_root.is_dir():
-        return items
-    for cat_dir in sorted(cat_root.iterdir()):
-        models = cat_dir / "models"
-        if not models.is_dir():
-            continue
-        cat = cat_dir.name
-        for glb in sorted(models.glob("*.glb")):
+
+    def viewer_url(glb_rel, name, cat):
+        """Link to the self-contained _viewer/, loading the glb the portal
+        deployed at `glb_rel` (relative to the site root)."""
+        return ("_viewer/view.html?glb=" + quote("../" + glb_rel)
+                + "&name=" + quote(name) + "&cat=" + quote(cat))
+
+    def mesh_thumb(cat, name):
+        """Copy the GL-rendered thumbnail for (cat, name) into the portal and
+        return its relative URL, or None if no thumbnail exists."""
+        src = MESH_THUMB_SRC / cat / "thumb" / f"{name}.png"
+        if not src.is_file():
+            return None
+        rel = f"thumbs/mesh/{cat}/{name}.png"
+        dst = out / rel
+        dst.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(src, dst)
+        return rel
+
+    def attach_ase(name, formats, src):
+        ase = ase_index.get(name.lower())
+        if not ase:
+            return
+        if name.lower() not in ase_copied:
+            rel = f"files/mesh-ase/{ase.name}"
+            shutil.copy2(ase, out / rel)
+            ase_copied[name.lower()] = rel
+        formats["ase"] = ase_copied[name.lower()]
+        src["ase"] = str(ase)
+
+    seen = set()
+    if cat_root.is_dir():
+        for cat_dir in sorted(cat_root.iterdir()):
+            models = cat_dir / "models"
+            if not models.is_dir():
+                continue
+            cat = cat_dir.name
+            for glb in sorted(models.glob("*.glb")):
+                name = glb.stem
+                key = (cat.lower(), name.lower())
+                seen.add(key)
+                glb_rel = f"{cat}/models/{glb.name}"
+                formats = {"glb": glb_rel}
+                src = {"glb": str(glb)}
+                th = cat_dir / "thumb" / f"{name}.png"
+                thumb = f"{cat}/thumb/{name}.png" if th.exists() else None
+                attach_ase(name, formats, src)
+                items.append({"name": name, "group": "mesh", "category": cat,
+                              "thumb": thumb, "formats": formats, "_src": src,
+                              "viewer": viewer_url(glb_rel, name, cat)})
+
+    glb_root = ASSETS / "glb" / "omt"
+    if glb_root.is_dir():
+        for glb in sorted(glb_root.rglob("*.glb")):
+            cat = "level1" if glb.parent == glb_root else glb.parent.name
             name = glb.stem
-            formats = {"glb": f"{cat}/models/{glb.name}"}
+            key = (cat.lower(), name.lower())
+            if key in seen:
+                continue
+            seen.add(key)
+            rel = f"files/mesh-glb/{cat}/{glb.name}"
+            (out / "files/mesh-glb" / cat).mkdir(parents=True, exist_ok=True)
+            shutil.copy2(glb, out / rel)
+            formats = {"glb": rel}
             src = {"glb": str(glb)}
-            th = cat_dir / "thumb" / f"{name}.png"
-            thumb = f"{cat}/thumb/{name}.png" if th.exists() else None
-            ase = ase_index.get(name.lower())
-            if ase:
-                if name.lower() not in ase_copied:
-                    rel = f"files/mesh-ase/{ase.name}"
-                    shutil.copy2(ase, out / rel); ase_copied[name.lower()] = rel
-                formats["ase"] = ase_copied[name.lower()]
-                src["ase"] = str(ase)
+            attach_ase(name, formats, src)
             items.append({"name": name, "group": "mesh", "category": cat,
-                          "thumb": thumb, "formats": formats, "_src": src,
-                          "viewer": f"_viewer/view.html?cat={cat}&name={name}"})
+                          "thumb": mesh_thumb(cat, name), "formats": formats, "_src": src,
+                          "viewer": viewer_url(rel, name, cat)})
     return items
 
 
@@ -173,7 +226,9 @@ def collect_jnvsjn(out, grn_catalog):
                               "subset": sub.name, "thumb": None, "formats": {"wav": rel}})
 
     # --- meshes: Granny .grn originals; attach glb/thumb/viewer from the
-    #     deployed grn-catalog (catalog.json maps source_grn -> mesh entry) ---
+    #     deployed grn-catalog (catalog.json maps source_grn -> mesh entry).
+    #     Fall back to local static/captured GLBs for source .grn files not yet
+    #     present in the deployed capture catalog.
     gc = Path(grn_catalog); base = "/jnvsjn/grn-catalog"
     grn_map = {}
     cj = gc / "data" / "catalog.json"
@@ -182,8 +237,16 @@ def collect_jnvsjn(out, grn_catalog):
             sg = e.get("source_grn", "").replace("\\", "/").split("/")[-1].lower()
             if sg:
                 grn_map.setdefault(sg, e)
+    local_glbs = {}
+    for glb_root in (ASSETS / "glb" / "grn_capture", ASSETS / "glb" / "grn"):
+        if not glb_root.is_dir():
+            continue
+        for glb in sorted(glb_root.glob("*.glb")):
+            stem = re.sub(r"_m[0-9a-fA-F]{8}$", "", glb.stem).lower()
+            local_glbs.setdefault(f"{stem}.grn", glb)
     if (SRC / "grn").is_dir():
         (out / "files/grn").mkdir(parents=True, exist_ok=True)
+        (out / "files/grn-glb").mkdir(parents=True, exist_ok=True)
         for grn in sorted((SRC / "grn").glob("*.grn")):
             rel = f"files/grn/{grn.name}"; shutil.copy2(grn, out / rel)
             it = {"name": grn.stem, "group": "mesh", "category": "grn",
@@ -195,6 +258,13 @@ def collect_jnvsjn(out, grn_catalog):
                 if (gc / e["thumb"]).exists():
                     it["thumb"] = f"{base}/{e['thumb']}"
                 it["viewer"] = f"{base}/view.html?m={e['name']}"
+            else:
+                glb = local_glbs.get(grn.name.lower())
+                if glb:
+                    glb_rel = f"files/grn-glb/{glb.name}"
+                    shutil.copy2(glb, out / glb_rel)
+                    it["formats"]["glb"] = glb_rel
+                    it["_src"]["glb"] = str(glb)
             items.append(it)
 
     # --- meshes: ASE originals ---
@@ -267,6 +337,51 @@ def make_zips(out, items):
     return zips
 
 
+def _version_url(out, url):
+    """Append a content hash to local generated files so browser caches refresh."""
+    if not url or "://" in url or url.startswith("/"):
+        return url
+    path = out / url
+    if not path.is_file():
+        return url
+    h = hashlib.sha1(path.read_bytes()).hexdigest()[:12]
+    sep = "&" if "?" in url else "?"
+    return f"{url}{sep}v={h}"
+
+
+def version_manifest_urls(out, items, zips):
+    for it in items:
+        if it.get("thumb"):
+            it["thumb"] = _version_url(out, it["thumb"])
+        for fmt, url in list(it.get("formats", {}).items()):
+            it["formats"][fmt] = _version_url(out, url)
+    for z in zips.values():
+        z["path"] = _version_url(out, z["path"])
+
+
+def deploy_viewer(out):
+    """Deploy the self-contained three.js mesh viewer into <out>/_viewer/ so the
+    portal does not depend on a separately-run catalog generator. Reuses the
+    canonical viewer assets from build_jn_assets_catalog.py."""
+    try:
+        from build_jn_assets_catalog import VIEW_HTML, VIEW_JS, VENDOR_SRC
+    except Exception as e:
+        print(f"  [viewer] SKIPPED — could not import viewer assets: {e}")
+        return
+    v = out / "_viewer"
+    v.mkdir(parents=True, exist_ok=True)
+    (v / "view.html").write_text(VIEW_HTML)
+    (v / "view.js").write_text(VIEW_JS)
+    dst = v / "vendor"
+    if dst.exists():
+        shutil.rmtree(dst)
+    if VENDOR_SRC.is_dir():
+        shutil.copytree(VENDOR_SRC, dst)
+        print("  [viewer] deployed _viewer/ (three.js)")
+    else:
+        print(f"  [viewer] WARN vendored three.js missing at {VENDOR_SRC}")
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--game", choices=["jn", "jnvsjn"], default="jn",
@@ -302,6 +417,7 @@ def main():
     zips = {} if a.no_zips else make_zips(out, items)
     if zips:
         print(f"wrote {len(zips)} zips")
+    version_manifest_urls(out, items, zips)
 
     for it in items:           # fs paths are build-only; keep them out of the manifest
         it.pop("_src", None)
@@ -317,6 +433,8 @@ def main():
                 "assets": items}
     (out / "manifest.json").write_text(json.dumps(manifest))
     (out / "index.html").write_text(INDEX_HTML)
+    if any(it.get("viewer", "").startswith("_viewer/") for it in items):
+        deploy_viewer(out)
     print(f"wrote manifest.json ({len(items)} assets) + index.html -> {out}")
 
 
@@ -353,6 +471,16 @@ main{flex:1;padding:14px 18px;min-width:0}
 .card .fmts{margin-top:5px;display:flex;gap:6px;justify-content:center;flex-wrap:wrap}
 .card .fmts a{font-size:10px;color:var(--lnk);text-decoration:none;border:1px solid var(--line);border-radius:5px;padding:1px 6px}
 .card .fmts a:hover{border-color:var(--lnk)}
+.card .ph.view{cursor:pointer;position:relative}
+.card .ph.view:hover{outline:1px solid var(--acc);outline-offset:-1px}
+.badge3d{position:absolute;top:5px;right:5px;background:rgba(17,17,17,.8);border:1px solid #444;color:var(--acc);font-size:9px;font-weight:700;letter-spacing:.04em;padding:1px 6px;border-radius:999px;pointer-events:none}
+.fmts a.view{color:var(--acc);border-color:#5a4f2a}
+.ov{display:none;position:fixed;inset:0;background:rgba(0,0,0,.82);z-index:50;align-items:center;justify-content:center;padding:24px}
+.ov.on{display:flex}
+.ovbox{position:relative;width:min(1040px,96vw);height:min(86vh,840px);background:#121515;border:1px solid #363c3c;border-radius:12px;overflow:hidden}
+.ovbox iframe{width:100%;height:100%;border:0;background:#121515}
+.ovx{position:absolute;top:8px;right:10px;z-index:2;background:rgba(17,17,17,.82);border:1px solid #444;color:var(--fg);font-size:15px;line-height:1;width:32px;height:32px;border-radius:8px;cursor:pointer}
+.ovx:hover{border-color:var(--acc);color:var(--acc)}
 .more{display:block;margin:18px auto;padding:9px 18px;background:var(--panel);border:1px solid var(--line);color:var(--fg);border-radius:8px;cursor:pointer}
 audio{width:100%;margin-top:6px;height:30px}
 .catbtn{display:none}
@@ -382,7 +510,7 @@ audio{width:100%;margin-top:6px;height:30px}
   <div class=sub><span id=game></span> — extracted assets for reimplementation / preservation · <span id=tot></span></div>
   <div class=bar>
     <button id=catbtn class=catbtn>☰ Categories</button>
-    <input id=q type=search placeholder="Search assets by name…">
+    <input id=q type=search placeholder="Search assets by name, category, or path…">
     <span class=chip data-g="" >All</span>
     <span class=chip data-g=2d>2D textures</span>
     <span class=chip data-g=mesh>3D meshes</span>
@@ -399,10 +527,11 @@ audio{width:100%;margin-top:6px;height:30px}
     <button class=more id=more style=display:none>Show more</button>
   </main>
 </div>
+<div class=ov id=ov><div class=ovbox><button class=ovx id=ovx title="close (Esc)">✕</button><iframe id=oviframe src=about:blank></iframe></div></div>
 <script>
 let M={assets:[],groups:{},zips:{}},F={q:"",group:"",cat:""},shown=0,PAGE=120,view=[];
 const ICON={mesh:"◈",audio:"♪",level:"▤"};
-fetch("manifest.json").then(r=>r.json()).then(m=>{M=m;init()});
+fetch("manifest.json?v="+Date.now()).then(r=>r.json()).then(m=>{M=m;init()});
 function init(){
   document.getElementById("tot").textContent=M.total.toLocaleString()+" assets";
   document.getElementById("game").textContent=M.game||"";
@@ -417,6 +546,24 @@ function init(){
   document.querySelector('.chip[data-g=""]').classList.add("on");
   document.getElementById("more").onclick=()=>{shown+=PAGE;draw()};
   document.getElementById("catbtn").onclick=()=>document.getElementById("cats").classList.toggle("open");
+  // 3D lightbox: delegated so it survives grid re-renders.
+  document.getElementById("grid").addEventListener("click",e=>{
+    const t=e.target.closest("[data-viewer]");
+    if(t){e.preventDefault();openViewer(t.getAttribute("data-viewer"));}
+  });
+  document.getElementById("ovx").onclick=closeViewer;
+  document.getElementById("ov").addEventListener("click",e=>{if(e.target.id==="ov")closeViewer();});
+  addEventListener("keydown",e=>{if(e.key==="Escape")closeViewer();});
+}
+function openViewer(src){
+  const o=document.getElementById("ov");
+  document.getElementById("oviframe").src=src;
+  o.classList.add("on");
+}
+function closeViewer(){
+  const o=document.getElementById("ov");
+  o.classList.remove("on");
+  document.getElementById("oviframe").src="about:blank";
 }
 function renderCats(){
   const a=document.getElementById("cats");a.innerHTML="";
@@ -445,7 +592,7 @@ function renderDownloads(){
 }
 function apply(){
   view=M.assets.filter(a=>(!F.group||a.group===F.group)&&(!F.cat||a.category===F.cat)
-    &&(!F.q||a.name.toLowerCase().includes(F.q)));
+    &&(!F.q||searchText(a).includes(F.q)));
   shown=PAGE;draw();
   // category zip link
   if(F.cat&&M.zips["cat:"+F.cat]){const z=M.zips["cat:"+F.cat];
@@ -456,15 +603,30 @@ function draw(){
   document.getElementById("count").textContent=view.length.toLocaleString()+" results";
   const slice=view.slice(0,shown);
   g.innerHTML=slice.map(a=>{
-    const vis=a.thumb?`<img loading=lazy src="${a.thumb}">`:`<span class=icon>${ICON[a.group]||"▦"}</span>`;
+    const nm=assetLabel(a);
+    const vis=a.thumb?`<img loading=lazy src="${a.thumb}" alt="${nm}" title="${nm}">`:`<span class=icon>${ICON[a.group]||"▦"}</span>`;
     const dim=a.w?`${a.w}×${a.h}`:(a.subset||a.category);
     const f=Object.entries(a.formats).map(([k,p])=>`<a href="${p}" download>${k}</a>`).join("");
-    const view=a.viewer?`<a href="${a.viewer}" target=_blank title="view 3D">3D ▸</a>`:"";
+    const v3=a.viewer?` data-viewer="${a.viewer}"`:"";
+    const ph=a.viewer
+      ?`<div class="ph view"${v3} title="click to rotate in 3D">${vis}<span class=badge3d>3D</span></div>`
+      :`<div class=ph>${vis}</div>`;
+    const view=a.viewer?`<a href="#" class=view${v3} title="view in 3D">3D ▸</a>`:"";
     const audio=a.formats.wav?`<audio controls preload=none src="${a.formats.wav}"></audio>`:"";
-    return `<div class=card><div class=ph>${vis}</div><div class=nm>${a.name}</div>
+    return `<div class=card>${ph}<div class=nm>${nm}</div>
       <div class=meta>${dim}</div><div class=fmts>${f}${view}</div>${audio}</div>`;
   }).join("");
   document.getElementById("more").style.display=view.length>shown?"block":"none";
+}
+function assetLabel(a){
+  if(a.group==="2d") return `${a.category}/${a.name}`;
+  if(a.subset) return `${a.subset}/${a.name}`;
+  if(a.category&&a.category!==a.group) return `${a.category}/${a.name}`;
+  return a.name;
+}
+function searchText(a){
+  return [assetLabel(a),a.name,a.category,a.subset,a.group,...Object.values(a.formats||{})]
+    .filter(Boolean).join(" ").toLowerCase();
 }
 </script></body></html>"""
 

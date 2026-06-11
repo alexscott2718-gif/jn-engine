@@ -30,6 +30,8 @@
               accent-color: #9fb3c8; }
   #progress[hidden] { display: none; }
   #controls { font-size: 12px; color: #6b7785; }
+  #controls a { color: #9fb3c8; text-decoration: none; border-bottom: 1px dotted #53677f; }
+  #controls a:hover { color: #e8f0f8; }
   #levelnav { display: flex; align-items: center; justify-content: center; gap: 8px;
               flex-wrap: wrap; max-width: 980px; }
   #levelnav button, #levelSelect {
@@ -50,6 +52,45 @@
   /* #stage wraps the canvas so the overlay can position over it. */
   #stage { position: relative; width: min(1280px, 100%); }
   #stage canvas#canvas { display: block; width: 100% !important; }
+  /* QA annotation hover tooltip (engine pushes events via window.jnQA). */
+  #qaTip { position: absolute; display: none; pointer-events: none; z-index: 60;
+           background: rgba(20, 26, 34, 0.92); border: 1px solid #53677f;
+           color: #e8f0f8; font: 12px/1.4 monospace; padding: 3px 7px;
+           border-radius: 4px; max-width: 360px; white-space: nowrap; }
+  /* QA report tag stack — pinned over the canvas top-right, scrolls when long. */
+  #qaTags { position: absolute; top: 8px; right: 8px; z-index: 55; width: 250px;
+            max-height: 75%; overflow-y: auto; display: none;
+            font: 11px/1.5 monospace; }
+  #qaTagsHead { color: #8aa0b8; text-align: right; margin-bottom: 4px; }
+  #qaTagsHead button { margin-left: 8px; background: #263244; color: #e8f0f8;
+            border: 1px solid #53677f; border-radius: 3px; cursor: pointer;
+            font: inherit; }
+  #qaTagsHead #qaClearAll { color: #d08080; }
+  .qaTag { background: rgba(20, 26, 34, 0.92); border: 1px solid #53677f;
+           color: #e8f0f8; border-radius: 4px; padding: 3px 22px 3px 6px;
+           margin-bottom: 4px; position: relative; word-break: break-word; }
+  .qaTagCat { color: #f0b050; font-weight: bold; }
+  .qaTagDel { position: absolute; top: 2px; right: 3px; background: none;
+              border: none; color: #8aa0b8; cursor: pointer; font: inherit; }
+  .qaTagDel:hover { color: #fff; }
+  /* QA issue dialog. */
+  dialog#qaDialog { background: #15191f; color: #e8f0f8; border: 1px solid #53677f;
+            border-radius: 8px; padding: 16px; width: min(420px, 90vw);
+            font: 13px/1.5 system-ui, sans-serif; }
+  dialog#qaDialog::backdrop { background: rgba(0, 0, 0, 0.5); }
+  #qaDlgIdent { font-family: monospace; font-size: 14px; color: #f0b050; }
+  #qaDlgMeta { font-family: monospace; font-size: 11px; color: #8aa0b8;
+               margin: 2px 0 10px; word-break: break-word; }
+  #qaDialog label { display: block; margin: 8px 0 2px; color: #8aa0b8;
+                    font-size: 12px; }
+  #qaDialog select, #qaDialog textarea { width: 100%; box-sizing: border-box;
+            background: #0d1117; color: #e8f0f8; border: 1px solid #53677f;
+            border-radius: 4px; padding: 5px 6px; font: 12px monospace; }
+  #qaDlgButtons { margin-top: 12px; text-align: right; }
+  #qaDlgButtons button { margin-left: 8px; padding: 4px 14px; background: #263244;
+            color: #e8f0f8; border: 1px solid #53677f; border-radius: 4px;
+            cursor: pointer; font: inherit; }
+  #qaDlgButtons button:hover { border-color: #7890ad; }
   #touch { position: absolute; inset: 0; pointer-events: none;
            display: none; touch-action: none; -webkit-user-select: none; user-select: none; }
   /* Shown only when the device reports coarse (touch) pointer. */
@@ -114,6 +155,7 @@
     <button id="nextLevel" type="button">Next</button>
     <button id="noclipToggle" type="button">Noclip: Off</button>
     <button id="turboToggle" type="button">Speed: 1x</button>
+    <button id="qaToggle" type="button">QA: Off</button>
   </div>
   <div id="levelLinks"></div>
   <div id="status">Loading…</div>
@@ -121,6 +163,8 @@
   <div id="stage">
     <canvas id="canvas" width="1280" height="720" tabindex="0"
             oncontextmenu="event.preventDefault()"></canvas>
+    <div id="qaTip"></div>
+    <div id="qaTags"></div>
     <div id="touch">
       <div id="joy"><div id="joynub"></div></div>
       <div id="flyButtons">
@@ -129,12 +173,250 @@
       </div>
     </div>
   </div>
-  <div id="controls">WASD move · SPACE jump/up · Ctrl/Q down · SHIFT run · T speed · N noclip · R respawn · drag = orbit</div>
+  <div id="controls">WASD move · SPACE jump/up · Ctrl/Q down · SHIFT run · T speed · N noclip · R respawn · B report · drag = orbit · <a id="qaHowto" href="https://exentt.com/jn/qa-howto.html" target="_blank" rel="noopener">how to report bugs</a></div>
   <div id="note">
     Native WebGL2 rebuild using original GAM/OMT data.
   </div>
 </div>
+
+<!-- QA issue dialog: opened by jnQA when a picked object is clicked. -->
+<dialog id="qaDialog">
+  <div id="qaDlgIdent"></div>
+  <div id="qaDlgMeta"></div>
+  <label for="qaCategory">Category</label>
+  <select id="qaCategory"></select>
+  <label for="qaMessage">Issue</label>
+  <textarea id="qaMessage" rows="3"
+            placeholder="What's wrong with this object?"></textarea>
+  <div id="qaDlgButtons">
+    <button id="qaOk" type="button">OK</button>
+    <button id="qaCancel" type="button">Cancel</button>
+  </div>
+</dialog>
+
 <script type="text/javascript">
+  /* --- QA annotation bridge (M1, docs/qa_annotate_plan.md) ---------------
+     Press Q in-game to toggle annotation mode; the engine then pushes JSON
+     events here via window.jnQA.onEvent (hover / pick / mode). This stub
+     renders the hover tooltip and logs picks; the dialog, tag stack and
+     clipboard export are M2/M3. */
+  window.jnQA = (function () {
+    /* Fixed category vocabulary (docs/qa_annotate_plan.md §6) — exports
+       triage mechanically, so no free-typed abbreviations. */
+    var CATEGORIES = [
+      ['PLC', 'placement (wrong position)'],
+      ['ORI', 'orientation / rotation'],
+      ['SCL', 'scale'],
+      ['ANI', 'animation wrong/missing'],
+      ['TEX', 'texture wrong/missing'],
+      ['MIS', 'model missing'],
+      ['GFX', 'other visual glitch'],
+      ['OTH', 'other'],
+    ];
+    /* Level toggles are full page navigations, so the report store lives in
+       localStorage and the tag stack re-renders on every load. */
+    var STORE_KEY = 'jnqa_reports_v1';
+    var active = false, tip = null, mouseX = 0, mouseY = 0;
+    var pending = null;   /* pick payload while the dialog is open */
+
+    function $(id) { return document.getElementById(id); }
+    function el() { return tip || (tip = $('qaTip')); }
+    function esc(s) {
+      return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) {
+        return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c];
+      });
+    }
+    function place() {
+      var t = el(); if (!t) return;
+      var r = $('stage').getBoundingClientRect();
+      t.style.left = (mouseX - r.left + 14) + 'px';
+      t.style.top  = (mouseY - r.top  + 12) + 'px';
+    }
+    document.addEventListener('mousemove', function (e) {
+      mouseX = e.clientX; mouseY = e.clientY;
+      if (active) place();
+    });
+    function label(d) {
+      var s = d.name || '?';
+      if (d.tag)  s += ' [' + d.tag + ']';
+      if (d.kind) s += ' · ' + d.kind;
+      return s;
+    }
+
+    /* ---- report store + tag stack ---- */
+    function loadReports() {
+      try { return JSON.parse(localStorage.getItem(STORE_KEY)) || []; }
+      catch (e) { return []; }
+    }
+    function saveReports(r) {
+      try { localStorage.setItem(STORE_KEY, JSON.stringify(r)); } catch (e) {}
+    }
+    function renderTags() {
+      var wrap = $('qaTags'); if (!wrap) return;
+      var reports = loadReports();
+      wrap.style.display = reports.length ? 'block' : 'none';
+      if (!reports.length) { wrap.innerHTML = ''; return; }
+      wrap.innerHTML =
+        '<div id="qaTagsHead">' + reports.length + ' issue' +
+        (reports.length === 1 ? '' : 's') +
+        '<button id="qaExport" type="button">export</button>' +
+        '<button id="qaClearAll" type="button">clear</button></div>' +
+        reports.map(function (r, i) {
+          var pos = (r.pos || []).map(function (v) { return Math.round(v); }).join(',');
+          return '<div class="qaTag"><span class="qaTagCat">[' + esc(r.category) +
+                 ']</span> ' + esc(r.name) + (r.tag ? ' [' + esc(r.tag) + ']' : '') +
+                 ' @ ' + pos + ' · ' + esc(r.level) +
+                 '<button class="qaTagDel" data-i="' + i + '" type="button" ' +
+                 'title="' + esc(r.message) + '">✕</button></div>';
+        }).join('');
+      $('qaExport').onclick = function () { exportToClipboard(this); };
+      $('qaClearAll').onclick = function () {
+        var n = loadReports().length;
+        if (confirm('Delete all ' + n + ' QA report' + (n === 1 ? '' : 's') + '?')) {
+          saveReports([]); renderTags();
+        }
+      };
+      wrap.querySelectorAll('.qaTagDel').forEach(function (b) {
+        b.onclick = function () {
+          var r = loadReports();
+          r.splice(+b.dataset.i, 1);
+          saveReports(r); renderTags();
+        };
+      });
+    }
+
+    /* ---- clipboard export (plan §7): one payload, two audiences — humans
+       skim the markdown table, agents parse the fenced JSON. ---- */
+    function buildExport(reports) {
+      var day = new Date().toISOString().slice(0, 10);
+      var cell = function (s) {
+        return String(s == null ? '' : s)
+          .replace(/\|/g, '\\|').replace(/\s*\n\s*/g, ' ');
+      };
+      var md = '## JN QA session — ' + day + ' (' + reports.length +
+               ' report' + (reports.length === 1 ? '' : 's') + ')\n\n' +
+               '| level | model | category | pos | issue |\n' +
+               '|---|---|---|---|---|\n';
+      reports.forEach(function (r) {
+        var model = r.name + (r.tag ? ' [' + r.tag + ']' : '');
+        var pos = (r.pos || []).map(Math.round).join(', ');
+        md += '| ' + [r.level, model, r.category, pos, r.message]
+                       .map(cell).join(' | ') + ' |\n';
+      });
+      return md + '\n```json\n' + JSON.stringify(reports, null, 1) + '\n```\n';
+    }
+    function fallbackCopy(text) {
+      var ta = document.createElement('textarea');
+      ta.value = text;
+      ta.style.position = 'fixed';
+      ta.style.opacity = '0';
+      document.body.appendChild(ta);
+      ta.select();
+      var ok = false;
+      try { ok = document.execCommand('copy'); } catch (e) {}
+      document.body.removeChild(ta);
+      return ok;
+    }
+    function exportToClipboard(btn) {
+      var reports = loadReports();
+      if (!reports.length) return;
+      var text = buildExport(reports);
+      function done(ok) {
+        if (!btn) return;
+        btn.textContent = ok ? 'copied ✓' : 'copy failed';
+        setTimeout(function () { btn.textContent = 'export'; }, 1500);
+      }
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(
+          function () { done(true); },
+          function () { done(fallbackCopy(text)); });
+      } else {
+        /* plain-http contexts (LAN nginx) have no navigator.clipboard */
+        done(fallbackCopy(text));
+      }
+    }
+
+    /* ---- issue dialog ---- */
+    function clearSel() {
+      if (window.Module && Module.ccall)
+        try { Module.ccall('qa_clear_selection', null, [], []); } catch (e) {}
+    }
+    function openDialog(d) {
+      pending = d;
+      if (el()) el().style.display = 'none';
+      $('qaDlgIdent').textContent = label(d);
+      $('qaDlgMeta').textContent =
+        'pos ' + (d.pos || []).map(Math.round).join(', ') + ' · ' + d.level +
+        (d.asset ? ' · ' + d.asset : '');
+      $('qaMessage').value = '';
+      var dlg = $('qaDialog');
+      if (!dlg.open) dlg.showModal();
+      $('qaMessage').focus();
+    }
+    (function initDialog() {
+      var dlg = $('qaDialog');
+      /* Keystrokes typed into the dialog must never reach the emscripten SDL
+         window listener — otherwise typing "b" toggles QA mode and WASD walks
+         the player around mid-report. */
+      ['keydown', 'keyup', 'keypress'].forEach(function (t) {
+        dlg.addEventListener(t, function (e) { e.stopPropagation(); });
+      });
+      $('qaOk').onclick = function () {
+        if (pending) {
+          var r = loadReports();
+          r.push({
+            level: pending.level, kind: pending.kind, name: pending.name,
+            tag: pending.tag || '', asset: pending.asset || '',
+            pos: pending.pos, authored_pos: pending.authored_pos,
+            cam: pending.cam, category: $('qaCategory').value,
+            message: $('qaMessage').value.trim(),
+            ts: new Date().toISOString()
+          });
+          saveReports(r);
+          renderTags();
+        }
+        dlg.close();
+      };
+      $('qaCancel').onclick = function () { dlg.close(); };
+      /* Fires for OK, Cancel and ESC alike: drop the orange selection tint
+         and hand focus back to the game. */
+      dlg.addEventListener('close', function () {
+        pending = null;
+        clearSel();
+        try { $('canvas').focus(); } catch (e) {}
+      });
+      var sel = $('qaCategory');
+      CATEGORIES.forEach(function (c) {
+        var o = document.createElement('option');
+        o.value = c[0];
+        o.textContent = c[0] + ' — ' + c[1];
+        sel.appendChild(o);
+      });
+      renderTags();
+    })();
+
+    return {
+      onEvent: function (json) {
+        var d; try { d = JSON.parse(json); } catch (e) { return; }
+        if (d.ev === 'mode') {
+          active = !!d.active;
+          if (!active && el()) el().style.display = 'none';
+          var btn = $('qaToggle');
+          if (btn) btn.textContent = active ? 'QA: On' : 'QA: Off';
+        } else if (d.ev === 'hover') {
+          var t = el(); if (!t) return;
+          if (!d.id) { t.style.display = 'none'; return; }
+          t.textContent = label(d);
+          t.style.display = 'block';
+          place();
+        } else if (d.ev === 'pick') {
+          if (d.id) openDialog(d);
+        }
+      },
+      clearSelection: clearSel
+    };
+  })();
+
   var GAME1_LEVELS = [
     'level1', 'level1a', 'level1b', 'level1c', 'level1d', 'level1e', 'level1f',
     'level2', 'level2a', 'level2b',
@@ -240,6 +522,21 @@
       setNoclipButton(!!Module.ccall('input_toggle_noclip', 'number', [], []));
       document.getElementById('canvas').focus();
     } catch (e) {}
+  });
+
+  /* QA annotation toggle — mobile-friendly stand-in for the Q key. The label
+     is updated by jnQA's "mode" event (also fired on Q), not set here, so the
+     button and keyboard can never disagree about the mode. */
+  document.getElementById('qaToggle').addEventListener('click', function () {
+    if (!Module || !Module.ccall) return;
+    try {
+      Module.ccall('qa_toggle', null, [], []);
+      document.getElementById('canvas').focus();
+    } catch (e) {
+      /* A stale cached jnengine.js without the _qa_toggle export lands here —
+         leave a trace instead of dying silently (cost us a debug session). */
+      console.warn('[jnQA] qa_toggle ccall failed (stale cached build?)', e);
+    }
   });
 
   var turboButton = document.getElementById('turboToggle');

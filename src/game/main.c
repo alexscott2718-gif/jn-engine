@@ -23,6 +23,7 @@
 #include "gamestate.h"
 #include "hud.h"
 #include "player_anim.h"
+#include "qa.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
@@ -479,6 +480,259 @@ static void entity_color(const char *type, float *r, float *g, float *b) {
     else                                { *r=0.5f; *g=0.5f; *b=0.5f; }  /* grey   = other  */
 }
 
+/* Draw every pickable scene object: entities, then static OMT placements.
+   This is the single enumeration path shared by the main render pass and the
+   QA pick pass (docs/qa_annotate_plan.md) -- object N here must be object N
+   there, so the pick pass must never grow its own loop. Sky, clouds, ground
+   and HUD are not pickable and stay outside. */
+static void draw_scene(World *world, int jim_model_ok)
+{
+    unsigned int box_vao = world_box_vao();
+    int          box_idx = world_box_index_count();
+
+    for (Entity *e = world->head; e; e = e->next) {
+        if (!e->alive) continue;
+
+        /* Authored InitiallyVisible=0: the original hides these at boot
+           until scripting shows them (phone booth, hydrant, teleport FX,
+           rockets...). No native show-scripting exists yet, so they stay
+           hidden — strictly more faithful than drawing them. */
+        if (e->has_initially_visible && e->initially_visible == 0) continue;
+
+        /* QA annotation: every drawable entity registers here so the pick
+           pass and the main pass assign identical IDs. */
+        qa_register_entity(e);
+
+        /* Player: dedicated anim path. */
+        if (jim_model_ok && strcmp(e->type, "3JIM") == 0) {
+            PlayerAnimSample sample = player_anim_sample((PlayerAnim)e->user_flag);
+            if (sample.model) {
+                renderer_draw_model_anim(sample.model, 0, e->x, e->y, e->z,
+                                         e->ry + 3.14159265f, 1.0f,
+                                         sample.frame_a, sample.frame_b, sample.lerp);
+            }
+            continue;
+        }
+
+        /* 3ASE (C3DASEObj): generic per-object mesh named by the GAM's
+           ASEStop/ASEWalk, textured by PNGFile. Meshes live under
+           assets/ase/jnvsjn/ (lowercased on import). */
+        if (strcmp(e->type, "3ASE") == 0 && e->ase_file[0]) {
+            char lower[64]; size_t li = 0;
+            for (const char *p = e->ase_file; *p && li < sizeof(lower) - 1; p++)
+                lower[li++] = (char)tolower((unsigned char)*p);
+            lower[li] = '\0';
+            char path[160];
+            snprintf(path, sizeof(path), "assets/ase/jnvsjn/%s", lower);
+            AseModel *m = model_cache_get(path);
+            if (m) {
+                unsigned int tex = e->png_file[0] ? tex_cache_resolve_bmp(e->png_file) : 0;
+                renderer_set_hide_untextured_groups(0);
+                renderer_draw_model(m, tex, e->x, e->y, e->z, e->ry, 1.0f);
+                renderer_set_hide_untextured_groups(1);
+                continue;
+            }
+            /* mesh missing -> fall through to placeholder box */
+        }
+
+        /* Sprite-indexed objects: 3PIC pickups and sprite objects are 2D
+           sprites from sprites.omt (chunk id == SpriteIndex), NOT meshes.
+           Render the real sprite as a camera-facing billboard instead of a
+           placeholder. (sprite_index 0 falls through so game-1 3PIC, which
+           predates SpriteIndex, keep their ASE props.) Each game ships its
+           own sprites.omt: JNBG resolves through the generated chunk map,
+           JNvsJN through its spr_<id> extraction — previously JNBG levels
+           wrongly loaded the sequel's sprites where indices collide. */
+        if ((strcmp(e->type, "3PIC") == 0 || strcmp(e->type, "3SRO") == 0 ||
+             strcmp(e->type, "3SPR") == 0 || strcmp(e->type, "3ANI") == 0)
+            && e->sprite_index > 0
+            /* Curated per-tag visuals win over the sprite shortcut: the
+               level2 kitty authors SpriteIndex 106 — the editor's "hidden"
+               ?-placeholder — but renders as the cat (TAG_TABLE row). */
+            && !entity_visual_tag_override(e, NULL)) {
+            char spath[96];
+            unsigned int stex = 0;
+            if (entity_visual_is_jnbg()) {
+                const char *cp = sprite_chunk_path(e->sprite_index);
+                if (cp) stex = tex_cache_get(cp);
+            } else {
+                snprintf(spath, sizeof(spath),
+                         "assets/parsed/sprites/jnvsjn/spr_%d.png", e->sprite_index);
+                stex = tex_cache_get(spath);
+            }
+            if (stex) {
+                float sz = e->sprite_size > 1.0f ? e->sprite_size : 110.0f;
+                /* Lift the quad so its bottom edge sits at the pickup's Y
+                   (its position is at ground level) instead of sinking the
+                   lower half into the floor; the item bob keeps it floating. */
+                renderer_draw_billboard(stex, e->x, e->y + sz * 0.5f, e->z,
+                                        sz, sz, 0.0f, 0.0f, 0.0f, 0.0f);
+                continue;
+            }
+        }
+
+        /* Pre-bound model from entity vtable (legacy path). */
+        if (e->model) {
+            renderer_draw_model(e->model, 0, e->x, e->y, e->z, 0.0f, 1.0f);
+            continue;
+        }
+
+        /* Resolver path: tag override → FourCC default → invisible/box. */
+        EntityVisual v;
+        if (entity_visual_resolve(e, &v)) {
+            if (v.invisible) continue;
+            if (v.sprite_path) {
+                unsigned int tex = tex_cache_get(v.sprite_path);
+                if (tex) {
+                    float sz = v.sprite_size > 0.0f ? v.sprite_size : 64.0f;
+                    renderer_draw_billboard(tex, e->x, e->y, e->z, sz, sz,
+                                            v.tint_r, v.tint_g, v.tint_b, v.tint_a);
+                    continue;
+                }
+            }
+            if (v.model_path) {
+                AseModel *m = model_cache_get(v.model_path);
+                if (m) {
+                    unsigned int tex = v.texture_path ? tex_cache_get(v.texture_path) : 0;
+                    float sc = v.scale > 0.0f ? v.scale : 1.0f;
+                    /* Absolute-positioned placement meshes used as entity
+                       meshes bake their level world position into vertices;
+                       offset by the mesh bbox center so the mesh sits at the
+                       entity (x,y,z) instead of its baked level position. */
+                    float dx = e->x, dy = e->y, dz = e->z;
+                    if (v.recenter) {
+                        dx -= (m->min[0] + m->max[0]) * 0.5f * sc;
+                        dy -= (m->min[1] + m->max[1]) * 0.5f * sc;
+                        dz -= (m->min[2] + m->max[2]) * 0.5f * sc;
+                    }
+                    /* Entity props are deliberately-chosen meshes; some
+                       (gems, converted GRN props) are untextured flat-color
+                       meshes. The global hide-untextured flag is for OMT
+                       collision slabs, not these — render them regardless. */
+                    renderer_set_hide_untextured_groups(0);
+                    /* Props whose behavior drives a roll (Ferris wheel 3FER,
+                       pendulum 3PEN spin in a vertical plane; the fan 3FAN
+                       spins its blade disc about GL Z like a pinwheel) author
+                       rz in radians at runtime; draw them with full euler so
+                       the motion shows. Only these types opt in — authored
+                       .gam RotationX/Z (degrees, ~1% of objects) stays on the
+                       cheap yaw-only path to avoid wrong-unit tilts. */
+                    int spins = strncmp(e->type, "3FER", 4) == 0 ||
+                                strncmp(e->type, "3PEN", 4) == 0 ||
+                                strncmp(e->type, "3FAN", 4) == 0;
+                    if (spins)
+                        renderer_draw_model_euler(m, tex, dx, dy, dz,
+                                                  e->ry, 0.0f, e->rz, sc);
+                    else
+                        renderer_draw_model(m, tex, dx, dy, dz, e->ry, sc);
+                    renderer_set_hide_untextured_groups(1);
+                    continue;
+                }
+            }
+        }
+
+        /* Fallback: colored placeholder box. */
+        float r, g, b;
+        entity_color(e->type, &r, &g, &b);
+        float scale = 50.0f;
+        if      (strcmp(e->type, "3TRE") == 0) scale = 100.0f;
+        else if (strcmp(e->type, "LOAD") == 0) scale = 30.0f;
+        else if (strcmp(e->type, "DOOR") == 0) scale = 80.0f;
+        else if (strcmp(e->type, "PLAT") == 0) scale = 120.0f;
+        else if (strcmp(e->type, "ITEM") == 0) scale = 28.0f;
+        else if (strcmp(e->type, "TRIG") == 0) scale = 60.0f;
+        renderer_draw_box(box_vao, box_idx, e->x, e->y, e->z, scale, r, g, b);
+    }
+
+    /* Static world geometry from level1.omt (Phase 8). OMT-exported ASEs
+       localize X/Z around the chunk center; ase_load maps Max Y to GL -Z.
+       Native Level 1 therefore draws at (center_x, 0, -center_z) so the
+       map shares the same basis as solved keyframe cameras. Keep the old
+       +Z placement for legacy/hybrid validation paths. */
+    for (int pi = 0; pi < world->placement_count; pi++) {
+        const WorldPlacement *pl = &world->placements[pi];
+        /* QA annotation: one ID per placement; a tree's trunk mesh and crown
+           billboard share it, so clicking either picks the tree. */
+        qa_register_placement(pl, pl->x, 0.0f, -pl->z);
+        if (!env_enabled("JN_DISABLE_TREE_BILLBOARDS") &&
+            strncmp(pl->name, "tree", 4) == 0) {
+            /* Full scattered tree = bark TRUNK mesh (base at ground) + a
+               camera-facing green-crown CANOPY billboard sitting on the
+               trunk top. The trunk mesh's own canvas mis-resolves to a fence
+               texture, so we override it with the real brown bark canvas
+               (level1.omt "tree"). The canopy (tex_052e7090) is alpha-keyed
+               so the sky shows through; sized from the measured override
+               table. */
+            float bb_size = 0.0f;
+            const char *unused_tex = NULL;
+            if (!billboard_overrides_lookup(pl->name, &bb_size, &unused_tex)
+                || bb_size <= 0.0f) {
+                /* Not in the capture-measured table (only ~12 trees were in
+                   frame 8881). Fall back to the measured median for the
+                   category so untabled trees match the others rather than
+                   defaulting small. Exact per-tree sizes would come from a
+                   full-capture scan of build/level1_session.omtc. */
+                bb_size = (strncmp(pl->name, "treebranch", 10) == 0)
+                          ? 500.0f : 600.0f;
+            }
+
+            AseModel *trunk = model_cache_get(pl->ase_path);
+            float trunk_top = trunk ? trunk->max[1] : 300.0f;
+            if (trunk) {
+                unsigned int bark = tex_cache_get("assets/native/tree_bark.png");
+                renderer_draw_model(trunk, bark, pl->x, 0.0f, -pl->z, 0.0f, 1.0f);
+            }
+            unsigned int crown = tex_cache_get(
+                "assets/native/billboard_textures/tex_052e7090_128x128.png");
+            if (crown) {
+                /* The crown's opaque pixels sit in the lower ~57% of the
+                   texture, so raise the quad centre above the trunk top to
+                   seat the crown ON the trunk (overlapping it slightly)
+                   instead of hanging below it. */
+                float canopy_y = trunk_top + bb_size * 0.40f;
+                renderer_draw_billboard(crown, pl->x, canopy_y, -pl->z,
+                                        bb_size, bb_size,
+                                        1.0f, 1.0f, 1.0f, 1.0f);
+            }
+            continue;
+        }
+        AseModel *pm = model_cache_get(pl->ase_path);
+        if (!pm) continue;
+        /* Phase C: capture-derived texture overrides retired. The glTF
+           meshes carry breakthrough-correct OMT-canvas textures, so the
+           30-entry override layer is redundant (verified: keyframe 8881
+           changes <1% without it). See docs/gltf_export_plan.md. */
+        /* Faithfulness (audit D1/D2): the original game renders ZERO
+           untextured geometry. A placement whose OMT material resolved no
+           texture is either collision/blocking (BLOCKING_*, GROUND base
+           slab) or a mesh whose canvas couldn't be resolved -- neither
+           appears as a visible surface in the game. Skip them rather than
+           draw dark filler slabs. The old audit mode rendered them as
+           debug_flat, but the resulting huge gray BLOCKING_06
+           (radius 12697) and SCHOOL slab were dominating the view; the
+           coverage manifest tracks them, the renderer no longer needs to. */
+        if (getenv("JN_DEBUG_DRAW") && pi < 6)
+            fprintf(stderr, "[draw] %s mats=%d m0.tex=%u m.tex=%u hastex=%d "
+                    "bbox=(%.0f,%.0f,%.0f)-(%.0f,%.0f,%.0f) at(%.0f,%.0f)\n",
+                    pl->name, pm->material_count,
+                    pm->material_count>0?pm->materials[0].texture_id:0,
+                    pm->texture_id, model_has_texture(pm),
+                    pm->min[0],pm->min[1],pm->min[2],
+                    pm->max[0],pm->max[1],pm->max[2], pl->x, pl->z);
+        if (!model_has_texture(pm)) continue;
+        float draw_z = -pl->z;
+        /* 2D_Trees boundary walls bake the sky behind the tree-line as an
+           opaque chroma blue (RGB 57,148,198); key it out so the real sky
+           shows through (Retroville feel pass, issue 5). */
+        int foliage_wall = (strncmp(pl->name, "2D_Trees", 8) == 0);
+        if (foliage_wall)
+            renderer_set_color_key(1, 57.0f/255.0f, 148.0f/255.0f, 198.0f/255.0f, 0.08f);
+        renderer_draw_model(pm, 0, pl->x, 0.0f, draw_z, 0.0f, 1.0f);
+        if (foliage_wall)
+            renderer_set_color_key(0, 0, 0, 0, 0.08f);
+    }
+}
+
 int main(int argc, char **argv) {
     const char *start_level = "level1";
     for (int i = 1; i < argc - 1; i++) {
@@ -900,6 +1154,17 @@ int main(int argc, char **argv) {
     int demo_jump_sent = 0;
     int demo_jump_tick = demo_jump_enabled ? env_int_default("JN_DEMO_JUMP_TICK", 2) : 0;
 
+    /* QA probe: JN_QA_PROBE="x,y" simulates a QA-mode click at window coords
+       (x,y) once warmup settles, printing the pick JSON to stdout. Headless
+       acceptance check for the annotation feature (docs/qa_annotate_plan.md):
+       combine with JN_SCREENSHOT to also capture the selection highlight. */
+    int qa_probe_armed = 0, qa_probe_x = 0, qa_probe_y = 0;
+    {
+        const char *probe = getenv("JN_QA_PROBE");
+        if (probe && sscanf(probe, "%d,%d", &qa_probe_x, &qa_probe_y) == 2)
+            qa_probe_armed = 1;
+    }
+
     /* Debug: pre-queue a level swap so the swap path can be exercised
        without walking to a LOAD trigger. Format: "level1c.gam:FRONTDOOR" */
     {
@@ -1035,6 +1300,12 @@ int main(int argc, char **argv) {
             if (ev.type == SDL_QUIT) w.should_quit = 1;
             if (ev.type == SDL_KEYDOWN && ev.key.keysym.sym == SDLK_ESCAPE) w.should_quit = 1;
             if (ev.type == SDL_KEYDOWN && ev.key.keysym.sym == SDLK_c) g_show_coords = !g_show_coords;
+            /* B ("bug"), not Q: in noclip Q is held-to-fly-down
+               (behavior_player.c) and reporters fly constantly while
+               annotating. Not an F-key: F2 never reached the emscripten
+               build in Firefox, while letter keys are proven to arrive. */
+            if (ev.type == SDL_KEYDOWN && ev.key.keysym.sym == SDLK_b && !ev.key.repeat)
+                qa_toggle();
             if (ev.type == SDL_KEYDOWN && ev.key.keysym.sym == SDLK_1) audio_play(0);
             if (ev.type == SDL_KEYDOWN && ev.key.keysym.sym == SDLK_2) audio_play(1);
             if (ev.type == SDL_KEYDOWN && ev.key.keysym.sym == SDLK_3) audio_play(2);
@@ -1042,11 +1313,18 @@ int main(int argc, char **argv) {
             if (ev.type == SDL_WINDOWEVENT && ev.window.event == SDL_WINDOWEVENT_RESIZED) {
                 w.width = ev.window.data1; w.height = ev.window.data2;
             }
+            /* QA mode: the cursor annotates instead of steering the camera —
+               clicks pick objects, motion drives the hover probe. */
             if (ev.type == SDL_MOUSEBUTTONDOWN && ev.button.button == SDL_BUTTON_LEFT) {
-                mouse_down = 1; last_mx = ev.button.x; last_my = ev.button.y;
+                if (qa_active()) qa_on_mouse_click(ev.button.x, ev.button.y);
+                else { mouse_down = 1; last_mx = ev.button.x; last_my = ev.button.y; }
             }
             if (ev.type == SDL_MOUSEBUTTONUP && ev.button.button == SDL_BUTTON_LEFT) mouse_down = 0;
-            if (ev.type == SDL_MOUSEMOTION && mouse_down) {
+            /* Track the cursor even with QA off so toggling the mode on picks
+               whatever is already under the resting pointer. */
+            if (ev.type == SDL_MOUSEMOTION)
+                qa_on_mouse_motion(ev.motion.x, ev.motion.y);
+            if (ev.type == SDL_MOUSEMOTION && mouse_down && !qa_active()) {
                 int dx = ev.motion.x - last_mx, dy = ev.motion.y - last_my;
                 last_mx = ev.motion.x; last_my = ev.motion.y;
                 /* Free-look: layer a temporary yaw offset (decays back behind
@@ -1056,6 +1334,12 @@ int main(int argc, char **argv) {
                 if (fcam.pitch >  0.6f) fcam.pitch =  0.6f;
                 if (fcam.pitch < -1.2f) fcam.pitch = -1.2f;
             }
+        }
+
+        if (qa_probe_armed && screenshot_warmup_ticks >= 1) {
+            if (!qa_active()) qa_toggle();
+            qa_on_mouse_click(qa_probe_x, qa_probe_y);
+            qa_probe_armed = 0;
         }
 
         /* Render phase: uncapped */
@@ -1072,238 +1356,23 @@ int main(int argc, char **argv) {
            physics only when authored terrain does not catch the player. */
         ground_draw(world.safety_floor_enabled ? world.safety_floor_y : world.ground_y);
 
-        unsigned int box_vao = world_box_vao();
-        int          box_idx = world_box_index_count();
+        /* Pickable scene content: entities + placements (single enumeration
+           path shared with the QA pick pass -- see draw_scene). */
+        qa_begin_scene(0);
+        draw_scene(&world, jim_model_ok);
+        qa_end_scene();
 
-        for (Entity *e = world.head; e; e = e->next) {
-            if (!e->alive) continue;
-
-            /* Authored InitiallyVisible=0: the original hides these at boot
-               until scripting shows them (phone booth, hydrant, teleport FX,
-               rockets...). No native show-scripting exists yet, so they stay
-               hidden — strictly more faithful than drawing them. */
-            if (e->has_initially_visible && e->initially_visible == 0) continue;
-
-            /* Player: dedicated anim path. */
-            if (jim_model_ok && strcmp(e->type, "3JIM") == 0) {
-                PlayerAnimSample sample = player_anim_sample((PlayerAnim)e->user_flag);
-                if (sample.model) {
-                    renderer_draw_model_anim(sample.model, 0, e->x, e->y, e->z,
-                                             e->ry + 3.14159265f, 1.0f,
-                                             sample.frame_a, sample.frame_b, sample.lerp);
-                }
-                continue;
-            }
-
-            /* 3ASE (C3DASEObj): generic per-object mesh named by the GAM's
-               ASEStop/ASEWalk, textured by PNGFile. Meshes live under
-               assets/ase/jnvsjn/ (lowercased on import). */
-            if (strcmp(e->type, "3ASE") == 0 && e->ase_file[0]) {
-                char lower[64]; size_t li = 0;
-                for (const char *p = e->ase_file; *p && li < sizeof(lower) - 1; p++)
-                    lower[li++] = (char)tolower((unsigned char)*p);
-                lower[li] = '\0';
-                char path[160];
-                snprintf(path, sizeof(path), "assets/ase/jnvsjn/%s", lower);
-                AseModel *m = model_cache_get(path);
-                if (m) {
-                    unsigned int tex = e->png_file[0] ? tex_cache_resolve_bmp(e->png_file) : 0;
-                    renderer_set_hide_untextured_groups(0);
-                    renderer_draw_model(m, tex, e->x, e->y, e->z, e->ry, 1.0f);
-                    renderer_set_hide_untextured_groups(1);
-                    continue;
-                }
-                /* mesh missing -> fall through to placeholder box */
-            }
-
-            /* Sprite-indexed objects: 3PIC pickups and sprite objects are 2D
-               sprites from sprites.omt (chunk id == SpriteIndex), NOT meshes.
-               Render the real sprite as a camera-facing billboard instead of a
-               placeholder. (sprite_index 0 falls through so game-1 3PIC, which
-               predates SpriteIndex, keep their ASE props.) Each game ships its
-               own sprites.omt: JNBG resolves through the generated chunk map,
-               JNvsJN through its spr_<id> extraction — previously JNBG levels
-               wrongly loaded the sequel's sprites where indices collide. */
-            if ((strcmp(e->type, "3PIC") == 0 || strcmp(e->type, "3SRO") == 0 ||
-                 strcmp(e->type, "3SPR") == 0 || strcmp(e->type, "3ANI") == 0)
-                && e->sprite_index > 0) {
-                char spath[96];
-                unsigned int stex = 0;
-                if (entity_visual_is_jnbg()) {
-                    const char *cp = sprite_chunk_path(e->sprite_index);
-                    if (cp) stex = tex_cache_get(cp);
-                } else {
-                    snprintf(spath, sizeof(spath),
-                             "assets/parsed/sprites/jnvsjn/spr_%d.png", e->sprite_index);
-                    stex = tex_cache_get(spath);
-                }
-                if (stex) {
-                    float sz = e->sprite_size > 1.0f ? e->sprite_size : 110.0f;
-                    /* Lift the quad so its bottom edge sits at the pickup's Y
-                       (its position is at ground level) instead of sinking the
-                       lower half into the floor; the item bob keeps it floating. */
-                    renderer_draw_billboard(stex, e->x, e->y + sz * 0.5f, e->z,
-                                            sz, sz, 0.0f, 0.0f, 0.0f, 0.0f);
-                    continue;
-                }
-            }
-
-            /* Pre-bound model from entity vtable (legacy path). */
-            if (e->model) {
-                renderer_draw_model(e->model, 0, e->x, e->y, e->z, 0.0f, 1.0f);
-                continue;
-            }
-
-            /* Resolver path: tag override → FourCC default → invisible/box. */
-            EntityVisual v;
-            if (entity_visual_resolve(e, &v)) {
-                if (v.invisible) continue;
-                if (v.sprite_path) {
-                    unsigned int tex = tex_cache_get(v.sprite_path);
-                    if (tex) {
-                        float sz = v.sprite_size > 0.0f ? v.sprite_size : 64.0f;
-                        renderer_draw_billboard(tex, e->x, e->y, e->z, sz, sz,
-                                                v.tint_r, v.tint_g, v.tint_b, v.tint_a);
-                        continue;
-                    }
-                }
-                if (v.model_path) {
-                    AseModel *m = model_cache_get(v.model_path);
-                    if (m) {
-                        unsigned int tex = v.texture_path ? tex_cache_get(v.texture_path) : 0;
-                        float sc = v.scale > 0.0f ? v.scale : 1.0f;
-                        /* Absolute-positioned placement meshes used as entity
-                           meshes bake their level world position into vertices;
-                           offset by the mesh bbox center so the mesh sits at the
-                           entity (x,y,z) instead of its baked level position. */
-                        float dx = e->x, dy = e->y, dz = e->z;
-                        if (v.recenter) {
-                            dx -= (m->min[0] + m->max[0]) * 0.5f * sc;
-                            dy -= (m->min[1] + m->max[1]) * 0.5f * sc;
-                            dz -= (m->min[2] + m->max[2]) * 0.5f * sc;
-                        }
-                        /* Entity props are deliberately-chosen meshes; some
-                           (gems, converted GRN props) are untextured flat-color
-                           meshes. The global hide-untextured flag is for OMT
-                           collision slabs, not these — render them regardless. */
-                        renderer_set_hide_untextured_groups(0);
-                        /* Props whose behavior drives a roll (Ferris wheel 3FER,
-                           pendulum 3PEN spin in a vertical plane; the fan 3FAN
-                           spins its blade disc about GL Z like a pinwheel) author
-                           rz in radians at runtime; draw them with full euler so
-                           the motion shows. Only these types opt in — authored
-                           .gam RotationX/Z (degrees, ~1% of objects) stays on the
-                           cheap yaw-only path to avoid wrong-unit tilts. */
-                        int spins = strncmp(e->type, "3FER", 4) == 0 ||
-                                    strncmp(e->type, "3PEN", 4) == 0 ||
-                                    strncmp(e->type, "3FAN", 4) == 0;
-                        if (spins)
-                            renderer_draw_model_euler(m, tex, dx, dy, dz,
-                                                      e->ry, 0.0f, e->rz, sc);
-                        else
-                            renderer_draw_model(m, tex, dx, dy, dz, e->ry, sc);
-                        renderer_set_hide_untextured_groups(1);
-                        continue;
-                    }
-                }
-            }
-
-            /* Fallback: colored placeholder box. */
-            float r, g, b;
-            entity_color(e->type, &r, &g, &b);
-            float scale = 50.0f;
-            if      (strcmp(e->type, "3TRE") == 0) scale = 100.0f;
-            else if (strcmp(e->type, "LOAD") == 0) scale = 30.0f;
-            else if (strcmp(e->type, "DOOR") == 0) scale = 80.0f;
-            else if (strcmp(e->type, "PLAT") == 0) scale = 120.0f;
-            else if (strcmp(e->type, "ITEM") == 0) scale = 28.0f;
-            else if (strcmp(e->type, "TRIG") == 0) scale = 60.0f;
-            renderer_draw_box(box_vao, box_idx, e->x, e->y, e->z, scale, r, g, b);
-        }
-
-        /* Static world geometry from level1.omt (Phase 8). OMT-exported ASEs
-           localize X/Z around the chunk center; ase_load maps Max Y to GL -Z.
-           Native Level 1 therefore draws at (center_x, 0, -center_z) so the
-           map shares the same basis as solved keyframe cameras. Keep the old
-           +Z placement for legacy/hybrid validation paths. */
-        for (int pi = 0; pi < world.placement_count; pi++) {
-            const WorldPlacement *pl = &world.placements[pi];
-            if (!env_enabled("JN_DISABLE_TREE_BILLBOARDS") &&
-                strncmp(pl->name, "tree", 4) == 0) {
-                /* Full scattered tree = bark TRUNK mesh (base at ground) + a
-                   camera-facing green-crown CANOPY billboard sitting on the
-                   trunk top. The trunk mesh's own canvas mis-resolves to a fence
-                   texture, so we override it with the real brown bark canvas
-                   (level1.omt "tree"). The canopy (tex_052e7090) is alpha-keyed
-                   so the sky shows through; sized from the measured override
-                   table. */
-                float bb_size = 0.0f;
-                const char *unused_tex = NULL;
-                if (!billboard_overrides_lookup(pl->name, &bb_size, &unused_tex)
-                    || bb_size <= 0.0f) {
-                    /* Not in the capture-measured table (only ~12 trees were in
-                       frame 8881). Fall back to the measured median for the
-                       category so untabled trees match the others rather than
-                       defaulting small. Exact per-tree sizes would come from a
-                       full-capture scan of build/level1_session.omtc. */
-                    bb_size = (strncmp(pl->name, "treebranch", 10) == 0)
-                              ? 500.0f : 600.0f;
-                }
-
-                AseModel *trunk = model_cache_get(pl->ase_path);
-                float trunk_top = trunk ? trunk->max[1] : 300.0f;
-                if (trunk) {
-                    unsigned int bark = tex_cache_get("assets/native/tree_bark.png");
-                    renderer_draw_model(trunk, bark, pl->x, 0.0f, -pl->z, 0.0f, 1.0f);
-                }
-                unsigned int crown = tex_cache_get(
-                    "assets/native/billboard_textures/tex_052e7090_128x128.png");
-                if (crown) {
-                    /* The crown's opaque pixels sit in the lower ~57% of the
-                       texture, so raise the quad centre above the trunk top to
-                       seat the crown ON the trunk (overlapping it slightly)
-                       instead of hanging below it. */
-                    float canopy_y = trunk_top + bb_size * 0.40f;
-                    renderer_draw_billboard(crown, pl->x, canopy_y, -pl->z,
-                                            bb_size, bb_size,
-                                            1.0f, 1.0f, 1.0f, 1.0f);
-                }
-                continue;
-            }
-            AseModel *pm = model_cache_get(pl->ase_path);
-            if (!pm) continue;
-            /* Phase C: capture-derived texture overrides retired. The glTF
-               meshes carry breakthrough-correct OMT-canvas textures, so the
-               30-entry override layer is redundant (verified: keyframe 8881
-               changes <1% without it). See docs/gltf_export_plan.md. */
-            /* Faithfulness (audit D1/D2): the original game renders ZERO
-               untextured geometry. A placement whose OMT material resolved no
-               texture is either collision/blocking (BLOCKING_*, GROUND base
-               slab) or a mesh whose canvas couldn't be resolved -- neither
-               appears as a visible surface in the game. Skip them rather than
-               draw dark filler slabs. The old audit mode rendered them as
-               debug_flat, but the resulting huge gray BLOCKING_06
-               (radius 12697) and SCHOOL slab were dominating the view; the
-               coverage manifest tracks them, the renderer no longer needs to. */
-            if (getenv("JN_DEBUG_DRAW") && pi < 6)
-                fprintf(stderr, "[draw] %s mats=%d m0.tex=%u m.tex=%u hastex=%d "
-                        "bbox=(%.0f,%.0f,%.0f)-(%.0f,%.0f,%.0f) at(%.0f,%.0f)\n",
-                        pl->name, pm->material_count,
-                        pm->material_count>0?pm->materials[0].texture_id:0,
-                        pm->texture_id, model_has_texture(pm),
-                        pm->min[0],pm->min[1],pm->min[2],
-                        pm->max[0],pm->max[1],pm->max[2], pl->x, pl->z);
-            if (!model_has_texture(pm)) continue;
-            float draw_z = -pl->z;
-            /* 2D_Trees boundary walls bake the sky behind the tree-line as an
-               opaque chroma blue (RGB 57,148,198); key it out so the real sky
-               shows through (Retroville feel pass, issue 5). */
-            int foliage_wall = (strncmp(pl->name, "2D_Trees", 8) == 0);
-            if (foliage_wall)
-                renderer_set_color_key(1, 57.0f/255.0f, 148.0f/255.0f, 198.0f/255.0f, 0.08f);
-            renderer_draw_model(pm, 0, pl->x, 0.0f, draw_z, 0.0f, 1.0f);
-            if (foliage_wall)
-                renderer_set_color_key(0, 0, 0, 0, 0.08f);
+        /* QA pick pass: re-enumerate the same scene into the offscreen ID
+           buffer and resolve the object under the cursor. Throttled inside
+           qa_want_pick; immediate when a click is pending. */
+        if (qa_want_pick(SDL_GetTicks()) &&
+            renderer_pick_begin(w.width, w.height)) {
+            qa_begin_scene(1);
+            draw_scene(&world, jim_model_ok);
+            int qx, qy;
+            qa_get_cursor(&qx, &qy);
+            qa_pick_resolve(renderer_pick_end(qx, qy), current_desc.name,
+                            cam->pos[0], cam->pos[1], cam->pos[2], cam->yaw);
         }
 
         /* 2D HUD overlay, drawn after all 3D geometry. */

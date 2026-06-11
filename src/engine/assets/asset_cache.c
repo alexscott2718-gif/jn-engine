@@ -100,9 +100,10 @@ unsigned int tex_cache_get(const char *path) {
             return g_tex[i].id;
         }
     }
-    /* Load and insert. */
+    /* Load and insert. Failures are cached too (id = 0, same pattern as
+       model_cache_get): per-frame callers retrying a missing file otherwise
+       cost an fopen + a "tex_load: failed" log line every frame. */
     unsigned int id = tex_load(path);
-    if (!id) return 0;
     for (int i = 0; i < MAX_TEX; i++) {
         if (!g_tex[i].used) {
             g_tex[i].used = 1;
@@ -112,7 +113,7 @@ unsigned int tex_cache_get(const char *path) {
             return id;
         }
     }
-    fprintf(stderr, "tex_cache: full, leaking %s\n", path);
+    if (id) fprintf(stderr, "tex_cache: full, leaking %s\n", path);
     return id;
 }
 

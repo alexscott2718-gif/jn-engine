@@ -1,13 +1,22 @@
 /*
  * granny.dll capture proxy for JNvsJN (Jimmy Neutron vs Jimmy Negatron).
  *
- * M2d capture build. Most exports stay forwarders to granny_orig.dll
+ * M3a capture build. Most exports stay forwarders to granny_orig.dll
  * (granny_proxy.def). A focused set of data-flow exports are real thunks here
  * that call granny_orig, dump decoded mesh streams to C:\grn_dump, and keep a
  * small handle->source .grn name map so captures are not all named "llun"/"null".
  *
  * LockNextNewTexture uses an OUT buffer too. The decoded layout is dumped to
  * .grntex files: source/material names, dimensions, pitch, and raw RGB rows.
+ *
+ * M3a ANIMATION CAPTURE (opt-in, off by default): if the environment variable
+ * GRN_ANIM_SRC is set, every LockNextRenderingState whose source .grn name
+ * contains that (case-insensitive) substring also appends the current POSED
+ * float streams (Granny already deformed them for the live frame) plus the
+ * per-frame transform to a per-descriptor C:\grn_dump\a<descp>.grnanim file.
+ * The Debian exporter (grnanim_to_glb.py) turns base mesh + .grnanim into a
+ * glTF morph-target animation. Hard-bounded (descriptors, samples, bytes) and
+ * disabled when GRN_ANIM_SRC is empty, so the DLL is safe to leave deployed.
  *
  * XP-safety: -nostdlib (no UCRT). kernel32 + user32 (wsprintfA) only. DllMain is
  * the raw entry point (-Wl,-e,DllMain@12).
@@ -587,6 +596,153 @@ static void dump_texture(uint32_t outbuf)
          texname, srcname, bmp_path, matname);
 }
 
+/* ---- M3a animation capture --------------------------------------------- */
+/*
+ * Opt-in (GRN_ANIM_SRC). For each tracked descriptor we keep ONE open file and
+ * append a sample every LockNextRenderingState call. A sample is the per-frame
+ * transform + the float (dtype 6) attribute streams in their stored order, so
+ * the Debian side can diff against the base mesh: streams that change over time
+ * are positions/normals (the morph targets); constant ones are uv/color taken
+ * from the base. Indices/topology are NOT re-written here (they live in the
+ * one-shot .grnmesh base). No trailing END. record -- the parser tolerates a
+ * truncated tail because the game may exit without a clean DLL detach.
+ *
+ *   "GRNA" version:u32 descp:u32            (written once, on the first sample)
+ *   "SRCN" len:u32 bytes                    source .grn name
+ *   repeat per sample:
+ *     "FRAM" sample_index:u32 time_ms:u32
+ *     "XFRM" 16*f32                          per-frame 4x4 transform
+ *     nstreams:u32
+ *     repeat: "STRM" dtype:u32 ncomp:u32 count:u32 data[count*ncomp*4]
+ */
+#define ANIM_MAX_DESCS        4
+#define ANIM_MAX_SAMPLES      2400
+#define ANIM_MAX_TOTAL_BYTES  (160u * 1024u * 1024u)
+
+static char  g_anim_filter[64];        /* GRN_ANIM_SRC; empty => disabled */
+static int   g_anim_on = 0;
+
+typedef struct {
+    uint32_t descp;
+    HANDLE   h;
+    uint32_t samples;
+} AnimSlot;
+
+static AnimSlot g_anim[ANIM_MAX_DESCS];
+static int      g_anim_n = 0;
+static uint32_t g_anim_bytes = 0;      /* approx total written, for the cap */
+
+/* case-insensitive substring test (haystack contains needle) */
+static int contains_ci(const char *hay, const char *needle)
+{
+    int i, j;
+    if (!hay || !needle || !needle[0]) return 0;
+    for (i = 0; hay[i]; ++i) {
+        for (j = 0; needle[j]; ++j) {
+            char a = hay[i + j], b = needle[j];
+            if (a >= 'A' && a <= 'Z') a = (char)(a + 32);
+            if (b >= 'A' && b <= 'Z') b = (char)(b + 32);
+            if (a != b) break;
+        }
+        if (!needle[j]) return 1;
+    }
+    return 0;
+}
+
+/* find (or open) the anim file for a descriptor; NULL if disabled/over budget */
+static AnimSlot *anim_slot(uint32_t descp, const char *src)
+{
+    int i;
+    char path[80];
+    HANDLE h;
+    for (i = 0; i < g_anim_n; ++i)
+        if (g_anim[i].descp == descp) return &g_anim[i];
+    if (g_anim_n >= ANIM_MAX_DESCS) return 0;
+    if (g_anim_bytes >= ANIM_MAX_TOTAL_BYTES) return 0;
+
+    wsprintfA(path, "%s\\a%08x.grnanim", DUMP_DIR, descp);
+    h = CreateFileA(path, GENERIC_WRITE, FILE_SHARE_READ, NULL,
+                    CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+    if (h == INVALID_HANDLE_VALUE) return 0;
+
+    {
+        uint32_t version = 1;
+        wr(h, "GRNA", 4);
+        wr(h, &version, 4);
+        wr(h, &descp, 4);
+        wr_text_record(h, "SRCN", src ? src : "");
+    }
+    g_anim[g_anim_n].descp   = descp;
+    g_anim[g_anim_n].h       = h;
+    g_anim[g_anim_n].samples = 0;
+    logf("ANIM open a%08x.grnanim src=%s\n", descp, src ? src : "");
+    return &g_anim[g_anim_n++];
+}
+
+/* append one posed sample for descriptor `descp` (render-state buffer `c`) */
+static void dump_anim_sample(uint32_t c, uint32_t descp, const char *src)
+{
+    AnimSlot *slot;
+    uint32_t tptr, off, k, sidx, nstreams = 0;
+    long     nstreams_pos;
+    HANDLE   h;
+
+    if (!g_anim_on) return;
+    if (!contains_ci(src ? src : "", g_anim_filter)) return;
+    if (g_anim_bytes >= ANIM_MAX_TOTAL_BYTES) return;
+    slot = anim_slot(descp, src);
+    if (!slot || slot->samples >= ANIM_MAX_SAMPLES) return;
+    h = slot->h;
+
+    wr(h, "FRAM", 4);
+    sidx = slot->samples;
+    wr(h, &sidx, 4);
+    { uint32_t t = GetTickCount(); wr(h, &t, 4); }
+
+    tptr = peek(c + 0x20);
+    wr(h, "XFRM", 4);
+    if (readable(tptr, 64)) wr(h, (void *)tptr, 64);
+    else { char z[64]; for (k = 0; k < 64; ++k) z[k] = 0; wr(h, z, 64); }
+
+    /* placeholder for the stream count; back-patched after the walk */
+    nstreams_pos = (long)SetFilePointer(h, 0, NULL, FILE_CURRENT);
+    wr(h, &nstreams, 4);
+
+    off = 0x30;
+    for (k = 0; k < 32; ++k) {
+        uint32_t dtype = peek(c + off);
+        uint32_t ncomp = peek(c + off + 4);
+        uint32_t count = peek(c + off + 8);
+        uint32_t ptr   = peek(c + off + 16);
+        uint32_t nbytes;
+        if (!(dtype == 6 || dtype == 3)) break;     /* table terminator */
+        if (dtype == 3) { off += 24; continue; }    /* indices: topology, skip */
+        if (ncomp == 0 || ncomp > 4) break;
+        if (count == 0 || count > 500000) break;
+        nbytes = count * ncomp * 4u;
+        if (readable(ptr, nbytes)) {
+            wr(h, "STRM", 4);
+            wr(h, &dtype, 4);
+            wr(h, &ncomp, 4);
+            wr(h, &count, 4);
+            wr(h, (void *)ptr, nbytes);
+            g_anim_bytes += nbytes + 16u;
+            ++nstreams;
+        }
+        off += 24;
+    }
+
+    /* back-patch nstreams, then return to append position */
+    SetFilePointer(h, nstreams_pos, NULL, FILE_BEGIN);
+    wr(h, &nstreams, 4);
+    SetFilePointer(h, 0, NULL, FILE_END);
+
+    ++slot->samples;
+    if (slot->samples == 1 || (slot->samples % 120) == 0)
+        logf("ANIM a%08x sample=%u streams=%u bytes=%u\n",
+             descp, slot->samples, nstreams, g_anim_bytes);
+}
+
 uint32_t __stdcall _GrannyLockNextRenderingState(uint32_t a, uint32_t b, uint32_t c)
 {
     static fn3 r = 0; RESOLVE(r, "_GrannyLockNextRenderingState@12");
@@ -596,13 +752,17 @@ uint32_t __stdcall _GrannyLockNextRenderingState(uint32_t a, uint32_t b, uint32_
          * (+0x18) which is stable per loaded mesh -- unlike +0x10 which varies
          * per call and collapses distinct meshes. */
         uint32_t descp = peek(c + 0x18);
-        if (descp >= 0x00100000 && descp < 0x7f000000 && !already_dumped_mesh(descp)) {
-            uint32_t nv, nt;
+        if (descp >= 0x00100000 && descp < 0x7f000000) {
             const char *src = name_lookup(b);
             if (!src) src = name_lookup_near(b);
-            dump_mesh(c, descp, src, &nv, &nt);
-            logf("DUMPED desc=%08x model=%08x meshid=%08x verts=%u tris=%u src=%s\n",
-                 descp, b, peek(c + 0x10), nv, nt, src ? src : "");
+            if (!already_dumped_mesh(descp)) {
+                uint32_t nv, nt;
+                dump_mesh(c, descp, src, &nv, &nt);
+                logf("DUMPED desc=%08x model=%08x meshid=%08x verts=%u tris=%u src=%s\n",
+                     descp, b, peek(c + 0x10), nv, nt, src ? src : "");
+            }
+            /* M3a: opt-in per-frame posed sample (no-op unless GRN_ANIM_SRC matches) */
+            dump_anim_sample(c, descp, src);
         }
     }
     return ret;
@@ -648,13 +808,22 @@ BOOL WINAPI DllMain(HINSTANCE inst, DWORD reason, LPVOID reserved)
         DisableThreadLibraryCalls(inst);
         InitializeCriticalSection(&g_cs);
         CreateDirectoryA(DUMP_DIR, NULL);   /* M2b geometry output (ok if exists) */
+        /* M3a: animation capture is opt-in via GRN_ANIM_SRC (substring of the
+         * source .grn name, e.g. "jimmy"). Empty/unset => disabled. */
+        g_anim_filter[0] = 0;
+        GetEnvironmentVariableA("GRN_ANIM_SRC", g_anim_filter, sizeof(g_anim_filter));
+        g_anim_on = (g_anim_filter[0] != 0);
         g_orig = LoadLibraryA("granny_orig.dll");
         g_log  = CreateFileA(LOG_PATH, GENERIC_WRITE, FILE_SHARE_READ | FILE_SHARE_WRITE,
                              NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
         g_ready = (g_orig != NULL && g_log != INVALID_HANDLE_VALUE);
         if (g_ready) {
-            const char *hdr = "=== JNvsJN granny capture (M2d names + texture dump) ===\n";
-            DWORD w; WriteFile(g_log, hdr, lstrlenA(hdr), &w, NULL);
+            char hdr[160];
+            int n = wsprintfA(hdr,
+                "=== JNvsJN granny capture (M3a: names + texture + anim) "
+                "anim=%s filter=\"%s\" ===\n",
+                g_anim_on ? "ON" : "off", g_anim_filter);
+            DWORD w; WriteFile(g_log, hdr, (DWORD)n, &w, NULL);
         }
     }
     return TRUE;

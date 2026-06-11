@@ -53,7 +53,19 @@ PFNGLACTIVETEXTUREPROC           glActiveTexture;
 PFNGLGETERRORPROC                glGetError;
 PFNGLREADPIXELSPROC              glReadPixels;
 PFNGLDEPTHMASKPROC               glDepthMask;
+PFNGLDEPTHFUNCPROC               glDepthFunc;
 GLFINISHPROC                     glFinish;
+PFNGLUNIFORM4FVPROC              glUniform4fv;
+PFNGLGENFRAMEBUFFERSPROC         glGenFramebuffers;
+PFNGLBINDFRAMEBUFFERPROC         glBindFramebuffer;
+PFNGLFRAMEBUFFERTEXTURE2DPROC    glFramebufferTexture2D;
+PFNGLFRAMEBUFFERRENDERBUFFERPROC glFramebufferRenderbuffer;
+PFNGLCHECKFRAMEBUFFERSTATUSPROC  glCheckFramebufferStatus;
+PFNGLDELETEFRAMEBUFFERSPROC      glDeleteFramebuffers;
+PFNGLGENRENDERBUFFERSPROC        glGenRenderbuffers;
+PFNGLBINDRENDERBUFFERPROC        glBindRenderbuffer;
+PFNGLRENDERBUFFERSTORAGEPROC     glRenderbufferStorage;
+PFNGLDELETERENDERBUFFERSPROC     glDeleteRenderbuffers;
 
 #define LOAD(name) \
     name = (typeof(name))SDL_GL_GetProcAddress(#name); \
@@ -109,7 +121,19 @@ int glad_load_gl(void) {
     LOAD(glGetError)
     LOAD(glReadPixels)
     LOAD(glDepthMask)
+    LOAD(glDepthFunc)
     LOAD(glFinish)
+    LOAD(glUniform4fv)
+    LOAD(glGenFramebuffers)
+    LOAD(glBindFramebuffer)
+    LOAD(glFramebufferTexture2D)
+    LOAD(glFramebufferRenderbuffer)
+    LOAD(glCheckFramebufferStatus)
+    LOAD(glDeleteFramebuffers)
+    LOAD(glGenRenderbuffers)
+    LOAD(glBindRenderbuffer)
+    LOAD(glRenderbufferStorage)
+    LOAD(glDeleteRenderbuffers)
     return ok;
 }
 

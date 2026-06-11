@@ -41,6 +41,7 @@ typedef ptrdiff_t      GLintptr;
 #define GL_UNSIGNED_INT                   0x1405
 #define GL_FLOAT                          0x1406
 #define GL_DEPTH_TEST                     0x0B71
+#define GL_LEQUAL                         0x0203
 #define GL_BLEND                          0x0BE2
 #define GL_SRC_ALPHA                      0x0302
 #define GL_ONE_MINUS_SRC_ALPHA            0x0303
@@ -61,9 +62,17 @@ typedef ptrdiff_t      GLintptr;
 #define GL_TEXTURE_MIN_FILTER             0x2801
 #define GL_TEXTURE_MAG_FILTER             0x2800
 #define GL_LINEAR                         0x2601
+#define GL_NEAREST                        0x2600
 #define GL_LINEAR_MIPMAP_LINEAR           0x2703
 #define GL_TEXTURE0                       0x84C0
 #define GL_CULL_FACE                      0x0B44
+#define GL_RGBA8                          0x8058
+#define GL_FRAMEBUFFER                    0x8D40
+#define GL_RENDERBUFFER                   0x8D41
+#define GL_COLOR_ATTACHMENT0              0x8CE0
+#define GL_DEPTH_ATTACHMENT               0x8D00
+#define GL_DEPTH_COMPONENT24              0x81A6
+#define GL_FRAMEBUFFER_COMPLETE           0x8CD5
 
 /* Function pointer typedefs */
 typedef void (*PFNGLCLEARCOLORPROC)(GLfloat, GLfloat, GLfloat, GLfloat);
@@ -114,6 +123,18 @@ typedef void (*PFNGLACTIVETEXTUREPROC)(GLenum);
 typedef GLenum (*PFNGLGETERRORPROC)(void);
 typedef void (*PFNGLREADPIXELSPROC)(GLint, GLint, GLsizei, GLsizei, GLenum, GLenum, void*);
 typedef void (*PFNGLDEPTHMASKPROC)(GLboolean);
+typedef void (*PFNGLDEPTHFUNCPROC)(GLenum);
+typedef void (*PFNGLUNIFORM4FVPROC)(GLint, GLsizei, const GLfloat*);
+typedef void (*PFNGLGENFRAMEBUFFERSPROC)(GLsizei, GLuint*);
+typedef void (*PFNGLBINDFRAMEBUFFERPROC)(GLenum, GLuint);
+typedef void (*PFNGLFRAMEBUFFERTEXTURE2DPROC)(GLenum, GLenum, GLenum, GLuint, GLint);
+typedef void (*PFNGLFRAMEBUFFERRENDERBUFFERPROC)(GLenum, GLenum, GLenum, GLuint);
+typedef GLenum (*PFNGLCHECKFRAMEBUFFERSTATUSPROC)(GLenum);
+typedef void (*PFNGLDELETEFRAMEBUFFERSPROC)(GLsizei, const GLuint*);
+typedef void (*PFNGLGENRENDERBUFFERSPROC)(GLsizei, GLuint*);
+typedef void (*PFNGLBINDRENDERBUFFERPROC)(GLenum, GLuint);
+typedef void (*PFNGLRENDERBUFFERSTORAGEPROC)(GLenum, GLenum, GLsizei, GLsizei);
+typedef void (*PFNGLDELETERENDERBUFFERSPROC)(GLsizei, const GLuint*);
 
 /* Global function pointer declarations */
 extern PFNGLCLEARCOLORPROC              glClearColor;
@@ -164,6 +185,18 @@ extern PFNGLACTIVETEXTUREPROC           glActiveTexture;
 extern PFNGLGETERRORPROC                glGetError;
 extern PFNGLREADPIXELSPROC              glReadPixels;
 extern PFNGLDEPTHMASKPROC               glDepthMask;
+extern PFNGLDEPTHFUNCPROC               glDepthFunc;
+extern PFNGLUNIFORM4FVPROC              glUniform4fv;
+extern PFNGLGENFRAMEBUFFERSPROC         glGenFramebuffers;
+extern PFNGLBINDFRAMEBUFFERPROC         glBindFramebuffer;
+extern PFNGLFRAMEBUFFERTEXTURE2DPROC    glFramebufferTexture2D;
+extern PFNGLFRAMEBUFFERRENDERBUFFERPROC glFramebufferRenderbuffer;
+extern PFNGLCHECKFRAMEBUFFERSTATUSPROC  glCheckFramebufferStatus;
+extern PFNGLDELETEFRAMEBUFFERSPROC      glDeleteFramebuffers;
+extern PFNGLGENRENDERBUFFERSPROC        glGenRenderbuffers;
+extern PFNGLBINDRENDERBUFFERPROC        glBindRenderbuffer;
+extern PFNGLRENDERBUFFERSTORAGEPROC     glRenderbufferStorage;
+extern PFNGLDELETERENDERBUFFERSPROC     glDeleteRenderbuffers;
 typedef void (*GLFINISHPROC)(void);
 extern GLFINISHPROC                     glFinish;
 

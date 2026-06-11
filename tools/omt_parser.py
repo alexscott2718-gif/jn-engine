@@ -11,7 +11,7 @@ import sys
 import json
 import zlib
 from dataclasses import dataclass, field, asdict
-from typing import List, Optional
+from typing import List, Optional, Tuple
 
 
 # ---------------------------------------------------------------------------
@@ -113,8 +113,21 @@ class ImageHeader:
     dotransparent: bool
     transp_packed: int  # ARGB BE, only valid when dotransparent
     dopalette: bool
+    palette: Optional[List[Tuple[int, int, int]]]
     bufsize: int        # compressed buffer total size
     buf_offset: int     # byte offset from start of omgw_data to row buffer
+
+
+def _read_omt_palette_string(data: bytes, pos: int):
+    """Read the short length-prefixed OMT string used in palette headers."""
+    if pos >= len(data):
+        return '', pos
+    length = data[pos]
+    pos += 1
+    if length == 0:
+        return '', pos
+    s = data[pos:pos + length].decode('ascii', errors='replace')
+    return s, pos + length
 
 
 def _parse_omgw_header(omgw_data: bytes) -> ImageHeader:
@@ -130,7 +143,7 @@ def _parse_omgw_header(omgw_data: bytes) -> ImageHeader:
      10  s16  dotransparent (bool)
      12  [u32 transp_packed — only if version>0 and dotransparent]
      +0  s16  dopalette (bool)
-     +2  [palette — skipped]
+     +2  [palette — optional OPa2/OmPa block]
      +?  u32  bufsize
      +4  row data
     """
@@ -149,12 +162,25 @@ def _parse_omgw_header(omgw_data: bytes) -> ImageHeader:
 
     dopalette = bool(struct.unpack_from('>h', omgw_data, pos)[0]); pos += 2
 
+    palette = None
     if dopalette:
-        # palette header tag (4 bytes) + palette size depends on depth;
-        # read the pal header to skip: OmPa/OPa2 tag + ncolors (s16 BE) + 4 bytes/color
+        # OMediaOMTConverter::read_palette():
+        #   tag:u32, desc:string, size:u32, size * RGB16, and for OPa2 a
+        #   16*16*16 lookup table. JN/JNvsJN 8-bit canvases use OPa2 with an
+        #   empty descriptor and 256 RGB16 entries.
         pal_tag = omgw_data[pos:pos + 4]; pos += 4
-        ncolors = struct.unpack_from('>h', omgw_data, pos)[0]; pos += 2
-        pos += ncolors * 4  # each palette entry is 4 bytes
+        _desc, pos = _read_omt_palette_string(omgw_data, pos)
+        ncolors = struct.unpack_from('>I', omgw_data, pos)[0]; pos += 4
+        if ncolors > 256:
+            raise ValueError(f'Invalid OMT palette size: {ncolors}')
+        palette = []
+        for _ in range(ncolors):
+            r16 = struct.unpack_from('>H', omgw_data, pos)[0]; pos += 2
+            g16 = struct.unpack_from('>H', omgw_data, pos)[0]; pos += 2
+            b16 = struct.unpack_from('>H', omgw_data, pos)[0]; pos += 2
+            palette.append((r16 & 0xFF, g16 & 0xFF, b16 & 0xFF))
+        if pal_tag == b'OPa2':
+            pos += 16 * 16 * 16
 
     bufsize = struct.unpack_from('>I', omgw_data, pos)[0]; pos += 4
 
@@ -163,7 +189,7 @@ def _parse_omgw_header(omgw_data: bytes) -> ImageHeader:
         compression=compression, version=version,
         stride=stride,
         dotransparent=dotransparent, transp_packed=transp_packed,
-        dopalette=dopalette,
+        dopalette=dopalette, palette=palette,
         bufsize=bufsize, buf_offset=pos,
     )
 
@@ -181,25 +207,30 @@ def _decode_image(hdr: ImageHeader, omgw_data: bytes) -> List[bytes]:
     Returns list of `height` rows, each `width * 4` bytes (R, G, B, A).
 
     Pixel storage in OMT files:
-      - 32 bpp: 4 raw bytes per pixel in RGBA byte order (R, G, B, A).
+      - 32 bpp: 4 raw bytes per pixel as big-endian ARGB (A, R, G, B).
+                The stored alpha byte is not used as PNG opacity here; OMT
+                canvas transparency is color-keyed by transp_packed, and all
+                non-key pixels are exported opaque.
       - 16 bpp: 2 bytes per pixel, BE u16 with ARGB1555 layout in the
                 value (bit 15 = alpha bit, 14-10 = R5, 9-5 = G5, 4-0 = B5).
                 The alpha bit is NOT used as per-pixel opacity -- it is
                 ignored. All non-chroma-key pixels are fully opaque
                 (matches OMT canvas behavior of `fill_alpha(0xFF)`).
-      - transp_packed: RGBA-packed u32 for 32 bpp (R in high byte, A in
+      - transp_packed: ARGB-packed u32 for 32 bpp (A in high byte, B in
                 low). For 16 bpp it holds the BE u16 value in its low 16
                 bits. Verified: sprites[0] background pixel bytes
-                [00, 42, 3F, BA] match transp_packed=0x00423FBA
-                byte-for-byte; sprite[184] 16bpp pixel bytes [25, 0C]
-                read as BE = 0x250C, matching transp_packed=0x0000250C.
+                [00, 42, 3F, BA] are ARGB=0x00423FBA; sprite[184]
+                16bpp pixel bytes [25, 0C] read as BE = 0x250C,
+                matching transp_packed=0x0000250C.
+      - 8 bpp: 1 palette index per pixel. Version > 0 transparency stores the
+                transparent palette index in transp_packed.
     """
     pos = hdr.buf_offset
     unit_size = UNIT_SIZES.get(hdr.compression, 1)
 
-    transp_r = (hdr.transp_packed >> 24) & 0xFF
-    transp_g = (hdr.transp_packed >> 16) & 0xFF
-    transp_b = (hdr.transp_packed >>  8) & 0xFF
+    transp_r = (hdr.transp_packed >> 16) & 0xFF
+    transp_g = (hdr.transp_packed >>  8) & 0xFF
+    transp_b =  hdr.transp_packed        & 0xFF
     transp_r5 = (hdr.transp_packed >> 10) & 0x1F
     transp_g5 = (hdr.transp_packed >>  5) & 0x1F
     transp_b5 =  hdr.transp_packed        & 0x1F
@@ -228,15 +259,16 @@ def _decode_image(hdr: ImageHeader, omgw_data: bytes) -> List[bytes]:
         row_rgba = bytearray(hdr.width * 4)
 
         if hdr.depth == 32:
-            # File byte order: [R, G, B, A] per pixel
+            # File byte order: [A, R, G, B] per pixel (ARGB u32, big-endian).
             for x in range(hdr.width):
                 o = x * 4
-                r = raw_row[o]
-                g = raw_row[o + 1]
-                b = raw_row[o + 2]
-                a = raw_row[o + 3]
+                r = raw_row[o + 1]
+                g = raw_row[o + 2]
+                b = raw_row[o + 3]
                 if hdr.dotransparent and r == transp_r and g == transp_g and b == transp_b:
                     r = g = b = a = 0
+                else:
+                    a = 255
                 row_rgba[x*4:x*4+4] = bytes([r, g, b, a])
 
         elif hdr.depth == 16:
@@ -256,8 +288,17 @@ def _decode_image(hdr: ImageHeader, omgw_data: bytes) -> List[bytes]:
                     a = 255
                 row_rgba[x*4:x*4+4] = bytes([r, g, b, a])
 
+        elif hdr.depth == 8:
+            for x in range(hdr.width):
+                idx = raw_row[x] if x < len(raw_row) else 0
+                if hdr.palette and idx < len(hdr.palette):
+                    r, g, b = hdr.palette[idx]
+                else:
+                    r = g = b = idx
+                a = 0 if hdr.dotransparent and idx == hdr.transp_packed else 255
+                row_rgba[x*4:x*4+4] = bytes([r, g, b, a])
+
         else:
-            # 8 bpp — paletted; not yet implemented, output grey
             for x in range(hdr.width):
                 v = raw_row[x] if x < len(raw_row) else 0
                 row_rgba[x*4:x*4+4] = bytes([v, v, v, 255])
@@ -275,6 +316,8 @@ def _decode_image(hdr: ImageHeader, omgw_data: bytes) -> List[bytes]:
 class ImageChunk:
     index: int
     offset: int          # file offset of OmCv tag
+    chunk_id: Optional[int]
+    name: str
     width: int
     height: int
     depth: int
@@ -311,14 +354,104 @@ class OmtFile:
 # Image chunk finder
 # ---------------------------------------------------------------------------
 
+def _read_omt_string(data: bytes, pos: int):
+    c1, c2 = data[pos], data[pos + 1]
+    pos += 2
+    if c1 == 0xFF and c2 == 0xFF:
+        length = struct.unpack_from('>i', data, pos)[0]
+        pos += 4
+        s = data[pos:pos + length].decode('ascii', errors='replace')
+        return s, pos + length
+    length = c1
+    s = bytes([c2]) + data[pos:pos + length - 1]
+    return s.decode('ascii', errors='replace'), pos + length - 1
+
+
+def _canvas_table(data: bytes):
+    """Return authoritative Canv chunks from the OMT chunk table, if present."""
+    if data[:4] not in (b'0MF2', b'0MF3') or len(data) < 12:
+        return []
+    version = 2 if data[:4] == b'0MF2' else 3
+    try:
+        pos = struct.unpack_from('>I', data, 4)[0]
+        if pos <= 0 or pos >= len(data):
+            return []
+        ntypes = struct.unpack_from('>I', data, pos)[0]
+        pos += 4
+        if ntypes > 256:
+            return []
+        canvases = []
+        for _ in range(ntypes):
+            ctype = data[pos:pos + 4]
+            pos += 4
+            nchunks = struct.unpack_from('>I', data, pos)[0]
+            pos += 4
+            if nchunks > 100000:
+                return []
+            for _ in range(nchunks):
+                chunk_id = struct.unpack_from('>i', data, pos)[0]; pos += 4
+                offset = struct.unpack_from('>I', data, pos)[0]; pos += 4
+                size = struct.unpack_from('>I', data, pos)[0]; pos += 4
+                name, pos = _read_omt_string(data, pos)
+                if version >= 3:
+                    pos += 1  # per-chunk compression byte
+                if ctype == b'Canv':
+                    canvases.append((offset, size, chunk_id, name))
+        return sorted(canvases, key=lambda x: x[0])
+    except Exception:
+        return []
+
+
+def _parse_image_at(data: bytes, start: int, index: int, chunk_id=None, name=''):
+    if start + 12 > len(data) or data[start:start + 4] != b'OmCv' or data[start + 8:start + 12] != b'OmGW':
+        return None
+    omgw_start = start + 12
+    if omgw_start + 20 > len(data):
+        return None
+    hdr = _parse_omgw_header(data[omgw_start:])
+    omgw_end = omgw_start + hdr.buf_offset + hdr.bufsize
+    if omgw_end > len(data):
+        return None
+    omgw_data = data[omgw_start:omgw_end]
+    return ImageChunk(
+        index=index,
+        offset=start,
+        chunk_id=chunk_id,
+        name=name,
+        width=hdr.width,
+        height=hdr.height,
+        depth=hdr.depth,
+        compression=hdr.compression,
+        stride=hdr.stride,
+        dotransparent=hdr.dotransparent,
+        transp_packed=hdr.transp_packed,
+        dopalette=hdr.dopalette,
+        bufsize=hdr.bufsize,
+        _omgw_data=omgw_data,
+        _hdr=hdr,
+    )
+
+
 def _parse_images(data: bytes) -> List[ImageChunk]:
     """
-    Parse OmCv/OmGW image chunks sequentially.
-    We cannot scan for all OmCv positions up front because the compressed
-    image buffer may contain the byte sequence 'OmCv' as a false match.
-    Instead, parse each header to get bufsize, then advance exactly past
-    the buffer before searching for the next chunk.
+    Parse OmCv/OmGW image chunks.
+
+    Prefer the authoritative OMT chunk table. Raw byte scanning is only a
+    fallback for malformed/standalone streams because compressed or unrelated
+    payloads can contain plausible-looking OmCv/OmGW byte sequences.
     """
+    table = _canvas_table(data)
+    if table:
+        chunks = []
+        for i, (offset, _size, chunk_id, name) in enumerate(table):
+            try:
+                img = _parse_image_at(data, offset, i, chunk_id, name)
+            except Exception:
+                img = None
+            if img is not None:
+                chunks.append(img)
+        return chunks
+
     chunks = []
     search_from = 0
     i = 0
@@ -333,37 +466,17 @@ def _parse_images(data: bytes) -> List[ImageChunk]:
             search_from = start + 1
             continue
 
-        omgw_start = start + 12
-        if omgw_start + 20 > len(data):
-            break
-
         try:
-            hdr = _parse_omgw_header(data[omgw_start:])
+            img = _parse_image_at(data, start, i)
         except Exception:
             search_from = start + 1
             continue
+        if img is None:
+            search_from = start + 1
+            continue
+        chunks.append(img)
 
-        # Slice exactly as much omgw_data as the header + buffer need
-        omgw_end = omgw_start + hdr.buf_offset + hdr.bufsize
-        omgw_data = data[omgw_start:omgw_end]
-
-        chunks.append(ImageChunk(
-            index=i,
-            offset=start,
-            width=hdr.width,
-            height=hdr.height,
-            depth=hdr.depth,
-            compression=hdr.compression,
-            stride=hdr.stride,
-            dotransparent=hdr.dotransparent,
-            transp_packed=hdr.transp_packed,
-            dopalette=hdr.dopalette,
-            bufsize=hdr.bufsize,
-            _omgw_data=omgw_data,
-            _hdr=hdr,
-        ))
-
-        search_from = omgw_end  # skip past this chunk's data
+        search_from = start + 12 + img._hdr.buf_offset + img._hdr.bufsize
         i += 1
 
     return chunks
@@ -492,6 +605,8 @@ def export_omt(omt: OmtFile, out_dir: str):
                 errors.append((img.index, str(e)))
             img_meta.append({
                 'index': img.index,
+                'chunk_id': img.chunk_id,
+                'name': img.name,
                 'width': img.width,
                 'height': img.height,
                 'depth': img.depth,

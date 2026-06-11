@@ -13,7 +13,7 @@ Output per OMT: assets/parsed/<name>/<name>_images/NNNN_WxHdD.png  +  <name>.jso
 
 Audio OMTs (music/voice/sfx) are listed but skipped unless --audio is passed.
 """
-import argparse, os, sys, glob
+import argparse, os, sys, glob, shutil
 sys.path.insert(0, os.path.dirname(__file__))
 import omt_parser as op
 
@@ -41,6 +41,8 @@ def main():
             print(f"  ERR {name}: {e}"); errs += 1; continue
         if omt.images:
             img_dir = os.path.join(out, name, f"{name}_images")
+            if os.path.isdir(img_dir) and a.force:
+                shutil.rmtree(img_dir)
             if os.path.isdir(img_dir) and os.listdir(img_dir) and not a.force:
                 continue  # already extracted
             meta = op.export_omt(_images_only(omt) if not a.audio else omt,
@@ -51,6 +53,8 @@ def main():
                   + (f"  ({bad} decode errors)" if bad else ""))
         elif omt.audio and a.audio:
             aud_dir = os.path.join(out, name, f"{name}_audio")
+            if os.path.isdir(aud_dir) and a.force:
+                shutil.rmtree(aud_dir)
             if os.path.isdir(aud_dir) and os.listdir(aud_dir) and not a.force:
                 continue
             op.export_omt(omt, os.path.join(out, name))

@@ -102,11 +102,15 @@ static const char *BB_FRAG_SRC =
     "out vec4 FragColor;\n"
     "uniform sampler2D uTex;\n"
     "uniform vec4 uTint;\n"
+    "uniform int  uPickOn;\n"     /* QA pick pass: flat ID color after discards */
+    "uniform vec4 uPickColor;\n"
+    "uniform vec4 uHighlight;\n"  /* QA hover/select tint: rgb + mix strength */
     "void main() {\n"
     "    vec4 c = texture(uTex, vUV);\n"
     "    if (c.a < 0.5) discard;\n"
+    "    if (uPickOn != 0) { FragColor = uPickColor; return; }\n"
     "    if (uTint.a > 0.0) c.rgb *= uTint.rgb;\n"
-    "    FragColor = vec4(c.rgb, 1.0);\n"
+    "    FragColor = vec4(mix(c.rgb, uHighlight.rgb, uHighlight.a), 1.0);\n"
     "}\n";
 
 /* Sky-gradient shader. Two fullscreen triangles in NDC; alpha attribute carries
@@ -192,6 +196,9 @@ static const char *LIT_FRAG_SRC =
     "uniform int  uColorKeyOn;\n"    /* foliage cutout: 1 = discard near uColorKey */
     "uniform vec3 uColorKey;\n"      /* chroma-key RGB (e.g. the 2D_Trees sky blue) */
     "uniform float uColorKeyTol;\n"  /* squared-distance threshold */
+    "uniform int  uPickOn;\n"        /* QA pick pass: flat ID color after discards */
+    "uniform vec4 uPickColor;\n"
+    "uniform vec4 uHighlight;\n"     /* QA hover/select tint: rgb + mix strength */
     "void main() {\n"
     "    vec3 n = normalize(vNorm);\n"
     "    /* Match the original's measured lighting. With LIGHTING OFF (Phase 12\n"
@@ -221,7 +228,9 @@ static const char *LIT_FRAG_SRC =
     "       as a measured ambient/sky cast on both lit and unlit paths.\n"
     "       Phase 4: alpha forced to 1.0 (live-window X compositor safety; the\n"
     "       alpha cutout above already handles transparency via discard). */\n"
-    "    FragColor = vec4(base * lightTerm * uSceneTint, 1.0);\n"
+    "    if (uPickOn != 0) { FragColor = uPickColor; return; }\n"
+    "    vec3 rgb = base * lightTerm * uSceneTint;\n"
+    "    FragColor = vec4(mix(rgb, uHighlight.rgb, uHighlight.a), 1.0);\n"
     "}\n";
 
 static unsigned int compile_shader(GLenum type, const char *src) {
@@ -265,6 +274,24 @@ static float g_alpha_threshold = 0.5f;
    collision-only volumes and unresolved canvas slots (BLOCKING_*, SCHOOL
    cross-level slots, etc.) don't dominate the view. */
 static int g_hide_untextured_groups = 0;
+
+/* --- QA color-ID pick pass (docs/qa_annotate_plan.md) ----------------------
+   draw_scene is re-rendered into an offscreen FBO with each object's 24-bit ID
+   as a flat color; one glReadPixels under the cursor resolves what the user is
+   pointing at, pixel-accurate through the same alpha/color-key discards as the
+   main pass. ID 0 = background/none. */
+static int          g_pick_mode = 0;
+static unsigned int g_pick_fbo = 0, g_pick_tex = 0, g_pick_rbo = 0;
+static int          g_pick_w = 0, g_pick_h = 0;
+static float        g_pick_color[4] = { 0.0f, 0.0f, 0.0f, 1.0f };
+static int          g_lit_loc_pick_on = -1, g_lit_loc_pick_color = -1;
+static int          g_lit_loc_highlight = -1;
+static int          g_bb_loc_pick_on = -1, g_bb_loc_pick_color = -1;
+static int          g_bb_loc_highlight = -1;
+/* Hover/selection tint mixed into subsequent draws (a = strength, 0 = off). */
+static float        g_highlight[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
+/* Main viewport, restored after the pick pass. */
+static int          g_vp_w = 0, g_vp_h = 0;
 
 static unsigned int g_sky_prog = 0, g_sky_vao = 0, g_sky_vbo = 0;
 static int g_sky_loc_top = -1, g_sky_loc_bot = -1;
@@ -345,6 +372,9 @@ int renderer_init(int w, int h) {
     g_lit_loc_colorkey_on     = glGetUniformLocation(g_lit_prog, "uColorKeyOn");
     g_lit_loc_colorkey        = glGetUniformLocation(g_lit_prog, "uColorKey");
     g_lit_loc_colorkey_tol    = glGetUniformLocation(g_lit_prog, "uColorKeyTol");
+    g_lit_loc_pick_on    = glGetUniformLocation(g_lit_prog, "uPickOn");
+    g_lit_loc_pick_color = glGetUniformLocation(g_lit_prog, "uPickColor");
+    g_lit_loc_highlight  = glGetUniformLocation(g_lit_prog, "uHighlight");
 
     /* Sky-gradient program + fullscreen quad. Each vertex carries an NDC
        position and a t value (1 at top, 0 at bottom) used to lerp top/bot. */
@@ -399,6 +429,9 @@ int renderer_init(int w, int h) {
         g_bb_loc_tex    = glGetUniformLocation(g_bb_prog, "uTex");
         g_bb_loc_tint   = glGetUniformLocation(g_bb_prog, "uTint");
         g_bb_loc_flip_v = glGetUniformLocation(g_bb_prog, "uFlipV");
+        g_bb_loc_pick_on    = glGetUniformLocation(g_bb_prog, "uPickOn");
+        g_bb_loc_pick_color = glGetUniformLocation(g_bb_prog, "uPickColor");
+        g_bb_loc_highlight  = glGetUniformLocation(g_bb_prog, "uHighlight");
 
         /* Unit quad (-0.5..0.5) with UV (0..1). V is flipped because
            tex_loader uses stbi_set_flip_vertically_on_load(1). */
@@ -476,6 +509,12 @@ int renderer_init(int w, int h) {
     g_cam.far_z  = 50000.0f;
 
     glEnable(GL_DEPTH_TEST);
+    /* D3D7 defaults to D3DCMP_LESSEQUAL; GL defaults to GL_LESS. The OMT
+       levels rely on the D3D rule for coincident decal layers — e.g. the
+       level2/2b START banner is two co-planar quads (blank cloth, then the
+       "Nick's Finish Line" text band) and the later layer must win the
+       depth test. Under GL_LESS the text layer can never draw. */
+    glDepthFunc(GL_LEQUAL);
     glViewport(0, 0, w, h);
     return 1;
 }
@@ -495,6 +534,10 @@ void renderer_destroy(void) {
     if (g_spr2d_prog){ glDeleteProgram(g_spr2d_prog); g_spr2d_prog = 0; }
     if (g_spr2d_vao) { glDeleteVertexArrays(1, &g_spr2d_vao); g_spr2d_vao = 0; }
     if (g_spr2d_vbo) { glDeleteBuffers(1, &g_spr2d_vbo);      g_spr2d_vbo = 0; }
+    if (g_pick_fbo)  { glDeleteFramebuffers(1, &g_pick_fbo);  g_pick_fbo = 0; }
+    if (g_pick_tex)  { glDeleteTextures(1, &g_pick_tex);      g_pick_tex = 0; }
+    if (g_pick_rbo)  { glDeleteRenderbuffers(1, &g_pick_rbo); g_pick_rbo = 0; }
+    g_pick_w = g_pick_h = 0;
 }
 
 void renderer_set_sky(float tr, float tg, float tb,
@@ -559,6 +602,7 @@ static void renderer_prepare_camera(int w, int h) {
 }
 
 void renderer_begin_frame(int w, int h) {
+    g_vp_w = w; g_vp_h = h;
     glViewport(0, 0, w, h);
     glClearColor(g_sky_bot[0], g_sky_bot[1], g_sky_bot[2], 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -590,7 +634,7 @@ void renderer_draw_billboard(unsigned int tex,
                              float width, float height,
                              float tint_r, float tint_g, float tint_b, float tint_a) {
     if (!tex || !g_bb_prog) return;
-    if (capture_active()) {
+    if (capture_active() && !g_pick_mode) {
         const float bmodel[16] = { 1,0,0,0, 0,1,0,0, 0,0,1,0, tx,ty,tz,1 };
         float hw = width * 0.5f, hh = height * 0.5f;
         const float bmin[3] = { -hw, -hh, -hw };
@@ -606,6 +650,8 @@ void renderer_draw_billboard(unsigned int tex,
     glUniform4f(g_bb_loc_tint, tint_r, tint_g, tint_b, tint_a);
     glUniform1i(g_bb_loc_tex, 0);
     glUniform1i(g_bb_loc_flip_v, g_bb_flip_v);
+    glUniform4fv(g_bb_loc_pick_color, 1, g_pick_color);
+    glUniform4fv(g_bb_loc_highlight, 1, g_highlight);
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, tex);
     glBindVertexArray(g_bb_vao);
@@ -704,7 +750,7 @@ void renderer_draw_model_matrix(const AseModel *m, unsigned int texture_id_overr
     mat4_mul(vp, g_proj, g_view);
     mat4_mul(mvp, vp, model);
 
-    if (capture_active()) {
+    if (capture_active() && !g_pick_mode) {
         unsigned int cap_tex = texture_id_override ? texture_id_override
             : (m->texture_id ? m->texture_id
                : (m->material_count > 0 ? m->materials[0].texture_id : 0));
@@ -731,6 +777,8 @@ void renderer_draw_model_matrix(const AseModel *m, unsigned int texture_id_overr
     glUniform1i(g_lit_loc_colorkey_on, g_colorkey_on);
     glUniform3f(g_lit_loc_colorkey, g_colorkey[0], g_colorkey[1], g_colorkey[2]);
     glUniform1f(g_lit_loc_colorkey_tol, g_colorkey_tol);
+    glUniform4fv(g_lit_loc_pick_color, 1, g_pick_color);
+    glUniform4fv(g_lit_loc_highlight, 1, g_highlight);
     glActiveTexture(GL_TEXTURE0);
 
     int groups = m->material_count > 0 ? m->material_count : 1;
@@ -1038,14 +1086,23 @@ void renderer_draw_box(unsigned int vao, int index_count,
     model[12]=tx; model[13]=ty; model[14]=tz;
     mat4_mul(vp, g_proj, g_view);
     mat4_mul(mvp, vp, model);
-    if (capture_active()) {
+    if (capture_active() && !g_pick_mode) {
         const float bmin[3] = { -1.0f, -1.0f, -1.0f };
         const float bmax[3] = {  1.0f,  1.0f,  1.0f };
         capture_draw(model, 0, bmin, bmax);
     }
     glUseProgram(g_prog);
     glUniformMatrix4fv(g_loc_mvp, 1, GL_FALSE, mvp);
-    glUniform4f(g_loc_color, r, g, b, 1.0f);
+    /* The flat program has no pick/highlight uniforms; both effects ride the
+       existing uColor instead. */
+    if (g_pick_mode) {
+        glUniform4fv(g_loc_color, 1, g_pick_color);
+    } else {
+        float hr = r + (g_highlight[0] - r) * g_highlight[3];
+        float hg = g + (g_highlight[1] - g) * g_highlight[3];
+        float hb = b + (g_highlight[2] - b) * g_highlight[3];
+        glUniform4f(g_loc_color, hr, hg, hb, 1.0f);
+    }
     glBindVertexArray(vao);
     glDrawElements(GL_TRIANGLES, index_count, GL_UNSIGNED_INT, 0);
     glBindVertexArray(0);
@@ -1053,6 +1110,90 @@ void renderer_draw_box(unsigned int vao, int index_count,
 
 void renderer_end_frame(void) {
     glUseProgram(0);
+}
+
+/* ---- QA color-ID pick pass (docs/qa_annotate_plan.md) ---- */
+
+void renderer_set_highlight(float r, float g, float b, float strength) {
+    g_highlight[0] = r; g_highlight[1] = g; g_highlight[2] = b;
+    g_highlight[3] = strength;
+}
+
+/* uPickOn is program state, not per-draw state: paths that drive g_lit_prog
+   directly (cloud dome) never set it, so flipping it once per pass here keeps
+   them from inheriting a stale pick mode. */
+static void pick_set_programs(int on) {
+    if (g_lit_prog) { glUseProgram(g_lit_prog); glUniform1i(g_lit_loc_pick_on, on); }
+    if (g_bb_prog)  { glUseProgram(g_bb_prog);  glUniform1i(g_bb_loc_pick_on, on); }
+    glUseProgram(0);
+}
+
+int renderer_pick_begin(int w, int h) {
+    if (w <= 0 || h <= 0) return 0;
+    if (!g_pick_fbo || g_pick_w != w || g_pick_h != h) {
+        if (!g_pick_fbo) {
+            glGenFramebuffers(1, &g_pick_fbo);
+            glGenTextures(1, &g_pick_tex);
+            glGenRenderbuffers(1, &g_pick_rbo);
+        }
+        glBindTexture(GL_TEXTURE_2D, g_pick_tex);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, w, h, 0,
+                     GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        glBindTexture(GL_TEXTURE_2D, 0);
+        glBindRenderbuffer(GL_RENDERBUFFER, g_pick_rbo);
+        glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, w, h);
+        glBindRenderbuffer(GL_RENDERBUFFER, 0);
+        glBindFramebuffer(GL_FRAMEBUFFER, g_pick_fbo);
+        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
+                               GL_TEXTURE_2D, g_pick_tex, 0);
+        glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT,
+                                  GL_RENDERBUFFER, g_pick_rbo);
+        if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
+            fprintf(stderr, "renderer: pick FBO incomplete\n");
+            glBindFramebuffer(GL_FRAMEBUFFER, 0);
+            return 0;
+        }
+        g_pick_w = w; g_pick_h = h;
+    } else {
+        glBindFramebuffer(GL_FRAMEBUFFER, g_pick_fbo);
+    }
+    glViewport(0, 0, w, h);
+    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    g_pick_mode = 1;
+    renderer_pick_set_id(0);
+    pick_set_programs(1);
+    return 1;
+}
+
+void renderer_pick_set_id(unsigned int id) {
+    g_pick_color[0] = (float)( id        & 0xffu) / 255.0f;
+    g_pick_color[1] = (float)((id >>  8) & 0xffu) / 255.0f;
+    g_pick_color[2] = (float)((id >> 16) & 0xffu) / 255.0f;
+    g_pick_color[3] = 1.0f;
+}
+
+unsigned int renderer_pick_end(int cursor_x, int cursor_y) {
+    unsigned int id = 0;
+    if (g_pick_mode) {
+        if (cursor_x >= 0 && cursor_y >= 0 &&
+            cursor_x < g_pick_w && cursor_y < g_pick_h) {
+            unsigned char px[4] = { 0, 0, 0, 0 };
+            /* SDL cursor coords are top-left origin; GL reads bottom-left. */
+            glReadPixels(cursor_x, g_pick_h - 1 - cursor_y, 1, 1,
+                         GL_RGBA, GL_UNSIGNED_BYTE, px);
+            id = (unsigned int)px[0]
+               | ((unsigned int)px[1] << 8)
+               | ((unsigned int)px[2] << 16);
+        }
+        pick_set_programs(0);
+        g_pick_mode = 0;
+    }
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    glViewport(0, 0, g_vp_w, g_vp_h);
+    return id;
 }
 
 

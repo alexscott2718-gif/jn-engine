@@ -77,3 +77,7 @@ build/jnvsjn_web/
 # deploys to /var/www/{jn-assets,jnvsjn-assets}). Large, never committed.
 build/portal/
 build/portal_jnvsjn/
+
+# One-off scratch (HUD digit harvest, ad-hoc experiments)
+build/hud_digit_harvest/
+build/oneoff/

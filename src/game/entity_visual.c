@@ -66,6 +66,9 @@ static const TagEntry TAG_TABLE[] = {
     { "3PIC", "pad2",          { "assets/ase/omt/RocketPad.ASE", NULL, 1.0f, 0 } },
     { "3PIC", "egg2b",         { "assets/ase/omt/egg.ASE",      NULL, 0.5f, 0 } },
     { "3PIC", "boatl",         { "assets/ase/omt/SailBoat.ASE", NULL, 0.5f, 0 } },
+    /* Level2 rescue kitty: C3DKitty registers cat anims + cat.png; the pickup
+       shows the cat itself (same referent pattern as hydrant/godphone). */
+    { "3PIC", "kitty",         { "assets/ase/catsit.ASE", "assets/png/cat.png", 1.0f, 0 } },
     { "3PIC", "hsounds",       { NULL, NULL, 0.0f, 1 } },  /* sound trigger, no mesh */
     /* No wrench/water2 ASEs available; fall through to TYPE_TABLE default. */
 
@@ -157,8 +160,11 @@ static const TypeEntry TYPE_TABLE[] = {
     { "3RCK", { NULL, NULL, 0.0f, 1 } },  /* rocket — HIDDEN flag on all instances */
     { "LOAD", { NULL, NULL, 0.0f, 1 } },  /* level-load trigger */
     { "3TSP", { NULL, NULL, 0.0f, 1 } },  /* JNvsJN transport effect; sprite/effect later */
-    /* 3CHK checkpoint: visible camera-facing marker (sprites.omt "checkpoint").
-       Behavior (vt_checkpoint) sets the respawn point on overlap. */
+    /* 3CHK checkpoint: visible camera-facing marker. Behavior (vt_checkpoint)
+       sets the respawn point on overlap. This row is the JNvsJN clock sprite;
+       JNBG checkpoints author SpriteIndex 42 (sprites.omt "flag" — crossed
+       flags) and are routed to the sprite-db tier before this row in
+       entity_visual_resolve(). */
     { "3CHK", { NULL, NULL, 0, 0,
                 "assets/parsed/sprites/jnvsjn/spr_checkpoint.png",
                 160.0f, 0,0,0,0 } },
@@ -198,7 +204,9 @@ static const TypeEntry TYPE_TABLE[] = {
     { "3CAR", { "assets/ase/carlstop.ASE",    NULL, 1.0f, 0 } },
     { "3BEN", { "assets/ase/bennystop.ASE",   NULL, 1.0f, 0 } },
     { "3HUM", { "assets/ase/humpstop.ASE",    NULL, 1.0f, 0 } },
-    { "3FIS", { "assets/ase/fish2.ASE",       NULL, 1.0f, 0 } },
+    /* C3DDarwinFish: darwinstop/walk/shrink.ase + darwin.png (decomp
+       C3DDarwinFish.md). fish2.ASE was the pickup/editor fish placeholder. */
+    { "3FIS", { "assets/ase/darwinstop.ASE",  "assets/png/darwin.png", 1.0f, 0 } },
     { "3PHO", { "assets/ase/phone.ASE",       NULL, 1.0f, 0 } },
     { "3HYD", { "assets/ase/firehydrant.ASE", NULL, 1.0f, 0 } },
     /* Phase 9 characters (Stage A confident mappings). */
@@ -212,11 +220,15 @@ static const TypeEntry TYPE_TABLE[] = {
     { "3GUA", { "assets/ase/guardwalk.ASE",   NULL, 1.0f, 0 } },
     { "3SOL", { "assets/ase/soldwalk.ASE",    NULL, 1.0f, 0 } },
     { "3FLA", { "assets/ase/firestrato.ASE",  NULL, 1.0f, 0 } },
-    { "3SBU", { "assets/ase/retrobus.ASE",    NULL, 1.0f, 0 } },
+    /* C3DBus is the school bus: HIDEFAULT -> bus.ase + bus.png (decomp
+       C3DBus.md). retrobus.ASE is the Retroland shuttle, a different vehicle. */
+    { "3SBU", { "assets/ase/bus.ASE",         "assets/png/bus.png", 1.0f, 0 } },
 
     /* Tier 4 — environment defaults sourced from OMT extraction (Phase 7). */
     { "3TRE", { "assets/glb/omt/tree01.glb",    NULL, 1.0f, 0 } },  /* GLB (ASE was 8-vert stub) */
-    { "3DIN", { "assets/ase/omt/dino.ASE",      NULL, 1.0f, 0 } },
+    /* C3DDino: dinostop/walk/shrink.ase + dino.png (decomp C3DDino.md).
+       omt/dino.ASE is the unrelated "dino" prop mesh inside objects.omt. */
+    { "3DIN", { "assets/ase/dinostop.ASE",      "assets/png/dino.png", 1.0f, 0 } },
     /* 3FAN: the old OMT->ASE export produced an 8-vert stub (fan.ASE) textured
        off a metal atlas — it rendered as a "wood" board. Use the OMT->GLB
        pipeline's real fan mesh (228 verts, embedded textures) instead. See the
@@ -246,22 +258,18 @@ static const TypeEntry TYPE_TABLE[] = {
        Canvas chunks (Ghidra-verified Phase 9, Stage B). No 3D mesh exists.
        3NEU/3RED share the same atlas (canvas 0–12); 3RED gets a red tint.
        sprite_size is in world units; tuned to match the Phase 9 placeholder
-       sphere scale so existing placement heights still read correctly. */
+       sphere scale so existing placement heights still read correctly.
+       3BAL/3CON/3LEA rows were removed (2026-06-11 QA): they hardcoded
+       image-file *ordinals* from before the SpriteIndex=chunk_id discovery
+       (cone showed the piggybank, balloon/leaf paths didn't exist). Those
+       FourCCs now fall through to the per-instance sprite-db tier, which
+       resolves the authored chunk id through the generated map. */
     { "3NEU", { NULL, NULL, 0, 0,
                 "assets/parsed/sprites/sprites_images/0000_100x100d32.png",
                 90.0f, 0,0,0,0 } },
     { "3RED", { NULL, NULL, 0, 0,
                 "assets/parsed/sprites/sprites_images/0000_100x100d32.png",
                 90.0f, 1.0f, 0.25f, 0.25f, 1.0f } },
-    { "3BAL", { NULL, NULL, 0, 0,
-                "assets/parsed/sprites/sprites_images/0050_32x32d32.png",
-                70.0f, 0,0,0,0 } },
-    { "3CON", { NULL, NULL, 0, 0,
-                "assets/parsed/sprites/sprites_images/0041_128x128d16.png",
-                90.0f, 0,0,0,0 } },
-    { "3LEA", { NULL, NULL, 0, 0,
-                "assets/parsed/sprites/sprites_images/0045_129x100d16.png",
-                90.0f, 0,0,0,0 } },
 
     /* ---- JNvsJN Step 5: widen entity coverage across all 22 levels ----
        FourCC->class from Neutron2.exe RTTI strings. Visible classes point at
@@ -438,19 +446,46 @@ static int resolve_sprite_db(const Entity *e, EntityVisual *out) {
     /* .gam SpriteSize is the world-space quad size (matches the existing
        sprite draw convention); 0/unset falls back in the draw path. */
     out->sprite_size = e->sprite_size;
+    /* C3DBalloon (and only it, today) authors per-instance Red/Green/Blue
+       color multipliers; the original copies them into the canvas color
+       record as (R, G, B, 0.8) — decomp C3DBalloon.md. tint_a==0 stays
+       "no tint" for entities that don't author a color. */
+    {
+        float r = gam_prop_f(e, "Red",   -1.0f);
+        float g = gam_prop_f(e, "Green", -1.0f);
+        float b = gam_prop_f(e, "Blue",  -1.0f);
+        if (r >= 0.0f || g >= 0.0f || b >= 0.0f) {
+            out->tint_r = r >= 0.0f ? r : 1.0f;
+            out->tint_g = g >= 0.0f ? g : 1.0f;
+            out->tint_b = b >= 0.0f ? b : 1.0f;
+            out->tint_a = 0.8f;
+        }
+    }
     return 1;
+}
+
+int entity_visual_tag_override(const Entity *e, EntityVisual *out) {
+    if (!e) return 0;
+    for (int i = 0; i < TAG_TABLE_N; i++) {
+        if (strncmp(e->type, TAG_TABLE[i].fourcc, 4) != 0) continue;
+        if (strcasecmp(e->tag, TAG_TABLE[i].tag) != 0) continue;
+        if (out) *out = TAG_TABLE[i].v;
+        return 1;
+    }
+    return 0;
 }
 
 int entity_visual_resolve(const Entity *e, EntityVisual *out) {
     if (!e || !out) return 0;
 
-    for (int i = 0; i < TAG_TABLE_N; i++) {
-        if (strncmp(e->type, TAG_TABLE[i].fourcc, 4) != 0) continue;
-        if (strcasecmp(e->tag, TAG_TABLE[i].tag) != 0) continue;
-        *out = TAG_TABLE[i].v;
-        return 1;
-    }
+    if (entity_visual_tag_override(e, out)) return 1;
     if (resolve_grn_asset(e, out)) return 1;
+    /* JNBG checkpoints author their own sprite (chunk 42 = crossed flags);
+       route them to the sprite-db tier ahead of the 3CHK TYPE row, which
+       carries the JNvsJN clock. (Deliberately narrow: a general reorder
+       would strip the curated 3NEU/3RED tints.) */
+    if (g_is_jnbg && strncmp(e->type, "3CHK", 4) == 0 &&
+        resolve_sprite_db(e, out)) return 1;
     for (int i = 0; i < TYPE_TABLE_N; i++) {
         if (strncmp(e->type, TYPE_TABLE[i].fourcc, 4) != 0) continue;
         *out = TYPE_TABLE[i].v;

@@ -30,6 +30,11 @@ typedef struct {
    and caller should fall back to placeholder rendering. */
 int entity_visual_resolve(const Entity *e, EntityVisual *out);
 
+/* Tag-table check only (tier 1). Lets draw paths that shortcut on
+   SpriteIndex (the 3PIC "hidden" ?-placeholder) yield to a curated
+   per-tag visual first. out may be NULL when only the test is needed. */
+int entity_visual_tag_override(const Entity *e, EntityVisual *out);
+
 /* Game selector for the per-instance sprite tier. The C3DSprite family reads
    SpriteDatabase ("sprites.omt") + SpriteIndex from the .gam, but each game
    ships its *own* sprites.omt — JNBG indices resolve through the generated

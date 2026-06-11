@@ -193,10 +193,15 @@ import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 const q = new URLSearchParams(location.search);
 const cat = q.get("cat") || "";
 const name = q.get("name") || "";
-const glbUrl = `../${cat}/models/${name}.glb`;
+// `glb` is an explicit URL to the mesh (used by the asset portal, which deploys
+// glbs under files/mesh-glb/…); fall back to the per-category catalog layout.
+const glbUrl = q.get("glb") || `../${cat}/models/${name}.glb`;
 
 const canvas = document.querySelector("#c");
-document.querySelector("#back").href = `../${cat}/index.html`;
+const back = document.querySelector("#back");
+back.href = q.get("back") || (q.get("glb") ? "../index.html" : `../${cat}/index.html`);
+// When embedded in a lightbox iframe there is nowhere to go "back" to — hide it.
+if (window.top !== window.self) back.style.display = "none";
 
 const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
 renderer.outputColorSpace = THREE.SRGBColorSpace;

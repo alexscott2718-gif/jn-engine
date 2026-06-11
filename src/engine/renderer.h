@@ -103,6 +103,22 @@ void renderer_set_alpha_cutout(int enable, float threshold);
  * after. */
 void renderer_set_billboard_uv_flip_y(int enable);
 
+/* QA color-ID pick pass (docs/qa_annotate_plan.md). pick_begin binds an
+ * offscreen ID framebuffer sized w x h (pass the viewport size so cursor
+ * coords map 1:1); model/billboard/box draws between begin and end render the
+ * 24-bit ID installed by pick_set_id as a flat color, through the same
+ * alpha/color-key discards as the main pass. pick_end reads the ID under the
+ * cursor (window coords, top-left origin), restores the default framebuffer
+ * and viewport, and returns it — 0 means background/none, so callers should
+ * register objects with IDs starting at 1. */
+int          renderer_pick_begin(int w, int h);
+void         renderer_pick_set_id(unsigned int id);
+unsigned int renderer_pick_end(int cursor_x, int cursor_y);
+
+/* QA hover/selection tint mixed into subsequent lit/billboard/box draws.
+ * strength 0 disables; stateful, so reset after the highlighted object. */
+void renderer_set_highlight(float r, float g, float b, float strength);
+
 Camera *renderer_camera(void);
 
 /* Copy the current projection*view matrix (computed at begin_frame) into out. */
