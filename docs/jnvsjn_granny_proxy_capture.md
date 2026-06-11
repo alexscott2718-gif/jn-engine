@@ -333,3 +333,108 @@ Do positions/normals change over time for the same descp while indices/UVs stay 
 ```
 
 If yes, baked vertex animation is the next pragmatic implementation path.
+
+## M3a Animation Capture — IMPLEMENTED (2026-06-06)
+
+The baked-vertex path is built. Rather than a separate ANIM-DIAG hash-only proxy,
+the M2d proxy was extended in place with an **opt-in** per-frame sampler, so the
+same DLL still produces the M2d static mesh/texture dumps and, when asked, also
+records animation. It is disabled by default and safe to leave deployed.
+
+### Proxy changes (`granny_proxy.c`, M3a)
+
+- New env var **`GRN_ANIM_SRC`** (read once in `DllMain`). Empty/unset → animation
+  capture off (identical to M2d). Set to a substring of the source `.grn` name
+  (case-insensitive, e.g. `jimmy`) → capture on, but only for matching meshes.
+- In `_GrannyLockNextRenderingState`, after the one-shot `.grnmesh` base dump, the
+  new `dump_anim_sample()` appends the **current posed** float streams (Granny has
+  already deformed them for the live frame) plus the per-frame `XFRM` transform to
+  a per-descriptor `C:\grn_dump\a<descp>.grnanim` file. Index/topology streams are
+  not re-written (they live in the base `.grnmesh`).
+- Hard bounds so a stray match can't fill the disk or stall the render thread:
+  `ANIM_MAX_DESCS=4`, `ANIM_MAX_SAMPLES=2400` per descriptor,
+  `ANIM_MAX_TOTAL_BYTES=160 MiB`. No socket I/O; plain buffered `WriteFile`.
+- No trailing `END.` record — the game can exit without a clean DLL detach, so the
+  Debian parser tolerates a truncated final sample.
+
+`.grnanim` layout:
+
+```text
+"GRNA" version:u32 descp:u32          (header, once)
+"SRCN" len:u32 bytes                  source .grn name
+repeat per sample:
+  "FRAM" sample_index:u32 time_ms:u32 (GetTickCount)
+  "XFRM" 16*f32                       per-frame 4x4 transform
+  nstreams:u32
+  repeat: "STRM" dtype:u32 ncomp:u32 count:u32 data[count*ncomp*4]
+```
+
+Build + verify with `./build.sh` (gates unchanged: 101 exports, 93 forwarders, 8
+decorated hooks at original ordinals, KERNEL32+USER32 only, no UCRT).
+**M3a SHA-1: `07b96f632778fe8a48f672d1dd467f61ffc067db`**, staged at
+`/srv/temp-vnc/granny_proxy/granny.dll` (= `\\192.168.1.2\temp-vnc\granny_proxy\`).
+
+### Exporter (`grnanim_to_glb.py`)
+
+Base `.grnmesh` (topology/UV/texture) + `a<descp>.grnanim` (pose sequence) → an
+animated `.glb`:
+
+- rest pose = first kept frame, localized to its AABB center;
+- one **morph target per frame** = position (and normal) delta from rest;
+- a glTF **animation** keying the morph **weights** (LINEAR, so adjacent frames
+  blend) over the captured `time_ms` timestamps (falls back to `--fps` if the
+  timestamps are degenerate);
+- embedded `.grntex` baseColorTexture reused by descriptor pointer;
+- `--max-frames` (default 150) uniformly subsamples long clips for viewer sanity.
+
+If positions are ~constant but `XFRM` varies, the clip is rigid-transform motion
+(prop animation) rather than vertex deformation — the exporter prints a `WARN` and
+that case routes to the skeleton/transform path later.
+
+Validated end-to-end **without the game** by `test_grnanim_synth.py`: it
+synthesizes a `.grnanim` (byte-identical to the proxy's output) from the real
+`jimmybase` capture, bakes it, and asserts a valid morph-target animation (60
+morph targets, a weights channel, 60 time keys, 3600 weight outputs, deform span
+8.0). Same injection-style proof used for the v3 ddraw pipeline.
+
+### Deploy + capture procedure (human, on XP via noVNC)
+
+The game **must** be launched from the noVNC desktop (interactive window station);
+`xp_client` launches land on an invisible station where Granny may never render.
+`xp_client` is used only for transfer / SHA / dump cleanup.
+
+1. **Stage** (Debian, done): `granny.dll` (M3a, SHA-1 above) is in
+   `\\192.168.1.2\temp-vnc\granny_proxy\`, alongside `capture_jimmy_anim.bat`.
+2. **Deploy** in the game dir
+   `C:\Program Files\THQ\Jimmy Neutron\Jimmy Neutron vs. Jimmy Negatron\`:
+   `granny_orig.dll` is already present from M1; just overwrite `granny.dll` with
+   the M3a build. Copy `capture_jimmy_anim.bat` into that same dir.
+3. **Verify the deployed bytes** from Debian (XP has no `certutil`):
+   download `granny.dll` back via `xp_client` and confirm SHA-1 ==
+   `07b96f632778fe8a48f672d1dd467f61ffc067db`.
+4. **Clear** old dumps (xp_client): delete `C:\grn_dump\a*.grnanim` (and
+   optionally `m*.grnmesh`/`t*.grntex` for a clean set) and `C:\granny_cap.log`.
+5. **Capture**: double-click `capture_jimmy_anim.bat` (it sets
+   `GRN_ANIM_SRC=jimmy` and launches `Neutron2.exe`). Get Jimmy on screen and
+   perform **one clear action for ~5–15 s** (idle, then walk, then turn). Keep
+   clips short and single-action — label them by what you did. Quit the game.
+6. **Pull** (xp_client): retrieve `C:\grn_dump\m<descp>.grnmesh`,
+   `t<descp>.grntex`, `a<descp>.grnanim`, and `C:\granny_cap.log` into a new
+   `~/jnvsjn-runtime/grn_anim_run1/`. The `granny_cap.log` header shows
+   `anim=ON filter="jimmy"` and `ANIM a01310230 sample=...` lines.
+7. **Bake + view** (Debian):
+   ```sh
+   cd ~/jn-engine/instrument/granny_proxy
+   ./grnanim_to_glb.py ~/jnvsjn-runtime/grn_anim_run1/m01310230.grnmesh \
+                       ~/jnvsjn-runtime/grn_anim_run1/a01310230.grnanim \
+                       --texture-dir ~/jnvsjn-runtime/grn_anim_run1 \
+                       -o ~/jnvsjn-runtime/grn_anim_run1/jimmy_walk.anim.glb
+   ```
+   Open the `.glb` in Blender (File → Import → glTF 2.0, press Space to play) or
+   drag onto https://gltf-viewer.donmccurdy.com to scrub the timeline.
+
+Note: `jimmy` matches `jimmybase.grn` and any `jimmy*` clip the renderer touches.
+The mesh descriptor (`a01310230` for jimmybase) is the same across sequences, so
+one continuous run captures whatever animation is playing; separate runs per
+action keep the baked clips clean.
+

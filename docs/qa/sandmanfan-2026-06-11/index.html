@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>QA Ticket Resolution — sandmanfan, 2026-06-11 · jn-engine</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body {
+  font-family:'Monaco','Menlo','Ubuntu Mono',monospace;
+  background:#0d0d0d; color:#e0e0e0;
+  line-height:1.55; padding:24px 16px;
+}
+.wrap { max-width:1060px; margin:0 auto; }
+h1 { font-size:1.5em; color:#fff; margin-bottom:4px; }
+h2 { font-size:1.15em; color:#7ec8ff; margin:40px 0 12px; border-bottom:1px solid #2a2a2a; padding-bottom:6px; }
+h3 { font-size:1.0em; color:#fff; }
+p { margin:10px 0; color:#c8c8c8; }
+a { color:#7ec8ff; text-decoration:none; }
+a:hover { text-decoration:underline; }
+.sub { color:#888; font-size:0.85em; }
+.badge { display:inline-block; padding:1px 8px; border-radius:4px; font-size:0.75em; vertical-align:middle; }
+.badge.green { background:#143a14; color:#7dde7d; border:1px solid #2c6e2c; }
+.badge.cat { background:#1d2c3d; color:#9ecbff; border:1px solid #2c5a8a; }
+table { width:100%; border-collapse:collapse; margin:14px 0; font-size:0.82em; }
+th,td { text-align:left; padding:6px 8px; border-bottom:1px solid #242424; vertical-align:top; }
+th { color:#9a9a9a; font-weight:normal; }
+td.msg { color:#c8c8c8; }
+.card { background:#141414; border:1px solid #262626; border-radius:10px; padding:20px; margin:26px 0; }
+.card h3 { margin-bottom:2px; }
+.meta { font-size:0.8em; color:#888; margin-bottom:12px; }
+.quote { border-left:3px solid #8a6d2c; background:#1a160d; color:#d9c08a; padding:8px 12px; margin:10px 0; font-size:0.88em; border-radius:0 6px 6px 0; }
+.ba { display:grid; grid-template-columns:1fr 1fr; gap:14px; margin:14px 0; }
+@media (max-width:760px) { .ba { grid-template-columns:1fr; } }
+.shot { background:#0a0a0a; border:1px solid #262626; border-radius:8px; overflow:hidden; }
+.shot img { display:block; width:100%; height:auto; }
+.shot .lbl { padding:6px 10px; font-size:0.78em; }
+.lbl.bad  { color:#ff8d8d; border-top:1px solid #3a1d1d; background:#1c1010; }
+.lbl.good { color:#7dde7d; border-top:1px solid #1d3a1d; background:#101c10; }
+.ev { background:#101418; border:1px solid #20303d; border-radius:8px; padding:14px 16px; margin:14px 0; }
+.ev .tag { color:#7ec8ff; font-size:0.78em; letter-spacing:0.08em; }
+.ev p { font-size:0.88em; }
+pre { background:#0a0a0a; border:1px solid #242424; border-radius:6px; padding:10px 12px; overflow-x:auto; font-size:0.75em; color:#b8c8b8; margin:10px 0; }
+code { color:#d9c08a; font-size:0.92em; }
+.sprites { display:flex; gap:18px; flex-wrap:wrap; align-items:flex-end; margin:12px 0; }
+.sprites figure { text-align:center; }
+.sprites img { image-rendering:pixelated; background:#222; border:1px solid #333; border-radius:4px; max-width:160px; }
+.sprites figcaption { font-size:0.72em; color:#888; margin-top:4px; max-width:170px; }
+.fix { border-left:3px solid #2c6e2c; background:#0d160d; padding:8px 12px; margin:12px 0; font-size:0.88em; color:#aFcFaF; border-radius:0 6px 6px 0; }
+.fix code { color:#9edf9e; }
+ul { margin:8px 0 8px 22px; color:#c8c8c8; }
+li { margin:6px 0; font-size:0.92em; }
+.footer { margin-top:48px; padding-top:14px; border-top:1px solid #2a2a2a; font-size:0.8em; color:#777; }
+.toc { font-size:0.85em; columns:2; }
+@media (max-width:600px) { .toc { columns:1; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<h1>QA Ticket Resolution Log <span class="badge green">8 / 8 RESOLVED</span></h1>
+<p class="sub">Ticket submitted by <strong>sandmanfan</strong> (Discord) · 2026-06-11 · levels 2 / 2a / 2b ·
+fixes authored autonomously by Claude (Fable&nbsp;5) via Claude Code · live demo: <a href="https://exentt.com/jn-engine/">exentt.com/jn-engine</a></p>
+
+<p>This page documents, line item by line item, how an 8-report QA ticket against the
+<a href="https://github.com/alexscott2718-gif/jn-engine">jn-engine</a> JNBG reimplementation was diagnosed and fixed.
+Each card shows the report as filed, a screenshot from the <em>deprecated</em> engine build that contained the flaw,
+the evidence trail that located the root cause, the fix, and the same camera shot from the fixed engine.
+The ticket was filed in-game with the engine's QA annotate tool (B-key picker → markdown/JSON export),
+which records entity FourCC, class tag, asset reference and world position — those positions were reused
+verbatim to aim the before/after cameras below.</p>
+
+<h2>The Ticket</h2>
+<table>
+<tr><th>#</th><th>level</th><th>entity</th><th>class</th><th>cat.</th><th>report</th></tr>
+<tr><td><a href="#i1">1</a></td><td>level2</td><td>3DIN</td><td>C3DDINO</td><td>MIS</td><td class="msg">model is GEP instead of dino. texture is correct. same applies in level2b</td></tr>
+<tr><td><a href="#i2">2</a></td><td>level2</td><td>3SBU</td><td>C3DBUS</td><td>TEX</td><td class="msg">texture is retroland shuttle instead of school bus. same applies in level2b</td></tr>
+<tr><td><a href="#i3">3</a></td><td>level2</td><td>3FIS</td><td>C3DDARWINFISH</td><td>MIS</td><td class="msg">in general, darwins use what seems to be a level editor model instead of the real one</td></tr>
+<tr><td><a href="#i4">4</a></td><td>level2</td><td>3PIC</td><td>kitty</td><td>MIS</td><td class="msg">missing cat ASE</td></tr>
+<tr><td><a href="#i5">5</a></td><td>level2</td><td>3BAL</td><td>C3DBALLOON</td><td>TEX</td><td class="msg">missing balloon sprite for every 3BAL entity. also look into what makes them different colors, as its white by default.</td></tr>
+<tr><td><a href="#i6">6</a></td><td>level2b</td><td>3CON</td><td>C3DCONE</td><td>TEX</td><td class="msg">texture is piggybank instead of cone for all entities. same applies in level2</td></tr>
+<tr><td><a href="#i7">7</a></td><td>level2b</td><td>START</td><td>placement</td><td>TEX</td><td class="msg">banner doesn't display "Nick's Finish Line". same applies in level2</td></tr>
+<tr><td><a href="#i8">8</a></td><td>level2b</td><td>3CHK</td><td>check1a</td><td>TEX</td><td class="msg">checkpoint should be crossed flags sprite and not the JNvJN clock. same applies in level2a</td></tr>
+</table>
+
+<p class="sub">MIS = wrong/missing model · TEX = wrong/missing texture. Six of eight items resolved in
+<code>src/game/entity_visual.c</code> (the entity→visual resolver); item 7 turned out to be a renderer-level
+D3D7↔OpenGL semantics mismatch. Items 5, 6 and 8 share a single root cause.</p>
+
+<!-- ================= ITEM 1 ================= -->
+<div class="card" id="i1">
+<h3>1 · 3DIN — wrong dino model <span class="badge cat">MIS</span></h3>
+<div class="meta">level2 @ (-1299, 30, -1061) · C3DDINO</div>
+<div class="quote">"model is GEP instead of dino. texture is correct. same applies in level2b"</div>
+<div class="ba">
+  <div class="shot"><img src="img/3din-before.jpg" alt="before: wrong prop mesh"><div class="lbl bad">DEPRECATED — resolver bound an unrelated prop mesh from objects.omt</div></div>
+  <div class="shot"><img src="img/3din-after.jpg" alt="after: real dino"><div class="lbl good">FIXED — the real dinostop.ASE character mesh + dino.png</div></div>
+</div>
+<div class="ev"><span class="tag">EVIDENCE TRAIL</span>
+<p>The resolver row pointed at <code>assets/ase/omt/dino.ASE</code> — a mesh that happens to be <em>named</em>
+"dino" inside the <code>objects.omt</code> container (a level prop, not the character). The ground truth was already
+on disk: the Ghidra-derived decomp spec <code>docs/decomp/C3DDino.md</code> captures the class's
+<code>InitObject</code> verbatim:</p>
+<pre>(**(code **)(puVar1 + 0xd8))(s_HIWALK,   s_dinowalk_ase);
+(**(code **)(this->vftable + 0xd8))(s_HISHRINK, s_dinoshrink_ASE);
+(**(code **)(this->vftable + 0xd8))(s_HISTOP,  s_dinostop_ase);
+(**(code **)(this->vftable + 0xf0))(s_dino_png, 0);</pre>
+<p>The class registers <code>dinostop.ase</code> (+walk/shrink anims) and loads <code>dino.png</code> —
+both already extracted from the original install. One <code>ls</code> confirmed they exist.</p>
+</div>
+<div class="fix"><strong>Fix:</strong> one-row swap in the resolver's TYPE table →
+<code>{ "3DIN", { "assets/ase/dinostop.ASE", "assets/png/dino.png" } }</code></div>
+</div>
+
+<!-- ================= ITEM 2 ================= -->
+<div class="card" id="i2">
+<h3>2 · 3SBU — shuttle texture instead of school bus <span class="badge cat">TEX</span></h3>
+<div class="meta">level2 @ (-1275, -1, -2735) · C3DBUS</div>
+<div class="quote">"texture is retroland shuttle instead of school bus. same applies in level2b"</div>
+<div class="ba">
+  <div class="shot"><img src="img/3sbu-before.jpg" alt="before: purple Retroland shuttle"><div class="lbl bad">DEPRECATED — retrobus.ASE: the purple Retroland shuttle, a different vehicle</div></div>
+  <div class="shot"><img src="img/3sbu-after.jpg" alt="after: yellow school bus"><div class="lbl good">FIXED — bus.ASE + bus.png: the yellow school bus</div></div>
+</div>
+<div class="ev"><span class="tag">EVIDENCE TRAIL</span>
+<p>Both bus meshes ship in the original install; the resolver had picked the wrong one. Their ASE material
+blocks distinguish them instantly:</p>
+<pre>bus.ASE:      *BITMAP "D:\neutron\run\png\bus.png"        ← school bus
+retrobus.ASE: *BITMAP "D:\Jimmy\busretro.bmp"             ← Retroland shuttle</pre>
+<p><code>docs/decomp/C3DBus.md</code> settles it from the binary itself: C3DBus's lazy visual loader
+"registers <code>HIDEFAULT → bus.ase</code>, loads <code>bus.png</code> into texture slot 0".</p>
+</div>
+<div class="fix"><strong>Fix:</strong> one-row swap →
+<code>{ "3SBU", { "assets/ase/bus.ASE", "assets/png/bus.png" } }</code></div>
+</div>
+
+<!-- ================= ITEM 3 ================= -->
+<div class="card" id="i3">
+<h3>3 · 3FIS — Darwin uses a level-editor model <span class="badge cat">MIS</span></h3>
+<div class="meta">level2 @ (5874, 12, -364) · C3DDARWINFISH</div>
+<div class="quote">"in general, darwins use what seems to be a level editor model instead of the real one"</div>
+<div class="ba">
+  <div class="shot"><img src="img/3fis-before.jpg" alt="before: flat editor fish"><div class="lbl bad">DEPRECATED — fish2.ASE, a flat pickup-item fish</div></div>
+  <div class="shot"><img src="img/3fis-after.jpg" alt="after: Darwin"><div class="lbl good">FIXED — darwinstop.ASE + darwin.png: the actual Darwin character</div></div>
+</div>
+<div class="ev"><span class="tag">EVIDENCE TRAIL</span>
+<p>The reporter's "level editor model" instinct was exactly right — the bound mesh's own material path
+betrays its origin as a 3D-items pickup asset, not a character:</p>
+<pre>fish2.ASE: *BITMAP "D:\Jimmy (ken)\3D Items (pick up)\bmp\fish3.bmp"</pre>
+<p><code>docs/decomp/C3DDarwinFish.md</code> shows the class registering
+<code>darwinwalk.ase / darwinshrink.ASE / darwinstop.ase</code> and loading <code>darwin.png</code> —
+the same registration pattern as the dino (the two classes share their decompiled InitObject shape).</p>
+</div>
+<div class="fix"><strong>Fix:</strong> one-row swap →
+<code>{ "3FIS", { "assets/ase/darwinstop.ASE", "assets/png/darwin.png" } }</code></div>
+</div>
+
+<!-- ================= ITEM 4 ================= -->
+<div class="card" id="i4">
+<h3>4 · 3PIC "kitty" — missing cat <span class="badge cat">MIS</span></h3>
+<div class="meta">level2 @ (3616, 904, -1679) · pickup, tag "kitty", authored SpriteIndex 106</div>
+<div class="quote">"missing cat ASE"</div>
+<div class="ba">
+  <div class="shot"><img src="img/3pic-kitty-before.jpg" alt="before: question mark sprite"><div class="lbl bad">DEPRECATED — a floating "?" placeholder sprite where the cat should sit</div></div>
+  <div class="shot"><img src="img/3pic-kitty-after.jpg" alt="after: cat on ledge"><div class="lbl good">FIXED — catsit.ASE + cat.png on the school ledge (note: bus in the background is also fixed)</div></div>
+</div>
+<div class="ev"><span class="tag">EVIDENCE TRAIL</span>
+<p>This one had two layers. First, the resolver had no per-tag row for "kitty", so it should have fallen
+to a generic pickup. But the engine logs showed no cat mesh ever loading — because 3PIC entities with an
+authored <code>SpriteIndex &gt; 0</code> take a separate billboard shortcut. Decoding what that index
+actually points at explained the mystery floating "?":</p>
+<div class="sprites">
+<figure><img src="img/ev-hidden.png" alt="hidden sprite"><figcaption>sprites.omt chunk 106 — a canvas literally named <code>hidden</code>: the original level editor's "hidden object" placeholder</figcaption></figure>
+</div>
+<p>The original game never renders this marker — the kitty pickup (the level's rescue-the-cat objective)
+shows the cat itself. <code>docs/decomp/C3DKitty.md</code> confirms cat animations + <code>cat.png</code>.</p>
+</div>
+<div class="fix"><strong>Fix:</strong> new tag row
+<code>{ "3PIC", "kitty", { "assets/ase/catsit.ASE", "assets/png/cat.png" } }</code>, plus a new
+<code>entity_visual_tag_override()</code> check so curated tag visuals take precedence over the
+SpriteIndex billboard shortcut.</div>
+</div>
+
+<!-- ================= ITEM 5 ================= -->
+<div class="card" id="i5">
+<h3>5 · 3BAL — white balloons / missing sprite + colors <span class="badge cat">TEX</span></h3>
+<div class="meta">level2 @ (14592, 858, 5647) · C3DBALLOON, authored SpriteIndex 50</div>
+<div class="quote">"missing balloon sprite for every 3BAL entity. also look into what makes them different colors, as its white by default."</div>
+<div class="ba">
+  <div class="shot"><img src="img/3bal-before.jpg" alt="before: white square"><div class="lbl bad">DEPRECATED — untextured white quad: the curated row referenced a file that doesn't exist</div></div>
+  <div class="shot"><img src="img/3bal-after.jpg" alt="after: tinted balloon"><div class="lbl good">FIXED — real balloon sprite, tinted per-instance from .gam Red/Green/Blue</div></div>
+</div>
+<div class="ev"><span class="tag">EVIDENCE TRAIL</span>
+<p><strong>Bug A (white quad):</strong> the resolver row hardcoded
+<code>0050_32x32d32.png</code> — an image-file <em>ordinal</em> from an older interpretation of SpriteIndex.
+That file doesn't exist (texture load fails → white). The generated sprite-chunk map, built after the
+SpriteIndex&nbsp;=&nbsp;canvas-chunk-id discovery, already had the right answer:</p>
+<pre>{ "sprites.omt", 50, ".../0071_128x128d32.png" },  /* balloon */</pre>
+<div class="sprites">
+<figure><img src="img/ev-balloon.png" alt="balloon sprite"><figcaption>chunk 50 — the real <code>balloon</code> canvas</figcaption></figure>
+</div>
+<p><strong>Bug B (colors):</strong> a hex dump of a 3BAL record in <code>Level2.gam</code> revealed three
+unparsed per-instance float properties:</p>
+<pre>Red   ... 3f000000  = 0.5      (big-endian float)
+Green ... 3dcccccd  = 0.1
+Blue  ... 3f800000  = 1.0</pre>
+<p><code>docs/decomp/C3DBalloon.md</code> (measured from the binary) documents exactly where they go:
+"Adjusted canvas/material color record set to <code>(Red, Green, Blue, 0.8)</code>". That's what makes
+each balloon a different color — the engine just wasn't reading them.</p>
+</div>
+<div class="fix"><strong>Fix:</strong> deleted the stale row (the per-instance sprite tier now resolves
+chunk 50 via the generated map, with the authored SpriteSize), and the resolver now reads
+<code>Red/Green/Blue</code> from the entity's property bag and applies them as an (R, G, B, 0.8) tint.</div>
+</div>
+
+<!-- ================= ITEM 6 ================= -->
+<div class="card" id="i6">
+<h3>6 · 3CON — piggybank instead of cone <span class="badge cat">TEX</span></h3>
+<div class="meta">level2b @ (-711, 377, 10515) · C3DCONE, authored SpriteIndex 41</div>
+<div class="quote">"texture is piggybank instead of cone for all entities. same applies in level2"</div>
+<div class="ba">
+  <div class="shot"><img src="img/3con-before.jpg" alt="before: piggybanks"><div class="lbl bad">DEPRECATED — piggybank sprites scattered across the dirt course</div></div>
+  <div class="shot"><img src="img/3con-after.jpg" alt="after: cones"><div class="lbl good">FIXED — orange traffic cones (the now-working START banner is visible top-left)</div></div>
+</div>
+<div class="ev"><span class="tag">EVIDENCE TRAIL</span>
+<p>Same root cause as the balloons, but this time the wrong file <em>existed</em> — which is why it rendered
+a piggybank rather than white. The stale row referenced image file <code>0041_…png</code>; cross-checking the
+generated chunk map showed file 0041 actually belongs to canvas chunk <strong>160</strong>:</p>
+<pre>{ "sprites.omt", 160, ".../0041_128x128d16.png" },  /* piggybank  ← what the row pointed at */
+{ "sprites.omt",  41, ".../0062_64x64d32.png"  },  /* cone       ← what chunk 41 really is  */</pre>
+<div class="sprites">
+<figure><img src="img/ev-piggybank.png" alt="piggybank"><figcaption>file 0041 = chunk 160 "piggybank" (what rendered)</figcaption></figure>
+<figure><img src="img/ev-cone.png" alt="cone"><figcaption>chunk 41 = "cone" → file 0062 (what should render)</figcaption></figure>
+</div>
+<p>A file-ordinal ↔ chunk-id collision: for low ids the two numbering schemes coincide (which is why
+older sprite rows worked), and they diverge exactly where this ticket found bugs. A third stale row
+(3LEA, leaves) was caught and fixed in the same sweep before anyone reported it.</p>
+</div>
+<div class="fix"><strong>Fix:</strong> deleted the stale 3CON row (and 3LEA) — the per-instance sprite tier
+resolves the authored chunk id through the generated map.</div>
+</div>
+
+<!-- ================= ITEM 7 ================= -->
+<div class="card" id="i7">
+<h3>7 · START — banner doesn't display "Nick's Finish Line" <span class="badge cat">TEX</span></h3>
+<div class="meta">level2b placement @ (-1175, 0, 10619) · assets/glb/omt/level2b/START.glb</div>
+<div class="quote">"banner doesn't display 'Nick's Finish Line'. same applies in level2"</div>
+<div class="ba">
+  <div class="shot"><img src="img/start-before.jpg" alt="before: blank banner"><div class="lbl bad">DEPRECATED — the banner renders as perfectly blank cloth</div></div>
+  <div class="shot"><img src="img/start-after.jpg" alt="after: banner with text"><div class="lbl good">FIXED — "NICK'S FINISH LINE / Lindbergh Elementary School / Annual Science Fair"</div></div>
+</div>
+<div class="ev"><span class="tag">EVIDENCE TRAIL</span>
+<p>The hardest item — every layer of the asset pipeline checked out clean, one by one:
+the banner texture parses correctly from the level container; the exported GLB embeds it
+on the right faces (verified by decoding the mesh's triangles + materials directly);
+the GLB loader uploads one GL texture per material group; the placement draw path passes no overrides;
+culling is off. The data was provably perfect:</p>
+<div class="sprites">
+<figure><img src="img/ev-finish.png" alt="finish texture"><figcaption>the 64×64 <code>finish</code> canvas, parsed from level2b.omt — text intact</figcaption></figure>
+</div>
+<p>With the asset exonerated, the suspect had to be runtime state. A raw view/projection camera descriptor
+was crafted to frame the sign headless — it rendered <em>textured cloth with no text</em>. Dumping the
+banner primitive's UVs exposed the trick: <strong>the banner is two co-planar quads at identical depth</strong> —
+triangles 0–7 sample the blank-cloth band of the texture, triangles 8–15 (drawn second) sample the text band:</p>
+<pre>tri  0  cloth  v= [-0.55 -0.20 -0.54]      tri  8  TEXT  v= [-0.65 -1.00 -0.99]
+tri  1  cloth  v= [-0.20 -0.22 -0.54]      tri  9  TEXT  v= [-0.67 -0.65 -0.99]
+...                                         ...      (same positions, same depth)</pre>
+<p>That's a decal pattern that only works under Direct3D&nbsp;7's <em>default</em> depth test,
+<code>D3DCMP_LESSEQUAL</code> — equal-depth fragments pass, so the later text layer wins. OpenGL defaults to
+<code>GL_LESS</code> — equal-depth fragments <em>fail</em>, so the text layer could never draw a single pixel.
+The engine had simply never set a depth function.</p>
+</div>
+<div class="fix"><strong>Fix:</strong> <code>glDepthFunc(GL_LEQUAL)</code> at renderer init (matching the
+D3D7 default the original game ran under), plus adding the symbol to the engine's minimal GL loader.
+This is a faithfulness fix at the renderer level: any other co-planar decal layering in the original data
+now resolves the same way it did in 2001.</div>
+</div>
+
+<!-- ================= ITEM 8 ================= -->
+<div class="card" id="i8">
+<h3>8 · 3CHK — JNvsJN clock instead of crossed flags <span class="badge cat">TEX</span></h3>
+<div class="meta">level2b @ (-208, -61, 13484) · checkpoint, authored SpriteIndex 42</div>
+<div class="quote">"checkpoint should be crossed flags sprite and not the JNvJN clock. same applies in level2a"</div>
+<div class="ba">
+  <div class="shot"><img src="img/3chk-before.jpg" alt="before: clock sprite"><div class="lbl bad">DEPRECATED — the sequel's (JN vs JN) clock checkpoint sprite</div></div>
+  <div class="shot"><img src="img/3chk-after.jpg" alt="after: crossed flags"><div class="lbl good">FIXED — crossed checkered flags, resolved from the level's own authored sprite</div></div>
+</div>
+<div class="ev"><span class="tag">EVIDENCE TRAIL</span>
+<p>The engine runs two games (JNBG and its sequel JN&nbsp;vs&nbsp;JN), and the checkpoint visual was a single
+hard-coded row pointing at the <em>sequel's</em> clock sprite for both. But the QA export itself contained
+the answer: the JNBG <code>.gam</code> authors <code>SpriteIndex 42</code> on every checkpoint, and chunk 42
+in sprites.omt is a canvas named — literally — <code>flag</code>:</p>
+<div class="sprites">
+<figure><img src="img/ev-clock.png" alt="clock"><figcaption>JNvsJN <code>spr_checkpoint</code> (what rendered)</figcaption></figure>
+<figure><img src="img/ev-flag.png" alt="flags"><figcaption>sprites.omt chunk 42 "flag" (what the level authored)</figcaption></figure>
+</div>
+</div>
+<div class="fix"><strong>Fix:</strong> JNBG checkpoints are now routed to their authored sprite ahead of
+the hard-coded row; the row remains as the JNvsJN path (that game's checkpoints really are clocks).
+Done as a narrow special case, since a blanket priority reorder would have broken curated tinted sprites
+elsewhere.</div>
+</div>
+
+<!-- ================= PROCESS ================= -->
+<h2>How These Were Resolved — Process Notes</h2>
+<p>All eight items were diagnosed and fixed in a single session by Claude (Fable&nbsp;5) running in Claude Code
+on the project box, with no human-written code. The general loop:</p>
+<ul>
+<li><strong>Ticket → resolver:</strong> the QA export's FourCC + tag + asset fields point directly into
+<code>entity_visual.c</code>; five reports were table-row inspections from there.</li>
+<li><strong>Ground truth lookup:</strong> for each suspect class, the repo's Ghidra-derived decomp specs
+(<code>docs/decomp/C3D*.md</code>) state which assets the original binary registers — four items were settled
+by reading them, no new reverse engineering needed.</li>
+<li><strong>Artifact decoding:</strong> sprite/canvas questions were answered by decoding the original
+containers (sprites.omt chunk map, .gam hex dumps, GLB triangle/UV dumps) rather than guessing.</li>
+<li><strong>Headless verification:</strong> every fix was confirmed by aiming a camera at the reported
+world position and screenshotting the native engine — the same harness that produced every image on this page.</li>
+</ul>
+
+<h2>Efficiency Takeaways</h2>
+<ul>
+<li><strong>Three reports, one bug.</strong> Items 5, 6 and 8 (and an unreported 3LEA case) all traced to
+sprite rows written before the SpriteIndex=chunk-id discovery. When a data-interpretation discovery like that
+lands, sweeping <em>all</em> existing consumers of the old interpretation would have prevented three of
+eight tickets.</li>
+<li><strong>Decomp docs are the highest-leverage artifact.</strong> Items 1, 2, 3 and 5's color logic were
+answered in minutes because <code>docs/decomp/</code> already recorded each class's measured asset bindings.
+A lint that cross-checks resolver rows against decomp-doc asset references could catch mismatches
+before QA ever sees them.</li>
+<li><strong>Reported coordinates should drive cameras automatically.</strong> The before/after shots here
+were produced by generating raw view/proj descriptors from the ticket's own positions. Folding that into the
+QA tool ("screenshot every reported position, before and after") would make regression evidence free.</li>
+<li><strong>API-default mismatches are a class, not an incident.</strong> The depth-function bug joins a
+known family (UV V-flip, Z-handedness, alpha-test defaults, D3D vs GL conventions). Auditing the remaining
+D3D7 render-state defaults against GL state at renderer init is cheap insurance.</li>
+<li><strong>The reporter's instincts were data.</strong> "Seems like a level editor model" (item 3) and
+"look into what makes them different colors" (item 5) both pointed at the exact root cause. QA phrasing
+is evidence.</li>
+</ul>
+
+<div class="footer">
+<p>jn-engine QA archive · ticket: sandmanfan (Discord), 2026-06-11 · fixes deployed same day to
+<a href="https://exentt.com/jn-engine/">the live demo</a> ·
+engine source: <a href="https://github.com/alexscott2718-gif/jn-engine">github.com/alexscott2718-gif/jn-engine</a></p>
+<p>Screenshots: 1280×720 native engine captures; "deprecated" images were produced by temporarily reverting
+the fix commits and rebuilding, so each pair uses an identical camera. Sprite evidence images are
+nearest-neighbor upscales of the original game assets.</p>
+</div>
+
+</div>
+</body>
+</html>

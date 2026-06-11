@@ -393,23 +393,25 @@ almost entirely **OMT canvases**. The install is 100 `.omt` + 128 PNG + 254 ASE 
 right default is *static extraction*, not runtime capture. Concretely: the full
 chrome HUD digit font (0–9, **including the 3/4/6 we were about to recapture**)
 lives in `alpha.omt` #118–135; the front-end/menu art (save slots, objective
-text, buttons, Jimmy portrait) is `screens.omt`'s 373 canvases.
+text, buttons, Jimmy portrait) is `screens.omt`'s 340 real canvases.
 
 **What landed.**
 - **`tools/extract_all_omt.py`** — extracts every image-bearing OMT to
   `assets/parsed/<name>/<name>_images/` (and audio via `--audio`), idempotent.
-  Result: **1,658 canvases from 58 OMTs, 0 decode errors** (was ~8 catalogued);
-  1,017 audio WAVs on disk (gitignored — ~70 MB proprietary, regenerable).
+  Result: **1,614 canvases from 58 OMTs, 0 decode errors** (was ~8 catalogued);
+  1,021 audio WAVs on disk (gitignored — ~70 MB proprietary, regenerable).
 - **`tools/gen_asset_galleries.py`** now discovers categories dynamically, so the
   catalog auto-covers the full OMT set: **61 galleries, 2,086 assets** in
   `asset-index.html` (was 11 / ~921).
 - Decode verified clean against `screens`/`permanenticons` (transparency + color
   correct; the faint HUD overlay icons are genuine additive-overlay art).
 - **`tools/build_asset_portal.py`** + the public **Asset Library** at
-  `exentt.com/JN-assets/`: one searchable SPA over **4,957 assets** (2D canvases,
-  meshes, audio, level data), each downloadable in original + modern formats
-  (2D PNG; meshes ASE+glb, reusing the existing GL thumbnails + 3D viewer in
-  place; audio WAV; levels GAM), with per-category and bulk `.zip` batches. The
+  `exentt.com/JN-assets/`: one searchable SPA over **4,900 assets** (1,770 2D,
+  2,074 mesh GLB, 1,021 audio, 35 level), each downloadable in original + modern
+  formats (2D PNG; meshes ASE+glb; audio WAV; levels GAM), with per-category and
+  bulk `.zip` batches. The builder now falls back to durable
+  `assets/glb/omt/**/*.glb`, so the JN mesh portal no longer depends on old live
+  catalog directories surviving under `/var/www`. The
   stale `/jn-engine/catalog/` now 301-redirects here; the hub consolidated to a
   single Asset Library card and its disclaimer updated to reflect non-commercial
   redistribution of extracted assets (no original executables). Portal output
@@ -418,12 +420,51 @@ text, buttons, Jimmy portrait) is `screens.omt`'s 373 canvases.
   parallel **JNvsJN Asset Library** at `exentt.com/JNvsJN-assets/`. The sequel
   uses the same container stack + Granny, so it's extracted the same way (install
   at `~/jnvsjn-original`; OMTs via `extract_all_omt.py --src` → `assets/parsed_jnvsjn`):
-  **4,258 assets** — 2,459 2D (84 OMTs' canvases + loose PNG), 1,085 audio, 684
-  meshes (389 Granny `.grn` originals — 19 with glb/thumbnail/3D viewer from the
-  deployed `grn-catalog`; only ~25/389 convert since most are skinned actors the
-  Granny decoder skips — + 295 ASE), 30 GAM. 2D images committed; audio
-  gitignored/regenerable like JNBG.
-- **2026-06-08 Neutron.exe full-tier decomp - Phase 1 base/framework specs complete.**
+  **4,196 assets** — 2,397 2D (43 OMTs' 2,216 real canvases + loose PNG), 1,085
+  audio, 684 meshes (389 Granny `.grn` originals + 295 ASE), 30 GAM. Of the 389
+  Granny originals, **39 now have GLB exports**: 19 from the deployed
+  `grn-catalog` with thumbnails/viewer plus 20 local fallback GLBs from
+  `assets/glb/grn*`. The remaining 350 still need deeper Granny capture/type-tree
+  work, especially skinned actors. 2D images committed; audio gitignored/
+  regenerable like JNBG.
+- **2026-06-06/07 decoder corrections:** 32-bit OMT canvases are stored as
+  big-endian ARGB (`A,R,G,B`), not RGBA. The alpha byte is not PNG opacity; OMT
+  transparency is the canvas color key, with non-key pixels exported opaque. The
+  old RGBA assumption made many 32-bit extracted canvases lose the red channel
+  (blue/green-only previews). The image parser now also uses the authoritative OMT
+  `Canv` chunk table instead of scanning raw bytes for `OmCv`; byte scanning
+  admitted false positives inside pixel payloads (e.g. JNvsJN `doors.omt` bogus
+  `0010_64x64d32` / `0015_128x128d32`). 8-bit canvases now parse real `OPa2`
+  palettes: descriptor string, u32 palette size, 256 RGB16 entries, then the
+  4096-byte lookup table; 8-bit transparency is a palette index. That fixed
+  row-misaligned grayscale/opaque paletted exports and recovered two additional JN
+  `level1f` canvases. `extract_all_omt.py --force` now clears generated image/audio
+  dirs before rewriting so disappeared false-positive files cannot linger. Both
+  public portals were regenerated and clean-deployed: `/JN-assets/` and
+  `/JNvsJN-assets/`.
+- **2026-06-06 Granny M3a — baked-vertex ANIMATION capture (the 350-file lever).**
+  The remaining ~350 `.grn` files are not 350 models: they are ~55 actors/props
+  each split into one `*base.grn` (mesh+skeleton+texture) plus a fan of
+  animation-only clips (`*stop/move/talk/run/walk/idle/...`). The blocker was
+  never count, it was *motion*. The M2d capture proxy was extended in place with
+  an opt-in per-frame sampler (`granny_proxy.c`, M3a): with env
+  `GRN_ANIM_SRC=<name substring>` set, `LockNextRenderingState` appends the
+  already-posed float streams + per-frame transform to
+  `C:\grn_dump\a<descp>.grnanim` (hard-bounded; default off, so the DLL still
+  behaves as M2d and is safe to leave deployed). New `grnanim_to_glb.py` bakes
+  base `.grnmesh` + `.grnanim` into an animated `.glb` using glTF **morph
+  targets** (per-frame position/normal deltas) + a weights animation — viewable
+  in Blender / any glTF viewer; no skeleton/skin decode needed because Granny
+  already hands us deformed verts. Validated end-to-end **without the game**
+  (`test_grnanim_synth.py`, injection-style proof): 60 morph targets, weights
+  channel, 60 time keys, deform span 8.0 on the real `jimmybase` mesh. Proxy
+  rebuilt + gated (101 exports, no UCRT), SHA-1
+  `07b96f632778fe8a48f672d1dd467f61ffc067db`, staged to
+  `\\192.168.1.2\temp-vnc\granny_proxy\` with `capture_jimmy_anim.bat`. Pending:
+  one XP noVNC capture run (procedure in `docs/jnvsjn_granny_proxy_capture.md`
+  §"M3a Animation Capture"). Rigid prop motion (positions constant, XFRM varies)
+  and full skeletal rigs (held tools, blending) remain the later tier.
+- **2026-06-08 Neutron.exe full-tier decomp — Phase 1 base/framework specs complete.**
   The decomp campaign's foundation wave is now review-ready: all 25 Wave 1
   base/framework classes have committed specs under `docs/decomp/` and ledger
   rows at `status=spec` / `owner=codex`. The wave established the shared
