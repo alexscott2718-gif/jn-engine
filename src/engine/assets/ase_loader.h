@@ -41,6 +41,15 @@ typedef struct {
        always populated after a successful load (material_count >= 1). */
     int          material_count;
     AseMaterial  materials[ASE_MAX_MATERIALS];
+    /* OMT-sourced meshes (assets/glb/omt/) bake two-sided surfaces as
+       explicit reversed-winding twin polys with their own UVs, and the
+       original OMediaPipeline back-face culls every poly before submitting
+       (om3pf_TwoSided is unused in the corpus). Without culling the later
+       twin overdraws the front face under GL_LEQUAL — blanking co-planar
+       decals like the SIGN/Constsign text quads (2026-06-11 QA). Set by
+       asset_cache for assets/glb/omt/ models; renderer enables
+       GL_CULL_FACE while drawing them. */
+    int          cull_backfaces;
 } AseModel;
 
 /* Load ASE from path. Returns 1 on success, 0 on failure. */

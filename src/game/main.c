@@ -499,6 +499,12 @@ static void draw_scene(World *world, int jim_model_ok)
            hidden — strictly more faithful than drawing them. */
         if (e->has_initially_visible && e->initially_visible == 0) continue;
 
+        /* Same shape for pickups: InitallyActive=0 (sic — the original's
+           registrar typo) marks quest-spawned pickups (level1 egg2b nest
+           egg, ...) that scripting activates later; the original never
+           draws them at boot (2026-06-11 QA). */
+        if (gam_prop_i(e, "InitallyActive", -1) == 0) continue;
+
         /* QA annotation: every drawable entity registers here so the pick
            pass and the main pass assign identical IDs. */
         qa_register_entity(e);
@@ -531,6 +537,28 @@ static void draw_scene(World *world, int jim_model_ok)
                 renderer_draw_model(m, tex, e->x, e->y, e->z, e->ry, 1.0f);
                 renderer_set_hide_untextured_groups(1);
                 continue;
+            }
+            /* mesh missing -> fall through to placeholder box */
+        }
+
+        /* C3DSwingDoor (3SWN): per-instance authored ASEFile/PNGFile —
+           every level's swing door is a different mesh (level1 blocksdoor,
+           level2a door2a, level3a pyramiddoor1...). The files ship with the
+           original install under assets/ase + assets/png with mixed case,
+           so resolve case-insensitively. */
+        if (strcmp(e->type, "3SWN") == 0 && e->ase_file[0]) {
+            char path[160];
+            if (asset_path_ci(path, sizeof(path), "assets/ase", e->ase_file)) {
+                AseModel *m = model_cache_get(path);
+                if (m) {
+                    unsigned int tex = 0;
+                    char tpath[160];
+                    if (e->png_file[0] &&
+                        asset_path_ci(tpath, sizeof(tpath), "assets/png", e->png_file))
+                        tex = tex_cache_get(tpath);
+                    renderer_draw_model(m, tex, e->x, e->y, e->z, e->ry, 1.0f);
+                    continue;
+                }
             }
             /* mesh missing -> fall through to placeholder box */
         }
@@ -927,12 +955,18 @@ int main(int argc, char **argv) {
            specific entity (gem, vehicle, NPC) in any level. Takes precedence. */
         const char *spawn_xyz = getenv("JN_DEMO_SPAWN_XYZ");
         if (spawn_xyz && spawn_xyz[0]) {
-            float sx = 0, sy = 0, sz = 0;
-            if (sscanf(spawn_xyz, "%f,%f,%f", &sx, &sy, &sz) == 3) {
+            float sx = 0, sy = 0, sz = 0, sry = 0;
+            int n = sscanf(spawn_xyz, "%f,%f,%f,%f", &sx, &sy, &sz, &sry);
+            if (n >= 3) {
                 Entity *js = world_find_type(&world, "3JIM");
                 if (js) {
                     js->x = sx; js->y = sy; js->z = sz;
-                    fprintf(stderr, "[demo_spawn] override 3JIM at (%.0f,%.0f,%.0f)\n", sx, sy, sz);
+                    /* optional 4th component: facing in radians, so QA
+                       screenshots can re-aim the follow cam at a reported
+                       entity (ry convention: forward = (sin ry, cos ry)). */
+                    if (n == 4) js->ry = sry;
+                    fprintf(stderr, "[demo_spawn] override 3JIM at (%.0f,%.0f,%.0f) ry=%.2f\n",
+                            sx, sy, sz, js->ry);
                 }
                 do_demo_spawn = 0;
             }

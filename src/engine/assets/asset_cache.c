@@ -8,6 +8,7 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <ctype.h>
+#include <dirent.h>
 
 /* Dispatch by file extension: .glb -> self-contained glTF (textures embedded,
    texture_id populated by the loader); anything else -> legacy ASE text. */
@@ -45,6 +46,24 @@ static int       g_gen = 0;
 
 void asset_cache_begin_level(void) {
     g_gen++;
+}
+
+int asset_path_ci(char *out, int out_size, const char *dir, const char *name) {
+    if (!out || out_size <= 0 || !dir || !name || !name[0]) return 0;
+    snprintf(out, (size_t)out_size, "%s/%s", dir, name);
+    if (access(out, R_OK) == 0) return 1;     /* exact case exists */
+    DIR *d = opendir(dir);
+    if (!d) return 0;
+    struct dirent *de;
+    while ((de = readdir(d)) != NULL) {
+        if (strcasecmp(de->d_name, name) == 0) {
+            snprintf(out, (size_t)out_size, "%s/%s", dir, de->d_name);
+            closedir(d);
+            return 1;
+        }
+    }
+    closedir(d);
+    return 0;
 }
 
 /* Try assets/png/<stem>.png; return texture id (via tex_cache_get) or 0. */
@@ -141,6 +160,11 @@ AseModel *model_cache_get(const char *path) {
                  - legacy Windows BMP basenames (Jimmy + NPC ASEs) which we
                    remap to assets/png/<stem>.png via tex_cache_resolve_bmp. */
             AseModel *mm = &g_model[i].model;
+            /* OMT-exported GLBs are single-sided by data (reversed-winding
+               twins carry the back sides); cull like the original pipeline.
+               ASE and GRN sources keep cull-off (windings unverified). */
+            if (strncmp(path, "assets/glb/omt/", 15) == 0)
+                mm->cull_backfaces = 1;
             for (int k = 0; k < mm->material_count; k++) {
                 AseMaterial *am = &mm->materials[k];
                 if (am->texture_id) continue;

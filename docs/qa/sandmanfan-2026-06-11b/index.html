@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>QA Ticket Resolution — sandmanfan #2, 2026-06-11 · jn-engine</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body {
+  font-family:'Monaco','Menlo','Ubuntu Mono',monospace;
+  background:#0d0d0d; color:#e0e0e0;
+  line-height:1.55; padding:24px 16px;
+}
+.wrap { max-width:1060px; margin:0 auto; }
+h1 { font-size:1.5em; color:#fff; margin-bottom:4px; }
+h2 { font-size:1.15em; color:#7ec8ff; margin:40px 0 12px; border-bottom:1px solid #2a2a2a; padding-bottom:6px; }
+h3 { font-size:1.0em; color:#fff; }
+p { margin:10px 0; color:#c8c8c8; }
+a { color:#7ec8ff; text-decoration:none; }
+a:hover { text-decoration:underline; }
+.sub { color:#888; font-size:0.85em; }
+.badge { display:inline-block; padding:1px 8px; border-radius:4px; font-size:0.75em; vertical-align:middle; }
+.badge.green { background:#143a14; color:#7dde7d; border:1px solid #2c6e2c; }
+.badge.cat { background:#1d2c3d; color:#9ecbff; border:1px solid #2c5a8a; }
+table { width:100%; border-collapse:collapse; margin:14px 0; font-size:0.82em; }
+th,td { text-align:left; padding:6px 8px; border-bottom:1px solid #242424; vertical-align:top; }
+th { color:#9a9a9a; font-weight:normal; }
+td.msg { color:#c8c8c8; }
+.card { background:#141414; border:1px solid #262626; border-radius:10px; padding:20px; margin:26px 0; }
+.card h3 { margin-bottom:2px; }
+.meta { font-size:0.8em; color:#888; margin-bottom:12px; }
+.quote { border-left:3px solid #8a6d2c; background:#1a160d; color:#d9c08a; padding:8px 12px; margin:10px 0; font-size:0.88em; border-radius:0 6px 6px 0; }
+.ba { display:grid; grid-template-columns:1fr 1fr; gap:14px; margin:14px 0; }
+@media (max-width:760px) { .ba { grid-template-columns:1fr; } }
+.shot { background:#0a0a0a; border:1px solid #262626; border-radius:8px; overflow:hidden; }
+.shot img { display:block; width:100%; height:auto; }
+.shot .lbl { padding:6px 10px; font-size:0.78em; }
+.lbl.bad  { color:#ff8d8d; border-top:1px solid #3a1d1d; background:#1c1010; }
+.lbl.good { color:#7dde7d; border-top:1px solid #1d3a1d; background:#101c10; }
+.ev { background:#101418; border:1px solid #20303d; border-radius:8px; padding:14px 16px; margin:14px 0; }
+.ev .tag { color:#7ec8ff; font-size:0.78em; letter-spacing:0.08em; }
+.ev p { font-size:0.88em; }
+pre { background:#0a0a0a; border:1px solid #242424; border-radius:6px; padding:10px 12px; overflow-x:auto; font-size:0.75em; color:#b8c8b8; margin:10px 0; }
+code { color:#d9c08a; font-size:0.92em; }
+.sprites { display:flex; gap:18px; flex-wrap:wrap; align-items:flex-end; margin:12px 0; }
+.sprites figure { text-align:center; }
+.sprites img { image-rendering:pixelated; background:#222; border:1px solid #333; border-radius:4px; max-width:160px; }
+.sprites figcaption { font-size:0.72em; color:#888; margin-top:4px; max-width:170px; }
+.fix { border-left:3px solid #2c6e2c; background:#0d160d; padding:8px 12px; margin:12px 0; font-size:0.88em; color:#aFcFaF; border-radius:0 6px 6px 0; }
+.fix code { color:#9edf9e; }
+ul { margin:8px 0 8px 22px; color:#c8c8c8; }
+li { margin:6px 0; font-size:0.92em; }
+.footer { margin-top:48px; padding-top:14px; border-top:1px solid #2a2a2a; font-size:0.8em; color:#777; }
+.toc { font-size:0.85em; columns:2; }
+@media (max-width:600px) { .toc { columns:1; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<h1>QA Ticket Resolution Log #2 <span class="badge green">12 / 12 RESOLVED</span></h1>
+<p class="sub">Ticket submitted by <strong>sandmanfan</strong> (Discord) · 2026-06-11 · level 1 (Retroville) ·
+fixes authored autonomously by Claude (Fable&nbsp;5) via Claude Code · live demo: <a href="https://exentt.com/jn-engine/">exentt.com/jn-engine</a> ·
+previous ticket: <a href="../sandmanfan-2026-06-11/">2026-06-11 #1 (8 reports)</a></p>
+
+<p>Second same-day ticket from sandmanfan, filed in-game with the engine's QA annotate tool
+(B-key picker → JSON export), this time covering Level&nbsp;1. Twelve reports, ten root causes —
+and unlike the first ticket, the biggest item was not a resolver row but a <em>renderer semantics gap</em>:
+the engine never back-face culled, while the original OMT pipeline culls every polygon in software.
+That one fix resolved five reports (all four sign items + the blue rocket's sibling defects) and
+repaired unreported damage across the whole map (the toy-block playhouses got their colors back).</p>
+
+<h2>The Ticket</h2>
+<table>
+<tr><th>#</th><th>entity / placement</th><th>class / tag</th><th>cat.</th><th>report</th></tr>
+<tr><td><a href="#i1">1</a></td><td>3MER</td><td>C3DMERRYGO</td><td>TEX</td><td class="msg">texture is the rocket ship instead of merry-go-round</td></tr>
+<tr><td><a href="#i2">2</a></td><td>3SWN</td><td>C3DDOORSWING</td><td>MIS</td><td class="msg">should be the blocks door instead of the one in level2a</td></tr>
+<tr><td><a href="#i3">3</a></td><td>Constsign01</td><td>placement</td><td>TEX</td><td class="msg">does not display text. applies to other constsigns</td></tr>
+<tr><td><a href="#i3">4</a></td><td>SIGN02</td><td>placement</td><td>TEX</td><td class="msg">should have text saying "Elementary School"</td></tr>
+<tr><td><a href="#i3">5</a></td><td>SIGN03</td><td>placement</td><td>TEX</td><td class="msg">should have text saying "Retroland"</td></tr>
+<tr><td><a href="#i3">6</a></td><td>SIGN01</td><td>placement</td><td>TEX</td><td class="msg">should have text saying "Downtown"</td></tr>
+<tr><td><a href="#i7">7</a></td><td>3MOM</td><td>C3DJUDY</td><td>TEX</td><td class="msg">in general, NPCs and enemies' textures have a dark color tint</td></tr>
+<tr><td><a href="#i8">8</a></td><td>3SAI</td><td>SAILBOAT1</td><td>MIS</td><td class="msg">model should be the sailboat with the appropriate texture</td></tr>
+<tr><td><a href="#i9">9</a></td><td>Rocketa</td><td>placement</td><td>TEX</td><td class="msg">rocket should be white instead of blue</td></tr>
+<tr><td><a href="#i10">10</a></td><td>3PIC</td><td>egg2b</td><td>GFX</td><td class="msg">3pic assets look wrong, but they shouldn't be visible anyway assuming they can only be seen through the level editor</td></tr>
+<tr><td><a href="#i11">11</a></td><td>3SUV</td><td>C3DSUV</td><td>TEX</td><td class="msg">SUV entities missing texture</td></tr>
+<tr><td><a href="#i12">12</a></td><td>3AIO</td><td>C3DAIOMTOBJ</td><td>MIS</td><td class="msg">model should not be visible</td></tr>
+</table>
+
+<p class="sub">MIS = wrong/missing model · TEX = wrong/missing texture · GFX = rendering artifact.
+Items 3–6 share one renderer root cause. Items 1, 8, 11 were wrong OMT chunk bindings.
+Items 10 and 12 were authored-visibility flags the engine didn't honor yet.</p>
+
+<!-- ================= CULLING (items 3-6) ================= -->
+<div class="card" id="i3">
+<h3>3–6 · SIGN01/02/03 + Constsign01 — text never displayed <span class="badge cat">TEX ×4</span></h3>
+<div class="meta">level1 placements · root cause shared with item 9</div>
+<div class="quote">"does not display text" · "should have text saying ELEMENTARY SCHOOL / RETROLAND / DOWNTOWN"</div>
+<div class="ba">
+  <div class="shot"><img src="img/sign02-before.jpg" alt="before: blank gantry board"><div class="lbl bad">DEPRECATED — the overhead board renders blank green</div></div>
+  <div class="shot"><img src="img/sign02-after.jpg" alt="after: ELEMENTARY SCHOOL"><div class="lbl good">FIXED — "ELEMENTARY SCHOOL" renders</div></div>
+</div>
+<div class="ba">
+  <div class="shot"><img src="img/sign03-before.jpg" alt="before: blank"><div class="lbl bad">DEPRECATED — Retroland gantry blank</div></div>
+  <div class="shot"><img src="img/sign03-after.jpg" alt="after: RETROLAND"><div class="lbl good">FIXED — "RETROLAND"</div></div>
+</div>
+<div class="ba">
+  <div class="shot"><img src="img/sign01-after.jpg" alt="after: DOWNTOWN"><div class="lbl good">FIXED — "DOWNTOWN"</div></div>
+  <div class="shot"><img src="img/constsign01-after.jpg" alt="after: CONSTRUCTION AHEAD"><div class="lbl good">FIXED — Constsign01 "CONSTRUCTION AHEAD 150 FT"</div></div>
+</div>
+<div class="ev"><span class="tag">EVIDENCE TRAIL</span>
+<p>The sign textures were never missing — every GLB already embedded the correct atlas
+(below). Dumping <code>SIGN01.glb</code>'s triangles showed the text quad present with sane UVs… followed by a
+<em>second copy of the same quad with reversed winding and degenerate UVs</em> (sampling a flat color region).
+Decoding <code>level1.omt</code> raw confirmed the original authors both: polys 32–33 are the text face,
+polys 34–35 the same four vertices re-wound as the board's back.</p>
+<div class="sprites">
+<figure><img src="img/ev-signs-atlas.png" alt="signs atlas"><figcaption>canvas "signs" — all four texts, present in the GLB all along</figcaption></figure>
+<figure><img src="img/ev-signscon-atlas.png" alt="signscon atlas"><figcaption>canvas "signscon" — construction signs</figcaption></figure>
+</div>
+<p>So why did the back face win? The engine draws with <code>glDepthFunc(GL_LEQUAL)</code> (a previous ticket's
+fix) and <strong>no back-face culling</strong> — so the later-drawn back face overwrote the text on equal depth.
+The original engine's source (GarageCube Open Media Toolkit) settles the question: <code>OMediaPipeline</code>
+back-face culls <em>every polygon in software</em> before submitting — which is exactly why our 4&nbsp;GB D3D7
+capture shows <code>CULLMODE=NONE</code> on 3209 of 3235 draws. The cull happened before D3D ever saw the
+triangles. A corpus scan found the per-poly <code>om3pf_TwoSided</code> exemption flag unused in all 5,255
+level1 polys: two-sided surfaces are always baked as explicit twin polys, so GL back-face culling is a
+loss-free reproduction.</p>
+</div>
+<div class="fix"><strong>Fix:</strong> <code>AseModel.cull_backfaces</code>, set for models loaded from
+<code>assets/glb/omt/</code> (OMT-sourced, winding preserved by the exporter); the renderer enables
+<code>GL_CULL_FACE</code> around their draws. GL's defaults (cull back, front=CCW) match the data — no
+state beyond the enable. Side bonus: block playhouses regained their face colors, and the level2b
+START banner no longer mirror-bleeds its text through the cloth's back side.</div>
+</div>
+
+<!-- ================= ITEM 1 ================= -->
+<div class="card" id="i1">
+<h3>1 · 3MER — merry-go-round shows the rocket <span class="badge cat">TEX</span></h3>
+<div class="meta">level1 @ (3435, −2, −7972) · C3DMERRYGO</div>
+<div class="quote">"texture is the rocket ship instead of merry-go-round"</div>
+<div class="ba">
+  <div class="shot"><img src="img/3mer-before.jpg" alt="before: rocket mesh on the playground"><div class="lbl bad">DEPRECATED — resolver bound objects.omt shape 15 ("Rocket")</div></div>
+  <div class="shot"><img src="img/3mer-after.jpg" alt="after: metal merry-go-round"><div class="lbl good">FIXED — shape 16 "RideSpin", the metal merry-go-round</div></div>
+</div>
+<div class="ev"><span class="tag">EVIDENCE TRAIL</span>
+<p>The old resolver row's own comment said <code>objects.omt id-16</code> — but bound
+<code>Rocket.ASE</code>, which is shape <strong>15</strong>. Dumping the objects.omt 3DSh chunk table:</p>
+<pre>shape 13 SailBoat   shape 14 RocketPad   shape 15 Rocket   shape 16 RideSpin   shape 17 Swing</pre>
+<p>Shape 16 is <code>RideSpin</code> — the playground spinner. The old ASE export of it was also a stale
+partial read (26 of 85 verts); the toolkit's GLB exporter reads it fully, textured by its authored
+MetalPlate canvas.</p>
+<div class="sprites">
+<figure><img src="img/ev-ridespin.png" alt="RideSpin reference"><figcaption>objects.omt shape 16 "RideSpin" — reference render</figcaption></figure>
+</div>
+</div>
+<div class="fix"><strong>Fix:</strong> resolver row → <code>assets/glb/omt/RideSpin.glb</code> (new textured
+export from objects.omt).</div>
+</div>
+
+<!-- ================= ITEM 2 ================= -->
+<div class="card" id="i2">
+<h3>2 · 3SWN — level2a door instead of the blocks door <span class="badge cat">MIS</span></h3>
+<div class="meta">level1 @ (4803, −1, −8031) · C3DDOORSWING</div>
+<div class="quote">"should be the blocks door instead of the one in level2a"</div>
+<div class="ba">
+  <div class="shot"><img src="img/3swn-before-crop.jpg" alt="before: maroon door"><div class="lbl bad">DEPRECATED — hardcoded doorfowl.ASE (the level2a door) on the blocks playhouse</div></div>
+  <div class="shot"><img src="img/3swn-after-crop.jpg" alt="after: blocks door"><div class="lbl good">FIXED — BlocksDoor.ASE + BlocksDoor.png, camouflaged into the playhouse by design</div></div>
+</div>
+<div class="ev"><span class="tag">EVIDENCE TRAIL</span>
+<p>The decomp spec <code>docs/decomp/C3DSwingDoor.md</code> shows the class registers per-instance
+<code>ASEFile</code>/<code>PNGFile</code> .gam properties. Reading every level's 3SWN rows:</p>
+<pre>Level1.gam   C3DDOORSWING  blocksdoor.ase   blocksdoor.png
+level2a.gam  ldoor         downdoor2a.ase   doorfowl.png
+level2a.gam  C3DDOORSWING  door2a.ase       doorfowl.png
+Level3.gam   mummydoor     showmedoor.ase   showmedoor.png
+level3a.gam  C3DDOORSWING  pyramiddoor1.ase pyramiddoor1.png</pre>
+<p>The reporter's "the one in level2a" was literally correct — the hardcoded doorfowl is level2a's door
+texture. The fix is generic: honor the authored pair, which repairs the level3/3a/3d swing doors too.
+The picker confirms the new door draws at the reported spot
+(<code>"name":"3SWN","asset":"blocksdoor.ase"</code>); it's easy to miss visually because
+BlocksDoor.png <em>is</em> a blocks-pattern texture — a hidden door that blends into the playhouse wall.</p>
+<div class="sprites">
+<figure><img src="img/ev-blocksdoor-tex.png" alt="BlocksDoor texture"><figcaption>BlocksDoor.png — the door wears the playhouse's own pattern</figcaption></figure>
+</div>
+</div>
+<div class="fix"><strong>Fix:</strong> .gam loader now parses <code>ASEFile</code> into the per-object mesh
+field; a 3SWN draw branch resolves it (case-insensitively — rows author "blocksdoor.ase", disk ships
+"BlocksDoor.ASE") with its authored PNG. The doorfowl row remains only as a fallback.</div>
+</div>
+
+<!-- ================= ITEM 7 ================= -->
+<div class="card" id="i7">
+<h3>7 · 3MOM — NPCs and enemies dark-tinted <span class="badge cat">TEX</span></h3>
+<div class="meta">level1 @ (8159, 26, −1384) · C3DJUDY · "in general"</div>
+<div class="quote">"in general, NPCs and enemies' textures have a dark color tint"</div>
+<div class="ba">
+  <div class="shot"><img src="img/npc-lineup-before.jpg" alt="before: dark NPCs"><div class="lbl bad">DEPRECATED — NPC ring spawn: Carl maroon, Hugh muddy, Cindy dim</div></div>
+  <div class="shot"><img src="img/npc-lineup-after.jpg" alt="after: clean NPCs"><div class="lbl good">FIXED — textures render full-bright as in the original</div></div>
+</div>
+<div class="ba">
+  <div class="shot"><img src="img/3mom-before.jpg" alt="before: Judy spot"><div class="lbl bad">DEPRECATED — the reported Judy sighting</div></div>
+  <div class="shot"><img src="img/3mom-after.jpg" alt="after: Judy clean"><div class="lbl good">FIXED — Judy by the family car, untinted</div></div>
+</div>
+<div class="ev"><span class="tag">EVIDENCE TRAIL</span>
+<p>The character ASEs carry 3ds&nbsp;Max <em>viewport</em> colors in <code>*MATERIAL_DIFFUSE</code>:</p>
+<pre>carlstop.ASE   *MATERIAL_DIFFUSE 0.6471 0.1922 0.3765   (dark magenta)
+nickstop.ASE   *MATERIAL_DIFFUSE 0.5373 0.1961 0.1961   (dark red)
+judystop.ASE   *MATERIAL_DIFFUSE 0.9255 0.6980 0.4745   (skin tone)</pre>
+<p>Our renderer multiplied the texture by that color whenever the material's bitmap resolved.
+The original never does: D3D7's default texture stage modulates the texture by the <em>vertex</em>
+diffuse (white when the FVF has no color), and material diffuse only enters through lighting —
+which Phase&nbsp;12 measured as <code>LIGHTING=OFF</code> for these scenes (build/canon.json).
+Jimmy escaped only by accident: his bitmap paths never resolved, which routed him through a
+tint-neutralizing fallback.</p>
+</div>
+<div class="fix"><strong>Fix:</strong> textured material groups now draw the texture unmodified;
+the ASE diffuse still colors untextured groups (where it is the material's flat color).</div>
+</div>
+
+<!-- ================= ITEM 8 ================= -->
+<div class="card" id="i8">
+<h3>8 · 3SAI — sailboat wrong model/texture <span class="badge cat">MIS</span></h3>
+<div class="meta">level1 @ (458, 17, −4839) · SAILBOAT1</div>
+<div class="quote">"model should be the sailboat with the appropriate texture"</div>
+<div class="ba">
+  <div class="shot"><img src="img/3sai-before.jpg" alt="before: no visible boat"><div class="lbl bad">DEPRECATED — gray rocketpad-textured stub, invisible against the river</div></div>
+  <div class="shot"><img src="img/3sai-after.jpg" alt="after: sailboat"><div class="lbl good">FIXED — textured sailboat on the river</div></div>
+</div>
+<div class="ev"><span class="tag">EVIDENCE TRAIL</span>
+<p><code>docs/decomp/C3DSailBoat.md</code> already flagged this in its open questions: the class binds
+objects.omt entry 13 ("SailBoat", canvas 13), but "the current ASE export's material path points at
+image 0009" — the <em>rocketpad</em> canvas. The export predated the canvas-table fix. The toolkit
+GLB exporter resolves the canvas correctly:</p>
+<div class="sprites">
+<figure><img src="img/ev-sailboat.png" alt="SailBoat reference"><figcaption>objects.omt shape 13 + canvas 13 — reference render</figcaption></figure>
+</div>
+</div>
+<div class="fix"><strong>Fix:</strong> resolver row → <code>assets/glb/omt/SailBoat.glb</code>; the "boatl"
+toy-boat pickup row was migrated to the same mesh.</div>
+</div>
+
+<!-- ================= ITEM 9 ================= -->
+<div class="card" id="i9">
+<h3>9 · Rocketa — rocket blue instead of white <span class="badge cat">TEX</span></h3>
+<div class="meta">level1 @ (7526, 0, −7870) · placement</div>
+<div class="quote">"rocket should be white instead of blue"</div>
+<div class="ba">
+  <div class="shot"><img src="img/rocketa-before.jpg" alt="before: blue rocket"><div class="lbl bad">DEPRECATED — playground rocket renders blue</div></div>
+  <div class="shot"><img src="img/rocketa-after.jpg" alt="after: white rocket"><div class="lbl good">FIXED — white body, striped Rocketa details</div></div>
+</div>
+<div class="ev"><span class="tag">EVIDENCE TRAIL</span>
+<p>A fun one: the picker names <code>Rocketa.glb</code>, but the big cone is a <em>stack</em> of co-located
+placements — <code>Rocketa</code> (the striped 14-poly detail mesh, which was fine) inside
+<code>BLOCK_Rocket03</code> + <code>BLOCKrockettop</code>, the giant playground rocket. BLOCK_Rocket03 has
+<em>no material links at all</em> in level1.omt — the OMT pipeline draws it default-material flat white,
+which is the white rocket the reporter remembers. Our GLB instead wore a capture-derived texture override
+whose own ground-truth record marked it junk (<code>tex_mse 3736</code> — matcher noise): a dark billboard
+texture stretched over the cone read as blue.</p>
+<div class="sprites">
+<figure><img src="img/ev-rocketa-thumb.png" alt="Rocketa reference"><figcaption>Rocketa detail mesh — reference render (white body + red/blue trim + slide)</figcaption></figure>
+<figure><img src="img/ev-rocket03-badmatch.png" alt="bad capture match"><figcaption>the mse-3736 "match" that painted the rocket blue</figcaption></figure>
+</div>
+</div>
+<div class="fix"><strong>Fix:</strong> the junk override row now bakes flat white (annotated in
+<code>level1_texture_overrides_groundtruth.txt</code>); BLOCK_Rocket03.glb re-exported. The back-face
+culling fix (items 3–6) also stopped the rocket's interior shells from bleeding through.</div>
+</div>
+
+<!-- ================= ITEM 10 ================= -->
+<div class="card" id="i10">
+<h3>10 · 3PIC egg2b — shouldn't be visible <span class="badge cat">GFX</span></h3>
+<div class="meta">level1 @ (8144, 501, −3851) · 3PIC "egg2b" · SpriteIndex 140</div>
+<div class="quote">"3pic assets look wrong, but they shouldn't be visible anyway assuming they can only be seen through the level editor"</div>
+<div class="ba">
+  <div class="shot"><img src="img/3pic-before.jpg" alt="before: white egg in tree"><div class="lbl bad">DEPRECATED — untextured white egg.ASE floating in the tree</div></div>
+  <div class="shot"><img src="img/3pic-after.jpg" alt="after: hidden"><div class="lbl good">FIXED — hidden at boot, as authored</div></div>
+</div>
+<div class="ev"><span class="tag">EVIDENCE TRAIL</span>
+<p>The reporter's instinct was right again. The .gam row authors
+<code>InitallyActive=0</code> (the original registrar's own typo) — a quest-spawned pickup that scripting
+activates later; the original never draws it at boot. Two sibling egg pickups author
+<code>InitallyActive=1</code> and remain visible through the per-instance sprite tier (chunk 140 "egg"),
+replacing the stale tag row that drew an untextured mesh.</p>
+</div>
+<div class="fix"><strong>Fix:</strong> the draw loop now skips entities authored <code>InitallyActive=0</code>
+(exact parallel of the existing <code>InitiallyVisible=0</code> rule), and the stale egg2b tag row was deleted
+— the same stale-row family the first ticket's 3BAL/3CON/3LEA fix cleaned up.</div>
+</div>
+
+<!-- ================= ITEM 11 ================= -->
+<div class="card" id="i11">
+<h3>11 · 3SUV — missing texture <span class="badge cat">TEX</span></h3>
+<div class="meta">level1 @ (11104, 109, −13672) · C3DSUV</div>
+<div class="quote">"SUV entities missing texture"</div>
+<div class="ba">
+  <div class="shot"><img src="img/3suv-before.jpg" alt="before: white car"><div class="lbl bad">DEPRECATED — untextured lawnmower.ASE (also the wrong mesh)</div></div>
+  <div class="shot"><img src="img/3suv-after.jpg" alt="after: textured SUV"><div class="lbl good">FIXED — jeep.omt "truck", the proper SUV</div></div>
+</div>
+<div class="ev"><span class="tag">EVIDENCE TRAIL</span>
+<p><code>docs/decomp/C3DAISuv.md</code>: the class binds <code>jeep.omt</code> entry <strong>2</strong>, and even
+recorded the suspicion that the entry "may be a non-image chunk or parser gap". The jeep.omt 3DSh table
+resolves it:</p>
+<pre>jeep.omt shapes:  (2, 'truck')   (7, 'lawnmower')</pre>
+<p>Shape 2 is <code>truck</code> — the resolver had bound shape 7's lawnmower (untextured at that).</p>
+<div class="sprites">
+<figure><img src="img/ev-truck.png" alt="truck reference"><figcaption>jeep.omt shape 2 "truck" — reference render</figcaption></figure>
+</div>
+</div>
+<div class="fix"><strong>Fix:</strong> resolver row → <code>assets/glb/omt/truck.glb</code> (new textured export
+from jeep.omt).</div>
+</div>
+
+<!-- ================= ITEM 12 ================= -->
+<div class="card" id="i12">
+<h3>12 · 3AIO — should not be visible <span class="badge cat">MIS</span></h3>
+<div class="meta">level1 @ (15753, −13, −7833) · C3DAIOMTOBJ ×3 in level1</div>
+<div class="quote">"model should not be visible"</div>
+<div class="ba">
+  <div class="shot"><img src="img/3aio-before.jpg" alt="before: giant block"><div class="lbl bad">DEPRECATED — Box03 placeholder drawn for every 3AIO</div></div>
+  <div class="shot"><img src="img/3aio-after.jpg" alt="after: hidden"><div class="lbl good">FIXED — hidden until progress gating exists</div></div>
+</div>
+<div class="ev"><span class="tag">EVIDENCE TRAIL</span>
+<p><code>docs/decomp/C3DAIOmtObj.md</code>: the class loads a per-instance OMT shape
+(<code>OmtDatabase</code>/<code>OmtIndex</code>). All three level1 rows author
+<code>objects.omt</code> index <strong>30</strong> — the "roadclosed" barrier — gated by
+<code>RequiredLevel=1</code> / <code>RemoveLevel=110–320</code> story-progress windows that the engine doesn't
+run yet. The old row drew a generic Box03 for all of them, all the time.</p>
+<div class="sprites">
+<figure><img src="img/ev-roadclosed.png" alt="roadclosed reference"><figcaption>objects.omt shape 30 "roadclosed" — exported and ready for when progress gating lands</figcaption></figure>
+</div>
+</div>
+<div class="fix"><strong>Fix:</strong> 3AIO marked invisible (the 3TRC cutscene-object precedent), with
+<code>roadclosed.glb</code> exported and documented in the row for the future progress system.</div>
+</div>
+
+<!-- ================= REGRESSION ================= -->
+<h2>Regression Sweep</h2>
+<p>The culling and tint changes touch every OMT placement and ASE entity, so the sweep went wider than
+the ticket: default-spawn captures of level2, level3, level5a and the level1c house interior
+(interiors matter — they're seen from "inside" the mesh), placement/missing-mesh counters
+(<code>missing_mesh=0</code>, "all entities resolved" on every level checked), and the level2b
+START banner — the co-planar decal whose fix shipped in ticket #1:</p>
+<div class="ba">
+  <div class="shot"><img src="img/banner-regression-front.jpg" alt="banner front ok"><div class="lbl good">START banner front face intact — and the back face no longer mirror-bleeds the text, an accidental fidelity gain</div></div>
+  <div class="shot"><img src="img/3mer-after.jpg" alt="playground"><div class="lbl good">unreported repair: the block playhouses regained their face colors (they had been overdrawn by their own interiors)</div></div>
+</div>
+
+<!-- ================= PROCESS ================= -->
+<h2>How These Were Resolved — Process Notes</h2>
+<ul>
+<li><strong>Ticket → data, not guesses:</strong> seven items were settled by reading what the original
+authored — the .gam rows (3SWN's ASEFile, 3PIC's InitallyActive, 3AIO's OmtIndex), the OMT chunk tables
+(RideSpin/truck/SailBoat), or the decomp specs that had already recorded the binding.</li>
+<li><strong>The capture corpus as arbiter:</strong> the culling question was decided by measurement —
+3209/3235 captured draws say <code>CULLMODE=NONE</code>, which <em>seemed</em> to forbid culling until the
+OMT engine source showed the cull happens in software before D3D. Conventions need both the capture
+and the source.</li>
+<li><strong>Reference renders as ground truth:</strong> the asset toolkit's software rasterizer (which
+culls per-poly like the original) produced "what it should look like" images for every mesh in question
+— the white rocket, the DOWNTOWN board, the textured truck — before any engine change was made.</li>
+<li><strong>Headless aimed screenshots:</strong> every report's own camera coordinates drove the
+before/after captures via <code>tools/qa_shot.sh</code> (new this ticket — the previous ticket's manual
+process, now scripted), plus a <code>JN_QA_NOCULL</code> env to reproduce the culling defect honestly
+after the fix landed.</li>
+</ul>
+
+<h2>Efficiency Takeaways</h2>
+<ul>
+<li><strong>Five reports, one renderer gap.</strong> The missing back-face cull blanked every co-planar
+decal in the game and overdrew every closed mesh with its own interior. API-default audits (depth func
+last ticket, cull mode this ticket) keep finding whole defect families — the remaining D3D7 vs GL
+default deltas (fog, alpha test, texture addressing) deserve a proactive pass.</li>
+<li><strong>Stale exports are defects waiting for QA.</strong> Three items (SailBoat, RideSpin, egg) were
+correct decisions rendered through pre-canvas-fix exports. When an exporter convention fix lands,
+regenerate <em>everything</em> it produced.</li>
+<li><strong>Trust the authored data over curated rows.</strong> Items 2, 10, 12 were all cases where the
+.gam already said exactly what to do (ASEFile, InitallyActive, OmtIndex) and a hardcoded row said
+something else. Every new property the loader honors deletes a class of future tickets.</li>
+<li><strong>Ground-truth pipelines need quality gates.</strong> The blue rocket shipped because a
+tex_mse-3736 capture match (noise) was baked as if it were signal. The override generator should refuse
+matches above a threshold — that single gate would have prevented the most visible defect in the ticket.</li>
+<li><strong>The reporter's hedge was the answer.</strong> "they shouldn't be visible anyway" (item 10) and
+"should not be visible" (item 12) both matched authored visibility flags the engine wasn't reading.
+QA phrasing is evidence, again.</li>
+</ul>
+
+<div class="footer">
+<p>jn-engine QA archive · ticket: sandmanfan (Discord), 2026-06-11 #2 · fixes deployed same day to
+<a href="https://exentt.com/jn-engine/">the live demo</a> ·
+engine source: <a href="https://github.com/alexscott2718-gif/jn-engine">github.com/alexscott2718-gif/jn-engine</a></p>
+<p>Screenshots: 1280×720 native engine captures aimed from the ticket's own reported coordinates;
+"deprecated" sign images use the JN_QA_NOCULL switch to reproduce the pre-fix renderer, other
+deprecated images are pre-fix builds. Reference renders come from the omt_asset_toolkit software
+rasterizer reading the original game containers.</p>
+</div>
+
+</div>
+</body>
+</html>

@@ -64,8 +64,12 @@ static const TagEntry TAG_TABLE[] = {
     { "3PIC", "godphone",      { "assets/ase/phone.ASE",        NULL, 1.0f, 0 } },
     { "3PIC", "pad",           { "assets/ase/omt/RocketPad.ASE", NULL, 1.0f, 0 } },
     { "3PIC", "pad2",          { "assets/ase/omt/RocketPad.ASE", NULL, 1.0f, 0 } },
-    { "3PIC", "egg2b",         { "assets/ase/omt/egg.ASE",      NULL, 0.5f, 0 } },
-    { "3PIC", "boatl",         { "assets/ase/omt/SailBoat.ASE", NULL, 0.5f, 0 } },
+    /* egg2b row removed (2026-06-11 QA #2): the instance authors
+       SpriteIndex 140 ("egg") + InitallyActive=0 — it's a quest-spawned
+       sprite pickup, hidden at boot; the stale row drew an untextured
+       white egg.ASE in the tree. Active egg pickups resolve through the
+       sprite-db tier like every other SpriteIndex pickup. */
+    { "3PIC", "boatl",         { "assets/glb/omt/SailBoat.glb", NULL, 0.5f, 0 } },
     /* Level2 rescue kitty: C3DKitty registers cat anims + cat.png; the pickup
        shows the cat itself (same referent pattern as hydrant/godphone). */
     { "3PIC", "kitty",         { "assets/ase/catsit.ASE", "assets/png/cat.png", 1.0f, 0 } },
@@ -245,14 +249,33 @@ static const TypeEntry TYPE_TABLE[] = {
        the only fan source and substituted the barrier GLB; the authentic blade
        mesh assets/ase/fan.ASE was overlooked.) */
     { "3FAN", { "assets/ase/fan.ASE", "assets/png/fan.png", 1.0f, 0 } },
-    { "3SAI", { "assets/ase/omt/SailBoat.ASE",  NULL, 1.0f, 0 } },
+    /* C3DSailBoat binds objects.omt shape 13 = "SailBoat" with canvas 13
+       (the sailboat sail/hull sheet). The stale ASE export predated the
+       canvas-table fix and textured it with canvas 14 (rocketpad) — gray
+       boat (2026-06-11 QA #2). */
+    { "3SAI", { "assets/glb/omt/SailBoat.glb",  NULL, 1.0f, 0 } },
     { "3SPH", { "assets/ase/omt/Sphere01.ASE",  NULL, 1.0f, 0 } },
 
-    /* Phase 9 — exact 3D meshes (Stage B Ghidra confirmed). */
-    { "3MER", { "assets/ase/omt/Rocket.ASE",     NULL, 1.0f, 0 } },  /* objects.omt id-16 */
-    { "3SUV", { "assets/ase/omt/lawnmower.ASE",  NULL, 1.0f, 0 } },  /* jeep.omt id-2 */
-    { "3AIO", { "assets/glb/omt/Box03.glb",      NULL, 1.0f, 0 } },  /* objects.omt id-4 default (GLB; ASE was 11-vert stub) */
-    { "3SWN", { "assets/ase/doorfowl.ASE",       NULL, 1.0f, 0 } },  /* ASE-direct */
+    /* Phase 9 — exact 3D meshes (Stage B Ghidra confirmed; bindings fixed by
+       the 2026-06-11 QA ticket #2 against the objects.omt 3DSh chunk table). */
+    /* C3DMerryGo binds objects.omt shape 16 = "RideSpin" (the metal
+       merry-go-round platform). The old row read the id-16 note but bound
+       Rocket.ASE — shape 15 — so the playground ride drew as the rocket. */
+    { "3MER", { "assets/glb/omt/RideSpin.glb",   NULL, 1.0f, 0 } },  /* objects.omt 3DSh 16 */
+    /* C3DAISuv binds jeep.omt entry 2 = "truck" (the mib-canvas SUV).
+       lawnmower (shape 7) was both the wrong mesh and untextured. */
+    { "3SUV", { "assets/glb/omt/truck.glb",      NULL, 1.0f, 0 } },  /* jeep.omt 3DSh 2 */
+    /* C3DAIOmtObj instances author OmtDatabase/OmtIndex; every level1 row
+       binds objects.omt shape 30 = "roadclosed" (exported and ready at
+       assets/glb/omt/roadclosed.glb) gated by RequiredLevel/RemoveLevel
+       progress windows the engine doesn't run yet. The original never shows
+       them at boot (2026-06-11 QA) — invisible until progress gating lands
+       (same shape as the 3TRC cutscene precedent). */
+    { "3AIO", { NULL, NULL, 0.0f, 1 } },
+    /* C3DSwingDoor (3SWN) authors per-instance ASEFile/PNGFile (level1:
+       blocksdoor) — drawn by the dedicated main.c branch. This row is the
+       fallback for instances with no readable ASEFile. */
+    { "3SWN", { "assets/ase/doorfowl.ASE",       NULL, 1.0f, 0 } },
 
     /* Phase 10 Step 2 — sprite billboards. These FourCCs back to sprites.omt
        Canvas chunks (Ghidra-verified Phase 9, Stage B). No 3D mesh exists.

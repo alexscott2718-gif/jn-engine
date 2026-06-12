@@ -143,6 +143,13 @@ int gam_load(World *w, const char *path) {
                 } else if (strcmp(prop_name, "ASEWalk") == 0) {
                     if (!e->ase_file[0] && str_val[0] && strcasecmp(str_val, "none") != 0)
                         copy_string(e->ase_file, sizeof(e->ase_file), str_val);
+                /* C3DSwingDoor (3SWN) + shrink-ray family author a
+                   per-instance "ASEFile"/"PNGFile" pair — each level's swing
+                   door is a different mesh (level1 blocksdoor, level2a
+                   door2a, level3a pyramiddoor1...). Reuse the 3ASE fields. */
+                } else if (strcmp(prop_name, "ASEFile") == 0) {
+                    if (str_val[0] && strcasecmp(str_val, "none") != 0)
+                        copy_string(e->ase_file, sizeof(e->ase_file), str_val);
                 } else if (strcmp(prop_name, "PNGFile") == 0)
                     copy_string(e->png_file, sizeof(e->png_file), str_val);
                 else if (strcmp(prop_name, "PatrolPoint") == 0) {

@@ -484,6 +484,48 @@ statically from `alpha.omt` (obsoleting the XP recapture in
 
 ---
 
+## Era 13 — Community QA: tickets as a fidelity instrument (~June 10–11)
+
+**Goal.** With the in-game QA annotate tool live (B-key picker → JSON export,
+`docs/qa_annotate_plan.md`), community testers can file positioned, asset-attributed
+reports against the deployed demos. Two tickets from **sandmanfan** arrived on
+2026-06-11 — 8 reports (levels 2/2a/2b), then 12 reports (level 1) — and both were
+resolved same-day with public before/after logs at `exentt.com/jn-engine/qa/`
+(`docs/qa/sandmanfan-2026-06-11{,b}/`).
+
+**What the tickets taught (beyond the row fixes).**
+- **Ticket #1 (8 reports):** five resolver-row defects (stale pre-SpriteIndex rows,
+  wrong objects.omt prop for the dino, shuttle-for-bus); plus the first D3D-vs-GL
+  default gap — `glDepthFunc(GL_LEQUAL)` to match `D3DCMP_LESSEQUAL`, without which
+  co-planar decal layers (START banner text) can never draw.
+- **Ticket #2 (12 reports):** the second, bigger default gap — **back-face culling**.
+  The OMT `OMediaPipeline` software-culls every poly before submitting (that's why the
+  capture shows `CULLMODE=NONE` on 3209/3235 draws), and OMT meshes bake two-sided
+  surfaces as explicit reversed-winding twin polys with their own UVs
+  (`om3pf_TwoSided` is unused in the whole level1 corpus). Cull-off + LEQUAL let the
+  later twin overdraw the front: every sign text in the game was blanked and closed
+  meshes were overdrawn by their interiors. Fix: `AseModel.cull_backfaces` for
+  `assets/glb/omt/` models (GL defaults match the exporter's winding). Also: ASE
+  `*MATERIAL_DIFFUSE` is a Max viewport color the original never multiplies into
+  textures (texture stage modulates *vertex* diffuse; lighting measured OFF) — this
+  had dark-tinted every NPC; new gam-loader honors for per-instance `ASEFile`/`PNGFile`
+  (3SWN swing doors) and `InitallyActive=0` (sic — quest-spawned pickups); three wrong
+  OMT chunk bindings corrected against the chunk tables (3MER=objects #16 RideSpin,
+  3SUV=jeep #2 truck, 3SAI=objects #13 with its real canvas); 3AIO=objects #30
+  roadclosed exported but hidden pending story-progress gating; one junk capture
+  ground-truth override (tex_mse 3736) had painted the playground rocket blue —
+  overrides above a sane mse threshold are noise, not signal.
+- **Tooling that came out of it:** `tools/qa_shot.sh` (aimed native screenshots from a
+  ticket's own coordinates), `JN_DEMO_SPAWN_XYZ` optional facing component,
+  `JN_QA_NOCULL` (reproduce the pre-cull renderer for honest befores), and
+  `asset_path_ci()` (case-insensitive authored-filename resolution).
+
+**Pattern worth keeping:** the highest-yield fixes were *engine semantics audited
+against the original's defaults* and *authored data honored over curated rows* —
+both found via tickets, both classes, not incidents.
+
+---
+
 ## Invariants (don't relitigate these)
 
 Paid for with measured evidence. Changing one needs *new* measurement, not argument.

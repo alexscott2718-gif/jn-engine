@@ -781,6 +781,18 @@ void renderer_draw_model_matrix(const AseModel *m, unsigned int texture_id_overr
     glUniform4fv(g_lit_loc_highlight, 1, g_highlight);
     glActiveTexture(GL_TEXTURE0);
 
+    /* OMT-sourced meshes need back-face culling (see AseModel.cull_backfaces):
+       the original OMediaPipeline culls every poly in screen space before
+       submitting (capture shows D3D CULLMODE=NONE because the cull already
+       happened in software). GL defaults (cull face GL_BACK, front CCW) match
+       the exporter's preserved winding, so enabling the cap is sufficient.
+       JN_QA_NOCULL=1 restores the old draw-everything behavior for QA
+       before/after comparisons. */
+    static int s_nocull = -1;
+    if (s_nocull < 0) s_nocull = getenv("JN_QA_NOCULL") != NULL;
+    int cull = m->cull_backfaces && !s_nocull;
+    if (cull) glEnable(GL_CULL_FACE);
+
     int groups = m->material_count > 0 ? m->material_count : 1;
     for (int g = 0; g < groups; g++) {
         int offset_idx, count_idx;
@@ -805,6 +817,16 @@ void renderer_draw_model_matrix(const AseModel *m, unsigned int texture_id_overr
                 tr = tg = tb = 1.0f;
             } else if (am->texture_id) {
                 group_tex = am->texture_id;
+                /* Textured groups draw the texture unmodified. The original
+                   modulates the texture by the *vertex* diffuse (D3D7 stage
+                   default, white when the FVF has no color) — material
+                   diffuse only enters via lighting, which is measured OFF
+                   (build/canon.json). Multiplying by the ASE's
+                   *MATERIAL_DIFFUSE (a Max viewport color: Carl magenta,
+                   Nick dark red...) is what dark-tinted every NPC/enemy
+                   (2026-06-11 QA). Untextured groups below still use the
+                   diffuse as their flat color. */
+                tr = tg = tb = 1.0f;
             } else if (m->texture_id) {
                 group_tex = m->texture_id;
                 tr = tg = tb = 1.0f;
@@ -836,6 +858,7 @@ void renderer_draw_model_matrix(const AseModel *m, unsigned int texture_id_overr
                        (void*)(size_t)(offset_idx * sizeof(unsigned int)));
     }
 
+    if (cull) glDisable(GL_CULL_FACE);
     glBindVertexArray(0);
     glBindTexture(GL_TEXTURE_2D, 0);
 }

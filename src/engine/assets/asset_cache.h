@@ -18,6 +18,12 @@ AseModel    *model_cache_get(const char *path);   /* NULL on failure */
    legacy Jimmy ASEs render with their authored textures. */
 unsigned int tex_cache_resolve_bmp(const char *bmp_basename);
 
+/* Build "<dir>/<name>" resolving the basename case-insensitively against the
+   directory listing (GAM rows author "blocksdoor.ase"; the install ships
+   "BlocksDoor.ASE"). Writes the on-disk path into out; returns 1 on match,
+   0 if the directory has no case-insensitive entry for name. */
+int asset_path_ci(char *out, int out_size, const char *dir, const char *name);
+
 void asset_cache_begin_level(void);   /* bump generation */
 void asset_cache_purge_stale(void);   /* free entries not touched this gen */
 void asset_cache_destroy_all(void);   /* shutdown */

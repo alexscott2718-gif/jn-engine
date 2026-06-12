@@ -139,7 +139,12 @@ CHIMNEY04	0	assets/native/groundtruth_capture_textures/tex_03e2ca70_256x256.png
 CHIMNEY05	0	assets/native/groundtruth_capture_textures/tex_03e2ca70_256x256.png
 CHIMNEY06	0	assets/native/groundtruth_capture_textures/tex_03e2ca70_256x256.png
 CHIMNEY07	0	assets/native/groundtruth_capture_textures/tex_03e2ca70_256x256.png
-BLOCK_Rocket03	0	assets/native/groundtruth_capture_textures/tex_0019a748_64x64.png
+# BLOCK_Rocket03's capture match was matcher noise (tex_mse 3736 in
+# level1_texture_groundtruth.json — a dark billboard texture stretched over
+# the playground rocket made it render blue, 2026-06-11 QA #2). The mesh has
+# no material links in level1.omt; the OMT pipeline draws it default-material
+# flat white. Bake white so it stays visible through the textured path.
+BLOCK_Rocket03	0	assets/native/flat_white_64.png
 BIRDHOUSE04	0	assets/native/groundtruth_capture_textures/tex_0019a748_64x64.png
 BIRDHOUSE05	0	assets/native/groundtruth_capture_textures/tex_0019a748_64x64.png
 BIRDHOUSE03	0	assets/native/groundtruth_capture_textures/tex_0019d028_256x256.png
