@@ -49,4 +49,8 @@ int  entity_visual_is_jnbg(void);
 const char *sprite_db_path(const char *db, int chunk_id);
 const char *sprite_chunk_path(int chunk_id);
 
+/* 1 when the entity's authored sprite ref is JNBG sprites.omt chunk 106 —
+   the "hidden" canvas: an invisible pickup-trigger stand-in. Draw nothing. */
+int sprite_ref_hidden(const Entity *e);
+
 #endif

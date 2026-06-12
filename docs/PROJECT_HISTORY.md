@@ -484,14 +484,14 @@ statically from `alpha.omt` (obsoleting the XP recapture in
 
 ---
 
-## Era 13 — Community QA: tickets as a fidelity instrument (~June 10–11)
+## Era 13 — Community QA: tickets as a fidelity instrument (~June 10–12)
 
 **Goal.** With the in-game QA annotate tool live (B-key picker → JSON export,
 `docs/qa_annotate_plan.md`), community testers can file positioned, asset-attributed
-reports against the deployed demos. Two tickets from **sandmanfan** arrived on
-2026-06-11 — 8 reports (levels 2/2a/2b), then 12 reports (level 1) — and both were
-resolved same-day with public before/after logs at `exentt.com/jn-engine/qa/`
-(`docs/qa/sandmanfan-2026-06-11{,b}/`).
+reports against the deployed demos. Three tickets from **sandmanfan** arrived on
+2026-06-11/12 — 8 reports (levels 2/2a/2b), 12 reports (level 1), then 14 reports
+(levels 1/1b/1c/1e) — all resolved same-day with public before/after logs at
+`exentt.com/jn-engine/qa/` (`sandmanfan-2026-06-11{,b}` and `sandmanfan-2026-06-12`).
 
 **What the tickets taught (beyond the row fixes).**
 - **Ticket #1 (8 reports):** five resolver-row defects (stale pre-SpriteIndex rows,
@@ -520,9 +520,65 @@ resolved same-day with public before/after logs at `exentt.com/jn-engine/qa/`
   `JN_QA_NOCULL` (reproduce the pre-cull renderer for honest befores), and
   `asset_path_ci()` (case-insensitive authored-filename resolution).
 
+- **Ticket #3 (14 reports, 2026-06-12):** the third — and largest — engine-default gap:
+  **`.gam` rotations are degrees, the engine consumed them as radians** (and the
+  load-boundary z-mirror flips rotation handedness, so converted X/Y angles also
+  negate: `M·R(θ)·M = R(−θ)`). One `gam_loader.c` conversion fixed all three ORI
+  reports (toolchest 180°, labfan 90°, yokdoors 270°) *and* Jimmy's authored 220°
+  spawn facing, wrong since the entity system landed — symmetric angles (0°/180°)
+  had hidden the bug from three QA passes. Authored-data finds: sprites.omt chunk
+  106 is a canvas literally named **"hidden"** → pickups authoring it (nest/boat/
+  hydrant/pad/kitty/...) are invisible trigger volumes (`sprite_ref_hidden()`,
+  ten referent-mesh tag rows deleted); C3DArrow is a C3DSpriteType (sprite chunk 33
+  "arrow", mesh row deleted); C3DLeaves instances author the *editor's* icons.omt
+  placeholder (chunk 4, the "soda") — the class swaps in sprites.omt 45 "leave0000"
+  at runtime; 3SCD authors per-instance ASEFile like 3SWN (firedoor/doorretro/
+  doorfowl; glb twin preferred over 8-vert ASE stubs); C3DPhoneBooth's InitObject
+  binds **phone.omt shape 0** (booth exported to glb; phone.ASE is the walkie-talkie);
+  C3DCindy's default is `cindstop.ase`+cindy.png, not the cheer anim. Anchoring:
+  sprite pickups center on authored Y (the +size/2 "ground lift" was floating
+  fishbowls off their shelf). Capture-evidence refinement of ticket #2's lesson (reporter-corrected):
+  **material-less meshes have no captured texture truth** — BLOCK_Rocket03 authors
+  no material, so its captured tex_id (0x19a748, a sign panel) was just stale
+  last-bound pipeline state, not intent. Reporter-specified: the fins take the
+  **blue stripe of rocket.png** (the red/white/blue striped rocket texture); UVs
+  are bare full-canvas corners so the full sheet can't bind raw — the stripe is
+  cropped into its own tile (`assets/native/rocket_blue_stripe_64.png`). Tree billboard
+  outliers vs instanced siblings (tree07=50, treebranch04=200 against families at
+  450–700/500–600) were mis-clustered drawcalls → family-median fallback.
+
+- **Ticket #3 follow-ups (same day):** three reporter corrections that sharpened the
+  rules. (a) The school fire door's first fix drew nothing — the glb door twins
+  embed **no textures**; the authored per-instance `PNGFile` is the texture truth
+  for 3SWN/3SCD and now applies over whichever mesh source loads. (b) The rocket
+  fins took three wrong textures before the real rule landed: **`BLOCK*`-prefixed
+  meshes (case-insensitive — level1c authors "Blocking01") are the original's
+  collision volumes and are never drawn**; the visible playground rocket, fins
+  included, is Rocketa (canvas "Rocket2"), which was already correct. All 19
+  BLOCK* texture-override rows deleted. (c) Don't fix how something draws before
+  asking whether it should draw.
+
+**From tickets to sweeps (2026-06-12).** sandmanfan asked whether misplaced/
+mis-oriented objects could be fixed "based on the game code instead of reporting
+each instance" — the answer is the new **faithfulness sweep**: `JN_AUDIT=1` makes
+the engine emit every entity/placement draw decision through its *real* resolution
+code, and `tools/audit_faithfulness.py` runs all levels and asserts the invariants
+the tickets established (no placeholder boxes / missing assets / unresolved sprite
+refs / visible zero-texture draws / entity stub meshes / visible BLOCK collision
+meshes; waiver file for accepted findings). The first full sweep found 28
+unreported defects that collapsed into three root causes, fixed same-day: every
+Yokian soldier/guard in 9 levels untextured (classes attach yoksold/yokguard.png
+in code — ASEs carry no bitmap), 3SCR bound to a name-matched guess
+(C3DLabScreen really loads screen.ase+screen1.png), and level4c DOORPP1 boxed
+because ase_loader rejected mismatched animation frame counts instead of keeping
+frame 0 as a static mesh. It also caught the BLOCK-skip case-sensitivity bug
+minutes after it was written. Current state: **0 findings across all 35 levels.**
+Each future ticket's root cause should land as a new sweep assertion.
+
 **Pattern worth keeping:** the highest-yield fixes were *engine semantics audited
 against the original's defaults* and *authored data honored over curated rows* —
-both found via tickets, both classes, not incidents.
+both found via tickets, both classes, not incidents. The sweep turns that pattern
+from a habit into a gate.
 
 ---
 

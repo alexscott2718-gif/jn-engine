@@ -1,6 +1,11 @@
 # Capture-derived ground-truth texture overrides for native Level 1.
 # Format: <mesh_name> <TAB> <material_slot> <TAB> <texture_path>
 # Source: level1_texture_groundtruth.json (per-frame coherent capture ground truth)
+# BLOCK*-prefixed meshes are COLLISION volumes, never visible
+# (reporter-confirmed, 2026-06-12 QA #3 follow-up: "all Block meshes should
+# be invisible" — their visible twins are separate meshes, e.g. the
+# playground rocket + fins are Rocketa, canvas "Rocket2"/0012_128x128d16).
+# All BLOCK* override rows removed; the renderer also skips them by name.
 labshak	0	assets/native/groundtruth_capture_textures/tex_00155bc0_128x128.png
 bench05	0	assets/native/groundtruth_capture_textures/tex_00155bc0_128x128.png
 bench06	0	assets/native/groundtruth_capture_textures/tex_00155bc0_128x128.png
@@ -47,7 +52,6 @@ JHOUSE	2	assets/native/groundtruth_capture_textures/tex_03e2ca70_256x256.png
 HOUSE BASE	0	assets/native/groundtruth_capture_textures/tex_05e90038_128x128.png
 HOUSE BASE	1	assets/native/groundtruth_capture_textures/tex_00161ba8_128x128.png
 HOUSE BASE	2	assets/native/groundtruth_capture_textures/tex_03e2ca70_256x256.png
-BLOCKING_02	0	assets/native/groundtruth_capture_textures/tex_0541a3e0_64x64.png
 tree29	0	assets/native/groundtruth_capture_textures/tex_0541a3e0_64x64.png
 tree30	0	assets/native/groundtruth_capture_textures/tex_0541a3e0_64x64.png
 tree31	0	assets/native/groundtruth_capture_textures/tex_0541a3e0_64x64.png
@@ -88,7 +92,6 @@ bushes10	0	assets/native/groundtruth_capture_textures/tex_0540c6f8_128x128.png
 AApart03	0	assets/native/groundtruth_capture_textures/tex_05c88f28_256x256.png
 AApart03	1	assets/native/groundtruth_capture_textures/tex_05caf398_128x128.png
 SIGN03	0	assets/native/groundtruth_capture_textures/tex_03d558b0_256x256.png
-BLOCKING_08	0	assets/native/groundtruth_capture_textures/tex_03f81c48_128x128.png
 Object19	0	assets/native/groundtruth_capture_textures/tex_0019a748_64x64.png
 BIRDHOUSE01	0	assets/native/groundtruth_capture_textures/tex_03f81c48_128x128.png
 BIRDHOUSE01	1	assets/native/groundtruth_capture_textures/tex_0537ffe8_64x64.png
@@ -124,27 +127,14 @@ tree08	0	assets/native/groundtruth_capture_textures/tex_0541a3c0_128x128.png
 tree08	1	assets/native/groundtruth_capture_textures/tex_0019a748_64x64.png
 ParkBench01	0	assets/native/groundtruth_capture_textures/tex_03f6efa8_64x64.png
 grill01	0	assets/native/groundtruth_capture_textures/tex_0541a3c0_128x128.png
-BLOCKING12_monkeybars	0	assets/native/groundtruth_capture_textures/tex_001948e8_128x128.png
-BLOCKING12_monkeybars	1	assets/native/groundtruth_capture_textures/tex_00231558_128x128.png
-BLOCKING12_monkeybars	2	assets/native/groundtruth_capture_textures/tex_001952c0_256x256.png
-BLOCKING12_monkeybars	3	assets/native/groundtruth_capture_textures/tex_001952c0_256x256.png
 Rocketa	0	assets/native/groundtruth_capture_textures/tex_03dc0fa0_128x128.png
-BLOCKING_road01	0	assets/native/groundtruth_capture_textures/tex_00193cd8_256x256.png
 DirtPile_04	0	assets/native/groundtruth_capture_textures/tex_00193cd8_256x256.png
-BLOCKING01Sign	0	assets/native/groundtruth_capture_textures/tex_03e2ca70_256x256.png
-BLOCK_Slide	0	assets/native/groundtruth_capture_textures/tex_03e2ca70_256x256.png
 CHIMNEY02	0	assets/native/groundtruth_capture_textures/tex_03e2ca70_256x256.png
 CHIMNEY03	0	assets/native/groundtruth_capture_textures/tex_03e2ca70_256x256.png
 CHIMNEY04	0	assets/native/groundtruth_capture_textures/tex_03e2ca70_256x256.png
 CHIMNEY05	0	assets/native/groundtruth_capture_textures/tex_03e2ca70_256x256.png
 CHIMNEY06	0	assets/native/groundtruth_capture_textures/tex_03e2ca70_256x256.png
 CHIMNEY07	0	assets/native/groundtruth_capture_textures/tex_03e2ca70_256x256.png
-# BLOCK_Rocket03's capture match was matcher noise (tex_mse 3736 in
-# level1_texture_groundtruth.json — a dark billboard texture stretched over
-# the playground rocket made it render blue, 2026-06-11 QA #2). The mesh has
-# no material links in level1.omt; the OMT pipeline draws it default-material
-# flat white. Bake white so it stays visible through the textured path.
-BLOCK_Rocket03	0	assets/native/flat_white_64.png
 BIRDHOUSE04	0	assets/native/groundtruth_capture_textures/tex_0019a748_64x64.png
 BIRDHOUSE05	0	assets/native/groundtruth_capture_textures/tex_0019a748_64x64.png
 BIRDHOUSE03	0	assets/native/groundtruth_capture_textures/tex_0019d028_256x256.png
@@ -164,16 +154,7 @@ SCHOOL	11	assets/native/groundtruth_capture_textures/tex_05c88f28_256x256.png
 SCHOOL	12	assets/native/groundtruth_capture_textures/tex_0517afd8_128x128.png
 SCHOOL	13	assets/native/groundtruth_capture_textures/tex_05c2a880_256x256.png
 SCHOOL	14	assets/native/groundtruth_capture_textures/tex_05c88f28_256x256.png
-BLOCKpicnic02	0	assets/native/groundtruth_capture_textures/tex_0540ca38_128x128.png
-BLOCKpicnic02	1	assets/native/groundtruth_capture_textures/tex_0540ca38_128x128.png
 Line01	0	assets/native/groundtruth_capture_textures/tex_05e90038_128x128.png
-BLOCKbench01	0	assets/native/groundtruth_capture_textures/tex_05e90038_128x128.png
-BLOCKpost03	0	assets/native/groundtruth_capture_textures/tex_05e90038_128x128.png
 ncwater3	0	assets/native/groundtruth_capture_textures/tex_0541a3c0_128x128.png
-BLOCKrockettop	0	assets/native/groundtruth_capture_textures/tex_05ceb4b0_128x128.png
-BLOCKrockettop	1	assets/native/groundtruth_capture_textures/tex_0541a3e0_64x64.png
-BLOCKcarhood	0	assets/native/groundtruth_capture_textures/tex_0019d028_256x256.png
-BLOCKcarhood	1	assets/native/groundtruth_capture_textures/tex_03defe88_128x128.png
-BLOCKcarhood	2	assets/native/groundtruth_capture_textures/tex_0019d028_256x256.png
 house01	0	assets/native/groundtruth_capture_textures/tex_03defe88_128x128.png
 house01	1	assets/native/groundtruth_capture_textures/tex_03defe88_128x128.png

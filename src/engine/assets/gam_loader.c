@@ -181,9 +181,16 @@ int gam_load(World *w, const char *path) {
                    camera, physics, NPCs) shares one convention with the scenery
                    instead of being reflected across z=0. */
                 else if (strcmp(prop_name, "PositionZ") == 0) e->z = -fval;
-                else if (strcmp(prop_name, "RotationX") == 0) e->rx = fval;
-                else if (strcmp(prop_name, "RotationY") == 0) e->ry = fval;
-                else if (strcmp(prop_name, "RotationZ") == 0) e->rz = fval;
+                /* .gam rotations are authored in DEGREES (samples: 0/90/170/
+                   180/270); every consumer (player heading, draw yaw, fan
+                   euler) treats e->rx/ry/rz as radians. Convert here. The
+                   z-mirror above also flips handedness, so rotations about
+                   axes that mix z (X and Y) negate: M·R(θ)·M = R(−θ) for
+                   R_x/R_y, R_z unchanged. (2026-06-12 QA: toolchest/labfan/
+                   yokdoor "incorrect rotation" — 90° read as 90 rad ≈ 117°.) */
+                else if (strcmp(prop_name, "RotationX") == 0) e->rx = -fval * 0.017453293f;
+                else if (strcmp(prop_name, "RotationY") == 0) e->ry = -fval * 0.017453293f;
+                else if (strcmp(prop_name, "RotationZ") == 0) e->rz = fval * 0.017453293f;
                 else if (strcmp(prop_name, "SpriteSize") == 0) e->sprite_size = fval;
                 else {
                     /* C3DPlayer movement/physics constants -> PlayerPhysics. */

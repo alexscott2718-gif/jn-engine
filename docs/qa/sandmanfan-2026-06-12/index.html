@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>QA Ticket Resolution — sandmanfan #3, 2026-06-12 · jn-engine</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body {
+  font-family:'Monaco','Menlo','Ubuntu Mono',monospace;
+  background:#0d0d0d; color:#e0e0e0;
+  line-height:1.55; padding:24px 16px;
+}
+.wrap { max-width:1060px; margin:0 auto; }
+h1 { font-size:1.5em; color:#fff; margin-bottom:4px; }
+h2 { font-size:1.15em; color:#7ec8ff; margin:40px 0 12px; border-bottom:1px solid #2a2a2a; padding-bottom:6px; }
+h3 { font-size:1.0em; color:#fff; }
+p { margin:10px 0; color:#c8c8c8; }
+a { color:#7ec8ff; text-decoration:none; }
+a:hover { text-decoration:underline; }
+.sub { color:#888; font-size:0.85em; }
+.badge { display:inline-block; padding:1px 8px; border-radius:4px; font-size:0.75em; vertical-align:middle; }
+.badge.green { background:#143a14; color:#7dde7d; border:1px solid #2c6e2c; }
+.badge.cat { background:#1d2c3d; color:#9ecbff; border:1px solid #2c5a8a; }
+table { width:100%; border-collapse:collapse; margin:14px 0; font-size:0.82em; }
+th,td { text-align:left; padding:6px 8px; border-bottom:1px solid #242424; vertical-align:top; }
+th { color:#9a9a9a; font-weight:normal; }
+td.msg { color:#c8c8c8; }
+.card { background:#141414; border:1px solid #262626; border-radius:10px; padding:20px; margin:26px 0; }
+.card h3 { margin-bottom:2px; }
+.meta { font-size:0.8em; color:#888; margin-bottom:12px; }
+.quote { border-left:3px solid #8a6d2c; background:#1a160d; color:#d9c08a; padding:8px 12px; margin:10px 0; font-size:0.88em; border-radius:0 6px 6px 0; }
+.ba { display:grid; grid-template-columns:1fr 1fr; gap:14px; margin:14px 0; }
+@media (max-width:760px) { .ba { grid-template-columns:1fr; } }
+.shot { background:#0a0a0a; border:1px solid #262626; border-radius:8px; overflow:hidden; }
+.shot img { display:block; width:100%; height:auto; }
+.shot .lbl { padding:6px 10px; font-size:0.78em; }
+.lbl.bad  { color:#ff8d8d; border-top:1px solid #3a1d1d; background:#1c1010; }
+.lbl.good { color:#7dde7d; border-top:1px solid #1d3a1d; background:#101c10; }
+.ev { background:#101418; border:1px solid #20303d; border-radius:8px; padding:14px 16px; margin:14px 0; }
+.ev .tag { color:#7ec8ff; font-size:0.78em; letter-spacing:0.08em; }
+.ev p { font-size:0.88em; }
+pre { background:#0a0a0a; border:1px solid #242424; border-radius:6px; padding:10px 12px; overflow-x:auto; font-size:0.75em; color:#b8c8b8; margin:10px 0; }
+code { color:#d9c08a; font-size:0.92em; }
+.sprites { display:flex; gap:18px; flex-wrap:wrap; align-items:flex-end; margin:12px 0; }
+.sprites figure { text-align:center; }
+.sprites img { image-rendering:pixelated; background:#222; border:1px solid #333; border-radius:4px; max-width:160px; }
+.sprites figcaption { font-size:0.72em; color:#888; margin-top:4px; max-width:170px; }
+.fix { border-left:3px solid #2c6e2c; background:#0d160d; padding:8px 12px; margin:12px 0; font-size:0.88em; color:#aFcFaF; border-radius:0 6px 6px 0; }
+.fix code { color:#9edf9e; }
+ul { margin:8px 0 8px 22px; color:#c8c8c8; }
+li { margin:6px 0; font-size:0.92em; }
+.footer { margin-top:48px; padding-top:14px; border-top:1px solid #2a2a2a; font-size:0.8em; color:#777; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<h1>QA Ticket Resolution Log #3 <span class="badge green">14 / 14 RESOLVED</span></h1>
+<p class="sub">Ticket submitted by <strong>sandmanfan</strong> (Discord) · 2026-06-12 · levels 1, 1b, 1c, 1e ·
+fixes authored autonomously by Claude (Fable&nbsp;5) via Claude Code · live demo: <a href="https://exentt.com/jn-engine/">exentt.com/jn-engine</a> ·
+previous tickets: <a href="../sandmanfan-2026-06-11/">#1</a> · <a href="../sandmanfan-2026-06-11b/">#2</a></p>
+
+<p>Third community ticket, and the first to range beyond Retroville — into Jimmy's lab
+(level1b), the school (level1c), and the Yokian ship (level1e). Fourteen reports, ten root
+causes. The headline find is an <em>engine-wide unit bug</em>: the <code>.gam</code> loader stored authored
+rotations in <strong>degrees</strong> into fields every consumer reads as <strong>radians</strong> — so a door authored at
+270° rendered at ≈350°, a fan authored at 90° sat diagonally in its duct, and even Jimmy's
+spawn-facing direction had been silently wrong on every level since the entity system landed.
+One conversion at the load boundary fixed all three orientation reports plus unreported damage
+everywhere. Honorable mention: the "hidden" canvas — the four invisibility reports turned out to
+be authored data the engine simply hadn't learned to read yet.</p>
+
+<h2>The Ticket</h2>
+<table>
+<tr><th>#</th><th>level</th><th>entity / placement</th><th>class / tag</th><th>cat.</th><th>report</th></tr>
+<tr><td><a href="#i1">1</a></td><td>level1</td><td>BLOCK_Rocket03</td><td>placement</td><td>TEX</td><td class="msg">fins should be blue</td></tr>
+<tr><td><a href="#i2">2</a></td><td>level1</td><td>3ARR</td><td>C3DARROW</td><td>TEX</td><td class="msg">transparent arrow should be in place of the C3DARROW entities</td></tr>
+<tr><td><a href="#i3">3</a></td><td>level1</td><td>3PHO</td><td>C3DPHONEBOOTH</td><td>MIS</td><td class="msg">model walkie talkie, should be the phonebooth in phone.omt</td></tr>
+<tr><td><a href="#i4">4</a></td><td>level1</td><td>3PIC</td><td>hydrant</td><td>GFX</td><td class="msg">generally 3pic models for nest, boat, hydrant should be invisible</td></tr>
+<tr><td><a href="#i5">5</a></td><td>level1</td><td>3LEA</td><td>C3DLEAVES</td><td>TEX</td><td class="msg">soda sprite should be leaves</td></tr>
+<tr><td><a href="#i6">6</a></td><td>level1</td><td>tree07</td><td>placement</td><td>SCL</td><td class="msg">tree sprite is too small</td></tr>
+<tr><td><a href="#i6">7</a></td><td>level1</td><td>treebranch04</td><td>placement</td><td>SCL</td><td class="msg">tree sprite is too small</td></tr>
+<tr><td><a href="#i8">8</a></td><td>level1c</td><td>3TOL</td><td>C3DTOOLCHEST</td><td>ORI</td><td class="msg">incorrect rotation</td></tr>
+<tr><td><a href="#i9">9</a></td><td>level1c</td><td>3SCD</td><td>C3DSCHOOLDOOR</td><td>MIS</td><td class="msg">wrong door model and texture</td></tr>
+<tr><td><a href="#i8">10</a></td><td>level1b</td><td>3FAN</td><td>labfan</td><td>ORI</td><td class="msg">fan is not aligned properly in it's dedicated space</td></tr>
+<tr><td><a href="#i11">11</a></td><td>level1b</td><td>3PIC</td><td>C3DPICKUPITEM</td><td>PLC</td><td class="msg">fishbowls are floating</td></tr>
+<tr><td><a href="#i11">12</a></td><td>level1b</td><td>3PIC</td><td>shrinkray</td><td>PLC</td><td class="msg">jet pack is slightly off-center to the entryway</td></tr>
+<tr><td><a href="#i8">13</a></td><td>level1e</td><td>3DOR</td><td>yokdoor</td><td>ORI</td><td class="msg">generally rotation on yokdoors are incorrect</td></tr>
+<tr><td><a href="#i14">14</a></td><td>level1e</td><td>3CIN</td><td>C3DCINDY</td><td>MIS</td><td class="msg">wrong cindy model</td></tr>
+</table>
+
+<p class="sub">MIS = wrong/missing model · TEX = wrong/missing texture · GFX = rendering artifact ·
+ORI = wrong orientation · PLC = wrong placement · SCL = wrong scale.
+Items 8, 10, 13 share one root cause (rotation units); so do 11 + 12 (billboard anchoring) and 6 + 7 (mis-clustered capture sizes).</p>
+
+<!-- ================= ROTATION UNITS (items 8, 10, 13) ================= -->
+<div class="card" id="i8">
+<h3>8 · 10 · 13 — toolchest, lab fan, Yokian doors all mis-rotated <span class="badge cat">ORI ×3</span></h3>
+<div class="meta">level1c 3TOL · level1b 3FAN [labfan] · level1e 3DOR [yokdoor] — one engine-wide root cause</div>
+<div class="quote">"incorrect rotation" · "fan is not aligned properly in it's dedicated space" · "generally rotation on yokdoors are incorrect"</div>
+<div class="ba">
+  <div class="shot"><img src="img/labfan-before.jpg" alt="before: fan diagonal in duct"><div class="lbl bad">DEPRECATED — labfan authored at 90° renders at ≈117°, diagonal in its duct</div></div>
+  <div class="shot"><img src="img/labfan-after.jpg" alt="after: fan seated in duct"><div class="lbl good">FIXED — blades seat square in the octagonal housing</div></div>
+</div>
+<div class="ba">
+  <div class="shot"><img src="img/yokdoor-before.jpg" alt="before: yokdoor wrong angle"><div class="lbl bad">DEPRECATED — yokdoor authored at 270° renders at ≈350°</div></div>
+  <div class="shot"><img src="img/yokdoor-after-v2.jpg" alt="after: yokdoor aligned"><div class="lbl good">FIXED — authored 270° yaw applied. (Shot retaken: the white shapes in the first "after" were the untextured Yokian soldiers, since fixed by the sweep below.)</div></div>
+</div>
+<div class="ba">
+  <div class="shot"><img src="img/toolchest-before.jpg" alt="before: toolchest rotated wrong"><div class="lbl bad">DEPRECATED — toolchest authored at 180° renders at ≈167°</div></div>
+  <div class="shot"><img src="img/toolchest-after.jpg" alt="after: toolchest squared"><div class="lbl good">FIXED — squared against the garage wall</div></div>
+</div>
+<div class="ev"><span class="tag">EVIDENCE TRAIL</span>
+<p>The <code>.gam</code> data authors rotations in <strong>degrees</strong> — across all 35 levels the values are
+clean editor angles (0, 90, 170, 180, 220, 270). But <code>gam_loader.c</code> stored them raw into
+<code>e-&gt;rx/ry/rz</code>, which the player heading (<code>sinf(e-&gt;ry)</code>), the draw paths, and the camera all
+consume as <em>radians</em>. So 90° became 90&nbsp;rad ≡ 116.6°, 270° became ≡ 350.1°, and 180° became ≡ 167.3° —
+close enough to "right" in some places that it survived three QA passes. A second, subtler half:
+the engine mirrors the original's left-handed Z at the load boundary (<code>z = −z</code>), and a mirror
+flips rotation handedness too — <code>M·R<sub>y</sub>(θ)·M = R<sub>y</sub>(−θ)</code> — so the converted yaw must also negate.</p>
+</div>
+<div class="fix"><strong>Fix:</strong> convert at the load boundary in <code>gam_loader.c</code> — <code>rx, ry = −deg·π/180</code>, <code>rz = +deg·π/180</code>
+(Z-axis rotations don't mix the mirrored axis). Removed <code>behavior_fan.c</code>'s local degrees compensation.
+Every authored rotation in both games now lands correctly, including Jimmy's authored 220° spawn facing (see "collateral repairs" below).</div>
+</div>
+
+<!-- ================= HIDDEN CANVAS (item 4) ================= -->
+<div class="card" id="i4">
+<h3>4 · nest / boat / hydrant pickups should be invisible <span class="badge cat">GFX</span></h3>
+<div class="meta">level1 3PIC [hydrant, nest1, nest2, boatl] — plus pad, pad2, godphone, kitty by the same evidence</div>
+<div class="quote">"generally 3pic models for nest, boat, hydrant should be invisible"</div>
+<div class="ba">
+  <div class="shot"><img src="img/hydrant-before.jpg" alt="before: untextured hydrant mesh on sidewalk"><div class="lbl bad">DEPRECATED — an untextured hydrant mesh drawn at the pickup trigger</div></div>
+  <div class="shot"><img src="img/hydrant-after.jpg" alt="after: pickup invisible"><div class="lbl good">FIXED — the trigger is invisible; the visible hydrant is level geometry</div></div>
+</div>
+<div class="ev"><span class="tag">EVIDENCE TRAIL</span>
+<p>Dumping the <code>.gam</code> instances settled it: every flagged pickup authors
+<code>SpriteDatabase=sprites.omt, SpriteIndex=106</code> — and chunk 106 in sprites.omt is a canvas
+literally named <strong>"hidden"</strong> (the editor's ?-placeholder, below). These are invisible trigger
+volumes sitting on top of their visible referent — the hydrant mesh is level geometry, the level2
+rescue cat is the separate 3KIT entity. The engine had been "helpfully" binding referent meshes
+per tag (drawing a second, untextured hydrant). The same dump showed <code>pad/pad2</code> author 106 too
+(rows removed), while <code>godphone</code> authors chunk 184 — a real phone sprite — so it now renders as
+the original does.</p>
+<div class="sprites">
+<figure><img src="img/ev-hidden-canvas.png" alt="hidden canvas"><figcaption>sprites.omt chunk 106 — "hidden". If a pickup authors this, the original draws nothing.</figcaption></figure>
+</div>
+<pre>Level1.gam 3PIC nest1   sprites.omt idx=106   ("hidden")
+Level1.gam 3PIC nest2   sprites.omt idx=106   ("hidden")
+Level1.gam 3PIC boatl   sprites.omt idx=106   ("hidden")
+Level1.gam 3PIC hydrant sprites.omt idx=106   ("hidden")
+Level1.gam 3PIC pad     sprites.omt idx=106   ("hidden")
+Level1.gam 3PIC godphone sprites.omt idx=184  ("phone" — a real sprite)</pre>
+</div>
+<div class="fix"><strong>Fix:</strong> new <code>sprite_ref_hidden()</code> rule — any JNBG entity authoring sprites.omt chunk 106 draws
+nothing. Deleted ten per-tag referent-mesh rows (nest×5, hydrant, boatl, pad×2, godphone, kitty) that were
+overriding the authored data. Data-driven, so it covers every level, not just the reported ones.</div>
+</div>
+
+<!-- ================= ARROW (item 2) ================= -->
+<div class="card" id="i2">
+<h3>2 · C3DARROW — opaque 3D arrow instead of the transparent sprite <span class="badge cat">TEX</span></h3>
+<div class="meta">level1 3ARR ×8 instances</div>
+<div class="quote">"transparent arrow should be in place of the C3DARROW entities"</div>
+<div class="ba">
+  <div class="shot"><img src="img/arrow-before.jpg" alt="before: untextured arrow mesh in doorframe"><div class="lbl bad">DEPRECATED — an untextured 3D arrow mesh wedged into the doorframe</div></div>
+  <div class="shot"><img src="img/arrow-after.jpg" alt="after: transparent yellow arrow sprite"><div class="lbl good">FIXED — the alpha-keyed yellow arrow floats over the door</div></div>
+</div>
+<div class="ev"><span class="tag">EVIDENCE TRAIL</span>
+<p>The decomp settles the class's nature: <code>C3DArrow</code>'s base chain is
+<code>C3DSpriteType → C3DSprite</code> — it's a <em>billboard sprite</em>, not a mesh class. All eight
+instances author <code>sprites.omt</code> chunk 33, which is the canvas named "arrow" (size 200). The
+engine's per-FourCC table bound <code>3Darrow.ASE</code> — a leftover from before the sprite tier existed —
+which shadowed the authored sprite reference.</p>
+<div class="sprites">
+<figure><img src="img/ev-arrow-sprite.png" alt="arrow sprite"><figcaption>sprites.omt chunk 33 "arrow" — alpha-keyed, exactly what the reporter asked for</figcaption></figure>
+</div>
+</div>
+<div class="fix"><strong>Fix:</strong> deleted the <code>3ARR → 3Darrow.ASE</code> row; the resolver now falls through to the
+sprite-database tier and draws the authored chunk-33 billboard at the authored 200-unit size.</div>
+</div>
+
+<!-- ================= PHONEBOOTH (item 3) ================= -->
+<div class="card" id="i3">
+<h3>3 · C3DPHONEBOOTH — walkie-talkie instead of the booth <span class="badge cat">MIS</span></h3>
+<div class="meta">level1 3PHO ×2 instances</div>
+<div class="quote">"model walkie talkie, should be the phonebooth in phone.omt"</div>
+<div class="ba">
+  <div class="shot"><img src="img/phone-before.jpg" alt="before: handheld phone prop floating"><div class="lbl bad">DEPRECATED — the handheld godphone prop (phone.ASE), lost in the tree</div></div>
+  <div class="shot"><img src="img/phone-after.jpg" alt="after: red phonebooth"><div class="lbl good">FIXED — the phone.omt booth, exported to glb with its three canvases</div></div>
+</div>
+<div class="ev"><span class="tag">EVIDENCE TRAIL</span>
+<p>The reporter named the exact container, and the decompiled <code>C3DPhoneBooth::InitObject</code>
+agrees verbatim: it resolves <code>"phone.omt"</code> and binds <strong>shape 0</strong> from it. phone.omt holds one
+3DSh chunk — id 0, named "phone" (the booth, 482 units tall) — plus canvases <code>Phone2 / phone /
+PhoneFloor</code>. <code>phone.ASE</code>, what the engine had been drawing, is the handheld walkie-talkie prop.</p>
+<pre>// C3DPhoneBooth::vfunc_01_007 (InitObject), Ghidra @ 00435780
+puVar1 = FUN_0046a910(s_phone_omt_004f0314);   // resolve "phone.omt"
+uVar2  = FUN_00477ba0(this[0x12a].vftable, 0); // bind shape id 0 = the booth</pre>
+</div>
+<div class="fix"><strong>Fix:</strong> exported phone.omt shape 0 via <code>omt-gltf</code> →
+<code>assets/glb/omt/phone/phone.glb</code> (canvas textures embedded) and pointed the 3PHO row at it.
+The second booth instance authors RotationY=180°, which now also renders correctly thanks to the rotation fix.</div>
+</div>
+
+<!-- ================= LEAVES (item 5) ================= -->
+<div class="card" id="i5">
+<h3>5 · C3DLEAVES — "soda sprite" in the trees <span class="badge cat">TEX</span></h3>
+<div class="meta">level1 3LEA ×27 instances (all levels share the row)</div>
+<div class="quote">"soda sprite should be leaves"</div>
+<div class="ba">
+  <div class="shot"><img src="img/leaves-before.jpg" alt="before: green bottle icon in tree"><div class="lbl bad">DEPRECATED — the green bottle-shaped icon hanging under the canopy</div></div>
+  <div class="shot"><img src="img/leaves-after.jpg" alt="after: leaves sprite"><div class="lbl good">FIXED — the leave0000 cluster (blends into the canopy, as it should)</div></div>
+</div>
+<div class="ev"><span class="tag">EVIDENCE TRAIL</span>
+<p>A fun one: the "soda" is real. The instances author <code>SpriteDatabase=icons.omt, SpriteIndex=4</code> —
+but icons.omt is the <em>level editor's</em> 12-icon set (trigger, dispatch, load, question…), and
+chunk 4 is the generic "sprite" placeholder icon, which happens to be drawn as a little green
+bottle. The original class swaps in its real visual at runtime; the engine was faithfully rendering
+the editor's stand-in. The actual leaves canvas lives in sprites.omt as chunk 45, "leave0000".</p>
+<div class="sprites">
+<figure><img src="img/ev-icons-placeholder.png" alt="icons.omt sprite icon"><figcaption>icons.omt chunk 4 "sprite" — the editor placeholder the reporter read as a soda</figcaption></figure>
+<figure><img src="img/ev-leaves-sprite.png" alt="leaves sprite"><figcaption>sprites.omt chunk 45 "leave0000" — the real visual</figcaption></figure>
+</div>
+</div>
+<div class="fix"><strong>Fix:</strong> curated <code>3LEA</code> row binding the chunk-45 leaves canvas at the authored
+100-unit size — mirroring what <code>C3DLeaves</code> does in code at runtime.</div>
+</div>
+
+<!-- ================= TREES (items 6, 7) ================= -->
+<div class="card" id="i6">
+<h3>6 · 7 — tree07 + treebranch04 canopies too small <span class="badge cat">SCL ×2</span></h3>
+<div class="meta">level1 placements · capture-measured billboard sizes</div>
+<div class="quote">"tree sprite is too small" ×2</div>
+<div class="ba">
+  <div class="shot"><img src="img/tree07-before.jpg" alt="before: bare trunk, tiny blob"><div class="lbl bad">DEPRECATED — tree07: a bare trunk with a 50-unit speck on top</div></div>
+  <div class="shot"><img src="img/tree07-after.jpg" alt="after: full canopy"><div class="lbl good">FIXED — full 600-unit canopy</div></div>
+</div>
+<div class="ba">
+  <div class="shot"><img src="img/treebr04-before.jpg" alt="before: treebranch04 tiny canopy"><div class="lbl bad">DEPRECATED — treebranch04: 200-unit canopy on a 652-unit trunk</div></div>
+  <div class="shot"><img src="img/treebr04-after.jpg" alt="after: proper canopy"><div class="lbl good">FIXED — 500-unit canopy seated on the branches</div></div>
+</div>
+<div class="ev"><span class="tag">EVIDENCE TRAIL</span>
+<p>The Phase-5 tree sizes were measured per-tree from captured 4-vertex billboard drawcalls,
+matched to placements by position clustering. Re-auditing the table against the source meshes
+exposed the two flagged trees as mis-associations: every <code>tree*</code> placement shares the
+<em>identical</em> instanced trunk mesh, and the eleven siblings measure 450–700 units — except tree07
+at <strong>50</strong>, with a one-off 64×64 texture no other tree uses. Same story for treebranch04 (200 vs
+its family's 500–600, on a 652-unit-tall trunk). Those two drawcalls had been clustered onto the
+wrong quads.</p>
+<pre>tree01  450   tree06  700   tree07   50 ←  tree29 650   tree30 550   tree31/32 600
+treebranch02 500   treebranch03 600   treebranch04 200 ←   treebranch07 500</pre>
+</div>
+<div class="fix"><strong>Fix:</strong> dropped both bogus rows from <code>level1_billboard_overrides</code>; the renderer's
+family-median fallback (600 for trees, 500 for treebranches, family canopy texture) — built for exactly
+this case — takes over. Provenance preserved in the override JSON.</div>
+</div>
+
+<!-- ================= ROCKET (item 1) ================= -->
+<div class="card" id="i1">
+<h3>1 · BLOCK_Rocket03 — playground rocket fins should be blue <span class="badge cat">TEX</span></h3>
+<div class="meta">level1 placement · a wrong call in ticket #2, now corrected with capture evidence</div>
+<div class="quote">"fins should be blue"</div>
+<div class="ba">
+  <div class="shot"><img src="img/rocket-before-v2.jpg" alt="before: white fins"><div class="lbl bad">DEPRECATED — a collision mesh, painted white, drawn over the real rocket</div></div>
+  <div class="shot"><img src="img/rocket-after-v4.jpg" alt="after: Rocketa only"><div class="lbl good">FIXED — BLOCK_Rocket03 no longer drawn at all; what you see is Rocketa, fins included</div></div>
+</div>
+<div class="ev"><span class="tag">EVIDENCE TRAIL</span>
+<p>The hardest item of the ticket — because every previous answer (including two from this ticket) was a
+texture for a mesh that <strong>should never draw</strong>. <code>BLOCK_Rocket03</code> has no material links and
+bare full-canvas UVs because it is a <em>collision volume</em>: the original's <code>BLOCK*</code>-prefixed
+meshes are invisible blockers, each with a separate visible twin (BLOCKbench ↔ bench05, BLOCKING_road ↔ the
+road). Ticket #2 baked it white, this ticket first bound a stale captured tex_id, then a stripe tile — three
+guesses painting an object the original never shows, on top of the real rocket. sandmanfan settled it:
+<em>"all Block meshes should be invisible"</em> — the visible playground rocket, fins included, is
+<strong>Rocketa</strong>, which was already textured correctly (canvas "Rocket2", the red/white/blue striped
+sheet).</p>
+<div class="sprites">
+<figure><img src="img/ev-rocket2-canvas.png" alt="canvas Rocket2"><figcaption>level1.omt canvas "Rocket2" (0012_128x128d16) — the striped sheet Rocketa (the real, visible rocket) already wears</figcaption></figure>
+</div>
+</div>
+<div class="fix"><strong>Fix:</strong> placements with a <code>BLOCK</code>-prefixed name (case-insensitive — level1c
+authors "Blocking01") are never drawn and never QA-pickable; all 19 BLOCK* texture-override rows deleted so no
+future export can resurrect one. Lessons recorded: a captured tex_id on a material-less mesh is <em>stale
+pipeline state</em>, not evidence — and before fixing how something draws, check whether it should draw at all.</div>
+</div>
+
+<!-- ================= SCHOOL DOOR (item 9) ================= -->
+<div class="card" id="i9">
+<h3>9 · C3DSCHOOLDOOR — wrong door model and texture <span class="badge cat">MIS</span></h3>
+<div class="meta">level1c 3SCD · fix also covers level3 (doorretro ×4) and level2a (doorfowl)</div>
+<div class="quote">"wrong door model and texture"</div>
+<div class="ba">
+  <div class="shot"><img src="img/schooldoor-before.jpg" alt="before: yellow Retroville door"><div class="lbl bad">DEPRECATED — a hardcoded Retroville DOOR.glb in the school hallway</div></div>
+  <div class="shot"><img src="img/schooldoor-after-v2.jpg" alt="after: fire door"><div class="lbl good">FIXED — the authored fire door (second attempt; see note)</div></div>
+</div>
+<div class="ev"><span class="tag">EVIDENCE TRAIL</span>
+<p>The QA report's own asset field gave it away: <code>firedoor.ase</code>. <code>C3DSchoolDoor</code> authors a
+per-instance <code>ASEFile/PNGFile</code> pair exactly like the swing door class the engine already handles —
+level1c says firedoor, level3 says doorretro (with exit.png / retrodoor.png variants), level2a says
+doorfowl. The engine's one-size-fits-all <code>3SCD → DOOR.glb</code> row ignored all of it. One wrinkle:
+the install's <code>firedoor.ASE</code> is a degenerate 8-vertex export stub, but the textured
+<code>glb/ase/firedoor.glb</code> twin already existed from the door-family migration.</p>
+</div>
+<div class="fix"><strong>Fix:</strong> extended the per-instance ASEFile draw branch to 3SCD, preferring the
+<code>assets/glb/ase/&lt;stem&gt;.glb</code> twin when the ASE is a stub. <strong>Repair note (sandmanfan,
+same day):</strong> the first shipped fix drew <em>nothing</em> — the glb twin turned out to embed no textures, and
+the engine faithfully hides untextured geometry. The authored <code>PNGFile</code> is the per-instance texture
+truth (level3 reuses one doorretro mesh with exit.png vs retrodoor.png), so it now applies to whichever mesh
+source loads. This failure class — a visible draw resolving zero textures — is now a standing assertion in the
+faithfulness sweep below, checked across every level.</div>
+</div>
+
+<!-- ================= PICKUP ANCHORING (items 11, 12) ================= -->
+<div class="card" id="i11">
+<h3>11 · 12 — floating fishbowls, off-center jetpack <span class="badge cat">PLC ×2</span></h3>
+<div class="meta">level1b 3PIC [C3DPICKUPITEM ×4 fishbowls, shrinkray] — one anchoring root cause</div>
+<div class="quote">"fishbowls are floating" · "jet pack is slightly off-center to the entryway"</div>
+<div class="ba">
+  <div class="shot"><img src="img/fishbowl-before.jpg" alt="before: fishbowls hovering"><div class="lbl bad">DEPRECATED — bowls hovering half a quad above the shelf</div></div>
+  <div class="shot"><img src="img/fishbowl-after.jpg" alt="after: fishbowls seated"><div class="lbl good">FIXED — bowls sit on the platform</div></div>
+</div>
+<div class="ba">
+  <div class="shot"><img src="img/jetpack-before.jpg" alt="before: jetpack high in archway"><div class="lbl bad">DEPRECATED — jetpack riding high in the tunnel mouth</div></div>
+  <div class="shot"><img src="img/jetpack-after.jpg" alt="after: jetpack centered"><div class="lbl good">FIXED — centered in the entryway</div></div>
+</div>
+<div class="ev"><span class="tag">EVIDENCE TRAIL</span>
+<p>The sprite-pickup draw path "helpfully" lifted every billboard by half its size
+(<code>y + size/2</code>) on the assumption that authored pickup positions sit at ground level. The
+fishbowls disproved the assumption with numbers: they author Y=−472.8 on a floor at −500 — the
+authors placed the <em>center</em>, just like the original's <code>OMediaCanvasElement</code> places its canvas
+AT the element position. The lift pushed every sprite pickup (fishbowls +50, jetpack +75) half a
+quad too high.</p>
+</div>
+<div class="fix"><strong>Fix:</strong> billboards now center on the authored Y, matching the original's canvas anchoring.
+The item-bob animation still floats them gently around that point.</div>
+</div>
+
+<!-- ================= CINDY (item 14) ================= -->
+<div class="card" id="i14">
+<h3>14 · C3DCINDY — wrong Cindy model <span class="badge cat">MIS</span></h3>
+<div class="meta">level1e 3CIN</div>
+<div class="quote">"wrong cindy model"</div>
+<div class="ba">
+  <div class="shot"><img src="img/cindy-before.jpg" alt="before: cheering cindy pose"><div class="lbl bad">DEPRECATED — cindycheer.ASE (race-finish cheer pose, arms up)</div></div>
+  <div class="shot"><img src="img/cindy-after-v2.jpg" alt="after: cindy idle"><div class="lbl good">FIXED — cindstop.ASE idle pose with cindy.png. (Shot retaken after the sweep textured the surrounding soldiers.)</div></div>
+</div>
+<div class="ev"><span class="tag">EVIDENCE TRAIL</span>
+<p>Straight from the decomp: <code>C3DCindy</code>'s asset registration loads <code>cindy.png</code> once and
+registers <code>HISTOP → cindstop.ase</code> as the default stop/idle animation. <code>cindycheer.ASE</code> is the
+cheering anim the class swaps to at the race finish — not the default pose for a captive on the
+Yokian ship.</p>
+<pre>| texture   | cindy.png                  | 00414fa0 | loaded once at registration |
+| animation | HISTOP -> cindstop.ase     | 00414fa0 | default stop/idle           |</pre>
+</div>
+<div class="fix"><strong>Fix:</strong> 3CIN row now binds <code>cindstop.ASE</code> + <code>cindy.png</code> per
+<code>docs/decomp/C3DCindy.md</code>.</div>
+</div>
+
+<h2>Collateral repairs &amp; verification</h2>
+<div class="card">
+<p>Fixes that fell out of the root causes beyond the 14 reported items:</p>
+<ul>
+<li><strong>Jimmy's spawn facing, every level.</strong> Level&nbsp;1 authors <code>3JIM RotationY=220°</code>; the engine had
+been pointing him at the degrees-as-radians garbage angle since the entity system landed. He now spawns
+facing the authored direction (street-side, phonebooth on his left).</li>
+<li><strong>Every other authored rotation</strong> — including the second phonebooth (180°) and the second yokdoor (90°).</li>
+<li><strong>godphone / pad / pad2 / kitty / BUBBLEPICKUP</strong> pickups now follow their authored sprite data
+(hidden → invisible, real sprites → drawn) instead of hand-bound meshes.</li>
+<li><strong>Regression suite updated:</strong> the QA-annotate web check's "click sky" probe assumed the old (wrong)
+spawn view; re-aimed, plus a flaky fixed-sleep replaced with a deterministic poll. <code>qa_web_verify.py</code>: all 16 checks pass.</li>
+</ul>
+<div class="ba">
+  <div class="shot"><img src="img/spawn-after.jpg" alt="new spawn view"><div class="lbl good">The new boot view — authored 220° spawn yaw, item-3 booth and item-2 arrow both in frame</div></div>
+  <div class="shot"><img src="img/arrow-after.jpg" alt="arrow after"><div class="lbl good">Verified per-report with aimed before/after screenshots (tools/qa_shot.sh)</div></div>
+</div>
+</div>
+
+<h2>From tickets to sweeps — fixing classes, not instances</h2>
+<div class="card">
+<div class="quote">"Do you think theres a way that all of the misaligned/oriented objects can be fixed based on the
+game code instead of reporting each instance? … I feel that when one set of objects get adjusted, others get
+messed up." — sandmanfan, after this ticket</div>
+<p>That instinct is correct, and this ticket is the proof: the worst defects above were <em>earlier hand fixes</em>
+(the arrow's mesh row, the hydrant's referent row, the hardcoded school door, the rocket's painted collision
+fins). Hand-curated bindings rot; authored data and engine semantics don't. So the per-instance reports aren't
+the fix mechanism — they're the <em>measurement</em> that exposes which engine rule is wrong, and each rule fix
+covers every instance in every level at once (this ticket's rotation-unit fix corrected three reported objects
+<em>and</em> every authored rotation in both games, including the player's spawn facing).</p>
+<p>As of this ticket those rules are now <strong>executable</strong>. <code>JN_AUDIT=1</code> makes the engine log
+every entity/placement draw decision through its real resolution code, and
+<code>tools/audit_faithfulness.py</code> sweeps all 30+ levels and asserts the invariants the tickets paid for:
+no placeholder boxes, no missing assets, no unresolved sprite refs, no <em>visible</em> draw of a zero-texture
+mesh (the fire-door failure class), no degenerate stub bound as an entity visual, no BLOCK collision mesh drawn.
+New findings fail the run; accepted ones need a written waiver.</p>
+<p>The first full sweep immediately found 28 defects nobody had reported — which collapsed into just
+<strong>three root causes</strong>, all fixed the same day:</p>
+<ul>
+<li><strong>Every Yokian soldier and guard in 9 levels drew untextured</strong> — their ASEs carry no material
+bitmap; the classes attach <code>yoksold.png</code>/<code>yokguard.png</code> in code (decomp-verified).</li>
+<li><strong>The lab screen was a name-matched guess</strong> — C3DLabScreen actually loads
+<code>screen.ase</code> + <code>screen1.png</code>.</li>
+<li><strong>level4c's DOORPP1 was a placeholder box</strong> — its ASE has mismatched animation frame counts and
+the loader rejected the whole mesh; it now keeps frame 0 as a static mesh.</li>
+</ul>
+<p>It also caught a bug in this very ticket's own fix within minutes of existing: the BLOCK skip was
+case-sensitive, and level1c spells its collision meshes "Blocking01". A reporter would have found that next
+week; the sweep found it on the first run. Each future ticket's root cause becomes a new assertion — QA mines
+the rules, the sweep enforces them everywhere, forever.</p>
+</div>
+
+<h2>Process notes</h2>
+<div class="card">
+<ul>
+<li><strong>Trust the authored data over curated tables.</strong> Eight of the fourteen items were the engine
+overriding (or ignoring) something the <code>.gam</code> already said plainly: a sprite index, a "hidden" canvas,
+an ASEFile, a rotation. The fixes mostly <em>delete</em> code.</li>
+<li><strong>Material-less meshes have no captured texture truth.</strong> The rocket fins went white (ticket #2:
+"matcher noise"), then sign-panel blue ("trust the tex_id") before the reporter settled it: the blue stripe of
+rocket.png. When a mesh authors no material, the capture's tex_id is whatever happened to be bound beforehand —
+community knowledge of the original is the only ground truth left.</li>
+<li><strong>Outliers against instanced geometry are bugs.</strong> Twelve trees share one trunk mesh; the two
+complaints were exactly the two rows that disagreed with their family by an order of magnitude.</li>
+<li><strong>Unit bugs hide behind symmetric angles.</strong> 0° and 180° survive a degrees/radians mixup almost
+intact (180° ≡ 167°) — which is why three QA passes saw "mostly fine" rotations before a 90° fan and a
+270° door finally exposed it.</li>
+</ul>
+</div>
+
+<div class="footer">
+<p>All 14 reports resolved · native + WASM builds verified · deployed to
+<a href="https://exentt.com/jn-engine/">exentt.com/jn-engine</a> ·
+<a href="https://github.com/alexscott2718-gif/jn-engine">source on GitHub</a> ·
+report bugs in-game: <a href="/jn/qa-howto.html">2-minute guide</a></p>
+<p>Resolution log generated 2026-06-12 · fixes + page authored autonomously by Claude (Fable 5) via Claude Code, from sandmanfan's in-game QA export.</p>
+</div>
+
+</div>
+</body>
+</html>

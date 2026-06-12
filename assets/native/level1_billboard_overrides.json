@@ -1,25 +1,98 @@
 {
-  "schema": "jn-native-level1-billboard-overrides/v1",
-  "source": "build/frame_v4_hudfix_candidate_8881.omtc (keyframe 8881) -- 4-vertex DRAW_PRIMITIVE FVF=0x152 records matched against assets/native/level1_map_coverage.json by translation cluster",
-  "rationale": "Every entry replaces a native 3D tree mesh with a camera-facing quad of the size the captured frame uses for that tree. The capture renders all in-frustum trees as single 4-vertex billboards (verified in Phase 0 diff: 12/12 capture-matched tree drawcalls have vtx_count=4 and zero local Z range). The native fallback was an 8-38 vertex 3D leafy mesh, which already used the same texture (Phase 3 overrides) but kept the wrong silhouette. Replacing the mesh with the quad closes the foreground-composition gap called out as Phase 5 in docs/native_vs_capture_8881_plan.md.",
-  "size_units": "world-space (OMT units). The captured quad's local extent in X/Y is the value below; Z extent is always 0 (flat). Native consumes (size, size) into renderer_draw_billboard as (width, height).",
-  "y_pivot": "The native placement Y is 0 (ground). The captured quad has Y range ~ ±size/2 around its world translation; to keep the billboard's base on the ground we render with center_y = size/2.",
-  "overrides": [
-    {"mesh": "tree01",       "size": 450.0, "texture": "assets/native/level1_capture_overrides/tex_052e7090_128x128.png", "capture_tex_id": "052e7090", "capture_drawcall": 3331, "rationale": "drawcall 3331 quad half-extent 225 (full 450). Texture matches existing Phase 3 override; size measured directly from FVF152 vertex data."},
-    {"mesh": "tree06",       "size": 700.0, "texture": "assets/native/level1_capture_overrides/tex_052e7090_128x128.png", "capture_tex_id": "052e7090", "capture_drawcall": 3369, "rationale": "drawcall 3369 quad half-extent 350 (full 700). Largest tree billboard in the frame."},
-    {"mesh": "tree07",       "size":  50.0, "texture": "assets/native/level1_capture_overrides/tex_0541bf80_64x64.png",   "capture_tex_id": "0541bf80", "capture_drawcall": 3360, "rationale": "drawcall 3360 quad half-extent 25 (full 50). Smallest billboard; trunk-coloured texture (0541bf80) consistent with Phase 3 override."},
-    {"mesh": "tree29",       "size": 650.0, "texture": "assets/native/level1_capture_overrides/tex_052e7090_128x128.png", "capture_tex_id": "052e7090", "capture_drawcall": 3349, "rationale": "drawcall 3349 quad half-extent 325 (full 650)."},
-    {"mesh": "tree30",       "size": 550.0, "texture": "assets/native/level1_capture_overrides/tex_052e7090_128x128.png", "capture_tex_id": "052e7090", "capture_drawcall": 3351, "rationale": "drawcall 3351 quad half-extent 275 (full 550)."},
-    {"mesh": "tree31",       "size": 600.0, "texture": "assets/native/level1_capture_overrides/tex_052e7090_128x128.png", "capture_tex_id": "052e7090", "capture_drawcall": 3342, "rationale": "drawcall 3342 quad half-extent 300 (full 600)."},
-    {"mesh": "tree32",       "size": 600.0, "texture": "assets/native/level1_capture_overrides/tex_052e7090_128x128.png", "capture_tex_id": "052e7090", "capture_drawcall": 3330, "rationale": "drawcall 3330 quad half-extent 300 (full 600). Cluster shared with treebranch03 -- same size used for the sibling override."},
-    {"mesh": "treebranch02", "size": 500.0, "texture": "assets/native/level1_capture_overrides/tex_052e7090_128x128.png", "capture_tex_id": "052e7090", "capture_drawcall": 3386, "rationale": "drawcall 3386 quad half-extent 250 (full 500)."},
-    {"mesh": "treebranch03", "size": 600.0, "texture": "assets/native/level1_capture_overrides/tex_052e7090_128x128.png", "capture_tex_id": "052e7090", "capture_drawcall": 3330, "rationale": "ambiguous cluster shared with tree32 (same drawcall 3330); use the measured 600 size."},
-    {"mesh": "treebranch04", "size": 200.0, "texture": "assets/native/level1_capture_overrides/tex_03ebbbc8_64x64.png",   "capture_tex_id": "03ebbbc8", "capture_drawcall": 3365, "rationale": "drawcall 3365 quad half-extent 100 (full 200). Distinct foliage texture (03ebbbc8) consistent with Phase 3 override."},
-    {"mesh": "treebranch07", "size": 500.0, "texture": "assets/native/level1_capture_overrides/tex_052e7090_128x128.png", "capture_tex_id": "052e7090", "capture_drawcall": 3393, "rationale": "drawcall 3393 quad half-extent 250 (full 500)."},
-    {"mesh": "2D_Trees05",   "size": 450.0, "texture": "assets/native/level1_capture_overrides/tex_052e7090_128x128.png", "capture_tex_id": "052e7090", "capture_drawcall": 3331, "rationale": "ambiguous cluster shared with tree01 (same drawcall 3331); use the measured 450 size. Already a '2D_' prefix in OMT, so the billboard interpretation is canonical."}
-  ],
-  "deferred": {
-    "rationale": "These tree-named meshes are present in level1.omt but were NOT drawn in keyframe 8881's capture. We have no measured size for them; defer until a future keyframe surfaces a 4-vertex drawcall at their world translation.",
-    "meshes": ["2D_Trees03", "treebranch08", "2D_Trees_06"]
+ "schema": "jn-native-level1-billboard-overrides/v1",
+ "source": "build/frame_v4_hudfix_candidate_8881.omtc (keyframe 8881) -- 4-vertex DRAW_PRIMITIVE FVF=0x152 records matched against assets/native/level1_map_coverage.json by translation cluster",
+ "rationale": "Every entry replaces a native 3D tree mesh with a camera-facing quad of the size the captured frame uses for that tree. The capture renders all in-frustum trees as single 4-vertex billboards (verified in Phase 0 diff: 12/12 capture-matched tree drawcalls have vtx_count=4 and zero local Z range). The native fallback was an 8-38 vertex 3D leafy mesh, which already used the same texture (Phase 3 overrides) but kept the wrong silhouette. Replacing the mesh with the quad closes the foreground-composition gap called out as Phase 5 in docs/native_vs_capture_8881_plan.md.",
+ "size_units": "world-space (OMT units). The captured quad's local extent in X/Y is the value below; Z extent is always 0 (flat). Native consumes (size, size) into renderer_draw_billboard as (width, height).",
+ "y_pivot": "The native placement Y is 0 (ground). The captured quad has Y range ~ \u00b1size/2 around its world translation; to keep the billboard's base on the ground we render with center_y = size/2.",
+ "overrides": [
+  {
+   "mesh": "tree01",
+   "size": 450.0,
+   "texture": "assets/native/level1_capture_overrides/tex_052e7090_128x128.png",
+   "capture_tex_id": "052e7090",
+   "capture_drawcall": 3331,
+   "rationale": "drawcall 3331 quad half-extent 225 (full 450). Texture matches existing Phase 3 override; size measured directly from FVF152 vertex data."
+  },
+  {
+   "mesh": "tree06",
+   "size": 700.0,
+   "texture": "assets/native/level1_capture_overrides/tex_052e7090_128x128.png",
+   "capture_tex_id": "052e7090",
+   "capture_drawcall": 3369,
+   "rationale": "drawcall 3369 quad half-extent 350 (full 700). Largest tree billboard in the frame."
+  },
+  {
+   "mesh": "tree29",
+   "size": 650.0,
+   "texture": "assets/native/level1_capture_overrides/tex_052e7090_128x128.png",
+   "capture_tex_id": "052e7090",
+   "capture_drawcall": 3349,
+   "rationale": "drawcall 3349 quad half-extent 325 (full 650)."
+  },
+  {
+   "mesh": "tree30",
+   "size": 550.0,
+   "texture": "assets/native/level1_capture_overrides/tex_052e7090_128x128.png",
+   "capture_tex_id": "052e7090",
+   "capture_drawcall": 3351,
+   "rationale": "drawcall 3351 quad half-extent 275 (full 550)."
+  },
+  {
+   "mesh": "tree31",
+   "size": 600.0,
+   "texture": "assets/native/level1_capture_overrides/tex_052e7090_128x128.png",
+   "capture_tex_id": "052e7090",
+   "capture_drawcall": 3342,
+   "rationale": "drawcall 3342 quad half-extent 300 (full 600)."
+  },
+  {
+   "mesh": "tree32",
+   "size": 600.0,
+   "texture": "assets/native/level1_capture_overrides/tex_052e7090_128x128.png",
+   "capture_tex_id": "052e7090",
+   "capture_drawcall": 3330,
+   "rationale": "drawcall 3330 quad half-extent 300 (full 600). Cluster shared with treebranch03 -- same size used for the sibling override."
+  },
+  {
+   "mesh": "treebranch02",
+   "size": 500.0,
+   "texture": "assets/native/level1_capture_overrides/tex_052e7090_128x128.png",
+   "capture_tex_id": "052e7090",
+   "capture_drawcall": 3386,
+   "rationale": "drawcall 3386 quad half-extent 250 (full 500)."
+  },
+  {
+   "mesh": "treebranch03",
+   "size": 600.0,
+   "texture": "assets/native/level1_capture_overrides/tex_052e7090_128x128.png",
+   "capture_tex_id": "052e7090",
+   "capture_drawcall": 3330,
+   "rationale": "ambiguous cluster shared with tree32 (same drawcall 3330); use the measured 600 size."
+  },
+  {
+   "mesh": "treebranch07",
+   "size": 500.0,
+   "texture": "assets/native/level1_capture_overrides/tex_052e7090_128x128.png",
+   "capture_tex_id": "052e7090",
+   "capture_drawcall": 3393,
+   "rationale": "drawcall 3393 quad half-extent 250 (full 500)."
+  },
+  {
+   "mesh": "2D_Trees05",
+   "size": 450.0,
+   "texture": "assets/native/level1_capture_overrides/tex_052e7090_128x128.png",
+   "capture_tex_id": "052e7090",
+   "capture_drawcall": 3331,
+   "rationale": "ambiguous cluster shared with tree01 (same drawcall 3331); use the measured 450 size. Already a '2D_' prefix in OMT, so the billboard interpretation is canonical."
   }
+ ],
+ "deferred": {
+  "rationale": "These tree-named meshes are present in level1.omt but were NOT drawn in keyframe 8881's capture. We have no measured size for them; defer until a future keyframe surfaces a 4-vertex drawcall at their world translation.",
+  "meshes": [
+   "2D_Trees03",
+   "treebranch08",
+   "2D_Trees_06"
+  ]
+ },
+ "amendment_2026_06_12": "tree07 (50) and treebranch04 (200) entries removed: QA #3 'tree sprite is too small'. Both were mis-associated capture drawcalls \u2014 every sibling of the same instanced trunk mesh measures 450-700 (trees) / 500-600 (treebranches) with canopy tex_052e7090. They now use the main.c family-median fallback (600/500). Removed entries preserved here for provenance: [{\"mesh\": \"tree07\", \"size\": 50.0, \"texture\": \"assets/native/level1_capture_overrides/tex_0541bf80_64x64.png\", \"capture_tex_id\": \"0541bf80\", \"capture_drawcall\": 3360, \"rationale\": \"drawcall 3360 quad half-extent 25 (full 50). Smallest billboard; trunk-coloured texture (0541bf80) consistent with Phase 3 override.\"}, {\"mesh\": \"treebranch04\", \"size\": 200.0, \"texture\": \"assets/native/level1_capture_overrides/tex_03ebbbc8_64x64.png\", \"capture_tex_id\": \"03ebbbc8\", \"capture_drawcall\": 3365, \"rationale\": \"drawcall 3365 quad half-extent 100 (full 200). Distinct foliage texture (03ebbbc8) consistent with Phase 3 override.\"}]"
 }

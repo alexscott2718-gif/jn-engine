@@ -165,6 +165,31 @@ static int model_has_texture(const AseModel *m) {
     return 0;
 }
 
+/* JN_AUDIT=1: faithfulness sweep mode. Every entity/placement draw decision
+   emits one machine-readable line through the REAL resolution code path (no
+   parallel reimplementation that could drift). tools/audit_faithfulness.py
+   runs this across every level and asserts the invariants the QA tickets
+   established (no placeholder boxes, no invisible textured-mesh draws, no
+   missing assets, no visible BLOCK collision meshes, no stub meshes...).
+   Lines repeat per frame; the harness dedups. */
+static int audit_active(void) {
+    static int v = -1;
+    if (v == -1) v = env_enabled("JN_AUDIT") ? 1 : 0;
+    return v;
+}
+static void audit_line(const char *cat, const char *name, const char *tag,
+                       const char *kind, const char *path,
+                       const AseModel *m, unsigned int tex_override) {
+    if (!audit_active()) return;
+    fprintf(stderr, "[audit] cat=%s name=%s tag=%s kind=%s path=%s "
+            "verts=%d textured=%d\n",
+            cat, name && name[0] ? name : "-", tag && tag[0] ? tag : "-",
+            kind, path && path[0] ? path : "-",
+            m ? m->vertex_count : -1,
+            m ? (model_has_texture(m) || tex_override != 0)
+              : (tex_override != 0));
+}
+
 /* Save current GL framebuffer as a PNG using only stdlib + zlib */
 static void save_screenshot(const char *path, int w, int h) {
     unsigned char *pixels = malloc((size_t)w * h * 3);
@@ -497,13 +522,19 @@ static void draw_scene(World *world, int jim_model_ok)
            until scripting shows them (phone booth, hydrant, teleport FX,
            rockets...). No native show-scripting exists yet, so they stay
            hidden — strictly more faithful than drawing them. */
-        if (e->has_initially_visible && e->initially_visible == 0) continue;
+        if (e->has_initially_visible && e->initially_visible == 0) {
+            audit_line("entity", e->type, e->tag, "gated", NULL, NULL, 0);
+            continue;
+        }
 
         /* Same shape for pickups: InitallyActive=0 (sic — the original's
            registrar typo) marks quest-spawned pickups (level1 egg2b nest
            egg, ...) that scripting activates later; the original never
            draws them at boot (2026-06-11 QA). */
-        if (gam_prop_i(e, "InitallyActive", -1) == 0) continue;
+        if (gam_prop_i(e, "InitallyActive", -1) == 0) {
+            audit_line("entity", e->type, e->tag, "gated", NULL, NULL, 0);
+            continue;
+        }
 
         /* QA annotation: every drawable entity registers here so the pick
            pass and the main pass assign identical IDs. */
@@ -517,6 +548,8 @@ static void draw_scene(World *world, int jim_model_ok)
                                          e->ry + 3.14159265f, 1.0f,
                                          sample.frame_a, sample.frame_b, sample.lerp);
             }
+            audit_line("entity", e->type, e->tag, "player", NULL,
+                       sample.model, 0);
             continue;
         }
 
@@ -536,30 +569,56 @@ static void draw_scene(World *world, int jim_model_ok)
                 renderer_set_hide_untextured_groups(0);
                 renderer_draw_model(m, tex, e->x, e->y, e->z, e->ry, 1.0f);
                 renderer_set_hide_untextured_groups(1);
+                audit_line("entity", e->type, e->tag, "mesh", path, m, tex);
                 continue;
             }
+            audit_line("entity", e->type, e->tag, "mesh-missing", path, NULL, 0);
             /* mesh missing -> fall through to placeholder box */
         }
 
-        /* C3DSwingDoor (3SWN): per-instance authored ASEFile/PNGFile —
-           every level's swing door is a different mesh (level1 blocksdoor,
-           level2a door2a, level3a pyramiddoor1...). The files ship with the
-           original install under assets/ase + assets/png with mixed case,
-           so resolve case-insensitively. */
-        if (strcmp(e->type, "3SWN") == 0 && e->ase_file[0]) {
+        /* C3DSwingDoor (3SWN) and C3DSchoolDoor (3SCD): per-instance
+           authored ASEFile/PNGFile — every level's door is a different mesh
+           (level1 blocksdoor, level1c firedoor, level3 doorretro, level2a
+           doorfowl...). The files ship with the original install under
+           assets/ase + assets/png with mixed case, so resolve
+           case-insensitively. Several of the door ASEs are degenerate
+           OMT->ASE stubs (firedoor.ASE is 8 verts); prefer the textured
+           assets/glb/ase/<stem>.glb twin when one exists
+           (2026-06-12 QA #3: school fire door). */
+        if ((strcmp(e->type, "3SWN") == 0 || strcmp(e->type, "3SCD") == 0)
+            && e->ase_file[0]) {
             char path[160];
-            if (asset_path_ci(path, sizeof(path), "assets/ase", e->ase_file)) {
-                AseModel *m = model_cache_get(path);
-                if (m) {
-                    unsigned int tex = 0;
-                    char tpath[160];
-                    if (e->png_file[0] &&
-                        asset_path_ci(tpath, sizeof(tpath), "assets/png", e->png_file))
-                        tex = tex_cache_get(tpath);
-                    renderer_draw_model(m, tex, e->x, e->y, e->z, e->ry, 1.0f);
-                    continue;
-                }
+            AseModel *m = NULL;
+            unsigned int tex = 0;
+            /* The authored PNGFile is the per-instance texture truth and
+               applies to EITHER mesh source — level3 reuses one doorretro
+               mesh with exit.png vs retrodoor.png, and the glb twins are
+               geometry-only (firedoor.glb embeds no images; drawing it
+               bare left the school fire door invisible — 2026-06-12 QA #3
+               follow-up from sandmanfan). */
+            char tpath[160];
+            if (e->png_file[0] &&
+                asset_path_ci(tpath, sizeof(tpath), "assets/png", e->png_file))
+                tex = tex_cache_get(tpath);
+            char glb_name[96];
+            const char *dot = strrchr(e->ase_file, '.');
+            size_t stem_n = dot ? (size_t)(dot - e->ase_file)
+                                : strlen(e->ase_file);
+            if (stem_n < sizeof(glb_name) - 5) {
+                memcpy(glb_name, e->ase_file, stem_n);
+                memcpy(glb_name + stem_n, ".glb", 5);
+                if (asset_path_ci(path, sizeof(path), "assets/glb/ase", glb_name))
+                    m = model_cache_get(path);   /* real geometry (ASE may be a stub) */
             }
+            if (!m && asset_path_ci(path, sizeof(path), "assets/ase", e->ase_file))
+                m = model_cache_get(path);
+            if (m) {
+                renderer_draw_model(m, tex, e->x, e->y, e->z, e->ry, 1.0f);
+                audit_line("entity", e->type, e->tag, "mesh", path, m, tex);
+                continue;
+            }
+            audit_line("entity", e->type, e->tag, "mesh-missing",
+                       e->ase_file, NULL, 0);
             /* mesh missing -> fall through to placeholder box */
         }
 
@@ -574,27 +633,45 @@ static void draw_scene(World *world, int jim_model_ok)
         if ((strcmp(e->type, "3PIC") == 0 || strcmp(e->type, "3SRO") == 0 ||
              strcmp(e->type, "3SPR") == 0 || strcmp(e->type, "3ANI") == 0)
             && e->sprite_index > 0
-            /* Curated per-tag visuals win over the sprite shortcut: the
-               level2 kitty authors SpriteIndex 106 — the editor's "hidden"
-               ?-placeholder — but renders as the cat (TAG_TABLE row). */
+            /* Curated per-tag visuals win over the sprite shortcut. */
             && !entity_visual_tag_override(e, NULL)) {
+            /* sprites.omt chunk 106 = the "hidden" canvas: an invisible
+               pickup trigger whose visible referent is level geometry or a
+               separate entity (2026-06-12 QA #3 — hydrant/nests/boat). */
+            if (sprite_ref_hidden(e)) {
+                audit_line("entity", e->type, e->tag, "hidden", NULL, NULL, 0);
+                continue;
+            }
             char spath[96];
             unsigned int stex = 0;
+            const char *sprite_src = NULL;
             if (entity_visual_is_jnbg()) {
                 const char *cp = sprite_chunk_path(e->sprite_index);
-                if (cp) stex = tex_cache_get(cp);
+                if (cp) { stex = tex_cache_get(cp); sprite_src = cp; }
             } else {
                 snprintf(spath, sizeof(spath),
                          "assets/parsed/sprites/jnvsjn/spr_%d.png", e->sprite_index);
                 stex = tex_cache_get(spath);
+                sprite_src = spath;
             }
+            if (!stex)
+                audit_line("entity", e->type, e->tag, "sprite-unresolved",
+                           sprite_src, NULL, 0);
             if (stex) {
                 float sz = e->sprite_size > 1.0f ? e->sprite_size : 110.0f;
-                /* Lift the quad so its bottom edge sits at the pickup's Y
-                   (its position is at ground level) instead of sinking the
-                   lower half into the floor; the item bob keeps it floating. */
-                renderer_draw_billboard(stex, e->x, e->y + sz * 0.5f, e->z,
+                /* JNBG: centre the quad at the authored Y — the original's
+                   OMediaCanvasElement places the canvas AT the element
+                   position. The old +sz/2 "ground lift" floated every
+                   sprite pickup half a quad too high (2026-06-12 QA #3:
+                   floating fishbowls, jetpack off-centre in its doorway).
+                   JNvsJN is a different engine (Granny, not OMT) whose
+                   anchoring hasn't been measured; keep its QA'd lift until
+                   a ticket says otherwise. */
+                float by = entity_visual_is_jnbg() ? e->y : e->y + sz * 0.5f;
+                renderer_draw_billboard(stex, e->x, by, e->z,
                                         sz, sz, 0.0f, 0.0f, 0.0f, 0.0f);
+                audit_line("entity", e->type, e->tag, "sprite",
+                           sprite_src, NULL, stex);
                 continue;
             }
         }
@@ -602,24 +679,36 @@ static void draw_scene(World *world, int jim_model_ok)
         /* Pre-bound model from entity vtable (legacy path). */
         if (e->model) {
             renderer_draw_model(e->model, 0, e->x, e->y, e->z, 0.0f, 1.0f);
+            audit_line("entity", e->type, e->tag, "mesh-prebound", NULL,
+                       e->model, 0);
             continue;
         }
 
         /* Resolver path: tag override → FourCC default → invisible/box. */
         EntityVisual v;
         if (entity_visual_resolve(e, &v)) {
-            if (v.invisible) continue;
+            if (v.invisible) {
+                audit_line("entity", e->type, e->tag, "invisible", NULL, NULL, 0);
+                continue;
+            }
             if (v.sprite_path) {
                 unsigned int tex = tex_cache_get(v.sprite_path);
                 if (tex) {
                     float sz = v.sprite_size > 0.0f ? v.sprite_size : 64.0f;
                     renderer_draw_billboard(tex, e->x, e->y, e->z, sz, sz,
                                             v.tint_r, v.tint_g, v.tint_b, v.tint_a);
+                    audit_line("entity", e->type, e->tag, "sprite",
+                               v.sprite_path, NULL, tex);
                     continue;
                 }
+                audit_line("entity", e->type, e->tag, "sprite-unresolved",
+                           v.sprite_path, NULL, 0);
             }
             if (v.model_path) {
                 AseModel *m = model_cache_get(v.model_path);
+                if (!m)
+                    audit_line("entity", e->type, e->tag, "mesh-missing",
+                               v.model_path, NULL, 0);
                 if (m) {
                     unsigned int tex = v.texture_path ? tex_cache_get(v.texture_path) : 0;
                     float sc = v.scale > 0.0f ? v.scale : 1.0f;
@@ -654,6 +743,8 @@ static void draw_scene(World *world, int jim_model_ok)
                     else
                         renderer_draw_model(m, tex, dx, dy, dz, e->ry, sc);
                     renderer_set_hide_untextured_groups(1);
+                    audit_line("entity", e->type, e->tag, "mesh",
+                               v.model_path, m, tex);
                     continue;
                 }
             }
@@ -670,6 +761,7 @@ static void draw_scene(World *world, int jim_model_ok)
         else if (strcmp(e->type, "ITEM") == 0) scale = 28.0f;
         else if (strcmp(e->type, "TRIG") == 0) scale = 60.0f;
         renderer_draw_box(box_vao, box_idx, e->x, e->y, e->z, scale, r, g, b);
+        audit_line("entity", e->type, e->tag, "box", NULL, NULL, 0);
     }
 
     /* Static world geometry from level1.omt (Phase 8). OMT-exported ASEs
@@ -679,6 +771,18 @@ static void draw_scene(World *world, int jim_model_ok)
        +Z placement for legacy/hybrid validation paths. */
     for (int pi = 0; pi < world->placement_count; pi++) {
         const WorldPlacement *pl = &world->placements[pi];
+        /* BLOCK*-prefixed meshes are the original's COLLISION volumes
+           (BLOCKbench, BLOCKING_road, BLOCK_Rocket03...) — never visible;
+           each has a separate visible twin (bench05, the road, Rocketa).
+           Reporter-confirmed 2026-06-12 QA #3 follow-up: "all Block meshes
+           should be invisible". Most were already skipped as untextured;
+           this names the rule so a future texture bake can't resurrect
+           them. Skipped before QA registration: an invisible mesh must not
+           swallow picks aimed at its visible twin. */
+        if (strncasecmp(pl->name, "BLOCK", 5) == 0) {  /* level1c authors "Blocking01" */
+            audit_line("placement", pl->name, NULL, "collision-skip", NULL, NULL, 0);
+            continue;
+        }
         /* QA annotation: one ID per placement; a tree's trunk mesh and crown
            billboard share it, so clicking either picks the tree. */
         qa_register_placement(pl, pl->x, 0.0f, -pl->z);
@@ -722,10 +826,16 @@ static void draw_scene(World *world, int jim_model_ok)
                                         bb_size, bb_size,
                                         1.0f, 1.0f, 1.0f, 1.0f);
             }
+            audit_line("placement", pl->name, NULL, "tree-billboard",
+                       pl->ase_path, NULL, crown);
             continue;
         }
         AseModel *pm = model_cache_get(pl->ase_path);
-        if (!pm) continue;
+        if (!pm) {
+            audit_line("placement", pl->name, NULL, "mesh-missing",
+                       pl->ase_path, NULL, 0);
+            continue;
+        }
         /* Phase C: capture-derived texture overrides retired. The glTF
            meshes carry breakthrough-correct OMT-canvas textures, so the
            30-entry override layer is redundant (verified: keyframe 8881
@@ -747,7 +857,11 @@ static void draw_scene(World *world, int jim_model_ok)
                     pm->texture_id, model_has_texture(pm),
                     pm->min[0],pm->min[1],pm->min[2],
                     pm->max[0],pm->max[1],pm->max[2], pl->x, pl->z);
-        if (!model_has_texture(pm)) continue;
+        if (!model_has_texture(pm)) {
+            audit_line("placement", pl->name, NULL, "untextured-skip",
+                       pl->ase_path, NULL, 0);
+            continue;
+        }
         float draw_z = -pl->z;
         /* 2D_Trees boundary walls bake the sky behind the tree-line as an
            opaque chroma blue (RGB 57,148,198); key it out so the real sky
@@ -758,6 +872,7 @@ static void draw_scene(World *world, int jim_model_ok)
         renderer_draw_model(pm, 0, pl->x, 0.0f, draw_z, 0.0f, 1.0f);
         if (foliage_wall)
             renderer_set_color_key(0, 0, 0, 0, 0.08f);
+        audit_line("placement", pl->name, NULL, "mesh", pl->ase_path, pm, 0);
     }
 }
 

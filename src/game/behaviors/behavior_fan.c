@@ -51,7 +51,8 @@ static void fan_on_update(Entity *e, World *w, float dt) {
         float dz = g_player->z - e->z;
         float dist = sqrtf(dx*dx + dz*dz);
         if (dist < fan_range) {
-            float yaw = e->home[0] * FAN_DEG2RAD;
+            /* home[0] is radians (gam_loader converts authored degrees). */
+            float yaw = e->home[0];
             float fx = -sinf(yaw), fz = -cosf(yaw);     /* forward dir */
             float strength = (fan_range - dist) / fan_range;     /* 1 at fan, 0 at edge */
             float gust = (fan_speed * 0.02f) * strength * dt;

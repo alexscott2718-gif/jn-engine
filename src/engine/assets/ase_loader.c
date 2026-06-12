@@ -358,11 +358,17 @@ update_depths:
         goto fail;
     }
 
+    /* Frames with mismatched vertex counts can't morph-animate, but frame 0
+       is still a complete static mesh — keep it instead of failing the whole
+       load (DoorPP1.ASE: frame1 has 8 verts vs frame0's 12; rejecting it left
+       every level4c DOORPP1 as a placeholder box — 2026-06-12 audit sweep). */
     for (int fr = 1; fr < frame_count; fr++) {
         if (frame_pos_count[fr] != n_pos) {
-            fprintf(stderr, "ase_load: %s frame %d vertex count %d != frame0 %d\n",
+            fprintf(stderr, "ase_load: %s frame %d vertex count %d != frame0 %d"
+                    " -- keeping frame 0 as static mesh\n",
                     path, fr, frame_pos_count[fr], n_pos);
-            goto fail;
+            frame_count = 1;
+            break;
         }
     }
 

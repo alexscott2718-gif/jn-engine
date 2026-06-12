@@ -33,6 +33,16 @@ const char *sprite_chunk_path(int chunk_id) {
     return sprite_db_path("sprites.omt", chunk_id);
 }
 
+/* JNBG sprites.omt chunk 106 is the canvas literally named "hidden": the
+   editor's stand-in for pickups whose visible referent is something else
+   (level geometry hydrant/nests/rocket pads, the 3KIT cat...). The original
+   draws nothing for them — they are invisible trigger volumes
+   (2026-06-12 QA #3). */
+int sprite_ref_hidden(const Entity *e) {
+    return g_is_jnbg && e && e->sprite_index == 106 &&
+           strcasecmp(e->sprite_database, "sprites.omt") == 0;
+}
+
 typedef struct {
     const char  *fourcc;
     const char  *tag;          /* case-insensitive match */
@@ -54,27 +64,18 @@ typedef struct {
    use this mesh." Tags are matched case-insensitively. */
 static const TagEntry TAG_TABLE[] = {
 
-    /* 3PIC — pickups whose visual is the tag's referent (Level1 tags). */
-    { "3PIC", "BUBBLEPICKUP",  { "assets/ase/nest.ASE",         NULL, 1.0f, 0 } },
-    { "3PIC", "NEST",          { "assets/ase/nest.ASE",         NULL, 1.0f, 0 } },
-    { "3PIC", "NEST2",         { "assets/ase/nest.ASE",         NULL, 1.0f, 0 } },
-    { "3PIC", "nest1",         { "assets/ase/nest.ASE",         NULL, 1.0f, 0 } },
-    { "3PIC", "nest2",         { "assets/ase/nest.ASE",         NULL, 1.0f, 0 } },
-    { "3PIC", "hydrant",       { "assets/ase/firehydrant.ASE",  NULL, 1.0f, 0 } },
-    { "3PIC", "godphone",      { "assets/ase/phone.ASE",        NULL, 1.0f, 0 } },
-    { "3PIC", "pad",           { "assets/ase/omt/RocketPad.ASE", NULL, 1.0f, 0 } },
-    { "3PIC", "pad2",          { "assets/ase/omt/RocketPad.ASE", NULL, 1.0f, 0 } },
-    /* egg2b row removed (2026-06-11 QA #2): the instance authors
-       SpriteIndex 140 ("egg") + InitallyActive=0 — it's a quest-spawned
-       sprite pickup, hidden at boot; the stale row drew an untextured
-       white egg.ASE in the tree. Active egg pickups resolve through the
-       sprite-db tier like every other SpriteIndex pickup. */
-    { "3PIC", "boatl",         { "assets/glb/omt/SailBoat.glb", NULL, 0.5f, 0 } },
-    /* Level2 rescue kitty: C3DKitty registers cat anims + cat.png; the pickup
-       shows the cat itself (same referent pattern as hydrant/godphone). */
-    { "3PIC", "kitty",         { "assets/ase/catsit.ASE", "assets/png/cat.png", 1.0f, 0 } },
+    /* 3PIC — the nest/boat/hydrant/pad/kitty referent-mesh rows were removed
+       (2026-06-12 QA #3): every one of those instances authors
+       SpriteDatabase=sprites.omt SpriteIndex=106 — the canvas literally
+       named "hidden" — i.e. they are INVISIBLE pickup triggers placed on
+       top of their visible referent (the hydrant mesh is level geometry,
+       the level2 cat is the separate 3KIT entity). The sprite tier now
+       resolves chunk 106 to invisible (sprite_ref_hidden), so they need no
+       rows. godphone authors chunk 184 ("phone" sprite) and BUBBLEPICKUP
+       chunk 26 ("bubshadw") — both resolve through the sprite tier too.
+       egg2b precedent (2026-06-11 QA #2) was the first instance of this
+       same shape. */
     { "3PIC", "hsounds",       { NULL, NULL, 0.0f, 1 } },  /* sound trigger, no mesh */
-    /* No wrench/water2 ASEs available; fall through to TYPE_TABLE default. */
 
     /* 3GRN — JNvsJN GRN-backed props. Prefer a textured OMT/ASE twin over the
        untextured GRN extraction: the mailbox already exists as a textured mesh
@@ -197,7 +198,10 @@ static const TypeEntry TYPE_TABLE[] = {
 
     /* Tier 2 — environment singletons. */
     { "3ROC", { "assets/ase/rocket.ASE",   NULL, 1.0f, 0 } },
-    { "3ARR", { "assets/ase/3Darrow.ASE",  NULL, 1.0f, 0 } },
+    /* 3ARR row removed (2026-06-12 QA #3): C3DArrow is a C3DSpriteType — a
+       billboard, not a mesh. Every instance authors sprites.omt chunk 33
+       (the alpha-keyed "arrow" canvas, size 200); the 3Darrow.ASE row drew
+       an opaque 3D arrow instead. Falls through to the sprite-db tier. */
     { "3BUT", { "assets/ase/buttonup.ASE", NULL, 1.0f, 0 } },
     /* No same-named door.glb exists (the generic "door" mesh isn't in the
        OMT or ase->glb pipelines); substitute a textured Retroville door from
@@ -211,7 +215,10 @@ static const TypeEntry TYPE_TABLE[] = {
     /* C3DDarwinFish: darwinstop/walk/shrink.ase + darwin.png (decomp
        C3DDarwinFish.md). fish2.ASE was the pickup/editor fish placeholder. */
     { "3FIS", { "assets/ase/darwinstop.ASE",  "assets/png/darwin.png", 1.0f, 0 } },
-    { "3PHO", { "assets/ase/phone.ASE",       NULL, 1.0f, 0 } },
+    /* C3DPhoneBooth::InitObject loads phone.omt and binds shape 0 — the
+       phonebooth (decomp C3DPhoneBooth.md). phone.ASE is the handheld
+       walkie-talkie prop (2026-06-12 QA #3). Exported via omt-gltf. */
+    { "3PHO", { "assets/glb/omt/phone/phone.glb", NULL, 1.0f, 0 } },
     { "3HYD", { "assets/ase/firehydrant.ASE", NULL, 1.0f, 0 } },
     /* Phase 9 characters (Stage A confident mappings). */
     { "3JIM", { "assets/ase/jimstop.ase",     NULL, 1.0f, 0 } },
@@ -221,8 +228,12 @@ static const TypeEntry TYPE_TABLE[] = {
     { "3GIR", { "assets/ase/plantstop.ASE",   NULL, 1.0f, 0 } },
     { "3KIT", { "assets/ase/catsit.ASE",      NULL, 1.0f, 0 } },
     { "3NIC", { "assets/ase/nickstop.ASE",    NULL, 1.0f, 0 } },
-    { "3GUA", { "assets/ase/guardwalk.ASE",   NULL, 1.0f, 0 } },
-    { "3SOL", { "assets/ase/soldwalk.ASE",    NULL, 1.0f, 0 } },
+    /* Yokian guard/soldier ASEs carry no material bitmap; the classes attach
+       yokguard.png / yoksold.png in code (decomp C3DYokianGuard.md /
+       C3DYokianSoldier.md). Without the explicit texture every guard and
+       soldier in 9 levels drew untextured — 2026-06-12 audit sweep. */
+    { "3GUA", { "assets/ase/guardwalk.ASE",   "assets/png/yokguard.png", 1.0f, 0 } },
+    { "3SOL", { "assets/ase/soldwalk.ASE",    "assets/png/yoksold.png",  1.0f, 0 } },
     { "3FLA", { "assets/ase/firestrato.ASE",  NULL, 1.0f, 0 } },
     /* C3DBus is the school bus: HIDEFAULT -> bus.ase + bus.png (decomp
        C3DBus.md). retrobus.ASE is the Retroland shuttle, a different vehicle. */
@@ -287,6 +298,14 @@ static const TypeEntry TYPE_TABLE[] = {
        (cone showed the piggybank, balloon/leaf paths didn't exist). Those
        FourCCs now fall through to the per-instance sprite-db tier, which
        resolves the authored chunk id through the generated map. */
+    /* C3DLeaves: instances author icons.omt index 4 — the *editor's* generic
+       "sprite" placeholder icon, not the runtime visual; the class swaps in
+       the falling-leaves canvas (sprites.omt chunk 45 "leave0000") itself.
+       Authored SpriteSize is 100 on every instance (2026-06-12 QA #3 — the
+       icon path drew what QA read as a "soda sprite"). */
+    { "3LEA", { NULL, NULL, 0, 0,
+                "assets/parsed/sprites/sprites_images/0008_64x64d32.png",
+                100.0f, 0,0,0,0 } },
     { "3NEU", { NULL, NULL, 0, 0,
                 "assets/parsed/sprites/sprites_images/0000_100x100d32.png",
                 90.0f, 0,0,0,0 } },
@@ -300,7 +319,10 @@ static const TypeEntry TYPE_TABLE[] = {
        marked invisible so they stop drawing placeholder boxes. */
 
     /* Characters / enemies (textured ASEs ship in assets/ase). */
-    { "3CIN", { "assets/ase/cindycheer.ASE",   NULL, 1.0f, 0 } },  /* Cindy */
+    /* C3DCindy registers HISTOP -> cindstop.ase + cindy.png (decomp
+       C3DCindy.md). cindycheer is the race-finish cheer anim, not the
+       default pose (2026-06-12 QA #3). */
+    { "3CIN", { "assets/ase/cindstop.ASE",     "assets/png/cindy.png", 1.0f, 0 } },
     { "3HUG", { "assets/ase/hughstop.ASE",     NULL, 1.0f, 0 } },  /* Hugh */
     { "3ULT", { "assets/ase/ultrastop.ASE",    NULL, 1.0f, 0 } },  /* UltraLord */
     { "3FOW", { "assets/glb/grn_capture/fowlbase.glb", NULL, 1.0f, 0 } },  /* Fowl — M2d capture (RTTI C3DFOWL) */
@@ -318,8 +340,17 @@ static const TypeEntry TYPE_TABLE[] = {
     { "3SHU", { "assets/glb/omt/BUSH01.glb",     NULL, 1.0f, 0 } },  /* Shrubbery (GLB; ASE was 6-vert stub) */
     { "3DUD", { "assets/glb/ase/downdoor2a.glb", NULL, 1.0f, 0 } },  /* DoorUpDown (GLB; ASE was 4-vert stub) */
     { "3WAB", { "assets/ase/buttondown.ASE",     NULL, 1.0f, 0 } },  /* WaterButton */
-    { "3SCR", { "assets/ase/omt/blockscreen.ASE", NULL, 1.0f, 0 } }, /* Screen */
-    { "3SCD", { "assets/glb/omt/level1d/DOOR.glb", NULL, 1.0f, 0 } }, /* SchoolDoor (GLB; ASE door was 8-vert stub) */
+    /* C3DLabScreen loads screen.ase + screen1/screen0.png (decomp
+       C3DLabScreen.md) — blockscreen.ASE was a name-matched guess and drew
+       untextured (2026-06-12 audit sweep). */
+    { "3SCR", { "assets/ase/screen.ASE", "assets/png/screen1.png", 1.0f, 0 } },
+    /* C3DSchoolDoor authors per-instance ASEFile/PNGFile exactly like 3SWN
+       (level1c firedoor, level3 doorretro+exit/retrodoor, level2a doorfowl)
+       — drawn by the shared main.c ASEFile branch, glb twin preferred.
+       This row is the fallback for instances with no readable ASEFile
+       (2026-06-12 QA #3: the unconditional DOOR.glb drew a Retroville
+       door for the school fire door). */
+    { "3SCD", { "assets/glb/omt/level1d/DOOR.glb", NULL, 1.0f, 0 } },
     { "3CRB", { "assets/ase/omt/block.ASE",      NULL, 1.0f, 0 } },  /* CraneBoom */
 
     /* Sprite-backed objects (sprites.omt). Camera-facing billboards. */
@@ -462,6 +493,11 @@ static int resolve_sprite_db(const Entity *e, EntityVisual *out) {
        sprites.omt id 0 is bneu0000, never authored by a .gam. */
     if (e->sprite_index == 0 &&
         strcasecmp(e->sprite_database, "icons.omt") != 0) return 0;
+    if (sprite_ref_hidden(e)) {            /* "hidden" canvas -> draw nothing */
+        memset(out, 0, sizeof(*out));
+        out->invisible = 1;
+        return 1;
+    }
     const char *path = sprite_db_path(e->sprite_database, e->sprite_index);
     if (!path) return 0;
     memset(out, 0, sizeof(*out));

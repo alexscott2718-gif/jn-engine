@@ -128,16 +128,29 @@ def main():
         # on an object would pick it and re-open the dialog, swallowing the
         # keystrokes below into the textarea (that isolation is by design).
         box = page.locator("#canvas").bounding_box()
+        # Left of top-centre: since the gam_loader rotation fix (2026-06-12)
+        # the spawn view faces the authored 220-degree yaw, putting the
+        # AApart03 facade at top-centre; x=0.3 is open sky in that view (the
+        # top-RIGHT corner is covered by the #qaTags overlay, so stay left).
         page.locator("#canvas").click(
-            position={"x": box["width"] / 2, "y": 10})
+            position={"x": box["width"] * 0.3, "y": 10})
         page.wait_for_timeout(300)
         check("no dialog after sky click", not dlg.is_visible())
+        def wait_label(expect):
+            # The label flips on the engine's next frame; under headless
+            # load that can exceed a fixed 500ms — poll instead of sleeping.
+            try:
+                page.wait_for_function(
+                    "document.getElementById('qaToggle').textContent === "
+                    + repr(expect), timeout=5000)
+            except Exception:
+                pass
         page.keyboard.press("b")
-        page.wait_for_timeout(500)
+        wait_label("QA: Off")
         check("B key toggles off", btn.text_content() == "QA: Off",
               btn.text_content())
         page.keyboard.press("b")
-        page.wait_for_timeout(500)
+        wait_label("QA: On")
         check("B key toggles on", btn.text_content() == "QA: On",
               btn.text_content())
 
