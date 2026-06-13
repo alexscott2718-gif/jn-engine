@@ -84,12 +84,11 @@ static const TagEntry TAG_TABLE[] = {
        exists. */
     { "3GRN", "mailbox", { "assets/glb/omt/mailbox.glb", NULL, 1.0f, 0 } },
 
-    /* 3OMT — generic OMT-backed props by tag. */
-    { "3OMT", "bench01", { "assets/ase/board.ASE",      NULL, 1.0f, 0 } },
-    { "3OMT", "beam",    { "assets/ase/beams.ASE",      NULL, 1.0f, 0 } },
-    { "3OMT", "beams",   { "assets/ase/beams.ASE",      NULL, 1.0f, 0 } },
-    { "3OMT", "board",   { "assets/ase/board.ASE",      NULL, 1.0f, 0 } },
-    { "3OMT", "ray",     { "assets/ase/ray.ASE",        NULL, 1.0f, 0 } },
+    /* 3OMT tag rows (bench01/beam/beams/board/ray) removed 2026-06-12 QA #4:
+       they were name-matched ASE guesses shadowing the AUTHORED
+       OmtDatabase/OmtIndex shape binding (bench01..06 author objects.omt 19
+       = the bench04 school-desk shape; beam/ray author 29 = ray01). The
+       JNBG omt-db tier below resolves the authored chunk instead. */
 
     /* 3DOR — door variants by tag (else FourCC default below picks a door). */
     { "3DOR", "DOORPP1",     { "assets/ase/DoorPP1.ASE",     NULL, 1.0f, 0 } },
@@ -226,7 +225,9 @@ static const TypeEntry TYPE_TABLE[] = {
     { "3LIB", { "assets/ase/libystop.ASE",    NULL, 1.0f, 0 } },
     { "3MOM", { "assets/ase/judystop.ASE",    NULL, 1.0f, 0 } },
     { "3GIR", { "assets/ase/plantstop.ASE",   NULL, 1.0f, 0 } },
-    { "3KIT", { "assets/ase/catsit.ASE",      NULL, 1.0f, 0 } },
+    /* C3DKitty loads cat.png at init and registers HISTOP -> catsit.ase
+       (decomp C3DKitty.md); the ASE itself carries no usable bitmap. */
+    { "3KIT", { "assets/ase/catsit.ASE",      "assets/png/cat.png", 1.0f, 0 } },
     { "3NIC", { "assets/ase/nickstop.ASE",    NULL, 1.0f, 0 } },
     /* Yokian guard/soldier ASEs carry no material bitmap; the classes attach
        yokguard.png / yoksold.png in code (decomp C3DYokianGuard.md /
@@ -234,13 +235,25 @@ static const TypeEntry TYPE_TABLE[] = {
        soldier in 9 levels drew untextured — 2026-06-12 audit sweep. */
     { "3GUA", { "assets/ase/guardwalk.ASE",   "assets/png/yokguard.png", 1.0f, 0 } },
     { "3SOL", { "assets/ase/soldwalk.ASE",    "assets/png/yoksold.png",  1.0f, 0 } },
-    { "3FLA", { "assets/ase/firestrato.ASE",  NULL, 1.0f, 0 } },
+    /* 3FLA = C3DFlag (the registrar FUN_00419550 @0041964b sits inside
+       C3DFlag's code region, 004194d0..00419680 — docs/_gam_classids.tsv):
+       the rooftop flagpole's American flag, flag.ase + flag.png. The old
+       firestrato.ASE row was a guess name-matched to the freeform editor
+       tag "C3DFIRESTRATO"; its mesh is authored ~350 units off-origin and
+       drew floating away from the pole (2026-06-12 QA #4 "missing flag
+       model"). */
+    { "3FLA", { "assets/ase/flag.ASE",        "assets/png/flag.png", 1.0f, 0 } },
     /* C3DBus is the school bus: HIDEFAULT -> bus.ase + bus.png (decomp
        C3DBus.md). retrobus.ASE is the Retroland shuttle, a different vehicle. */
     { "3SBU", { "assets/ase/bus.ASE",         "assets/png/bus.png", 1.0f, 0 } },
 
     /* Tier 4 — environment defaults sourced from OMT extraction (Phase 7). */
-    { "3TRE", { "assets/glb/omt/tree01.glb",    NULL, 1.0f, 0 } },  /* GLB (ASE was 8-vert stub) */
+    /* 3TRE row removed (2026-06-12 QA #4): C3DTree is a C3DSprite-family
+       billboard class — every instance authors a sprites.omt canvas
+       (cactus, treetop3, trees4/6, cone, Palmtree, Earth/Moon in the VR
+       levels...). The tree01.glb row drew a Retroville trunk mesh for ALL
+       of them, including the level2a race "cones". Falls through to the
+       per-instance sprite-db tier. */
     /* C3DDino: dinostop/walk/shrink.ase + dino.png (decomp C3DDino.md).
        omt/dino.ASE is the unrelated "dino" prop mesh inside objects.omt. */
     { "3DIN", { "assets/ase/dinostop.ASE",      "assets/png/dino.png", 1.0f, 0 } },
@@ -385,7 +398,12 @@ static const TypeEntry TYPE_TABLE[] = {
        mesh exported and ready at assets/ase/yraystop.ASE. */
     { "3TRC", { NULL, NULL, 0.0f, 1 } },
     { "3SWI", { "assets/ase/switch.ASE",        "assets/png/switch.png", 1.0f, 0 } },  /* C3DSwitch: switch.ase + switch.png */
-    { "3OCT", { "assets/ase/octo.ASE",          "assets/png/octapuke1.png", 1.0f, 0 } },  /* C3DOctapuke (default DEFAULT) */
+    /* C3DOctapuke: octostop.ase (HISTOP) + octapuke1.png. octo.ASE (the
+       HIDEFAULT puke anim) authors ZERO texture UVs — the original engine
+       keeps the base shape's UVs across morph anims, but our static draw
+       sampled one dark texel and the octopus rendered as a black
+       silhouette (2026-06-12 QA #4 "missing texture"). */
+    { "3OCT", { "assets/ase/octostop.ASE",      "assets/png/octapuke1.png", 1.0f, 0 } },
     { "3DIG", { "assets/ase/drill.ASE",         "assets/png/drill.png", 1.0f, 0 } },  /* C3DDigger */
     /* RTTI-name-evident original meshes (class spec says "inherited visual
        path"; the install ships exactly one matching ASE). */
@@ -433,6 +451,42 @@ static const TypeEntry TYPE_TABLE[] = {
     { "3TRA", { NULL, NULL, 0.0f, 1 } },  /* trampoline (no mesh) */
 };
 static const int TYPE_TABLE_N = (int)(sizeof(TYPE_TABLE) / sizeof(TYPE_TABLE[0]));
+
+/* --- JNBG OMT shape map: C3DOmtObj (3OMT) authors OmtDatabase + OmtIndex
+   (a 3DSh shape chunk id). Shapes are exported RAW-ORIGIN (omt-gltf
+   --raw-origin): the original binds the 3DSh verts as-is, so the authored
+   rotation pivots about the authored origin. JNBG-only — JNvsJN ships its
+   own objects.omt whose chunk ids collide (2026-06-12 QA #4: school desks,
+   rockship, Octopuke arch sign all drew the Sphere01 fallback). */
+typedef struct { const char *db; int chunk_id; const char *path; } OmtChunkEntry;
+static const OmtChunkEntry OMT_CHUNK_MAP[] = {
+    { "objects.omt",  6, "assets/glb/omt/objects/Sphere01.glb"   }, /* podship pod (level5) */
+    { "objects.omt", 19, "assets/glb/omt/objects/bench04.glb"    }, /* school desk (level2a bench01..06) */
+    { "objects.omt", 20, "assets/glb/omt/objects/candysign.glb"  }, /* candy sign (level4) */
+    { "objects.omt", 21, "assets/glb/omt/objects/block.glb"      }, /* octasign arch quad (level3d) */
+    { "objects.omt", 23, "assets/glb/omt/objects/sun01.glb"      }, /* shooting-gallery prop (level3c) */
+    { "objects.omt", 24, "assets/glb/omt/objects/sun.glb"        }, /* shooting-gallery prop (level3c) */
+    { "objects.omt", 25, "assets/glb/omt/objects/shootoing.glb"  }, /* shooting-gallery prop (level3c) */
+    { "objects.omt", 26, "assets/glb/omt/objects/rocketship.glb" }, /* Retroland rocketship ride (level3) */
+    { "objects.omt", 27, "assets/glb/omt/objects/dino.glb"       }, /* lab dino prop (level1b) */
+    { "objects.omt", 28, "assets/glb/omt/objects/plant.glb"      }, /* lab plant (level1b plant1..3) */
+    { "objects.omt", 29, "assets/glb/omt/objects/ray01.glb"      }, /* shrink-ray beam prop (Level1/level6) */
+};
+static const int OMT_CHUNK_MAP_N = (int)(sizeof(OMT_CHUNK_MAP) / sizeof(OMT_CHUNK_MAP[0]));
+
+static int resolve_omt_db(const Entity *e, EntityVisual *out) {
+    if (!g_is_jnbg) return 0;
+    if (e->omt_index < 0 || !e->omt_database[0]) return 0;
+    for (int i = 0; i < OMT_CHUNK_MAP_N; i++) {
+        if (OMT_CHUNK_MAP[i].chunk_id != e->omt_index) continue;
+        if (strcasecmp(OMT_CHUNK_MAP[i].db, e->omt_database) != 0) continue;
+        memset(out, 0, sizeof(*out));
+        out->model_path = OMT_CHUNK_MAP[i].path;
+        out->scale = 1.0f;
+        return 1;
+    }
+    return 0;
+}
 
 static const char *first_grn_name(const Entity *e) {
     const char *names[] = {
@@ -539,14 +593,20 @@ int entity_visual_resolve(const Entity *e, EntityVisual *out) {
 
     if (entity_visual_tag_override(e, out)) return 1;
     if (resolve_grn_asset(e, out)) return 1;
-    /* JNBG checkpoints author their own sprite (chunk 42 = crossed flags);
-       route them to the sprite-db tier ahead of the 3CHK TYPE row, which
-       carries the JNvsJN clock. (Deliberately narrow: a general reorder
-       would strip the curated 3NEU/3RED tints.) */
-    if (g_is_jnbg && strncmp(e->type, "3CHK", 4) == 0 &&
-        resolve_sprite_db(e, out)) return 1;
+    /* Authored OMT shape binding (C3DOmtObj) beats the per-FourCC default. */
+    if (resolve_omt_db(e, out)) return 1;
     for (int i = 0; i < TYPE_TABLE_N; i++) {
         if (strncmp(e->type, TYPE_TABLE[i].fourcc, 4) != 0) continue;
+        /* A JNBG entity authoring a real sprites.omt canvas IS its visual
+           (the C3DSprite family: 3TRE cones/treetops, 3TAR s-star/martian,
+           3CHK crossed flags...) — the authored data beats a visible TYPE
+           default, which is either a JNvsJN row or a guess. icons.omt refs
+           are *editor placeholders* (3NEU/3RED/3LEA) and rows curated
+           invisible stay invisible, so both keep their TYPE rows.
+           Generalizes the old 3CHK special case (2026-06-12 QA #4). */
+        if (g_is_jnbg && !TYPE_TABLE[i].v.invisible &&
+            strcasecmp(e->sprite_database, "sprites.omt") == 0 &&
+            e->sprite_index > 0 && resolve_sprite_db(e, out)) return 1;
         *out = TYPE_TABLE[i].v;
         return 1;
     }

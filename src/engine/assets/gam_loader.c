@@ -135,6 +135,11 @@ int gam_load(World *w, const char *path) {
                     copy_string(e->grn_anim[3], sizeof(e->grn_anim[3]), str_val);
                 else if (strcmp(prop_name, "SpriteDatabase") == 0)
                     copy_string(e->sprite_database, sizeof(e->sprite_database), str_val);
+                /* C3DOmtObj (3OMT) binds OmtDatabase/OmtIndex — a 3DSh shape
+                   chunk in an OMT container (every authored row today is
+                   objects.omt). */
+                else if (strcmp(prop_name, "OmtDatabase") == 0)
+                    copy_string(e->omt_database, sizeof(e->omt_database), str_val);
                 /* 3ASE (C3DASEObj): per-object ASE mesh + PNG texture. Prefer
                    the Stop pose; fall back to Walk only if Stop is unset. */
                 else if (strcmp(prop_name, "ASEStop") == 0) {
@@ -183,14 +188,21 @@ int gam_load(World *w, const char *path) {
                 else if (strcmp(prop_name, "PositionZ") == 0) e->z = -fval;
                 /* .gam rotations are authored in DEGREES (samples: 0/90/170/
                    180/270); every consumer (player heading, draw yaw, fan
-                   euler) treats e->rx/ry/rz as radians. Convert here. The
-                   z-mirror above also flips handedness, so rotations about
-                   axes that mix z (X and Y) negate: M·R(θ)·M = R(−θ) for
-                   R_x/R_y, R_z unchanged. (2026-06-12 QA: toolchest/labfan/
-                   yokdoor "incorrect rotation" — 90° read as 90 rad ≈ 117°.) */
-                else if (strcmp(prop_name, "RotationX") == 0) e->rx = -fval * 0.017453293f;
-                else if (strcmp(prop_name, "RotationY") == 0) e->ry = -fval * 0.017453293f;
-                else if (strcmp(prop_name, "RotationZ") == 0) e->rz = fval * 0.017453293f;
+                   euler) treats e->rx/ry/rz as radians. Convert here.
+                   SIGN (2026-06-12 QA #4): X/Y pass through UN-negated.
+                   QA #3 negated them from the z-relabel algebra alone
+                   (S·R(θ)·S = R(−θ) for R_x/R_y), but that is only half the
+                   conversion: the original is left-handed, and a LH +θ
+                   rotation is the RH −θ rotation, so the two negations
+                   cancel on X/Y and land once on Z. Ground truth is level
+                   geometry: mummydoor (90°) only seals its Level3 doorway
+                   and the Retroland viking ship (303°) only hangs aligned
+                   inside its A-frame with the un-negated angle. QA #3's
+                   validation cases never discriminated the sign (180°
+                   toolchest/booths, rotationally symmetric fan disc). */
+                else if (strcmp(prop_name, "RotationX") == 0) e->rx = fval * 0.017453293f;
+                else if (strcmp(prop_name, "RotationY") == 0) e->ry = fval * 0.017453293f;
+                else if (strcmp(prop_name, "RotationZ") == 0) e->rz = -fval * 0.017453293f;
                 else if (strcmp(prop_name, "SpriteSize") == 0) e->sprite_size = fval;
                 else {
                     /* C3DPlayer movement/physics constants -> PlayerPhysics. */
@@ -228,6 +240,8 @@ int gam_load(World *w, const char *path) {
                     e->sprite_size = (float)ival;
                 } else if (strcmp(prop_name, "SpriteIndex") == 0) {
                     e->sprite_index = ival;
+                } else if (strcmp(prop_name, "OmtIndex") == 0) {
+                    e->omt_index = ival;
                 } else if (strcmp(prop_name, "EffectType") == 0) {
                     e->effect_type = ival;
                 } else if (strcmp(prop_name, "Points") == 0) {

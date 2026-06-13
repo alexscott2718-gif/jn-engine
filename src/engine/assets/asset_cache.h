@@ -9,6 +9,11 @@
    shape of the original engine's OMediaDataBase, sans LRU/factory/async. */
 
 unsigned int tex_cache_get(const char *path);     /* 0 on failure */
+/* As tex_cache_get, but the image is loaded with the opposite vertical
+   orientation (cached separately). For standalone PNGs applied to glb-twin
+   meshes whose baked UVs use the DX convention (authored door PNGFile on
+   assets/glb/ase twins rendered upside down — 2026-06-12 QA #4). */
+unsigned int tex_cache_get_vflip(const char *path);
 AseModel    *model_cache_get(const char *path);   /* NULL on failure */
 
 /* Resolve a Windows-style BMP basename (e.g. "carl3.bmp") to a PNG under

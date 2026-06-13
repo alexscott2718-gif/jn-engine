@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>QA Ticket Resolution — sandmanfan #4, 2026-06-12 · jn-engine</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body {
+  font-family:'Monaco','Menlo','Ubuntu Mono',monospace;
+  background:#0d0d0d; color:#e0e0e0;
+  line-height:1.55; padding:24px 16px;
+}
+.wrap { max-width:1060px; margin:0 auto; }
+h1 { font-size:1.5em; color:#fff; margin-bottom:4px; }
+h2 { font-size:1.15em; color:#7ec8ff; margin:40px 0 12px; border-bottom:1px solid #2a2a2a; padding-bottom:6px; }
+h3 { font-size:1.0em; color:#fff; }
+p { margin:10px 0; color:#c8c8c8; }
+a { color:#7ec8ff; text-decoration:none; }
+a:hover { text-decoration:underline; }
+.sub { color:#888; font-size:0.85em; }
+.badge { display:inline-block; padding:1px 8px; border-radius:4px; font-size:0.75em; vertical-align:middle; }
+.badge.green { background:#143a14; color:#7dde7d; border:1px solid #2c6e2c; }
+.badge.cat { background:#1d2c3d; color:#9ecbff; border:1px solid #2c5a8a; }
+table { width:100%; border-collapse:collapse; margin:14px 0; font-size:0.82em; }
+th,td { text-align:left; padding:6px 8px; border-bottom:1px solid #242424; vertical-align:top; }
+th { color:#9a9a9a; font-weight:normal; }
+td.msg { color:#c8c8c8; }
+.card { background:#141414; border:1px solid #262626; border-radius:10px; padding:20px; margin:26px 0; }
+.card h3 { margin-bottom:2px; }
+.meta { font-size:0.8em; color:#888; margin-bottom:12px; }
+.quote { border-left:3px solid #8a6d2c; background:#1a160d; color:#d9c08a; padding:8px 12px; margin:10px 0; font-size:0.88em; border-radius:0 6px 6px 0; }
+.ba { display:grid; grid-template-columns:1fr 1fr; gap:14px; margin:14px 0; }
+@media (max-width:760px) { .ba { grid-template-columns:1fr; } }
+.shot { background:#0a0a0a; border:1px solid #262626; border-radius:8px; overflow:hidden; }
+.shot img { display:block; width:100%; height:auto; }
+.shot .lbl { padding:6px 10px; font-size:0.78em; }
+.lbl.bad  { color:#ff8d8d; border-top:1px solid #3a1d1d; background:#1c1010; }
+.lbl.good { color:#7dde7d; border-top:1px solid #1d3a1d; background:#101c10; }
+.ev { background:#101418; border:1px solid #20303d; border-radius:8px; padding:14px 16px; margin:14px 0; }
+.ev .tag { color:#7ec8ff; font-size:0.78em; letter-spacing:0.08em; }
+.ev p { font-size:0.88em; }
+pre { background:#0a0a0a; border:1px solid #242424; border-radius:6px; padding:10px 12px; overflow-x:auto; font-size:0.75em; color:#b8c8b8; margin:10px 0; }
+code { color:#d9c08a; font-size:0.92em; }
+.fix { border-left:3px solid #2c6e2c; background:#0d160d; padding:8px 12px; margin:12px 0; font-size:0.88em; color:#aFcFaF; border-radius:0 6px 6px 0; }
+.fix code { color:#9edf9e; }
+ul { margin:8px 0 8px 22px; color:#c8c8c8; }
+li { margin:6px 0; font-size:0.92em; }
+.footer { margin-top:48px; padding-top:14px; border-top:1px solid #2a2a2a; font-size:0.8em; color:#777; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<h1>QA Ticket Resolution Log #4 <span class="badge green">15 / 15 RESOLVED</span></h1>
+<p class="sub">Ticket submitted by <strong>sandmanfan</strong> (Discord) · 2026-06-12 · levels 1, 1b, 2, 2a, 3, 3c, 3d ·
+fixes authored autonomously by Claude (Fable&nbsp;5) via Claude Code · live demo: <a href="https://exentt.com/jn-engine/">exentt.com/jn-engine</a> ·
+previous tickets: <a href="../sandmanfan-2026-06-11/">#1</a> · <a href="../sandmanfan-2026-06-11b/">#2</a> · <a href="../sandmanfan-2026-06-12/">#3</a></p>
+
+<p>The fourth community ticket ranges across Retroville, the school (level2a), the Egypt/Retroland
+park (level3, 3c, 3d) and Jimmy's lab (level1b). Fifteen reports, and — exactly as sandmanfan
+predicted at the close of ticket #3 — most collapse into a handful of <em>engine rules</em>, not
+fifteen one-off patches. The headline is a sequel to the previous ticket's unit bug: the rotation
+the loader stores was the right magnitude but the <strong>wrong sign</strong>. Ticket #3 derived the sign from the
+Z-mirror alone and validated it against rotationally-symmetric props; this ticket's mummy-tomb door
+and pirate ship — both asymmetric — proved the sign was inverted and pinned the correct one against
+fixed level geometry. Two more class rules (a never-read OMT shape binding, and "the authored sprite
+<em>is</em> the visual") cleared seven further reports between them.</p>
+
+<h2>The Ticket</h2>
+<table>
+<tr><th>#</th><th>level</th><th>entity</th><th>class / tag</th><th>cat.</th><th>report</th></tr>
+<tr><td><a href="#i1">1</a></td><td>level1</td><td>—</td><td>Blocks_Out</td><td>MIS</td><td class="msg">the model BoxsOut is now gone</td></tr>
+<tr><td><a href="#i2">2</a></td><td>level1b</td><td>3PHO</td><td>PHONE1</td><td>ORI</td><td class="msg">both phone booths are clipping into the wall</td></tr>
+<tr><td><a href="#i3">3</a></td><td>level2</td><td>3KIT</td><td>C3DKITTY</td><td>GFX</td><td class="msg">missing/invisible cat model next to the 3NEU sprite</td></tr>
+<tr><td><a href="#i4">4</a></td><td>level2</td><td>3FLA</td><td>C3DFIRESTRATO</td><td>MIS</td><td class="msg">missing flag model</td></tr>
+<tr><td><a href="#i5">5</a></td><td>level2a</td><td>3TRE</td><td>C3DTREE</td><td>MIS</td><td class="msg">3TRE entities should be cones</td></tr>
+<tr><td><a href="#i6">6</a></td><td>level2a</td><td>3SCD</td><td>fowlroom</td><td>PLC</td><td class="msg">not aligned in the doorway, texture not displayed properly</td></tr>
+<tr><td><a href="#i7">7</a></td><td>level2a</td><td>3OMT</td><td>bench06</td><td>MIS</td><td class="msg">school desks are fans</td></tr>
+<tr><td><a href="#i8">8</a></td><td>level3</td><td>3SCD</td><td>C3DSCHOOLDOOR</td><td>TEX</td><td class="msg">retroland entrance/exit doors' textures are upside down</td></tr>
+<tr><td><a href="#i9">9</a></td><td>level3</td><td>3SWN</td><td>mummydoor</td><td>PLC</td><td class="msg">mummy door not aligned in doorway</td></tr>
+<tr><td><a href="#i7">10</a></td><td>level3</td><td>3OMT</td><td>rockship</td><td>MIS</td><td class="msg">should be the rocketship instead of fan</td></tr>
+<tr><td><a href="#i11">11</a></td><td>level3d</td><td>3OCT</td><td>C3DOCTAPUKE</td><td>MIS</td><td class="msg">missing texture</td></tr>
+<tr><td><a href="#i7">12</a></td><td>level3d</td><td>3OMT</td><td>C3DOMTOBJ</td><td>MIS</td><td class="msg">missing arch sign</td></tr>
+<tr><td><a href="#i9">13</a></td><td>level3d</td><td>3PIR</td><td>C3DPIRATE</td><td>ORI</td><td class="msg">rotation off, not aligned with top beam</td></tr>
+<tr><td><a href="#i5">14</a></td><td>level3c</td><td>3TAR</td><td>C3DMOVINGTARGET</td><td>TEX</td><td class="msg">texture should be s-star</td></tr>
+<tr><td><a href="#i5">15</a></td><td>level3c</td><td>3TAR</td><td>C3DMOVINGTARGET</td><td>TEX</td><td class="msg">texture should be martian</td></tr>
+</table>
+
+<p class="sub">MIS = wrong/missing model · TEX = wrong/missing texture · GFX = rendering artifact ·
+ORI = wrong orientation · PLC = wrong placement.
+Items 9, 13 (and the alignment half of 6) share the rotation-sign root cause; 7, 10, 12 share the
+OMT-shape binding; 5, 14, 15 share "the authored sprite is the visual."</p>
+
+<!-- ================= ROTATION SIGN (items 9, 13, 6) ================= -->
+<div class="card" id="i9">
+<h3>9 · 13 · 6 — mummy door, pirate ship, fowl-room door all mis-rotated <span class="badge cat">ORI/PLC ×3</span></h3>
+<div class="meta">level3 3SWN [mummydoor] · level3d 3PIR · level2a 3SCD [fowlroom] — one engine-wide root cause (a sequel to ticket&nbsp;#3's unit bug)</div>
+<div class="quote">"mummy door not aligned in doorway" · "rotation off, not aligned with top beam" · "not aligned in the doorway"</div>
+<div class="ba">
+  <div class="shot"><img src="img/09-mummydoor-before.png" alt="before: mummy door rotated edge-on, dark recess showing"><div class="lbl bad">DEPRECATED — the mummy-tomb door (authored 90°) sits edge-on, leaving the doorway a dark gap</div></div>
+  <div class="shot"><img src="img/09-mummydoor-after.png" alt="after: mummy door fills the frame"><div class="lbl good">FIXED — the sarcophagus seats flush in the recess, relief facing the room</div></div>
+</div>
+<div class="ba">
+  <div class="shot"><img src="img/13-pirate-before.png" alt="before: pirate ship askew"><div class="lbl bad">DEPRECATED — the swinging pirate ship (authored 303°) hangs skewed across its A-frame</div></div>
+  <div class="shot"><img src="img/13-pirate-after.png" alt="after: pirate ship aligned in A-frame"><div class="lbl good">FIXED — the hull lines up along the top beam</div></div>
+</div>
+<div class="ev"><span class="tag">EVIDENCE TRAIL</span>
+<p>Ticket&nbsp;#3 found that <code>.gam</code> rotations are authored in <strong>degrees</strong> and fixed the magnitude — but it
+derived the <em>sign</em> from the Z-mirror alone: a reflection flips a Y-rotation
+(<code>S·R<sub>y</sub>(θ)·S = R<sub>y</sub>(−θ)</code>), so it stored <code>ry = −θ</code>. That is only half the conversion. The
+original world is <strong>left-handed</strong>, and a left-handed rotation by <code>+θ</code> <em>is</em> the right-handed (GL)
+rotation by <code>−θ</code> — a second negation that cancels the first on the X and Y axes, leaving a single
+negation on Z. So the faithful import is <code>rx, ry = +θ</code>, <code>rz = −θ</code>.</p>
+<p>Why did ticket&nbsp;#3's sign survive its own QA? Its three validation props were all sign-blind:
+a toolchest at 180° (<code>−180° ≡ +180°</code>), a phone booth at 180°, and a fan <em>disc</em> that is
+rotationally symmetric. The one asymmetric case (a 270° yokian door) reads "filled" from either
+facing because a door panel spans its opening both ways — so the shot was retaken and looked fine.
+This ticket finally supplied <em>unambiguous</em> arbiters: the mummy tomb is a one-sided 3D sarcophagus
+(at the wrong sign it turns edge-on, baring the dark recess) and the pirate ship must hang inside a
+fixed A-frame. Both lock to the authored angle only at <code>+θ</code>.</p>
+</div>
+<div class="fix"><strong>Fix:</strong> at the load boundary in <code>gam_loader.c</code>, <code>rx, ry = +deg·π/180</code> and
+<code>rz = −deg·π/180</code> (the mirrored axis lands the lone negation on Z). The same single change re-seats
+the fowl-room door (item&nbsp;6, authored 90°). The sign is uniform across every consumer (draw yaw, the
+player heading <code>sinf(ry)</code>, the camera), so it also corrects Jimmy's spawn facing once more — see
+collateral below; ticket&nbsp;#3's "phonebooth on his left" note is superseded.</div>
+</div>
+
+<!-- ================= OMT SHAPE BINDING (items 7, 10, 12) ================= -->
+<div class="card" id="i7">
+<h3>7 · 10 · 12 — "school desks are fans," "should be the rocketship," "missing arch sign" <span class="badge cat">MIS ×3</span></h3>
+<div class="meta">level2a 3OMT [bench06] · level3 3OMT [rockship] · level3d 3OMT [C3DOMTOBJ] — the C3DOmtObj shape binding the engine never read</div>
+<div class="quote">"school desks are fans" · "should be the rocketship instead of fan" · "missing arch sign"</div>
+<div class="ba">
+  <div class="shot"><img src="img/07-desks-before.png" alt="before: faceted spheres where desks should be"><div class="lbl bad">DEPRECATED — every 3OMT prop drew the generic Sphere01 fallback (the "fan")</div></div>
+  <div class="shot"><img src="img/07-desks-after.png" alt="after: school desks"><div class="lbl good">FIXED — objects.omt shape 19 (the bench/desk) at each authored seat</div></div>
+</div>
+<div class="ba">
+  <div class="shot"><img src="img/10-rockship-before.png" alt="before: tiny grey blob on the steps"><div class="lbl bad">DEPRECATED — the Retroland rocketship ride drawn as the Sphere01 blob</div></div>
+  <div class="shot"><img src="img/10-rockship-after.png" alt="after: rocketship"><div class="lbl good">FIXED — objects.omt shape 26 (rocketship), authored 230°</div></div>
+</div>
+<div class="ba">
+  <div class="shot"><img src="img/12-archsign-before.png" alt="before: stray slab over the water"><div class="lbl bad">DEPRECATED — the octopus arch sign missing; a stray fallback slab in its place</div></div>
+  <div class="shot"><img src="img/12-archsign-after.png" alt="after: OCTA banner sign"><div class="lbl good">FIXED — objects.omt shape 21 (the "octasign" banner), authored 65°</div></div>
+</div>
+<div class="ev"><span class="tag">EVIDENCE TRAIL</span>
+<p><code>C3DOmtObj</code> (FourCC <code>3OMT</code>) authors two properties the engine had never parsed:
+<code>OmtDatabase</code> (a container, always <code>objects.omt</code> in JNBG) and <code>OmtIndex</code> (a <code>3DSh</code> shape-chunk
+id). With no reader, every 3OMT instance fell through to the per-FourCC default — a faceted
+<code>Sphere01</code> mesh that reporters across three levels all read as "a fan." The authored indices map
+cleanly onto the OMT shape table:</p>
+<pre>Level2a 3OMT bench01..06  OmtDatabase=objects.omt  OmtIndex=19  -> shape "bench04" (school desk)
+Level3  3OMT rockship     OmtDatabase=objects.omt  OmtIndex=26  -> shape "rocketship"
+Level3D 3OMT C3DOMTOBJ    OmtDatabase=objects.omt  OmtIndex=21  -> shape "block" (octasign banner)</pre>
+</div>
+<div class="fix"><strong>Fix:</strong> parse <code>OmtDatabase</code>/<code>OmtIndex</code> in <code>gam_loader.c</code> and add a JNBG OMT-shape
+resolver tier that binds the authored chunk to its <code>omt-gltf</code> export. The shapes are exported with
+<code>--raw-origin</code> (a new toolkit flag) — keeping each shape's authored origin instead of localizing to
+its AABB centre — so the authored rotation pivots correctly (the same property that fixes the phone
+booth, item&nbsp;2). The tier is JNBG-gated: JNvsJN ships its own <code>objects.omt</code> with colliding indices.
+This is one data-driven rule, so the dino, plant, candy-sign and Retroland gallery props it also
+covers are fixed for free.</div>
+</div>
+
+<!-- ================= AUTHORED SPRITE IS THE VISUAL (items 5, 14, 15) ================= -->
+<div class="card" id="i5">
+<h3>5 · 14 · 15 — race cones, "s-star" and "martian" targets <span class="badge cat">MIS/TEX ×3</span></h3>
+<div class="meta">level2a 3TRE [C3DTREE] · level3c 3TAR [C3DMOVINGTARGET] ×2 — a curated default shadowing the authored sprite</div>
+<div class="quote">"3TRE entities should be cones" · "texture should be s-star" · "texture should be martian"</div>
+<div class="ba">
+  <div class="shot"><img src="img/05-cones-before.png" alt="before: full tree mesh on the race track"><div class="lbl bad">DEPRECATED — 3TRE drew a Retroville trunk mesh on the indoor race track</div></div>
+  <div class="shot"><img src="img/05-cones-after.png" alt="after: traffic cones"><div class="lbl good">FIXED — the authored sprites.omt "cone" canvas (chunk 41)</div></div>
+</div>
+<div class="ba">
+  <div class="shot"><img src="img/14-sstar-before.png" alt="before: generic target sprite"><div class="lbl bad">DEPRECATED — 3TAR drew the sequel's generic target sprite</div></div>
+  <div class="shot"><img src="img/14-sstar-after.png" alt="after: shooting stars"><div class="lbl good">FIXED — the authored "s-star" canvas (chunk 175)</div></div>
+</div>
+<div class="ba">
+  <div class="shot"><img src="img/15-martian-before.png" alt="before: generic target sprite"><div class="lbl bad">DEPRECATED — same generic target stand-in</div></div>
+  <div class="shot"><img src="img/15-martian-after.png" alt="after: martian"><div class="lbl good">FIXED — the authored "martian" canvas (chunk 176)</div></div>
+</div>
+<div class="ev"><span class="tag">EVIDENCE TRAIL</span>
+<p><code>C3DTree</code> and <code>C3DMovingTarget</code> are both members of the <code>C3DSprite</code> family — every instance
+authors a <code>SpriteDatabase=sprites.omt</code> + <code>SpriteIndex</code> canvas, which <em>is</em> the object's visual. But
+the resolver checked its per-FourCC table first, where a <code>3TRE → tree01.glb</code> mesh row (a Retroville
+trunk, applied to <em>every</em> tree including the level2a race cones) and a <code>3TAR →</code> JNvsJN target sprite
+shadowed the authored data. The instances knew what they were all along — they author cone (41),
+shooting-stars (175) and martian (176).</p>
+</div>
+<div class="fix"><strong>Fix:</strong> generalize the narrow <code>3CHK</code> exception from ticket&nbsp;#3 into a rule — when a JNBG
+entity authors a real <code>sprites.omt</code> canvas, the sprite tier wins over a <em>visible</em> per-FourCC mesh
+default. (Curated <code>icons.omt</code> placeholders like 3NEU/3RED and rows marked invisible keep their TYPE
+rows, so nothing regresses.) Removed the stale <code>3TRE</code> mesh row and <code>3OMT</code> name-matched tag rows.</div>
+</div>
+
+<!-- ================= PHONE BOOTH PIVOT (item 2) ================= -->
+<div class="card" id="i2">
+<h3>2 · C3DPhoneBooth — both booths clipping into the wall <span class="badge cat">ORI</span></h3>
+<div class="meta">level1b 3PHO [PHONE1, PHONE2] — both authored RotationY=180°</div>
+<div class="quote">"both phone booths are clipping into the wall"</div>
+<div class="ba">
+  <div class="shot"><img src="img/02-phone-before.png" alt="before: booth pushed back into the corner wall"><div class="lbl bad">DEPRECATED — the 180° booths swing back through the wall</div></div>
+  <div class="shot"><img src="img/02-phone-after.png" alt="after: booths flush against the wall"><div class="lbl good">FIXED — both booths sit flush against the wall</div></div>
+</div>
+<div class="ev"><span class="tag">EVIDENCE TRAIL</span>
+<p>The booth was exported (ticket&nbsp;#3) with its geometry <em>localized</em> to the mesh AABB centre — correct
+for static placements, which the engine translates by the centre offset. But an <em>entity</em> mesh is
+rotated about its own origin. The phone shape's authored origin sits ~83 units off its AABB centre in
+Z, so the authored 180° rotation swung the localized booth twice that distance — straight into the
+wall behind it.</p>
+</div>
+<div class="fix"><strong>Fix:</strong> re-export <code>phone.glb</code> with the new <code>omt-gltf --raw-origin</code> flag, preserving the
+shape's authored origin so the 180° rotation pivots where the original pivots it. (Entity-bound OMT
+shapes now all take this path — see item&nbsp;7.)</div>
+</div>
+
+<!-- ================= DOOR PNG V-FLIP (item 8) ================= -->
+<div class="card" id="i8">
+<h3>8 · C3DSchoolDoor — Retroland entrance/exit door textures upside down <span class="badge cat">TEX</span></h3>
+<div class="meta">level3 3SCD [C3DSCHOOLDOOR] ×4 (exit.png / retrodoor.png)</div>
+<div class="quote">"retroland entrance/exit doors' textures are upside down"</div>
+<div class="ba">
+  <div class="shot"><img src="img/08-retrodoor-before.png" alt="before: upside-down EXIT text"><div class="lbl bad">DEPRECATED — the EXIT / RETRO LAND lettering renders inverted</div></div>
+  <div class="shot"><img src="img/08-retrodoor-after.png" alt="after: upright EXIT text"><div class="lbl good">FIXED — lettering upright</div></div>
+</div>
+<div class="ev"><span class="tag">EVIDENCE TRAIL</span>
+<p>The school/swing-door classes apply a per-instance authored <code>PNGFile</code> to whichever mesh source
+loads (ticket&nbsp;#3). When that source is a textured <strong>glb twin</strong>, its UVs are baked with the
+DX/glTF convention (the <code>omt-gltf</code> <code>1−v</code> flip). A standalone PNG loaded with the engine's default
+(OpenGL, bottom-up) orientation then samples vertically inverted — so the doorretro lettering came out
+upside down.</p>
+</div>
+<div class="fix"><strong>Fix:</strong> add <code>tex_cache_get_vflip()</code> and use it for the authored door PNG when the door
+resolves to a glb-twin mesh (separate cache key, so a path can hold both orientations). ASE-sourced
+doors keep the default load. This also seats the fowl-room note (item&nbsp;6) right-side up.</div>
+</div>
+
+<!-- ================= BLOCK OVER-MATCH (item 1) ================= -->
+<div class="card" id="i1">
+<h3>1 · Blocks_Out — the playground climbing toy went invisible <span class="badge cat">MIS</span></h3>
+<div class="meta">level1 placement [Blocks_Out / Blocks_In] — a false positive from ticket #3's BLOCK rule</div>
+<div class="quote">"this model is correct, but the model BoxsOut is now gone"</div>
+<div class="ba">
+  <div class="shot"><img src="img/01-boxsout-before.png" alt="before: hollow block frame, outer shell missing"><div class="lbl bad">DEPRECATED — the colored climbing blocks lost their outer/inner shells</div></div>
+  <div class="shot"><img src="img/01-boxsout-after.png" alt="after: solid colored blocks"><div class="lbl good">FIXED — the full colored-cube toy is back</div></div>
+</div>
+<div class="ev"><span class="tag">EVIDENCE TRAIL</span>
+<p>Ticket&nbsp;#3 made every <code>BLOCK*</code>-prefixed placement an invisible collider — case-insensitively, to
+catch level1c's "Blocking01". That rule over-matched: level1's playground climbing toy is built from
+visible meshes literally named <strong>Blocks_Out</strong> and <strong>Blocks_In</strong>. Sweeping all 35 levels confirms
+those two are the <em>only</em> BLOCK-named meshes that carry real visible texture rather than being a bare
+collider (the fence-textured <code>BLOCK_HOODFAR</code> shells, for instance, are level-perimeter colliders whose
+visible counterpart is the chroma-keyed <code>2D_Trees</code> foliage — they stay hidden).</p>
+</div>
+<div class="fix"><strong>Fix:</strong> exempt the exact names <code>Blocks_Out</code> / <code>Blocks_In</code> from the collision skip;
+everything else <code>BLOCK*</code> stays invisible. The faithfulness sweep encodes the same two-name exception
+so the two rules can't drift.</div>
+</div>
+
+<!-- ================= FLAG (item 4) ================= -->
+<div class="card" id="i4">
+<h3>4 · 3FLA — missing rooftop flag <span class="badge cat">MIS</span></h3>
+<div class="meta">level2 3FLA [editor tag "C3DFIRESTRATO"]</div>
+<div class="quote">"missing flag model"</div>
+<div class="ba">
+  <div class="shot"><img src="img/04-flag-before.png" alt="before: bare flagpole"><div class="lbl bad">DEPRECATED — a bare pole; the flag mesh floated ~350 units away, off-screen</div></div>
+  <div class="shot"><img src="img/04-flag-after.png" alt="after: American flag on the pole"><div class="lbl good">FIXED — flag.ase + flag.png on the pole</div></div>
+</div>
+<div class="ev"><span class="tag">EVIDENCE TRAIL</span>
+<p>The <code>3FLA</code> FourCC is registered by <code>C3DFlag</code> (its registrar <code>FUN_00419550</code> sits inside the class's
+code region per <code>docs/_gam_classids.tsv</code>) — the rooftop flag. The old row was a name-match to the
+freeform editor tag string "C3DFIRESTRATO" and bound <code>firestrato.ASE</code>, whose geometry is authored
+~350 units off-origin; it rendered floating away from the pole, reading as "missing."</p>
+</div>
+<div class="fix"><strong>Fix:</strong> bind <code>3FLA → flag.ASE + flag.png</code> (the American flag on its pole).</div>
+</div>
+
+<!-- ================= KITTY (item 3) ================= -->
+<div class="card" id="i3">
+<h3>3 · C3DKitty — the cat was invisible <span class="badge cat">GFX</span></h3>
+<div class="meta">level2 3KIT [C3DKITTY] — authored InitiallyVisible=0</div>
+<div class="quote">"i can't select the missing/invisible cat model next to it"</div>
+<div class="ba">
+  <div class="shot"><img src="img/03-cat-before.png" alt="before: empty ledge"><div class="lbl bad">DEPRECATED — the rescue cat hidden at boot; only the 3NEU sprite beside it shows</div></div>
+  <div class="shot"><img src="img/03-cat-after.png" alt="after: cat on the ledge"><div class="lbl good">FIXED — the cat sits on the ledge (catsit.ase + cat.png)</div></div>
+</div>
+<div class="ev"><span class="tag">EVIDENCE TRAIL</span>
+<p>The engine hides any entity authoring <code>InitiallyVisible=0</code> at boot (faithful — the original reveals
+them via scripting). But <code>C3DKitty</code>'s own per-frame update <em>force-enables</em> its visibility while its
+task state is below the rescue threshold (10) — decomp <code>C3DKitty.md</code> — so the original shows the cat
+from frame one despite the authored flag. The engine's generic boot-hide didn't know about the
+class's override.</p>
+</div>
+<div class="fix"><strong>Fix:</strong> exempt <code>3KIT</code> from the <code>InitiallyVisible=0</code> boot-hide, and give the row its
+class-loaded texture (<code>cat.png</code>; the ASE carries no usable bitmap).</div>
+</div>
+
+<!-- ================= OCTAPUKE (item 11) ================= -->
+<div class="card" id="i11">
+<h3>11 · C3DOctapuke — black-silhouette octopus <span class="badge cat">MIS</span></h3>
+<div class="meta">level3d 3OCT [C3DOCTAPUKE]</div>
+<div class="quote">"missing texture"</div>
+<div class="ba">
+  <div class="shot"><img src="img/11-octapuke-before.png" alt="before: black silhouette octopus"><div class="lbl bad">DEPRECATED — a flat black silhouette in the fountain</div></div>
+  <div class="shot"><img src="img/11-octapuke-after.png" alt="after: textured green octopus"><div class="lbl good">FIXED — the octapuke1 texture resolves</div></div>
+</div>
+<div class="ev"><span class="tag">EVIDENCE TRAIL</span>
+<p><code>C3DOctapuke</code> registers <code>HIDEFAULT → octo.ase</code> (the puke animation) and <code>HISTOP → octostop.ase</code>,
+both textured by <code>octapuke1.png</code>. The engine bound <code>octo.ASE</code> — but that morph-anim ASE carries
+<strong>zero texture UVs</strong> (the original keeps the base shape's UVs across morph frames). Drawn statically it
+sampled a single dark texel and rendered as a black silhouette.</p>
+</div>
+<div class="fix"><strong>Fix:</strong> bind the idle pose <code>octostop.ASE</code> (which carries the UVs) + <code>octapuke1.png</code> —
+the same stop/idle-pose rule used for Cindy in ticket&nbsp;#3.</div>
+</div>
+
+<h2>Collateral repairs &amp; verification</h2>
+<div class="card">
+<ul>
+<li><strong>Jimmy's spawn facing, every level (again).</strong> The rotation-sign correction is uniform, so it
+re-aims Jimmy's authored 220° spawn to its faithful orientation. Ticket&nbsp;#3's "phonebooth on his left"
+note was validated against the inverted sign and is superseded; the booth is now on his right, matching
+the door/ship ground-truth.</li>
+<li><strong>Every authored rotation in JNBG</strong> flips to the corrected sign — NPC facings, props, the
+second phone booth (180°), the yokian doors. The fix is in shared engine code, so JNvsJN (which uses
+the same loader and GL mesh convention) inherits the same correctness fix on its next rebuild; that
+build wasn't re-deployed here, pending its own rotation QA pass.</li>
+<li><strong>The OMT-shape rule covers more than the three reported props</strong> — the lab dino &amp; plants
+(objects.omt 27/28), the candy sign (20), and the Retroland shooting-gallery signage (23/24/25) now
+draw their real shapes instead of the Sphere01 fallback.</li>
+<li><strong>Faithfulness sweep: 0 findings across 35 levels.</strong> See below.</li>
+<li><strong>Web regression suite re-aimed.</strong> <code>qa_web_verify.py</code>'s "click sky" probe assumed the old spawn
+orientation; the open-sky band moved with the corrected spawn, so the probe was re-pointed. All 16
+checks pass.</li>
+</ul>
+</div>
+
+<h2>The sweep caught two of this ticket's own fixes</h2>
+<div class="card">
+<p>Ticket&nbsp;#3 left behind an executable invariant checker — <code>JN_AUDIT=1</code> logs every draw decision and
+<code>tools/audit_faithfulness.py</code> asserts the QA-derived rules across all 35 levels. Within one run it
+flagged two regressions I'd just introduced, before any human saw the build:</p>
+<ul>
+<li><strong>An over-broad first attempt at item&nbsp;1.</strong> I first un-hid <em>all</em> textured BLOCK meshes, which the
+sweep immediately flagged as five spurious <code>BLOCK_HOODFAR</code> perimeter shells drawing as giant fence
+walls. That sent me to the data: only <code>Blocks_Out</code>/<code>Blocks_In</code> are real geometry, so the fix became the
+two-name exception above.</li>
+<li><strong>A false-positive in the stub-mesh rule.</strong> The rule flags entity meshes under 12 vertices (the
+degenerate-ASE-export class from ticket&nbsp;#3). The OMT-shape tier legitimately binds flat 6-vertex sign
+quads — Retroland's "SUN SPOTTER" and "SHOOTING STARS" boards. Those are faithfully-exported flat
+signage, not stubs, so the rule was scoped to ASE-derived meshes (its actual target); OMT&nbsp;→&nbsp;glb shapes
+are exempt.</li>
+</ul>
+<p>Both new rules are now encoded in the sweep, so neither regression can come back silently — exactly
+the "mine the rule, enforce it everywhere" loop sandmanfan asked for.</p>
+</div>
+
+<div class="footer">
+<p>All 15 reports resolved · native + WASM builds verified · 0 sweep findings / 35 levels · deployed to
+<a href="https://exentt.com/jn-engine/">exentt.com/jn-engine</a> ·
+<a href="https://github.com/alexscott2718-gif/jn-engine">source on GitHub</a> ·
+report bugs in-game: <a href="/jn/qa-howto.html">2-minute guide</a></p>
+<p>Resolution log generated 2026-06-12 · fixes + page authored autonomously by Claude (Fable 5) via Claude Code, from sandmanfan's in-game QA export.</p>
+</div>
+
+</div>
+</body>
+</html>

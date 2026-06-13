@@ -521,8 +521,14 @@ static void draw_scene(World *world, int jim_model_ok)
         /* Authored InitiallyVisible=0: the original hides these at boot
            until scripting shows them (phone booth, hydrant, teleport FX,
            rockets...). No native show-scripting exists yet, so they stay
-           hidden — strictly more faithful than drawing them. */
-        if (e->has_initially_visible && e->initially_visible == 0) {
+           hidden — strictly more faithful than drawing them.
+           Exception: C3DKitty's own per-frame update force-enables
+           visibility while its task state is below 10 (cat not yet
+           rescued) — decomp C3DKitty.md — so the original shows the cat
+           from the first frame despite IV=0 (2026-06-12 QA #4: the level2
+           marquee cat was invisible). */
+        if (e->has_initially_visible && e->initially_visible == 0 &&
+            strcmp(e->type, "3KIT") != 0) {
             audit_line("entity", e->type, e->tag, "gated", NULL, NULL, 0);
             continue;
         }
@@ -590,16 +596,7 @@ static void draw_scene(World *world, int jim_model_ok)
             char path[160];
             AseModel *m = NULL;
             unsigned int tex = 0;
-            /* The authored PNGFile is the per-instance texture truth and
-               applies to EITHER mesh source — level3 reuses one doorretro
-               mesh with exit.png vs retrodoor.png, and the glb twins are
-               geometry-only (firedoor.glb embeds no images; drawing it
-               bare left the school fire door invisible — 2026-06-12 QA #3
-               follow-up from sandmanfan). */
-            char tpath[160];
-            if (e->png_file[0] &&
-                asset_path_ci(tpath, sizeof(tpath), "assets/png", e->png_file))
-                tex = tex_cache_get(tpath);
+            int from_glb = 0;
             char glb_name[96];
             const char *dot = strrchr(e->ase_file, '.');
             size_t stem_n = dot ? (size_t)(dot - e->ase_file)
@@ -607,11 +604,27 @@ static void draw_scene(World *world, int jim_model_ok)
             if (stem_n < sizeof(glb_name) - 5) {
                 memcpy(glb_name, e->ase_file, stem_n);
                 memcpy(glb_name + stem_n, ".glb", 5);
-                if (asset_path_ci(path, sizeof(path), "assets/glb/ase", glb_name))
+                if (asset_path_ci(path, sizeof(path), "assets/glb/ase", glb_name)) {
                     m = model_cache_get(path);   /* real geometry (ASE may be a stub) */
+                    from_glb = (m != NULL);
+                }
             }
             if (!m && asset_path_ci(path, sizeof(path), "assets/ase", e->ase_file))
                 m = model_cache_get(path);
+            /* The authored PNGFile is the per-instance texture truth and
+               applies to EITHER mesh source — level3 reuses one doorretro
+               mesh with exit.png vs retrodoor.png, and the glb twins are
+               geometry-only (firedoor.glb embeds no images; drawing it
+               bare left the school fire door invisible — 2026-06-12 QA #3
+               follow-up from sandmanfan). glb twins bake DX-convention
+               UVs (the omt-gltf 1-v flip), so the standalone PNG must load
+               with the opposite vertical orientation there or it renders
+               upside down (2026-06-12 QA #4: the Retroland EXIT doors). */
+            char tpath[160];
+            if (e->png_file[0] &&
+                asset_path_ci(tpath, sizeof(tpath), "assets/png", e->png_file))
+                tex = from_glb ? tex_cache_get_vflip(tpath)
+                               : tex_cache_get(tpath);
             if (m) {
                 renderer_draw_model(m, tex, e->x, e->y, e->z, e->ry, 1.0f);
                 audit_line("entity", e->type, e->tag, "mesh", path, m, tex);
@@ -772,14 +785,22 @@ static void draw_scene(World *world, int jim_model_ok)
     for (int pi = 0; pi < world->placement_count; pi++) {
         const WorldPlacement *pl = &world->placements[pi];
         /* BLOCK*-prefixed meshes are the original's COLLISION volumes
-           (BLOCKbench, BLOCKING_road, BLOCK_Rocket03...) — never visible;
-           each has a separate visible twin (bench05, the road, Rocketa).
-           Reporter-confirmed 2026-06-12 QA #3 follow-up: "all Block meshes
-           should be invisible". Most were already skipped as untextured;
-           this names the rule so a future texture bake can't resurrect
-           them. Skipped before QA registration: an invisible mesh must not
-           swallow picks aimed at its visible twin. */
-        if (strncasecmp(pl->name, "BLOCK", 5) == 0) {  /* level1c authors "Blocking01" */
+           (BLOCKbench, BLOCKING_road, BLOCK_Rocket03, the level-perimeter
+           BLOCK_HOODFAR fence shell...) — never visible; each has a separate
+           visible twin (bench05, the road, Rocketa; the perimeter's visible
+           fence is the chroma-keyed 2D_Trees foliage). Reporter-confirmed
+           2026-06-12 QA #3 follow-up: "all Block meshes should be invisible".
+           EXCEPTION (QA #4): the prefix over-matches level1's playground
+           climbing toy, whose visible outer/inner shells are literally named
+           Blocks_Out / Blocks_In ("the model BoxsOut is now gone"). Those two
+           are the only BLOCK-named meshes that are real visible geometry
+           rather than a collider (verified across all 35 levels by the
+           faithfulness sweep) — let them draw; skip everything else.
+           Skipped before QA registration so an invisible collider can't
+           swallow a pick aimed at its visible twin. */
+        if (strncasecmp(pl->name, "BLOCK", 5) == 0 &&
+            strcasecmp(pl->name, "Blocks_Out") != 0 &&
+            strcasecmp(pl->name, "Blocks_In")  != 0) {  /* level1c authors "Blocking01" */
             audit_line("placement", pl->name, NULL, "collision-skip", NULL, NULL, 0);
             continue;
         }

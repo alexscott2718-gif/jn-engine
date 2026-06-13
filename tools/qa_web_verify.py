@@ -128,12 +128,15 @@ def main():
         # on an object would pick it and re-open the dialog, swallowing the
         # keystrokes below into the textarea (that isolation is by design).
         box = page.locator("#canvas").bounding_box()
-        # Left of top-centre: since the gam_loader rotation fix (2026-06-12)
-        # the spawn view faces the authored 220-degree yaw, putting the
-        # AApart03 facade at top-centre; x=0.3 is open sky in that view (the
-        # top-RIGHT corner is covered by the #qaTags overlay, so stay left).
+        # Top-left sky: the 2026-06-12 QA#4 rotation-sign correction flipped
+        # the authored 220-degree spawn yaw to its faithful orientation,
+        # which rotated the boot view. Open sky now spans the top-LEFT
+        # quarter (x<=0.25 at the top edge); x=0.3 lands on a building now.
+        # The top-RIGHT corner is covered by the #qaTags overlay, so the
+        # left band is the safe sky click. (A click on any object would pick
+        # it and re-open the dialog, swallowing the keystrokes below.)
         page.locator("#canvas").click(
-            position={"x": box["width"] * 0.3, "y": 10})
+            position={"x": box["width"] * 0.12, "y": 10})
         page.wait_for_timeout(300)
         check("no dialog after sky click", not dlg.is_visible())
         def wait_label(expect):

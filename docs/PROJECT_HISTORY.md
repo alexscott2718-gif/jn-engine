@@ -580,6 +580,59 @@ against the original's defaults* and *authored data honored over curated rows* �
 both found via tickets, both classes, not incidents. The sweep turns that pattern
 from a habit into a gate.
 
+- **Ticket #4 (15 reports, 2026-06-12, `sandmanfan-2026-06-12b`):** four levels of
+  Retroville/school/park. Most collapsed into three class rules:
+  - **Rotation SIGN correction (sequel to #3's unit bug).** #3 fixed the
+    degrees→radians magnitude but derived the sign from the Z-mirror alone
+    (`ry = −θ`); that's only half the conversion. The original is left-handed, and
+    an LH `+θ` rotation is the RH/GL `−θ` rotation — a second negation that cancels
+    the first on X/Y, leaving the lone negation on **Z**. Faithful import is now
+    `rx, ry = +deg·π/180`, `rz = −deg·π/180` (gam_loader.c). #3's sign survived its
+    own QA because all three validation props were sign-blind (180° toolchest/booth,
+    rotationally-symmetric fan disc; a door panel reads "filled" from either facing).
+    #4's **one-sided mummy sarcophagus** and the **A-frame pirate ship** are
+    asymmetric and lock to the authored angle only at `+θ`. Uniform across draw yaw,
+    player heading, camera — so **Jimmy's spawn facing flips again** and #3's
+    "phonebooth on his left" note is **superseded** (booth is on his right). Shared
+    engine code → JNvsJN inherits the fix on next rebuild (not re-deployed/QA'd here).
+    `qa_web_verify.py` sky-click probe re-aimed to the new spawn (x 0.3→0.12).
+  - **C3DOmtObj OmtDatabase/OmtIndex** were never parsed → every `3OMT` drew the
+    Sphere01 default (reporters: "fans"). New JNBG OMT-shape resolver tier binds the
+    authored `objects.omt` 3DSh chunk (desk=19, rocketship=26, octasign=21, +dino 27,
+    plant 28, candysign 20, gallery signs 23/24/25). Shapes exported **raw-origin**
+    (new `omt-gltf --raw-origin`): entity-bound shapes keep the authored origin so the
+    authored rotation pivots correctly — same property that un-clips the phone booths
+    (which were localized-to-AABB-centre and swung 2× the offset into the wall).
+  - **Authored sprites.omt canvas beats a *visible* per-FourCC default.** `C3DTree`
+    (3TRE) and `C3DMovingTarget` (3TAR) are C3DSprite-family — the authored
+    canvas IS the visual, but a `3TRE→tree01.glb` mesh row and a `3TAR→`JNvsJN-sprite
+    row shadowed it (level2a race "cones", level3c "s-star"/"martian"). Generalized
+    #3's narrow 3CHK exception into the rule; icons.omt placeholders + invisible rows
+    keep their TYPE rows.
+  - Singletons: door PNGs on **glb twins load v-flipped** (`tex_cache_get_vflip`) —
+    glb twins bake DX-convention UVs, so a default-orientation PNG renders upside down
+    (Retroland EXIT doors, fowl-room note); **3FLA = C3DFlag** (flag.ase+flag.png; was
+    a name-match to editor tag "C3DFIRESTRATO", whose mesh floats ~350u off-origin);
+    **3KIT exempt from the InitiallyVisible=0 boot-hide** (C3DKitty force-enables
+    visibility while task-state<10, so the cat shows from frame one); **3OCT →
+    octostop.ASE** (octo.ASE puke-anim carries zero UVs → black silhouette; the idle
+    pose has them — same stop-pose rule as Cindy in #3).
+  - **#1 (Blocks_Out "now gone")** was #3's own collateral: the case-insensitive
+    `BLOCK*` collision skip over-matched the visible playground climbing toy
+    `Blocks_Out`/`Blocks_In`. Two-name exception (the only BLOCK-named *visible*
+    geometry across 35 levels; `BLOCK_HOODFAR` fence shells stay colliders).
+  - **Sweep caught two of #4's own regressions before deploy:** an over-broad first
+    cut un-hid all textured BLOCK meshes (5 spurious `BLOCK_HOODFAR` walls →
+    narrowed to the two-name exception, mirrored in the sweep); and the stub-mesh
+    rule false-flagged the flat 6-vert OMT sign quads (SUN SPOTTER / SHOOTING STARS)
+    → scoped to ASE-derived meshes (its real target; OMT→glb shapes are faithful).
+    **0 findings / 35 levels.**
+
+**Pattern (reinforced by #4):** a "fix" can be only half a coordinate conversion and
+still pass QA if the validation cases are symmetric — asymmetric ground-truth geometry
+(a one-sided sarcophagus, an A-frame) is what pins a sign. And the sweep paid for
+itself twice in one ticket by catching the fixer's own regressions.
+
 ---
 
 ## Invariants (don't relitigate these)

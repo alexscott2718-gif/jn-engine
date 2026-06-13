@@ -110,14 +110,23 @@ def findings_for(level, rows):
             add("untextured-mesh", d,
                 "draws invisible/dark (school fire-door class)")
         if d["cat"] == "entity" and kind in ("mesh", "mesh-prebound") \
-                and 0 <= d["verts"] < 12:
-            # Entity visuals only: a 4-vert PLACEMENT quad (floors, water
-            # sheets) is legitimate OMT level geometry, but an entity bound
-            # to a <12-vert mesh is a degenerate OMT->ASE export stub
-            # (firedoor.ASE class).
+                and 0 <= d["verts"] < 12 \
+                and "/glb/omt/" not in d["path"]:
+            # The stub rule targets degenerate OMT->ASE export stubs
+            # (the firedoor.ASE class: a mesh that lost its geometry and
+            # drew invisible/wrong). It is scoped to ASE-derived meshes
+            # (assets/ase, assets/glb/ase). OMT->glb shapes are exported
+            # faithfully by the breakthrough pipeline, so a low vert count
+            # there is the REAL geometry — Retroland's flat "SUN SPOTTER" /
+            # "SHOOTING STARS" signs (objects.omt 23/24) are genuinely
+            # 6-vert quads, not stubs (2026-06-12 QA #4).
             add("stub-mesh", d, "degenerate export stub bound as a visual")
         if d["cat"] == "placement" and d["name"].upper().startswith("BLOCK") \
-                and kind != "collision-skip":
+                and kind != "collision-skip" \
+                and d["name"].lower() not in ("blocks_out", "blocks_in"):
+            # Blocks_Out / Blocks_In are the level1 playground climbing toy's
+            # visible shells — the only BLOCK-named real geometry, not
+            # colliders (2026-06-12 QA #4; mirrors the engine exception).
             add("block-visible", d)
     return out
 

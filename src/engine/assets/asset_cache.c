@@ -111,10 +111,11 @@ unsigned int tex_cache_resolve_bmp(const char *basename) {
     return 0;
 }
 
-unsigned int tex_cache_get(const char *path) {
+static unsigned int tex_cache_get_keyed(const char *path, const char *key,
+                                        unsigned int (*loader)(const char *)) {
     if (!path || !path[0]) return 0;
     for (int i = 0; i < MAX_TEX; i++) {
-        if (g_tex[i].used && strncmp(g_tex[i].path, path, PATH_LEN) == 0) {
+        if (g_tex[i].used && strncmp(g_tex[i].path, key, PATH_LEN) == 0) {
             g_tex[i].gen = g_gen;
             return g_tex[i].id;
         }
@@ -122,18 +123,30 @@ unsigned int tex_cache_get(const char *path) {
     /* Load and insert. Failures are cached too (id = 0, same pattern as
        model_cache_get): per-frame callers retrying a missing file otherwise
        cost an fopen + a "tex_load: failed" log line every frame. */
-    unsigned int id = tex_load(path);
+    unsigned int id = loader(path);
     for (int i = 0; i < MAX_TEX; i++) {
         if (!g_tex[i].used) {
             g_tex[i].used = 1;
             g_tex[i].id   = id;
             g_tex[i].gen  = g_gen;
-            snprintf(g_tex[i].path, PATH_LEN, "%s", path);
+            snprintf(g_tex[i].path, PATH_LEN, "%s", key);
             return id;
         }
     }
-    if (id) fprintf(stderr, "tex_cache: full, leaking %s\n", path);
+    if (id) fprintf(stderr, "tex_cache: full, leaking %s\n", key);
     return id;
+}
+
+unsigned int tex_cache_get(const char *path) {
+    return tex_cache_get_keyed(path, path, tex_load);
+}
+
+unsigned int tex_cache_get_vflip(const char *path) {
+    /* Distinct cache key so a path can hold both orientations. */
+    char key[PATH_LEN];
+    if (!path || !path[0]) return 0;
+    snprintf(key, sizeof(key), "vflip|%s", path);
+    return tex_cache_get_keyed(path, key, tex_load_vflip);
 }
 
 AseModel *model_cache_get(const char *path) {

@@ -6,9 +6,9 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include "../stb_image.h"
 
-unsigned int tex_load(const char *path) {
+static unsigned int tex_load_flip(const char *path, int flip) {
     int w, h, ch;
-    stbi_set_flip_vertically_on_load(1);
+    stbi_set_flip_vertically_on_load(flip);
     unsigned char *data = stbi_load(path, &w, &h, &ch, 0);
     if (!data) {
         fprintf(stderr, "tex_load: failed to load %s: %s\n", path, stbi_failure_reason());
@@ -31,6 +31,9 @@ unsigned int tex_load(const char *path) {
     capture_note_texture(id, path, w, h);
     return id;
 }
+
+unsigned int tex_load(const char *path)       { return tex_load_flip(path, 1); }
+unsigned int tex_load_vflip(const char *path) { return tex_load_flip(path, 0); }
 
 void tex_free(unsigned int id) {
     if (id) glDeleteTextures(1, &id);

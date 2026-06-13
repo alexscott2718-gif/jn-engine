@@ -20,6 +20,7 @@ Entity *world_add(World *w) {
     Entity *e = calloc(1, sizeof(Entity));
     if (!e) return NULL;
     e->alive = 1;
+    e->omt_index = -1;           /* 0 is a valid OMT shape chunk id */
     e->next = w->head;
     w->head = e;
     w->count++;
