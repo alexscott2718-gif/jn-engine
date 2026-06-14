@@ -640,15 +640,16 @@ overlap with the sandmanfan #4 resolver work, but added four carried-forward rul
 `3DUD` DoorUpDown rows share the per-instance door ASE/PNG path (`bars.ASE` +
 `chain.png` in level1b), and sliding-door behavior now honors authored `OpenAmount`
 (`bars` rises 500u instead of the old hard-coded 180u), uses `DoorSpeed * 30` 30 Hz
-travel speed, plays `soundeffects.omt[59]` ("Door opening loop") on open, waits for
-authored `OpenTime`, then plays `soundeffects.omt[58]` ("door closing") while closing;
+travel speed, and plays `soundeffects.omt[59]` ("Door opening loop") on open;
 scripted `3ROC` rocketship markers stay invisible until flight/cutscene behavior owns
 them; and static NPC stop-pose meshes foot-anchor to their authored floor point instead
-of sinking by their negative local-Y bounds. The level3d stomach-ride hamburger car
-remains incomplete: an attempted `3AIO/wooper` `hamburger.ASE` binding was visually
-rejected as the wrong small/flat asset and removed. Audit guards the completed resolver
-rules only. QA log:
-`docs/qa/lu9-2026-06-12/index.html`.
+of sinking by their negative local-Y bounds. **The `3DUD bars` row is marked incomplete:**
+the rise, speed, and opening sound are correct, but the closing animation and closing
+sound still need fixing (`soundeffects.omt[58]` close playback / close-phase timing not
+yet right) — follow-up required before it can be marked resolved. The level3d stomach-ride
+hamburger car also remains incomplete: an attempted `3AIO/wooper` `hamburger.ASE` binding
+was visually rejected as the wrong small/flat asset and removed. Audit guards the completed
+resolver rules only. QA log: `docs/qa/lu9-2026-06-12/index.html`.
 
 ---
 

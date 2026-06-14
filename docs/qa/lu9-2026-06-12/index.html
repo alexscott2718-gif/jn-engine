@@ -39,11 +39,11 @@ pre { overflow-x:auto; background:#0a0a0a; border:1px solid #242424; border-radi
 <body>
 <div class="wrap">
 
-<h1>QA Ticket Resolution - Lu9 <span class="badge amber">12 / 14 ADDRESSED</span> <span class="badge red">2 INCOMPLETE</span></h1>
+<h1>QA Ticket Resolution - Lu9 <span class="badge amber">11 / 14 ADDRESSED</span> <span class="badge red">3 INCOMPLETE</span></h1>
 <p class="sub">Ticket submitted 2026-06-12 before the final sandmanfan 2026-06-12 resolution landed. This page intentionally avoids re-litigating duplicate line items and records only the new deltas plus resolver evidence for the overlap.</p>
 
 <h2>Summary</h2>
-<p>Two new resolver changes came from this ticket: per-instance <code>3DUD</code> door meshes/textures and hidden scripted <code>3ROC</code> markers. One placement issue, NPC foot sinking, got a draw-time foot-anchor rule for the stop-pose NPC meshes. The <code>3DUD bars</code> row also needed a behavior follow-up: the mesh/texture were correct, but the door still used the old hard-coded 180-unit rise instead of the authored 500-unit <code>OpenAmount</code>, moved too slowly, and lacked its opening sound. Most other rows overlap with the sandmanfan 2026-06-12b fixes or are already covered by the static placement path. The level4a candy-bar <code>Plane01</code> artifact and the level3d stomach-ride hamburger car both remain incomplete and need dedicated follow-up passes.</p>
+<p>Two new resolver changes came from this ticket: per-instance <code>3DUD</code> door meshes/textures and hidden scripted <code>3ROC</code> markers. One placement issue, NPC foot sinking, got a draw-time foot-anchor rule for the stop-pose NPC meshes. The <code>3DUD bars</code> row also needed a behavior follow-up: the mesh/texture were correct, but the door still used the old hard-coded 180-unit rise instead of the authored 500-unit <code>OpenAmount</code>, moved too slowly, and lacked its opening sound. The rise and opening pass are fixed, but the <strong>closing animation and closing sound still need work</strong>, so this row is marked incomplete pending that follow-up. Most other rows overlap with the sandmanfan 2026-06-12b fixes or are already covered by the static placement path. The level4a candy-bar <code>Plane01</code> artifact and the level3d stomach-ride hamburger car both remain incomplete and need dedicated follow-up passes.</p>
 
 <table>
 <tr><th>#</th><th>level</th><th>object</th><th>report</th><th>resolution</th></tr>
@@ -52,7 +52,7 @@ pre { overflow-x:auto; background:#0a0a0a; border:1px solid #242424; border-radi
 <tr><td>3</td><td>level1</td><td><code>Box03</code></td><td>playhouse hidden door missing box geometry</td><td><span class="badge blue">verified</span> static placement draws <code>assets/glb/omt/Box03.glb</code>, textured</td></tr>
 <tr><td>4</td><td>level1c</td><td><code>3ROC C3DROCKETSHIP</code></td><td>rocket model visible when it should be a trigger/cutscene object</td><td><span class="badge green">new</span> <code>3ROC</code> is invisible until flight/cutscene behavior owns it</td></tr>
 <tr><td>5</td><td>level4a</td><td><code>Plane01</code></td><td>odd triangle planes inside candy bar</td><td><span class="badge red">incomplete</span> artifact still visible; requires follow-up mesh/render investigation</td></tr>
-<tr><td>6</td><td>level1b</td><td><code>3DUD bars</code></td><td>wrong door texture / not raised high enough / wrong speed and sound</td><td><span class="badge green">new</span> <code>3DUD</code> now draws <code>bars.ASE</code> + <code>chain.png</code>, opens by authored <code>OpenAmount=500</code>, uses 30 Hz authored speed scaling, and plays opening/closing door sounds</td></tr>
+<tr><td>6</td><td>level1b</td><td><code>3DUD bars</code></td><td>wrong door texture / not raised high enough / wrong speed and sound</td><td><span class="badge red">incomplete</span> <code>3DUD</code> now draws <code>bars.ASE</code> + <code>chain.png</code>, opens by authored <code>OpenAmount=500</code> at 30 Hz speed, opening sound plays; <strong>closing animation and closing sound still need fixing</strong></td></tr>
 <tr><td>7</td><td>level1</td><td><code>3DOR DOORGRILL2</code></td><td>incorrect rotation of sewer bars</td><td><span class="badge blue">overlap</span> existing degree/yaw fix applies; resolver draws <code>DoorGrill2.glb</code>, textured</td></tr>
 <tr><td>8</td><td>level1</td><td><code>3TRE C3DTREE</code></td><td>extra trunk growing at top</td><td><span class="badge blue">overlap</span> sprite-family rule removes generic tree mesh; authored sprite wins</td></tr>
 <tr><td>9</td><td>level3</td><td><code>3SCD C3DSCHOOLDOOR</code></td><td>mirrored/upside-down sign text</td><td><span class="badge blue">overlap</span> GLB door twins use authored PNG with vertical-flip correction</td></tr>
@@ -65,10 +65,11 @@ pre { overflow-x:auto; background:#0a0a0a; border:1px solid #242424; border-radi
 
 <h2>New Fixes</h2>
 <div class="card">
-<h3>Per-instance DoorUpDown assets</h3>
+<h3>Per-instance DoorUpDown assets <span class="badge red">INCOMPLETE</span></h3>
 <div class="meta">Lu9 item 6: level1b <code>3DUD bars</code></div>
 <p><code>3DUD</code> had a fallback row for <code>downdoor2a.glb</code>, so the authored <code>ASEFile=bars.ase</code> and <code>PNGFile=chain.png</code> on the level1b row were ignored. The existing per-instance door path already handled <code>3SWN</code> and <code>3SCD</code>; <code>3DUD</code> is the same data shape. Follow-up visual review found the bars still did not clear the entryway because the shared door behavior used a fixed 180-unit rise while this row authors <code>OpenAmount=500</code>; the same behavior also used the wrong speed scale and had no class door sound.</p>
 <div class="fix">Changed <code>src/game/main.c</code> so <code>3DUD</code> shares the case-insensitive ASE/PNG resolver. Changed <code>behavior_door.c</code> so sliding doors rise to their authored <code>OpenAmount</code>, use <code>DoorSpeed * 30</code> 30&nbsp;Hz speed scaling, wait for authored <code>OpenTime</code>, then close. Opening plays <code>soundeffects.omt[59]</code> (<code>Door_opening_loop.wav</code>); closing plays <code>soundeffects.omt[58]</code> (<code>door_closing.wav</code>). Added an audit invariant that <code>3DUD bars</code> must resolve to <code>bars.ASE</code>.</div>
+<div class="note">Status: incomplete. The mesh/texture, authored rise, speed scale, and opening sound are correct, but the <strong>closing animation and closing sound still need fixing</strong> (close phase timing/playback is not yet right). Follow-up must finish the close half of the cycle before this row can be marked resolved.</div>
 <pre>[audit] cat=entity name=3DUD tag=bars kind=mesh path=assets/ase/bars.ASE verts=162 textured=1</pre>
 <pre>[BUTTON] pressed 'C3DBUTTON'
 [AUDIO] play soundeffects.omt[59] -> assets/parsed/soundeffects/soundeffects_audio/0267_Door_opening_loop.wav on channel 1
@@ -104,7 +105,7 @@ pre { overflow-x:auto; background:#0a0a0a; border:1px solid #242424; border-radi
 
 <h2>Evidence Captures</h2>
 <div class="shots">
-  <div class="shot"><img src="img/level1b-3dud-bars.png" alt="level1b 3DUD bars screenshot"><div>level1b: bars door capture from Lu9 camera payload</div></div>
+  <div class="shot"><img src="img/level1b-3dud-bars.png?v=barsfix" alt="level1b 3DUD bars screenshot"><div>level1b: Jimmy at the <code>bars</code> gate (camera re-aimed at the authored door height; the earlier shot sat too low and missed the bars) — incomplete: closing animation and sound still need fixing</div></div>
   <div class="shot"><img src="img/level1c-3roc-hidden.png" alt="level1c hidden 3ROC screenshot"><div>level1c: rocket marker no longer draws as a static rocket</div></div>
   <div class="shot"><img src="img/level2-benny-flag.png" alt="level2 Benny and flag screenshot"><div>level2: Benny/flag area, covering the NPC anchor fix and prior flag overlap</div></div>
   <div class="shot"><img src="img/level3d-stomach-wooper.png?v=lu9b" alt="level3d stomach ride screenshot"><div>level3d: incomplete - hamburger ride car still needs the real model/source</div></div>
