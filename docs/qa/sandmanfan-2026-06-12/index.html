@@ -117,12 +117,15 @@ clean editor angles (0, 90, 170, 180, 220, 270). But <code>gam_loader.c</code> s
 <code>e-&gt;rx/ry/rz</code>, which the player heading (<code>sinf(e-&gt;ry)</code>), the draw paths, and the camera all
 consume as <em>radians</em>. So 90° became 90&nbsp;rad ≡ 116.6°, 270° became ≡ 350.1°, and 180° became ≡ 167.3° —
 close enough to "right" in some places that it survived three QA passes. A second, subtler half:
-the engine mirrors the original's left-handed Z at the load boundary (<code>z = −z</code>), and a mirror
-flips rotation handedness too — <code>M·R<sub>y</sub>(θ)·M = R<sub>y</sub>(−θ)</code> — so the converted yaw must also negate.</p>
+the engine mirrors the original's left-handed Z at the load boundary (<code>z = −z</code>). This ticket
+initially treated the mirror term alone as the sign rule; ticket&nbsp;#4 later showed that the original's
+left-handed rotation convention adds the second negation, leaving current X/Y rotation un-negated.</p>
 </div>
-<div class="fix"><strong>Fix:</strong> convert at the load boundary in <code>gam_loader.c</code> — <code>rx, ry = −deg·π/180</code>, <code>rz = +deg·π/180</code>
-(Z-axis rotations don't mix the mirrored axis). Removed <code>behavior_fan.c</code>'s local degrees compensation.
-Every authored rotation in both games now lands correctly, including Jimmy's authored 220° spawn facing (see "collateral repairs" below).</div>
+<div class="fix"><strong>Fix at the time:</strong> convert authored degrees to radians at the load boundary in
+<code>gam_loader.c</code>. <strong>Historical correction:</strong> ticket&nbsp;#4 supplied asymmetric ground-truth geometry
+and corrected the sign convention to <code>rx, ry = +deg·π/180</code>, <code>rz = −deg·π/180</code>. This card is kept
+as the record of the degrees/radians root cause; use the ticket&nbsp;#4 convention for current work.
+Removed <code>behavior_fan.c</code>'s local degrees compensation.</div>
 </div>
 
 <!-- ================= HIDDEN CANVAS (item 4) ================= -->

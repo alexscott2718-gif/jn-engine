@@ -187,11 +187,14 @@ the fixed-timestep loop, and the **entity draw-dispatch chain** (this order matt
 
 1. **Player** → dedicated `player_anim` blend path.
 2. **`3ASE`** (generic per-object mesh named by the GAM, JNvsJN) → `assets/ase/jnvsjn/`.
-3. **Sprite-indexed** (`3PIC`/`3SRO`/`3SPR`/`3ANI` with `sprite_index>0`) → 2D
+3. **Authored door mesh** (`3SWN`/`3SCD` with `ASEFile`/`PNGFile`) → mixed-case
+   original asset lookup, preferring `assets/glb/ase/` twins and applying the
+   authored PNG over either mesh source.
+4. **Sprite-indexed** (`3PIC`/`3SRO`/`3SPR`/`3ANI` with `sprite_index>0`) → 2D
    sprite billboard from `assets/parsed/sprites/`.
-4. **Pre-bound vtable model** (`e->model`).
-5. **Resolver** (`entity_visual_resolve`) → sprite billboard / mesh / invisible.
-6. **Fallback** → colored placeholder box.
+5. **Pre-bound vtable model** (`e->model`).
+6. **Resolver** (`entity_visual_resolve`) → sprite billboard / mesh / invisible.
+7. **Fallback** → colored placeholder box.
 
 Then **static OMT placements** are drawn (with the tree trunk-mesh + camera-facing
 canopy-billboard special case), then the **HUD**.
@@ -203,10 +206,14 @@ It's also the home of the many **`JN_*` test/QA env knobs** — see §10.
   binds each entity's behavior by FourCC after load and runs `on_spawn`.
 - **`entity_visual.c`** — **the resolver** (history Eras 6–7). Tiered lookup:
   1. per-`(FourCC, tag)` override (`TAG_TABLE`),
-  2. per-FourCC default (`TYPE_TABLE`),
-  3. FourCC marked invisible,
-  4. GRN-stem → glb asset table (`GRN_ASSET_TABLE`, JNvsJN props — prefers a textured
-     OMT/glTF twin over the untextured GRN extraction).
+  2. GRN-stem → glb asset table (`GRN_ASSET_TABLE`, JNvsJN props — prefers a textured
+     OMT/glTF twin over the untextured GRN extraction),
+  3. JNBG `C3DOmtObj` authored `OmtDatabase`/`OmtIndex` → raw-origin OMT glb shape,
+  4. per-FourCC default (`TYPE_TABLE`), with a JNBG exception: an authored
+     `sprites.omt` canvas beats a *visible* type default for C3DSprite-family rows
+     (`3TRE` cones/trees, `3TAR` targets, `3CHK` flags),
+  5. per-instance sprite database fallback,
+  6. FourCC marked invisible.
   No match → caller draws the placeholder box. This is where you wire a new
   game object to its mesh/sprite.
 
@@ -380,6 +387,9 @@ phase history (cross-referenced from `PROJECT_HISTORY.md`):
   mesh resolution truth.
 - 🟢 **`gltf_export_plan.md`** — the current asset format path.
 - 🟢 **`ghidra_notes.md`** — the OMT2.dll RE map (render entry point etc.).
+- 🟢 **`qa_ticket_resolution_workflow.md`** — required workflow for turning
+  in-game QA exports into fixes, verification, deploys, and public
+  `docs/qa/<ticket>/` resolution-log pages.
 - 🟢 **`CONTRIBUTOR_object_capture_plan.md`** / **`CONTRIBUTING_AWEFAN.md`** — on-ramps.
 - 🟢 **`claude_code_failure_patterns.md`** — the operating rules (also in `CLAUDE.md`).
 - 🔴 **`phase12_*`**, **`replay_v0/v3/v4_*`**, **`native_vs_capture_8881_*`**,

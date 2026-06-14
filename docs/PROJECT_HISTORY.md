@@ -488,10 +488,12 @@ statically from `alpha.omt` (obsoleting the XP recapture in
 
 **Goal.** With the in-game QA annotate tool live (B-key picker → JSON export,
 `docs/qa_annotate_plan.md`), community testers can file positioned, asset-attributed
-reports against the deployed demos. Three tickets from **sandmanfan** arrived on
-2026-06-11/12 — 8 reports (levels 2/2a/2b), 12 reports (level 1), then 14 reports
-(levels 1/1b/1c/1e) — all resolved same-day with public before/after logs at
-`exentt.com/jn-engine/qa/` (`sandmanfan-2026-06-11{,b}` and `sandmanfan-2026-06-12`).
+reports against the deployed demos. Four tickets from **sandmanfan** arrived on
+2026-06-11/12 — 8 reports (levels 2/2a/2b), 12 reports (level 1), 14 reports
+(levels 1/1b/1c/1e), then 15 reports (levels 1/1b/2/2a/3/3c/3d) — all resolved
+same-day with public before/after logs at `exentt.com/jn-engine/qa/`
+(`sandmanfan-2026-06-11`, `sandmanfan-2026-06-11b`,
+`sandmanfan-2026-06-12`, and `sandmanfan-2026-06-12b`).
 
 **What the tickets taught (beyond the row fixes).**
 - **Ticket #1 (8 reports):** five resolver-row defects (stale pre-SpriteIndex rows,
@@ -522,8 +524,8 @@ reports against the deployed demos. Three tickets from **sandmanfan** arrived on
 
 - **Ticket #3 (14 reports, 2026-06-12):** the third — and largest — engine-default gap:
   **`.gam` rotations are degrees, the engine consumed them as radians** (and the
-  load-boundary z-mirror flips rotation handedness, so converted X/Y angles also
-  negate: `M·R(θ)·M = R(−θ)`). One `gam_loader.c` conversion fixed all three ORI
+  first fix only got the magnitude right; its X/Y sign was superseded by ticket
+  #4 below). One `gam_loader.c` conversion fixed all three ORI
   reports (toolchest 180°, labfan 90°, yokdoors 270°) *and* Jimmy's authored 220°
   spawn facing, wrong since the entity system landed — symmetric angles (0°/180°)
   had hidden the bug from three QA passes. Authored-data finds: sprites.omt chunk

@@ -4,6 +4,10 @@ Contributor-facing usage guide: `docs/qa_annotate_howto.md`, published at
 https://exentt.com/jn/qa-howto.html (linked from the hub's Contribute section
 and from the in-game help line in both demos).
 
+Agent-facing ticket workflow: `docs/qa_ticket_resolution_workflow.md`. Use it
+when turning exported QA sessions into fixes, verification runs, deploys, and
+public resolution-log pages under `docs/qa/`.
+
 Status: **M1–M4 ALL DONE, DEPLOYED (2026-06-10).**
 M1: pick plumbing, hover/selection highlight, web tooltip bridge, `B`-key
 binding, nav-bar QA button — verified natively (JN_QA_PROBE picks
