@@ -196,7 +196,10 @@ static const TypeEntry TYPE_TABLE[] = {
     { "3OMT", { "assets/ase/omt/Sphere01.ASE",  NULL, 1.0f, 0 } },
 
     /* Tier 2 — environment singletons. */
-    { "3ROC", { "assets/ase/rocket.ASE",   NULL, 1.0f, 0 } },
+    /* C3DRocketShip is a scripted flight/cutscene object. Drawing the idle
+       rocket mesh at its authored marker exposes invisible trigger objects
+       before the behavior system owns linked visibility/state. */
+    { "3ROC", { NULL, NULL, 0.0f, 1 } },
     /* 3ARR row removed (2026-06-12 QA #3): C3DArrow is a C3DSpriteType — a
        billboard, not a mesh. Every instance authors sprites.omt chunk 33
        (the alpha-keyed "arrow" canvas, size 200); the 3Darrow.ASE row drew

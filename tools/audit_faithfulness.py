@@ -128,6 +128,15 @@ def findings_for(level, rows):
             # visible shells — the only BLOCK-named real geometry, not
             # colliders (2026-06-12 QA #4; mirrors the engine exception).
             add("block-visible", d)
+        if d["cat"] == "entity" and d["name"] == "3DUD" and \
+                d["tag"].lower() == "bars" and \
+                not d["path"].lower().endswith("/bars.ase"):
+            add("authored-door-ignored", d,
+                "3DUD bars must use authored bars.ASE + chain.png")
+        if d["cat"] == "entity" and d["name"] == "3ROC" and \
+                kind in VISIBLE_KINDS:
+            add("scripted-rocket-visible", d,
+                "C3DRocketShip markers stay hidden until flight behavior owns them")
     return out
 
 

@@ -1,28 +1,66 @@
 #include "behaviors.h"
+#include "../../engine/audio.h"
 #include <stddef.h>
 #include <stdio.h>
 
 #define DOOR_OPEN_RISE   180.0f   /* units */
 #define DOOR_OPEN_SPEED  240.0f   /* units / sec */
+#define DOOR_OPEN_SOUND  59       /* soundeffects.omt: Door opening loop */
+#define DOOR_CLOSE_SOUND 58       /* soundeffects.omt: door closing */
+
+static float door_open_rise(const Entity *e) {
+    float rise = gam_prop_f(e, "OpenAmount", DOOR_OPEN_RISE);
+    return rise > 0.0f ? rise : DOOR_OPEN_RISE;
+}
+
+static float door_open_speed(const Entity *e) {
+    float speed = gam_prop_f(e, "DoorSpeed", 0.0f);
+    return speed > 0.0f ? speed * 30.0f : DOOR_OPEN_SPEED;
+}
+
+static float door_open_time(const Entity *e) {
+    float t = gam_prop_f(e, "OpenTime", 0.0f);
+    return t > 0.0f ? t : 3.0f;
+}
 
 static void door_on_spawn(Entity *e, World *w) {
     (void)w;
     e->half_extents[0] = 70.0f;
     e->half_extents[1] = 90.0f;
     e->half_extents[2] = 70.0f;
-    e->user_flag = 0;          /* 0 = closed, 1 = opening, 2 = open */
+    e->home[0] = 0.0f;         /* open wait timer */
+    e->home[1] = e->y;         /* closed/base Y; update writes base + rise */
+    e->user_flag = 0;          /* 0=closed, 1=opening, 2=open-wait, 3=closing */
     e->user_float = 0.0f;      /* current rise (additive to base y) */
 }
 
 static void door_on_update(Entity *e, World *w, float dt) {
     (void)w;
     if (e->user_flag == 1) {
-        e->user_float += DOOR_OPEN_SPEED * dt;
-        e->y += DOOR_OPEN_SPEED * dt;
-        if (e->user_float >= DOOR_OPEN_RISE) {
+        float rise = door_open_rise(e);
+        e->user_float += door_open_speed(e) * dt;
+        if (e->user_float >= rise) {
+            e->user_float = rise;
             e->user_flag = 2;
+            e->home[0] = 0.0f;
             printf("[DOOR] open (tag='%s')\n", e->tag);
         }
+        e->y = e->home[1] + e->user_float;
+    } else if (e->user_flag == 2) {
+        e->home[0] += dt;
+        if (e->home[0] >= door_open_time(e)) {
+            e->user_flag = 3;
+            audio_play_db("soundeffects.omt", DOOR_CLOSE_SOUND, 0, 96);
+            printf("[DOOR] closing (tag='%s')\n", e->tag);
+        }
+    } else if (e->user_flag == 3) {
+        e->user_float -= door_open_speed(e) * dt;
+        if (e->user_float <= 0.0f) {
+            e->user_float = 0.0f;
+            e->user_flag = 0;
+            printf("[DOOR] closed (tag='%s')\n", e->tag);
+        }
+        e->y = e->home[1] + e->user_float;
     }
 }
 
@@ -30,6 +68,7 @@ static void door_on_trigger(Entity *e, Entity *by) {
     (void)by;
     if (e->user_flag == 0) {
         e->user_flag = 1;
+        audio_play_db("soundeffects.omt", DOOR_OPEN_SOUND, 0, 96);
         printf("[DOOR] opening (tag='%s')\n", e->tag);
     }
 }

@@ -517,6 +517,18 @@ static void entity_color(const char *type, float *r, float *g, float *b) {
     else                                { *r=0.5f; *g=0.5f; *b=0.5f; }  /* grey   = other  */
 }
 
+static int entity_visual_foot_anchors(const Entity *e) {
+    static const char *types[] = {
+        "3BEN", "3CAR", "3HUM", "3LIB", "3MOM", "3NIC",
+        "3SHE", "3ULT", "3FOW", "3SPK"
+    };
+    if (!e) return 0;
+    for (size_t i = 0; i < sizeof(types) / sizeof(types[0]); i++) {
+        if (strncmp(e->type, types[i], 4) == 0) return 1;
+    }
+    return 0;
+}
+
 /* Draw every pickable scene object: entities, then static OMT placements.
    This is the single enumeration path shared by the main render pass and the
    QA pick pass (docs/qa_annotate_plan.md) -- object N here must be object N
@@ -594,16 +606,17 @@ static void draw_scene(World *world, int jim_model_ok)
             /* mesh missing -> fall through to placeholder box */
         }
 
-        /* C3DSwingDoor (3SWN) and C3DSchoolDoor (3SCD): per-instance
-           authored ASEFile/PNGFile — every level's door is a different mesh
-           (level1 blocksdoor, level1c firedoor, level3 doorretro, level2a
-           doorfowl...). The files ship with the original install under
-           assets/ase + assets/png with mixed case, so resolve
-           case-insensitively. Several of the door ASEs are degenerate
-           OMT->ASE stubs (firedoor.ASE is 8 verts); prefer the textured
-           assets/glb/ase/<stem>.glb twin when one exists
-           (2026-06-12 QA #3: school fire door). */
-        if ((strcmp(e->type, "3SWN") == 0 || strcmp(e->type, "3SCD") == 0)
+        /* Door classes with per-instance authored ASEFile/PNGFile:
+           C3DSwingDoor (3SWN), C3DSchoolDoor (3SCD), and C3DDoorUpDown
+           (3DUD). Every level's door can be a different mesh/texture pair
+           (level1 blocksdoor, level1b bars+chain, level1c firedoor, level3
+           doorretro, level2a doorfowl...). The files ship with the original
+           install under assets/ase + assets/png with mixed case, so resolve
+           case-insensitively. Several door ASEs are degenerate OMT->ASE
+           stubs (firedoor.ASE is 8 verts); prefer the textured
+           assets/glb/ase/<stem>.glb twin when one exists. */
+        if ((strcmp(e->type, "3SWN") == 0 || strcmp(e->type, "3SCD") == 0 ||
+             strcmp(e->type, "3DUD") == 0)
             && e->ase_file[0]) {
             char path[160];
             AseModel *m = NULL;
@@ -747,6 +760,8 @@ static void draw_scene(World *world, int jim_model_ok)
                         dy -= (m->min[1] + m->max[1]) * 0.5f * sc;
                         dz -= (m->min[2] + m->max[2]) * 0.5f * sc;
                     }
+                    if (entity_visual_foot_anchors(e) && m->min[1] < 0.0f)
+                        dy -= m->min[1] * sc;
                     /* Entity props are deliberately-chosen meshes; some
                        (gems, converted GRN props) are untextured flat-color
                        meshes. The global hide-untextured flag is for OMT

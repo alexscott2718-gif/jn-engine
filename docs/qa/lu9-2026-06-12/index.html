@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>QA Ticket Resolution - Lu9, 2026-06-12 - jn-engine</title>
+<style>
+* { box-sizing:border-box; margin:0; padding:0; }
+body { font-family:Monaco,Menlo,"Ubuntu Mono",monospace; background:#0d0d0d; color:#dedede; line-height:1.55; padding:24px 16px; }
+.wrap { max-width:1080px; margin:0 auto; }
+h1 { font-size:1.45rem; color:#fff; margin-bottom:4px; }
+h2 { font-size:1.08rem; color:#7ec8ff; border-bottom:1px solid #2a2a2a; padding-bottom:6px; margin:34px 0 12px; }
+p { margin:10px 0; color:#c8c8c8; }
+a { color:#7ec8ff; text-decoration:none; }
+a:hover { text-decoration:underline; }
+.sub { color:#888; font-size:0.84rem; }
+.badge { display:inline-block; border-radius:4px; padding:1px 8px; font-size:0.74rem; vertical-align:middle; }
+.green { background:#143a14; color:#7dde7d; border:1px solid #2c6e2c; }
+.blue { background:#1d2c3d; color:#9ecbff; border:1px solid #2c5a8a; }
+.amber { background:#33280e; color:#e6c66f; border:1px solid #6c5720; }
+.red { background:#3a1414; color:#ff9a9a; border:1px solid #7a2a2a; }
+table { width:100%; border-collapse:collapse; margin:14px 0; font-size:0.82rem; }
+th,td { text-align:left; padding:7px 8px; border-bottom:1px solid #242424; vertical-align:top; }
+th { color:#9a9a9a; font-weight:normal; }
+td code { color:#d9c08a; }
+.card { background:#141414; border:1px solid #262626; border-radius:8px; padding:18px; margin:22px 0; }
+.meta { color:#888; font-size:0.8rem; margin-bottom:10px; }
+.fix { border-left:3px solid #2c6e2c; background:#0d160d; border-radius:0 6px 6px 0; color:#afd0af; padding:8px 12px; margin:12px 0; font-size:0.88rem; }
+.note { border-left:3px solid #6c5720; background:#181409; border-radius:0 6px 6px 0; color:#d8c184; padding:8px 12px; margin:12px 0; font-size:0.88rem; }
+pre { overflow-x:auto; background:#0a0a0a; border:1px solid #242424; border-radius:6px; padding:10px 12px; font-size:0.76rem; color:#b8c8b8; margin:10px 0; }
+.shots { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; margin:14px 0; }
+@media (max-width:760px) { .shots { grid-template-columns:1fr; } }
+.shot { background:#0a0a0a; border:1px solid #262626; border-radius:8px; overflow:hidden; }
+.shot img { display:block; width:100%; height:auto; }
+.shot div { color:#9a9a9a; font-size:0.76rem; padding:6px 10px; border-top:1px solid #242424; }
+.footer { color:#777; border-top:1px solid #2a2a2a; margin-top:40px; padding-top:12px; font-size:0.8rem; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<h1>QA Ticket Resolution - Lu9 <span class="badge amber">12 / 14 ADDRESSED</span> <span class="badge red">2 INCOMPLETE</span></h1>
+<p class="sub">Ticket submitted 2026-06-12 before the final sandmanfan 2026-06-12 resolution landed. This page intentionally avoids re-litigating duplicate line items and records only the new deltas plus resolver evidence for the overlap.</p>
+
+<h2>Summary</h2>
+<p>Two new resolver changes came from this ticket: per-instance <code>3DUD</code> door meshes/textures and hidden scripted <code>3ROC</code> markers. One placement issue, NPC foot sinking, got a draw-time foot-anchor rule for the stop-pose NPC meshes. The <code>3DUD bars</code> row also needed a behavior follow-up: the mesh/texture were correct, but the door still used the old hard-coded 180-unit rise instead of the authored 500-unit <code>OpenAmount</code>, moved too slowly, and lacked its opening sound. Most other rows overlap with the sandmanfan 2026-06-12b fixes or are already covered by the static placement path. The level4a candy-bar <code>Plane01</code> artifact and the level3d stomach-ride hamburger car both remain incomplete and need dedicated follow-up passes.</p>
+
+<table>
+<tr><th>#</th><th>level</th><th>object</th><th>report</th><th>resolution</th></tr>
+<tr><td>1</td><td>level2</td><td><code>3FLA C3DFIRESTRATO</code></td><td>rocket flame near flagpole instead of flag</td><td><span class="badge blue">overlap</span> already resolves to <code>assets/ase/flag.ASE</code> + <code>flag.png</code></td></tr>
+<tr><td>2</td><td>level2</td><td><code>3BEN C3DBENNY</code></td><td>Benny and NPCs slightly under floor</td><td><span class="badge green">new</span> NPC stop-pose meshes foot-anchor to authored floor points</td></tr>
+<tr><td>3</td><td>level1</td><td><code>Box03</code></td><td>playhouse hidden door missing box geometry</td><td><span class="badge blue">verified</span> static placement draws <code>assets/glb/omt/Box03.glb</code>, textured</td></tr>
+<tr><td>4</td><td>level1c</td><td><code>3ROC C3DROCKETSHIP</code></td><td>rocket model visible when it should be a trigger/cutscene object</td><td><span class="badge green">new</span> <code>3ROC</code> is invisible until flight/cutscene behavior owns it</td></tr>
+<tr><td>5</td><td>level4a</td><td><code>Plane01</code></td><td>odd triangle planes inside candy bar</td><td><span class="badge red">incomplete</span> artifact still visible; requires follow-up mesh/render investigation</td></tr>
+<tr><td>6</td><td>level1b</td><td><code>3DUD bars</code></td><td>wrong door texture / not raised high enough / wrong speed and sound</td><td><span class="badge green">new</span> <code>3DUD</code> now draws <code>bars.ASE</code> + <code>chain.png</code>, opens by authored <code>OpenAmount=500</code>, uses 30 Hz authored speed scaling, and plays opening/closing door sounds</td></tr>
+<tr><td>7</td><td>level1</td><td><code>3DOR DOORGRILL2</code></td><td>incorrect rotation of sewer bars</td><td><span class="badge blue">overlap</span> existing degree/yaw fix applies; resolver draws <code>DoorGrill2.glb</code>, textured</td></tr>
+<tr><td>8</td><td>level1</td><td><code>3TRE C3DTREE</code></td><td>extra trunk growing at top</td><td><span class="badge blue">overlap</span> sprite-family rule removes generic tree mesh; authored sprite wins</td></tr>
+<tr><td>9</td><td>level3</td><td><code>3SCD C3DSCHOOLDOOR</code></td><td>mirrored/upside-down sign text</td><td><span class="badge blue">overlap</span> GLB door twins use authored PNG with vertical-flip correction</td></tr>
+<tr><td>10</td><td>level3</td><td><code>3OMT rockship</code></td><td>incorrect rocket ship model</td><td><span class="badge blue">overlap</span> authored <code>objects.omt</code> shape resolver maps to <code>rocketship.glb</code></td></tr>
+<tr><td>11</td><td>level3d</td><td><code>3OCT C3DOCTAPUKE</code></td><td>Octapuke ride untextured</td><td><span class="badge blue">overlap</span> resolves to <code>octostop.ASE</code> + <code>octapuke1.png</code></td></tr>
+<tr><td>12</td><td>level3d</td><td><code>stomach</code></td><td>hamburger car missing from ride</td><td><span class="badge red">incomplete</span> attempted <code>3AIO wooper</code> binding was the wrong small/flat asset; follow-up must identify the real car source</td></tr>
+<tr><td>13</td><td>level2a</td><td><code>Box01</code></td><td>pink door to area missing</td><td><span class="badge blue">verified</span> static placement draws <code>assets/glb/omt/level2a/Box01.glb</code>, textured</td></tr>
+<tr><td>14</td><td>level2a</td><td><code>3OMT bench05</code></td><td>school desks use incorrect model</td><td><span class="badge blue">overlap</span> authored <code>objects.omt</code> shape resolver maps bench rows to <code>bench04.glb</code></td></tr>
+</table>
+
+<h2>New Fixes</h2>
+<div class="card">
+<h3>Per-instance DoorUpDown assets</h3>
+<div class="meta">Lu9 item 6: level1b <code>3DUD bars</code></div>
+<p><code>3DUD</code> had a fallback row for <code>downdoor2a.glb</code>, so the authored <code>ASEFile=bars.ase</code> and <code>PNGFile=chain.png</code> on the level1b row were ignored. The existing per-instance door path already handled <code>3SWN</code> and <code>3SCD</code>; <code>3DUD</code> is the same data shape. Follow-up visual review found the bars still did not clear the entryway because the shared door behavior used a fixed 180-unit rise while this row authors <code>OpenAmount=500</code>; the same behavior also used the wrong speed scale and had no class door sound.</p>
+<div class="fix">Changed <code>src/game/main.c</code> so <code>3DUD</code> shares the case-insensitive ASE/PNG resolver. Changed <code>behavior_door.c</code> so sliding doors rise to their authored <code>OpenAmount</code>, use <code>DoorSpeed * 30</code> 30&nbsp;Hz speed scaling, wait for authored <code>OpenTime</code>, then close. Opening plays <code>soundeffects.omt[59]</code> (<code>Door_opening_loop.wav</code>); closing plays <code>soundeffects.omt[58]</code> (<code>door_closing.wav</code>). Added an audit invariant that <code>3DUD bars</code> must resolve to <code>bars.ASE</code>.</div>
+<pre>[audit] cat=entity name=3DUD tag=bars kind=mesh path=assets/ase/bars.ASE verts=162 textured=1</pre>
+<pre>[BUTTON] pressed 'C3DBUTTON'
+[AUDIO] play soundeffects.omt[59] -> assets/parsed/soundeffects/soundeffects_audio/0267_Door_opening_loop.wav on channel 1
+[DOOR] opening (tag='bars')
+[DOOR] open (tag='bars')
+[AUDIO] play soundeffects.omt[58] -> assets/parsed/soundeffects/soundeffects_audio/0117_door_closing.wav on channel 1
+[DOOR] closing (tag='bars')
+[DOOR] closed (tag='bars')</pre>
+</div>
+
+<div class="card">
+<h3>Scripted rocket markers stay hidden</h3>
+<div class="meta">Lu9 item 4: level1c <code>3ROC C3DROCKETSHIP</code></div>
+<p><code>C3DRocketShip</code> is a scripted flight/cutscene object, not a static rocket prop at every authored marker. Drawing <code>rocket.ASE</code> directly exposed invisible marker objects before the behavior system owns linked visibility and flight state.</p>
+<div class="fix">Changed the <code>3ROC</code> type resolver to explicit invisible and added an audit invariant that visible <code>3ROC</code> meshes are regressions.</div>
+<pre>[audit] cat=entity name=3ROC tag=C3DROCKETSHIP kind=invisible path=- verts=-1 textured=0</pre>
+</div>
+
+<div class="card">
+<h3>NPC stop poses rest on the floor</h3>
+<div class="meta">Lu9 item 2: level2 <code>3BEN C3DBENNY</code> and related NPCs</div>
+<p>The JNBG stop-pose character ASEs have negative local Y bounds. Drawing them at the authored floor coordinate puts their feet below the floor. The player path is separate, so the adjustment is scoped to static NPC/friend stop-pose meshes.</p>
+<div class="fix">Added a foot-anchor offset for the NPC stop-pose FourCCs in the resolver draw path.</div>
+<pre>[audit] cat=entity name=3BEN tag=C3DBENNY kind=mesh path=assets/ase/bennystop.ASE verts=1488 textured=1</pre>
+</div>
+
+<div class="card">
+<h3>Stomach ride hamburger car <span class="badge red">INCOMPLETE</span></h3>
+<div class="meta">Lu9 item 12: level3d <code>3AIO wooper</code> near <code>stomach.glb</code></div>
+<p>The first pass guessed that <code>3AIO/wooper</code> should bind to <code>assets/ase/omt/hamburger.ASE</code>. Visual review rejected that: the ride car still does not appear, and the visible replacement is only a small unrelated flat/textured artifact. That binding and its audit assertion were removed rather than preserving a bad visual as a fix.</p>
+<div class="note">Status: incomplete. The follow-up needs to identify the original game's actual hamburger-car source and scale/origin, likely from the level3d ride data or another code-spawned vehicle path.</div>
+</div>
+
+<h2>Evidence Captures</h2>
+<div class="shots">
+  <div class="shot"><img src="img/level1b-3dud-bars.png" alt="level1b 3DUD bars screenshot"><div>level1b: bars door capture from Lu9 camera payload</div></div>
+  <div class="shot"><img src="img/level1c-3roc-hidden.png" alt="level1c hidden 3ROC screenshot"><div>level1c: rocket marker no longer draws as a static rocket</div></div>
+  <div class="shot"><img src="img/level2-benny-flag.png" alt="level2 Benny and flag screenshot"><div>level2: Benny/flag area, covering the NPC anchor fix and prior flag overlap</div></div>
+  <div class="shot"><img src="img/level3d-stomach-wooper.png?v=lu9b" alt="level3d stomach ride screenshot"><div>level3d: incomplete - hamburger ride car still needs the real model/source</div></div>
+  <div class="shot"><img src="img/level4a-plane01.png?v=lu9b" alt="level4a Plane01 candy bar screenshot"><div>level4a: incomplete - candy-bar triangle artifact still needs follow-up</div></div>
+</div>
+
+<h2>Audit Gate</h2>
+<pre>make
+python3 tools/audit_faithfulness.py
+
+0 findings (0 waived, 0 NEW) -> build/audit_faithfulness.json</pre>
+
+<p class="note">This ticket was submitted before the sandmanfan 2026-06-12b work was complete. Items marked overlap are intentionally closed by that already-landed resolver work rather than duplicated here.</p>
+
+<div class="footer">Files touched: <code>src/game/main.c</code>, <code>src/game/entity_visual.c</code>, <code>tools/audit_faithfulness.py</code>. Resolution log generated for <code>docs/qa/lu9-2026-06-12/</code>.</div>
+
+</div>
+</body>
+</html>

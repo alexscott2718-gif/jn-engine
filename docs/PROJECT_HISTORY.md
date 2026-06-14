@@ -635,6 +635,21 @@ still pass QA if the validation cases are symmetric — asymmetric ground-truth 
 (a one-sided sarcophagus, an A-frame) is what pins a sign. And the sweep paid for
 itself twice in one ticket by catching the fixer's own regressions.
 
+**Lu9 follow-up ticket (submitted before #4 landed, resolved 2026-06-14):** mostly
+overlap with the sandmanfan #4 resolver work, but added four carried-forward rules:
+`3DUD` DoorUpDown rows share the per-instance door ASE/PNG path (`bars.ASE` +
+`chain.png` in level1b), and sliding-door behavior now honors authored `OpenAmount`
+(`bars` rises 500u instead of the old hard-coded 180u), uses `DoorSpeed * 30` 30 Hz
+travel speed, plays `soundeffects.omt[59]` ("Door opening loop") on open, waits for
+authored `OpenTime`, then plays `soundeffects.omt[58]` ("door closing") while closing;
+scripted `3ROC` rocketship markers stay invisible until flight/cutscene behavior owns
+them; and static NPC stop-pose meshes foot-anchor to their authored floor point instead
+of sinking by their negative local-Y bounds. The level3d stomach-ride hamburger car
+remains incomplete: an attempted `3AIO/wooper` `hamburger.ASE` binding was visually
+rejected as the wrong small/flat asset and removed. Audit guards the completed resolver
+rules only. QA log:
+`docs/qa/lu9-2026-06-12/index.html`.
+
 ---
 
 ## Invariants (don't relitigate these)
