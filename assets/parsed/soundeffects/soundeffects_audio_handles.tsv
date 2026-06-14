@@ -1,0 +1,253 @@
+# handle	wav_path	name	offset	size
+# source	/home/scotty/xp-jnbg-original/omt/soundeffects.omt
+0	assets/parsed/soundeffects/soundeffects_audio/0000_shrinkray.wav	shrinkray	8	35358
+1	assets/parsed/soundeffects/soundeffects_audio/0014_jetpack.wav	jetpack	222596	88268
+2	assets/parsed/soundeffects/soundeffects_audio/0008_gravitybubble.wav	gravitybubble	81858	16320
+3	assets/parsed/soundeffects/soundeffects_audio/0001_gravitybubbleoff.wav	gravitybubbleoff	35420	11364
+4	assets/parsed/soundeffects/soundeffects_audio/0015_neutron.wav	neutron	310864	30700
+5	assets/parsed/soundeffects/soundeffects_audio/0007_steps.wav	steps	70076	11692
+6	assets/parsed/soundeffects/soundeffects_audio/0011_car.wav	car	124526	67776
+7	assets/parsed/soundeffects/soundeffects_audio/0010_horn.wav	horn	110210	14316
+8	assets/parsed/soundeffects/soundeffects_audio/0012_not_available.wav	not available	192302	17930
+9	assets/parsed/soundeffects/soundeffects_audio/0024_goddard_flying.wav	goddard flying	593687	67776
+10	assets/parsed/soundeffects/soundeffects_audio/0002_goddard_baseballs.wav	goddard baseballs	46784	12364
+11	assets/parsed/soundeffects/soundeffects_audio/0025_goddard_off.wav	goddard off	661463	71466
+12	assets/parsed/soundeffects/soundeffects_audio/0019_zap.wav	zap	401599	82348
+13	assets/parsed/soundeffects/soundeffects_audio/0020_goddard_bark.wav	goddard bark	483947	55552
+14	assets/parsed/soundeffects/soundeffects_audio/0016_red_neutron.wav	red neutron	341564	32428
+15	assets/parsed/soundeffects/soundeffects_audio/0021_zipper.wav	zipper	539499	19116
+16	assets/parsed/soundeffects/soundeffects_audio/0022_squeak.wav	squeak	558615	30734
+17	assets/parsed/soundeffects/soundeffects_audio/0009_steps_echo.wav	steps echo	98178	11692
+18	assets/parsed/soundeffects/soundeffects_audio/0026_pickupbaseball.wav	pickupbaseball	732929	79770
+19	assets/parsed/soundeffects/soundeffects_audio/0124_evil_laugh.wav	evil laugh	2982995	46164
+20	assets/parsed/soundeffects/soundeffects_audio/0108_jimmyrocket3.wav	jimmyrocket3	2479951	36278
+21	assets/parsed/soundeffects/soundeffects_audio/0188_jimmypie1.wav	jimmypie1	4847319	47940
+22	assets/parsed/soundeffects/soundeffects_audio/0189_jimmypie2.wav	jimmypie2	4895259	17484
+23	assets/parsed/soundeffects/soundeffects_audio/0191_jimmydarwin1.wav	jimmydarwin1	4949431	35850
+24	assets/parsed/soundeffects/soundeffects_audio/0116_jimmydarwin2.wav	jimmydarwin2	2701549	33184
+25	assets/parsed/soundeffects/soundeffects_audio/0193_jimmyexp1.wav	jimmyexp1	5012173	44550
+26	assets/parsed/soundeffects/soundeffects_audio/0075_jimmyexp2.wav	jimmyexp2	1639223	39872
+27	assets/parsed/soundeffects/soundeffects_audio/0114_jimmyexp4.wav	jimmyexp4	2645959	45652
+28	assets/parsed/soundeffects/soundeffects_audio/0194_jimmyexp11.wav	jimmyexp11	5056723	17004
+29	assets/parsed/soundeffects/soundeffects_audio/0065_jimmyexp12.wav	jimmyexp12	1513387	19756
+30	assets/parsed/soundeffects/soundeffects_audio/0060_jimmycoal2.wav	jimmycoal2	1462175	20332
+31	assets/parsed/soundeffects/soundeffects_audio/0083_GRAPLINGHOOK.wav	GRAPLINGHOOK	1776515	21772
+32	assets/parsed/soundeffects/soundeffects_audio/0097_fanstartup.wav	fanstartup	2135249	83194
+33	assets/parsed/soundeffects/soundeffects_audio/0127_fanloop.wav	fanloop	3118861	22464
+34	assets/parsed/soundeffects/soundeffects_audio/0088_GRAPLEUP.wav	GRAPLEUP	1927529	26352
+35	assets/parsed/soundeffects/soundeffects_audio/0089_Lava.wav	Lava	1953881	66752
+36	assets/parsed/soundeffects/soundeffects_audio/0139_jimmycoal3.wav	jimmycoal3	3532617	30934
+37	assets/parsed/soundeffects/soundeffects_audio/0084_shock.wav	shock	1798287	22336
+38	assets/parsed/soundeffects/soundeffects_audio/0095_steam.wav	steam	2065305	45676
+39	assets/parsed/soundeffects/soundeffects_audio/0096_SPLASH.wav	SPLASH	2110981	24268
+40	assets/parsed/soundeffects/soundeffects_audio/0017_swiming.wav	swiming	373992	22272
+41	assets/parsed/soundeffects/soundeffects_audio/0286_fanoff.wav	fanoff	9136915	96516
+42	assets/parsed/soundeffects/soundeffects_audio/0093_YokianBump.wav	YokianBump	2042969	13536
+43	assets/parsed/soundeffects/soundeffects_audio/0190_jimmycoal4.wav	jimmycoal4	4912743	31668
+44	assets/parsed/soundeffects/soundeffects_audio/0104_SHUTDOWN.wav	SHUTDOWN	2335021	42756
+45	assets/parsed/soundeffects/soundeffects_audio/0105_rocketship.wav	rocketship	2377777	64364
+46	assets/parsed/soundeffects/soundeffects_audio/0013_Scooter.wav	Scooter	210232	9152
+47	assets/parsed/soundeffects/soundeffects_audio/0003_HitHead.wav	HitHead	59580	7132
+48	assets/parsed/soundeffects/soundeffects_audio/0158_candybar.wav	candybar	3986121	40918
+49	assets/parsed/soundeffects/soundeffects_audio/0070_jimmyburger1.wav	jimmyburger1	1595985	28912
+50	assets/parsed/soundeffects/soundeffects_audio/0055_jimmyburger2.wav	jimmyburger2	1362735	27180
+51	assets/parsed/soundeffects/soundeffects_audio/0208_water_stream.wav	water stream	5436937	50110
+52	assets/parsed/soundeffects/soundeffects_audio/0099_jimmyself12.wav	jimmyself12	2251573	25228
+53	assets/parsed/soundeffects/soundeffects_audio/0273_bird_chirp.wav	bird chirp	7976365	59534
+54	assets/parsed/soundeffects/soundeffects_audio/0277_construction_ambience.wav	construction ambience	8365883	151930
+55	assets/parsed/soundeffects/soundeffects_audio/0278_Electricity_ambient.wav	Electricity ambient	8517813	132542
+56	assets/parsed/soundeffects/soundeffects_audio/0131_yokiansoldier1.wav	yokiansoldier1	3229483	58418
+57	assets/parsed/soundeffects/soundeffects_audio/0271_darwin_noises.wav	darwin noises	7723093	36606
+58	assets/parsed/soundeffects/soundeffects_audio/0117_door_closing.wav	door closing	2734733	25626
+59	assets/parsed/soundeffects/soundeffects_audio/0267_Door_opening_loop.wav	Door opening loop	7402665	72698
+60	assets/parsed/soundeffects/soundeffects_audio/0275_alarm_human_boy_stop.wav	alarm human boy stop	8072505	52332
+61	assets/parsed/soundeffects/soundeffects_audio/0085_alien_computer_hum.wav	alien computer hum	1820623	71998
+62	assets/parsed/soundeffects/soundeffects_audio/0282_tv_distortion.wav	tv distortion	8795051	149164
+63	assets/parsed/soundeffects/soundeffects_audio/0218_bark_humphrey.wav	bark humphrey	5939257	30682
+64	assets/parsed/soundeffects/soundeffects_audio/0220_humphrey_growl.wav	humphrey growl	6007311	32396
+65	assets/parsed/soundeffects/soundeffects_audio/0284_Computer_ambient.wav	Computer ambient	8976611	137840
+66	assets/parsed/soundeffects/soundeffects_audio/0230_girl_eating_plant.wav	girl eating plant	6507299	51820
+67	assets/parsed/soundeffects/soundeffects_audio/0137_vox_talk.wav	vox talk	3488099	33932
+68	assets/parsed/soundeffects/soundeffects_audio/0185_jimmyself13.wav	jimmyself13	4794401	21746
+69	assets/parsed/soundeffects/soundeffects_audio/0053_jimmyself14.wav	jimmyself14	1332081	24686
+70	assets/parsed/soundeffects/soundeffects_audio/0110_jimmyself24.wav	jimmyself24	2572025	34240
+71	assets/parsed/soundeffects/soundeffects_audio/0203_vendingmachine1.wav	vendingmachine1	5288833	53626
+72	assets/parsed/soundeffects/soundeffects_audio/0051_need_more_change.wav	need more change	1291831	16138
+73	assets/parsed/soundeffects/soundeffects_audio/0041_jimmyself20.wav	jimmyself20	921933	13642
+74	assets/parsed/soundeffects/soundeffects_audio/0207_jimmyhydrant1b.wav	jimmyhydrant1b	5390341	46596
+75	assets/parsed/soundeffects/soundeffects_audio/0135_jimmyself25.wav	jimmyself25	3443413	24778
+76	assets/parsed/soundeffects/soundeffects_audio/0111_jimmyself26.wav	jimmyself26	2606265	15848
+77	assets/parsed/soundeffects/soundeffects_audio/0140_jimmyself27.wav	jimmyself27	3563551	26798
+78	assets/parsed/soundeffects/soundeffects_audio/0155_jimmyself28.wav	jimmyself28	3893991	17042
+79	assets/parsed/soundeffects/soundeffects_audio/0080_jimmyself29.wav	jimmyself29	1730191	12652
+80	assets/parsed/soundeffects/soundeffects_audio/0057_jimmyself31.wav	jimmyself31	1395897	22848
+81	assets/parsed/soundeffects/soundeffects_audio/0030_switch.wav	switch	823167	3986
+82	assets/parsed/soundeffects/soundeffects_audio/0209_cat_hiss.wav	cat hiss	5487047	19834
+83	assets/parsed/soundeffects/soundeffects_audio/0253_cat_meow.wav	cat meow	6783453	49914
+84	assets/parsed/soundeffects/soundeffects_audio/0058_coin_take.wav	coin take	1418745	9194
+85	assets/parsed/soundeffects/soundeffects_audio/0157_voxentrance.wav	voxentrance	3947955	38090
+86	assets/parsed/soundeffects/soundeffects_audio/0222_voxdna.wav	voxdna	6067519	46620
+87	assets/parsed/soundeffects/soundeffects_audio/0183_tinfoil.wav	tinfoil	4748895	14380
+88	assets/parsed/soundeffects/soundeffects_audio/0197_sodacan.wav	sodacan	5123409	22412
+89	assets/parsed/soundeffects/soundeffects_audio/0187_boing.wav	boing	4834349	12970
+90	assets/parsed/soundeffects/soundeffects_audio/0216_cash_register.wav	cash register	5818703	35194
+91	assets/parsed/soundeffects/soundeffects_audio/0217_voxtele1.wav	voxtele1	5853897	85360
+92	assets/parsed/soundeffects/soundeffects_audio/0211_banana1.wav	banana1	5530945	21290
+93	assets/parsed/soundeffects/soundeffects_audio/0178_cake1.wav	cake1	4634459	15554
+94	assets/parsed/soundeffects/soundeffects_audio/0204_coin1.wav	coin1	5342459	19154
+95	assets/parsed/soundeffects/soundeffects_audio/0198_retrotickets.wav	retrotickets	5145821	30566
+96	assets/parsed/soundeffects/soundeffects_audio/0098_plutonium2.wav	plutonium2	2227531	24042
+97	assets/parsed/soundeffects/soundeffects_audio/0087_coin2.wav	coin2	1903817	23180
+98	assets/parsed/soundeffects/soundeffects_audio/0136_pipe.wav	pipe	3468191	19908
+99	assets/parsed/soundeffects/soundeffects_audio/0279_holon.wav	holon	8650355	89864
+100	assets/parsed/soundeffects/soundeffects_audio/0303_typing_idle.wav	typing idle	10437695	130810
+101	assets/parsed/soundeffects/soundeffects_audio/0118_jimmywrench1.wav	jimmywrench1	2761697	73888
+102	assets/parsed/soundeffects/soundeffects_audio/0221_nicks_lap_completed.wav	nicks lap completed	6042337	25182
+103	assets/parsed/soundeffects/soundeffects_audio/0192_pigbank1.wav	pigbank1	4985281	22564
+104	assets/parsed/soundeffects/soundeffects_audio/0052_jimmyself9.wav	jimmyself9	1307969	22764
+105	assets/parsed/soundeffects/soundeffects_audio/0210_jimmy_more_candy.wav	jimmy more candy	5506881	20306
+106	assets/parsed/soundeffects/soundeffects_audio/0227_bubble_boing.wav	bubble boing	6265511	32698
+107	assets/parsed/soundeffects/soundeffects_audio/0059_jimmyitem9.wav	jimmyitem9	1428643	33532
+108	assets/parsed/soundeffects/soundeffects_audio/0077_jimmyitem8.wav	jimmyitem8	1692427	15072
+109	assets/parsed/soundeffects/soundeffects_audio/0069_jimmyitem7.wav	jimmyitem7	1573719	22266
+110	assets/parsed/soundeffects/soundeffects_audio/0064_jimmyitem6.wav	jimmyitem6	1499263	14124
+111	assets/parsed/soundeffects/soundeffects_audio/0063_jimmyitem5.wav	jimmyitem5	1484795	14468
+112	assets/parsed/soundeffects/soundeffects_audio/0079_jimmyitem4.wav	jimmyitem4	1720253	9938
+113	assets/parsed/soundeffects/soundeffects_audio/0078_jimmyitem3.wav	jimmyitem3	1707499	12754
+114	assets/parsed/soundeffects/soundeffects_audio/0076_jimmyitem2.wav	jimmyitem2	1679095	13332
+115	assets/parsed/soundeffects/soundeffects_audio/0101_jimmyitem10.wav	jimmyitem10	2292191	16864
+116	assets/parsed/soundeffects/soundeffects_audio/0100_jimmyitem1.wav	jimmyitem1	2280249	11942
+117	assets/parsed/soundeffects/soundeffects_audio/0034_click_shrink_ray.wav	click shrink ray	844197	4474
+118	assets/parsed/soundeffects/soundeffects_audio/0301_scratch_ass.wav	scratch ass	10255977	55270
+119	assets/parsed/soundeffects/soundeffects_audio/0066_goddarddogbark6.wav	goddarddogbark6	1533143	8332
+120	assets/parsed/soundeffects/soundeffects_audio/0142_jimmygoddard6.wav	jimmygoddard6	3680143	29114
+121	assets/parsed/soundeffects/soundeffects_audio/0032_arcade_whistle1.wav	arcade whistle1	831387	6650
+122	assets/parsed/soundeffects/soundeffects_audio/0112_arcade_whistle2.wav	arcade whistle2	2622113	9178
+123	assets/parsed/soundeffects/soundeffects_audio/0113_steps_mud.wav	steps mud	2631307	11754
+124	assets/parsed/soundeffects/soundeffects_audio/0182_steps_concrete.wav	steps concrete	4737063	11832
+125	assets/parsed/soundeffects/soundeffects_audio/0130_steps_leaves.wav	steps leaves	3217637	11846
+126	assets/parsed/soundeffects/soundeffects_audio/0037_steps_concrete_gritty.wav	steps concrete gritty	899189	11834
+127	assets/parsed/soundeffects/soundeffects_audio/0186_steps_deck.wav	steps deck	4818279	11838
+128	assets/parsed/soundeffects/soundeffects_audio/0123_steps_dirt.wav	steps dirt	2969471	11824
+129	assets/parsed/soundeffects/soundeffects_audio/0090_steps_metal.wav	steps metal	2020633	11828
+130	assets/parsed/soundeffects/soundeffects_audio/0196_climbwood.wav	climbwood	5099617	23792
+131	assets/parsed/soundeffects/soundeffects_audio/0159_fridge.wav	fridge	4027039	23142
+132	assets/parsed/soundeffects/soundeffects_audio/0263_wings_flap.wav	wings flap	7192143	34668
+133	assets/parsed/soundeffects/soundeffects_audio/0176_doorknob.wav	doorknob	4575749	28382
+134	assets/parsed/soundeffects/soundeffects_audio/0028_pickup_blip.wav	pickup blip	813691	3172
+135	assets/parsed/soundeffects/soundeffects_audio/0086_pickup2.wav	pickup2	1892621	9510
+136	assets/parsed/soundeffects/soundeffects_audio/0172_computer.wav	computer	4451799	49008
+137	assets/parsed/soundeffects/soundeffects_audio/0177_turret_shot.wav	turret shot	4604131	29754
+138	assets/parsed/soundeffects/soundeffects_audio/0068_pickup_blip2.wav	pickup blip2	1566231	6934
+139	assets/parsed/soundeffects/soundeffects_audio/0202_jimmyflurp.wav	jimmyflurp	5263031	25468
+140	assets/parsed/soundeffects/soundeffects_audio/0201_jimmyapple1.wav	jimmyapple1	5219497	43534
+141	assets/parsed/soundeffects/soundeffects_audio/0179_jimmyflower1.wav	jimmyflower1	4650491	22572
+142	assets/parsed/soundeffects/soundeffects_audio/0233_RetroLandWorker1.wav	RetroLandWorker1	6629253	43132
+143	assets/parsed/soundeffects/soundeffects_audio/0283_xylophone.wav	xylophone	8944215	31930
+144	assets/parsed/soundeffects/soundeffects_audio/0174_operator.wav	operator	4535415	15074
+145	assets/parsed/soundeffects/soundeffects_audio/0163_operator_check_number.wav	operator check number	4108743	40514
+146	assets/parsed/soundeffects/soundeffects_audio/0164_umph_climb.wav	umph climb	4149257	16976
+147	assets/parsed/soundeffects/soundeffects_audio/0254_RetroLandWorker6.wav	RetroLandWorker6	6845577	78708
+148	assets/parsed/soundeffects/soundeffects_audio/0255_RetroLandWorker7.wav	RetroLandWorker7	6924285	36350
+149	assets/parsed/soundeffects/soundeffects_audio/0134_jimmyself22.wav	jimmyself22	3425533	16716
+150	assets/parsed/soundeffects/soundeffects_audio/0160_RetroLandWorker20.wav	RetroLandWorker20	4050181	41814
+151	assets/parsed/soundeffects/soundeffects_audio/0258_RetroLandWorker11.wav	RetroLandWorker11	7003985	31174
+152	assets/parsed/soundeffects/soundeffects_audio/0165_RetroLandWorker19.wav	RetroLandWorker19	4174613	24906
+153	assets/parsed/soundeffects/soundeffects_audio/0199_goddardtrash.wav	goddardtrash	5176387	18828
+154	assets/parsed/soundeffects/soundeffects_audio/0166_dogbone.wav	dogbone	4199519	17588
+155	assets/parsed/soundeffects/soundeffects_audio/0128_RetroLandWorker15.wav	RetroLandWorker15	3142147	24280
+156	assets/parsed/soundeffects/soundeffects_audio/0260_RetroLandWorker16.wav	RetroLandWorker16	7059439	28700
+157	assets/parsed/soundeffects/soundeffects_audio/0261_RetroLandWorker17.wav	RetroLandWorker17	7088139	56540
+158	assets/parsed/soundeffects/soundeffects_audio/0262_RetroLandWorker18.wav	RetroLandWorker18	7144679	47464
+159	assets/parsed/soundeffects/soundeffects_audio/0171_yokianteleport.wav	yokianteleport	4339395	112404
+160	assets/parsed/soundeffects/soundeffects_audio/0154_offbed.wav	offbed	3864253	29738
+161	assets/parsed/soundeffects/soundeffects_audio/0296_flag_waving.wav	flag waving	9927879	74942
+162	assets/parsed/soundeffects/soundeffects_audio/0033_bird1.wav	bird1	838215	5982
+163	assets/parsed/soundeffects/soundeffects_audio/0170_cheering.wav	cheering	4279319	60076
+164	assets/parsed/soundeffects/soundeffects_audio/0121_sinkdr.wav	sinkdr	2911445	44250
+165	assets/parsed/soundeffects/soundeffects_audio/0212_toilet1.wav	toilet1	5552235	192634
+166	assets/parsed/soundeffects/soundeffects_audio/0156_china.wav	china	3913099	34856
+167	assets/parsed/soundeffects/soundeffects_audio/0129_radio_tune.wav	radio tune	3170219	47418
+168	assets/parsed/soundeffects/soundeffects_audio/0122_book.wav	book	2955695	13776
+169	assets/parsed/soundeffects/soundeffects_audio/0126_Piano.wav	Piano	3057299	61562
+170	assets/parsed/soundeffects/soundeffects_audio/0067_doorbell.wav	doorbell	1541617	24614
+171	assets/parsed/soundeffects/soundeffects_audio/0181_knocking.wav	knocking	4692845	44218
+172	assets/parsed/soundeffects/soundeffects_audio/0184_sodamachine.wav	sodamachine	4763275	31126
+173	assets/parsed/soundeffects/soundeffects_audio/0018_balloon_pop.wav	balloon pop	396264	4522
+174	assets/parsed/soundeffects/soundeffects_audio/0043_score_points3.wav	score points3	951881	6866
+175	assets/parsed/soundeffects/soundeffects_audio/0074_steam.wav	steam	1627873	11118
+176	assets/parsed/soundeffects/soundeffects_audio/0180_electric_spark.wav	electric spark	4673357	17310
+177	assets/parsed/soundeffects/soundeffects_audio/0169_leaves.wav	leaves	4246367	32952
+178	assets/parsed/soundeffects/soundeffects_audio/0223_jimmycreature2.wav	jimmycreature2	6114139	35986
+179	assets/parsed/soundeffects/soundeffects_audio/0213_suv1.wav	suv1	5744869	22766
+180	assets/parsed/soundeffects/soundeffects_audio/0225_suv2.wav	suv2	6172891	72314
+181	assets/parsed/soundeffects/soundeffects_audio/0138_change_return.wav	change return	3522031	10516
+182	assets/parsed/soundeffects/soundeffects_audio/0228_low_neutron_energy.wav	low neutron energy	6298209	52972
+183	assets/parsed/soundeffects/soundeffects_audio/0229_vox_pract_disconnect.wav	vox pract disconnect	6374867	106108
+184	assets/parsed/soundeffects/soundeffects_audio/0264_vulture_cry.wav	vulture cry	7226811	55610
+185	assets/parsed/soundeffects/soundeffects_audio/0265_arcade_cans_crash.wav	arcade cans crash	7282421	41402
+186	assets/parsed/soundeffects/soundeffects_audio/0266_trex_growl.wav	trex growl	7323823	78842
+187	assets/parsed/soundeffects/soundeffects_audio/0152_exhaust_fan.wav	exhaust fan	3830807	21498
+188	assets/parsed/soundeffects/soundeffects_audio/0091_pain_ooh_ha_haa.wav	pain ooh ha haa	2032461	8940
+189	assets/parsed/soundeffects/soundeffects_audio/0153_pain_agh_agh.wav	pain agh agh	3852305	11948
+190	assets/parsed/soundeffects/soundeffects_audio/0107_pain_agh_ahh.wav	pain agh ahh	2461119	15340
+191	assets/parsed/soundeffects/soundeffects_audio/0161_pain_ah_agh_aww.wav	pain ah agh aww	4091995	15756
+192	assets/parsed/soundeffects/soundeffects_audio/0054_pain_ahhouch.wav	pain ahhouch	1356767	5884
+193	assets/parsed/soundeffects/soundeffects_audio/0023_pain_agh.wav	pain agh	589349	3988
+194	assets/parsed/soundeffects/soundeffects_audio/0031_pain_oww.wav	pain oww	828127	3260
+195	assets/parsed/soundeffects/soundeffects_audio/0102_rocket_fly.wav	rocket fly	2310705	22398
+196	assets/parsed/soundeffects/soundeffects_audio/0200_rocket_blast.wav	rocket blast	5197349	22148
+197	assets/parsed/soundeffects/soundeffects_audio/0167_rocket_hit.wav	rocket hit	4220577	14764
+198	assets/parsed/soundeffects/soundeffects_audio/0029_pickup_blip3.wav	pickup blip3	816863	3202
+199	assets/parsed/soundeffects/soundeffects_audio/0106_pickup2.wav	pickup2	2442141	18978
+200	assets/parsed/soundeffects/soundeffects_audio/0151_pickup3.wav	pickup3	3813943	14630
+201	assets/parsed/soundeffects/soundeffects_audio/0132_stalagtite_fal.wav	stalagtite fal	3296689	69036
+202	assets/parsed/soundeffects/soundeffects_audio/0150_rock_explosion2.wav	rock explosion2	3775997	37946
+203	assets/parsed/soundeffects/soundeffects_audio/0149_rock_explosion1.wav	rock explosion1	3716483	59514
+204	assets/parsed/soundeffects/soundeffects_audio/0081_sonar.wav	sonar	1743299	31756
+205	assets/parsed/soundeffects/soundeffects_audio/0109_jimmyself2.wav	jimmyself2	2516229	55796
+206	assets/parsed/soundeffects/soundeffects_audio/0035_jimmyclone.wav	jimmyclone	849403	45946
+207	assets/parsed/soundeffects/soundeffects_audio/0205_jimmyself3.wav	jimmyself3	5362367	26982
+208	assets/parsed/soundeffects/soundeffects_audio/0050_jimmyself4.wav	jimmyself4	1270059	21772
+209	assets/parsed/soundeffects/soundeffects_audio/0049_tracksound.wav	tracksound	1221549	48510
+210	assets/parsed/soundeffects/soundeffects_audio/0048_clicking.wav	clicking	1074611	146938
+211	assets/parsed/soundeffects/soundeffects_audio/0047_whoosh.wav	whoosh	1021177	53434
+212	assets/parsed/soundeffects/soundeffects_audio/0046_scream.wav	scream	961663	59514
+213	assets/parsed/soundeffects/soundeffects_audio/0042_jimmyself15.wav	jimmyself15	935575	16306
+214	assets/parsed/soundeffects/soundeffects_audio/0257_arcade_can_fall2.wav	arcade can fall2	6961627	29818
+215	assets/parsed/soundeffects/soundeffects_audio/0120_cans_fall.wav	cans fall	2890687	17850
+216	assets/parsed/soundeffects/soundeffects_audio/0215_objective_sound.wav	objective sound	5779809	26202
+217	assets/parsed/soundeffects/soundeffects_audio/0056_pop2_arcade.wav	pop2 arcade	1389915	5802
+218	assets/parsed/soundeffects/soundeffects_audio/0115_pop_arcade.wav	pop arcade	2691611	9242
+219	assets/parsed/soundeffects/soundeffects_audio/0268_cheer_small_crowd.wav	cheer small crowd	7483145	66426
+220	assets/parsed/soundeffects/soundeffects_audio/0231_cuckoo.wav	cuckoo	6560323	28922
+221	assets/parsed/soundeffects/soundeffects_audio/0125_arcade_can_fall1.wav	arcade can fall1	3029159	25786
+222	assets/parsed/soundeffects/soundeffects_audio/0232_jimmypie4.wav	jimmypie4	6589245	33270
+223	assets/parsed/soundeffects/soundeffects_audio/0195_jimmypie3.wav	jimmypie3	5073727	24506
+224	assets/parsed/soundeffects/soundeffects_audio/0219_bus_screams.wav	bus screams	5981591	25720
+225	assets/parsed/soundeffects/soundeffects_audio/0270_voxphone4.wav	voxphone4	7575291	147802
+226	assets/parsed/soundeffects/soundeffects_audio/0297_jimmytarzan.wav	jimmytarzan	10002821	28424
+227	assets/parsed/soundeffects/soundeffects_audio/0272_end_cheer_crowd.wav	end cheer crowd	7763329	213036
+228	assets/parsed/soundeffects/soundeffects_audio/0252_no_neutron_energy.wav	no neutron energy	6690241	93212
+229	assets/parsed/soundeffects/soundeffects_audio/0276_no_neutron_teleport.wav	no neutron teleport	8135857	230026
+230	assets/parsed/soundeffects/soundeffects_audio/0133_winning_prize2.wav	winning prize2	3365725	59808
+231	assets/parsed/soundeffects/soundeffects_audio/0141_water_fall.wav	water fall	3590349	81342
+232	assets/parsed/soundeffects/soundeffects_audio/0119_fan_exhaust.wav	fan exhaust	2835585	55102
+233	assets/parsed/soundeffects/soundeffects_audio/0287_water_stream.wav	water stream	9233431	78270
+234	assets/parsed/soundeffects/soundeffects_audio/0004_empty.wav	empty	66712	992
+235	assets/parsed/soundeffects/soundeffects_audio/0289_cave_drip.wav	cave drip	9378451	157818
+236	assets/parsed/soundeffects/soundeffects_audio/0290_drilling.wav	drilling	9536269	88254
+237	assets/parsed/soundeffects/soundeffects_audio/0291_eerie_alien_sound.wav	eerie alien sound	9624523	119742
+238	assets/parsed/soundeffects/soundeffects_audio/0292_eerie_tunnel.wav	eerie tunnel	9744265	89278
+239	assets/parsed/soundeffects/soundeffects_audio/0293_eerie_wind.wav	eerie wind	9833543	92352
+240	assets/parsed/soundeffects/soundeffects_audio/0005_empty.wav	empty	67704	992
+241	assets/parsed/soundeffects/soundeffects_audio/0299_LavaCaveLoop.wav	LavaCaveLoop	10085761	117226
+242	assets/parsed/soundeffects/soundeffects_audio/0175_AlertLoop.wav	AlertLoop	4550489	14296
+243	assets/parsed/soundeffects/soundeffects_audio/0300_yokian_shrunk1.wav	yokian shrunk1	10202987	52990
+244	assets/parsed/soundeffects/soundeffects_audio/0298_yokian_shrunk2.wav	yokian shrunk2	10031245	39608
+245	assets/parsed/soundeffects/soundeffects_audio/0281_yokian_shrunk3.wav	yokian shrunk3	8756702	30914
+246	assets/parsed/soundeffects/soundeffects_audio/0274_yokian_shrunk4.wav	yokian shrunk4	8035899	31676
+247	assets/parsed/soundeffects/soundeffects_audio/0288_jimmy_yahoo.wav	jimmy yahoo	9311701	42668
+248	assets/parsed/soundeffects/soundeffects_audio/0302_jimmy_dizzy.wav	jimmy dizzy	10338253	99442
+249	assets/parsed/soundeffects/soundeffects_audio/0038_bell.wav	bell	911023	7100
+250	assets/parsed/soundeffects/soundeffects_audio/0173_savecarl1.wav	savecarl1	4500807	34608

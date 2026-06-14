@@ -1,0 +1,5 @@
+# handle	wav_path	name	offset	size
+# source	/home/scotty/xp-jnbg-original/omt/voicedemo.omt
+0	assets/parsed/voicedemo/voicedemo_audio/0000_savecarl2.wav	savecarl2	8	28524
+1	assets/parsed/voicedemo/voicedemo_audio/0001_savecarl2B.wav	savecarl2B	28532	44666
+2	assets/parsed/voicedemo/voicedemo_audio/0002_jimmyend3.wav	jimmyend3	73198	39134

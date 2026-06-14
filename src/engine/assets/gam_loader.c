@@ -135,6 +135,10 @@ int gam_load(World *w, const char *path) {
                     copy_string(e->grn_anim[3], sizeof(e->grn_anim[3]), str_val);
                 else if (strcmp(prop_name, "SpriteDatabase") == 0)
                     copy_string(e->sprite_database, sizeof(e->sprite_database), str_val);
+                else if (strcmp(prop_name, "SoundDatabase") == 0)
+                    copy_string(e->sound_database, sizeof(e->sound_database), str_val);
+                else if (strcmp(prop_name, "MusicDatabase") == 0)
+                    copy_string(e->music_database, sizeof(e->music_database), str_val);
                 /* C3DOmtObj (3OMT) binds OmtDatabase/OmtIndex — a 3DSh shape
                    chunk in an OMT container (every authored row today is
                    objects.omt). */

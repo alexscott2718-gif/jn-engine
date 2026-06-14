@@ -1,0 +1,62 @@
+# handle	wav_path	name	offset	size
+# source	/home/scotty/xp-jnbg-original/omt/voiceschool.omt
+0	assets/parsed/voiceschool/voiceschool_audio/0023_jimmybenny10.wav	jimmybenny10	804314	29096
+1	assets/parsed/voiceschool/voiceschool_audio/0011_bennywipe.wav	bennywipe	220290	14940
+2	assets/parsed/voiceschool/voiceschool_audio/0047_jimmynick7.wav	jimmynick7	2149548	50980
+3	assets/parsed/voiceschool/voiceschool_audio/0019_jimmynick6.wav	jimmynick6	529302	109100
+4	assets/parsed/voiceschool/voiceschool_audio/0018_jimmynick5.wav	jimmynick5	493774	35528
+5	assets/parsed/voiceschool/voiceschool_audio/0017_jimmynick4.wav	jimmynick4	423940	69834
+6	assets/parsed/voiceschool/voiceschool_audio/0044_jimmynick3.wav	jimmynick3	1984402	42050
+7	assets/parsed/voiceschool/voiceschool_audio/0020_jimmynick26.wav	jimmynick26	638402	68546
+8	assets/parsed/voiceschool/voiceschool_audio/0056_jimmynick25.wav	jimmynick25	2876552	84496
+9	assets/parsed/voiceschool/voiceschool_audio/0026_jimmynick24.wav	jimmynick24	929308	27074
+10	assets/parsed/voiceschool/voiceschool_audio/0027_jimmynick23.wav	jimmynick23	962270	73232
+11	assets/parsed/voiceschool/voiceschool_audio/0060_jimmynick22.wav	jimmynick22	3268968	93280
+12	assets/parsed/voiceschool/voiceschool_audio/0030_jimmynick21.wav	jimmynick21	1137200	38558
+13	assets/parsed/voiceschool/voiceschool_audio/0031_jimmynick20.wav	jimmynick20	1175758	50612
+14	assets/parsed/voiceschool/voiceschool_audio/0036_jimmynick2.wav	jimmynick2	1439918	58330
+15	assets/parsed/voiceschool/voiceschool_audio/0041_jimmynick19.wav	jimmynick19	1728412	83908
+16	assets/parsed/voiceschool/voiceschool_audio/0040_jimmynick18.wav	jimmynick18	1636878	91534
+17	assets/parsed/voiceschool/voiceschool_audio/0024_jimmynick17.wav	jimmynick17	835064	67720
+18	assets/parsed/voiceschool/voiceschool_audio/0043_jimmynick16.wav	jimmynick16	1860400	124002
+19	assets/parsed/voiceschool/voiceschool_audio/0022_jimmynick15.wav	jimmynick15	755354	48960
+20	assets/parsed/voiceschool/voiceschool_audio/0042_jimmynick14.wav	jimmynick14	1812320	45652
+21	assets/parsed/voiceschool/voiceschool_audio/0007_jimmynick13.wav	jimmynick13	84932	30750
+22	assets/parsed/voiceschool/voiceschool_audio/0033_jimmynick12.wav	jimmynick12	1259424	95576
+23	assets/parsed/voiceschool/voiceschool_audio/0009_jimmynick11.wav	jimmynick11	135912	31300
+24	assets/parsed/voiceschool/voiceschool_audio/0049_jimmynick10.wav	jimmynick10	2261540	62484
+25	assets/parsed/voiceschool/voiceschool_audio/0016_jimmynick1.wav	jimmynick1	371366	30566
+26	assets/parsed/voiceschool/voiceschool_audio/0002_empty.wav	empty	77718	992
+27	assets/parsed/voiceschool/voiceschool_audio/0003_empty.wav	empty	79144	992
+28	assets/parsed/voiceschool/voiceschool_audio/0065_Intro_Race_C.wav	Intro Race C	3861014	109364
+29	assets/parsed/voiceschool/voiceschool_audio/0064_Intro_Race_B.wav	Intro Race B	3755036	105978
+30	assets/parsed/voiceschool/voiceschool_audio/0028_jimmybenny9.wav	jimmybenny9	1035502	57004
+31	assets/parsed/voiceschool/voiceschool_audio/0029_jimmybenny8.wav	jimmybenny8	1094856	42344
+32	assets/parsed/voiceschool/voiceschool_audio/0059_jimmybenny7.wav	jimmybenny7	3185160	83808
+33	assets/parsed/voiceschool/voiceschool_audio/0000_jimmybenny6.wav	jimmybenny6	8	43814
+34	assets/parsed/voiceschool/voiceschool_audio/0054_jimmybenny13.wav	jimmybenny13	2668628	49142
+35	assets/parsed/voiceschool/voiceschool_audio/0034_jimmybenny12.wav	jimmybenny12	1367468	43354
+36	assets/parsed/voiceschool/voiceschool_audio/0052_jimmybenny11.wav	jimmybenny11	2487220	87408
+37	assets/parsed/voiceschool/voiceschool_audio/0050_jimmynick9.wav	jimmynick9	2324382	53186
+38	assets/parsed/voiceschool/voiceschool_audio/0062_Intro_Race_A.wav	Intro Race A	3457938	108540
+39	assets/parsed/voiceschool/voiceschool_audio/0025_jimmymissfowl9.wav	jimmymissfowl9	902784	26524
+40	assets/parsed/voiceschool/voiceschool_audio/0063_jimmymissfowl6.wav	jimmymissfowl6	3595350	159686
+41	assets/parsed/voiceschool/voiceschool_audio/0045_jimmymissfowl7.wav	jimmymissfowl7	2026452	69190
+42	assets/parsed/voiceschool/voiceschool_audio/0058_jimmymissfowl8.wav	jimmymissfowl8	3066792	118368
+43	assets/parsed/voiceschool/voiceschool_audio/0013_jimmymissfowl5.wav	jimmymissfowl5	274206	37732
+44	assets/parsed/voiceschool/voiceschool_audio/0037_jimmybenny18.wav	jimmybenny18	1498248	34058
+45	assets/parsed/voiceschool/voiceschool_audio/0051_jimmybenny19.wav	jimmybenny19	2377568	101460
+46	assets/parsed/voiceschool/voiceschool_audio/0057_jimmycarl32.wav	jimmycarl32	2966982	99810
+47	assets/parsed/voiceschool/voiceschool_audio/0053_jimmycarl30.wav	jimmycarl30	2600354	68274
+48	assets/parsed/voiceschool/voiceschool_audio/0038_jimmycarl31.wav	jimmycarl31	1532306	49156
+49	assets/parsed/voiceschool/voiceschool_audio/0008_jimmycarl29.wav	jimmycarl29	115682	18858
+50	assets/parsed/voiceschool/voiceschool_audio/0001_jimmysheen19.wav	jimmysheen19	43822	33338
+51	assets/parsed/voiceschool/voiceschool_audio/0046_jimmysheen16.wav	jimmysheen16	2097296	52252
+52	assets/parsed/voiceschool/voiceschool_audio/0039_jimmysheen17.wav	jimmysheen17	1581462	39692
+53	assets/parsed/voiceschool/voiceschool_audio/0055_jimmysheen18.wav	jimmysheen18	2742434	134118
+54	assets/parsed/voiceschool/voiceschool_audio/0015_jimmysheen15.wav	jimmysheen15	333710	32404
+55	assets/parsed/voiceschool/voiceschool_audio/0021_jimmybenny17.wav	jimmybenny17	706948	34184
+56	assets/parsed/voiceschool/voiceschool_audio/0010_jimmybenny15.wav	jimmybenny15	167212	53078
+57	assets/parsed/voiceschool/voiceschool_audio/0012_jimmybenny16.wav	jimmybenny16	238128	36078
+58	assets/parsed/voiceschool/voiceschool_audio/0014_jimmybenny14.wav	jimmybenny14	312074	21636
+59	assets/parsed/voiceschool/voiceschool_audio/0048_jimmynick16b.wav	jimmynick16b	2201280	60260

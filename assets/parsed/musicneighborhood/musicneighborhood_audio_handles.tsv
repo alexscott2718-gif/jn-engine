@@ -1,0 +1,4 @@
+# handle	wav_path	name	offset	size
+# source	/home/scotty/xp-jnbg-original/omt/musicneighborhood.omt
+0	assets/parsed/musicneighborhood/musicneighborhood_audio/0000_Hunting2_11k.wav	Hunting2_11k	80	1514220
+1	assets/parsed/musicneighborhood/musicneighborhood_audio/0001_Rescue_Libby.wav	Rescue Libby	1514300	130302

@@ -401,6 +401,20 @@ update_depths:
     }
 
     int have_uvs = (n_uv>0 && n_tface==n_face);
+    float uv_min_x = 0.0f, uv_max_x = 1.0f, uv_min_y = 0.0f, uv_max_y = 1.0f;
+    if (!have_uvs) {
+        uv_min_x = uv_max_x = frame_pos[0][0].x;
+        uv_min_y = uv_max_y = frame_pos[0][0].y;
+        for (int vi = 1; vi < n_pos; vi++) {
+            V3 p0 = frame_pos[0][vi];
+            if (p0.x < uv_min_x) uv_min_x = p0.x;
+            if (p0.x > uv_max_x) uv_max_x = p0.x;
+            if (p0.y < uv_min_y) uv_min_y = p0.y;
+            if (p0.y > uv_max_y) uv_max_y = p0.y;
+        }
+        if (fabsf(uv_max_x - uv_min_x) < 0.001f) uv_max_x = uv_min_x + 1.0f;
+        if (fabsf(uv_max_y - uv_min_y) < 0.001f) uv_max_y = uv_min_y + 1.0f;
+    }
 
     /* If MATERIAL_REF points to a Standard material (i.e. it has a bitmap), all
        faces belong to that material regardless of per-face MTLID. This matches
@@ -496,7 +510,8 @@ update_depths:
                 if (have_uvs && ti[k]>=0 && ti[k]<n_uv) {
                     dst[base+3]=s_uv[ti[k]].u; dst[base+4]=s_uv[ti[k]].v;
                 } else {
-                    dst[base+3]=dst[base+4]=0.0f;
+                    dst[base+3]=(pos.x - uv_min_x) / (uv_max_x - uv_min_x);
+                    dst[base+4]=(pos.y - uv_min_y) / (uv_max_y - uv_min_y);
                 }
                 dst[base+5]=nrm.x; dst[base+6]=nrm.y; dst[base+7]=nrm.z;
 
@@ -540,6 +555,7 @@ update_depths:
     m->vertex_count=out_v;
     m->frame_count=frame_count;
     m->framespeed=scene_framespeed;
+    m->generated_uvs = !have_uvs;
     if (frame_count > 1) {
         m->frames = all_frames;
         all_frames = NULL;
@@ -584,6 +600,8 @@ update_depths:
     printf("ase_load: %s  faces=%d  frames=%d  fps=%.1f  mats=%d  ref=%d  tex='%s'\n",
            path, n_face, frame_count, scene_framespeed, n_groups, geomobject_mat_ref,
            m->tex_file[0]?m->tex_file:"(none)");
+    if (m->generated_uvs)
+        printf("ase_load: %s generated object-space UVs (source has no MESH_TVERT)\n", path);
     free_temp_frames(frame_pos, frame_norm, frame_count);
     return 1;
 

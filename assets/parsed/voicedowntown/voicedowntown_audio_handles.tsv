@@ -1,0 +1,47 @@
+# handle	wav_path	name	offset	size
+# source	/home/scotty/xp-jnbg-original/omt/voicedowntown.omt
+0	assets/parsed/voicedowntown/voicedowntown_audio/0000_jimmycindy1.wav	jimmycindy1	8	28912
+1	assets/parsed/voicedowntown/voicedowntown_audio/0030_jimmysheen8.wav	jimmysheen8	282334	112040
+2	assets/parsed/voicedowntown/voicedowntown_audio/0029_jimmysheen7.wav	jimmysheen7	238888	43446
+3	assets/parsed/voicedowntown/voicedowntown_audio/0064_jimmycheer1.wav	jimmycheer1	1744104	31916
+4	assets/parsed/voicedowntown/voicedowntown_audio/0055_jimmycheer2.wav	jimmycheer2	1376620	28588
+5	assets/parsed/voicedowntown/voicedowntown_audio/0056_jimmycheer3.wav	jimmycheer3	1405208	60204
+6	assets/parsed/voicedowntown/voicedowntown_audio/0057_jimmycheer4.wav	jimmycheer4	1465412	37932
+7	assets/parsed/voicedowntown/voicedowntown_audio/0058_jimmycheer5.wav	jimmycheer5	1503344	43308
+8	assets/parsed/voicedowntown/voicedowntown_audio/0050_jimmydad8.wav	jimmydad8	1191356	45744
+9	assets/parsed/voicedowntown/voicedowntown_audio/0051_jimmydad7.wav	jimmydad7	1237100	33414
+10	assets/parsed/voicedowntown/voicedowntown_audio/0054_jimmydad6.wav	jimmydad6	1325824	50796
+11	assets/parsed/voicedowntown/voicedowntown_audio/0053_jimmydad5.wav	jimmydad5	1293696	32128
+12	assets/parsed/voicedowntown/voicedowntown_audio/0059_jimmycheer6.wav	jimmycheer6	1546652	28908
+13	assets/parsed/voicedowntown/voicedowntown_audio/0060_jimmycheer7.wav	jimmycheer7	1575560	39788
+14	assets/parsed/voicedowntown/voicedowntown_audio/0061_jimmycheer8.wav	jimmycheer8	1615348	31836
+15	assets/parsed/voicedowntown/voicedowntown_audio/0062_jimmycheer9.wav	jimmycheer9	1647184	57260
+16	assets/parsed/voicedowntown/voicedowntown_audio/0063_jimmycheer10.wav	jimmycheer10	1704444	39660
+17	assets/parsed/voicedowntown/voicedowntown_audio/0065_cheer_crowd.wav	cheer crowd	1776020	68524
+18	assets/parsed/voicedowntown/voicedowntown_audio/0068_cheering_encore.wav	cheering encore	2015198	204922
+19	assets/parsed/voicedowntown/voicedowntown_audio/0042_jimmycindy4a.wav	jimmycindy4a	680340	169702
+20	assets/parsed/voicedowntown/voicedowntown_audio/0049_jimmycindy4.wav	jimmycindy4	1104140	87216
+21	assets/parsed/voicedowntown/voicedowntown_audio/0048_jimmycindy3.wav	jimmycindy3	1057390	46750
+22	assets/parsed/voicedowntown/voicedowntown_audio/0047_jimmycindy2.wav	jimmycindy2	1003928	53462
+23	assets/parsed/voicedowntown/voicedowntown_audio/0001_empty.wav	empty	28920	992
+24	assets/parsed/voicedowntown/voicedowntown_audio/0002_empty.wav	empty	29912	992
+25	assets/parsed/voicedowntown/voicedowntown_audio/0003_empty.wav	empty	30904	992
+26	assets/parsed/voicedowntown/voicedowntown_audio/0008_empty.wav	empty	36467	992
+27	assets/parsed/voicedowntown/voicedowntown_audio/0009_empty.wav	empty	37459	992
+28	assets/parsed/voicedowntown/voicedowntown_audio/0007_empty.wav	empty	35475	992
+29	assets/parsed/voicedowntown/voicedowntown_audio/0043_jimmymissfowl12.wav	jimmymissfowl12	850042	30566
+30	assets/parsed/voicedowntown/voicedowntown_audio/0044_jimmymissfowl11.wav	jimmymissfowl11	880608	76908
+31	assets/parsed/voicedowntown/voicedowntown_audio/0045_jimmymissfowl10.wav	jimmymissfowl10	957516	24318
+32	assets/parsed/voicedowntown/voicedowntown_audio/0006_empty.wav	empty	34483	992
+33	assets/parsed/voicedowntown/voicedowntown_audio/0005_empty.wav	empty	33491	992
+34	assets/parsed/voicedowntown/voicedowntown_audio/0004_empty.wav	empty	32499	992
+35	assets/parsed/voicedowntown/voicedowntown_audio/0046_jimmymissfowl13.wav	jimmymissfowl13	981834	22094
+36	assets/parsed/voicedowntown/voicedowntown_audio/0035_jimmygoddard40.wav	jimmygoddard40	398342	58994
+37	assets/parsed/voicedowntown/voicedowntown_audio/0040_jimmygoddard45.wav	jimmygoddard45	592798	54312
+38	assets/parsed/voicedowntown/voicedowntown_audio/0039_jimmygoddard44.wav	jimmygoddard44	543104	49694
+39	assets/parsed/voicedowntown/voicedowntown_audio/0038_jimmygoddard43.wav	jimmygoddard43	513732	29372
+40	assets/parsed/voicedowntown/voicedowntown_audio/0037_jimmygoddard42.wav	jimmygoddard42	476644	37088
+41	assets/parsed/voicedowntown/voicedowntown_audio/0036_jimmygoddard41.wav	jimmygoddard41	457336	19308
+42	assets/parsed/voicedowntown/voicedowntown_audio/0022_hughdef1.wav	hughdef1	189026	43910
+43	assets/parsed/voicedowntown/voicedowntown_audio/0021_hughdef2.wav	hughdef2	49934	139092
+44	assets/parsed/voicedowntown/voicedowntown_audio/0041_jimmygoddard46.wav	jimmygoddard46	647110	33230

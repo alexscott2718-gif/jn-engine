@@ -1,0 +1,71 @@
+# handle	wav_path	name	offset	size
+# source	/home/scotty/xp-jnbg-original/omt/voiceship.omt
+0	assets/parsed/voiceship/voiceship_audio/0001_yokian4.wav	yokian4	24144	14394
+1	assets/parsed/voiceship/voiceship_audio/0006_empty.wav	empty	43766	992
+2	assets/parsed/voiceship/voiceship_audio/0000_yokian1.wav	yokian1	8	24136
+3	assets/parsed/voiceship/voiceship_audio/0018_yokian2.wav	yokian2	524694	83180
+4	assets/parsed/voiceship/voiceship_audio/0017_yokian3.wav	yokian3	437858	86836
+5	assets/parsed/voiceship/voiceship_audio/0005_empty.wav	empty	42774	992
+6	assets/parsed/voiceship/voiceship_audio/0012_yokian6.wav	yokian6	182118	26382
+7	assets/parsed/voiceship/voiceship_audio/0031_yokiancindy22.wav	yokiancindy22	1358452	38284
+8	assets/parsed/voiceship/voiceship_audio/0030_yokian21.wav	yokian21	1296814	61638
+9	assets/parsed/voiceship/voiceship_audio/0034_yokiancindy20.wav	yokiancindy20	1478446	60528
+10	assets/parsed/voiceship/voiceship_audio/0036_yokian19.wav	yokian19	1579162	106194
+11	assets/parsed/voiceship/voiceship_audio/0010_yokian18.wav	yokian18	122265	29074
+12	assets/parsed/voiceship/voiceship_audio/0057_yokian17b.wav	yokian17b	2641274	41082
+13	assets/parsed/voiceship/voiceship_audio/0064_yokian17.wav	yokian17	3210106	71724
+14	assets/parsed/voiceship/voiceship_audio/0044_yokian16.wav	yokian16	1978586	46000
+15	assets/parsed/voiceship/voiceship_audio/0046_yokian15B.wav	yokian15B	2112152	32208
+16	assets/parsed/voiceship/voiceship_audio/0048_yokian15.wav	yokian15	2171132	44012
+17	assets/parsed/voiceship/voiceship_audio/0041_yokian14.wav	yokian14	1879186	26674
+18	assets/parsed/voiceship/voiceship_audio/0052_yokian13.wav	yokian13	2359988	44380
+19	assets/parsed/voiceship/voiceship_audio/0051_yokian12.wav	yokian12	2321258	38730
+20	assets/parsed/voiceship/voiceship_audio/0056_yokian11.wav	yokian11	2587754	53520
+21	assets/parsed/voiceship/voiceship_audio/0055_yokian10.wav	yokian10	2530326	57428
+22	assets/parsed/voiceship/voiceship_audio/0019_yokian9.wav	yokian9	607874	24656
+23	assets/parsed/voiceship/voiceship_audio/0025_yokian8.wav	yokian8	849020	88814
+24	assets/parsed/voiceship/voiceship_audio/0024_yokian7.wav	yokian7	820664	28356
+25	assets/parsed/voiceship/voiceship_audio/0032_yokian23.wav	yokian23	1396736	24902
+26	assets/parsed/voiceship/voiceship_audio/0026_savecarl1_2.wav	savecarl1&2	937834	60080
+27	assets/parsed/voiceship/voiceship_audio/0058_jimmyend3.wav	jimmyend3	2710950	42142
+28	assets/parsed/voiceship/voiceship_audio/0063_jimmyend2.wav	jimmyend2	3151316	58790
+29	assets/parsed/voiceship/voiceship_audio/0068_jimmyend1.wav	jimmyend1	3463728	58698
+30	assets/parsed/voiceship/voiceship_audio/0062_yokian26.wav	yokian26	3101114	50202
+31	assets/parsed/voiceship/voiceship_audio/0016_yokian25.wav	yokian25	402734	32470
+32	assets/parsed/voiceship/voiceship_audio/0069_yokian24.wav	yokian24	3522426	94252
+33	assets/parsed/voiceship/voiceship_audio/0042_jimmyking9.wav	jimmyking9	1906690	43080
+34	assets/parsed/voiceship/voiceship_audio/0067_jimmyking10.wav	jimmyking10	3406690	40042
+35	assets/parsed/voiceship/voiceship_audio/0045_jimmyking8.wav	jimmyking8	2024586	67498
+36	assets/parsed/voiceship/voiceship_audio/0037_jimmyking7.wav	jimmyking7	1687354	58606
+37	assets/parsed/voiceship/voiceship_audio/0028_jimmyking6.wav	jimmyking6	1210536	23886
+38	assets/parsed/voiceship/voiceship_audio/0035_jimmyking5.wav	jimmyking5	1558538	20624
+39	assets/parsed/voiceship/voiceship_audio/0014_jimmyking4.wav	jimmyking4	327722	31272
+40	assets/parsed/voiceship/voiceship_audio/0011_jimmyking3.wav	jimmyking3	151339	27626
+41	assets/parsed/voiceship/voiceship_audio/0061_jimmyking2.wav	jimmyking2	3033766	67348
+42	assets/parsed/voiceship/voiceship_audio/0066_jimmyking1.wav	jimmyking1	3362048	44642
+43	assets/parsed/voiceship/voiceship_audio/0050_savecarl9.wav	savecarl9	2264012	37088
+44	assets/parsed/voiceship/voiceship_audio/0015_savecarl8.wav	savecarl8	358994	25054
+45	assets/parsed/voiceship/voiceship_audio/0040_savecarl7.wav	savecarl7	1842562	32818
+46	assets/parsed/voiceship/voiceship_audio/0049_savecarl4.wav	savecarl4	2215144	48868
+47	assets/parsed/voiceship/voiceship_audio/0053_savecarl5.wav	savecarl5	2438976	56952
+48	assets/parsed/voiceship/voiceship_audio/0003_empty.wav	empty	40151	992
+49	assets/parsed/voiceship/voiceship_audio/0029_jimmyend4.wav	jimmyend4	1234422	62392
+50	assets/parsed/voiceship/voiceship_audio/0008_savecarl2B.wav	savecarl2B	60781	44666
+51	assets/parsed/voiceship/voiceship_audio/0071_fcintro2_bkg.wav	fcintro2 bkg	3688402	161146
+52	assets/parsed/voiceship/voiceship_audio/0007_yokian2b.wav	yokian2b	48787	11994
+53	assets/parsed/voiceship/voiceship_audio/0002_empty.wav	empty	39159	992
+54	assets/parsed/voiceship/voiceship_audio/0060_yokian17C.wav	yokian17C	2898544	135222
+55	assets/parsed/voiceship/voiceship_audio/0027_savecarl6.wav	savecarl6	997914	208356
+56	assets/parsed/voiceship/voiceship_audio/0073_spaceship_blasts_by2d.wav	spaceship blasts by2d	3923358	275500
+57	assets/parsed/voiceship/voiceship_audio/0013_ship_blast.wav	ship blast	210864	116858
+58	assets/parsed/voiceship/voiceship_audio/0059_spacedoor.wav	spacedoor	2755748	121432
+59	assets/parsed/voiceship/voiceship_audio/0033_yokian30.wav	yokian30	1423308	55138
+60	assets/parsed/voiceship/voiceship_audio/0009_yokian28.wav	yokian28	105447	15758
+61	assets/parsed/voiceship/voiceship_audio/0023_yokian29.wav	yokian29	792232	23500
+62	assets/parsed/voiceship/voiceship_audio/0065_yokian27.wav	yokian27	3307152	44986
+63	assets/parsed/voiceship/voiceship_audio/0039_rocket_blast.wav	rocket blast	1746952	95610
+64	assets/parsed/voiceship/voiceship_audio/0022_yokiansolider4.wav	yokiansolider4	737492	54740
+65	assets/parsed/voiceship/voiceship_audio/0021_yokiansolider1.wav	yokiansolider1	689456	48036
+66	assets/parsed/voiceship/voiceship_audio/0020_shrinkray.wav	shrinkray	632530	56926
+67	assets/parsed/voiceship/voiceship_audio/0004_empty.wav	empty	41782	992
+68	assets/parsed/voiceship/voiceship_audio/0075_Jaws_Carl_Entrance.wav	Jaws Carl Entrance	4294590	247672

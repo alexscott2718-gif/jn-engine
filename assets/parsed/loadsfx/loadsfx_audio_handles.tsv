@@ -1,0 +1,105 @@
+# handle	wav_path	name	offset	size
+# source	/home/scotty/xp-jnbg-original/omt/loadsfx.omt
+0	assets/parsed/loadsfx/loadsfx_audio/0061_retroland5.wav	retroland5	1380818	44916
+1	assets/parsed/loadsfx/loadsfx_audio/0110_retroland6.wav	retroland6	2848500	26890
+2	assets/parsed/loadsfx/loadsfx_audio/0117_cat_meow.wav	cat meow	3430110	33786
+3	assets/parsed/loadsfx/loadsfx_audio/0121_cat_hiss.wav	cat hiss	4022628	43898
+4	assets/parsed/loadsfx/loadsfx_audio/0013_goddardfood1.wav	goddardfood1	112076	29830
+5	assets/parsed/loadsfx/loadsfx_audio/0020_goddardfood2.wav	goddardfood2	211286	23288
+6	assets/parsed/loadsfx/loadsfx_audio/0091_jimmyfish.wav	jimmyfish	2501664	30470
+7	assets/parsed/loadsfx/loadsfx_audio/0118_jimmyred.wav	jimmyred	3466438	209666
+8	assets/parsed/loadsfx/loadsfx_audio/0048_jimmyself10.wav	jimmyself10	985104	26064
+9	assets/parsed/loadsfx/loadsfx_audio/0024_jimmyself11.wav	jimmyself11	296020	32128
+10	assets/parsed/loadsfx/loadsfx_audio/0026_jimmyself12.wav	jimmyself12	351768	31300
+11	assets/parsed/loadsfx/loadsfx_audio/0027_jimmyself13.wav	jimmyself13	383068	27258
+12	assets/parsed/loadsfx/loadsfx_audio/0028_jimmyself14.wav	jimmyself14	410326	29096
+13	assets/parsed/loadsfx/loadsfx_audio/0029_jimmyself15.wav	jimmyself15	439422	20716
+14	assets/parsed/loadsfx/loadsfx_audio/0030_jimmyself20.wav	jimmyself20	460138	15028
+15	assets/parsed/loadsfx/loadsfx_audio/0031_jimmyself22.wav	jimmyself22	475166	23656
+16	assets/parsed/loadsfx/loadsfx_audio/0032_jimmyself23.wav	jimmyself23	498822	40270
+17	assets/parsed/loadsfx/loadsfx_audio/0033_jimmyself24.wav	jimmyself24	539092	38650
+18	assets/parsed/loadsfx/loadsfx_audio/0034_jimmyself25.wav	jimmyself25	577742	29188
+19	assets/parsed/loadsfx/loadsfx_audio/0035_jimmyself26.wav	jimmyself26	606930	17426
+20	assets/parsed/loadsfx/loadsfx_audio/0036_jimmyself27.wav	jimmyself27	624356	31208
+21	assets/parsed/loadsfx/loadsfx_audio/0037_jimmyself28.wav	jimmyself28	655564	21452
+22	assets/parsed/loadsfx/loadsfx_audio/0023_jimmyself29.wav	jimmyself29	282132	13676
+23	assets/parsed/loadsfx/loadsfx_audio/0039_jimmyself3.wav	jimmyself3	690692	29600
+24	assets/parsed/loadsfx/loadsfx_audio/0040_jimmyself31.wav	jimmyself31	720292	24442
+25	assets/parsed/loadsfx/loadsfx_audio/0041_jimmyself4.wav	jimmyself4	744734	25900
+26	assets/parsed/loadsfx/loadsfx_audio/0042_jimmyself5.wav	jimmyself5	770634	21004
+27	assets/parsed/loadsfx/loadsfx_audio/0043_jimmyself6.wav	jimmyself6	791638	36170
+28	assets/parsed/loadsfx/loadsfx_audio/0044_jimmyself7.wav	jimmyself7	827808	36078
+29	assets/parsed/loadsfx/loadsfx_audio/0045_jimmyself8.wav	jimmyself8	863886	26332
+30	assets/parsed/loadsfx/loadsfx_audio/0046_jimmyself9.wav	jimmyself9	890218	47660
+31	assets/parsed/loadsfx/loadsfx_audio/0123_fry_eggs.wav	fry eggs	4596910	201850
+32	assets/parsed/loadsfx/loadsfx_audio/0056_pigbank1.wav	pigbank1	1249498	28014
+33	assets/parsed/loadsfx/loadsfx_audio/0057_retroland1.wav	retroland1	1277512	26524
+34	assets/parsed/loadsfx/loadsfx_audio/0058_retroland2.wav	retroland2	1304036	30474
+35	assets/parsed/loadsfx/loadsfx_audio/0011_retroland3.wav	retroland3	93092	17562
+36	assets/parsed/loadsfx/loadsfx_audio/0060_retroland4.wav	retroland4	1352072	28746
+37	assets/parsed/loadsfx/loadsfx_audio/0125_goddarddogbark_shrink.wav	goddarddogbark shrink	4878752	53804
+38	assets/parsed/loadsfx/loadsfx_audio/0120_goddard_after_eating.wav	goddard after eating	3983672	38956
+39	assets/parsed/loadsfx/loadsfx_audio/0055_jimmytarzan.wav	jimmytarzan	1194292	55206
+40	assets/parsed/loadsfx/loadsfx_audio/0114_goddard_eating.wav	goddard eating	3145504	35596
+41	assets/parsed/loadsfx/loadsfx_audio/0010_coin2.wav	coin2	69912	23180
+42	assets/parsed/loadsfx/loadsfx_audio/0075_jimmyhydrant3.wav	jimmyhydrant3	1834584	26028
+43	assets/parsed/loadsfx/loadsfx_audio/0074_jimmyhydrant2.wav	jimmyhydrant2	1786084	48500
+44	assets/parsed/loadsfx/loadsfx_audio/0062_jimmyhydrant1.wav	jimmyhydrant1	1425734	31452
+45	assets/parsed/loadsfx/loadsfx_audio/0078_jimmybird6.wav	jimmybird6	1938826	57816
+46	assets/parsed/loadsfx/loadsfx_audio/0083_jimmybird5.wav	jimmybird5	2165374	49970
+47	assets/parsed/loadsfx/loadsfx_audio/0082_jimmybird4.wav	jimmybird4	2109874	55500
+48	assets/parsed/loadsfx/loadsfx_audio/0086_jimmybird3.wav	jimmybird3	2324080	32588
+49	assets/parsed/loadsfx/loadsfx_audio/0085_jimmybird2.wav	jimmybird2	2243580	68396
+50	assets/parsed/loadsfx/loadsfx_audio/0090_jimmybird1.wav	jimmybird1	2462370	39294
+51	assets/parsed/loadsfx/loadsfx_audio/0089_jimmyballoon3.wav	jimmyballoon3	2424546	37824
+52	assets/parsed/loadsfx/loadsfx_audio/0017_jimmyballoon2.wav	jimmyballoon2	160894	48408
+53	assets/parsed/loadsfx/loadsfx_audio/0092_jimmyballoon1.wav	jimmyballoon1	2543056	61462
+54	assets/parsed/loadsfx/loadsfx_audio/0124_enlargeray.wav	enlargeray	4798760	79992
+55	assets/parsed/loadsfx/loadsfx_audio/0080_jimmygoddard36.wav	jimmygoddard36	2034762	19522
+56	assets/parsed/loadsfx/loadsfx_audio/0005_empty.wav	empty	64952	992
+57	assets/parsed/loadsfx/loadsfx_audio/0108_jimmycoal1.wav	jimmycoal1	2738160	64964
+58	assets/parsed/loadsfx/loadsfx_audio/0077_jimmyshrink4.wav	jimmyshrink4	1897058	33900
+59	assets/parsed/loadsfx/loadsfx_audio/0014_jimmyshrink3.wav	jimmyshrink3	141906	16972
+60	assets/parsed/loadsfx/loadsfx_audio/0051_jimmyshrink2.wav	jimmyshrink2	1068588	24770
+61	assets/parsed/loadsfx/loadsfx_audio/0047_jimmyshrink1.wav	jimmyshrink1	937878	47226
+62	assets/parsed/loadsfx/loadsfx_audio/0119_jimmypie4.wav	jimmypie4	3676104	307568
+63	assets/parsed/loadsfx/loadsfx_audio/0054_jimmycreature6.wav	jimmycreature6	1160328	30192
+64	assets/parsed/loadsfx/loadsfx_audio/0093_jimmycreature5.wav	jimmycreature5	2604518	35894
+65	assets/parsed/loadsfx/loadsfx_audio/0049_jimmycreature4.wav	jimmycreature4	1011168	33414
+66	assets/parsed/loadsfx/loadsfx_audio/0076_jimmycreature3.wav	jimmycreature3	1860612	36446
+67	assets/parsed/loadsfx/loadsfx_audio/0022_jimmycreature2.wav	jimmycreature2	246146	35986
+68	assets/parsed/loadsfx/loadsfx_audio/0094_jimmycreature1.wav	jimmycreature1	2654790	65056
+69	assets/parsed/loadsfx/loadsfx_audio/0064_jimmyexp14.wav	jimmyexp14	1490146	44936
+70	assets/parsed/loadsfx/loadsfx_audio/0109_jimmyexp13.wav	jimmyexp13	2803124	45376
+71	assets/parsed/loadsfx/loadsfx_audio/0087_way_2_go_goddard.wav	way 2 go goddard	2356668	19670
+72	assets/parsed/loadsfx/loadsfx_audio/0128_growl_bark_growl.wav	growl bark growl	4944306	35054
+73	assets/parsed/loadsfx/loadsfx_audio/0002_jimmyexp10.wav	jimmyexp10	38548	22750
+74	assets/parsed/loadsfx/loadsfx_audio/0001_jimmyexp9.wav	jimmyexp9	1000	37548
+75	assets/parsed/loadsfx/loadsfx_audio/0088_jimmyexp8.wav	jimmyexp8	2379418	38468
+76	assets/parsed/loadsfx/loadsfx_audio/0113_jimmyexp7.wav	jimmyexp7	3089470	56034
+77	assets/parsed/loadsfx/loadsfx_audio/0050_jimmyexp6.wav	jimmyexp6	1044582	19950
+78	assets/parsed/loadsfx/loadsfx_audio/0025_jimmyexp5.wav	jimmyexp5	328148	21544
+79	assets/parsed/loadsfx/loadsfx_audio/0021_look_goddard.wav	look goddard	234574	10758
+80	assets/parsed/loadsfx/loadsfx_audio/0071_jimmyexp3.wav	jimmyexp3	1673778	66250
+81	assets/parsed/loadsfx/loadsfx_audio/0130_goddard_chasing_pussy2.wav	goddard chasing pussy2	5021414	145850
+82	assets/parsed/loadsfx/loadsfx_audio/0131_Oh_no_goddard.wav	Oh no goddard	5167264	49422
+83	assets/parsed/loadsfx/loadsfx_audio/0007_empty.wav	empty	66936	992
+84	assets/parsed/loadsfx/loadsfx_audio/0006_empty.wav	empty	65944	992
+85	assets/parsed/loadsfx/loadsfx_audio/0111_jimmypie3.wav	jimmypie3	2882400	179532
+86	assets/parsed/loadsfx/loadsfx_audio/0004_empty.wav	empty	63960	992
+87	assets/parsed/loadsfx/loadsfx_audio/0003_empty.wav	empty	62968	992
+88	assets/parsed/loadsfx/loadsfx_audio/0070_jimmycat3.wav	jimmycat3	1651316	20624
+89	assets/parsed/loadsfx/loadsfx_audio/0067_jimmycat2.wav	jimmycat2	1574660	37180
+90	assets/parsed/loadsfx/loadsfx_audio/0079_jimmycat1.wav	jimmycat1	1996642	38120
+91	assets/parsed/loadsfx/loadsfx_audio/0073_jimmyrocket8.wav	jimmyrocket8	1741518	28728
+92	assets/parsed/loadsfx/loadsfx_audio/0081_jimmyrocket7.wav	jimmyrocket7	2055386	35342
+93	assets/parsed/loadsfx/loadsfx_audio/0084_jimmyrocket6.wav	jimmyrocket6	2215344	28236
+94	assets/parsed/loadsfx/loadsfx_audio/0063_jimmyrocket5.wav	jimmyrocket5	1457186	28728
+95	assets/parsed/loadsfx/loadsfx_audio/0000_empty.wav	empty	8	992
+96	assets/parsed/loadsfx/loadsfx_audio/0115_jimmyrocket4.wav	jimmyrocket4	3182280	62024
+97	assets/parsed/loadsfx/loadsfx_audio/0053_jimmyrocket2.wav	jimmyrocket2	1131876	28452
+98	assets/parsed/loadsfx/loadsfx_audio/0052_jimmyrocket1.wav	jimmyrocket1	1093358	38518
+99	assets/parsed/loadsfx/loadsfx_audio/0069_jimmyyodle.wav	jimmyyodle	1613768	37548
+100	assets/parsed/loadsfx/loadsfx_audio/0122_rocket2.wav	rocket2	4078644	518266
+101	assets/parsed/loadsfx/loadsfx_audio/0116_rocket1.wav	rocket1	3250020	180090
+102	assets/parsed/loadsfx/loadsfx_audio/0066_jimmyrocket1a.wav	jimmyrocket1a	1536074	26452

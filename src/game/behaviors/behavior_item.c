@@ -1,5 +1,6 @@
 #include "behaviors.h"
 #include "../gamestate.h"
+#include "../../engine/audio.h"
 #include <stddef.h>
 #include <string.h>
 #include <math.h>
@@ -75,6 +76,13 @@ static void item_on_trigger(Entity *e, Entity *by) {
         gamestate_gem_collected();
     if (e->points)
         gamestate_add_points(e->points);
+    {
+        int snd = gam_prop_i(e, "SoundIndex", -1);
+        if (snd >= 0) {
+            const char *db = e->sound_database[0] ? e->sound_database : "soundeffects.omt";
+            audio_play_db(db, snd, 0, 128);
+        }
+    }
     item_grant_tool(e);
     gamestate_item_collected();
 }

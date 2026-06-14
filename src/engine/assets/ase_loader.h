@@ -50,6 +50,10 @@ typedef struct {
        asset_cache for assets/glb/omt/ models; renderer enables
        GL_CULL_FACE while drawing them. */
     int          cull_backfaces;
+    /* Source ASE omitted texture coordinates; loader supplied object-space
+       fallback UVs so class-attached texture pages do not sample (0,0)
+       everywhere. */
+    int          generated_uvs;
 } AseModel;
 
 /* Load ASE from path. Returns 1 on success, 0 on failure. */

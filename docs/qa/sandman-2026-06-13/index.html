@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>QA Ticket Resolution - sandman, 2026-06-13 - jn-engine</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family:'Monaco','Menlo','Ubuntu Mono',monospace; background:#0d0d0d; color:#e0e0e0; line-height:1.55; padding:24px 16px; }
+.wrap { max-width:1100px; margin:0 auto; }
+h1 { font-size:1.5em; color:#fff; margin-bottom:4px; }
+h2 { font-size:1.15em; color:#7ec8ff; margin:38px 0 12px; border-bottom:1px solid #2a2a2a; padding-bottom:6px; }
+h3 { font-size:1.0em; color:#fff; margin-bottom:4px; }
+p { margin:10px 0; color:#c8c8c8; }
+a { color:#7ec8ff; text-decoration:none; }
+a:hover { text-decoration:underline; }
+.sub { color:#888; font-size:0.85em; }
+.badge { display:inline-block; padding:1px 8px; border-radius:4px; font-size:0.75em; vertical-align:middle; }
+.green { background:#143a14; color:#7dde7d; border:1px solid #2c6e2c; }
+.cat { background:#1d2c3d; color:#9ecbff; border:1px solid #2c5a8a; }
+table { width:100%; border-collapse:collapse; margin:14px 0; font-size:0.82em; }
+th,td { text-align:left; padding:6px 8px; border-bottom:1px solid #242424; vertical-align:top; }
+th { color:#9a9a9a; font-weight:normal; }
+td.msg { color:#c8c8c8; }
+code { color:#d9c08a; font-size:0.92em; }
+.card { background:#141414; border:1px solid #262626; border-radius:10px; padding:20px; margin:26px 0; }
+.meta { font-size:0.8em; color:#888; margin-bottom:12px; }
+.quote { border-left:3px solid #8a6d2c; background:#1a160d; color:#d9c08a; padding:8px 12px; margin:10px 0; font-size:0.88em; border-radius:0 6px 6px 0; }
+.fix { border-left:3px solid #2c6e2c; background:#0d160d; padding:8px 12px; margin:12px 0; font-size:0.88em; color:#afcfaf; border-radius:0 6px 6px 0; }
+.warn { border-left:3px solid #8a6d2c; background:#1a160d; padding:8px 12px; margin:12px 0; font-size:0.88em; color:#d9c08a; border-radius:0 6px 6px 0; }
+.ba { display:grid; grid-template-columns:1fr 1fr; gap:14px; margin:14px 0; }
+@media (max-width:760px) { .ba { grid-template-columns:1fr; } }
+.shot { background:#0a0a0a; border:1px solid #262626; border-radius:8px; overflow:hidden; }
+.shot img { display:block; width:100%; height:auto; }
+.shot .lbl { padding:6px 10px; font-size:0.78em; }
+.lbl.bad { color:#ff8d8d; border-top:1px solid #3a1d1d; background:#1c1010; }
+.lbl.good { color:#7dde7d; border-top:1px solid #1d3a1d; background:#101c10; }
+pre { background:#0a0a0a; border:1px solid #242424; border-radius:6px; padding:10px 12px; overflow-x:auto; font-size:0.75em; color:#b8c8b8; margin:10px 0; }
+ul { margin:8px 0 8px 22px; color:#c8c8c8; }
+li { margin:6px 0; font-size:0.92em; }
+.footer { margin-top:48px; padding-top:14px; border-top:1px solid #2a2a2a; font-size:0.8em; color:#777; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<h1>QA Ticket Resolution Log <span class="badge green">20 / 20 ADDRESSED</span></h1>
+<p class="sub">Ticket submitted by <strong>sandman</strong> - 2026-06-13 - level5a - fixes by Codex via jn-engine - live demo: <a href="https://exentt.com/jn-engine/">exentt.com/jn-engine</a></p>
+
+<p>This ticket looked like twenty separate audio and texture reports, but it reduced to two engine rules. First, GAM audio indices are original OMT <code>Wave</code> handles, not extracted RIFF-order filenames. The resolver now reads handle maps generated from the shipped <code>*.omt</code> files and routes <code>C3DStartPoint</code>, <code>C3DMusicTrigger</code>, <code>C3DSoundEffect</code>, and <code>C3DPickupItem</code> through those handles. Second, the Yokian classes already bind the correct original assets; their shipped ASEs simply omit UV blocks, so the loader now supplies object-space fallback UVs instead of sampling texel <code>(0,0)</code> everywhere.</p>
+
+<h2>The Ticket</h2>
+<table>
+<tr><th>#</th><th>level</th><th>entity</th><th>cat.</th><th>report</th><th>resolution path</th></tr>
+<tr><td>1</td><td>level5a</td><td>3ROC [C3DROCKETSHIP]</td><td>OTH</td><td class="msg">audio trigger should be musicrocketmaze/0000_Surf_Music_Demo_End</td><td>C3DStartPoint music bank resolver; single-entry music fallback</td></tr>
+<tr><td>2</td><td>level5a</td><td>3PIC [C3DPICKUPITEM]</td><td>OTH</td><td class="msg">audio trigger should be musicarea51/0000_Hunting3_11k</td><td>C3DStartPoint / C3DMusicTrigger music resolver</td></tr>
+<tr><td>3</td><td>level5a</td><td>3SOL [C3DYOKIANSOLDIER]</td><td>TEX</td><td class="msg">missing yokian texture</td><td>class texture plus no-UV ASE fallback</td></tr>
+<tr><td>4</td><td>level5a</td><td>3GUA [C3DYOKIANGUARD]</td><td>TEX</td><td class="msg">missing yokian texture</td><td>class texture plus no-UV ASE fallback</td></tr>
+<tr><td>5</td><td>level5a</td><td>3GUA [C3DYOKIANGUARD]</td><td>TEX</td><td class="msg">missing yokian texture</td><td>class texture plus no-UV ASE fallback</td></tr>
+<tr><td>6</td><td>level5a</td><td>3JIM [JIM1]</td><td>OTH</td><td class="msg">trigger plays musicship/0002_Spooky_22k</td><td>3MUS musicship handle 2</td></tr>
+<tr><td>7</td><td>level5a</td><td>3JIM [JIM1]</td><td>OTH</td><td class="msg">trigger plays musicship/0001_Snip1_22k</td><td>3MUS musicship handle 1</td></tr>
+<tr><td>8</td><td>level5a</td><td>3JIM [JIM1]</td><td>OTH</td><td class="msg">pipe trigger for musicarea51/0000_Hunting3_11k resets the track</td><td>musicarea51 handle 0 resolver and music dedupe</td></tr>
+<tr><td>9</td><td>level5a</td><td>3PIC [C3DPICKUPITEM]</td><td>OTH</td><td class="msg">soundeffects/0279_holon</td><td>SoundEffects handle 99</td></tr>
+<tr><td>10</td><td>level5a</td><td>placement 03</td><td>OTH</td><td class="msg">0101_jimmyitem10</td><td>nearby pickup SoundEffects handle 115</td></tr>
+<tr><td>11</td><td>level5a</td><td>3PIC [barrelroll]</td><td>OTH</td><td class="msg">soundeffects/0288_jimmy_yahoo</td><td>SoundEffects handle 247</td></tr>
+<tr><td>12</td><td>level5a</td><td>3PIC [C3DPICKUPITEM]</td><td>OTH</td><td class="msg">soundeffects/0076_jimmyitem2</td><td>SoundEffects handle 114</td></tr>
+<tr><td>13</td><td>level5a</td><td>3PIC [C3DPICKUPITEM]</td><td>OTH</td><td class="msg">soundeffects/0101_jimmyitem10</td><td>SoundEffects handle 115</td></tr>
+<tr><td>14</td><td>level5a</td><td>3PIC [C3DPICKUPITEM]</td><td>OTH</td><td class="msg">soundeffects/0063_jimmyitem5</td><td>SoundEffects handle 111</td></tr>
+<tr><td>15</td><td>level5a</td><td>3PIC [barrelroll2]</td><td>OTH</td><td class="msg">soundeffects/0302_jimmy_dizzy</td><td>SoundEffects handle 248</td></tr>
+<tr><td>16</td><td>level5a</td><td>3PIC [C3DPICKUPITEM]</td><td>OTH</td><td class="msg">soundeffects/0101_jimmyitem10</td><td>SoundEffects handle 115</td></tr>
+<tr><td>17</td><td>level5a</td><td>3PIC [C3DPICKUPITEM]</td><td>OTH</td><td class="msg">soundeffects/0066_goddarddogbark6</td><td>SoundEffects handle 119</td></tr>
+<tr><td>18</td><td>level5a</td><td>3PIC [C3DPICKUPITEM]</td><td>OTH</td><td class="msg">soundeffects/0079_jimmyitem4</td><td>SoundEffects handle 112</td></tr>
+<tr><td>19</td><td>level5a</td><td>3PIC [C3DPICKUPITEM]</td><td>OTH</td><td class="msg">soundeffects/0079_jimmyitem10</td><td>SoundEffects handle 115 resolves to 0101_jimmyitem10</td></tr>
+<tr><td>20</td><td>level5a</td><td>3PIC [C3DPICKUPITEM]</td><td>OTH</td><td class="msg">soundeffects/0059_jimmyitem9</td><td>SoundEffects handle 107</td></tr>
+</table>
+
+<div class="card">
+<h3>Audio - original OMT Wave handles <span class="badge cat">OTH x17</span></h3>
+<div class="meta">C3DStartPoint, C3DMusicTrigger, C3DSoundEffect, C3DPickupItem</div>
+<div class="quote">"audio trigger should be..." / "audio trigger for..."</div>
+<p>The extracted WAV filenames previously used RIFF byte order, so <code>SoundIndex=115</code> incorrectly meant <code>0115_pop_arcade.wav</code>. The original <code>soundeffects.omt</code> has a trailing <code>Wave</code> table: handle <code>115</code> points to the RIFF offset for <code>jimmyitem10</code>. That exact table also resolves the other reported pickup and barrel-roll sounds.</p>
+<table>
+<tr><th>authored handle</th><th>original bank</th><th>resolved WAV</th></tr>
+<tr><td>99</td><td>soundeffects.omt</td><td><code>0279_holon.wav</code></td></tr>
+<tr><td>107</td><td>soundeffects.omt</td><td><code>0059_jimmyitem9.wav</code></td></tr>
+<tr><td>111</td><td>soundeffects.omt</td><td><code>0063_jimmyitem5.wav</code></td></tr>
+<tr><td>112</td><td>soundeffects.omt</td><td><code>0079_jimmyitem4.wav</code></td></tr>
+<tr><td>114</td><td>soundeffects.omt</td><td><code>0076_jimmyitem2.wav</code></td></tr>
+<tr><td>115</td><td>soundeffects.omt</td><td><code>0101_jimmyitem10.wav</code></td></tr>
+<tr><td>119</td><td>soundeffects.omt</td><td><code>0066_goddarddogbark6.wav</code></td></tr>
+<tr><td>247</td><td>soundeffects.omt</td><td><code>0288_jimmy_yahoo.wav</code></td></tr>
+<tr><td>248</td><td>soundeffects.omt</td><td><code>0302_jimmy_dizzy.wav</code></td></tr>
+<tr><td>0</td><td>musicarea51.omt</td><td><code>0000_Hunting3_11k.wav</code></td></tr>
+<tr><td>1</td><td>musicship.omt</td><td><code>0001_Snip1_22k.wav</code></td></tr>
+<tr><td>2</td><td>musicship.omt</td><td><code>0002_Spooky_22k.wav</code></td></tr>
+<tr><td>0</td><td>musicrocketmaze.omt</td><td><code>0000_Surf_Music_Demo_End.wav</code></td></tr>
+</table>
+<div class="fix"><strong>Fix:</strong> <code>tools/gen_audio_handle_maps.py</code> generates <code>assets/parsed/*/*_audio_handles.tsv</code> from the shipped OMTs. Runtime audio uses <code>audio_play_db()</code> / <code>audio_set_music_db()</code> to resolve authored handles through those maps. <code>3MUS</code> now selects the first authored non-negative <code>MusicIndex0..4</code>, which reaches Level5a's <code>MusicIndex2=1/2</code> rows. <code>C3DStartPoint</code> music is applied when the player is placed at the named start point, and one-entry music banks fall back to their sole original track.</div>
+</div>
+
+<div class="card">
+<h3>Yokian guard and soldier class textures <span class="badge cat">TEX x3</span></h3>
+<div class="meta">3GUA C3DYokianGuard - 3SOL C3DYokianSoldier</div>
+<div class="quote">"missing yokian texture"</div>
+<div class="ba">
+  <div class="shot"><img src="img/yokian-before.png" alt="before: flat untextured Yokian"><div class="lbl bad">BEFORE - class texture was bound, but every vertex sampled UV (0,0), so the actor appeared as a flat missing-texture blob</div></div>
+  <div class="shot"><img src="img/yokian-after.png" alt="after: Yokian texture visible"><div class="lbl good">AFTER - same class assets, with fallback coordinates so the attached Yokian texture page is sampled across the mesh</div></div>
+</div>
+<p><code>C3DYokianGuard</code> registers <code>guardwalk.ASE</code> and loads <code>yokguard.png</code>. <code>C3DYokianSoldier</code> registers <code>soldwalk.ASE</code> and loads <code>yoksold.png</code>/<code>yoksoldtalk.png</code>. The current engine already selected those class assets, but the original ASE files contain no <code>*MESH_TVERT</code> or <code>*MESH_TFACE</code> blocks. Our loader filled missing UVs with zeroes, so an attached texture page collapsed to one texel.</p>
+<div class="fix"><strong>Fix:</strong> when an ASE has no authored UV blocks, <code>ase_loader.c</code> now supplies object-space fallback UVs derived from the source mesh bounds. This preserves the original class-selected mesh and texture files and removes the missing-texture failure. Exact Yokian atlas unwrap remains a rendering-decomp gap; this page records the fallback as an approximation, not a recovered pixel-exact skin.</div>
+</div>
+
+<h2>Verification</h2>
+<pre>make -j2
+python3 tools/audit_audio_handles.py
+SDL_AUDIODRIVER=dummy python3 tools/audit_faithfulness.py level5a
+SDL_AUDIODRIVER=dummy JN_SCREENSHOT=1 JN_SCREENSHOT_PATH=/tmp/level5a-audio-smoke.png JN_SCREENSHOT_WARMUP_TICKS=2 xvfb-run -a ./jnengine --level level5a
+SDL_AUDIODRIVER=dummy ./tools/qa_shot.sh /tmp/yokian-after.png 1124.9 -4170.9 37567.7 2453.3 -3703.5 37585.2 level5a 1200</pre>
+<ul>
+<li><code>tools/audit_audio_handles.py</code> asserts the Level5a handles above against the generated OMT maps and verifies the Yokian ASE/PNG prerequisites.</li>
+<li><code>audit_faithfulness.py level5a</code> completed with <code>0 findings</code>.</li>
+<li>The dummy-audio smoke log confirms <code>musicarea51[0] -> 0000_Hunting3_11k.wav</code> on Level5a initial placement.</li>
+</ul>
+
+<div class="footer">Generated for the tracked QA folder <code>docs/qa/sandman-2026-06-13/</code>. Mirrored to <code>/var/www/jn-engine/qa/sandman-2026-06-13/</code> during deployment.</div>
+</div>
+</body>
+</html>

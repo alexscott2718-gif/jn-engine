@@ -1,0 +1,103 @@
+# handle	wav_path	name	offset	size
+# source	/home/scotty/xp-jnbg-original/omt/voiceneighborhood.omt
+0	assets/parsed/voiceneighborhood/voiceneighborhood_audio/0007_jimmycarl13.wav	jimmycarl13	220034	45652
+1	assets/parsed/voiceneighborhood/voiceneighborhood_audio/0006_jimmycarl23.wav	jimmycarl23	102940	116102
+2	assets/parsed/voiceneighborhood/voiceneighborhood_audio/0005_jimmycarl22.wav	jimmycarl22	44964	57976
+3	assets/parsed/voiceneighborhood/voiceneighborhood_audio/0011_jimmycarl21.wav	jimmycarl21	319768	53370
+4	assets/parsed/voiceneighborhood/voiceneighborhood_audio/0012_jimmycarl20.wav	jimmycarl20	373138	58640
+5	assets/parsed/voiceneighborhood/voiceneighborhood_audio/0013_jimmycarl19.wav	jimmycarl19	432966	130618
+6	assets/parsed/voiceneighborhood/voiceneighborhood_audio/0015_jimmycarl18.wav	jimmycarl18	627542	21222
+7	assets/parsed/voiceneighborhood/voiceneighborhood_audio/0018_jimmycarl17.wav	jimmycarl17	819434	54932
+8	assets/parsed/voiceneighborhood/voiceneighborhood_audio/0017_jimmycarl16.wav	jimmycarl16	755920	63514
+9	assets/parsed/voiceneighborhood/voiceneighborhood_audio/0016_jimmycarl15.wav	jimmycarl15	648764	99510
+10	assets/parsed/voiceneighborhood/voiceneighborhood_audio/0023_jimmycarl14.wav	jimmycarl14	998932	77276
+11	assets/parsed/voiceneighborhood/voiceneighborhood_audio/0010_jimmycarl24.wav	jimmycarl24	272412	47356
+12	assets/parsed/voiceneighborhood/voiceneighborhood_audio/0022_jimmygoddard3.wav	jimmygoddard3	985492	11804
+13	assets/parsed/voiceneighborhood/voiceneighborhood_audio/0039_jimmybenny2.wav	jimmybenny2	1606678	50062
+14	assets/parsed/voiceneighborhood/voiceneighborhood_audio/0030_jimmybenny3.wav	jimmybenny3	1325610	54828
+15	assets/parsed/voiceneighborhood/voiceneighborhood_audio/0027_jimmybenny4.wav	jimmybenny4	1179666	57514
+16	assets/parsed/voiceneighborhood/voiceneighborhood_audio/0046_jimmybenny5.wav	jimmybenny5	1943218	40556
+17	assets/parsed/voiceneighborhood/voiceneighborhood_audio/0034_jimmygoddard1.wav	jimmygoddard1	1458158	24748
+18	assets/parsed/voiceneighborhood/voiceneighborhood_audio/0036_jimmygoddard2.wav	jimmygoddard2	1537824	27570
+19	assets/parsed/voiceneighborhood/voiceneighborhood_audio/0045_jimmybenny1.wav	jimmybenny1	1915174	28044
+20	assets/parsed/voiceneighborhood/voiceneighborhood_audio/0096_jimmycarl26.wav	jimmycarl26	4815960	64574
+21	assets/parsed/voiceneighborhood/voiceneighborhood_audio/0031_bennywipe.wav	bennywipe	1380438	14940
+22	assets/parsed/voiceneighborhood/voiceneighborhood_audio/0043_jimmybenny1b.wav	jimmybenny1b	1834030	80152
+23	assets/parsed/voiceneighborhood/voiceneighborhood_audio/0080_jimmycarl31.wav	jimmycarl31	3774888	41996
+24	assets/parsed/voiceneighborhood/voiceneighborhood_audio/0058_jimmymom13.wav	jimmymom13	2523674	37180
+25	assets/parsed/voiceneighborhood/voiceneighborhood_audio/0059_jimmymom14.wav	jimmymom14	2560854	86390
+26	assets/parsed/voiceneighborhood/voiceneighborhood_audio/0001_jimmymom15.wav	jimmymom15	15134	18788
+27	assets/parsed/voiceneighborhood/voiceneighborhood_audio/0052_jimmymom16.wav	jimmymom16	2211174	43630
+28	assets/parsed/voiceneighborhood/voiceneighborhood_audio/0041_jimmymom2.wav	jimmymom2	1739868	72498
+29	assets/parsed/voiceneighborhood/voiceneighborhood_audio/0053_jimmymom3.wav	jimmymom3	2269066	53350
+30	assets/parsed/voiceneighborhood/voiceneighborhood_audio/0054_jimmymom4.wav	jimmymom4	2322416	91810
+31	assets/parsed/voiceneighborhood/voiceneighborhood_audio/0021_jimmymom5.wav	jimmymom5	961928	23564
+32	assets/parsed/voiceneighborhood/voiceneighborhood_audio/0055_jimmymom6.wav	jimmymom6	2414226	62208
+33	assets/parsed/voiceneighborhood/voiceneighborhood_audio/0056_jimmymom7.wav	jimmymom7	2476434	26524
+34	assets/parsed/voiceneighborhood/voiceneighborhood_audio/0057_jimmymom8.wav	jimmymom8	2502958	20716
+35	assets/parsed/voiceneighborhood/voiceneighborhood_audio/0000_jimmymom1.wav	jimmymom1	8	15126
+36	assets/parsed/voiceneighborhood/voiceneighborhood_audio/0073_jimmycarl1.wav	jimmycarl1	3312654	37822
+37	assets/parsed/voiceneighborhood/voiceneighborhood_audio/0072_jimmygoddard39.wav	jimmygoddard39	3186446	126208
+38	assets/parsed/voiceneighborhood/voiceneighborhood_audio/0076_jimmygoddard38.wav	jimmygoddard38	3489942	52342
+39	assets/parsed/voiceneighborhood/voiceneighborhood_audio/0070_jimmygoddard37.wav	jimmygoddard37	3077836	44548
+40	assets/parsed/voiceneighborhood/voiceneighborhood_audio/0042_jimmygoddard36.wav	jimmygoddard36	1812366	19522
+41	assets/parsed/voiceneighborhood/voiceneighborhood_audio/0071_jimmygoddard35.wav	jimmygoddard35	3122384	64062
+42	assets/parsed/voiceneighborhood/voiceneighborhood_audio/0095_jimmycarl6.wav	jimmycarl6	4719144	96816
+43	assets/parsed/voiceneighborhood/voiceneighborhood_audio/0014_jimmycarl5.wav	jimmycarl5	563584	52724
+44	assets/parsed/voiceneighborhood/voiceneighborhood_audio/0028_jimmycarl4.wav	jimmycarl4	1237180	40108
+45	assets/parsed/voiceneighborhood/voiceneighborhood_audio/0078_jimmycarl3.wav	jimmycarl3	3624350	61012
+46	assets/parsed/voiceneighborhood/voiceneighborhood_audio/0083_jimmycarl2.wav	jimmycarl2	4004148	57140
+47	assets/parsed/voiceneighborhood/voiceneighborhood_audio/0081_jimmycarl7.wav	jimmycarl7	3838134	79884
+48	assets/parsed/voiceneighborhood/voiceneighborhood_audio/0064_appleteleports.wav	appleteleports	2813730	17900
+49	assets/parsed/voiceneighborhood/voiceneighborhood_audio/0085_jimmygoddard39a.wav	jimmygoddard39a	4088246	66834
+50	assets/parsed/voiceneighborhood/voiceneighborhood_audio/0086_teleportation.wav	teleportation	4155080	55546
+51	assets/parsed/voiceneighborhood/voiceneighborhood_audio/0075_jimmygoddard40.wav	jimmygoddard40	3389938	100004
+52	assets/parsed/voiceneighborhood/voiceneighborhood_audio/0029_jimmyself1.wav	jimmyself1	1284486	41124
+53	assets/parsed/voiceneighborhood/voiceneighborhood_audio/0035_jimmysheen1.wav	jimmysheen1	1484180	53644
+54	assets/parsed/voiceneighborhood/voiceneighborhood_audio/0089_jimmysheen5.wav	jimmysheen5	4330500	72682
+55	assets/parsed/voiceneighborhood/voiceneighborhood_audio/0092_jimmysheen4.wav	jimmysheen4	4537700	50430
+56	assets/parsed/voiceneighborhood/voiceneighborhood_audio/0091_jimmysheen2.wav	jimmysheen2	4451774	80326
+57	assets/parsed/voiceneighborhood/voiceneighborhood_audio/0093_jimmysheen3.wav	jimmysheen3	4588130	41774
+58	assets/parsed/voiceneighborhood/voiceneighborhood_audio/0090_jimmysheen6.wav	jimmysheen6	4403182	48592
+59	assets/parsed/voiceneighborhood/voiceneighborhood_audio/0062_jimmylibby1.wav	jimmylibby1	2649228	56364
+60	assets/parsed/voiceneighborhood/voiceneighborhood_audio/0038_jimmylibby6W.wav	jimmylibby6W	1580832	25754
+61	assets/parsed/voiceneighborhood/voiceneighborhood_audio/0094_jimmylibby8w.wav	jimmylibby8w	4629904	84120
+62	assets/parsed/voiceneighborhood/voiceneighborhood_audio/0050_jimmylibby10W.wav	jimmylibby10W	2114508	37634
+63	assets/parsed/voiceneighborhood/voiceneighborhood_audio/0098_jimmycarl12.wav	jimmycarl12	5018562	106764
+64	assets/parsed/voiceneighborhood/voiceneighborhood_audio/0077_jimmycarl11.wav	jimmycarl11	3542284	76666
+65	assets/parsed/voiceneighborhood/voiceneighborhood_audio/0047_jimmycarl10.wav	jimmycarl10	1983774	85132
+66	assets/parsed/voiceneighborhood/voiceneighborhood_audio/0019_jimmycarl9.wav	jimmycarl9	874366	57000
+67	assets/parsed/voiceneighborhood/voiceneighborhood_audio/0082_jimmylibby12.wav	jimmylibby12	3918018	69702
+68	assets/parsed/voiceneighborhood/voiceneighborhood_audio/0033_jimmylibby11.wav	jimmylibby11	1442634	15524
+69	assets/parsed/voiceneighborhood/voiceneighborhood_audio/0067_jimmylibby10.wav	jimmylibby10	2945650	25642
+70	assets/parsed/voiceneighborhood/voiceneighborhood_audio/0026_jimmylibby9.wav	jimmylibby9	1146802	24042
+71	assets/parsed/voiceneighborhood/voiceneighborhood_audio/0037_jimmylibby8.wav	jimmylibby8	1566388	14444
+72	assets/parsed/voiceneighborhood/voiceneighborhood_audio/0079_jimmylibby6.wav	jimmylibby6	3685362	89526
+73	assets/parsed/voiceneighborhood/voiceneighborhood_audio/0049_jimmylibby7.wav	jimmylibby7	2091830	22678
+74	assets/parsed/voiceneighborhood/voiceneighborhood_audio/0048_jimmylibby5.wav	jimmylibby5	2068906	22924
+75	assets/parsed/voiceneighborhood/voiceneighborhood_audio/0063_jimmylibby4.wav	jimmylibby4	2705592	108138
+76	assets/parsed/voiceneighborhood/voiceneighborhood_audio/0032_jimmylibby3.wav	jimmylibby3	1395378	47256
+77	assets/parsed/voiceneighborhood/voiceneighborhood_audio/0051_jimmylibby2.wav	jimmylibby2	2152588	58586
+78	assets/parsed/voiceneighborhood/voiceneighborhood_audio/0112_phone_ring.wav	phone ring	5918200	52140
+79	assets/parsed/voiceneighborhood/voiceneighborhood_audio/0066_jimmyvox1.wav	jimmyvox1	2915636	30014
+80	assets/parsed/voiceneighborhood/voiceneighborhood_audio/0024_jimmyvox3.wav	jimmyvox3	1076208	58790
+81	assets/parsed/voiceneighborhood/voiceneighborhood_audio/0068_jimmyvox2.wav	jimmyvox2	2971292	42816
+82	assets/parsed/voiceneighborhood/voiceneighborhood_audio/0108_jimmyvox4.wav	jimmyvox4	5674384	101300
+83	assets/parsed/voiceneighborhood/voiceneighborhood_audio/0109_jimmyvox4b.wav	jimmyvox4b	5775684	60252
+84	assets/parsed/voiceneighborhood/voiceneighborhood_audio/0065_jimmymom17.wav	jimmymom17	2841300	74336
+85	assets/parsed/voiceneighborhood/voiceneighborhood_audio/0040_jimmycarl14b.wav	jimmycarl14b	1656740	83128
+86	assets/parsed/voiceneighborhood/voiceneighborhood_audio/0097_jimmycarl1b.wav	jimmycarl1b	4903554	111482
+87	assets/parsed/voiceneighborhood/voiceneighborhood_audio/0088_jimmycarl13b.wav	jimmycarl13b	4234668	95832
+88	assets/parsed/voiceneighborhood/voiceneighborhood_audio/0020_carlinhaler.wav	carlinhaler	931366	30562
+89	assets/parsed/voiceneighborhood/voiceneighborhood_audio/0100_jimmyshrink1.wav	jimmyshrink1	5240314	92488
+90	assets/parsed/voiceneighborhood/voiceneighborhood_audio/0099_jimmyshrink2.wav	jimmyshrink2	5125326	114988
+91	assets/parsed/voiceneighborhood/voiceneighborhood_audio/0074_jimmyshrink4.wav	jimmyshrink4	3350476	35052
+92	assets/parsed/voiceneighborhood/voiceneighborhood_audio/0102_shrink_humphrey.wav	shrink humphrey	5375534	42722
+93	assets/parsed/voiceneighborhood/voiceneighborhood_audio/0104_hump_bark1.wav	hump bark1	5479080	50490
+94	assets/parsed/voiceneighborhood/voiceneighborhood_audio/0105_hump_bark3.wav	hump bark3	5529570	43194
+95	assets/parsed/voiceneighborhood/voiceneighborhood_audio/0106_hump_bark4.wav	hump bark4	5586588	43578
+96	assets/parsed/voiceneighborhood/voiceneighborhood_audio/0107_hump_bark2.wav	hump bark2	5630166	44218
+97	assets/parsed/voiceneighborhood/voiceneighborhood_audio/0069_Hump_growl2.wav	Hump growl2	3014108	62906
+98	assets/parsed/voiceneighborhood/voiceneighborhood_audio/0103_typing.wav	typing	5418256	49530
+99	assets/parsed/voiceneighborhood/voiceneighborhood_audio/0101_vox_recharge2.wav	vox recharge2	5332802	36652
+100	assets/parsed/voiceneighborhood/voiceneighborhood_audio/0111_vox_recharge.wav	vox recharge	5872588	45612

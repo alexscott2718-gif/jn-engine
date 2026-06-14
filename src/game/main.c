@@ -474,16 +474,28 @@ static void configure_safety_floor(World *world, const Entity *jim) {
 static Entity *place_player(World *world, const char *start_point) {
     Entity *jim = world_find_type(world, "3JIM");
     if (!jim) return NULL;
-    if (start_point && start_point[0]) {
+    const char *want = start_point;
+    if (!want || !want[0]) want = jim->start_point;
+    const char *explicit_spawn = getenv("JN_DEMO_SPAWN_XYZ");
+    int preserve_position = (explicit_spawn && explicit_spawn[0] && (!start_point || !start_point[0]));
+    Entity *selected_start = NULL;
+    if (want && want[0]) {
         for (Entity *e = world->head; e; e = e->next) {
             if (strncmp(e->type, "STRT", 4) != 0) continue;
-            if (strcasecmp(e->tag, start_point) == 0) {
-                jim->x = e->x; jim->y = e->y; jim->z = e->z;
+            if (strcasecmp(e->tag, want) == 0) {
+                if (!preserve_position) {
+                    jim->x = e->x; jim->y = e->y; jim->z = e->z;
+                }
+                selected_start = e;
                 printf("[SPAWN] using STRT '%s' at (%.1f, %.1f, %.1f)\n",
                        e->tag, e->x, e->y, e->z);
                 break;
             }
         }
+    }
+    if (selected_start && selected_start->music_database[0]) {
+        int music_index = gam_prop_i(selected_start, "MusicIndex", -1);
+        audio_set_music_db(selected_start->music_database, music_index);
     }
     jim->vx = jim->vy = jim->vz = 0.0f;
     jim->on_ground = 0;
@@ -1277,7 +1289,7 @@ int main(int argc, char **argv) {
 
     /* Find JIM and frame the camera on him. JIM's spawn Y becomes the ground plane. */
     Camera *cam = renderer_camera();
-    Entity *jim  = world_find_type(&world, "3JIM");
+    Entity *jim  = place_player(&world, NULL);
     if (jim) {
         world.ground_y = jim->y - jim->half_extents[1];
         gamestate_set_spawn(jim->x, jim->y, jim->z);

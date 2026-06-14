@@ -1,0 +1,5 @@
+# handle	wav_path	name	offset	size
+# source	/home/scotty/xp-jnbg-original/omt/musicship.omt
+0	assets/parsed/musicship/musicship_audio/0000_yoke_ship_BG_sounds.wav	yoke ship BG sounds	8	155770
+1	assets/parsed/musicship/musicship_audio/0001_Snip1_22k.wav	Snip1_22k	155805	200976
+2	assets/parsed/musicship/musicship_audio/0002_Spooky_22k.wav	Spooky_22k	356781	491568

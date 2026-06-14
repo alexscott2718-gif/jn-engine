@@ -1,0 +1,18 @@
+# handle	wav_path	name	offset	size
+# source	/home/scotty/xp-jnbg-original/omt/voicephonebooth.omt
+0	assets/parsed/voicephonebooth/voicephonebooth_audio/0000_voxphone1.wav	voxphone1	8	76044
+1	assets/parsed/voicephonebooth/voicephonebooth_audio/0001_voxphone6.wav	voxphone6	76052	108684
+2	assets/parsed/voicephonebooth/voicephonebooth_audio/0002_voxphone5-9.wav	voxphone5-9	184736	43532
+3	assets/parsed/voicephonebooth/voicephonebooth_audio/0003_voxphone5-8.wav	voxphone5-8	228268	59340
+4	assets/parsed/voicephonebooth/voicephonebooth_audio/0004_voxphone5-7.wav	voxphone5-7	287608	50380
+5	assets/parsed/voicephonebooth/voicephonebooth_audio/0005_voxphone5-6.wav	voxphone5-6	337988	45644
+6	assets/parsed/voicephonebooth/voicephonebooth_audio/0006_voxphone5-5.wav	voxphone5-5	383632	40780
+7	assets/parsed/voicephonebooth/voicephonebooth_audio/0007_voxphone5-4.wav	voxphone5-4	424412	43404
+8	assets/parsed/voicephonebooth/voicephonebooth_audio/0008_voxphone5-3.wav	voxphone5-3	467816	37772
+9	assets/parsed/voicephonebooth/voicephonebooth_audio/0009_voxphone5-2.wav	voxphone5-2	505588	38348
+10	assets/parsed/voicephonebooth/voicephonebooth_audio/0010_voxphone5-10.wav	voxphone5-10	543936	33132
+11	assets/parsed/voicephonebooth/voicephonebooth_audio/0011_voxphone5-1.wav	voxphone5-1	577068	36300
+12	assets/parsed/voicephonebooth/voicephonebooth_audio/0012_voxphone4.wav	voxphone4	613368	76428
+13	assets/parsed/voicephonebooth/voicephonebooth_audio/0013_voxphone3.wav	voxphone3	689796	62988
+14	assets/parsed/voicephonebooth/voicephonebooth_audio/0014_voxphone2.wav	voxphone2	752784	41230
+15	assets/parsed/voicephonebooth/voicephonebooth_audio/0015_voxphone7.wav	voxphone7	794014	24044

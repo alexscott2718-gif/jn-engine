@@ -6,12 +6,13 @@
  * `MusicDatabase`. `TouchActivated` is the arm/fire state; RequiredLevel /
  * ExactLevel / RemoveLevel gate whether the trigger is live.
  *
- * Native realisation: faithful proximity edge-trigger. The music bank is not
- * loaded yet, so the actual switch routes through audio_set_music() (records +
- * logs the track; no playback). Which of MusicIndex0..4 is selected, and on
- * what condition, is an open decomp question — we use MusicIndex0 (the common
- * single-track case) and dedupe repeat switches. The level gates are read but
- * not enforced (no global level-progress counter yet).
+ * Native realisation: faithful proximity edge-trigger. MusicIndex values are
+ * OMT Wave handles in MusicDatabase. Which of MusicIndex0..4 is selected, and
+ * on what condition, is still an open decomp question; until the condition is
+ * recovered we pick the first authored non-negative slot, which matches the
+ * Level5a musicship trigger rows where slot 2 is the only live choice.
+ * The level gates are read but not enforced (no global level-progress counter
+ * yet).
  *
  * State: user_float = inside-edge (0/1).
  */
@@ -19,6 +20,17 @@
 #include "../../engine/audio.h"
 #include <stddef.h>
 #include <math.h>
+#include <stdio.h>
+
+static int selected_music_index(const Entity *e) {
+    for (int i = 0; i < 5; i++) {
+        char name[16];
+        snprintf(name, sizeof(name), "MusicIndex%d", i);
+        int v = gam_prop_i(e, name, -1);
+        if (v >= 0) return v;
+    }
+    return -1;
+}
 
 static void music_on_spawn(Entity *e, World *w) {
     (void)w;
@@ -38,8 +50,9 @@ static void music_on_update(Entity *e, World *w, float dt) {
     int was_inside = e->user_float > 0.5f;
 
     if (inside && !was_inside) {
-        int track = gam_prop_i(e, "MusicIndex0", 0);
-        audio_set_music(track);   /* records + logs; dedupe lives in audio.c */
+        int track = selected_music_index(e);
+        if (track >= 0)
+            audio_set_music_db(e->music_database, track);
     }
     e->user_float = inside ? 1.0f : 0.0f;
 }

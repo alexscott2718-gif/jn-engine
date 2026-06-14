@@ -1,0 +1,49 @@
+# handle	wav_path	name	offset	size
+# source	/home/scotty/xp-jnbg-original/omt/voicepowerplant.omt
+0	assets/parsed/voicepowerplant/voicepowerplant_audio/0011_jimmymissfowl1.wav	jimmymissfowl1	404266	44550
+1	assets/parsed/voicepowerplant/voicepowerplant_audio/0017_jimmymissfowl4.wav	jimmymissfowl4	1243965	37430
+2	assets/parsed/voicepowerplant/voicepowerplant_audio/0016_jimmymissfowl3.wav	jimmymissfowl3	1181757	62208
+3	assets/parsed/voicepowerplant/voicepowerplant_audio/0043_jimmymissfowl2.wav	jimmymissfowl2	4497305	171468
+4	assets/parsed/voicepowerplant/voicepowerplant_audio/0013_startpower.wav	startpower	498792	378808
+5	assets/parsed/voicepowerplant/voicepowerplant_audio/0021_savecarl3c.wav	savecarl3c	1451989	415354
+6	assets/parsed/voicepowerplant/voicepowerplant_audio/0014_savecarl1c.wav	savecarl1c	877699	74490
+7	assets/parsed/voicepowerplant/voicepowerplant_audio/0015_emptyspace.wav	emptyspace	952189	229568
+8	assets/parsed/voicepowerplant/voicepowerplant_audio/0022_spaceship_blasts_by2d.wav	spaceship blasts by2d	1867343	387634
+9	assets/parsed/voicepowerplant/voicepowerplant_audio/0027_jimmygoddard55.wav	jimmygoddard55	2566907	104834
+10	assets/parsed/voicepowerplant/voicepowerplant_audio/0003_jimmygoddard51.wav	jimmygoddard51	88842	19728
+11	assets/parsed/voicepowerplant/voicepowerplant_audio/0023_jimmygoddard52.wav	jimmygoddard52	2254977	87388
+12	assets/parsed/voicepowerplant/voicepowerplant_audio/0024_jimmygoddard53.wav	jimmygoddard53	2342365	59974
+13	assets/parsed/voicepowerplant/voicepowerplant_audio/0005_jimmygoddard54.wav	jimmygoddard54	152168	20624
+14	assets/parsed/voicepowerplant/voicepowerplant_audio/0019_jimmygoddard50.wav	jimmygoddard50	1358587	54656
+15	assets/parsed/voicepowerplant/voicepowerplant_audio/0025_jimmygoddard53b.wav	jimmygoddard53b	2404899	83616
+16	assets/parsed/voicepowerplant/voicepowerplant_audio/0026_jimmygoddard53c.wav	jimmygoddard53c	2488515	78392
+17	assets/parsed/voicepowerplant/voicepowerplant_audio/0031_jimmygoddard53d.wav	jimmygoddard53d	2826745	64838
+18	assets/parsed/voicepowerplant/voicepowerplant_audio/0045_jimmyself16.wav	jimmyself16	4725165	135396
+19	assets/parsed/voicepowerplant/voicepowerplant_audio/0048_spaceship_blasts_by.wav	spaceship blasts by	5135611	60588
+20	assets/parsed/voicepowerplant/voicepowerplant_audio/0010_jimmyself18.wav	jimmyself18	361738	42528
+21	assets/parsed/voicepowerplant/voicepowerplant_audio/0036_jimmyself13.wav	jimmyself13	3175379	95384
+22	assets/parsed/voicepowerplant/voicepowerplant_audio/0037_spaceship_blasts_by2c.wav	spaceship blasts by2c	3270763	387634
+23	assets/parsed/voicepowerplant/voicepowerplant_audio/0038_savecarl3b.wav	savecarl3b	3658397	425432
+24	assets/parsed/voicepowerplant/voicepowerplant_audio/0039_savecarl1b.wav	savecarl1b	4083829	169436
+25	assets/parsed/voicepowerplant/voicepowerplant_audio/0004_jimmyself17.wav	jimmyself17	108570	41260
+26	assets/parsed/voicepowerplant/voicepowerplant_audio/0040_jimmyself17b.wav	jimmyself17b	4253265	92400
+27	assets/parsed/voicepowerplant/voicepowerplant_audio/0008_jimmyinv1.wav	jimmyinv1	252306	35344
+28	assets/parsed/voicepowerplant/voicepowerplant_audio/0009_jimmyinv13.wav	jimmyinv13	288670	56952
+29	assets/parsed/voicepowerplant/voicepowerplant_audio/0034_jimmyinv12.wav	jimmyinv12	2986671	70660
+30	assets/parsed/voicepowerplant/voicepowerplant_audio/0000_jimmyinv11.wav	jimmyinv11	8	42344
+31	assets/parsed/voicepowerplant/voicepowerplant_audio/0032_jimmyinv10.wav	jimmyinv10	2891583	53828
+32	assets/parsed/voicepowerplant/voicepowerplant_audio/0012_jimmyinv9.wav	jimmyinv9	448816	46570
+33	assets/parsed/voicepowerplant/voicepowerplant_audio/0035_jimmyinv8.wav	jimmyinv8	3057331	107998
+34	assets/parsed/voicepowerplant/voicepowerplant_audio/0044_jimmyinv7.wav	jimmyinv7	4668773	34444
+35	assets/parsed/voicepowerplant/voicepowerplant_audio/0050_jimmyinv6.wav	jimmyinv6	5283549	69996
+36	assets/parsed/voicepowerplant/voicepowerplant_audio/0030_jimmyinv5.wav	jimmyinv5	2749061	56556
+37	assets/parsed/voicepowerplant/voicepowerplant_audio/0042_jimmyinv4.wav	jimmyinv4	4396347	92450
+38	assets/parsed/voicepowerplant/voicepowerplant_audio/0029_jimmyinv3.wav	jimmyinv3	2703041	46020
+39	assets/parsed/voicepowerplant/voicepowerplant_audio/0006_jimmyinv2.wav	jimmyinv2	184322	31300
+40	assets/parsed/voicepowerplant/voicepowerplant_audio/0018_jimmyinv14.wav	jimmyinv14	1281395	52780
+41	assets/parsed/voicepowerplant/voicepowerplant_audio/0046_jimmymissfowl4b.wav	jimmymissfowl4b	4860561	183962
+42	assets/parsed/voicepowerplant/voicepowerplant_audio/0047_spacedoor.wav	spacedoor	5061419	74192
+43	assets/parsed/voicepowerplant/voicepowerplant_audio/0041_pod_escape.wav	pod escape	4345665	50682
+44	assets/parsed/voicepowerplant/voicepowerplant_audio/0002_goddarddogbark_twice.wav	goddarddogbark twice	70850	17356
+45	assets/parsed/voicepowerplant/voicepowerplant_audio/0049_pod_crashing.wav	pod crashing	5196199	87350
+46	assets/parsed/voicepowerplant/voicepowerplant_audio/0001_jimmyself9.wav	jimmyself9	42793	22764

@@ -44,6 +44,8 @@ typedef struct Entity {
     char  grn_fly[64];           /* FLYAnimation GRN filename, when present */
     char  grn_anim[4][64];       /* ANIM1Animation..ANIM4Animation filenames */
     char  sprite_database[64];   /* SpriteDatabase property, when present */
+    char  sound_database[64];    /* SoundDatabase property, when present */
+    char  music_database[64];    /* MusicDatabase property, when present */
     char  omt_database[64];      /* 3OMT: OmtDatabase container filename */
     char  ase_file[64];          /* 3ASE: ASEStop/ASEWalk mesh filename */
     char  png_file[64];          /* 3ASE: PNGFile texture filename */

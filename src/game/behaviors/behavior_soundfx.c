@@ -6,10 +6,9 @@
  * one-shot up to `TimesToTrigger` times on entry. `RequiredLevel` is a progress
  * gate.
  *
- * Native realisation: faithful proximity/state control. The shipped level sound
- * bank is not yet wired (SoundIndex -> bank mapping is an open decomp question,
- * see the spec), so SoundIndex resolves into the small placeholder WAV bank via
- * `SoundIndex % audio_sound_count()`. Gain falls off linearly across Radius.
+ * Native realisation: faithful proximity/state control. SoundIndex is resolved
+ * against the original OMT Wave handle table (global SoundEffects.omt unless a
+ * SoundDatabase property is authored). Gain falls off linearly across Radius.
  * RequiredLevel is read but not enforced (no global level-progress counter yet).
  *
  * State packing (Entity scratch):
@@ -34,13 +33,11 @@ static void soundfx_on_spawn(Entity *e, World *w) {
 static void soundfx_on_update(Entity *e, World *w, float dt) {
     (void)w; (void)dt;
     if (!g_player) return;
-    int nsnd = audio_sound_count();
-    if (nsnd <= 0) return;         /* audio unavailable */
-
     float radius = gam_prop_f(e, "Radius", 200.0f);
     if (radius <= 0.0f) return;
-    int snd = gam_prop_i(e, "SoundIndex", 0) % nsnd;
-    if (snd < 0) snd += nsnd;
+    int snd = gam_prop_i(e, "SoundIndex", -1);
+    if (snd < 0) return;
+    const char *db = e->sound_database[0] ? e->sound_database : "soundeffects.omt";
 
     float dx = g_player->x - e->x;
     float dy = g_player->y - e->y;
@@ -53,7 +50,7 @@ static void soundfx_on_update(Entity *e, World *w, float dt) {
     if (gam_prop_i(e, "IsAmbient", 0)) {
         if (inside) {
             if (e->user_flag == 0) {
-                int ch = audio_play_ex(snd, -1, gain);
+                int ch = audio_play_db(db, snd, -1, gain);
                 e->user_flag = (ch >= 0) ? ch + 1 : 0;
             } else {
                 audio_channel_gain(e->user_flag - 1, gain);
@@ -65,7 +62,7 @@ static void soundfx_on_update(Entity *e, World *w, float dt) {
     } else {
         int was_inside = e->user_float > 0.5f;
         if (inside && !was_inside && e->user_flag > 0) {
-            audio_play_ex(snd, 0, gain);
+            audio_play_db(db, snd, 0, gain);
             e->user_flag--;        /* consume one of TimesToTrigger */
         }
         e->user_float = inside ? 1.0f : 0.0f;

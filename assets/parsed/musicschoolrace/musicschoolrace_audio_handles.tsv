@@ -1,0 +1,4 @@
+# handle	wav_path	name	offset	size
+# source	/home/scotty/xp-jnbg-original/omt/musicschoolrace.omt
+0	assets/parsed/musicschoolrace/musicschoolrace_audio/0000_Race_IntroOutro_11k.wav	Race_IntroOutro_11k	8	356402
+1	assets/parsed/musicschoolrace/musicschoolrace_audio/0001_HuntTension1_11k.wav	HuntTension1 11k	356892	783908

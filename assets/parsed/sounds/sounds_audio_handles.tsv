@@ -1,0 +1,6 @@
+# handle	wav_path	name	offset	size
+# source	/home/scotty/xp-jnbg-original/omt/sounds.omt
+0	assets/parsed/sounds/sounds_audio/0000_Windows_Logon_Sound.wav	Windows Logon Sound	14	486188
+1	assets/parsed/sounds/sounds_audio/0001_save.wav	save	486238	57164
+2	assets/parsed/sounds/sounds_audio/0002_bark1.wav	bark1	543402	155322
+3	assets/parsed/sounds/sounds_audio/0003_detect.wav	detect	698724	78880
