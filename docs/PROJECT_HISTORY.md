@@ -693,6 +693,24 @@ finished at **0 findings** across all levels. Wave-end web deploy is now part of
 browser checks. Next wave is N2: enemies/AI, starting with the
 Yokian family and a shared projectile/health path per `native_port_plan.md`.
 
+**Wave N2 (enemies/AI — Yokian family) landed on `native-port` (2026-06-22).** The first real
+enemies now react to the player. `behavior_enemy.c` ports the `C3DYokian` humanoid family (3SOL
+soldier, 3GUA guard, 3SPY spy) as a faithful subset of the `C3DAI` seek/scan/attack state machine:
+they acquire the player (`C3DAI` `TargetName` default `JIM1`) when inside the authored
+`VisibleRange` and FOV cone, chase via the `behavior_ai` seek primitive, and melee-strike on a
+cooldown in contact range — soldiers are melee in the decompiled body, so they spawn no projectile.
+A `behavior_projectile.c` shared module (FourCC `PROJ`) does spawn → integrate → `world_query_segment`
+wall test → AABB-overlap damage, team-tagged so enemy bolts hurt the player and the player's thrown
+baseball defeats Yokians (`C3DYokian::ReactToHitObject` reacts to `C3DBASEBALL`). Player health lives
+in `gamestate.c` (`gamestate_damage_player`), and enemy knockout uses a new `Entity.hp` plus a brief
+KO dwell before removal. The player can throw a baseball with **F** (Wave N3 will gate it behind the
+pickup/inventory); a headless `JN_TEST_THROW` hook exercises the defeat path under xvfb. Validation
+(level6, player parked in `yoksol`'s view cone): the soldier walked from z≈−3475 to −3742 into attack
+range and struck the player (health 100→70), and a thrown baseball logged `[ENEMY] 3SOL 'yoksol'
+defeated` and removed it. `python3 tools/audit_faithfulness.py` stayed at **0 findings**;
+`./tools/deploy_wasm.sh` published the build (`jnengine.83768ba3.js`, assets `f056e20c`) and
+`python3 tools/qa_web_verify.py` passed. Next wave is N3: player combat + the pickups family.
+
 ---
 
 ## Invariants (don't relitigate these)
