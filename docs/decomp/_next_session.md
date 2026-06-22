@@ -44,32 +44,44 @@ This is a shared, committed campaign — read the shared docs, don't rely on too
   baseball logged `[ENEMY] 3SOL 'yoksol' defeated`. `audit_faithfulness.py` = 0 findings; WASM
   deployed (`jnengine.83768ba3.js`, assets `f056e20c`); `qa_web_verify.py` passed. Headless combat
   exerciser: `JN_TEST_THROW=<tick>` throws at the nearest Yokian.
+- **Wave N3 DONE (player combat + pickups family):** `behavior_balloon.c` ports `C3DBalloon` (`3BAL`,
+  60 real instances) — Jimmy's touch releases it (it drifts up), a thrown baseball (`PROJ_TEAM_PLAYER`)
+  pops it for score (decomp distance-bonus + 10/200 base). The **F** throw is now gated behind
+  `gamestate_has_tool("baseball")`, granted in-level by a `3PIC` awarding `PIC_NUMBER==6`
+  (level1c/level2a/Level2b) or by `behavior_pickup.c`'s ability pickups (`3BPU` baseball, `3BUP` bubble,
+  `3HEL` helmet, `3MEP` score; abilities = gamestate inventory tools). Validation: Level2 logged
+  `[BALLOON] popped … (+69 pts)`, N2 defeat un-regressed, `audit_faithfulness.py` 0 findings,
+  `qa_web_verify.py` 16/16. `JN_TEST_BASEBALL=1` grants the baseball; the headless `JN_TEST_THROW` hook
+  now also targets the nearest `3BAL`. Deferred: `3SHR`/`3GRA`/`3BUB`/`3BAS` (0 instances; props/effects/
+  objects, not pickup→ability) and `3HOO` (an AI object → N2 track); `3MEP`'s Goddard beacon waits on
+  `C3DGoddard`.
 - **Still unimplemented:** the rest of the enemy roster (Digger/Tank/Tesla/Harrier/turret/mine/
-  laser), friends/NPCs (only the player), vehicles (visual-only), pickups→ability wiring, and the
+  laser), friends/NPCs (only the player), **vehicles (visual-only — Wave N4)**, and the
   game-flow/level-controller layer (`main.c` is a generic loop, not a port of
-  `CJimmyGame`/tasks/menus/cutscenes). ~90 of 208 specs have a doc but no runtime behavior.
+  `CJimmyGame`/tasks/menus/cutscenes). ~80 of 208 specs have a doc but no runtime behavior.
 - Implementation contract is `EntityVTable` in `src/engine/world.h`, registered by FourCC in
   `src/game/entities.c`; per-frame via `entity_update()` (`main.c:1418`); `.gam` params via
   `gam_prop_f/i`. Full contract in plan §1.
 
-## Your task this session: Wave N3 (player combat + the pickups family)
-Per plan §4, build on N2's `behavior_projectile.c` and the health model. Replace the generic
-`vt_item` with per-type behaviors where the spec differs, and wire inventory → ability:
-- `C3DBalloon`, `C3DBaseball`/`C3DBaseballPickup`, `C3DBubble`/`C3DBubblePickup`,
-  `C3DGraplingHook`/`C3DHook`, `C3DShrinkRay`, `C3DMetalPickup`, `C3DHelmet`.
-  (`docs/decomp/C3DPickupItem.md`, `C3DPickupType.md`, `CPickupType.md`.)
-- Gate the player's **F**-key throw (already wired in `behavior_player.c` as the N2 seed) behind
-  actually carrying the baseball, and route the thrown/fired items through `behavior_projectile.c`.
-- The shared projectile + `gamestate` health/hit model from N2 are the foundation — reuse them.
+## Your task this session: Wave N4 (vehicles)
+Per plan §4, port a shared **`behavior_vehicle.c`** ride base (mount/dismount, drive physics over the
+N1 `movement_base` helper), then the 12 vehicle leaves as thin overrides:
+- `C3DBus`/`C3DAICar` (AI-driven — reuse `behavior_ai` seek/patrol), `C3DJeep`, `C3DNeuCar`/`C3DNeuCar2`,
+  `C3DSailBoat`, `C3DSub`, `C3DSkateBoard`, `C3DRocket`/`C3DRocketShip`, `C3DPod`, `C3DWheel`.
+  (`docs/decomp/C3DVehicle.md`, `C3DAICar.md`, and the per-leaf specs.)
+- **Distinguish AI-driven from player-driven.** The AI bus (3SBU) drives itself on a patrol; player
+  vehicles mount when Jimmy boards and hand control to the player input path.
+- Reuse N1's `movement_base` (don't re-derive drive physics) and the `gamestate`/projectile foundations
+  where a vehicle has a weapon. **First check which vehicle FourCCs have real `.gam` instances** (grep the
+  corpus like N3 did) so the wave is validated on a level that actually places them, not just registered.
 
-**Remaining enemy roster (defer or fold into a later N2.x pass):** `C3DDigger`, `C3DTank`,
-`C3DTesla`, `C3DHarrier`, `C3DEnemyAircraft`, `C3DMine`, `C3DLaserTrigger`, `C3DYokTurret`,
-`C3DYokianShip`. The ranged ones (turret/tank/tesla/harrier/mine) are the natural first consumers
-of enemy-side `behavior_projectile.c` (`PROJ_TEAM_ENEMY`).
+**Remaining enemy roster (a later N2.x pass):** `C3DDigger`, `C3DTank`, `C3DTesla`, `C3DHarrier`,
+`C3DEnemyAircraft`, `C3DMine`, `C3DLaserTrigger`, `C3DYokTurret`, `C3DYokianShip`, plus `C3DHook` (3HOO,
+the level4b AI hook). The ranged ones are the natural first consumers of enemy-side
+`behavior_projectile.c` (`PROJ_TEAM_ENEMY`).
 
-**Done when:** picking up an item grants its ability and the player can use the thrown/fired items
-against the Wave N2 enemies, `tools/audit_faithfulness.py` stays at 0 findings, and affected levels
-pass `JN_SCREENSHOT` spot checks.
+**Done when:** the player can mount and drive at least one vehicle end-to-end on a level that places it,
+`tools/audit_faithfulness.py` stays at 0 findings, and affected levels pass `JN_SCREENSHOT` spot checks.
 
 ## Inner loop (per class)
 1. Read `docs/decomp/<Class>.md` (§Field map, §Per-frame behavior, §Constants). Confirm
@@ -93,7 +105,7 @@ pass `JN_SCREENSHOT` spot checks.
   source of truth.
 
 ## Definition of done for this session
-Wave N3 grants at least one pickup's ability on collection and lets the player use a thrown/fired
-item (through `behavior_projectile.c`) to defeat a Wave N2 enemy, validation is clean, and per-class
-commits are pushed on `native-port`. If the wave closes, append a Wave N3 paragraph to
-`PROJECT_HISTORY.md` and update this handoff to point at Wave N4 (vehicles).
+Wave N4 lets the player mount and drive at least one vehicle end-to-end on a level that places it
+(over the N1 `movement_base`), AI-driven vehicles drive themselves, validation is clean, and per-class
+commits are made on `native-port`. If the wave closes, append a Wave N4 paragraph to
+`PROJECT_HISTORY.md` and update this handoff to point at Wave N5 (game-flow / level controllers).

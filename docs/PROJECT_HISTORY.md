@@ -711,6 +711,28 @@ defeated` and removed it. `python3 tools/audit_faithfulness.py` stayed at **0 fi
 `./tools/deploy_wasm.sh` published the build (`jnengine.83768ba3.js`, assets `f056e20c`) and
 `python3 tools/qa_web_verify.py` passed. Next wave is N3: player combat + the pickups family.
 
+**Wave N3 (player combat + the pickups family) landed on `native-port` (2026-06-22).** The world now
+*reacts to* the player's combat. The headline is `behavior_balloon.c` (`C3DBalloon`, FourCC `3BAL` —
+60 real instances across Level2/2b/3D/4d): a balloon rests until Jimmy's touch *releases* it (it then
+drifts upward), and a thrown baseball *pops* it for score using the decomp's distance-bonus formula
+and 10 (resting) / 200 (released) base values. The "baseball" is the shared `PROJ_TEAM_PLAYER`
+projectile from N2 — the balloon scans for it, mirroring `C3DBalloon`'s `is_a("C3DBASEBALL")` test.
+The **F**-key throw is now *gated* behind actually carrying the baseball (`gamestate_has_tool`), faithful
+to `C3DBaseballPickup`'s picture/inventory flag `(0,6)`: it's granted in-level by collecting a `3PIC`
+that awards `PIC_NUMBER==6` (8 such pickups in level1c/level2a/Level2b) or by the new
+`behavior_pickup.c` ability pickups. That file ports the touch-to-grant pickups
+`C3DBaseballPickup` (`3BPU`→baseball), `C3DBubblePickup` (`3BUP`→bubble), `C3DHelmet` (`3HEL`→helmet),
+and `C3DMetalPickup` (`3MEP`→score); abilities are modelled as `gamestate` inventory tools (the native
+stand-in for the original picture/inventory flags). Validation: on Level2, a granted baseball thrown at
+the nearest balloon logged `[BALLOON] popped 'C3DBALLOON' (+69 pts, resting)`; the N2 path was confirmed
+un-regressed (`[ENEMY] 3SOL 'yoksol' defeated`); `audit_faithfulness.py` stayed at **0 findings**, Level1
+rendered clean, and `qa_web_verify.py` passed all 16 checks. **Deferred** (0 `.gam` instances and outside
+the pickup→ability shape): `C3DShrinkRay` (3SHR, animated ray prop), `C3DGraplingHook` (3GRA, code-spawned
+rope visual), `C3DBubble`/`C3DBaseball` (3BUB/3BAS effect+projectile *objects*, represented by the bubble
+ability + `PROJ`), and `C3DHook` (3HOO, an AI object in level4b — belongs with the N2 enemy/AI track).
+The `C3DMetalPickup` Goddard fetch-beacon (controller mode 5/2) waits on `C3DGoddard`. Next wave is N4:
+vehicles (`behavior_vehicle.c` ride base + the 12 vehicle leaves).
+
 ---
 
 ## Invariants (don't relitigate these)
