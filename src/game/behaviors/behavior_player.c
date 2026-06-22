@@ -1,5 +1,6 @@
 #include "behaviors.h"
 #include "../../engine/input.h"
+#include "../../engine/movement_base.h"
 #include "../gamestate.h"
 #include "../player_anim.h"
 #include <math.h>
@@ -80,20 +81,10 @@ static void player_on_update(Entity *e, World *w, float dt) {
     float vjx, vjy;
     input_get_virtual_move(&vjx, &vjy);
     turn += vjx; fwd += vjy;
-    turn = clampf(turn, -1.0f, 1.0f);
-    fwd  = clampf(fwd,  -1.0f, 1.0f);
-
-    /* Rotate heading. forward dir in world XZ is (sin ry, cos ry).
-       Negative so LEFT turns left / RIGHT turns right (matches the original). */
-    e->ry -= turn * PLAYER_TURN_RATE * dt;
-
-    if (fabsf(fwd) > 0.0001f) {
-        e->vx = sinf(e->ry) * speed * fwd;
-        e->vz = cosf(e->ry) * speed * fwd;
-    } else {
-        e->vx = 0.0f;
-        e->vz = 0.0f;
-    }
+    MovementTankInput drive =
+        movement_base_tank_drive(e, turn, fwd, speed, PLAYER_TURN_RATE, dt);
+    turn = drive.turn;
+    fwd = drive.forward;
 
     if (noclip) {
         float up = 0.0f;
