@@ -28,6 +28,12 @@ extern const EntityVTable vt_walker;      /* 3CAR — C3DAI patrol walker (Carl)
 extern const EntityVTable vt_patrolpoint; /* 3PAT — C3DPatrolPoint (nav node) */
 extern const EntityVTable vt_yokian;      /* 3SOL/3GUA/3SPY — C3DYokian family */
 extern const EntityVTable vt_projectile;  /* PROJ — shared projectile */
+/* Wave N3 — player combat + pickups family. */
+extern const EntityVTable vt_balloon;        /* 3BAL — C3DBalloon (release/pop) */
+extern const EntityVTable vt_baseball_pickup; /* 3BPU — C3DBaseballPickup */
+extern const EntityVTable vt_bubble_pickup;   /* 3BUP — C3DBubblePickup */
+extern const EntityVTable vt_helmet;          /* 3HEL — C3DHelmet */
+extern const EntityVTable vt_metal_pickup;    /* 3MEP — C3DMetalPickup */
 
 /* The currently-controlled player; resolved at spawn. NULL until first 3JIM resolved. */
 extern Entity *g_player;
