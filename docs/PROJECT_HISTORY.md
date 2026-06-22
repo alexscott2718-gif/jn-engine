@@ -687,7 +687,10 @@ idle/seek/patrol primitives. Carl's `vt_walker` now routes through the AI patrol
 carrying its own waypoint loop. Validation: `make`; `JN_SCREENSHOT` spot checks
 (`build/wave_n1_level1.png`, `build/wave_n1_level1b_carl.png`); Carl runtime dump after 240 ticks
 showed `C3DCARL` moving toward `CARL1` through the new base; `python3 tools/audit_faithfulness.py`
-finished at **0 findings** across all levels. Next wave is N2: enemies/AI, starting with the
+finished at **0 findings** across all levels. Wave-end web deploy is now part of the process:
+`./tools/deploy_wasm.sh` published the WASM build to https://exentt.com/jn-engine/
+(`jnengine.9da47a6d.js`, assets `fa48bc1b`), and `python3 tools/qa_web_verify.py` passed all
+browser checks. Next wave is N2: enemies/AI, starting with the
 Yokian family and a shared projectile/health path per `native_port_plan.md`.
 
 ---
