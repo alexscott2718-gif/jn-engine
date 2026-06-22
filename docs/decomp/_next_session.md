@@ -63,38 +63,58 @@ This is a shared, committed campaign — read the shared docs, don't rely on too
   (`JN_TEST_RIDE=<tick>`); Level2 bus drove ~391 units along `bus01`; audit 0 findings; `qa_web_verify` 16/16.
   Deferred: full `C3DVehicle` car-sim (`3CAR`=Carl; car leaves `3JEE`/`3NCA`/`3NC2`/`3POD`/`3SUB`/`3BOA`/`3WHE`
   have 0 instances) + SUV light-cone / AICar horn / SailBoat bob (need C3DLightCone/effect/Goddard).
+- **Wave N5 DONE (game-flow / level controllers):** the controller layer that was faked by a generic
+  `main.c` loop is ported in four pieces. `task_loader.c` ports **`CTaskList`** — the `.tsk` deserializer,
+  byte-exact with `tools/tsk_parser.py` (`NewGame.tsk` → `level1b.gam`, spawn `470.5965/609.2417/-87.7631`,
+  12-entity table incl. `SCENE=30`); falls back to a baked NewGame default since the `.tsk` binaries aren't
+  committed. `game_flow.c` ports **`CJimmyGame`** — `InitGame` seeds lives=5/`mission_value`=100/active=1, the
+  **40 zero-method `CLevel*Game`/`CLevelVR0N` leaves collapse into one level table**, death routes through the
+  lives/restart flow (`C2DInGameMenu` semantics; `gamestate` no longer auto-refills, exposes
+  `gamestate_player_is_down()`), and the win condition bridges `gamestate`'s level-clear to
+  `game_flow_level_objective_met()`. `behavior_cutscene.c` ports **`C3DCutSceneCamera`/`C3DMultiCutSceneCamera`**
+  (`3CAM`/`3MCA`) — each `3CAM` registers a shot (CameraTarget+TargOffset+dists+ZoomSpeed+LookVoffset) and the
+  runtime sequences the level's shots through the follow-cam slot. `menu.c` ports **`CMainMenu`** — a `--menu`
+  front-end routing New Game → `NewGame.tsk` → `level1b` (campaign mode on) / the 8 VR levels / Quit through the
+  level-swap machinery. Campaign entry / cutscene / menu are gated behind `--newgame` / `--menu` / `JN_CUTSCENE`,
+  so direct `--level X` launches keep campaign mode OFF and the audit + matched-camera validators render exactly
+  as before. The `RequiredLevel` visibility gate stays env-driven (`JN_PROGRESS_LEVEL`) — mapping campaign
+  progress → the original's ~550-range thresholds is a documented open question (no save-progress ground truth).
+  Validation: `--newgame` starts at `level1b` (lives=5); `--menu` auto-confirms New Game → swaps into `level1b`;
+  `level1a` sequences its 3 cutscene shots; `audit_faithfulness.py` 0 findings; WASM rebuilt and
+  `qa_web_verify.py` 16/16. Web deploy (`./tools/deploy_wasm.sh`) is the only wave-end step left and is
+  outward-facing — gated on user approval.
 - **Still unimplemented:** the rest of the enemy roster (Digger/Tank/Tesla/Harrier/turret/mine/
-  laser), friends/NPCs (only the player), and the **game-flow/level-controller layer (Wave N5)** —
-  `main.c` is a generic loop, not a port of `CJimmyGame`/tasks/menus/cutscenes. ~75 of 208 specs have a
-  doc but no runtime behavior.
+  laser), and friends/NPCs (only the player). ~60 of 208 specs have a doc but no runtime behavior. The big
+  structural waves (N1 base framework, N2 enemies, N3 combat/pickups, N4 vehicles, N5 game-flow) are all landed.
 - Implementation contract is `EntityVTable` in `src/engine/world.h`, registered by FourCC in
   `src/game/entities.c`; per-frame via `entity_update()` (`main.c:1418`); `.gam` params via
   `gam_prop_f/i`. Full contract in plan §1.
 
-## Your task this session: Wave N5 (game-flow / level controllers)
-Per plan §4 (the biggest structural gap), port the controller layer that today is faked by a generic
-`main.c` loop. Hold the decomp discipline — confirm behavior against `docs/decomp/<Class>.md`, table-drive
-the repetitive parts, special-case only the outliers:
-- `CJimmyGame` master controller + `CLoadLevel` + `CTaskList` → a real **objective / win-condition /
-  task-state** layer (replace the ad-hoc `gamestate` level-clear logic). The existing
-  `behavior_base.c` progress-gate bridge (`JN_PROGRESS_LEVEL`) and `gamestate` level-swap plumbing are
-  the seeds.
-- `CMainMenu` / `CMenuElement` / `C2DInGameMenu` → menu, pause, in-game HUD menu.
-- The ~40 `CLevel*Game` / `CLevelVR*` → a **data-driven per-level script table** (most are thin hooks;
-  a few carry real logic, e.g. `CLevel01FGame` death/restart). Decompile `CLevel01AGame` as the exemplar,
-  then diff the rest — don't hand-port 40 near-identical controllers.
-- Cutscene sequencing (`CMultiCutSceneCamera` + the cutscene-camera classes) → a scripted camera timeline.
-  (`docs/decomp/CJimmyGame.md`, `CTaskList.md`, `CMainMenu.md`, `CLevel01AGame.md`, and the controller specs;
-  cross-check each `CLevel*Game` against its `.gam`.)
+## Your task this session: Wave N2.x (remaining enemy roster) + friends/NPCs
+The big structural waves (N1–N5) are landed. The largest remaining *gameplay* gap is the rest of the enemy
+roster and the friend/NPC cast. Hold the decomp discipline — confirm behavior against `docs/decomp/<Class>.md`
+(the decompiled body, not an offset scan), build on the existing N1–N4 modules, and **first grep the corpus for
+which FourCCs have real `.gam` instances** so the wave is validated on levels that actually place them.
 
-**Remaining enemy roster (a later N2.x pass):** `C3DDigger`, `C3DTank`, `C3DTesla`, `C3DHarrier`,
-`C3DEnemyAircraft`, `C3DMine`, `C3DLaserTrigger`, `C3DYokTurret`, `C3DYokianShip`, plus `C3DHook` (3HOO,
-the level4b AI hook). The ranged ones are the natural first consumers of enemy-side
-`behavior_projectile.c` (`PROJ_TEAM_ENEMY`).
+**Remaining enemy roster (consume the existing `behavior_ai.c` + `behavior_projectile.c`):** `C3DDigger`,
+`C3DTank`, `C3DTesla`, `C3DHarrier`, `C3DEnemyAircraft`, `C3DMine`, `C3DLaserTrigger`, `C3DYokTurret`,
+`C3DYokianShip`, plus `C3DHook` (`3HOO`, the level4b AI hook). The **ranged ones** (turret/tank/harrier/tesla)
+are the natural first consumers of **enemy-side `behavior_projectile.c` (`PROJ_TEAM_ENEMY`)** — that path
+already exists from N2 (player side) and just needs an enemy spawner + the player-damage hit branch.
+`C3DMine`/`C3DLaserTrigger` are proximity/trigger damagers (lean on `behavior_trigger_spawn_base`).
 
-**Done when:** a level can be entered from a menu, its objectives tracked to a win state, and it transitions
-to the next level without per-level C hardcoding; `tools/audit_faithfulness.py` stays at 0 findings, and
-affected levels pass `JN_SCREENSHOT` spot checks.
+**Friends / NPCs:** only the player is ported. The `CTaskList` entity-state table (MOM/LIBBY/BENNY/SCENE/
+REACTOR — seeded via `game_flow_entity_state(tag)`) is the mission-actor hook for these; the `3CAM` cutscene
+TargetActAnim/FaceObject and the `SCENE=30` sequencer state are the wiring points.
+
+**Two small N5 tails worth picking up:** (1) a real **text renderer** for the menu/HUD (today `menu.c` draws
+bars + logs labels; `C2DInGameMenu` counters print numerals); (2) plumbing the `PlayerControlled` string prop
+onto the entity so cutscenes can lock player input (deferred in N5).
+
+**Done when:** at least the ranged-enemy track fires `PROJ_TEAM_ENEMY` projectiles that damage the player and
+can be defeated, validated against the levels that place them; `tools/audit_faithfulness.py` stays at 0 findings,
+affected levels pass `JN_SCREENSHOT` spot checks, and (wave end) `qa_web_verify.py` 16/16 with a one-line
+PROJECT_HISTORY paragraph + this handoff updated.
 
 ## Inner loop (per class)
 1. Read `docs/decomp/<Class>.md` (§Field map, §Per-frame behavior, §Constants). Confirm
@@ -118,8 +138,9 @@ affected levels pass `JN_SCREENSHOT` spot checks.
   source of truth.
 
 ## Definition of done for this session
-Wave N5 lets a level be entered from a menu, tracks its objectives to a win state via a real task layer,
-and transitions to the next level without per-level C hardcoding, validation is clean, and per-class
-commits are made on `native-port`. If the wave closes, append a Wave N5 paragraph to `PROJECT_HISTORY.md`
-and update this handoff (the native-port campaign would then have its base framework, enemies, combat,
-vehicles, and game-flow all ported — see `native_port_plan.md` for any remaining N2.x/cleanup tails).
+The ranged-enemy track (turret/tank/harrier/tesla) fires `PROJ_TEAM_ENEMY` projectiles that damage the player
+and can be defeated, validated on the levels that place those FourCCs; the proximity damagers (mine/laser) hurt
+on contact; validation is clean (`audit_faithfulness.py` 0 findings, `JN_SCREENSHOT` spot checks) and per-class
+commits are made on `native-port`. At wave end, rebuild + run `qa_web_verify.py` (16 checks), append a paragraph
+to `PROJECT_HISTORY.md`, and update this handoff. With N1–N5 already landed, the campaign's base framework,
+enemies, combat, vehicles, and game-flow are all ported — this wave fills the remaining enemy/NPC gameplay gap.

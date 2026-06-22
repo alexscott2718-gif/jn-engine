@@ -753,6 +753,37 @@ full `C3DVehicle` player-car sim (6-wheel steering/suspension; `3CAR` is taken b
 AICar horn-contact response / SailBoat sine-bob (need the C3DLightCone/effect/Goddard subsystems). Next wave
 is N5: the game-flow / level-controller layer (`CJimmyGame`, `CTaskList`, menus, the 40 `CLevel*Game`, cutscenes).
 
+**Wave N5 (game-flow / level controllers) landed on `native-port` (2026-06-22).** The biggest structural
+gap — `main.c` was a generic loop, not a port of the controller layer — is now filled by four pieces.
+**`CTaskList`** (`task_loader.c`): a C port of the `.tsk` deserializer (byte-exact with `tools/tsk_parser.py`
+on `NewGame.tsk` → `level1b.gam`, spawn `470.5965/609.2417/-87.7631`, 12-entity table incl. `SCENE=30`); the
+proprietary `.tsk` binaries aren't committed, so `task_load()` searches `JN_TSK_ROOT`/gam root/xp-jnbg-original
+and falls back to a baked `NewGame` default. **`CJimmyGame`** (`game_flow.c`): the per-level game-mode
+controller — `InitGame` seeds the mission layer (lives/`mission_counter`=5, `mission_value`=100,
+`mission_active`=1); the **40 zero-owned-method `CLevel*Game`/`CLevelVR0N` leaves collapse into one data-driven
+level table** (they only bind a `.gam` + campaign position); the death path now routes through CJimmyGame's
+lives/restart flow (`C2DInGameMenu` death semantics — a real death spends a life and respawns, game-over resets
+the mission, manual **R** costs none; `gamestate` no longer auto-refills) and the win condition bridges
+`gamestate`'s level-clear to `game_flow_level_objective_met()`. **`C3DCutSceneCamera`/`C3DMultiCutSceneCamera`**
+(`behavior_cutscene.c`): each placed `3CAM` registers a shot (CameraTarget — mapped onto `activate_target` by
+the loader — + TargOffset/InitialDist/Min/Max/ZoomSpeed/LookVoffset) and the runtime plays the level's shots in
+sequence (the `3MCA` sequencer role) through the follow-cam slot, framing each named target with eased distance.
+**`CMainMenu`** (`menu.c`): a `--menu` front-end (Up/Down + Enter over the loaded level as backdrop) whose items
+mirror the executable's level-file table — New Game → `NewGame.tsk` → `level1b` (turning on campaign mode), the
+8 VR levels in their specced menu order, and Quit — routing selections through the existing level-swap machinery
+with gameplay frozen while open. **The campaign entry / cutscene / menu are all gated behind `--newgame` /
+`--menu` / `JN_CUTSCENE`**, so a direct `--level X` launch (the audit + matched-camera validators) keeps campaign
+mode OFF and renders exactly as before — and the **`RequiredLevel`/`ExactLevel` visibility gate is deliberately
+left env-driven** (the original's ~550-range progress counter and its per-objective increments aren't
+ground-truthed, so feeding it a small campaign ordinal would wrongly hide gated objects — a documented open
+question). Validation: `--newgame` starts at `level1b` (lives=5); `--menu` opens, auto-confirms New Game, and
+swaps into `level1b` end-to-end; `level1a` sequences its 3 cutscene shots to a non-black frame;
+`audit_faithfulness.py` **0 findings** across 35 levels and `qa_web_verify.py` **16/16** on the WASM build.
+**Deferred**: full CTrigger→3MCA→3CAM message activation + the CameraType/ViewFromCamera enums + PlayerControlled
+input lock (the string prop isn't plumbed yet); a real menu/HUD text renderer; and the remaining N2.x enemy
+roster (Digger/Tank/Tesla/Harrier/turret/mine/laser, the natural first consumers of enemy-side
+`behavior_projectile.c`).
+
 ---
 
 ## Invariants (don't relitigate these)
