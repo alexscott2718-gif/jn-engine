@@ -20,6 +20,16 @@ static int g_is_jnbg = 1;
 void entity_visual_set_jnbg(int is_jnbg) { g_is_jnbg = is_jnbg; }
 int  entity_visual_is_jnbg(void)         { return g_is_jnbg; }
 
+/* Sandbox/verification mode (--sandbox / ?sandbox=1): reveals normally-hidden
+   rideable objects so they can be found and driven in the browser. Default
+   rendering (the audit + matched-camera validators run with this OFF) is
+   unchanged. Today this un-hides the rideable C3DRocketShip (3ROC), which the
+   default path keeps invisible (lu9 QA classified it as a scripted prop;
+   Wave N4 then made it the rideable vehicle — sandbox reconciles the two so
+   the vehicle is visible where it is boardable). */
+static int g_sandbox = 0;
+void entity_visual_set_sandbox(int on) { g_sandbox = on; }
+
 const char *sprite_db_path(const char *db, int chunk_id) {
     if (!db || !db[0]) return NULL;
     for (int i = 0; i < SPRITE_CHUNK_MAP_N; i++)
@@ -593,6 +603,16 @@ int entity_visual_tag_override(const Entity *e, EntityVisual *out) {
 
 int entity_visual_resolve(const Entity *e, EntityVisual *out) {
     if (!e || !out) return 0;
+
+    /* Sandbox: draw the rideable rocketship (C3DRocketShip) with its Strato
+       mesh so it can be located and boarded. Off by default (audit unaffected). */
+    if (g_sandbox && strncmp(e->type, "3ROC", 4) == 0) {
+        EntityVisual v = {0};
+        v.model_path = "assets/ase/strato.ASE";
+        v.scale = 1.0f;
+        *out = v;
+        return 1;
+    }
 
     if (entity_visual_tag_override(e, out)) return 1;
     if (resolve_grn_asset(e, out)) return 1;

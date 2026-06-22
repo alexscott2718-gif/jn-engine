@@ -43,6 +43,11 @@ int entity_visual_tag_override(const Entity *e, EntityVisual *out);
 void entity_visual_set_jnbg(int is_jnbg);
 int  entity_visual_is_jnbg(void);
 
+/* Sandbox/verification mode: reveal normally-hidden rideable objects (the
+   C3DRocketShip 3ROC) so they can be located and driven. Default OFF, so the
+   audit + matched-camera validators are unaffected. */
+void entity_visual_set_sandbox(int on);
+
 /* JNBG sprite-database lookups: (.gam SpriteDatabase, SpriteIndex=chunk id)
    -> extracted PNG path, NULL if unknown. sprite_chunk_path is the
    sprites.omt shorthand used by the pickup draw path. */

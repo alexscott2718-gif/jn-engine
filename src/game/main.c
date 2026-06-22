@@ -953,6 +953,7 @@ int main(int argc, char **argv) {
     const char *start_level = "level1";
     int want_newgame = 0;
     int want_menu = 0;
+    int want_sandbox = 0;
     for (int i = 1; i < argc; i++) {
         if (i < argc - 1 && strcmp(argv[i], "--level") == 0) {
             start_level = argv[i + 1];
@@ -961,6 +962,8 @@ int main(int argc, char **argv) {
             want_newgame = 1;
         } else if (strcmp(argv[i], "--menu") == 0) {
             want_menu = 1;
+        } else if (strcmp(argv[i], "--sandbox") == 0) {
+            want_sandbox = 1;
         }
     }
 
@@ -1128,6 +1131,19 @@ int main(int argc, char **argv) {
        The default GAM root is JNBG; a root naming jnvsjn selects the sequel. */
     entity_visual_set_jnbg(
         strstr(env_root_default("JN_GAM_ROOT", "assets/gam"), "jnvsjn") == NULL);
+
+    /* Sandbox / verification mode (--sandbox, or ?sandbox=1 on the web): reveal
+       the rideable C3DRocketShip and grant the combat tools so the player can
+       actually exercise the Wave N2–N4 behaviors in-browser, where the
+       JN_TEST_* env hooks aren't reachable and there's no inventory UI yet.
+       Must precede load_level so the visual resolver sees the flag. */
+    if (want_sandbox) {
+        entity_visual_set_sandbox(1);
+        gamestate_grant_tool("baseball", NULL);   /* enables the F throw */
+        gamestate_grant_tool("bubble", NULL);
+        gamestate_grant_tool("helmet", NULL);
+        printf("[SANDBOX] rocketship revealed; baseball/bubble/helmet granted\n");
+    }
 
     int n = load_level(&current_desc, &world);
     if (n < 0) {
