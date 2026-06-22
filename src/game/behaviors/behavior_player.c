@@ -108,10 +108,13 @@ static void player_on_update(Entity *e, World *w, float dt) {
         e->on_ground = 0;
     }
 
-    /* Throw a baseball (F) — defeats Yokians via the shared projectile path
-       (C3DYokian reacts to C3DBASEBALL). Wave N2 seed: always available; Wave
-       N3 will gate it behind picking up the baseball and wire the throw anim. */
-    if (!noclip && input_just_pressed(SDL_SCANCODE_F)) {
+    /* Throw a baseball (F) — defeats Yokians and pops balloons via the shared
+       projectile path (C3DYokian reacts to C3DBASEBALL; C3DBalloon pops on it).
+       Wave N3: gated behind actually carrying the baseball — granted by a
+       C3DBaseballPickup (3BPU) or by collecting a 3PIC that awards the baseball
+       picture (PIC_NUMBER==6), e.g. in level1c / level2a / Level2b. */
+    if (!noclip && input_just_pressed(SDL_SCANCODE_F) &&
+        gamestate_has_tool("baseball")) {
         float fx = sinf(e->ry), fz = cosf(e->ry);
         /* Spawn clear of the player's own SOLID AABB (half ~35) so the
            projectile's wall raycast doesn't immediately stop on the thrower. */

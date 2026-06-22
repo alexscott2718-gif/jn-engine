@@ -1247,7 +1247,13 @@ int main(int argc, char **argv) {
         gamestate_grant_tool("glasses",  "assets/hud/tool_glasses.png");
         gamestate_grant_tool("jetpack",  "assets/hud/tool_jetpack.png");
         gamestate_grant_tool("wrench",   "assets/hud/tool_wrench.png");
+        gamestate_grant_tool("baseball", NULL);   /* enables the F throw */
     }
+
+    /* Wave N3: grant the baseball so the gated F-key throw (and the balloon-pop
+       path) can be exercised without first walking to a PIC_NUMBER==6 pickup. */
+    if (getenv("JN_TEST_BASEBALL"))
+        gamestate_grant_tool("baseball", NULL);
 
     if (getenv("JN_TEST_GEMS")) {
         Entity *jp = world_find_type(&world, "3JIM");
@@ -1456,8 +1462,10 @@ int main(int argc, char **argv) {
                 Entity *best = NULL; float bestd2 = 1e30f;
                 for (Entity *en = world.head; en; en = en->next) {
                     if (!en->alive || en == jim) continue;
+                    /* Yokians (N2) and balloons (N3) are both valid baseball
+                       targets — picks the nearest so the test works on either. */
                     if (strncmp(en->type, "3SOL", 4) && strncmp(en->type, "3GUA", 4) &&
-                        strncmp(en->type, "3SPY", 4)) continue;
+                        strncmp(en->type, "3SPY", 4) && strncmp(en->type, "3BAL", 4)) continue;
                     float dx = en->x - jim->x, dz = en->z - jim->z;
                     float d2 = dx * dx + dz * dz;
                     if (d2 < bestd2) { bestd2 = d2; best = en; }

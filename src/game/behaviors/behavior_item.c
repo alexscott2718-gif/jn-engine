@@ -85,6 +85,11 @@ static void item_on_trigger(Entity *e, Entity *by) {
         }
     }
     item_grant_tool(e);
+    /* A 3PIC that awards the baseball picture (PIC_NUMBER==6, the same id
+       C3DBaseballPickup sets) grants the throw ability — the faithful, in-level
+       way to obtain the baseball (level1c / level2a / Level2b). */
+    if (gam_prop_i(e, "PIC_NUMBER", -1) == 6)
+        gamestate_grant_tool("baseball", NULL);
     gamestate_item_collected();
 }
 
