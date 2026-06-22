@@ -19,6 +19,7 @@
 #include "../engine/assets/billboard_overrides.h"
 #include "entities.h"
 #include "entity_visual.h"
+#include "behaviors/behaviors.h"
 #include "behaviors/behavior_projectile.h"
 #include "behaviors/behavior_enemy.h"
 #include "behaviors/behavior_vehicle.h"
@@ -1346,7 +1347,9 @@ int main(int argc, char **argv) {
         }
     }
 
-    /* Bind vtables + run on_spawn for every entity (must come after gam_load). */
+    /* Bind vtables + run on_spawn for every entity (must come after gam_load).
+       Reset the cutscene shot list first so 3CAM on_spawn registers fresh. */
+    cutscene_reset();
     entity_bind_vtables(&world);
 
     /* Find JIM and frame the camera on him. JIM's spawn Y becomes the ground plane. */
@@ -1359,6 +1362,14 @@ int main(int argc, char **argv) {
                jim->x, jim->y, jim->z, world.ground_y);
     }
     game_flow_enter_level(current_desc.name);
+
+    /* Intro cutscene: play the level's scripted 3CAM shots on a real new-game
+       (campaign) entry, or on demand via JN_CUTSCENE. A direct `--level X`
+       launch (audit + matched-camera validators) leaves campaign mode OFF and
+       JN_CUTSCENE unset, so the camera stays on the follow cam — rendering is
+       unchanged from before Wave N5. */
+    if (game_flow_campaign_active() || env_enabled("JN_CUTSCENE"))
+        cutscene_request_intro();
     configure_safety_floor(&world, jim);
     cam->fov = 1.047215f;
     cam->near_z = 20.0f;
@@ -1572,6 +1583,7 @@ int main(int argc, char **argv) {
                     if (load_level(&swap_desc, &world) >= 0) {
                         current_desc = swap_desc;
                         configure_level_sky(&current_desc, &sky_model, &clouds_tex);
+                        cutscene_reset();
                         entity_bind_vtables(&world);
                         /* Player textures + models + ground stay live across levels. */
                         tex_cache_get("assets/png/jimycarl.png");
@@ -1626,10 +1638,13 @@ int main(int argc, char **argv) {
                 }
             }
 
-            /* Follow camera tracks the player — unless a matched-camera
+            /* Camera: a playing cutscene drives the pose directly; otherwise
+               the follow camera tracks the player — unless a matched-camera
                override is installed (M7a), in which case the camera pose is
                fixed by the descriptor and begin_frame ignores the follow cam. */
-            if (!renderer_camera_override_active())
+            if (cutscene_active())
+                cutscene_update(cam, &world, DT);
+            else if (!renderer_camera_override_active())
                 follow_cam_update(&fcam, cam, jim, &world, DT);
         }
 

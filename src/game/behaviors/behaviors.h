@@ -2,6 +2,7 @@
 #define GAME_BEHAVIORS_H
 
 #include "../../engine/world.h"
+#include "../../engine/renderer.h"
 
 extern const EntityVTable vt_default;
 extern const EntityVTable vt_player;
@@ -37,6 +38,17 @@ extern const EntityVTable vt_metal_pickup;    /* 3MEP — C3DMetalPickup */
 /* Wave N4 — vehicles. */
 extern const EntityVTable vt_rocket;          /* 3ROC — C3DRocketShip (player-rideable) */
 extern const EntityVTable vt_ai_vehicle;      /* 3SUV/3SBU/3SAI — self-driving C3DAI vehicles */
+/* Wave N5 — scripted cutscene cameras. */
+extern const EntityVTable vt_cutscene_camera; /* 3CAM — C3DCutSceneCamera (shot) */
+extern const EntityVTable vt_multi_cutscene;  /* 3MCA — C3DMultiCutSceneCamera (sequencer) */
+
+/* Cutscene runtime (behavior_cutscene.c). 3CAM shots register on spawn; the
+   sequence plays through renderer_set_camera_override when requested. Off by
+   default so the audit / matched-camera validators are unaffected. */
+void cutscene_reset(void);                    /* clear registered shots (per level) */
+void cutscene_request_intro(void);            /* begin playing the level's shots */
+int  cutscene_active(void);
+void cutscene_update(Camera *cam, World *w, float dt);
 
 /* The currently-controlled player; resolved at spawn. NULL until first 3JIM resolved. */
 extern Entity *g_player;

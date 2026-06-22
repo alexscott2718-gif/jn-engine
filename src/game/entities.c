@@ -56,6 +56,9 @@ static const EntityTypeInfo entity_types[] = {
     { "3SUV", "AI SUV",                &vt_ai_vehicle },
     { "3SBU", "AI school bus",         &vt_ai_vehicle },
     { "3SAI", "AI sailboat",           &vt_ai_vehicle },
+    /* Wave N5: scripted cutscene cameras (invisible directors). */
+    { "3CAM", "Cutscene camera",       &vt_cutscene_camera },
+    { "3MCA", "Multi-cutscene camera", &vt_multi_cutscene },
     { NULL, NULL, NULL }
 };
 
