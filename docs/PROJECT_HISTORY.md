@@ -734,6 +734,24 @@ ability + `PROJ`), and `C3DHook` (3HOO, an AI object in level4b — belongs with
 The `C3DMetalPickup` Goddard fetch-beacon (controller mode 5/2) waits on `C3DGoddard`. Next wave is N4:
 vehicles (`behavior_vehicle.c` ride base + the 12 vehicle leaves).
 
+**Wave N4 (vehicles) landed on `native-port` (2026-06-22).** Vehicles split cleanly along their decomp base
+chains, and both halves reuse N1 modules. `behavior_vehicle.c` ports **`C3DRocketShip` (`3ROC`)** — a
+`C3DFlyingObject` leaf placed in *every* level — as the **player-rideable** vehicle: walk into it and press
+**E** to board, fly it with the move keys (forward/turn + SPACE up / CTRL|Q down) over the N1
+`behavior_flying_update_base` (authored `3ROC` flight params), press **E** to dismount. While ridden, the
+rocket integrates its own position (it isn't a `PHYSICS` entity, to avoid double gravity) and the player is
+snapped onto it — with its runtime flags cleared so `physics_step` doesn't fight the snap — so the follow
+camera tracks the ride. The other half, **`vt_ai_vehicle`**, drives the **self-driving** `C3DAI` traffic —
+`C3DAISuv` (`3SUV`), `C3DBus` (`3SBU`), `C3DSailBoat` (`3SAI`) — along their authored `PatrolPoint` chains via
+the N1 `behavior_ai` patrol primitive (the same one Carl uses). Validation: on Level1 the rocket boarded at
+y=156 and climbed to 210 under up-input (`JN_TEST_RIDE`); on Level2 the bus drove itself ~391 units along
+`bus01` (z −2907 → −3299, speed ≈400); `audit_faithfulness.py` stayed at **0 findings**;
+`./tools/deploy_wasm.sh` published the build and `qa_web_verify.py` passed all 16 checks. **Deferred**: the
+full `C3DVehicle` player-car sim (6-wheel steering/suspension; `3CAR` is taken by `C3DCarl` and the car leaves
+`3JEE`/`3NCA`/`3NC2`/`3POD`/`3SUB`/`3BOA`/`3WHE` have **0 `.gam` instances**), and the SUV light-cone child /
+AICar horn-contact response / SailBoat sine-bob (need the C3DLightCone/effect/Goddard subsystems). Next wave
+is N5: the game-flow / level-controller layer (`CJimmyGame`, `CTaskList`, menus, the 40 `CLevel*Game`, cutscenes).
+
 ---
 
 ## Invariants (don't relitigate these)

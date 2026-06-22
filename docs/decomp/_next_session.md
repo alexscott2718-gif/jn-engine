@@ -55,33 +55,46 @@ This is a shared, committed campaign — read the shared docs, don't rely on too
   now also targets the nearest `3BAL`. Deferred: `3SHR`/`3GRA`/`3BUB`/`3BAS` (0 instances; props/effects/
   objects, not pickup→ability) and `3HOO` (an AI object → N2 track); `3MEP`'s Goddard beacon waits on
   `C3DGoddard`.
+- **Wave N4 DONE (vehicles):** `behavior_vehicle.c`. `vt_rocket` (`3ROC` C3DRocketShip, placed every level)
+  is **player-rideable** — walk in + **E** to board, fly via N1 `behavior_flying_update_base` (move keys +
+  SPACE/CTRL), **E** to dismount; the rocket integrates its own position (not a `PHYSICS` entity) and snaps
+  the flag-cleared player onto it so the camera follows. `vt_ai_vehicle` (`3SUV`/`3SBU`/`3SAI`) is
+  **self-driving** via the N1 `behavior_ai` patrol primitive. Validation: Level1 rocket climbed 156→210
+  (`JN_TEST_RIDE=<tick>`); Level2 bus drove ~391 units along `bus01`; audit 0 findings; `qa_web_verify` 16/16.
+  Deferred: full `C3DVehicle` car-sim (`3CAR`=Carl; car leaves `3JEE`/`3NCA`/`3NC2`/`3POD`/`3SUB`/`3BOA`/`3WHE`
+  have 0 instances) + SUV light-cone / AICar horn / SailBoat bob (need C3DLightCone/effect/Goddard).
 - **Still unimplemented:** the rest of the enemy roster (Digger/Tank/Tesla/Harrier/turret/mine/
-  laser), friends/NPCs (only the player), **vehicles (visual-only — Wave N4)**, and the
-  game-flow/level-controller layer (`main.c` is a generic loop, not a port of
-  `CJimmyGame`/tasks/menus/cutscenes). ~80 of 208 specs have a doc but no runtime behavior.
+  laser), friends/NPCs (only the player), and the **game-flow/level-controller layer (Wave N5)** —
+  `main.c` is a generic loop, not a port of `CJimmyGame`/tasks/menus/cutscenes. ~75 of 208 specs have a
+  doc but no runtime behavior.
 - Implementation contract is `EntityVTable` in `src/engine/world.h`, registered by FourCC in
   `src/game/entities.c`; per-frame via `entity_update()` (`main.c:1418`); `.gam` params via
   `gam_prop_f/i`. Full contract in plan §1.
 
-## Your task this session: Wave N4 (vehicles)
-Per plan §4, port a shared **`behavior_vehicle.c`** ride base (mount/dismount, drive physics over the
-N1 `movement_base` helper), then the 12 vehicle leaves as thin overrides:
-- `C3DBus`/`C3DAICar` (AI-driven — reuse `behavior_ai` seek/patrol), `C3DJeep`, `C3DNeuCar`/`C3DNeuCar2`,
-  `C3DSailBoat`, `C3DSub`, `C3DSkateBoard`, `C3DRocket`/`C3DRocketShip`, `C3DPod`, `C3DWheel`.
-  (`docs/decomp/C3DVehicle.md`, `C3DAICar.md`, and the per-leaf specs.)
-- **Distinguish AI-driven from player-driven.** The AI bus (3SBU) drives itself on a patrol; player
-  vehicles mount when Jimmy boards and hand control to the player input path.
-- Reuse N1's `movement_base` (don't re-derive drive physics) and the `gamestate`/projectile foundations
-  where a vehicle has a weapon. **First check which vehicle FourCCs have real `.gam` instances** (grep the
-  corpus like N3 did) so the wave is validated on a level that actually places them, not just registered.
+## Your task this session: Wave N5 (game-flow / level controllers)
+Per plan §4 (the biggest structural gap), port the controller layer that today is faked by a generic
+`main.c` loop. Hold the decomp discipline — confirm behavior against `docs/decomp/<Class>.md`, table-drive
+the repetitive parts, special-case only the outliers:
+- `CJimmyGame` master controller + `CLoadLevel` + `CTaskList` → a real **objective / win-condition /
+  task-state** layer (replace the ad-hoc `gamestate` level-clear logic). The existing
+  `behavior_base.c` progress-gate bridge (`JN_PROGRESS_LEVEL`) and `gamestate` level-swap plumbing are
+  the seeds.
+- `CMainMenu` / `CMenuElement` / `C2DInGameMenu` → menu, pause, in-game HUD menu.
+- The ~40 `CLevel*Game` / `CLevelVR*` → a **data-driven per-level script table** (most are thin hooks;
+  a few carry real logic, e.g. `CLevel01FGame` death/restart). Decompile `CLevel01AGame` as the exemplar,
+  then diff the rest — don't hand-port 40 near-identical controllers.
+- Cutscene sequencing (`CMultiCutSceneCamera` + the cutscene-camera classes) → a scripted camera timeline.
+  (`docs/decomp/CJimmyGame.md`, `CTaskList.md`, `CMainMenu.md`, `CLevel01AGame.md`, and the controller specs;
+  cross-check each `CLevel*Game` against its `.gam`.)
 
 **Remaining enemy roster (a later N2.x pass):** `C3DDigger`, `C3DTank`, `C3DTesla`, `C3DHarrier`,
 `C3DEnemyAircraft`, `C3DMine`, `C3DLaserTrigger`, `C3DYokTurret`, `C3DYokianShip`, plus `C3DHook` (3HOO,
 the level4b AI hook). The ranged ones are the natural first consumers of enemy-side
 `behavior_projectile.c` (`PROJ_TEAM_ENEMY`).
 
-**Done when:** the player can mount and drive at least one vehicle end-to-end on a level that places it,
-`tools/audit_faithfulness.py` stays at 0 findings, and affected levels pass `JN_SCREENSHOT` spot checks.
+**Done when:** a level can be entered from a menu, its objectives tracked to a win state, and it transitions
+to the next level without per-level C hardcoding; `tools/audit_faithfulness.py` stays at 0 findings, and
+affected levels pass `JN_SCREENSHOT` spot checks.
 
 ## Inner loop (per class)
 1. Read `docs/decomp/<Class>.md` (§Field map, §Per-frame behavior, §Constants). Confirm
@@ -105,7 +118,8 @@ the level4b AI hook). The ranged ones are the natural first consumers of enemy-s
   source of truth.
 
 ## Definition of done for this session
-Wave N4 lets the player mount and drive at least one vehicle end-to-end on a level that places it
-(over the N1 `movement_base`), AI-driven vehicles drive themselves, validation is clean, and per-class
-commits are made on `native-port`. If the wave closes, append a Wave N4 paragraph to
-`PROJECT_HISTORY.md` and update this handoff to point at Wave N5 (game-flow / level controllers).
+Wave N5 lets a level be entered from a menu, tracks its objectives to a win state via a real task layer,
+and transitions to the next level without per-level C hardcoding, validation is clean, and per-class
+commits are made on `native-port`. If the wave closes, append a Wave N5 paragraph to `PROJECT_HISTORY.md`
+and update this handoff (the native-port campaign would then have its base framework, enemies, combat,
+vehicles, and game-flow all ported — see `native_port_plan.md` for any remaining N2.x/cleanup tails).
