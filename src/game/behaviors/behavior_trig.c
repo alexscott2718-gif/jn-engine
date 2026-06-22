@@ -1,12 +1,11 @@
 #include "behaviors.h"
+#include "behavior_base.h"
 #include <stddef.h>
 #include <stdio.h>
 
 static void trig_on_spawn(Entity *e, World *w) {
     (void)w;
-    e->half_extents[0] = 80.0f;
-    e->half_extents[1] = 80.0f;
-    e->half_extents[2] = 80.0f;
+    behavior_trigger_spawn_base(e, 80.0f, 80.0f, 80.0f);
     e->user_flag = 0;
 }
 

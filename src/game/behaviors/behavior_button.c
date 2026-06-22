@@ -1,4 +1,5 @@
 #include "behaviors.h"
+#include "behavior_base.h"
 #include <stddef.h>
 #include <stdio.h>
 #include <string.h>
@@ -10,9 +11,7 @@
    which is the engine's "level trigger -> world action" primitive. */
 
 static void button_on_spawn(Entity *e, World *w) {
-    e->half_extents[0] = 90.0f;
-    e->half_extents[1] = 90.0f;
-    e->half_extents[2] = 90.0f;
+    behavior_trigger_spawn_base(e, 90.0f, 90.0f, 90.0f);
     e->user_flag = 0;
     e->link_target = NULL;
     if (e->activate_target[0]) {

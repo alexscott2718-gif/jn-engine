@@ -1,4 +1,5 @@
 #include "behaviors.h"
+#include "behavior_base.h"
 #include "../gamestate.h"
 #include <stddef.h>
 #include <stdio.h>
@@ -11,9 +12,7 @@
 static void checkpoint_on_spawn(Entity *e, World *w) {
     (void)w;
     /* Generous trigger volume so the player reliably crosses it. */
-    e->half_extents[0] = 120.0f;
-    e->half_extents[1] = 160.0f;
-    e->half_extents[2] = 120.0f;
+    behavior_trigger_spawn_base(e, 120.0f, 160.0f, 120.0f);
     e->user_flag = 0;   /* 0 = not yet reached */
 }
 

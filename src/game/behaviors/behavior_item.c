@@ -1,4 +1,5 @@
 #include "behaviors.h"
+#include "behavior_base.h"
 #include "../gamestate.h"
 #include "../../engine/audio.h"
 #include <stddef.h>
@@ -11,17 +12,17 @@
 
 static void item_on_spawn(Entity *e, World *w) {
     (void)w;
-    e->half_extents[0] = 30.0f;
-    e->half_extents[1] = 30.0f;
-    e->half_extents[2] = 30.0f;
+    behavior_trigger_spawn_base(e, 30.0f, 30.0f, 30.0f);
     e->user_flag = 0;             /* 0 = uncollected, 1 = collected */
     e->user_float = e->y;         /* base y for bob */
-    gamestate_item_added();
+    if (e->visible && (e->runtime_flags & ENTITY_FLAG_TRIGGER))
+        gamestate_item_added();
 }
 
 static void item_on_update(Entity *e, World *w, float dt) {
     (void)w;
     if (!e->alive) return;
+    if (!behavior_animated_update_base(e, w, dt)) return;
     static float t = 0.0f;
     t += dt;
     e->y  = e->user_float + ITEM_BOB_AMP * sinf(6.28318f * ITEM_BOB_FREQ * t + e->x * 0.01f);

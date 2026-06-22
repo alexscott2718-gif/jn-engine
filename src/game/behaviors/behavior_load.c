@@ -1,13 +1,12 @@
 #include "behaviors.h"
+#include "behavior_base.h"
 #include "../gamestate.h"
 #include <stddef.h>
 #include <stdio.h>
 
 static void load_on_spawn(Entity *e, World *w) {
     (void)w;
-    e->half_extents[0] = 60.0f;
-    e->half_extents[1] = 60.0f;
-    e->half_extents[2] = 60.0f;
+    behavior_trigger_spawn_base(e, 60.0f, 60.0f, 60.0f);
 }
 
 static void load_on_trigger(Entity *e, Entity *by) {

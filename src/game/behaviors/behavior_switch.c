@@ -11,14 +11,13 @@
  * activate_target field with C3DButton).
  */
 #include "behaviors.h"
+#include "behavior_base.h"
 #include <stddef.h>
 #include <stdio.h>
 #include <strings.h>
 
 static void switch_on_spawn(Entity *e, World *w) {
-    e->half_extents[0] = 60.0f;
-    e->half_extents[1] = 80.0f;
-    e->half_extents[2] = 60.0f;
+    behavior_trigger_spawn_base(e, 60.0f, 80.0f, 60.0f);
     e->user_flag = gam_prop_i(e, "MyState", 0);   /* current switch position */
     e->user_float = 0.0f;                          /* contact debounce timer */
     e->link_target = NULL;
@@ -36,6 +35,7 @@ static void switch_on_spawn(Entity *e, World *w) {
 
 static void switch_on_update(Entity *e, World *w, float dt) {
     (void)w;
+    if (!behavior_animated_update_base(e, w, dt)) return;
     if (e->user_float > 0.0f) e->user_float -= dt;   /* cool down the debounce */
 }
 
