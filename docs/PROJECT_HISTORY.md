@@ -726,7 +726,8 @@ and `C3DMetalPickup` (`3MEP`→score); abilities are modelled as `gamestate` inv
 stand-in for the original picture/inventory flags). Validation: on Level2, a granted baseball thrown at
 the nearest balloon logged `[BALLOON] popped 'C3DBALLOON' (+69 pts, resting)`; the N2 path was confirmed
 un-regressed (`[ENEMY] 3SOL 'yoksol' defeated`); `audit_faithfulness.py` stayed at **0 findings**, Level1
-rendered clean, and `qa_web_verify.py` passed all 16 checks. **Deferred** (0 `.gam` instances and outside
+rendered clean, and `qa_web_verify.py` passed all 16 checks. `./tools/deploy_wasm.sh` published the build
+(`jnengine.7008060c.js`, assets `2f088a57`) live to exentt.com/jn-engine. **Deferred** (0 `.gam` instances and outside
 the pickup→ability shape): `C3DShrinkRay` (3SHR, animated ray prop), `C3DGraplingHook` (3GRA, code-spawned
 rope visual), `C3DBubble`/`C3DBaseball` (3BUB/3BAS effect+projectile *objects*, represented by the bubble
 ability + `PROJ`), and `C3DHook` (3HOO, an AI object in level4b — belongs with the N2 enemy/AI track).
