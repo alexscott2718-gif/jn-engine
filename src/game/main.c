@@ -19,6 +19,8 @@
 #include "../engine/assets/billboard_overrides.h"
 #include "entities.h"
 #include "entity_visual.h"
+#include "behaviors/behavior_projectile.h"
+#include "behaviors/behavior_enemy.h"
 #include "camera.h"
 #include "gamestate.h"
 #include "hud.h"
@@ -56,9 +58,9 @@ static void dump_entity_positions(const World *world) {
         if (!all && strcmp(e->tag, filter) != 0 && strcmp(e->type, filter) != 0)
             continue;
         printf("[entity_pos] type=%s tag=%s pos=(%.3f,%.3f,%.3f) "
-               "vel=(%.3f,%.3f,%.3f) patrol=%s state=%d timer=%.3f\n",
+               "vel=(%.3f,%.3f,%.3f) ry=%.3f patrol=%s state=%d timer=%.3f hp=%.1f\n",
                e->type, e->tag, e->x, e->y, e->z, e->vx, e->vy, e->vz,
-               e->patrol_point, e->user_flag, e->user_float);
+               e->ry, e->patrol_point, e->user_flag, e->user_float, e->hp);
     }
 }
 
@@ -1370,6 +1372,16 @@ int main(int argc, char **argv) {
     int demo_jump_sent = 0;
     int demo_jump_tick = demo_jump_enabled ? env_int_default("JN_DEMO_JUMP_TICK", 2) : 0;
 
+    /* Headless combat test (Wave N2): at warmup tick JN_TEST_THROW, the player
+       throws a baseball at the nearest Yokian so the enemy-defeat path can be
+       exercised without keyboard input. Mirrors the other JN_TEST_* hooks. */
+    int n2_throw_tick = -1;
+    int n2_throw_done = 0;
+    {
+        const char *s = getenv("JN_TEST_THROW");
+        if (s && *s) n2_throw_tick = atoi(s);
+    }
+
     /* QA probe: JN_QA_PROBE="x,y" simulates a QA-mode click at window coords
        (x,y) once warmup settles, printing the pick JSON to stdout. Headless
        acceptance check for the annotation feature (docs/qa_annotate_plan.md):
@@ -1435,6 +1447,37 @@ int main(int argc, char **argv) {
             /* Per-entity behavior tick (player reads input, platforms move, etc.) */
             for (Entity *e = world.head; e; e = e->next) {
                 entity_update(e, &world, DT);
+            }
+
+            /* Headless combat test: throw a baseball at the nearest Yokian. */
+            if (n2_throw_tick >= 0 && !n2_throw_done &&
+                screenshot_warmup_ticks >= n2_throw_tick && jim) {
+                n2_throw_done = 1;
+                Entity *best = NULL; float bestd2 = 1e30f;
+                for (Entity *en = world.head; en; en = en->next) {
+                    if (!en->alive || en == jim) continue;
+                    if (strncmp(en->type, "3SOL", 4) && strncmp(en->type, "3GUA", 4) &&
+                        strncmp(en->type, "3SPY", 4)) continue;
+                    float dx = en->x - jim->x, dz = en->z - jim->z;
+                    float d2 = dx * dx + dz * dz;
+                    if (d2 < bestd2) { bestd2 = d2; best = en; }
+                }
+                if (best) {
+                    fprintf(stderr, "[n2_test] throwing baseball at %s '%s'\n",
+                            best->type, best->tag);
+                    float dx = best->x - jim->x, dy = best->y - jim->y,
+                          dz = best->z - jim->z;
+                    float dl = sqrtf(dx * dx + dy * dy + dz * dz);
+                    float ux = dl > 1e-4f ? dx / dl : 0.0f;
+                    float uy = dl > 1e-4f ? dy / dl : 0.0f;
+                    float uz = dl > 1e-4f ? dz / dl : 1.0f;
+                    /* Origin clear of the player's own SOLID AABB. */
+                    projectile_spawn(&world,
+                                     jim->x + ux * 80.0f, jim->y + 30.0f + uy * 80.0f,
+                                     jim->z + uz * 80.0f,
+                                     dx, dy, dz,
+                                     PROJ_TEAM_PLAYER, 1200.0f, 100, 4.0f);
+                }
             }
 
             /* Physics: gravity, AABB collision, trigger detection. */

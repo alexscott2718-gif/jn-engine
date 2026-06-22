@@ -43,6 +43,9 @@ static const EntityTypeInfo entity_types[] = {
     { "3MUS", "Music trigger",         &vt_music     },
     { "3PAT", "Patrol point",          &vt_patrolpoint },
     { "3CAR", "Carl (patrol walker)",  &vt_walker    },
+    { "3SOL", "Yokian soldier",        &vt_yokian    },
+    { "3GUA", "Yokian guard",          &vt_yokian    },
+    { "3SPY", "Yokian spy",            &vt_yokian    },
     { NULL, NULL, NULL }
 };
 
