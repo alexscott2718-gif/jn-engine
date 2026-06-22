@@ -1,5 +1,6 @@
 #include "behaviors.h"
 #include "behavior_projectile.h"
+#include "behavior_vehicle.h"
 #include "../../engine/input.h"
 #include "../../engine/movement_base.h"
 #include "../gamestate.h"
@@ -58,6 +59,13 @@ static int player_near_swing(World *w, const Entity *p) {
 }
 
 static void player_on_update(Entity *e, World *w, float dt) {
+    /* Riding a vehicle: it drives and positions us (see behavior_vehicle.c).
+       Suppress on-foot control; hold the idle pose under the hidden player. */
+    if (behavior_vehicle_riding()) {
+        e->user_flag = (int)PA_IDLE;
+        player_anim_advance(PA_IDLE, dt);
+        return;
+    }
     if (input_just_pressed(SDL_SCANCODE_N))
         input_toggle_noclip();
     if (input_just_pressed(SDL_SCANCODE_T))

@@ -21,6 +21,7 @@
 #include "entity_visual.h"
 #include "behaviors/behavior_projectile.h"
 #include "behaviors/behavior_enemy.h"
+#include "behaviors/behavior_vehicle.h"
 #include "camera.h"
 #include "gamestate.h"
 #include "hud.h"
@@ -1388,6 +1389,16 @@ int main(int argc, char **argv) {
         if (s && *s) n2_throw_tick = atoi(s);
     }
 
+    /* Headless vehicle test (Wave N4): at warmup tick JN_TEST_RIDE, board the
+       nearest rocket (3ROC) and drive it forward+up via the virtual input so the
+       flight path can be exercised without a keyboard. */
+    int n4_ride_tick = -1, n4_ride_done = 0, n4_ride_climbed = 0;
+    float n4_ride_board_y = 0.0f;
+    {
+        const char *s = getenv("JN_TEST_RIDE");
+        if (s && *s) n4_ride_tick = atoi(s);
+    }
+
     /* QA probe: JN_QA_PROBE="x,y" simulates a QA-mode click at window coords
        (x,y) once warmup settles, printing the pick JSON to stdout. Headless
        acceptance check for the annotation feature (docs/qa_annotate_plan.md):
@@ -1485,6 +1496,37 @@ int main(int argc, char **argv) {
                                      jim->z + uz * 80.0f,
                                      dx, dy, dz,
                                      PROJ_TEAM_PLAYER, 1200.0f, 100, 4.0f);
+                }
+            }
+
+            /* Headless vehicle test: board the nearest rocket, then fly it. */
+            if (n4_ride_tick >= 0 && jim) {
+                if (!n4_ride_done && screenshot_warmup_ticks >= n4_ride_tick) {
+                    n4_ride_done = 1;
+                    Entity *best = NULL; float bestd2 = 1e30f;
+                    for (Entity *rk = world.head; rk; rk = rk->next) {
+                        if (!rk->alive || strncmp(rk->type, "3ROC", 4)) continue;
+                        float dx = rk->x - jim->x, dz = rk->z - jim->z;
+                        float d2 = dx * dx + dz * dz;
+                        if (d2 < bestd2) { bestd2 = d2; best = rk; }
+                    }
+                    if (best) {
+                        n4_ride_board_y = best->y;
+                        behavior_vehicle_force_board(best);
+                        fprintf(stderr, "[n4_test] boarded rocket '%s' at y=%.0f\n",
+                                best->tag, best->y);
+                    }
+                }
+                /* Once aboard, drive forward + up; log the first real climb. */
+                if (behavior_vehicle_riding()) {
+                    input_set_virtual_move(0.0f, 1.0f);
+                    input_set_virtual_fly(1.0f);
+                    Entity *rk = behavior_vehicle_current();
+                    if (rk && !n4_ride_climbed && rk->y - n4_ride_board_y > 50.0f) {
+                        n4_ride_climbed = 1;
+                        fprintf(stderr, "[n4_test] rocket climbed to y=%.0f (+%.0f)\n",
+                                rk->y, rk->y - n4_ride_board_y);
+                    }
                 }
             }
 

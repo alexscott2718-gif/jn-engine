@@ -11,7 +11,7 @@ typedef struct {
 /* NOTE: vtables are external (defined per behavior_*.c). */
 static const EntityTypeInfo entity_types[] = {
     { "3JIM", "Player start position", &vt_player  },
-    { "3ROC", "Rocket",                &vt_static  },
+    { "3ROC", "Rocketship (rideable)", &vt_rocket  },
     { "3TRE", "Tree",                  &vt_static  },
     { "LOAD", "Level loader trigger",  &vt_load    },
     { "STRT", "Start marker",          &vt_default },
@@ -52,6 +52,10 @@ static const EntityTypeInfo entity_types[] = {
     { "3BUP", "Bubble pickup",         &vt_bubble_pickup },
     { "3HEL", "Helmet pickup",         &vt_helmet    },
     { "3MEP", "Metal-can pickup",      &vt_metal_pickup },
+    /* Wave N4: self-driving AI vehicles (patrol via the C3DAI base). */
+    { "3SUV", "AI SUV",                &vt_ai_vehicle },
+    { "3SBU", "AI school bus",         &vt_ai_vehicle },
+    { "3SAI", "AI sailboat",           &vt_ai_vehicle },
     { NULL, NULL, NULL }
 };
 

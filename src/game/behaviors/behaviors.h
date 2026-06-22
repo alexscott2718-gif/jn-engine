@@ -34,6 +34,9 @@ extern const EntityVTable vt_baseball_pickup; /* 3BPU — C3DBaseballPickup */
 extern const EntityVTable vt_bubble_pickup;   /* 3BUP — C3DBubblePickup */
 extern const EntityVTable vt_helmet;          /* 3HEL — C3DHelmet */
 extern const EntityVTable vt_metal_pickup;    /* 3MEP — C3DMetalPickup */
+/* Wave N4 — vehicles. */
+extern const EntityVTable vt_rocket;          /* 3ROC — C3DRocketShip (player-rideable) */
+extern const EntityVTable vt_ai_vehicle;      /* 3SUV/3SBU/3SAI — self-driving C3DAI vehicles */
 
 /* The currently-controlled player; resolved at spawn. NULL until first 3JIM resolved. */
 extern Entity *g_player;
