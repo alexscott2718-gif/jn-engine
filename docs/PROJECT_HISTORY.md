@@ -679,6 +679,17 @@ class faithful to its `docs/decomp/<Class>.md` and validated by screenshot + `au
 + `.omtc` motion-diff. Work proceeds on the `native-port` branch; kickoff handoff is
 `docs/decomp/_next_session.md`.
 
+**Wave N1 (base behavior framework) landed on `native-port` (2026-06-22).** The native runtime now
+has shared base helpers for `C3DObject`/`C3DAnimated` lifecycle gates (`behavior_base.c`), mutable
+per-entity runtime flags for `HasCollision`/trigger enablement, a canonical trigger/pickup overlap
+path, a reusable `movement_base` plus `C3DFlyingObject` wrapper, and `behavior_ai.c` exposing
+idle/seek/patrol primitives. Carl's `vt_walker` now routes through the AI patrol base instead of
+carrying its own waypoint loop. Validation: `make`; `JN_SCREENSHOT` spot checks
+(`build/wave_n1_level1.png`, `build/wave_n1_level1b_carl.png`); Carl runtime dump after 240 ticks
+showed `C3DCARL` moving toward `CARL1` through the new base; `python3 tools/audit_faithfulness.py`
+finished at **0 findings** across all levels. Next wave is N2: enemies/AI, starting with the
+Yokian family and a shared projectile/health path per `native_port_plan.md`.
+
 ---
 
 ## Invariants (don't relitigate these)
