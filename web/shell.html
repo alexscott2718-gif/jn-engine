@@ -48,15 +48,11 @@
   }
   #levelLinks a.active { background: #263244; border-color: #7890ad; color: #e8f0f8; }
 
-  #controls { max-width: 640px; margin: 8px auto 0; font-size: 12px; color: #9fb3c8; }
-  #controls summary { cursor: pointer; color: #c8d6e6; padding: 4px 0; }
-  #controls .ctrlgrid { display: grid; grid-template-columns: max-content 1fr;
-                        gap: 3px 12px; margin: 6px 0; }
-  #controls .ctrlgrid b { color: #cfe0f0; font-weight: 600; }
-  #controls #sandboxNote { margin: 6px 0 0; padding: 6px 8px; border-radius: 4px;
-                           background: #16202c; border: 1px solid #273241; }
-  #controls #sandboxNote.on { background: #142a14; border-color: #2c6e2c; color: #9fe0a0; }
-  #controls #sandboxNote a { color: #7ec8ff; }
+  #sandboxBanner { max-width: 640px; margin: 6px auto 0; padding: 5px 9px;
+                   font-size: 12px; border-radius: 4px; color: #9fb3c8;
+                   background: #16202c; border: 1px solid #273241; }
+  #sandboxBanner.on { background: #142a14; border-color: #2c6e2c; color: #9fe0a0; }
+  #sandboxBanner a { color: #7ec8ff; }
 
   /* ---- Touch controls (mobile) ---- */
   /* #stage wraps the canvas so the overlay can position over it. */
@@ -168,20 +164,6 @@
     <button id="qaToggle" type="button">QA: Off</button>
   </div>
   <div id="levelLinks"></div>
-  <details id="controls">
-    <summary>Controls &amp; sandbox</summary>
-    <div class="ctrlgrid">
-      <span><b>Move</b></span><span>W/A/S/D or arrow keys</span>
-      <span><b>Jump</b></span><span>Space</span>
-      <span><b>Run</b></span><span>Shift (or the Speed button)</span>
-      <span><b>Respawn</b></span><span>R</span>
-      <span><b>Free-look</b></span><span>drag with the left mouse button</span>
-      <span><b>Board / leave rocket</b></span><span>walk into the rocketship, press E</span>
-      <span><b>Fly the rocket</b></span><span>move keys + Space (up) / Ctrl or Q (down)</span>
-      <span><b>Throw baseball</b></span><span>F</span>
-    </div>
-    <p id="sandboxNote"></p>
-  </details>
   <div id="status">Loading…</div>
   <progress id="progress" max="100" value="0"></progress>
   <div id="stage">
@@ -197,7 +179,8 @@
       </div>
     </div>
   </div>
-  <div id="controls">WASD move · SPACE jump/up · Ctrl/Q down · SHIFT run · T speed · N noclip · R respawn · B report · drag = orbit · <a id="qaHowto" href="https://exentt.com/jn/qa-howto.html" target="_blank" rel="noopener">how to report bugs</a></div>
+  <div id="controls">WASD move · SPACE jump/up · Ctrl/Q down · SHIFT run · E board/leave rocket · F throw · R respawn · B report · drag = orbit · <a id="qaHowto" href="https://exentt.com/jn/qa-howto.html" target="_blank" rel="noopener">how to report bugs</a></div>
+  <div id="sandboxBanner"></div>
   <div id="note">
     Native WebGL2 rebuild using original GAM/OMT data.
   </div>
@@ -495,20 +478,25 @@
   /* ?sandbox=1 — verification mode: reveals the rideable rocketship and grants
      the combat tools so behaviors can be exercised in-browser (see controls
      panel). */
-  var sandboxMode =
-      new URLSearchParams(window.location.search).get('sandbox') === '1';
+  var qparams = new URLSearchParams(window.location.search);
+  var sandboxMode = qparams.get('sandbox') === '1';
+  /* ?menu=1 — open the CMainMenu title/level-select over the level (Up/Down +
+     Enter; New Game -> level1b). */
+  var menuMode = qparams.get('menu') === '1';
   (function () {
-    var note = document.getElementById('sandboxNote');
-    if (!note) return;
+    var b = document.getElementById('sandboxBanner');
+    if (!b) return;
     if (sandboxMode) {
-      note.className = 'on';
-      note.textContent = 'Sandbox ON — the rideable rocketship is visible and the '
-        + 'baseball is granted, so E (board) and F (throw) work.';
+      b.className = 'on';
+      b.textContent = 'Sandbox ON — the rideable rocketship is visible and the '
+        + 'baseball is granted. Click the game first, then walk up to the rocket '
+        + 'and press E to fly it; press F to throw.';
     } else {
       var u = new URL(window.location.href);
       u.searchParams.set('sandbox', '1');
-      note.innerHTML = 'The rocketship and combat tools are off by default. '
-        + '<a href="' + u.pathname + u.search + u.hash + '">Enable sandbox mode</a> '
+      b.innerHTML = 'Tip: click the game to give it keyboard focus. '
+        + 'The rocketship + combat tools are off by default — '
+        + '<a href="' + u.pathname + u.search + u.hash + '">enable sandbox mode</a> '
         + 'to reveal the rideable rocket and grant the baseball.';
     }
   })();
@@ -760,8 +748,12 @@
         return path.replace(/\.(wasm|data)$/, JN_ASSET_VER + '.$1');
       return path;
     },
-    arguments: sandboxMode ? ['--level', selectedLevel, '--sandbox']
-                           : ['--level', selectedLevel],
+    arguments: (function () {
+      var a = ['--level', selectedLevel];
+      if (sandboxMode) a.push('--sandbox');
+      if (menuMode) a.push('--menu');
+      return a;
+    })(),
     canvas: (function () {
       canvasEl.addEventListener('webglcontextlost', function (e) {
         alert('WebGL context lost — reload the page.'); e.preventDefault();

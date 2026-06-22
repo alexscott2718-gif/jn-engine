@@ -101,16 +101,25 @@ static void rocket_on_spawn(Entity *e, World *w) {
         e->half_extents[0] = e->half_extents[1] = e->half_extents[2] = ROCKET_HALF;
 }
 
-/* Board on player contact + E (only when not already riding something). */
-static void rocket_on_trigger(Entity *e, Entity *by) {
-    (void)by;
-    if (!s_ride && input_just_pressed(SDL_SCANCODE_E))
-        rocket_mount(e);
+/* Boarding is proximity-based, not overlap-based: the rocket is SOLID, so the
+   player can never enter its AABB to fire a trigger — they stop at the surface.
+   Boarding in on_update (which runs before physics) when the player is within a
+   generous horizontal radius + E also avoids any dismount->reboard race. */
+#define ROCKET_BOARD_RADIUS  (ROCKET_HALF + 220.0f)
+
+static int rocket_player_in_range(const Entity *e) {
+    if (!g_player) return 0;
+    float dx = g_player->x - e->x, dz = g_player->z - e->z;
+    return dx * dx + dz * dz <= ROCKET_BOARD_RADIUS * ROCKET_BOARD_RADIUS;
 }
 
 static void rocket_on_update(Entity *e, World *w, float dt) {
     if (s_ride != e) {
         behavior_animated_update_base(e, w, dt);  /* idle: visible, not moving */
+        /* Board when the player is near and presses E. */
+        if (!s_ride && input_just_pressed(SDL_SCANCODE_E) &&
+            rocket_player_in_range(e))
+            rocket_mount(e);
         return;
     }
     if (input_just_pressed(SDL_SCANCODE_E)) { rocket_dismount(e); return; }
@@ -148,6 +157,6 @@ static void rocket_on_update(Entity *e, World *w, float dt) {
 const EntityVTable vt_rocket = {
     .on_spawn   = rocket_on_spawn,
     .on_update  = rocket_on_update,
-    .on_trigger = rocket_on_trigger,
-    .flags      = ENTITY_FLAG_SOLID | ENTITY_FLAG_TRIGGER,
+    .on_trigger = NULL,   /* boarding is proximity-based in on_update */
+    .flags      = ENTITY_FLAG_SOLID,
 };
