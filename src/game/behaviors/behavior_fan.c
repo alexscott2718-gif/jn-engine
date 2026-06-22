@@ -16,6 +16,7 @@
  * The player within FanRange is pushed along that facing.
  */
 #include "behaviors.h"
+#include "behavior_base.h"
 #include <math.h>
 #include <stddef.h>
 
@@ -26,6 +27,7 @@
 
 static void fan_on_spawn(Entity *e, World *w) {
     (void)w;
+    behavior_animated_spawn_base(e);
     e->home[0]   = e->ry;                       /* authored facing -> airflow dir */
     e->user_float = 0.0f;                       /* accumulated blade angle (rad) */
     e->user_flag  = gam_prop_i(e, "FanOn", 1);  /* runtime on-state; a C3DSwitch
@@ -34,6 +36,7 @@ static void fan_on_spawn(Entity *e, World *w) {
 
 static void fan_on_update(Entity *e, World *w, float dt) {
     (void)w;
+    if (!behavior_animated_update_base(e, w, dt)) return;
     float fan_speed = gam_prop_f(e, "FanSpeed", 0.0f);
     float fan_range = gam_prop_f(e, "FanRange", 0.0f);
     if (!e->user_flag || fan_speed <= 0.0f) return;

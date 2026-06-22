@@ -10,6 +10,7 @@
  * caught in the tractor beam. Strengths are engine-tuned.
  */
 #include "behaviors.h"
+#include "behavior_base.h"
 #include <math.h>
 #include <stddef.h>
 
@@ -17,8 +18,14 @@
 #define TRC_LIFT     520.0f   /* upward pull velocity (units/sec) */
 #define TRC_PULL     3.0f     /* inward centering rate (per sec) */
 
+static void tractor_on_spawn(Entity *e, World *w) {
+    (void)w;
+    behavior_animated_spawn_base(e);
+}
+
 static void tractor_on_update(Entity *e, World *w, float dt) {
     (void)w;
+    if (!behavior_animated_update_base(e, w, dt)) return;
     if (!g_player) return;
     float dx = g_player->x - e->x;
     float dz = g_player->z - e->z;
@@ -33,7 +40,7 @@ static void tractor_on_update(Entity *e, World *w, float dt) {
 }
 
 const EntityVTable vt_tractor = {
-    .on_spawn   = NULL,
+    .on_spawn   = tractor_on_spawn,
     .on_update  = tractor_on_update,
     .on_trigger = NULL,
     .flags      = 0,

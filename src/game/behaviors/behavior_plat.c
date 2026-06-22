@@ -1,4 +1,5 @@
 #include "behaviors.h"
+#include "behavior_base.h"
 #include <stddef.h>
 #include <math.h>
 
@@ -7,6 +8,7 @@
 
 static void plat_on_spawn(Entity *e, World *w) {
     (void)w;
+    behavior_animated_spawn_base(e);
     e->half_extents[0] = 120.0f;
     e->half_extents[1] = 20.0f;
     e->half_extents[2] = 120.0f;
@@ -16,6 +18,7 @@ static void plat_on_spawn(Entity *e, World *w) {
 
 static void plat_on_update(Entity *e, World *w, float dt) {
     (void)w;
+    if (!behavior_animated_update_base(e, w, dt)) return;
     static float t = 0.0f;
     t += dt;
     /* Per-platform phase offset based on world X to avoid all-in-sync motion. */

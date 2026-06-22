@@ -88,6 +88,7 @@ static void apply_default_extents(Entity *e) {
 void entity_bind_vtables(World *w) {
     for (Entity *e = w->head; e; e = e->next) {
         e->vt = entity_resolve_vtable(e->type);
+        e->runtime_flags = e->vt ? e->vt->flags : 0;
         if (e->vt && e->vt->on_spawn) e->vt->on_spawn(e, w);
         apply_default_extents(e);
     }

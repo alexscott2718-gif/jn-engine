@@ -10,6 +10,7 @@
  * swing direction — a sweeping hazard.
  */
 #include "behaviors.h"
+#include "behavior_base.h"
 #include <math.h>
 #include <stddef.h>
 
@@ -20,11 +21,13 @@
 
 static void pendulum_on_spawn(Entity *e, World *w) {
     (void)w;
+    behavior_animated_spawn_base(e);
     e->user_float = 0.0f;     /* swing phase clock */
 }
 
 static void pendulum_on_update(Entity *e, World *w, float dt) {
     (void)w;
+    if (!behavior_animated_update_base(e, w, dt)) return;
     float swing_height = gam_prop_f(e, "SwingHeight", 20.0f);
     float amp = swing_height * PEN_AMP_RAD;            /* radians */
 

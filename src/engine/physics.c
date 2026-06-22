@@ -9,12 +9,13 @@
 
 static Entity *find_player(World *w) {
     for (Entity *e = w->head; e; e = e->next) {
-        if (e->alive && e->vt && (e->vt->flags & ENTITY_FLAG_PLAYER)) return e;
+        if (e->alive && (e->runtime_flags & ENTITY_FLAG_PLAYER)) return e;
     }
     return NULL;
 }
 
-static int aabb_overlap(const Entity *a, const Entity *b) {
+int physics_aabb_overlap(const Entity *a, const Entity *b) {
+    if (!a || !b) return 0;
     return  fabsf(a->x - b->x) <= (a->half_extents[0] + b->half_extents[0]) &&
             fabsf(a->y - b->y) <= (a->half_extents[1] + b->half_extents[1]) &&
             fabsf(a->z - b->z) <= (a->half_extents[2] + b->half_extents[2]);
@@ -23,7 +24,7 @@ static int aabb_overlap(const Entity *a, const Entity *b) {
 /* Resolve a single dynamic-vs-static AABB collision on one axis.
    `axis` = 0/1/2 for x/y/z. Returns 1 if a collision was resolved on this axis. */
 static int resolve_axis(Entity *dyn, const Entity *solid, int axis) {
-    if (!aabb_overlap(dyn, solid)) return 0;
+    if (!physics_aabb_overlap(dyn, solid)) return 0;
 
     float *pos[3] = { &dyn->x, &dyn->y, &dyn->z };
     float *vel[3] = { &dyn->vx, &dyn->vy, &dyn->vz };
@@ -140,9 +141,9 @@ void physics_step(World *w, float dt) {
     /* 1. Integrate gravity + velocity for physics entities. */
     for (Entity *e = w->head; e; e = e->next) {
         if (!e->alive || !e->vt) continue;
-        if (!(e->vt->flags & ENTITY_FLAG_PHYSICS)) continue;
+        if (!(e->runtime_flags & ENTITY_FLAG_PHYSICS)) continue;
 
-        if ((e->vt->flags & ENTITY_FLAG_PLAYER) && input_noclip_enabled()) {
+        if ((e->runtime_flags & ENTITY_FLAG_PLAYER) && input_noclip_enabled()) {
             e->x += e->vx * dt;
             e->y += e->vy * dt;
             e->z += e->vz * dt;
@@ -157,14 +158,14 @@ void physics_step(World *w, float dt) {
         e->x += e->vx * dt;
         for (Entity *s = w->head; s; s = s->next) {
             if (s == e || !s->alive || !s->vt) continue;
-            if (!(s->vt->flags & ENTITY_FLAG_SOLID)) continue;
+            if (!(s->runtime_flags & ENTITY_FLAG_SOLID)) continue;
             resolve_axis(e, s, 0);
         }
 
         e->z += e->vz * dt;
         for (Entity *s = w->head; s; s = s->next) {
             if (s == e || !s->alive || !s->vt) continue;
-            if (!(s->vt->flags & ENTITY_FLAG_SOLID)) continue;
+            if (!(s->runtime_flags & ENTITY_FLAG_SOLID)) continue;
             resolve_axis(e, s, 2);
         }
 
@@ -173,7 +174,7 @@ void physics_step(World *w, float dt) {
         e->y += e->vy * dt;
         for (Entity *s = w->head; s; s = s->next) {
             if (s == e || !s->alive || !s->vt) continue;
-            if (!(s->vt->flags & ENTITY_FLAG_SOLID)) continue;
+            if (!(s->runtime_flags & ENTITY_FLAG_SOLID)) continue;
             resolve_axis(e, s, 1);
         }
         if (!e->on_ground) {
@@ -204,8 +205,8 @@ void physics_step(World *w, float dt) {
     if (p && p->alive) {
         for (Entity *t = w->head; t; t = t->next) {
             if (t == p || !t->alive || !t->vt) continue;
-            if (!(t->vt->flags & ENTITY_FLAG_TRIGGER)) continue;
-            if (!aabb_overlap(p, t)) continue;
+            if (!(t->runtime_flags & ENTITY_FLAG_TRIGGER)) continue;
+            if (!physics_aabb_overlap(p, t)) continue;
             if (t->vt->on_trigger) t->vt->on_trigger(t, p);
         }
     }

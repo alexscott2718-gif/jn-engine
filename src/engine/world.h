@@ -68,6 +68,12 @@ typedef struct Entity {
     int   points;                /* Points property (pickup score value) */
     int   on_ground;
     int   alive;
+    int   visible;               /* runtime draw/update gate; default true */
+    unsigned int runtime_flags;   /* mutable copy of EntityVTable.flags */
+    float anim_time;              /* shared animated-object clock */
+    float move_speed;             /* shared movement-base horizontal speed */
+    float move_vert;              /* shared movement-base vertical velocity */
+    float move_lean;              /* shared movement-base lean angle */
     int   user_flag;             /* per-type: door open, item collected, ... */
     float user_float;            /* per-type: phase, timer, ... */
     GamProp props[ENTITY_MAX_PROPS]; /* generic .gam property bag (see above) */

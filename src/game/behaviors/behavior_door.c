@@ -1,4 +1,5 @@
 #include "behaviors.h"
+#include "behavior_base.h"
 #include "../../engine/audio.h"
 #include <stddef.h>
 #include <stdio.h>
@@ -25,6 +26,7 @@ static float door_open_time(const Entity *e) {
 
 static void door_on_spawn(Entity *e, World *w) {
     (void)w;
+    behavior_animated_spawn_base(e);
     e->half_extents[0] = 70.0f;
     e->half_extents[1] = 90.0f;
     e->half_extents[2] = 70.0f;
@@ -36,6 +38,7 @@ static void door_on_spawn(Entity *e, World *w) {
 
 static void door_on_update(Entity *e, World *w, float dt) {
     (void)w;
+    if (!behavior_animated_update_base(e, w, dt)) return;
     if (e->user_flag == 1) {
         float rise = door_open_rise(e);
         e->user_float += door_open_speed(e) * dt;

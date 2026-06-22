@@ -1,4 +1,5 @@
 #include "behaviors.h"
+#include "behavior_base.h"
 #include <stddef.h>
 #include <stdio.h>
 #include <string.h>
@@ -13,6 +14,7 @@
 #define MOP_PERIOD 5.0f   /* seconds for a full home -> target -> home cycle */
 
 static void movplat_on_spawn(Entity *e, World *w) {
+    behavior_animated_spawn_base(e);
     e->half_extents[0] = 140.0f;
     e->half_extents[1] = 24.0f;
     e->half_extents[2] = 140.0f;
@@ -41,6 +43,7 @@ static void movplat_on_spawn(Entity *e, World *w) {
 
 static void movplat_on_update(Entity *e, World *w, float dt) {
     (void)w;
+    if (!behavior_animated_update_base(e, w, dt)) return;
     if (dt <= 0.0001f) return;
     e->user_float += dt;
     /* Smooth 0->1->0 ping-pong via a raised cosine. */

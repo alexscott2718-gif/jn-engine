@@ -13,6 +13,7 @@
  * per-instance .gam parameter).
  */
 #include "behaviors.h"
+#include "behavior_base.h"
 #include <stddef.h>
 
 #define STE_RADIUS  100.0f
@@ -20,13 +21,15 @@
 
 static void steamvent_on_spawn(Entity *e, World *w) {
     (void)w;
+    behavior_animated_spawn_base(e);
     e->home[1] = e->y;
     /* ButtonAvailable seeds the runtime emit-state; a control could toggle it. */
     e->user_flag = gam_prop_i(e, "ButtonAvailable", 1);
 }
 
 static void steamvent_on_update(Entity *e, World *w, float dt) {
-    (void)w; (void)dt;
+    (void)w;
+    if (!behavior_animated_update_base(e, w, dt)) return;
     if (!e->user_flag || !g_player) return;
     float dx = g_player->x - e->x;
     float dz = g_player->z - e->z;

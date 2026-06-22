@@ -17,6 +17,7 @@
  * State: user_float = inside-edge (0/1).
  */
 #include "behaviors.h"
+#include "behavior_base.h"
 #include "../../engine/audio.h"
 #include <stddef.h>
 #include <math.h>
@@ -34,11 +35,13 @@ static int selected_music_index(const Entity *e) {
 
 static void music_on_spawn(Entity *e, World *w) {
     (void)w;
+    behavior_animated_spawn_base(e);
     e->user_float = 0.0f;   /* outside */
 }
 
 static void music_on_update(Entity *e, World *w, float dt) {
-    (void)w; (void)dt;
+    (void)w;
+    if (!behavior_animated_update_base(e, w, dt)) return;
     if (!g_player) return;
 
     float radius = gam_prop_f(e, "Radius", 200.0f);

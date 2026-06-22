@@ -20,6 +20,7 @@ Entity *world_add(World *w) {
     Entity *e = calloc(1, sizeof(Entity));
     if (!e) return NULL;
     e->alive = 1;
+    e->visible = 1;
     e->omt_index = -1;           /* 0 is a valid OMT shape chunk id */
     e->next = w->head;
     w->head = e;
@@ -76,7 +77,7 @@ float world_query_segment(const World *w, const Entity *ignore,
     float best = 1.0f;
     for (Entity *e = w->head; e; e = e->next) {
         if (!e->alive || e == ignore) continue;
-        if (!e->vt || !(e->vt->flags & ENTITY_FLAG_SOLID)) continue;
+        if (!(e->runtime_flags & ENTITY_FLAG_SOLID)) continue;
         float t = segment_hit_aabb(px, py, pz, dx, dy, dz,
                                    e->x, e->y, e->z,
                                    e->half_extents[0], e->half_extents[1], e->half_extents[2]);

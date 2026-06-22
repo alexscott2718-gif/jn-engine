@@ -8,19 +8,26 @@
  * now the wheel turns visibly.
  */
 #include "behaviors.h"
+#include "behavior_base.h"
 #include <math.h>
 #include <stddef.h>
 
 #define FERRIS_RAD_PER_SEC  0.21f   /* ~12 deg/s — slow, stately wheel (radians) */
 
+static void ferris_on_spawn(Entity *e, World *w) {
+    (void)w;
+    behavior_animated_spawn_base(e);
+}
+
 static void ferris_on_update(Entity *e, World *w, float dt) {
     (void)w;
+    if (!behavior_animated_update_base(e, w, dt)) return;
     /* Roll about the wheel's local forward axis; renderer euler path applies rz. */
     e->rz = fmodf(e->rz + FERRIS_RAD_PER_SEC * dt, 6.2831853f);
 }
 
 const EntityVTable vt_ferris = {
-    .on_spawn   = NULL,
+    .on_spawn   = ferris_on_spawn,
     .on_update  = ferris_on_update,
     .on_trigger = NULL,
     .flags      = 0,

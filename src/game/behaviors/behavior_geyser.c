@@ -10,6 +10,7 @@
  * hazard. The mesh bobs up during the eruption for a visible plume.
  */
 #include "behaviors.h"
+#include "behavior_base.h"
 #include <math.h>
 #include <stddef.h>
 
@@ -20,12 +21,14 @@
 
 static void geyser_on_spawn(Entity *e, World *w) {
     (void)w;
+    behavior_animated_spawn_base(e);
     e->user_float = 0.0f;        /* cycle clock */
     e->home[1] = e->y;           /* base Y for the plume bob */
 }
 
 static void geyser_on_update(Entity *e, World *w, float dt) {
     (void)w;
+    if (!behavior_animated_update_base(e, w, dt)) return;
     float period = gam_prop_f(e, "SteamPeriod", 4.0f);
     if (period <= 0.0f) period = 4.0f;
 

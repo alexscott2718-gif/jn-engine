@@ -47,6 +47,21 @@ static int env_int_default(const char *name, int default_value) {
     return (s && s[0]) ? atoi(s) : default_value;
 }
 
+static void dump_entity_positions(const World *world) {
+    const char *filter = getenv("JN_DUMP_ENTITY_TAG");
+    if (!world || !filter || !filter[0]) return;
+    int all = (strcmp(filter, "*") == 0 || strcmp(filter, "1") == 0);
+    for (const Entity *e = world->head; e; e = e->next) {
+        if (!e->alive) continue;
+        if (!all && strcmp(e->tag, filter) != 0 && strcmp(e->type, filter) != 0)
+            continue;
+        printf("[entity_pos] type=%s tag=%s pos=(%.3f,%.3f,%.3f) "
+               "vel=(%.3f,%.3f,%.3f) patrol=%s state=%d timer=%.3f\n",
+               e->type, e->tag, e->x, e->y, e->z, e->vx, e->vy, e->vz,
+               e->patrol_point, e->user_flag, e->user_float);
+    }
+}
+
 /* ---- Debug coordinate overlay (QA) -------------------------------------
    A tiny self-contained 3x5 bitmap font drawn as screen-space quads, so it
    needs no font texture/asset and works in the WASM deploy. Shows the
@@ -541,6 +556,10 @@ static void draw_scene(World *world, int jim_model_ok)
 
     for (Entity *e = world->head; e; e = e->next) {
         if (!e->alive) continue;
+        if (!e->visible) {
+            audit_line("entity", e->type, e->tag, "gated", NULL, NULL, 0);
+            continue;
+        }
 
         /* Authored InitiallyVisible=0: the original hides these at boot
            until scripting shows them (phone booth, hydrant, teleport FX,
@@ -1590,6 +1609,7 @@ int main(int argc, char **argv) {
         if (screenshot_mode && !screenshot_taken) {
             if (screenshot_warmup_ticks >= screenshot_warmup_goal) {
                 glFinish();
+                dump_entity_positions(&world);
                 save_screenshot(screenshot_path, w.width, w.height);
                 screenshot_taken = 1;
                 w.should_quit = 1;
