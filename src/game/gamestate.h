@@ -45,6 +45,9 @@ void gamestate_add_points(int points);
 int  gamestate_player_health(void);
 void gamestate_damage_player(int amount);
 void gamestate_heal_player(int amount);
+/* 1 when health has hit 0 (death pending). The game-flow controller resolves
+   it into a life loss + respawn; gamestate no longer auto-refills. */
+int  gamestate_player_is_down(void);
 /* Inventory (Step 4). Grant a tool slot identified by tag (deduped); icon_path
    is a static string used by the HUD (may be NULL). Returns 1 if newly added. */
 int  gamestate_grant_tool(const char *tag, const char *icon_path);

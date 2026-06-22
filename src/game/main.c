@@ -24,6 +24,7 @@
 #include "behaviors/behavior_vehicle.h"
 #include "camera.h"
 #include "gamestate.h"
+#include "game_flow.h"
 #include "hud.h"
 #include "player_anim.h"
 #include "qa.h"
@@ -948,12 +949,26 @@ static void draw_scene(World *world, int jim_model_ok)
 
 int main(int argc, char **argv) {
     const char *start_level = "level1";
-    for (int i = 1; i < argc - 1; i++) {
-        if (strcmp(argv[i], "--level") == 0) {
+    int want_newgame = 0;
+    for (int i = 1; i < argc; i++) {
+        if (i < argc - 1 && strcmp(argv[i], "--level") == 0) {
             start_level = argv[i + 1];
             i++;
+        } else if (strcmp(argv[i], "--newgame") == 0) {
+            want_newgame = 1;
         }
     }
+
+    /* --newgame: enter through the CTaskList task system (CJimmyGame /
+       CMainMenu "New Game" route) instead of a direct level load. The task's
+       gam_file becomes the start level; this turns on campaign mode (lives,
+       mission, restart flow). Direct `--level X` keeps campaign mode OFF so the
+       audit + screenshot harnesses render exactly as before Wave N5. */
+    char newgame_gam[64] = {0};
+    if (want_newgame &&
+        game_flow_begin_task("NewGame", newgame_gam, sizeof(newgame_gam), NULL) &&
+        newgame_gam[0])
+        start_level = newgame_gam;
 
     LevelDesc current_desc;
     if (!level_desc_for(start_level, &current_desc)) {
@@ -1084,6 +1099,10 @@ int main(int argc, char **argv) {
     world_init(&world);
     world_box_init();
     gamestate_init();
+    /* CJimmyGame::InitGame — seed the mission layer (lives=5, value=100). For a
+       --newgame entry this already ran inside game_flow_begin_task. */
+    if (!game_flow_campaign_active())
+        game_flow_init_game();
 
     /* Load all player poses with the shared real-Jimmy texture. All jim*.ASE
        reference jimmylast.bmp (which doesn't exist); jimycarl.png is the
@@ -1339,6 +1358,7 @@ int main(int argc, char **argv) {
         printf("Player at (%.1f, %.1f, %.1f), ground_y=%.1f\n",
                jim->x, jim->y, jim->z, world.ground_y);
     }
+    game_flow_enter_level(current_desc.name);
     configure_safety_floor(&world, jim);
     cam->fov = 1.047215f;
     cam->near_z = 20.0f;
@@ -1563,6 +1583,7 @@ int main(int argc, char **argv) {
                             world.ground_y = jim->y - jim->half_extents[1];
                             gamestate_set_spawn(jim->x, jim->y, jim->z);
                         }
+                        game_flow_enter_level(swap_desc.name);
                         configure_safety_floor(&world, jim);
                         asset_cache_purge_stale();
                         printf("[SWAP] post-purge cache: %d tex, %d models\n",
@@ -1580,17 +1601,26 @@ int main(int argc, char **argv) {
                 continue;
             }
 
-            /* Lifecycle: manual respawn (R) or death plane below ground. */
+            /* Lifecycle: manual respawn (R, no life cost), or a real death
+               (health depleted by enemies, or fell below the kill plane).
+               Deaths route through CJimmyGame's lives/restart flow
+               (game_flow_player_died) before respawning + healing. */
             if (jim) {
-                int want_respawn = input_just_pressed(SDL_SCANCODE_R);
+                int manual_respawn = input_just_pressed(SDL_SCANCODE_R);
                 float kill_y = world.safety_floor_enabled
                     ? world.safety_floor_y - 2000.0f
                     : world.ground_y - 2000.0f;
-                if (!want_respawn && jim->y < kill_y) {
-                    printf("[DEATH] below kill plane (y=%.1f)\n", jim->y);
-                    want_respawn = 1;
-                }
-                if (want_respawn) {
+                int died = gamestate_player_is_down() || jim->y < kill_y;
+                if (died) {
+                    if (jim->y < kill_y)
+                        printf("[DEATH] below kill plane (y=%.1f)\n", jim->y);
+                    int respawn = game_flow_player_died();
+                    gamestate_heal_player(gamestate_get()->health_max);
+                    if (respawn) {
+                        gamestate_respawn_player(jim);
+                        follow_cam_snap(&fcam, cam, jim);
+                    }
+                } else if (manual_respawn) {
                     gamestate_respawn_player(jim);
                     follow_cam_snap(&fcam, cam, jim);
                 }

@@ -1,4 +1,5 @@
 #include "gamestate.h"
+#include "game_flow.h"
 #include "../engine/world.h"
 #include <stdio.h>
 #include <string.h>
@@ -31,12 +32,16 @@ void gamestate_damage_player(int amount) {
     if (g_state.health <= 0) {
         g_state.health = 0;
         printf("[HEALTH] player down (-%d) -> 0\n", amount);
-        g_state.health = g_state.health_max;  /* refill until Wave N5 death flow */
-        printf("[HEALTH] refilled to %d\n", g_state.health);
+        /* Death is resolved by the game-flow controller (lives/restart), which
+           the main loop drives off gamestate_player_is_down(). */
         return;
     }
     printf("[HEALTH] player hit (-%d) -> %d / %d\n",
            amount, g_state.health, g_state.health_max);
+}
+
+int gamestate_player_is_down(void) {
+    return g_state.health <= 0;
 }
 
 void gamestate_heal_player(int amount) {
@@ -81,6 +86,8 @@ void gamestate_item_collected(void) {
         if (!g_state.level_done) {
             g_state.level_done = 1;
             printf("=== LEVEL CLEARED ===\n");
+            /* Feed the CJimmyGame win-condition layer. */
+            game_flow_level_objective_met();
         }
     }
 }
