@@ -1,5 +1,22 @@
 # Godot ↔ pipeline bridge — design sketch
 
+> ## ⛔ RETIRED (2026-06-22) — superseded by the native port
+>
+> **This plan is no longer active. Do not start new work against it.** After hands-on
+> Godot use the artifact decision was reversed: the Godot-led game is **abandoned**, and
+> the C engine in `src/` is the product — not a foundry for Godot. The completed decomp
+> specs (`docs/decomp/*.md`, 208/208 at `status=spec`) now feed a **native Linux port**.
+>
+> - Forward plan: [`native_port_plan.md`](./native_port_plan.md) (five porting waves).
+> - Kickoff handoff: [`decomp/_next_session.md`](./decomp/_next_session.md).
+> - Context: [`PROJECT_HISTORY.md`](./PROJECT_HISTORY.md) §Era 14.
+>
+> The §8 "engine-as-artifact vs game-as-artifact" call was resolved in favor of
+> **engine-as-artifact** (the clean-room native engine). The text below is kept for the
+> historical record only.
+
+---
+
 *A concrete plan for running the **playable game** in Godot while keeping the
 existing C/Python work as the **RE + asset foundry**. Draft for review.*
 

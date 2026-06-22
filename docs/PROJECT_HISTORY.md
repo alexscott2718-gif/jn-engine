@@ -653,6 +653,34 @@ resolver rules only. QA log: `docs/qa/lu9-2026-06-12/index.html`.
 
 ---
 
+## Era 14 — Full-tier decomp complete; Godot retired; pivot to the native port (~June 7–22)
+
+The full-tier decompilation campaign ([`codex_full_decomp_plan.md`](./codex_full_decomp_plan.md))
+ran to completion: **all 208 `C*` gameplay classes in `Neutron.exe` have a faithful behavioral
+spec** (`docs/decomp/<Class>.md`) and a ledger row at `status=spec` (`docs/decomp_ledger.csv`).
+That corpus — identity, field map, vtable, per-frame behavior, constants, assets, confidence per
+class — is the durable RE deliverable.
+
+**Artifact decision reversed (2026-06-22): the Godot bridge is retired.** Era 10–13 had settled
+(`godot_bridge_plan.md` §8) on a Godot-led game as the *primary artifact*, with the C/Python work
+as a "foundry" feeding it across a data-contract seam. After hands-on Godot use, that direction was
+abandoned. The decomp specs now feed a **native Linux port**: the C engine in `src/` *is* the
+product, not a foundry. `godot_bridge_plan.md` is superseded — do not start new work against it.
+
+The pivot exposed the real gap. A coverage survey found the engine resolves objects through two
+independent tables: **visual** (`entity_visual.c`, ~120 FourCCs) and **behavior**
+(`behaviors/` via `entities.c`, only **31 FourCCs → 21 vtables**). Mechanisms/moving parts, player
+movement, triggers, and Carl's patrol walker are implemented; **enemies/AI, friends/NPCs, vehicles,
+and the entire game-flow/level-controller layer are not** — ~95 of 208 specs have a doc but no
+runtime behavior, and `main.c` is a generic loop rather than a port of `CJimmyGame`/tasks/menus/
+cutscenes. The forward plan is [`native_port_plan.md`](./native_port_plan.md): five waves
+(bases → enemies → combat/items → vehicles → game-flow), bases-first so leaves stay thin, each
+class faithful to its `docs/decomp/<Class>.md` and validated by screenshot + `audit_faithfulness.py`
++ `.omtc` motion-diff. Work proceeds on the `native-port` branch; kickoff handoff is
+`docs/decomp/_next_session.md`.
+
+---
+
 ## Invariants (don't relitigate these)
 
 Paid for with measured evidence. Changing one needs *new* measurement, not argument.
@@ -687,6 +715,8 @@ performance, shell hygiene) lives in the repo's `CLAUDE.md` and in
 
 ## Where to go next
 
+- **The active campaign — native Linux port:** [`native_port_plan.md`](./native_port_plan.md)
+  (the five waves) and [`decomp/_next_session.md`](./decomp/_next_session.md) (kickoff handoff).
 - **Understand the code as it stands today:** [`ARCHITECTURE.md`](./ARCHITECTURE.md).
 - **Pick up a self-contained contributor task:**
   [`CONTRIBUTOR_object_capture_plan.md`](./CONTRIBUTOR_object_capture_plan.md).
