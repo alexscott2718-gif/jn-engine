@@ -26,6 +26,7 @@
 #include "camera.h"
 #include "gamestate.h"
 #include "game_flow.h"
+#include "menu.h"
 #include "hud.h"
 #include "player_anim.h"
 #include "qa.h"
@@ -951,12 +952,15 @@ static void draw_scene(World *world, int jim_model_ok)
 int main(int argc, char **argv) {
     const char *start_level = "level1";
     int want_newgame = 0;
+    int want_menu = 0;
     for (int i = 1; i < argc; i++) {
         if (i < argc - 1 && strcmp(argv[i], "--level") == 0) {
             start_level = argv[i + 1];
             i++;
         } else if (strcmp(argv[i], "--newgame") == 0) {
             want_newgame = 1;
+        } else if (strcmp(argv[i], "--menu") == 0) {
+            want_menu = 1;
         }
     }
 
@@ -1370,6 +1374,12 @@ int main(int argc, char **argv) {
        unchanged from before Wave N5. */
     if (game_flow_campaign_active() || env_enabled("JN_CUTSCENE"))
         cutscene_request_intro();
+
+    /* CMainMenu front-end: --menu opens the title/level-select over the loaded
+       level as a backdrop; the player's choice routes into the level/task
+       system (New Game -> NewGame.tsk -> level1b; VR items load directly). */
+    if (want_menu)
+        menu_open();
     configure_safety_floor(&world, jim);
     cam->fov = 1.047215f;
     cam->near_z = 20.0f;
@@ -1428,6 +1438,15 @@ int main(int argc, char **argv) {
     {
         const char *s = getenv("JN_TEST_RIDE");
         if (s && *s) n4_ride_tick = atoi(s);
+    }
+
+    /* CMainMenu: when the menu is up in a headless screenshot run, auto-confirm
+       the default item (New Game) a few ticks after warmup so the menu route is
+       exercised end-to-end in CI. JN_MENU_AUTO_TICK overrides the delay. */
+    int menu_auto_tick = screenshot_warmup_goal + 2;
+    {
+        const char *s = getenv("JN_MENU_AUTO_TICK");
+        if (s && *s) menu_auto_tick = atoi(s);
     }
 
     /* QA probe: JN_QA_PROBE="x,y" simulates a QA-mode click at window coords
@@ -1492,6 +1511,37 @@ int main(int argc, char **argv) {
                 demo_jump_sent = 1;
             }
 
+            /* Front-end menu (CMainMenu): while open, gameplay is frozen and
+               the player's selection routes into the level/task system. The
+               currently-loaded level renders as a static backdrop. */
+            if (menu_active()) {
+                menu_input();
+                const char *sel_level = NULL;
+                int sel_newgame = 0;
+                int confirmed = menu_take_confirm(&sel_level, &sel_newgame);
+                /* Headless: auto-confirm the default item (New Game) so the
+                   menu route is exercised in screenshot/CI runs. */
+                if (!confirmed && screenshot_mode &&
+                    screenshot_warmup_ticks >= menu_auto_tick) {
+                    menu_current(&sel_level, &sel_newgame);
+                    confirmed = 1;
+                }
+                if (confirmed) {
+                    if (!sel_level) {
+                        w.should_quit = 1;   /* Quit item */
+                    } else {
+                        char ng[64] = {0};
+                        if (sel_newgame &&
+                            game_flow_begin_task("NewGame", ng, sizeof ng, NULL) &&
+                            ng[0])
+                            sel_level = ng;   /* NewGame.tsk -> level1b */
+                        gamestate_request_level_swap(sel_level, "");
+                        menu_close();
+                    }
+                }
+            }
+
+          if (!menu_active()) {
             /* Per-entity behavior tick (player reads input, platforms move, etc.) */
             for (Entity *e = world.head; e; e = e->next) {
                 entity_update(e, &world, DT);
@@ -1563,9 +1613,12 @@ int main(int argc, char **argv) {
 
             /* Physics: gravity, AABB collision, trigger detection. */
             physics_step(&world, DT);
+          }  /* end if (!menu_active()) — gameplay frozen while the menu is up */
 
-            /* Drain a pending level swap. Done outside the entity-update
-               iteration above so we don't mutate the list mid-walk. */
+            /* Drain a pending level swap (also the menu's New Game / VR route).
+               Done outside the entity-update iteration above so we don't mutate
+               the list mid-walk, and outside the menu freeze so the confirmed
+               selection actually loads. */
             const GameState *gs_pre = gamestate_get();
             if (gs_pre->swap_level[0] != '\0') {
                 char level_buf[64];
@@ -1730,8 +1783,11 @@ int main(int argc, char **argv) {
         }
 
         /* 2D HUD overlay, drawn after all 3D geometry. */
-        if (hud_enabled)
+        if (hud_enabled && !menu_active())
             hud_draw(w.width, w.height, gamestate_get());
+
+        /* CMainMenu overlay (drawn over the backdrop scene when open). */
+        menu_draw(w.width, w.height);
 
         /* Live coordinate readout (QA) — player draw-space pos + facing. */
         dbg_coords_overlay(w.width, w.height, jim);
