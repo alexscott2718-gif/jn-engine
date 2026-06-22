@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Native Linux Port - Waves N1-N5 - jn-engine</title>
+<style>
+* { box-sizing:border-box; margin:0; padding:0; }
+body { font-family:Monaco,Menlo,"Ubuntu Mono",monospace; background:#0d0d0d; color:#dedede; line-height:1.55; padding:24px 16px; }
+.wrap { max-width:1080px; margin:0 auto; }
+h1 { font-size:1.45rem; color:#fff; margin-bottom:4px; }
+h2 { font-size:1.08rem; color:#7ec8ff; border-bottom:1px solid #2a2a2a; padding-bottom:6px; margin:34px 0 12px; }
+h3 { font-size:0.98rem; color:#fff; margin-bottom:2px; }
+p { margin:10px 0; color:#c8c8c8; }
+a { color:#7ec8ff; text-decoration:none; }
+a:hover { text-decoration:underline; }
+.sub { color:#888; font-size:0.84rem; }
+.badge { display:inline-block; border-radius:4px; padding:1px 8px; font-size:0.74rem; vertical-align:middle; }
+.green { background:#143a14; color:#7dde7d; border:1px solid #2c6e2c; }
+.blue { background:#1d2c3d; color:#9ecbff; border:1px solid #2c5a8a; }
+.amber { background:#33280e; color:#e6c66f; border:1px solid #6c5720; }
+.red { background:#3a1414; color:#ff9a9a; border:1px solid #7a2a2a; }
+table { width:100%; border-collapse:collapse; margin:14px 0; font-size:0.82rem; }
+th,td { text-align:left; padding:7px 8px; border-bottom:1px solid #242424; vertical-align:top; }
+th { color:#9a9a9a; font-weight:normal; }
+td code { color:#d9c08a; }
+.card { background:#141414; border:1px solid #262626; border-radius:8px; padding:18px; margin:22px 0; }
+.meta { color:#888; font-size:0.8rem; margin-bottom:10px; }
+.fix { border-left:3px solid #2c6e2c; background:#0d160d; border-radius:0 6px 6px 0; color:#afd0af; padding:8px 12px; margin:12px 0; font-size:0.88rem; }
+.note { border-left:3px solid #6c5720; background:#181409; border-radius:0 6px 6px 0; color:#d8c184; padding:8px 12px; margin:12px 0; font-size:0.88rem; }
+pre { overflow-x:auto; background:#0a0a0a; border:1px solid #242424; border-radius:6px; padding:10px 12px; font-size:0.76rem; color:#b8c8b8; margin:10px 0; }
+.footer { color:#777; border-top:1px solid #2a2a2a; margin-top:40px; padding-top:12px; font-size:0.8rem; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<h1>Native Linux Port - Waves N1-N5 <span class="badge green">COMPLETE</span></h1>
+<p class="sub">Changelog &middot; 2026-06-22 &middot; branch <code>native-port</code>. The reverse-engineered behavioral specs for all 208 <code>Neutron.exe</code> gameplay classes now drive <em>runtime behavior</em> in the native C engine (<code>jnengine</code>) &mdash; not a separate game runtime. This log summarizes the five porting waves that took the engine from "renders the levels" to "plays them."</p>
+
+<h2>Summary</h2>
+<p>With the decomp spec campaign finished (208/208 classes at <code>status=spec</code>), the project pivoted to a <strong>native Linux port</strong>: turning those specs into live gameplay in the C engine. The work followed the inheritance DAG &mdash; <strong>bases first, then families, then leaves</strong> &mdash; so each wave builds on the last instead of re-copying logic. Five waves landed in sequence: the shared <strong>base-behavior framework</strong> (N1), <strong>enemies/AI</strong> (N2), <strong>player combat + pickups</strong> (N3), <strong>vehicles</strong> (N4), and the <strong>game-flow / level-controller layer</strong> (N5). Every wave was gated the same way: <code>JN_SCREENSHOT</code> spot checks, a full <code>tools/audit_faithfulness.py</code> sweep that must stay at <strong>0 findings</strong> across all 35 levels, and a WASM rebuild verified by <code>tools/qa_web_verify.py</code> (16 browser checks) before deploy. The browser build at <a href="/jn-engine/">exentt.com/jn-engine</a> is the live result.</p>
+
+<table>
+<tr><th>wave</th><th>focus</th><th>key modules (new/changed)</th><th>headline result</th></tr>
+<tr><td><span class="badge blue">N1</span></td><td>Base behavior framework</td><td><code>behavior_base.c</code>, <code>movement_base</code>, <code>behavior_flying.c</code>, <code>behavior_ai.c</code></td><td>Shared lifecycle gates + reusable seek/patrol/idle AI; Carl re-pointed onto the AI base</td></tr>
+<tr><td><span class="badge blue">N2</span></td><td>Enemies / AI (Yokian family)</td><td><code>behavior_enemy.c</code> (<code>3SOL</code>/<code>3GUA</code>/<code>3SPY</code>), <code>behavior_projectile.c</code> (<code>PROJ</code>)</td><td>Soldiers acquire, chase and melee the player; player health + enemy knockout model</td></tr>
+<tr><td><span class="badge blue">N3</span></td><td>Player combat + pickups</td><td><code>behavior_balloon.c</code> (<code>3BAL</code>), <code>behavior_pickup.c</code> (<code>3BPU</code>/<code>3BUP</code>/<code>3HEL</code>/<code>3MEP</code>)</td><td>Throw to pop balloons for score; the F throw is gated behind carrying the baseball</td></tr>
+<tr><td><span class="badge blue">N4</span></td><td>Vehicles</td><td><code>behavior_vehicle.c</code> (<code>3ROC</code> rideable; <code>3SUV</code>/<code>3SBU</code>/<code>3SAI</code> AI)</td><td>Board + fly the rocket with E; self-driving traffic patrols its routes</td></tr>
+<tr><td><span class="badge green">N5</span></td><td>Game-flow / level controllers</td><td><code>task_loader.c</code>, <code>game_flow.c</code>, <code>behavior_cutscene.c</code>, <code>menu.c</code></td><td>New Game from a menu &rarr; task system &rarr; mission/lives/win flow &rarr; cutscenes</td></tr>
+</table>
+
+<h2>Wave N1 &mdash; Base behavior framework <span class="badge green">DONE</span></h2>
+<div class="card">
+<div class="meta">unblocks every later wave &middot; <code>C3DObject</code> / <code>C3DAnimated</code> / <code>C3DFlyingObject</code> / <code>C3DAI</code></div>
+<p>The 208 classes are an inheritance DAG, so the shared bases were ported <em>once</em> as reusable native modules rather than copied per leaf. <code>behavior_base.c</code> gives every animated object the same lifecycle prologue (level-visibility gates, <code>InitiallyVisible</code>, per-entity <code>HasCollision</code>/trigger flags, anim advance). A <code>movement_base</code> helper plus a <code>C3DFlyingObject</code> wrapper extract the shared movement integrator so vehicles and AI can reuse it. <code>behavior_ai.c</code> exposes idle/seek/patrol primitives.</p>
+<div class="fix">Proof the base is real: Carl's <code>vt_walker</code> was re-pointed onto the new <code>behavior_ai</code> patrol primitive instead of carrying its own waypoint loop &mdash; and still patrols correctly, with no visual regression.</div>
+<pre>Carl runtime dump @ 240 ticks: C3DCARL moving toward CARL1 through behavior_ai base
+audit_faithfulness.py -> 0 findings</pre>
+</div>
+
+<h2>Wave N2 &mdash; Enemies / AI <span class="badge green">DONE</span></h2>
+<div class="card">
+<div class="meta"><code>C3DYokian</code> family: <code>3SOL</code> soldier, <code>3GUA</code> guard, <code>3SPY</code> spy &middot; shared <code>PROJ</code></div>
+<p>The first enemies that react to the player. <code>behavior_enemy.c</code> ports the Yokian humanoids as a faithful subset of the <code>C3DAI</code> seek/scan/attack machine: they acquire the player when inside the authored <code>VisibleRange</code> + FOV cone, chase via the N1 seek primitive, and melee-strike on a cooldown in contact range (soldiers are melee in the decompiled body, so they spawn no projectile). The new <code>behavior_projectile.c</code> module is the shared, team-tagged spawn &rarr; integrate &rarr; <code>world_query_segment</code> wall test &rarr; AABB-overlap damage path &mdash; used by enemies <em>and</em> the player. Health lives in <code>gamestate.c</code>; enemy knockout uses an <code>Entity.hp</code> + a brief KO dwell.</p>
+<div class="fix">Validated on level6: a soldier in <code>yoksol</code>'s view cone walked from z&approx;&minus;3475 to &minus;3742 into attack range and struck the player (health 100&rarr;70); a thrown baseball logged the defeat and removed it.</div>
+<pre>[ENEMY] 3SOL 'yoksol' defeated
+audit_faithfulness.py -> 0 findings</pre>
+</div>
+
+<h2>Wave N3 &mdash; Player combat + pickups <span class="badge green">DONE</span></h2>
+<div class="card">
+<div class="meta"><code>C3DBalloon</code> (<code>3BAL</code>, 60 real instances) &middot; the pickups family</div>
+<p>Now the world <em>reacts to</em> the player's combat. A balloon rests until Jimmy's touch <em>releases</em> it (it drifts upward); a thrown baseball <em>pops</em> it for score using the decomp's distance-bonus formula (10 resting / 200 released base). The baseball is the shared <code>PROJ_TEAM_PLAYER</code> projectile from N2. The <strong>F</strong> throw is now gated behind actually carrying the baseball &mdash; faithful to <code>C3DBaseballPickup</code>'s inventory flag &mdash; granted by collecting a <code>3PIC</code> that awards <code>PIC_NUMBER==6</code> or by the new <code>behavior_pickup.c</code> ability pickups (<code>3BPU</code> baseball, <code>3BUP</code> bubble, <code>3HEL</code> helmet, <code>3MEP</code> score). Abilities are modelled as <code>gamestate</code> inventory tools.</p>
+<div class="fix">On Level2, a granted baseball thrown at the nearest balloon scored; the N2 defeat path was confirmed un-regressed.</div>
+<pre>[BALLOON] popped 'C3DBALLOON' (+69 pts, resting)
+audit_faithfulness.py -> 0 findings &middot; qa_web_verify.py 16/16</pre>
+</div>
+
+<h2>Wave N4 &mdash; Vehicles <span class="badge green">DONE</span></h2>
+<div class="card">
+<div class="meta"><code>C3DRocketShip</code> (<code>3ROC</code>, rideable) &middot; <code>C3DAISuv</code>/<code>C3DBus</code>/<code>C3DSailBoat</code> (self-driving)</div>
+<p>Vehicles split cleanly along their decomp base chains, both halves reusing N1 modules. The rocket &mdash; a <code>C3DFlyingObject</code> leaf placed in <em>every</em> level &mdash; is <strong>player-rideable</strong>: walk in and press <strong>E</strong> to board, fly with the move keys (forward/turn + SPACE up / CTRL down) over the N1 flying base, press <strong>E</strong> to dismount. While ridden it integrates its own position (not a physics entity, to avoid double gravity) and snaps the player onto it so the follow camera tracks the ride. <code>vt_ai_vehicle</code> drives the <strong>self-driving</strong> <code>C3DAI</code> traffic along its authored <code>PatrolPoint</code> chains via the same patrol primitive Carl uses.</p>
+<div class="fix">Level1 rocket boarded at y=156 and climbed to 210 under up-input; Level2 bus drove itself ~391 units along its <code>bus01</code> route.</div>
+<pre>[n4_test] rocket climbed to y=210 (+54)
+audit_faithfulness.py -> 0 findings &middot; qa_web_verify.py 16/16</pre>
+</div>
+
+<h2>Wave N5 &mdash; Game-flow / level controllers <span class="badge green">DONE</span></h2>
+<p>The biggest structural gap: <code>main.c</code> was a generic loop, not a port of the controller layer. Four pieces fill it.</p>
+
+<div class="card">
+<h3>CTaskList &mdash; the <code>.tsk</code> task-state loader</h3>
+<div class="meta"><code>task_loader.c</code> &middot; docs/decomp/CTaskList.md</div>
+<p>A C port of the <code>.tsk</code> deserializer that the game loads at level start: the start record (which <code>.gam</code> to load + spawn point) plus the initial mission entity-state table (NPCs, the <code>SCENE</code> sequencer, the <code>REACTOR</code> objective). Byte-exact with the reference Python parser. The proprietary <code>.tsk</code> binaries aren't distributed, so the loader falls back to a baked <code>NewGame</code> default derived from the committed parse.</p>
+<div class="fix">Parses <code>NewGame.tsk</code> &rarr; <code>level1b.gam</code>, spawn (470.5965, 609.2417, &minus;87.7631), 12-entity table including the non-default <code>SCENE=30</code>.</div>
+</div>
+
+<div class="card">
+<h3>CJimmyGame &mdash; mission / lives / win-state + the level table</h3>
+<div class="meta"><code>game_flow.c</code> &middot; collapses the 40 <code>CLevel*Game</code> / <code>CLevelVR0N</code> leaves</div>
+<p>The per-level game-mode controller. <code>InitGame</code> seeds the mission layer exactly as the original (lives = 5, mission value = 100, mission active). The <strong>40 zero-owned-method <code>CLevel*Game</code> leaves &mdash; which only bind a <code>.gam</code> &mdash; collapse into one data-driven level table</strong> instead of 40 near-identical hand-ports. Death now routes through the real lives/restart flow (a death spends a life and respawns; game-over resets the mission; manual <strong>R</strong> costs none) and the level-clear bridges to a real win-condition hook.</p>
+<div class="note">The <code>RequiredLevel</code> visibility gate is deliberately left env-driven: the original's progress counter runs into the ~550 range and its per-objective increments aren't ground-truthed yet, so feeding it a small campaign ordinal would wrongly hide gated objects. Mapping campaign progress &rarr; gate thresholds is a documented open question.</div>
+<pre>[JIMMYGAME] InitGame: lives=5 mission_value=100 active=1
+[JIMMYGAME] begin task 'NewGame' -> level1b.gam (spawn 470.6,609.2,-87.8, 12 states)</pre>
+</div>
+
+<div class="card">
+<h3>C3DCutSceneCamera + C3DMultiCutSceneCamera &mdash; scripted camera timeline</h3>
+<div class="meta"><code>behavior_cutscene.c</code> &middot; FourCC <code>3CAM</code> / <code>3MCA</code></div>
+<p>Each placed <code>3CAM</code> registers a shot &mdash; its <code>CameraTarget</code> plus offset, distance clamp, zoom-ease rate and vertical look offset &mdash; and the runtime plays the level's shots in sequence (the <code>3MCA</code> sequencer role), framing each named target. The cameras are invisible directors (no mesh, no collision).</p>
+<div class="fix">level1a sequences its 3 shots (targets <code>c3dgoddard</code>, <code>sw</code>) to a rendered frame.</div>
+<pre>[CUTSCENE] play 3 shot(s)
+[CUTSCENE] shot 2/3 target='c3dgoddard'</pre>
+</div>
+
+<div class="card">
+<h3>CMainMenu &mdash; front-end menu + level/task routing</h3>
+<div class="meta"><code>menu.c</code> &middot; <code>--menu</code></div>
+<p>A keyboard-navigable title/level-select (Up/Down + Enter) over the loaded level as a backdrop. Items mirror the executable's level-file table: <strong>New Game</strong> &rarr; <code>NewGame.tsk</code> &rarr; <code>level1b</code> (turning on campaign mode), the 8 VR levels in their specced menu order, and Quit. Selections route through the existing level-swap machinery; gameplay freezes while the menu is up.</p>
+<div class="fix">A level can now be entered from a menu, tracked to a win state, and transitioned &mdash; without per-level C hardcoding.</div>
+<pre>[MAINMENU] activate 'New Game' -> level1b (NewGame task)
+[SWAP] loading assets/gam/level1b.gam
+[JIMMYGAME] enter level 'level1b' (campaign idx 2, vr=0)</pre>
+</div>
+
+<h2>How the campaign layer stays out of the validators</h2>
+<p>The campaign entry, cutscenes and menu are gated behind <code>--newgame</code> / <code>--menu</code> / <code>JN_CUTSCENE</code>. A direct <code>--level X</code> launch &mdash; which is exactly how the faithfulness audit and the matched-camera validators drive the engine &mdash; keeps campaign mode <strong>off</strong>, so rendering is identical to before Wave N5. That is why every wave above could add gameplay while the audit held at 0 findings.</p>
+
+<h2>Validation gate (every wave)</h2>
+<pre>make
+python3 tools/audit_faithfulness.py        # 0 findings across all 35 levels
+make web
+python3 tools/qa_web_verify.py             # 16/16 browser checks
+./tools/deploy_wasm.sh                      # publish to exentt.com/jn-engine</pre>
+
+<p class="sub">Live build: <code>jnengine.48a4e1b6.js</code>, assets <code>61adcac9</code>. Each wave is committed per class on the <code>native-port</code> branch.</p>
+
+<div class="footer">
+New runtime modules: <code>task_loader.c</code>, <code>game_flow.c</code>, <code>menu.c</code>, <code>behavior_cutscene.c</code>, <code>behavior_enemy.c</code>, <code>behavior_projectile.c</code>, <code>behavior_balloon.c</code>, <code>behavior_pickup.c</code>, <code>behavior_vehicle.c</code>, <code>behavior_ai.c</code>, <code>behavior_base.c</code>, <code>movement_base.c</code>.
+&middot; Full narrative: <a href="https://github.com/alexscott2718-gif/jn-engine/blob/native-port/docs/PROJECT_HISTORY.md">PROJECT_HISTORY.md</a>
+&middot; Plan: <a href="https://github.com/alexscott2718-gif/jn-engine/blob/native-port/docs/native_port_plan.md">native_port_plan.md</a>
+&middot; <a href="/jn-engine/">Play the browser build</a>
+</div>
+
+</div>
+</body>
+</html>
