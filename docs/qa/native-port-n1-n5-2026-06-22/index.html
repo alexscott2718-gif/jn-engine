@@ -127,8 +127,27 @@ audit_faithfulness.py -> 0 findings &middot; qa_web_verify.py 16/16</pre>
 <h2>How the campaign layer stays out of the validators</h2>
 <p>The campaign entry, cutscenes and menu are gated behind <code>--newgame</code> / <code>--menu</code> / <code>JN_CUTSCENE</code>. A direct <code>--level X</code> launch &mdash; which is exactly how the faithfulness audit and the matched-camera validators drive the engine &mdash; keeps campaign mode <strong>off</strong>, so rendering is identical to before Wave N5. That is why every wave above could add gameplay while the audit held at 0 findings.</p>
 
+<h2>Verifying the behaviors</h2>
+<p>Two ways to confirm a class is doing the right thing &mdash; one in the browser, one static.</p>
+<div class="card">
+<h3>In-browser sandbox &mdash; <code>?sandbox=1</code></h3>
+<p>The browser build can't reach the <code>JN_TEST_*</code> env hooks and has no inventory UI yet, so combat and vehicles were undiscoverable. Adding <code>?sandbox=1</code> to the level URL <strong>reveals the rideable rocketship</strong> (the <code>C3DRocketShip</code> mesh, normally hidden) and <strong>grants the baseball</strong> so <strong>E</strong> (board / leave the rocket) and <strong>F</strong> (throw) work. A Controls panel under the level bar lists every binding. Default loads keep sandbox off, so the faithfulness audit is unaffected.</p>
+<div class="fix">Try it: <a href="/jn-engine/jnengine.html?level=level1&amp;sandbox=1">level1 with sandbox on</a> &mdash; walk to the rocketship, press E to fly it, F to throw.</div>
+<div class="note">This also fixed a real contradiction: a prior QA ticket marked <code>3ROC</code> invisible as a "scripted prop," but it is in fact the rideable vehicle (Wave N4). Sandbox reconciles the two so the vehicle is visible where it is boardable; the default path stays unchanged pending a dedicated visibility pass.</div>
+</div>
+<div class="card">
+<h3>Static behavior-classification audit &mdash; <code>tools/verify_behaviors.py</code></h3>
+<p>Every FourCC&rarr;behavior-vtable in <code>entities.c</code> is cross-checked against the decompiled class's <strong>base chain</strong>. Each gameplay role implies a structural invariant: a rideable vehicle must derive <code>C3DFlyingObject</code>, an AI-driven vehicle/enemy/walker must derive <code>C3DAI</code>, a pickup/camera its matching base. A misclassification &mdash; like confusing the rideable <code>C3DRocketShip</code> with the autonomous toy <code>C3DRocket</code> &mdash; now fails mechanically instead of only surfacing in play.</p>
+<pre>behavior classification: 17 ok, 0 MISMATCH, ...
+  OK  3ROC  vt_rocket   C3DRocketShip     [vehicles]      &larr; derives C3DFlyingObject
+  OK  3SOL  vt_yokian   C3DYokianSoldier  [enemies_ai]    &larr; derives C3DAI
+  OK  3CAR  vt_walker   C3DCarl           [player_npcs]   &larr; derives C3DAI
+all 17 checked mappings consistent with the decomp base chains</pre>
+</div>
+
 <h2>Validation gate (every wave)</h2>
 <pre>make
+python3 tools/verify_behaviors.py          # FourCC -> behavior base-chain check
 python3 tools/audit_faithfulness.py        # 0 findings across all 35 levels
 make web
 python3 tools/qa_web_verify.py             # 16/16 browser checks
