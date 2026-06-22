@@ -1,4 +1,5 @@
 #include "behaviors.h"
+#include "behavior_projectile.h"
 #include "../../engine/input.h"
 #include "../../engine/movement_base.h"
 #include "../gamestate.h"
@@ -105,6 +106,19 @@ static void player_on_update(Entity *e, World *w, float dt) {
     if (!noclip && e->on_ground && jump_pressed) {
         e->vy = PLAYER_JUMP_VEL;
         e->on_ground = 0;
+    }
+
+    /* Throw a baseball (F) — defeats Yokians via the shared projectile path
+       (C3DYokian reacts to C3DBASEBALL). Wave N2 seed: always available; Wave
+       N3 will gate it behind picking up the baseball and wire the throw anim. */
+    if (!noclip && input_just_pressed(SDL_SCANCODE_F)) {
+        float fx = sinf(e->ry), fz = cosf(e->ry);
+        /* Spawn clear of the player's own SOLID AABB (half ~35) so the
+           projectile's wall raycast doesn't immediately stop on the thrower. */
+        projectile_spawn(w,
+                         e->x + fx * 80.0f, e->y + 30.0f, e->z + fz * 80.0f,
+                         fx, 0.0f, fz,
+                         PROJ_TEAM_PLAYER, 800.0f, 100, 2.5f);
     }
 
     /* Detect pickups: gamestate counter rising means an item triggered this tick. */
