@@ -76,6 +76,7 @@ typedef struct Entity {
     float move_lean;              /* shared movement-base lean angle */
     int   user_flag;             /* per-type: door open, item collected, ... */
     float user_float;            /* per-type: phase, timer, ... */
+    float hp;                    /* enemy/destructible health points (0 = unset) */
     GamProp props[ENTITY_MAX_PROPS]; /* generic .gam property bag (see above) */
     int    nprops;
     const EntityVTable *vt;

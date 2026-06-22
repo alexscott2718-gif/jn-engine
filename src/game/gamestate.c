@@ -16,6 +16,35 @@ void gamestate_gem_collected(void) {
     g_state.gems_collected++;
 }
 
+/* --- Player health / hit model (Wave N2) -------------------------------
+   Minimal damage tracking so enemies can hurt the player. health is a
+   0..health_max bar already shown by the HUD. At 0 the player is "down":
+   we log it and refill so the demo loop keeps running (a real death/restart
+   path lands with the Wave N5 game-flow controller). */
+int gamestate_player_health(void) {
+    return g_state.health;
+}
+
+void gamestate_damage_player(int amount) {
+    if (amount <= 0) return;
+    g_state.health -= amount;
+    if (g_state.health <= 0) {
+        g_state.health = 0;
+        printf("[HEALTH] player down (-%d) -> 0\n", amount);
+        g_state.health = g_state.health_max;  /* refill until Wave N5 death flow */
+        printf("[HEALTH] refilled to %d\n", g_state.health);
+        return;
+    }
+    printf("[HEALTH] player hit (-%d) -> %d / %d\n",
+           amount, g_state.health, g_state.health_max);
+}
+
+void gamestate_heal_player(int amount) {
+    if (amount <= 0) return;
+    g_state.health += amount;
+    if (g_state.health > g_state.health_max) g_state.health = g_state.health_max;
+}
+
 void gamestate_add_points(int points) {
     g_state.points += points;
 }

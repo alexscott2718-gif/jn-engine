@@ -41,6 +41,10 @@ void gamestate_item_collected(void);
 /* Typed pickups (Step 3). */
 void gamestate_gem_collected(void);
 void gamestate_add_points(int points);
+/* Player health / hit model (Wave N2). Enemies call damage; HUD reads health. */
+int  gamestate_player_health(void);
+void gamestate_damage_player(int amount);
+void gamestate_heal_player(int amount);
 /* Inventory (Step 4). Grant a tool slot identified by tag (deduped); icon_path
    is a static string used by the HUD (may be NULL). Returns 1 if newly added. */
 int  gamestate_grant_tool(const char *tag, const char *icon_path);
