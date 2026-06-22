@@ -746,7 +746,8 @@ camera tracks the ride. The other half, **`vt_ai_vehicle`**, drives the **self-d
 the N1 `behavior_ai` patrol primitive (the same one Carl uses). Validation: on Level1 the rocket boarded at
 y=156 and climbed to 210 under up-input (`JN_TEST_RIDE`); on Level2 the bus drove itself ~391 units along
 `bus01` (z −2907 → −3299, speed ≈400); `audit_faithfulness.py` stayed at **0 findings**;
-`./tools/deploy_wasm.sh` published the build and `qa_web_verify.py` passed all 16 checks. **Deferred**: the
+`./tools/deploy_wasm.sh` published the build (`jnengine.432411fb.js`, assets `49b7df51`) live to
+exentt.com/jn-engine and `qa_web_verify.py` passed all 16 checks. **Deferred**: the
 full `C3DVehicle` player-car sim (6-wheel steering/suspension; `3CAR` is taken by `C3DCarl` and the car leaves
 `3JEE`/`3NCA`/`3NC2`/`3POD`/`3SUB`/`3BOA`/`3WHE` have **0 `.gam` instances**), and the SUV light-cone child /
 AICar horn-contact response / SailBoat sine-bob (need the C3DLightCone/effect/Goddard subsystems). Next wave
