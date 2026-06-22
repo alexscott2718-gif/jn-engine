@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-static int progress_gate_enabled(void) {
+int behavior_progress_gate_enabled(void) {
     static int cached = -1;
     if (cached < 0) {
         const char *s = getenv("JN_PROGRESS_LEVEL");
@@ -11,15 +11,15 @@ static int progress_gate_enabled(void) {
     return cached;
 }
 
-static int current_progress_level(void) {
+int behavior_progress_level(void) {
     const char *s = getenv("JN_PROGRESS_LEVEL");
     return (s && s[0]) ? atoi(s) : 0;
 }
 
 static int animated_level_gate_allows(const Entity *e) {
-    if (!progress_gate_enabled()) return 1;
+    if (!behavior_progress_gate_enabled()) return 1;
 
-    int level = current_progress_level();
+    int level = behavior_progress_level();
     int exact = gam_prop_i(e, "ExactLevel", -1);
     int required = gam_prop_i(e, "RequiredLevel", -1);
     int remove = gam_prop_i(e, "RemoveLevel", -1);
