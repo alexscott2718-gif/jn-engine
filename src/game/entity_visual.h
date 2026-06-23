@@ -47,6 +47,7 @@ int  entity_visual_is_jnbg(void);
    C3DRocketShip 3ROC) so they can be located and driven. Default OFF, so the
    audit + matched-camera validators are unaffected. */
 void entity_visual_set_sandbox(int on);
+int  entity_visual_sandbox_enabled(void);
 
 /* JNBG sprite-database lookups: (.gam SpriteDatabase, SpriteIndex=chunk id)
    -> extracted PNG path, NULL if unknown. sprite_chunk_path is the

@@ -3,11 +3,12 @@
  * Two flavors, both reusing N1 movement/AI bases:
  *
  *  - vt_rocket (3ROC, C3DRocketShip — a C3DFlyingObject leaf): the player walks
- *    into it and presses **E** to BOARD, flies it with the normal move keys
- *    (forward/turn + SPACE up / CTRL|Q down), and presses **E** to dismount.
- *    While ridden the rocket flies via the N1 `behavior_flying_update_base`
- *    (authored 3ROC flight params), and the player entity is snapped onto the
- *    rocket so the follow camera tracks the ride. The player's runtime flags are
+ *    into it and presses **E** to BOARD, flies it with auto-forward cruise,
+ *    SHIFT boost, Up/Down pitch, Left/Right turn, CTRL|Q brake, and presses
+ *    **E** to dismount.
+ *    While ridden the rocket flies from the authored 3ROC flight params, and the
+ *    player entity is snapped onto the rocket so the follow camera tracks the
+ *    ride. The player's runtime flags are
  *    cleared while riding so `physics_step` doesn't fight the snap with gravity,
  *    and restored on dismount. Placed in every level — the player-driven vehicle
  *    validated on real levels.
@@ -54,6 +55,11 @@ const EntityVTable vt_ai_vehicle = {
 
 /* ---- Player-rideable rocket ------------------------------------------ */
 #define ROCKET_HALF   120.0f
+#define ROCKET_SEAT_UP  40.0f  /* Jimmy rides this far above the hull center */
+#define ROCKET_TURN_RATE  2.0f /* yaw rad/sec */
+#define ROCKET_PITCH_RATE 1.4f /* pitch rad/sec */
+#define ROCKET_PITCH_MAX  1.10f/* ~63 deg nose up/down clamp */
+#define ROCKET_BRAKE_DECEL 1800.0f /* speed bled per sec while braking */
 
 static Entity      *s_ride = NULL;          /* vehicle the player rides, or NULL */
 static unsigned int s_saved_player_flags = 0;
@@ -69,8 +75,13 @@ static void rocket_mount(Entity *e) {
            the rocket owns its position (restored on dismount). */
         s_saved_player_flags = g_player->runtime_flags;
         g_player->runtime_flags = 0;
-        g_player->visible = 0;
+        /* Jimmy stays VISIBLE and is parked at the rocket seat each frame
+           (rocket_on_update) so he's seen riding it, as in the game. */
+        g_player->visible = 1;
     }
+    /* Start level + stationary; it cruises up to speed once boarded. */
+    e->rx = 0.0f;
+    e->move_speed = 0.0f;
     printf("[VEHICLE] boarded rocket '%s'\n", e->tag);
 }
 
@@ -114,43 +125,83 @@ static int rocket_player_in_range(const Entity *e) {
 }
 
 static void rocket_on_update(Entity *e, World *w, float dt) {
+    /* Board/leave trigger: E key (edge) OR the web Enter-Vehicle button. The
+       button flag is peeked (not consumed) here so the one rocket that actually
+       (dis)mounts clears it; the main loop force-clears any leftover at end of
+       frame. */
+    int board_trig = input_just_pressed(SDL_SCANCODE_E) || input_virtual_board_peek();
     if (s_ride != e) {
         behavior_animated_update_base(e, w, dt);  /* idle: visible, not moving */
-        /* Board when the player is near and presses E. */
-        if (!s_ride && input_just_pressed(SDL_SCANCODE_E) &&
-            rocket_player_in_range(e))
+        /* Board when the player is near and presses the board trigger. */
+        if (!s_ride && board_trig && rocket_player_in_range(e)) {
             rocket_mount(e);
+            input_virtual_board_consume();
+        }
         return;
     }
-    if (input_just_pressed(SDL_SCANCODE_E)) { rocket_dismount(e); return; }
+    if (board_trig) { rocket_dismount(e); input_virtual_board_consume(); return; }
 
-    MovementFlyingInput in = {0};
-    if (input_is_down(SDL_SCANCODE_UP)   || input_is_down(SDL_SCANCODE_W)) in.forward = 1.0f;
-    if (input_is_down(SDL_SCANCODE_DOWN) || input_is_down(SDL_SCANCODE_S)) in.brake   = 1.0f;
-    if (input_is_down(SDL_SCANCODE_LEFT) || input_is_down(SDL_SCANCODE_A)) in.turn   -= 1.0f;
-    if (input_is_down(SDL_SCANCODE_RIGHT)|| input_is_down(SDL_SCANCODE_D)) in.turn   += 1.0f;
-    if (input_is_down(SDL_SCANCODE_SPACE)) in.up = 1.0f;
-    if (input_is_down(SDL_SCANCODE_LCTRL)|| input_is_down(SDL_SCANCODE_RCTRL) ||
-        input_is_down(SDL_SCANCODE_Q)) in.down = 1.0f;
-    /* Touch / headless: virtual stick drives turn+forward, virtual fly drives up. */
+    /* Flight feel per the original C3DRocketShip (player recollection + the
+       C3DFlyingObject .gam params, docs/decomp/C3DRocketShip.md): the rocket
+       CRUISES forward on its own; SHIFT boosts to full MaxSpeed; the brake cuts
+       the engine and bleeds speed to a stop. The nose uses direct controls:
+       Up/W = nose up, Down/S = nose down, Left/A = turn left, Right/D = turn
+       right; velocity follows the nose. (Brake also cuts the engine sound +
+       stops the C3DFireStrato exhaust -- both deferred, see docs/native_port_plan.md
+       section 6.) */
+    MovementFlyingParams fp; movement_base_flying_params_from_gam(e, &fp);
+    int boost = input_is_down(SDL_SCANCODE_LSHIFT) || input_is_down(SDL_SCANCODE_RSHIFT);
+    int brake = input_is_down(SDL_SCANCODE_LCTRL)  || input_is_down(SDL_SCANCODE_RCTRL) ||
+                input_is_down(SDL_SCANCODE_Q);
+    float turn = 0.0f, pitch_in = 0.0f;
+    if (input_is_down(SDL_SCANCODE_LEFT)  || input_is_down(SDL_SCANCODE_A)) turn     -= 1.0f;
+    if (input_is_down(SDL_SCANCODE_RIGHT) || input_is_down(SDL_SCANCODE_D)) turn     += 1.0f;
+    if (input_is_down(SDL_SCANCODE_UP)    || input_is_down(SDL_SCANCODE_W)) pitch_in -= 1.0f; /* nose up */
+    if (input_is_down(SDL_SCANCODE_DOWN)  || input_is_down(SDL_SCANCODE_S)) pitch_in += 1.0f; /* nose down */
+    /* Touch / headless: stick turns + pitches (stick up = nose up), fly axis pitches,
+       full stick-back brakes. Boost is keyboard-only for now. */
     float vjx, vjy; input_get_virtual_move(&vjx, &vjy);
-    in.turn += vjx;
-    if (vjy > 0.0f) in.forward = vjy; else if (vjy < 0.0f) in.brake = -vjy;
-    float vf = input_get_virtual_fly();
-    if (vf > 0.0f) in.up = vf; else if (vf < 0.0f) in.down = -vf;
+    turn += vjx;
+    pitch_in -= vjy;                       /* stick up = nose up, back = nose down */
+    pitch_in -= input_get_virtual_fly();   /* fly-up = nose up */
+    if (vjy < -0.85f) brake = 1;
 
-    behavior_flying_update_base(e, w, &in, dt);
-    /* The flying base sets vx/vy/vz; the rocket isn't a PHYSICS entity (no
-       double gravity), so integrate its own position here. */
+    e->ry -= turn * ROCKET_TURN_RATE * dt;
+    e->rx += pitch_in * ROCKET_PITCH_RATE * dt;
+    if (e->rx >  ROCKET_PITCH_MAX) e->rx =  ROCKET_PITCH_MAX;
+    if (e->rx < -ROCKET_PITCH_MAX) e->rx = -ROCKET_PITCH_MAX;
+
+    /* Cruise unless braking; SHIFT lifts the target to full MaxSpeed. */
+    float target = brake ? 0.0f : (boost ? fp.max_speed : fp.max_speed * 0.5f);
+    if (brake) {
+        e->move_speed -= ROCKET_BRAKE_DECEL * dt;
+        if (e->move_speed < 0.0f) e->move_speed = 0.0f;
+    } else if (e->move_speed < target) {
+        e->move_speed += fp.accel_rate * dt;
+        if (e->move_speed > target) e->move_speed = target;
+    } else if (e->move_speed > target) {
+        e->move_speed -= fp.accel_rate * dt;
+        if (e->move_speed < target) e->move_speed = target;
+    }
+
+    float cx = cosf(e->rx), sx = sinf(e->rx);
+    float sy = sinf(e->ry), cy = cosf(e->ry);
+    e->vx = sy * cx * e->move_speed;
+    e->vy = -sx * e->move_speed;          /* nose up (rx<0) -> climb */
+    e->vz = cy * cx * e->move_speed;
     e->x += e->vx * dt;
     e->y += e->vy * dt;
     e->z += e->vz * dt;
 
-    /* Slave the (inert, hidden) player to the rocket so the camera follows. */
+    /* Slave the (inert, VISIBLE) player to the rocket seat so Jimmy rides it and
+       the follow camera tracks the ride. Kept visible (see rocket_mount). */
     if (g_player) {
-        g_player->x = e->x; g_player->y = e->y; g_player->z = e->z;
+        g_player->x = e->x;
+        g_player->y = e->y + ROCKET_SEAT_UP;
+        g_player->z = e->z;
         g_player->ry = e->ry;
         g_player->vx = g_player->vy = g_player->vz = 0.0f;
+        g_player->visible = 1;
     }
 }
 

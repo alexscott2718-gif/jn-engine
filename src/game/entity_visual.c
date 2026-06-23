@@ -29,6 +29,7 @@ int  entity_visual_is_jnbg(void)         { return g_is_jnbg; }
    the vehicle is visible where it is boardable). */
 static int g_sandbox = 0;
 void entity_visual_set_sandbox(int on) { g_sandbox = on; }
+int  entity_visual_sandbox_enabled(void) { return g_sandbox; }
 
 const char *sprite_db_path(const char *db, int chunk_id) {
     if (!db || !db[0]) return NULL;
@@ -610,6 +611,20 @@ int entity_visual_resolve(const Entity *e, EntityVisual *out) {
         EntityVisual v = {0};
         v.model_path = "assets/ase/strato.ASE";
         v.scale = 1.0f;
+        *out = v;
+        return 1;
+    }
+
+    /* Thrown projectile. The player's baseball is C3DBaseball (3BAS), a retained
+       sprite: SpriteDatabase="retainedsprites.omt", frames ball0000..ball0003,
+       SpriteSize=25 (docs/decomp/C3DBaseball.md). The ball frames extract to
+       RetainedSprites chunk "ball0000" -> 0006_32x32d32.png. Draw the PROJ as
+       that billboard so the throw is actually visible (it rendered nothing
+       before — PROJ had no entity_visual entry at all). */
+    if (strncmp(e->type, "PROJ", 4) == 0) {
+        EntityVisual v = {0};
+        v.sprite_path = "assets/parsed/RetainedSprites/RetainedSprites_images/0006_32x32d32.png";
+        v.sprite_size = 36.0f;
         *out = v;
         return 1;
     }

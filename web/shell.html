@@ -111,7 +111,7 @@
   #flyButtons { position: absolute; right: 6%; bottom: 8%;
                 display: flex; flex-direction: column; gap: 12px;
                 pointer-events: none; }
-  #jump, #flyDown {
+  #jump, #flyDown, #useTool, #enterVehicle {
           width: 22vw; max-width: 110px; aspect-ratio: 1; border-radius: 50%;
           color: #eaffea; font: 600 18px/1 system-ui, sans-serif;
           display: flex; align-items: center; justify-content: center;
@@ -123,6 +123,12 @@
              border: 2px solid rgba(220,180,135,0.82); color: #fff1df; }
   body.noclip #flyDown { display: flex; }
   #flyDown:active { background: rgba(130,96,62,0.75); }
+  #useTool { background: rgba(60,90,130,0.55);
+             border: 2px solid rgba(150,185,230,0.82); color: #e8f1ff; font-size: 15px; }
+  #useTool:active { background: rgba(80,120,175,0.75); }
+  #enterVehicle { background: rgba(110,70,120,0.55);
+                  border: 2px solid rgba(210,165,225,0.82); color: #f7eaff; font-size: 13px; }
+  #enterVehicle:active { background: rgba(150,95,165,0.75); }
 
   /* ---- Phone layout: maximize the game, overlay controls on the whole screen ----
      Without this the 16:9 canvas letterboxes to a thin strip in portrait and the
@@ -162,6 +168,8 @@
     <button id="noclipToggle" type="button">Noclip: Off</button>
     <button id="turboToggle" type="button">Speed: 1x</button>
     <button id="qaToggle" type="button">QA: Off</button>
+    <button id="sandboxToggle" type="button">Sandbox: Off</button>
+    <button id="toolSelect" type="button">Tool: —</button>
   </div>
   <div id="levelLinks"></div>
   <div id="status">Loading…</div>
@@ -174,12 +182,14 @@
     <div id="touch">
       <div id="joy"><div id="joynub"></div></div>
       <div id="flyButtons">
+        <div id="enterVehicle">ENTER</div>
+        <div id="useTool">USE</div>
         <div id="jump">JUMP</div>
         <div id="flyDown">DOWN</div>
       </div>
     </div>
   </div>
-  <div id="controls">WASD move · SPACE jump/up · Ctrl/Q down · SHIFT run · E board/leave rocket · F throw · R respawn · B report · drag = orbit · <a id="qaHowto" href="https://exentt.com/jn/qa-howto.html" target="_blank" rel="noopener">how to report bugs</a></div>
+  <div id="controls">WASD move · SPACE jump/up · Ctrl/Q down · SHIFT run · E board/leave rocket · F use active tool · R respawn · B report · drag = orbit · <a id="qaHowto" href="https://exentt.com/jn/qa-howto.html" target="_blank" rel="noopener">how to report bugs</a></div>
   <div id="sandboxBanner"></div>
   <div id="note">
     Native WebGL2 rebuild using original GAM/OMT data.
@@ -488,16 +498,15 @@
     if (!b) return;
     if (sandboxMode) {
       b.className = 'on';
-      b.textContent = 'Sandbox ON — the rideable rocketship is visible and the '
-        + 'baseball is granted. Click the game first, then walk up to the rocket '
-        + 'and press E to fly it; press F to throw.';
+      b.textContent = 'Sandbox ON — a rideable rocketship is present and the '
+        + 'combat tools are granted. Click the game first, then walk up to the '
+        + 'rocket and press E (or ENTER) to fly it; press F (or USE) to fire the '
+        + 'active tool. Use the Tool button to switch tools, Sandbox to toggle.';
     } else {
-      var u = new URL(window.location.href);
-      u.searchParams.set('sandbox', '1');
       b.innerHTML = 'Tip: click the game to give it keyboard focus. '
-        + 'The rocketship + combat tools are off by default — '
-        + '<a href="' + u.pathname + u.search + u.hash + '">enable sandbox mode</a> '
-        + 'to reveal the rideable rocket and grant the baseball.';
+        + 'The rocketship + combat tools are off by default — hit the '
+        + '<strong>Sandbox</strong> button above to reveal the rideable rocket '
+        + 'and grant the baseball (works in any level, no reload needed).';
     }
   })();
   var selectedLabel = LEVEL_LABELS[selectedLevel] || selectedLevel;
@@ -582,6 +591,54 @@
       document.getElementById('canvas').focus();
     } catch (e) {}
   });
+
+  /* Sandbox toggle + tool selector. Sandbox reveals/spawns the rideable rocket
+     and grants the combat tools; the tool selector cycles the "active tool"
+     that the Use-Tool button (and F key) fires. The rocket is also equippable
+     via the in-game tool select once that lands — at which point the dedicated
+     Enter-Vehicle button below becomes redundant. */
+  var sandboxBtn = document.getElementById('sandboxToggle');
+  var toolBtn = document.getElementById('toolSelect');
+  function setSandboxButton(on) {
+    sandboxBtn.textContent = on ? 'Sandbox: On' : 'Sandbox: Off';
+    document.body.classList.toggle('sandbox', !!on);
+  }
+  function refreshToolLabel() {
+    if (!Module || !Module.ccall) return;
+    try {
+      var tag = Module.ccall('gamestate_active_tool_tag_web', 'string', [], []);
+      toolBtn.textContent = 'Tool: ' + (tag && tag.length ? tag : '—');
+    } catch (e) {}
+  }
+  sandboxBtn.addEventListener('click', function () {
+    if (!Module || !Module.ccall) return;
+    try {
+      setSandboxButton(!!Module.ccall('gamestate_toggle_sandbox', 'number', [], []));
+      refreshToolLabel();
+      document.getElementById('canvas').focus();
+    } catch (e) {}
+  });
+  toolBtn.addEventListener('click', function () {
+    if (!Module || !Module.ccall) return;
+    try {
+      Module.ccall('gamestate_cycle_active_tool_web', null, [], []);
+      refreshToolLabel();
+      document.getElementById('canvas').focus();
+    } catch (e) {}
+  });
+  /* Initial labels: button state from the URL (sandboxMode set the C flag at
+     startup), tool label polled until the runtime is up + tools are granted. */
+  setSandboxButton(sandboxMode);
+  (function syncToolLabel(tries) {
+    if (Module && Module.ccall) {
+      try { setSandboxButton(!!Module.ccall('gamestate_sandbox_enabled', 'number', [], [])); } catch (e) {}
+      refreshToolLabel();
+      if (toolBtn.textContent === 'Tool: —' && tries > 0)
+        setTimeout(function () { syncToolLabel(tries - 1); }, 500);
+      return;
+    }
+    if (tries > 0) setTimeout(function () { syncToolLabel(tries - 1); }, 500);
+  })(30);
 
   var statusEl = document.getElementById('status');
   var canvasEl = document.getElementById('canvas');
@@ -877,6 +934,21 @@
     }
     downBtn.addEventListener('pointerup', downEnd);
     downBtn.addEventListener('pointercancel', downEnd);
+
+    /* USE (fire active tool) + ENTER (board/leave vehicle): edge-triggered taps,
+       mirrors of the F and E keys via the virtual-input exports. */
+    var useBtn = document.getElementById('useTool');
+    var enterBtn = document.getElementById('enterVehicle');
+    if (useBtn) useBtn.addEventListener('pointerdown', function (ev) {
+      if (Module && Module.ccall)
+        try { Module.ccall('input_press_virtual_use', null, [], []); } catch (e) {}
+      ev.preventDefault();
+    });
+    if (enterBtn) enterBtn.addEventListener('pointerdown', function (ev) {
+      if (Module && Module.ccall)
+        try { Module.ccall('input_press_virtual_board', null, [], []); } catch (e) {}
+      ev.preventDefault();
+    });
 
     /* Push the stick vector to the engine every animation frame while held.
        Continuous push (not just on move) keeps movement going when the finger

@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>JN Engine — Rideable Rocket: diagnostic screenshots</title>
+<style>
+  :root { color-scheme: dark; }
+  body { background:#0d1117; color:#e8f0f8; font:15px/1.55 system-ui, sans-serif;
+         max-width: 1000px; margin: 0 auto; padding: 24px 18px 80px; }
+  h1 { font-size: 22px; margin: 0 0 4px; }
+  h2 { font-size: 17px; margin: 34px 0 8px; border-bottom:1px solid #243040; padding-bottom:5px; }
+  .sub { color:#8aa0b8; margin: 0 0 8px; }
+  figure { margin: 14px 0 8px; }
+  img { width:100%; border:1px solid #243040; border-radius:6px; display:block; background:#000; }
+  figcaption { color:#9fb3c8; font-size:13px; margin-top:6px; }
+  .grid { display:grid; grid-template-columns: 1fr 1fr; gap:18px; }
+  @media (max-width:720px){ .grid{ grid-template-columns:1fr; } }
+  code { background:#161b22; padding:1px 5px; border-radius:4px; font-size:13px; }
+  table { border-collapse: collapse; width:100%; margin:10px 0; font-size:14px; }
+  th,td { border:1px solid #243040; padding:7px 9px; text-align:left; vertical-align:top; }
+  th { background:#161b22; }
+  .bad { color:#ff8d8d; } .ok { color:#9fe0a0; } .warn { color:#f0c674; }
+  .note { background:#11161d; border:1px solid #243040; border-left:3px solid #4f86c6;
+          padding:10px 13px; border-radius:5px; margin:12px 0; }
+  ul { margin:6px 0 6px 2px; }
+</style>
+</head>
+<body>
+<h1>Rideable rocket — diagnostic screenshots</h1>
+<p class="sub">Generated 2026-06-23 · headless captures from the native build (level2/level1, sandbox mode).
+These are exactly the frames the engine renders; nothing is staged.</p>
+
+<div class="note" style="border-left-color:#2c6e2c; background:#11201a;">
+<strong>FIXES APPLIED (2026-06-23)</strong> — decomp-grounded (<code>docs/decomp/C3DRocketShip.md</code>,
+<code>C3DBaseball.md</code>).
+<div class="grid" style="margin-top:12px;">
+  <figure>
+    <img src="img/after-one-rocket.png" alt="One rocket brought to the player on the ground">
+    <figcaption><span class="ok">Fixed:</span> exactly ONE rocket, brought to the player on the
+    ground, non-solid in sandbox &rarr; no underground eject, no duplicate.</figcaption>
+  </figure>
+  <figure>
+    <img src="img/after-jimmy-seated.png" alt="Jimmy seated inside the rocket, flying">
+    <figcaption><span class="ok">Confirmed:</span> Jimmy rides seated inside the rocket; faithful
+    flight climbs (auto-forward + nose-up).</figcaption>
+  </figure>
+</div>
+<p style="margin:10px 0 0;"><strong>Flight (recollection + decomp):</strong> cruises forward on its
+own; <code>SHIFT</code> boosts; <code>Ctrl/Q</code> brake cuts the engine + stops it;
+<code>Down</code>=nose up, <code>Up</code>=nose down (inverted); <code>A/D</code> turn;
+<code>E</code> board/leave. (Engine sound + <code>C3DFireStrato</code> exhaust still deferred.)</p>
+<p style="margin:8px 0 0;"><strong>Baseball:</strong> the real ball sprite (RetainedSprites
+<code>ball0000</code> = <code>0006_32x32d32.png</code>) is wired to <code>PROJ</code> and renders
+(audit + texture-load confirmed). The earlier "diamond" was the wrong file. In head-on chase-cam
+shots the fast ball hides behind Jimmy (thrown straight along the view axis); visible in play.</p>
+</div>
+<hr style="border-color:#243040; margin:22px 0;">
+<p class="sub"><strong>Original diagnosis (before the fixes), for the record:</strong></p>
+
+<div class="note">
+<strong>Purpose:</strong> prove what the engine is actually drawing and pin the root cause of the
+three regressions reported (shoved underground near the rocket, invisible thrown baseball, a second
+rocket), grounded against the decompiled <code>C3DRocketShip</code> / <code>C3DBaseball</code>.
+</div>
+
+<h2>1 · Jimmy IS rendered on the rocket (riding)</h2>
+<figure>
+  <img src="img/jimmy-riding.png" alt="Jimmy seated on the rocket while flying">
+  <figcaption>Riding, mid-climb. Jimmy's model is visible in the cockpit area (no longer hidden).
+  The rocket stands vertical here only because it is pitched nose-up — see issue D.</figcaption>
+</figure>
+
+<h2>2 · Walking near the rocket shoves the player underground <span class="bad">(CONFIRMED)</span></h2>
+<div class="grid">
+  <figure>
+    <img src="img/walked-into-underground.png" alt="Camera at ground level, no player visible">
+    <figcaption>After walking into the spawned rocket: ground-skimming view, Jimmy displaced.</figcaption>
+  </figure>
+  <div>
+    <p>Position trace (auto-walk forward into the rocket):</p>
+    <table>
+      <tr><th>tick</th><th>player Y</th><th>on_ground</th></tr>
+      <tr><td>0</td><td>73 (normal)</td><td>0</td></tr>
+      <tr><td>30</td><td class="bad">−138</td><td>1</td></tr>
+      <tr><td>60…240</td><td class="bad">−138 (stuck)</td><td>1</td></tr>
+    </table>
+    <p><strong>Root cause:</strong> the sandbox rocket is <code>SOLID</code> and is spawned
+    <em>centered at the player's height</em>. The per-axis AABB resolver
+    (<code>physics.c resolve_axis</code>) pushes the player the full half-sum down the Y axis when
+    they penetrate the rocket's vertical span → ejected below the floor.</p>
+  </div>
+</div>
+
+<h2>3 · Thrown baseball is invisible <span class="bad">(CONFIRMED)</span></h2>
+<div class="grid">
+  <figure>
+    <img src="img/throw-no-baseball.png" alt="Throw frame with no baseball visible">
+    <figcaption>Immediately after a throw — no baseball anywhere. (Gray slab = the horizontal rocket up close.)</figcaption>
+  </figure>
+  <div>
+    <p><strong>Root cause:</strong> the projectile is a runtime entity of FourCC <code>PROJ</code>,
+    but <code>PROJ</code> has <em>no entry</em> in <code>entity_visual</code>, so
+    <code>entity_visual_resolve()</code> returns 0 and the draw loop skips it. The throw works
+    mechanically (it can hit Yokians/balloons) but renders nothing.</p>
+    <p><strong>Decomp ground truth:</strong> <code>C3DBaseball</code> (<code>3BAS</code>) is a
+    retained sprite — <code>SpriteDatabase="retainedsprites.omt"</code>, <code>SpriteIndex=2</code>,
+    <code>SpriteSize=25</code> (frames <code>ball0000..0003</code>). The asset exists:
+    <code>RetainedSprites_images/0002_64x64d32.png</code>. Fix = draw the projectile as that billboard.</p>
+  </div>
+</div>
+
+<h2>4 · A second rocket <span class="bad">(CONFIRMED — my regression)</span></h2>
+<figure>
+  <img src="img/level1-spawn.png" alt="Spawned rocket lying in front of the player in level 1">
+  <figcaption>Level 1 spawn. The horizontal rocket here is the <em>sandbox-spawned</em> one; level 1
+  also has its own authored rocket elsewhere → two rockets exist.</figcaption>
+</figure>
+<p><strong>Root cause:</strong> to fix "no rocket in level 2," I made sandbox spawn a rocket next to
+the player in <em>every</em> level — including levels that already have an authored
+<code>3ROC</code> (level 1 and level 2 both do). That duplicates it.</p>
+
+<h2>D · Bonus: the rocket lies on its side at rest</h2>
+<figure>
+  <img src="img/spawn-horizontal-rocket.png" alt="Rocket lying horizontally on the ground">
+  <figcaption>At rest (pitch 0) the strato mesh lies horizontal — its nose axis is model +Z, drawn
+  yaw-only. It only "stands up" when pitched (issue 1's riding shot). The authored placement
+  presumably carries an upright orientation we are not applying to the spawn.</figcaption>
+</figure>
+
+<h2>Decomp vs. the flight model I built</h2>
+<p>The real <code>C3DRocketShip</code> is a <code>C3DFlyingObject</code>: <code>AccelRate=400</code>,
+<code>MaxSpeed=1400</code>, <code>UpRate/DownRate=±650</code>, <code>NewGravity=0</code> — i.e.
+<strong>forward thrust + yaw turn + up/down vertical, no pitch-aiming.</strong> It also owns a
+<code>C3DFireStrato</code> exhaust child and a looping engine sound. My current model pitches the
+nose with W/S, which is <em>not</em> how the original flies — this is the open decision below.</p>
+
+<h2>Fix plan</h2>
+<table>
+  <tr><th>#</th><th>Issue</th><th>Fix</th></tr>
+  <tr><td>1</td><td class="bad">Underground</td>
+      <td>Stop spawning a SOLID box on the player. Spawn only where needed, seat it on the ground
+      (base at terrain, not centered at eye height), and/or keep it non-solid until boarded.</td></tr>
+  <tr><td>2</td><td class="bad">Invisible baseball</td>
+      <td>Give <code>PROJ</code> a visual = retainedsprites chunk-2 baseball billboard
+      (<code>0002_64x64d32.png</code>), size per <code>SpriteSize=25</code>.</td></tr>
+  <tr><td>3</td><td class="bad">Two rockets</td>
+      <td>Don't duplicate: spawn only when the level has no authored <code>3ROC</code>, otherwise
+      relocate/lift the authored one near the player.</td></tr>
+  <tr><td>D</td><td class="warn">Lies horizontal</td>
+      <td>Apply the upright rest orientation the mesh/placement expects.</td></tr>
+  <tr><td>F</td><td class="warn">Flight scheme</td>
+      <td><strong>Decision needed:</strong> match the decomp (forward + turn + up/down, no pitch) vs.
+      keep the W/S pitch model chosen earlier. SPACE = "go"/forward either way.</td></tr>
+</table>
+
+<p class="sub">Engine audio + the <code>C3DFireStrato</code> exhaust effect remain deferred per request
+(noted in <code>docs/native_port_plan.md</code> §6).</p>
+</body>
+</html>

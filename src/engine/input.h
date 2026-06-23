@@ -20,6 +20,11 @@ void  input_set_virtual_fly(float y);            /* JS: held noclip up/down */
 float input_get_virtual_fly(void);
 void  input_press_virtual_jump(void);            /* JS: jump button tap */
 int   input_virtual_take_jump(void);             /* behavior: consume the tap */
+void  input_press_virtual_use(void);             /* JS: use-active-tool button */
+int   input_virtual_take_use(void);              /* behavior: consume the tap */
+void  input_press_virtual_board(void);           /* JS: enter/leave vehicle button */
+int   input_virtual_board_peek(void);            /* behavior: read without consuming */
+void  input_virtual_board_consume(void);         /* behavior/main: clear the tap */
 
 /* Noclip/fly mode. Exported for web UI; native toggles it from player input. */
 void  input_set_noclip(int enabled);

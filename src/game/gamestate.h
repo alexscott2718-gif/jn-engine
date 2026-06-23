@@ -33,6 +33,9 @@ typedef struct {
     /* Inventory / tools (Step 4). */
     InventorySlot inventory[INVENTORY_MAX];
     int           inventory_count;
+    /* Currently selected tool (index into inventory). The "use tool" action
+       (F key / web Use-Tool button) dispatches on this slot's tag. */
+    int           active_tool;
 } GameState;
 
 void gamestate_init(void);
@@ -52,6 +55,14 @@ int  gamestate_player_is_down(void);
    is a static string used by the HUD (may be NULL). Returns 1 if newly added. */
 int  gamestate_grant_tool(const char *tag, const char *icon_path);
 int  gamestate_has_tool(const char *tag);
+/* Active-tool selection. tag() returns the selected slot's tag ("" if none);
+   cycle() advances to the next owned slot (wraps). Exported to the web UI. */
+const char *gamestate_active_tool_tag(void);
+void        gamestate_cycle_active_tool(void);
+/* Runtime sandbox toggle (web UI). toggle() flips + grants tools on enable and
+   returns the new state; enabled() reports it. */
+int  gamestate_toggle_sandbox(void);
+int  gamestate_sandbox_enabled(void);
 void gamestate_request_level_change(void);
 /* Stash a target level path + spawn-point name for the main loop to drain. */
 void gamestate_request_level_swap(const char *level, const char *start_point);

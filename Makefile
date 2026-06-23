@@ -131,7 +131,7 @@ WEB_LDFLAGS = -sUSE_SDL=2 -sUSE_SDL_MIXER=2 -sUSE_ZLIB=1 \
               -sFULL_ES3=1 -sMIN_WEBGL_VERSION=2 -sMAX_WEBGL_VERSION=2 \
               -sALLOW_MEMORY_GROWTH=1 -sASYNCIFY \
               -sEXIT_RUNTIME=0 \
-              -sEXPORTED_FUNCTIONS=_main,_input_set_virtual_move,_input_set_virtual_fly,_input_press_virtual_jump,_input_toggle_noclip,_input_set_noclip,_input_noclip_enabled,_input_toggle_turbo,_input_set_turbo,_input_turbo_enabled,_qa_clear_selection,_qa_toggle \
+              -sEXPORTED_FUNCTIONS=_main,_input_set_virtual_move,_input_set_virtual_fly,_input_press_virtual_jump,_input_press_virtual_use,_input_press_virtual_board,_input_toggle_noclip,_input_set_noclip,_input_noclip_enabled,_input_toggle_turbo,_input_set_turbo,_input_turbo_enabled,_gamestate_toggle_sandbox,_gamestate_sandbox_enabled,_gamestate_cycle_active_tool_web,_gamestate_active_tool_tag_web,_qa_clear_selection,_qa_toggle \
               -sEXPORTED_RUNTIME_METHODS=ccall,cwrap,UTF8ToString \
               --preload-file assets \
               --shell-file web/shell.html

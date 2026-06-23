@@ -7,6 +7,7 @@
 #include "../player_anim.h"
 #include <math.h>
 #include <stddef.h>
+#include <string.h>
 
 Entity *g_player = NULL;
 
@@ -59,8 +60,9 @@ static int player_near_swing(World *w, const Entity *p) {
 }
 
 static void player_on_update(Entity *e, World *w, float dt) {
-    /* Riding a vehicle: it drives and positions us (see behavior_vehicle.c).
-       Suppress on-foot control; hold the idle pose under the hidden player. */
+    /* Riding a vehicle: it drives and positions us at the seat (see
+       behavior_vehicle.c). Suppress on-foot control; hold the idle pose so the
+       visible, seated Jimmy reads as riding rather than running in place. */
     if (behavior_vehicle_riding()) {
         e->user_flag = (int)PA_IDLE;
         player_anim_advance(PA_IDLE, dt);
@@ -116,20 +118,24 @@ static void player_on_update(Entity *e, World *w, float dt) {
         e->on_ground = 0;
     }
 
-    /* Throw a baseball (F) — defeats Yokians and pops balloons via the shared
-       projectile path (C3DYokian reacts to C3DBASEBALL; C3DBalloon pops on it).
-       Wave N3: gated behind actually carrying the baseball — granted by a
-       C3DBaseballPickup (3BPU) or by collecting a 3PIC that awards the baseball
-       picture (PIC_NUMBER==6), e.g. in level1c / level2a / Level2b. */
-    if (!noclip && input_just_pressed(SDL_SCANCODE_F) &&
-        gamestate_has_tool("baseball")) {
-        float fx = sinf(e->ry), fz = cosf(e->ry);
-        /* Spawn clear of the player's own SOLID AABB (half ~35) so the
-           projectile's wall raycast doesn't immediately stop on the thrower. */
-        projectile_spawn(w,
-                         e->x + fx * 80.0f, e->y + 30.0f, e->z + fz * 80.0f,
-                         fx, 0.0f, fz,
-                         PROJ_TEAM_PLAYER, 800.0f, 100, 2.5f);
+    /* Use the active tool (F key, or the web "Use Tool" button). The active
+       tool is selected via the inventory cycle (web Tool button); dispatch is
+       by tag. Today only the baseball has an action — it throws via the shared
+       projectile path (defeats Yokians, pops balloons). The baseball is granted
+       by a C3DBaseballPickup (3BPU), a 3PIC awarding picture #6 (level1c /
+       level2a / Level2b), or sandbox mode. */
+    int use_tool = input_just_pressed(SDL_SCANCODE_F) || input_virtual_take_use();
+    if (!noclip && use_tool) {
+        const char *tool = gamestate_active_tool_tag();
+        if (tool && strcmp(tool, "baseball") == 0 && gamestate_has_tool("baseball")) {
+            float fx = sinf(e->ry), fz = cosf(e->ry);
+            /* Spawn clear of the player's own SOLID AABB (half ~35) so the
+               projectile's wall raycast doesn't immediately stop on the thrower. */
+            projectile_spawn(w,
+                             e->x + fx * 80.0f, e->y + 30.0f, e->z + fz * 80.0f,
+                             fx, 0.0f, fz,
+                             PROJ_TEAM_PLAYER, 800.0f, 100, 2.5f);
+        }
     }
 
     /* Detect pickups: gamestate counter rising means an item triggered this tick. */

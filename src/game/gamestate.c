@@ -1,9 +1,16 @@
 #include "gamestate.h"
 #include "game_flow.h"
+#include "entity_visual.h"
 #include "../engine/world.h"
 #include <stdio.h>
 #include <string.h>
 #include <strings.h>
+
+#ifdef __EMSCRIPTEN__
+#include <emscripten.h>
+#else
+#define EMSCRIPTEN_KEEPALIVE
+#endif
 
 static GameState g_state;
 
@@ -74,6 +81,51 @@ int gamestate_grant_tool(const char *tag, const char *icon_path) {
     printf("[INVENTORY] +tool '%s' (slot %d)\n", s->tag, g_state.inventory_count);
     return 1;
 }
+
+const char *gamestate_active_tool_tag(void) {
+    if (g_state.inventory_count <= 0) return "";
+    if (g_state.active_tool < 0 || g_state.active_tool >= g_state.inventory_count)
+        g_state.active_tool = 0;
+    return g_state.inventory[g_state.active_tool].tag;
+}
+
+void gamestate_cycle_active_tool(void) {
+    if (g_state.inventory_count <= 0) { g_state.active_tool = 0; return; }
+    g_state.active_tool = (g_state.active_tool + 1) % g_state.inventory_count;
+    printf("[INVENTORY] active tool -> '%s' (slot %d)\n",
+           g_state.inventory[g_state.active_tool].tag, g_state.active_tool + 1);
+}
+
+/* --- Sandbox / verification mode (web Use-Tool/vehicle/sandbox UI) -------
+   Runtime toggle of the sandbox flag (entity_visual draws the otherwise-hidden
+   rideable rocket when on; main.c spawns one where the level has none). Turning
+   it on also grants the combat tools so the active-tool path has something to
+   fire. Tools are left granted when toggled off (harmless for a QA aid). */
+EMSCRIPTEN_KEEPALIVE
+int gamestate_toggle_sandbox(void) {
+    int on = !entity_visual_sandbox_enabled();
+    entity_visual_set_sandbox(on);
+    if (on) {
+        gamestate_grant_tool("baseball", NULL);
+        gamestate_grant_tool("bubble", NULL);
+        gamestate_grant_tool("helmet", NULL);
+    }
+    printf("[SANDBOX] %s (runtime toggle)\n", on ? "ON" : "OFF");
+    return on;
+}
+
+EMSCRIPTEN_KEEPALIVE
+int gamestate_sandbox_enabled(void) {
+    return entity_visual_sandbox_enabled();
+}
+
+/* Thin EMSCRIPTEN_KEEPALIVE wrappers so the web UI can cycle/read the active
+   tool. (The plain functions above are also used by native code.) */
+EMSCRIPTEN_KEEPALIVE
+void gamestate_cycle_active_tool_web(void) { gamestate_cycle_active_tool(); }
+
+EMSCRIPTEN_KEEPALIVE
+const char *gamestate_active_tool_tag_web(void) { return gamestate_active_tool_tag(); }
 
 void gamestate_item_added(void) {
     g_state.items_total++;

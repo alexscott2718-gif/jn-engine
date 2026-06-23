@@ -17,6 +17,8 @@ static int input_initialized = 0;
 static float g_vmove_x = 0.0f, g_vmove_y = 0.0f;
 static float g_vfly_y = 0.0f;
 static int   g_vjump_pending = 0;
+static int   g_vuse_pending = 0;
+static int   g_vboard_pending = 0;
 static int   g_noclip_enabled = 0;
 static int   g_turbo_enabled  = 0;
 
@@ -44,7 +46,14 @@ int input_just_pressed(SDL_Scancode code) {
 
 void input_update(void) {
     if (!input_initialized) return;
+    /* Snapshot the prior frame's key states, THEN pump fresh OS/browser events
+       so this frame's keyboard array is current before any consumer reads it.
+       Without the pump here, the only event poll happens later in the frame
+       (after the update phase), so keys_current == keys_previous at read time
+       and input_just_pressed() can never see an edge — held keys (input_is_down)
+       still work, which is why movement worked but jump/throw/board did not. */
     memcpy(keys_previous, keys_current, num_keys);
+    SDL_PumpEvents();
     keys_current = SDL_GetKeyboardState(NULL);
 }
 
@@ -91,6 +100,31 @@ int input_virtual_take_jump(void) {
     g_vjump_pending = 0;
     return j;
 }
+
+/* Use-active-tool tap (web Use-Tool button). Edge-consumed by the player like
+   jump — a single consumer, so a plain take is fine. */
+EMSCRIPTEN_KEEPALIVE
+void input_press_virtual_use(void) {
+    g_vuse_pending = 1;
+}
+
+int input_virtual_take_use(void) {
+    int u = g_vuse_pending;
+    g_vuse_pending = 0;
+    return u;
+}
+
+/* Enter/leave-vehicle tap (web Enter-Vehicle button). Multiple rockets can read
+   it in one frame (each is SOLID), so it's peeked, consumed only by the rocket
+   that actually (dis)mounts, and force-cleared at end of frame by the main loop
+   to avoid staleness. */
+EMSCRIPTEN_KEEPALIVE
+void input_press_virtual_board(void) {
+    g_vboard_pending = 1;
+}
+
+int  input_virtual_board_peek(void)    { return g_vboard_pending; }
+void input_virtual_board_consume(void) { g_vboard_pending = 0; }
 
 EMSCRIPTEN_KEEPALIVE
 void input_set_noclip(int enabled) {

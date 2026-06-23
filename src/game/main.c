@@ -802,7 +802,13 @@ static void draw_scene(World *world, int jim_model_ok)
                     int spins = strncmp(e->type, "3FER", 4) == 0 ||
                                 strncmp(e->type, "3PEN", 4) == 0 ||
                                 strncmp(e->type, "3FAN", 4) == 0;
-                    if (spins)
+                    /* The rideable rocket pitches its nose (rx) as it's aimed
+                       (behavior_vehicle.c), so draw it with full euler too. */
+                    int rocket = strncmp(e->type, "3ROC", 4) == 0;
+                    if (rocket)
+                        renderer_draw_model_euler(m, tex, dx, dy, dz,
+                                                  e->ry, e->rx, e->rz, sc);
+                    else if (spins)
                         renderer_draw_model_euler(m, tex, dx, dy, dz,
                                                   e->ry, 0.0f, e->rz, sc);
                     else
@@ -946,6 +952,58 @@ static void draw_scene(World *world, int jim_model_ok)
         if (foliage_wall)
             renderer_set_color_key(0, 0, 0, 0, 0.08f);
         audit_line("placement", pl->name, NULL, "mesh", pl->ase_path, pm, 0);
+    }
+}
+
+/* Keep a findable rideable rocket in sync with the sandbox flag each tick.
+   Sandbox only *reveals* an authored 3ROC (entity_visual draws it), and where a
+   level does have one it's often far away on a distant pad (level2) — so rather
+   than rely on hunting it down, drop a tagged stand-in right next to the player
+   whenever sandbox is on and ours isn't already present. When sandbox is
+   switched off, retire that stand-in (unless the player is riding it). Authored
+   rockets are never moved or removed. */
+/* Sandbox/verification convenience for the rideable rocket. Every level ships
+   exactly one authored C3DRocketShip (3ROC), but it's often far away and parked
+   on an elevated pad (level2: ~590u off, y=158) — hard to find, and its SOLID
+   box nudges an approaching player downward. So when sandbox is ON we bring that
+   one rocket to the player ONCE, seat it on the ground, and clear its SOLID flag
+   (boarding is proximity-based, so it's still rideable). This is strictly a test
+   aid: we never duplicate the rocket, never touch it outside sandbox, and never
+   move one the player is currently riding. Flight stays faithful (the authored
+   .gam params / C3DFlyingObject defaults are unchanged). A stand-in is spawned
+   only in the hypothetical case of a level with no authored rocket. */
+static Entity *s_sandbox_prepped_rocket = NULL;
+
+static void sandbox_reconcile(World *w, Entity *jim) {
+    Entity *rk = NULL;
+    for (Entity *e = w->head; e; e = e->next)
+        if (e->alive && strncmp(e->type, "3ROC", 4) == 0) { rk = e; break; }
+
+    if (!entity_visual_sandbox_enabled()) {
+        /* Sandbox off: drop any stand-in we spawned; forget the prepped rocket. */
+        if (rk && strcmp(rk->tag, "sbxrocket") == 0 && behavior_vehicle_current() != rk)
+            rk->alive = 0;
+        s_sandbox_prepped_rocket = NULL;
+        return;
+    }
+    if (!jim) return;
+    if (!rk) {  /* no authored rocket in this level — spawn a stand-in */
+        float fx = sinf(jim->ry), fz = cosf(jim->ry);
+        rk = entity_spawn(w, "3ROC", "sbxrocket",
+                          jim->x + fx * 300.0f, jim->y, jim->z + fz * 300.0f);
+        if (!rk) return;
+    }
+    /* Bring the rocket to the player exactly once per level (until ridden). */
+    if (rk != s_sandbox_prepped_rocket && behavior_vehicle_current() != rk) {
+        float fx = sinf(jim->ry), fz = cosf(jim->ry);
+        rk->x = jim->x + fx * 300.0f;
+        rk->z = jim->z + fz * 300.0f;
+        rk->y = (jim->y - jim->half_extents[1]) + rk->half_extents[1]; /* base on ground */
+        rk->ry = jim->ry;
+        rk->runtime_flags &= ~ENTITY_FLAG_SOLID;   /* no downward eject on approach */
+        s_sandbox_prepped_rocket = rk;
+        printf("[SANDBOX] rideable rocket brought to player at (%.0f, %.0f, %.0f)\n",
+               rk->x, rk->y, rk->z);
     }
 }
 
@@ -1562,6 +1620,11 @@ int main(int argc, char **argv) {
             for (Entity *e = world.head; e; e = e->next) {
                 entity_update(e, &world, DT);
             }
+            /* Keep the rideable rocket in sync with the sandbox flag (handles
+               runtime toggles + levels with no authored rocket), then clear any
+               unhandled enter-vehicle tap so it can't leak into the next frame. */
+            sandbox_reconcile(&world, jim);
+            input_virtual_board_consume();
 
             /* Headless combat test: throw a baseball at the nearest Yokian. */
             if (n2_throw_tick >= 0 && !n2_throw_done &&

@@ -147,3 +147,20 @@ gameplay to wrap. Within each wave, hold the decomp discipline: **confirm every 
 the decompiled body in `docs/decomp/<Class>.md`, not an offset scan**, and don't relitigate the
 settled invariants (matrix convention, `PROJ[3][3]=1`, no X-mirror, `canvas_id=Canv+1`, DIFFUSE
 alpha 0, no fog — see `PROJECT_HISTORY.md` §Invariants).
+
+## 6. Deferred polish — rideable rocket (do toward the end)
+
+The rocket flight model (forward-thrust on SPACE / "go", W·S pitch the nose, A·D yaw, Ctrl·Q
+brake) and the visible seated Jimmy landed 2026-06-23. Two polish items were explicitly deferred
+to the end of the rocket work:
+
+1. **Engine audio.** Loop `rocket_fly` (soundeffects.omt handle **195**) while thrust (SPACE) is
+   held, with a `rocket_blast` (handle **196**) one-shot on ignition (thrust off→on); **halt the
+   loop the instant the engine is cut** so no-thrust = silence. Also halt on dismount. The mixer
+   API is ready: `audio_play_db("soundeffects", 195, -1, gain)` for the loop, `audio_channel_halt`
+   for the cut. Track the loop channel + an `engine_on` latch in `behavior_vehicle.c` so ignition
+   fires exactly once. (Investigated + asset-confirmed 2026-06-23; not yet wired.)
+2. **Engine exhaust effect.** A fire/exhaust visual behind the rocket while thrusting — emitted at
+   the tail (rocket center minus the forward aim vector `(sin ry·cos rx, -sin rx, cos ry·cos rx)`),
+   scaled with `move_speed`/thrust, hidden when the engine is cut. Reuse the existing
+   billboard/effect draw path.

@@ -1,5 +1,6 @@
 #include "entities.h"
 #include "behaviors/behaviors.h"
+#include <stdio.h>
 #include <string.h>
 
 typedef struct {
@@ -108,6 +109,20 @@ void entity_bind_vtables(World *w) {
         if (e->vt && e->vt->on_spawn) e->vt->on_spawn(e, w);
         apply_default_extents(e);
     }
+}
+
+Entity *entity_spawn(World *w, const char *type, const char *tag,
+                     float x, float y, float z) {
+    Entity *e = world_add(w);
+    if (!e) return NULL;
+    snprintf(e->type, sizeof(e->type), "%s", type);
+    if (tag) snprintf(e->tag, sizeof(e->tag), "%s", tag);
+    e->x = x; e->y = y; e->z = z;
+    e->vt = entity_resolve_vtable(e->type);
+    e->runtime_flags = e->vt ? e->vt->flags : 0;
+    if (e->vt && e->vt->on_spawn) e->vt->on_spawn(e, w);
+    apply_default_extents(e);
+    return e;
 }
 
 void entity_update(Entity *e, World *w, float dt) {
