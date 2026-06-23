@@ -63,6 +63,9 @@ static const EntityTypeInfo entity_types[] = {
     { "3BEN", "Benny (friend NPC)",    &vt_friend      },
     { "3MOM", "Judy (friend NPC)",     &vt_friend      },
     { "3KIT", "Kitty (C3DAI NPC)",     &vt_friend      },
+    /* C3DAnimated exit-escort actors (touch -> StartPoint teleport). */
+    { "3SUM", "Sumo (exit escort)",    &vt_escort      },
+    { "3PIR", "Pirate (exit escort)",  &vt_escort      },
     { "3TES", "Tesla hazard",          &vt_tesla     },
     { "3LAS", "Laser trigger",         &vt_laser_trigger },
     /* Wave N3: player combat + pickups family. */
