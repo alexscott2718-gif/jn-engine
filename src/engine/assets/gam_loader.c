@@ -169,11 +169,13 @@ int gam_load(World *w, const char *path) {
                         copy_string(e->next_patrol, sizeof(e->next_patrol), str_val);
                 } else if (strcmp(prop_name, "ActivateButton") == 0 ||
                            strcmp(prop_name, "SwitchObject") == 0 ||
-                           strcmp(prop_name, "CameraTarget") == 0) {
+                           strcmp(prop_name, "CameraTarget") == 0 ||
+                           strcmp(prop_name, "Next") == 0) {
                     /* ActivateButton/SwitchObject name the ObjectTag a control
                        drives (C3DButton / C3DSwitch); CameraTarget names the
-                       object a C3DCutSceneCamera (3CAM) frames. All resolve to
-                       the same per-instance target tag — share one field. */
+                       object a C3DCutSceneCamera (3CAM) frames; C3DLaserTrigger
+                       uses Next for its relay target. All resolve to the same
+                       per-instance target tag — share one field. */
                     if (str_val[0] && strcasecmp(str_val, "none") != 0)
                         copy_string(e->activate_target, sizeof(e->activate_target), str_val);
                 }
