@@ -95,6 +95,7 @@ static const EntityTypeInfo entity_types[] = {
     { "3TRO", "VR trophy (objective)", &vt_trophy },
     { "3LEA", "Leaves sprite decor",   &vt_leaves },
     { "3TAR", "Shadow sprite decor",   &vt_shadow },
+    { "3AIO", "AI OMT shape prop",     &vt_ai_omtobj },
     { NULL, NULL, NULL }
 };
 

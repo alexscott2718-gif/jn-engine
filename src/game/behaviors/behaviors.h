@@ -66,6 +66,7 @@ extern const EntityVTable vt_cone;            /* 3CON — C3DCone sprite decor *
 extern const EntityVTable vt_trophy;          /* 3TRO — C3DVRTrophy win-condition pickup */
 extern const EntityVTable vt_leaves;          /* 3LEA — C3DLeaves sprite decor */
 extern const EntityVTable vt_shadow;          /* 3TAR — C3DShadow sprite decor */
+extern const EntityVTable vt_ai_omtobj;       /* 3AIO — C3DAIOmtObj OMT-shape prop */
 
 /* Cutscene runtime (behavior_cutscene.c). 3CAM shots register on spawn; the
    sequence plays through renderer_set_camera_override when requested. Off by
