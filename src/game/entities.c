@@ -85,6 +85,7 @@ static const EntityTypeInfo entity_types[] = {
     /* Actor / gameplay focus rows (post-N5). */
     { "3PHO", "Phone booth (contact prop)", &vt_phonebooth },
     { "3RCK", "AI patrol rocket",      &vt_rocket_ai },
+    { "3HUM", "Humphrey (clone controller)", &vt_humphrey },
     { NULL, NULL, NULL }
 };
 
