@@ -93,8 +93,11 @@ This is a shared, committed campaign — read the shared docs, don't rely on too
 ## Your task this session: Wave N2.x (remaining enemy roster) + friends/NPCs
 The big structural waves (N1–N5) are landed. The largest remaining *gameplay* gap is the rest of the enemy
 roster and the friend/NPC cast. Hold the decomp discipline — confirm behavior against `docs/decomp/<Class>.md`
-(the decompiled body, not an offset scan), build on the existing N1–N4 modules, and **first grep the corpus for
-which FourCCs have real `.gam` instances** so the wave is validated on levels that actually place them.
+(the decompiled body, not an offset scan), build on the existing N1–N4 modules, and **pick targets from the
+Asset Catalog's behavior column** — `python3 tools/build_asset_catalog.py` then read `docs/asset_catalog/`
+(or the live `exentt.com/JN-assets/catalog/`); it already lists every used-in-level FourCC, its instance count
+× level reach, its visual, and whether a native vtable exists, so the wave is validated on levels that actually
+place each class (no more ad-hoc corpus grepping).
 
 **Remaining enemy roster (consume the existing `behavior_ai.c` + `behavior_projectile.c`):** `C3DDigger`,
 `C3DTank`, `C3DTesla`, `C3DHarrier`, `C3DEnemyAircraft`, `C3DMine`, `C3DLaserTrigger`, `C3DYokTurret`,

@@ -1,5 +1,11 @@
 # Full-Tier Decomp Plan — All 208 Gameplay Classes (Neutron.exe)
 
+> ✅ **DONE / HISTORICAL (2026-06-22).** All 208 specs are at `status=spec`; this plan's
+> deliverable is complete. Its **successor is [`native_port_plan.md`](./native_port_plan.md)**,
+> which consumes the specs to build runtime behavior in the native C engine. **Note the
+> framing below is superseded:** the Godot game it calls "the primary artifact" was *retired*
+> — the C engine in `src/` is the product. Read this only for how the spec corpus was built.
+
 > **Audience: Codex.** This is a shared, committed plan (per the anti-silo policy in
 > `~/CLAUDE.md`). Claude scoped it on 2026-06-07; Codex executes it. Keep the **ledger**
 > (`docs/decomp_ledger.csv`) and `docs/PROJECT_HISTORY.md` updated as you go — that is the

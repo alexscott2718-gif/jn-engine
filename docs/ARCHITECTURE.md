@@ -383,6 +383,13 @@ capture camera).
 phase history (cross-referenced from `PROJECT_HISTORY.md`):
 
 - 🟢 **`PROJECT_HISTORY.md`** (this doc's companion) — the narrative + invariants.
+- 🟢 **`native_port_plan.md`** — **the active campaign** (the native Linux port; Godot
+  retired 2026-06-22, `godot_bridge_plan.md` superseded). **`decomp/_next_session.md`** is
+  the live per-session handoff (current wave state + next task).
+- 🟢 **`asset_catalog.md`** — the **Asset Catalog** generator/usage: the resolution & usage
+  truth layer (FourCC → mesh/sprite/texture, level usage, native-behavior coverage),
+  published at `exentt.com/JN-assets/catalog/`. The first stop for "what is this asset and
+  where does the game use it."
 - 🟢 **`omt_rendering_breakthrough.md`** + **`omt_3dsp_format.md`** — current texture/
   mesh resolution truth.
 - 🟢 **`gltf_export_plan.md`** — the current asset format path.
