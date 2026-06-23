@@ -61,6 +61,7 @@ extern const EntityVTable vt_neutron;         /* 3NEU — C3DNeutron animated pi
 extern const EntityVTable vt_red_neutron;     /* 3RED — C3DRedNeutron trigger pickup sprite */
 extern const EntityVTable vt_arrow;           /* 3ARR — C3DArrow gated nav sprite */
 extern const EntityVTable vt_lightobj;        /* 3LIO — C3DLightObj invisible light-data row */
+extern const EntityVTable vt_omtobj;          /* 3OMT — C3DOmtObj authored OMT-shape prop */
 
 /* Cutscene runtime (behavior_cutscene.c). 3CAM shots register on spawn; the
    sequence plays through renderer_set_camera_override when requested. Off by

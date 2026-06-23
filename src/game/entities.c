@@ -90,6 +90,7 @@ static const EntityTypeInfo entity_types[] = {
     { "3RED", "Red neutron pickup",    &vt_red_neutron },
     { "3ARR", "Navigation arrow",      &vt_arrow },
     { "3LIO", "Light object",          &vt_lightobj },
+    { "3OMT", "OMT shape prop",        &vt_omtobj },
     { NULL, NULL, NULL }
 };
 
