@@ -53,6 +53,15 @@ static const EntityTypeInfo entity_types[] = {
     { "3DIG", "Digger animated prop",  &vt_digger      },
     { "3HOO", "Hook AI target",        &vt_hook        },
     { "3CIN", "Cindy friend NPC",      &vt_cindy       },
+    /* C3DFriends / C3DAI idle NPC cast (shared vt_friend). */
+    { "3NIC", "Nick (friend NPC)",     &vt_friend      },
+    { "3SHE", "Sheen (friend NPC)",    &vt_friend      },
+    { "3ULT", "UltraLord (friend NPC)",&vt_friend      },
+    { "3LIB", "Libby (friend NPC)",    &vt_friend      },
+    { "3HUG", "Hugh (friend NPC)",     &vt_friend      },
+    { "3BEN", "Benny (friend NPC)",    &vt_friend      },
+    { "3MOM", "Judy (friend NPC)",     &vt_friend      },
+    { "3KIT", "Kitty (C3DAI NPC)",     &vt_friend      },
     { "3TES", "Tesla hazard",          &vt_tesla     },
     { "3LAS", "Laser trigger",         &vt_laser_trigger },
     /* Wave N3: player combat + pickups family. */
