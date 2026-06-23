@@ -885,6 +885,20 @@ FourCCs, **58** with native vtables (up from 55), and **35** still missing; the 
 for `3NEU`/`3RED`/`3ARR`, explicit overlap runs logging `[NEUTRON]` and `[REDNEUTRON]`, `tools/audit_faithfulness.py`
 (0 findings), and `tools/qa_web_verify.py` (16/16).
 
+**Base/effect tail pass — light, OMT props, and cones (2026-06-23).** The next generated-lens pass moved the
+largest remaining base/resolver rows into native vtables. `3LIO`/`C3DLightObj` (`behavior_lightobj.c`) is now an
+invisible light-data row that preserves the authored color/alpha/pulse/sound properties and runs the shared
+visibility/progress gate without inventing a lighting side effect. `3OMT`/`C3DOmtObj` (`behavior_omtobj.c`) now
+owns the gameplay half of the already-existing OMT visual resolver: inherited gates, `Radius`-derived collision
+extents, and faithful `HasCollision==0` solidity clearing (the Level3C default-collision shooting-gallery props
+remain solid; the authored `HasCollision=0` bench/beam/prop rows stay intangible). `3CON`/`C3DCone`
+(`behavior_cone.c`) is a non-solid C3DSpriteType decor leaf over its authored `sprites.omt` chunk-41 billboard.
+The refreshed behavior lens reports **93** used FourCCs, **61** with native vtables (up from 58), and **32** still
+missing; the actor/gameplay focus section remains empty and the next queue starts with `3ROK`, `3YCA`, `3TRO`,
+`3SPR`, `3FIS`, and `3LEA`. Validation: `make`, focused screenshots (`level4c` for `3LIO`, `Level3C`/`level2a`
+for `3OMT`, `Level2b` for `3CON`), `tools/audit_faithfulness.py` (0 findings after each class), `make web`, and
+`tools/qa_web_verify.py` (16/16). Public WASM deploy was not requested.
+
 ---
 
 ## Invariants (don't relitigate these)

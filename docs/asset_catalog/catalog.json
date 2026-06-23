@@ -1,7 +1,7 @@
 {
  "summary": {
-  "generated": "2026-06-23 20:22 UTC",
-  "commit": "1fd5156",
+  "generated": "2026-06-23 20:51 UTC",
+  "commit": "221e2d4",
   "counts": {
    "resolution": 219,
    "st_mesh": 73,
@@ -9,10 +9,10 @@
    "st_invisible": 40,
    "st_mesh_untextured": 4,
    "st_no_visual": 87,
-   "native_behaviors": 70,
+   "native_behaviors": 73,
    "used_fourccs": 93,
-   "used_native_behaviors": 58,
-   "used_missing_native_behavior": 35,
+   "used_native_behaviors": 61,
+   "used_missing_native_behavior": 32,
    "decomp_specs": 104,
    "assets_total": 5807,
    "no_usage": 39,
@@ -1925,8 +1925,8 @@
    "decomp_status": "spec",
    "decomp_confidence": "Low",
    "family": "world_props_terrain",
-   "native_behavior": null,
-   "native_desc": null,
+   "native_behavior": "vt_cone",
+   "native_desc": "Cone sprite decor",
    "tags": [
     "C3DCONE"
    ],
@@ -4121,8 +4121,8 @@
    "decomp_status": "spec",
    "decomp_confidence": "Medium",
    "family": "world_props_terrain",
-   "native_behavior": null,
-   "native_desc": null,
+   "native_behavior": "vt_lightobj",
+   "native_desc": "Light object",
    "tags": [
     "C3DLIGHTOBJ",
     "LITE1",
@@ -5149,8 +5149,8 @@
    "decomp_status": "spec",
    "decomp_confidence": "Medium",
    "family": "base_framework",
-   "native_behavior": null,
-   "native_desc": null,
+   "native_behavior": "vt_omtobj",
+   "native_desc": "OMT shape prop",
    "tags": [
     "C3DOMTOBJ",
     "beam",
