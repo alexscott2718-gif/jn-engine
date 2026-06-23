@@ -1,9 +1,13 @@
 # jn-engine — Agent Instructions (Claude + Codex)
 
-Both Claude Code and Codex load this file when working in `~/jn-engine`. It is read
-**in addition to** `~/CLAUDE.md` (which `~/AGENTS.md` symlinks to — machine role, services,
-session-export workflow, JN operating rules). Keep cross-tool conventions in these shared
-files, never in an agent's private memory.
+Both Claude Code and Codex load this file when working in `~/jn-engine`. **This repo is
+self-contained for engine work** — everything needed to be oriented (mission, operating
+rules, env handling, gotchas) lives in tracked files here, so handing an agent this repo
+(or `docs/decomp/_next_session.md`) is enough. `~/CLAUDE.md` (which `~/AGENTS.md` symlinks
+to) is the **machine-only layer** — host/services/port-forwards and **credentials** — and
+is *not required* to work on the engine. **Never copy its secrets into this repo**; the repo
+references hosts/tokens/passwords only as env vars (see `docs/local_env.md`). Keep cross-tool
+engineering conventions in these tracked files, never in an agent's private memory.
 
 ## Mission (as of 2026-06-22)
 **Native Linux port.** The decomp **spec** campaign is finished (208/208 classes) and the
@@ -19,9 +23,11 @@ still largely inert — visual coverage is effectively complete).
 4. `docs/asset_catalog.md` + the **Asset Catalog** (`tools/build_asset_catalog.py`,
    `exentt.com/JN-assets/catalog/`) — the resolution/usage map for any asset question: which FourCC
    draws what, its texture truth, which levels use it, and whether it has a native vtable yet.
-5. `docs/claude_code_failure_patterns.md` — distilled failure modes; the durable rules from
-   it are also in `~/CLAUDE.md` § "JN Engine Operating Rules". Don't relitigate settled facts
-   (matrix convention, `PROJ[3][3]=1`, capture-reprojection ceiling) without measured evidence.
+5. `docs/claude_code_failure_patterns.md` — the **canonical** JN operating rules / failure
+   modes (in-repo; `~/CLAUDE.md` only carries a distilled copy). `docs/local_env.md` — how the
+   instrumentation reads hosts/tokens/passwords from env vars + a gitignored `.env` (no secret
+   values are ever committed). Don't relitigate settled facts (matrix convention,
+   `PROJ[3][3]=1`, capture-reprojection ceiling) without measured evidence.
 
 ## Shared memory — the anti-silo rule
 There is **one source of truth, and it is version-controlled markdown**, not an agent's
@@ -31,8 +37,10 @@ and vice-versa).
 - **Durable project facts/decisions/gotchas → append to `docs/PROJECT_HISTORY.md`**
   (or `docs/ARCHITECTURE.md` for structural facts). Commit them. That is how the other
   agent — and future you — inherit the knowledge.
-- Machine/workflow facts that aren't jn-engine-specific → `~/CLAUDE.md` (shared via the
-  AGENTS.md symlink).
+- jn-engine engineering facts/rules → tracked repo markdown (`docs/`), so the repo stays
+  self-contained. Only **secrets, host addresses, services, and machine-only ops** go in
+  `~/CLAUDE.md` (the un-versioned machine file, not needed for engine work). Never put a
+  secret in the repo — reference it as an env var per `docs/local_env.md`.
 - Treat each tool's built-in/auto memory as a **scratch cache**, not a record others rely on.
   If a fact matters beyond this session, it must land in a shared markdown file or it doesn't
   count as remembered.
