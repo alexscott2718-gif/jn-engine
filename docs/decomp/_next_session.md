@@ -141,11 +141,33 @@ This is a shared, committed campaign — read the shared docs, don't rely on too
   billboard path. Validation: `make`, focused `JN_SCREENSHOT` probes (`level4c`, `Level3C`, `level2a`, `Level2b`),
   `audit_faithfulness.py` 0 findings after each class, `make web`, and `qa_web_verify.py` 16/16. The refreshed
   catalog now reports **93** used FourCCs, **61** with native vtables, and **32** still missing.
-- **Still unimplemented:** the refreshed generated behavior lens reports **32** used-in-level FourCCs with no
-  native behavior (**93** used FourCCs total, **61** used FourCCs with native vtables). The actor/gameplay focus
+- **Base/effect tail pass 3 DONE — 3TRO / 3LEA / 3TAR / 3AIO (2026-06-23):** four more base/resolver + effect rows,
+  with each spec read first to fix the prior handoff's class guesses. `3TRO`/`C3DVRTrophy` (`behavior_trophy.c`,
+  `vt_trophy`) is the VR challenge-level reward: Jimmy's contact collects it (hide + stop triggering) and signals
+  `game_flow_level_objective_met()` — a no-op flag when campaign mode is off, so the audit/screenshot harnesses are
+  unchanged and the 2-tick probes never overlap it; visual already resolves trophy.ASE. `3LEA`/`C3DLeaves`
+  (`behavior_leaves.c`) and `3TAR`/`C3DShadow` (`behavior_shadow.c`) are zero-owned-method `C3DSpriteType`/
+  `C3DPermanentSprite` decor billboards — non-solid inherited-gate leaves in the `vt_cone` mould. `3AIO`/`C3DAIOmtObj`
+  (`behavior_ai_omtobj.c`) mirrors `behavior_omtobj.c` (OMT shape + `Radius` extents + `HasCollision==0`/`TerrainColl==0`
+  solidity clearing); per its spec it deliberately skips `C3DAI::PostLoadAI`, so the placed crashpod/pod/friedeggs rows
+  are static props with no runtime seek/patrol. **Deferred with documented reasons** (the two highest *raw-reach* rows
+  are the riskiest): `3ROK`/`C3DRock` (99 instances all at `(0,0,0)` with `CanMove=1`/`RotateToDest` — a
+  runtime-repositioned pool whose repositioning controller is not ported; drawing the origin pool would regress);
+  `3YCA`/`C3DYokCargo` (per-frame visibility gate keyed on level=="LEV5" + `SCENE>489`, which needs the unported SCENE
+  sequencer — and the cargo_ship mesh is already visible in 7/8 levels); `3SPR`/`C3DSprite` (rows carry zero serialized
+  `SpriteSize`/`SpriteDatabase`/`SpriteIndex`, so the default canvas is an unresolved spec open question — drawing it
+  would guess). Validation: per-class `make` (each commit builds), `JN_SCREENSHOT` on placing levels (`Level1` for
+  `3LEA`+`3AIO`, `Level3C` for `3TAR`, `VR01`/`VR07` for `3TRO`), `audit_faithfulness.py` 0 findings (all 35 levels),
+  `make web`, and `qa_web_verify.py` 16/16. The refreshed catalog now reports **93** used FourCCs, **65** with native
+  vtables, and **28** still missing.
+- **Still unimplemented:** the refreshed generated behavior lens reports **28** used-in-level FourCCs with no
+  native behavior (**93** used FourCCs total, **65** used FourCCs with native vtables). The actor/gameplay focus
   section in `docs/asset_catalog/behavior_todo.md` is still **empty** — the remaining holes are base/resolver and
-  effect/prop rows: `3ROK`, `3YCA`, `3TRO`, `3SPR`/`C3DSprite`, `3FIS`, `3LEA`/`C3DLeaves`, `3TAR`, `3AIO`/
-  `C3DAIOmtObj`, and lower-reach props/effects after them.
+  effect/prop rows. The top of the queue is now the three **deferred** rows (`3ROK`/`C3DRock` origin pool,
+  `3YCA`/`C3DYokCargo` SCENE-gated cargo, `3SPR`/`C3DSprite` no-canvas) — skip them unless new evidence appears
+  (see the pass-3 bullet). The next *portable* rows are `3FIS`/`C3DDarwinFish` (darwin set-dressing creature),
+  `3SWN` (doorfowl mesh), `3STA` (stalactite), `3ANI`/`C3DAnimatedSprite`, `3FOW`/`C3DFowl`, `3SPA` (powerline),
+  `3GIR` (plant), `3LIG`/`C3DLight`, `3DAI`/`C3DAI`, then the lower-reach props/effects after them.
   Code-spawned or currently unplaced enemy specs (`3TAN`/
   `C3DTank`, `3HAR`/`C3DHarrier`, `3MIN`/`C3DMine`, `3MIS`/`C3DMissile`) still have zero current `.gam` rows; treat
   them as database-spawned/code-spawned/unplaced until separate evidence says otherwise. The big structural waves
@@ -156,8 +178,8 @@ This is a shared, committed campaign — read the shared docs, don't rely on too
 
 ## Your task this session: continue the base/resolver + effect long tail
 The big structural waves (N1–N5), the placed enemy/hazard slice (N2.x), the friend/NPC cast + AI mission
-trigger (N2.y), the **actor/gameplay focus closeout (3PHO/3RCK/3HUM)**, and the first base/effect tail pass
-(`3NEU`/`3RED`/`3ARR`) plus the second base/effect tail pass (`3LIO`/`3OMT`/`3CON`) are all landed. The
+trigger (N2.y), the **actor/gameplay focus closeout (3PHO/3RCK/3HUM)**, and three base/effect tail passes
+(1: `3NEU`/`3RED`/`3ARR`; 2: `3LIO`/`3OMT`/`3CON`; 3: `3TRO`/`3LEA`/`3TAR`/`3AIO`) are all landed. The
 actor/gameplay focus section of the lens is **empty** — the remaining work is the base/resolver + effect/prop
 long tail. Hold the decomp discipline — confirm behavior against
 `docs/decomp/<Class>.md` (the decompiled body, not an offset scan), build on the existing modules, and **pick
@@ -173,16 +195,24 @@ sed -n '1,180p' docs/asset_catalog/behavior_todo.md
 levels that actually place each class. The live catalog remains useful for previews:
 <https://exentt.com/JN-assets/catalog/>.
 
-**Next rows from the refreshed lens (base/resolver + effect tail — largest remaining reach):**
-- `3ROK` — 99 inst / 1 level, currently invisible runtime-positioned pool at origin. No class mapping in the
-  refreshed lens; confirm the resolver/catalog evidence before coding, and do not draw the origin pool unless the
-  spec/evidence shows how it is positioned.
-- `3YCA` — 11 inst / 8 levels, cargo-ship mesh row with no class mapping in the lens. Identify the owning class
-  from `docs/_gam_classids.tsv` / specs or treat it as an unclassified prop until evidence is firm.
-- `3TRO` / `C3DTrophy` — 9 inst / 9 levels, VR trophy mesh; read the spec first to decide whether it is a static
-  trophy, level-complete trigger, or controller-facing reward prop.
-- Then `3SPR`/`C3DSprite`, `3FIS`, `3LEA`/`C3DLeaves`, `3TAR`, and `3AIO`/`C3DAIOmtObj` round out the next
-  high-reach tail.
+**Three deferred rows sit at the top of the raw-reach queue — skip them unless new evidence appears:**
+- `3ROK` / `C3DRock` — 99 inst / 1 level (Level5b), all serialized at `(0,0,0)` with `CanMove=1`/`RotateToDest`. A
+  runtime-repositioned pool; no controller that scatters them is ported yet, so drawing the origin pool regresses.
+  A spec exists (`C3DRock`, 1 owned method) — the blocker is *positioning*, not behavior.
+- `3YCA` / `C3DYokCargo` — 11 inst / 8 levels. Per-frame visibility gate keyed on level=="LEV5" + `SCENE>489`; the
+  SCENE sequencer isn't ported (SCENE stays at the CTaskList table value), and the cargo_ship mesh is already
+  visible in 7/8 levels, so a thin port changes almost nothing. Revisit when a SCENE sequencer lands.
+- `3SPR` / `C3DSprite` — 15 inst / 4 levels. Rows carry **zero** serialized `SpriteSize`/`SpriteDatabase`/
+  `SpriteIndex`; the spec's own open question is the default canvas. Drawing it would guess (resolver gap, not a
+  behavior gap; the faithful C3DSprite has no per-frame integrator).
+
+**Next *portable* rows from the refreshed lens (read each spec first):**
+- `3FIS` / `C3DDarwinFish` — 12 inst / 5 levels, darwin*.ASE set-dressing creature (HIWALK/HISHRINK/HISTOP anims).
+  C3DAI-derived but background; an idle/wander leaf is faithful enough (lean on `behavior_ai`/`behavior_friend`).
+- `3SWN` (doorfowl mesh), `3STA` (stalactite prop), `3ANI`/`C3DAnimatedSprite`, `3FOW`/`C3DFowl`, `3SPA`
+  (powerline), `3GIR` (plant), `3LIG`/`C3DLight`, `3DAI`/`C3DAI`,
+  then the lower-reach props/effects round out the tail. Confirm each FourCC→class via `docs/_gam_classids.tsv`
+  (the lens "Class" column is blank for several) before coding.
 
 NB on the just-closed focus rows: `3RCK`/`C3DRocket` turned out to be a **placed** C3DAI patrol rocket (9 `.gam`
 rows), not the code-spawned projectile the prior handoff guessed — reading the spec first mattered. The
@@ -235,10 +265,13 @@ Pick the next base/resolver or effect row(s) from `behavior_todo.md`, read each 
 one commit per class on `native-port`. Validate each class with `make`, affected-level `JN_SCREENSHOT` checks, and
 `tools/audit_faithfulness.py`; at wave end refresh `behavior_todo.md`, run `tools/qa_web_verify.py` (16 checks),
 append `PROJECT_HISTORY.md`, and update this handoff. With N1–N5 plus the N2.x / N2.y slices, the actor-focus
-closeout (`3PHO`/`3RCK`/`3HUM`), and the first base/effect tail pass (`3NEU`/`3RED`/`3ARR`) landed, the campaign's
-base framework, enemies, combat, vehicles, game-flow, placed ranged enemies/trigger hazards, the full friend/NPC
-cast, the escort actors, the AI mission-trigger volume, the phone-booth prop, the placed patrol rocket, the hidden
-Humphrey clone-controller, neutron pickups, red-neutron pickups, nav-arrow sprite gates, light-data rows, authored
-OMT-shape props, and cone sprite decor are ported (**61/93** used FourCCs now have native vtables) — the
-actor/gameplay focus section is empty and the remaining work is the base/resolver + effect long tail (`3ROK`,
-`3YCA`, `3TRO`, `3SPR`, `3FIS`, `3LEA`, `3TAR`, `3AIO`, plus lower-reach rows).
+closeout (`3PHO`/`3RCK`/`3HUM`), and the base/effect tail passes (1: `3NEU`/`3RED`/`3ARR`; 2: `3LIO`/`3OMT`/`3CON`;
+3: `3TRO`/`3LEA`/`3TAR`/`3AIO`) landed, the campaign's base framework, enemies, combat, vehicles, game-flow, placed
+ranged enemies/trigger hazards, the full friend/NPC cast, the escort actors, the AI mission-trigger volume, the
+phone-booth prop, the placed patrol rocket, the hidden Humphrey clone-controller, neutron + red-neutron pickups,
+nav-arrow sprite gates, light-data rows, authored OMT-shape props, cone/leaves/shadow sprite decor, the AI OMT prop,
+and the VR trophy win-condition pickup are ported (**65/93** used FourCCs now have native vtables) — the
+actor/gameplay focus section is empty and the remaining work is the base/resolver + effect long tail. The next
+*portable* rows are `3FIS`, `3SWN`, `3STA`, `3ANI`, `3FOW`, `3SPA`, `3GIR`, `3LIG`, `3DAI`, plus lower-reach rows;
+`3ROK`, `3YCA`, and `3SPR` are deferred with documented reasons (origin pool / unported SCENE gate / no serialized
+canvas).

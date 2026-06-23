@@ -899,6 +899,25 @@ missing; the actor/gameplay focus section remains empty and the next queue start
 for `3OMT`, `Level2b` for `3CON`), `tools/audit_faithfulness.py` (0 findings after each class), `make web`, and
 `tools/qa_web_verify.py` (16/16). Public WASM deploy was not requested.
 
+**Base/effect tail pass — trophy, decor sprites, AI OMT prop (2026-06-23).** The next lens pass cleared four more
+base/resolver + effect rows after reading each spec to fix the handoff's class guesses (`3ROK` is C3D**Rock**, a
+99-instance origin-positioned pool — not a rocket; `3FIS` is C3DDarwinFish). `3TRO`/`C3DVRTrophy`
+(`behavior_trophy.c`) is the VR challenge-level reward: Jimmy's contact collects it (hide + stop triggering) and
+signals `game_flow_level_objective_met()` — a no-op flag when campaign mode is off, so the audit/screenshot
+harnesses are unchanged. `3LEA`/`C3DLeaves` (`behavior_leaves.c`) and `3TAR`/`C3DShadow` (`behavior_shadow.c`) are
+both zero-owned-method `C3DSpriteType`/`C3DPermanentSprite` decor billboards — non-solid inherited-gate leaves in
+the `vt_cone` mould. `3AIO`/`C3DAIOmtObj` (`behavior_ai_omtobj.c`) mirrors `behavior_omtobj.c` (OMT shape + `Radius`
+collision extents + `HasCollision==0`/`TerrainColl==0` solidity clearing); per its spec it deliberately skips
+`C3DAI::PostLoadAI`, so the placed crashpod/pod/friedeggs rows are static props with no runtime seek/patrol. The
+refreshed lens reports **93** used FourCCs, **65** with native vtables (up from 61), and **28** still missing; the
+actor/gameplay focus section stays empty. Deliberately deferred with documented reasons: `3ROK` (origin-positioned
+pool with no ported repositioning controller — drawing it would regress), `3YCA`/`C3DYokCargo` (visibility gate
+needs the unported SCENE sequencer; mesh already visible), and `3SPR`/`C3DSprite` (rows carry zero serialized
+canvas fields — the default sprite is an unresolved spec open question). Validation: per-class `make` (each commit
+builds), `JN_SCREENSHOT` on placing levels (`Level1` for `3LEA`+`3AIO`, `Level3C` for `3TAR`, `VR01`/`VR07` for
+`3TRO`), `tools/audit_faithfulness.py` (0 findings, all 35 levels), `make web`, and `tools/qa_web_verify.py`
+(16/16). Public WASM deploy was not requested.
+
 ---
 
 ## Invariants (don't relitigate these)
