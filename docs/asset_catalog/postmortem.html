@@ -81,7 +81,7 @@
   </div>
 
   <h2>What the catalog does</h2>
-  <p>For four years this project pulled <em>everything</em> out of a 2002 Direct3D&nbsp;7 game — 4,900&nbsp;assets, a public <a href="/JN-assets/">download library</a>, 208 reverse-engineered class specs. But the assets were <strong>harvested, not accounted for</strong>. Nothing recorded the one thing the native port actually needs at every step: <em>how is this asset resolved, where does its texture come from, and where in the game is it used?</em></p>
+  <p>In a little over two months this project pulled <em>everything</em> out of a 2002 Direct3D&nbsp;7 game — 4,900&nbsp;assets, a public <a href="/JN-assets/">download library</a>, 208 reverse-engineered class specs. But the assets were <strong>harvested, not accounted for</strong>. Nothing recorded the one thing the native port actually needs at every step: <em>how is this asset resolved, where does its texture come from, and where in the game is it used?</em></p>
   <p>The <a href="/JN-assets/catalog/">Asset&nbsp;Catalog</a> is that accounting layer. It is a single deterministic generator that <strong>joins the project's own sources of truth</strong> — the live engine resolver tables, the sprite-canvas map, the behavior table, the class-id table, all 208&nbsp;decomp specs and their asset tables, the decomp ledger, and every one of the 35&nbsp;level files — into <strong>219 per-FourCC resolution rows</strong> and a <strong>5,807-file inventory</strong>, published as a searchable, filterable site. It reads those sources <em>in place</em>; it never re-derives or duplicates them, so it cannot drift from the engine it describes.</p>
 
   <p>Each FourCC row answers the whole question at once:</p>
