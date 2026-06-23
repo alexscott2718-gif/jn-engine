@@ -870,6 +870,21 @@ base/resolver + effect long tail (`3NEU`/`C3DSprite`, `3RED`, `3ARR`/`C3DArrow`,
 Validation: `make`, `make web`, affected `JN_SCREENSHOT` probes (Level1/Level2 phone booth renders; Humphreys
 hidden), `tools/audit_faithfulness.py` (0 findings), and `tools/qa_web_verify.py` (16/16).
 
+**Base/effect tail pass — neutrons + arrows (2026-06-23).** The first base/resolver long-tail pass moved the top
+three behavior-lens rows into native vtables. `3NEU` is now treated as its concrete `C3DNeutron` class, not just
+the inherited `C3DSprite` base: `behavior_neutron.c` switches it to the runtime `sprites.omt` frame strip, idles
+through frames 0..7, plays the neutron collection sound on Jimmy overlap, runs the burst frames, hides, and
+respawns. `3RED`/`C3DRedNeutron` shares the frame-strip machinery, adds the authored `Radius`, red pulsing/tint,
+collection sound, burst/hide latch, and conservative `NextTrigger` forwarding when the target exposes a native
+`on_trigger` (full scripted trigger-chain dispatch remains part of the existing deferred trigger system). `3ARR`/
+`C3DArrow` gets a thin gated sprite vtable over the existing resolver path for its authored `RequiredTask`/
+`RequiredLevel`/`ExactLevel` fields. The sprite resolver now permits `sprites.omt` frame 0 only for the neutron
+runtime classes, preserving the old `3PIC`/index-0 fallback behavior. The refreshed catalog reports **93** used
+FourCCs, **58** with native vtables (up from 55), and **35** still missing; the next rows are `3LIO`, `3OMT`,
+`3CON`, then the lower-reach effect/prop tail. Validation: `make`, `make web`, focused `JN_SCREENSHOT` probes
+for `3NEU`/`3RED`/`3ARR`, explicit overlap runs logging `[NEUTRON]` and `[REDNEUTRON]`, `tools/audit_faithfulness.py`
+(0 findings), and `tools/qa_web_verify.py` (16/16).
+
 ---
 
 ## Invariants (don't relitigate these)

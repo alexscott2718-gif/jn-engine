@@ -1,7 +1,7 @@
 {
  "summary": {
-  "generated": "2026-06-23 19:52 UTC",
-  "commit": "82cda6b",
+  "generated": "2026-06-23 20:22 UTC",
+  "commit": "1fd5156",
   "counts": {
    "resolution": 219,
    "st_mesh": 73,
@@ -9,10 +9,10 @@
    "st_invisible": 40,
    "st_mesh_untextured": 4,
    "st_no_visual": 87,
-   "native_behaviors": 67,
+   "native_behaviors": 70,
    "used_fourccs": 93,
-   "used_native_behaviors": 55,
-   "used_missing_native_behavior": 38,
+   "used_native_behaviors": 58,
+   "used_missing_native_behavior": 35,
    "decomp_specs": 104,
    "assets_total": 5807,
    "no_usage": 39,
@@ -892,8 +892,8 @@
    "decomp_status": "spec",
    "decomp_confidence": "Medium",
    "family": "effects_triggers_nav_cameras_sound",
-   "native_behavior": null,
-   "native_desc": null,
+   "native_behavior": "vt_arrow",
+   "native_desc": "Navigation arrow",
    "tags": [
     "C3DARROW",
     "housearrow"
@@ -4862,8 +4862,8 @@
    "decomp_status": "spec",
    "decomp_confidence": "Medium",
    "family": "base_framework",
-   "native_behavior": null,
-   "native_desc": null,
+   "native_behavior": "vt_neutron",
+   "native_desc": "Neutron pickup",
    "tags": [
     "C3DNEUTRON"
    ],
@@ -7031,8 +7031,8 @@
    "decomp_status": null,
    "decomp_confidence": null,
    "family": null,
-   "native_behavior": null,
-   "native_desc": null,
+   "native_behavior": "vt_red_neutron",
+   "native_desc": "Red neutron pickup",
    "tags": [
     "C3DREDNEUTRON",
     "c3dredneutron",
