@@ -32,6 +32,7 @@ extern const EntityVTable vt_yok_turret;  /* 3TUR — C3DYokTurret ranged enemy 
 extern const EntityVTable vt_yokian_ship; /* 3YSH — C3DYokianShip patrol actor */
 extern const EntityVTable vt_eye;         /* 3EYE — C3DEye C3DAICar patrol actor */
 extern const EntityVTable vt_digger;      /* 3DIG — C3DDigger animated prop */
+extern const EntityVTable vt_hook;        /* 3HOO — C3DHook AI hook target */
 extern const EntityVTable vt_tesla;       /* 3TES — C3DTesla electric hazard */
 extern const EntityVTable vt_laser_trigger; /* 3LAS — C3DLaserTrigger tripwire */
 extern const EntityVTable vt_projectile;  /* PROJ — shared projectile */

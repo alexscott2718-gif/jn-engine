@@ -424,7 +424,7 @@ static const TypeEntry TYPE_TABLE[] = {
     { "3EYE", { "assets/ase/eye.ASE",           "assets/png/eyemap.png", 1.0f, 0 } },  /* C3DEye (Retroland ride; ASE refs eye.bmp, install ships eyemap.png) */
     { "3FER", { "assets/ase/wheel.ASE",         NULL, 1.0f, 0 } },  /* C3DFerris: ferris wheel */
     { "3SUM", { "assets/ase/sumo.ASE",          NULL, 1.0f, 0 } },  /* C3DSumo */
-    { "3HOO", { "assets/ase/hook.ASE",          NULL, 1.0f, 0 } },  /* C3DHook (power plant) */
+    { "3HOO", { "assets/ase/hook.ASE",          "assets/png/fan.png", 1.0f, 0 } },  /* C3DHook: hook.ase + fan.png */
     { "3TOL", { "assets/ase/toolchestclosed.ASE", NULL, 1.0f, 0 } },/* C3DToolChest */
     { "3TRO", { "assets/ase/trophy.ASE",        NULL, 1.0f, 0 } },  /* C3DTrophy (VR levels) */
     { "3SPY", { "assets/ase/yokspy0.ASE",       NULL, 1.0f, 0 } },  /* C3DYokianSpy */
