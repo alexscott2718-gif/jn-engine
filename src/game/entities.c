@@ -82,6 +82,8 @@ static const EntityTypeInfo entity_types[] = {
     /* Wave N5: scripted cutscene cameras (invisible directors). */
     { "3CAM", "Cutscene camera",       &vt_cutscene_camera },
     { "3MCA", "Multi-cutscene camera", &vt_multi_cutscene },
+    /* Actor / gameplay focus rows (post-N5). */
+    { "3PHO", "Phone booth (contact prop)", &vt_phonebooth },
     { NULL, NULL, NULL }
 };
 

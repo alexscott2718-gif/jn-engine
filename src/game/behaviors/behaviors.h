@@ -53,6 +53,8 @@ extern const EntityVTable vt_ai_vehicle;      /* 3SUV/3SBU/3SAI — self-driving
 /* Wave N5 — scripted cutscene cameras. */
 extern const EntityVTable vt_cutscene_camera; /* 3CAM — C3DCutSceneCamera (shot) */
 extern const EntityVTable vt_multi_cutscene;  /* 3MCA — C3DMultiCutSceneCamera (sequencer) */
+/* Actor / gameplay focus rows (post-N5). */
+extern const EntityVTable vt_phonebooth;      /* 3PHO — C3DPhoneBooth (solid contact prop) */
 
 /* Cutscene runtime (behavior_cutscene.c). 3CAM shots register on spawn; the
    sequence plays through renderer_set_camera_override when requested. Off by
