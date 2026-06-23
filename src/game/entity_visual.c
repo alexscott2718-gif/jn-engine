@@ -610,6 +610,7 @@ int entity_visual_resolve(const Entity *e, EntityVisual *out) {
     if (g_sandbox && strncmp(e->type, "3ROC", 4) == 0) {
         EntityVisual v = {0};
         v.model_path = "assets/ase/strato.ASE";
+        v.texture_path = "assets/png/strato.png";
         v.scale = 1.0f;
         *out = v;
         return 1;

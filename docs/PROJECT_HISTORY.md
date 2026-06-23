@@ -784,6 +784,12 @@ input lock (the string prop isn't plumbed yet); a real menu/HUD text renderer; a
 roster (Digger/Tank/Tesla/Harrier/turret/mine/laser, the natural first consumers of enemy-side
 `behavior_projectile.c`).
 
+**Rocket visual asset correction (2026-06-23).** The rideable sandbox `3ROC` renderer was already using
+the correct `Strato.ase` mesh, but the local JNBG ASE still names the stale `rocket.bmp` bitmap. The decomp
+spec and the JNvsJN ASE both identify `strato.png` as the C3DRocketShip texture, so the sandbox rocket
+resolver now binds `assets/png/strato.png` explicitly. This keeps the authored rocket hidden in normal audit
+mode but makes the boardable sandbox rocket wear the proper Strato texture.
+
 ---
 
 ## Invariants (don't relitigate these)
