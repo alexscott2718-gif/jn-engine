@@ -49,6 +49,7 @@ static const EntityTypeInfo entity_types[] = {
     { "3SPY", "Yokian spy",            &vt_yokian    },
     { "3TUR", "Yokian turret",         &vt_yok_turret },
     { "3YSH", "Yokian ship",           &vt_yokian_ship },
+    { "3EYE", "Eye patrol actor",      &vt_eye         },
     { "3TES", "Tesla hazard",          &vt_tesla     },
     { "3LAS", "Laser trigger",         &vt_laser_trigger },
     /* Wave N3: player combat + pickups family. */
