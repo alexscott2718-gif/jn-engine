@@ -1,7 +1,7 @@
 {
  "summary": {
-  "generated": "2026-06-23 19:24 UTC",
-  "commit": "aea5e0c",
+  "generated": "2026-06-23 19:52 UTC",
+  "commit": "82cda6b",
   "counts": {
    "resolution": 219,
    "st_mesh": 73,
@@ -9,10 +9,10 @@
    "st_invisible": 40,
    "st_mesh_untextured": 4,
    "st_no_visual": 87,
-   "native_behaviors": 64,
+   "native_behaviors": 67,
    "used_fourccs": 93,
-   "used_native_behaviors": 52,
-   "used_missing_native_behavior": 41,
+   "used_native_behaviors": 55,
+   "used_missing_native_behavior": 38,
    "decomp_specs": 104,
    "assets_total": 5807,
    "no_usage": 39,
@@ -3557,8 +3557,8 @@
    "decomp_status": "spec",
    "decomp_confidence": "Medium",
    "family": "player_friends_npcs",
-   "native_behavior": null,
-   "native_desc": null,
+   "native_behavior": "vt_humphrey",
+   "native_desc": "Humphrey (clone controller)",
    "tags": [
     "C3DHUMPHREY",
     "clone1",
@@ -6177,8 +6177,8 @@
    "decomp_status": null,
    "decomp_confidence": null,
    "family": null,
-   "native_behavior": null,
-   "native_desc": null,
+   "native_behavior": "vt_phonebooth",
+   "native_desc": "Phone booth (contact prop)",
    "tags": [
     "C3DPHONEBOOTH",
     "PHONE1",
@@ -6980,8 +6980,8 @@
    "decomp_status": "spec",
    "decomp_confidence": "Medium",
    "family": "vehicles",
-   "native_behavior": null,
-   "native_desc": null,
+   "native_behavior": "vt_rocket_ai",
+   "native_desc": "AI patrol rocket",
    "tags": [
     "rocket",
     "rocket2",

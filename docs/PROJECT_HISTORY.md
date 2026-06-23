@@ -850,6 +850,26 @@ loader (`gam_str()`, the string analogue of the numeric prop bag) for the AITrig
 40), and **41** still missing. Validation stayed clean: `make`, `make web`, affected `JN_SCREENSHOT` probes,
 `tools/audit_faithfulness.py` (0 findings across all 35 levels), and `tools/qa_web_verify.py` (16/16).
 
+**Actor focus closeout — 3PHO / 3RCK / 3HUM (2026-06-23).** A third behavior-lens pass cleared the last three
+rows in the actor/gameplay focus section. `3PHO`/`C3DPhoneBooth` (`vt_phonebooth`) is the placeable red phone
+booth: a SOLID prop (phone.glb) that honors the authored InitiallyVisible/HasCollision gates (one Level1 booth
+is IV=0/non-solid) and detects Jimmy-only contact by proximity — the decompiled touch handler gates on
+`IsA("C3DJIMMY")`, but its player-side effect (`vfunc_01_016` → `player.method_0x1d4`) is unresolved in the
+decomp and is deferred; the booth's tag (`C3DPHONEBOOTH`) is *not* the player's StartPoint marker (`PHONEBOOTH`,
+a separate `STRT`), so it is not a spawn anchor. `3RCK`/`C3DRocket` (`vt_rocket_ai`) is the *placed* C3DAI patrol
+rocket (9 `.gam` rows — not a code-spawned projectile, and distinct from the rideable `3ROC`/`C3DRocketShip`):
+it flies its authored PatrolPoint chain through the shared `behavior_ai` patrol primitive (validated on level1e —
+the rocket patrols toward `RC1` at 600 u/s); the ten-puff `C3DNewSmokePuff` exhaust + objects.omt id-15 sprite
+are deferred (rendered hidden). `3HUM`/`C3DHumphrey` (`vt_humphrey`) is the C3DEnemy clone-controller: it hides
+itself on spawn (faithful to `PostLoadHideHumphrey`, strictly more faithful than the prior fall-through that drew
+an idle humpstop mesh), and the `SCENE==0x5a` clone-reveal gate (show `CLONE1..CLONE7`) is wired as decompiled but
+dormant — the only SCENE source is the CTaskList initial table (`SCENE=30`) and no SCENE sequencer is ported, so
+SCENE never reaches 90. The refreshed catalog now reports **93** used FourCCs, **55** with native vtables (up from
+52), and **38** still missing — the actor/gameplay focus section is now empty; the remaining queue is the
+base/resolver + effect long tail (`3NEU`/`C3DSprite`, `3RED`, `3ARR`/`C3DArrow`, `3LIO`, `3OMT`, `3CON`/`3LEA`).
+Validation: `make`, `make web`, affected `JN_SCREENSHOT` probes (Level1/Level2 phone booth renders; Humphreys
+hidden), `tools/audit_faithfulness.py` (0 findings), and `tools/qa_web_verify.py` (16/16).
+
 ---
 
 ## Invariants (don't relitigate these)

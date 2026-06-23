@@ -105,14 +105,27 @@ This is a shared, committed campaign — read the shared docs, don't rely on too
   loader (`gam_str()`) plus a `JN_TEST_AITRIG` headless hook (level6 `jimend` teleports the player to `jnspot`,
   verified). Validation: `make`, `make web`, `JN_SCREENSHOT` probes, `audit_faithfulness.py` 0 findings (all 35
   levels), `qa_web_verify.py` 16/16.
-- **Still unimplemented:** the refreshed generated behavior lens reports **41** used-in-level FourCCs with no
-  native behavior (**93** used FourCCs total, **52** used FourCCs with native vtables). The actor/gameplay focus is
-  down to three rows in `docs/asset_catalog/behavior_todo.md`: `3PHO`/`C3DPHONEBOOTH` (21 inst / 17 levels — now the
-  broadest placed actor hole, a phone-booth prop), `3RCK`/`C3DRocket` (9 inst / 5 levels — distinct from the
-  already-rideable `3ROC`/`C3DRocketShip`), and `3HUM`/`C3DHumphrey` (a `C3DEnemy` clone-controller that hides after
-  post-load — deferred this wave; read the spec before porting). After those, the remaining holes are base/resolver
-  and effect rows (`3NEU`/`C3DSprite` is the largest by count, `3ARR`/`C3DArrow` nav sprites, `3LIO`/`C3DLightObj`,
-  `3OMT`/`C3DOmtObj` props, `3CON`/`3LEA` decor sprites). Code-spawned or currently unplaced enemy specs (`3TAN`/
+- **Actor focus closeout DONE — 3PHO / 3RCK / 3HUM (2026-06-23):** cleared the final three rows of the
+  actor/gameplay focus section. `3PHO`/`C3DPhoneBooth` (`behavior_phonebooth.c`, `vt_phonebooth`): SOLID red
+  phone-booth prop (phone.glb) honoring the IV/HasCollision gates (one Level1 booth is IV=0/non-solid) + Jimmy-only
+  proximity contact; the decompiled touch handler gates on `IsA("C3DJIMMY")` but its player-side effect
+  (`vfunc_01_016` → `player.method_0x1d4`) is unresolved in the decomp and deferred — and the booth tag
+  (`C3DPHONEBOOTH`) is *not* the player's StartPoint marker (`PHONEBOOTH`, a separate `STRT`), so it is not a spawn
+  anchor. `3RCK`/`C3DRocket` (`behavior_rocket_ai.c`, `vt_rocket_ai`): the *placed* C3DAI patrol rocket (9 `.gam`
+  rows, NOT code-spawned; distinct from the rideable `3ROC`) flies its authored PatrolPoint chain via the shared
+  `behavior_ai` primitive — validated on level1e (patrols toward `RC1` at 600 u/s); smoke-puff pool + objects.omt
+  id-15 sprite deferred (rendered hidden). `3HUM`/`C3DHumphrey` (`behavior_humphrey.c`, `vt_humphrey`): the
+  C3DEnemy clone-controller hides itself on spawn (faithful `PostLoadHideHumphrey`; supersedes the prior
+  fall-through that drew an idle humpstop mesh) and the `SCENE==0x5a` clone-reveal gate (`CLONE1..CLONE7`) is wired
+  as decompiled but **dormant** — SCENE only comes from the CTaskList table (`SCENE=30`) and no SCENE sequencer is
+  ported, so it never reaches 90. Validation: `make`, `make web`, `JN_SCREENSHOT` (Level1/Level2 booth renders;
+  Humphreys hidden), `audit_faithfulness.py` 0 findings, `qa_web_verify.py` 16/16.
+- **Still unimplemented:** the refreshed generated behavior lens reports **38** used-in-level FourCCs with no
+  native behavior (**93** used FourCCs total, **55** used FourCCs with native vtables). The actor/gameplay focus
+  section in `docs/asset_catalog/behavior_todo.md` is now **empty** — the remaining holes are base/resolver and
+  effect rows: `3NEU`/`C3DSprite` (294 inst — billboard sprite plumbing, the largest by count), `3RED` (70 inst,
+  unclassified sprite), `3ARR`/`C3DArrow` nav sprites, `3LIO`/`C3DLightObj`, `3OMT`/`C3DOmtObj` props, and the
+  `3CON`/`3LEA` decor sprites. Code-spawned or currently unplaced enemy specs (`3TAN`/
   `C3DTank`, `3HAR`/`C3DHarrier`, `3MIN`/`C3DMine`, `3MIS`/`C3DMissile`) still have zero current `.gam` rows; treat
   them as database-spawned/code-spawned/unplaced until separate evidence says otherwise. The big structural waves
   (N1 base framework, N2 enemies, N3 combat/pickups, N4 vehicles, N5 game-flow) are all landed.
@@ -120,11 +133,12 @@ This is a shared, committed campaign — read the shared docs, don't rely on too
   `src/game/entities.c`; per-frame via `entity_update()` (`main.c:1418`); `.gam` params via
   `gam_prop_f/i`. Full contract in plan §1.
 
-## Your task this session: finish the actor/gameplay focus, then start the base/resolver rows
-The big structural waves (N1–N5), the placed enemy/hazard slice (N2.x), and the friend/NPC cast + AI mission
-trigger (N2.y) are all landed. The actor/gameplay focus is down to **three rows**; after them the remaining holes
-are base/resolver and effect classes. Hold the decomp discipline — confirm behavior against `docs/decomp/<Class>.md`
-(the decompiled body, not an offset scan), build on the existing modules, and **pick targets from the lens**:
+## Your task this session: start the base/resolver + effect long tail
+The big structural waves (N1–N5), the placed enemy/hazard slice (N2.x), the friend/NPC cast + AI mission
+trigger (N2.y), and the **actor/gameplay focus closeout (3PHO/3RCK/3HUM)** are all landed. The actor/gameplay
+focus section of the lens is **empty** — the remaining work is the base/resolver + effect long tail. Hold the
+decomp discipline — confirm behavior against `docs/decomp/<Class>.md` (the decompiled body, not an offset scan),
+build on the existing modules, and **pick targets from the lens**:
 
 ```bash
 python3 tools/build_asset_catalog.py
@@ -132,21 +146,26 @@ sed -n '1,180p' docs/asset_catalog/behavior_todo.md
 ```
 
 `behavior_todo.md` formalizes the strict query (`instances > 0 && native_behavior == null`), ranks by
-`instances * level_count`, and splits out an actor/gameplay focus section. Use it to validate on levels that
-actually place each class. The live catalog remains useful for previews: <https://exentt.com/JN-assets/catalog/>.
+`instances * level_count`, and splits out an actor/gameplay focus section (now empty). Use it to validate on
+levels that actually place each class. The live catalog remains useful for previews:
+<https://exentt.com/JN-assets/catalog/>.
 
-**Next actor/gameplay rows from the refreshed lens (all that's left in the focus section):**
-- `3PHO` / `C3DPHONEBOOTH` — 21 instances, 17 levels. Now the broadest placed actor hole (`mesh:phone.glb`).
-  Read the spec — likely an interactive prop (the player's 3JIM row even carries `StartPoint="PHONEBOOTH"`).
-- `3RCK` / `C3DRocket` — 9 instances, 5 levels. Distinct from the already-rideable `3ROC`/`C3DRocketShip`; the
-  spec is invisible (`no_visual`) so it's likely a code-spawned projectile/effect rocket — confirm before placing.
-- `3HUM` / `C3DHumphrey` — 10 instances, 4 levels. A `C3DEnemy` clone-controller that **hides itself after
-  post-load** and finds `CLONE1..CLONE7` when `SCENE==0x5a`. Deferred in N2.y; the safe faithful core is to spawn
-  it hidden, but read `docs/decomp/C3DHumphrey.md` first to confirm the clone-scene gate before wiring it.
+**Next rows from the refreshed lens (base/resolver + effect tail — the largest by reach):**
+- `3NEU` / `C3DSprite` — 294 inst / 19 levels. The single biggest hole by count. This is **billboard sprite
+  plumbing** (the resolver already routes `3NEU` to a sprite via `entity_visual.c`); the behavior question is
+  whether anything beyond static-billboard draw is owed. Read `docs/decomp/C3DSprite.md` before assuming it's
+  inert — `3SPR` (15 inst) shares the class.
+- `3RED` — 70 inst / 16 levels, unclassified sprite (`sprite:0000_100x100d32.png`). Confirm the class/spec
+  (no FourCC→class row in the ledger yet) before porting.
+- `3ARR` / `C3DArrow` — 47 inst / 19 levels. Nav-arrow billboard sprites (resolver already draws sprites.omt
+  chunk 33; the spec adds animated/aim behavior — confirm against `docs/decomp/C3DArrow.md`).
+- `3LIO` / `C3DLightObj` (37 inst, invisible), `3OMT` / `C3DOmtObj` (20 inst, placed OMT-shape props),
+  and the `3CON` / `3LEA` decor sprites round out the high-reach tail.
 
-After the focus rows, the largest remaining base/resolver holes are `3NEU`/`C3DSprite` (294 inst — billboard
-sprite plumbing), `3ARR`/`C3DArrow` (nav-arrow sprites), `3LIO`/`C3DLightObj`, `3OMT`/`C3DOmtObj` (placed OMT-shape
-props), and the `3CON`/`3LEA` decor sprites.
+NB on the just-closed focus rows: `3RCK`/`C3DRocket` turned out to be a **placed** C3DAI patrol rocket (9 `.gam`
+rows), not the code-spawned projectile the prior handoff guessed — reading the spec first mattered. The
+C3DPhoneBooth touch effect and the Humphrey `SCENE==0x5a` clone reveal are both wired-but-dormant / deferred (no
+ground truth or no SCENE sequencer); see the closeout bullet under Current state.
 
 **Friend / NPC wiring now available:** `vt_friend` (`behavior_friend.c`) is the shared C3DFriends/C3DAI idle base;
 the talk-reward path is still deferred. The `.gam` loader now has a generic string-prop bag (`gam_str()`) for
@@ -190,11 +209,12 @@ and (wave end) `qa_web_verify.py` is still 16/16 with a one-line PROJECT_HISTORY
   source of truth.
 
 ## Definition of done for this session
-Pick the next actor/gameplay row(s) from `behavior_todo.md`, read each class spec before coding, and land one
-commit per class on `native-port`. Validate each class with `make`, affected-level `JN_SCREENSHOT` checks, and
+Pick the next base/resolver or effect row(s) from `behavior_todo.md`, read each class spec before coding, and land
+one commit per class on `native-port`. Validate each class with `make`, affected-level `JN_SCREENSHOT` checks, and
 `tools/audit_faithfulness.py`; at wave end refresh `behavior_todo.md`, run `tools/qa_web_verify.py` (16 checks),
-append `PROJECT_HISTORY.md`, and update this handoff. With N1–N5 plus the N2.x and N2.y slices landed, the
-campaign's base framework, enemies, combat, vehicles, game-flow, placed ranged enemies/trigger hazards, the full
-friend/NPC cast, the escort actors, and the AI mission-trigger volume are ported (**52/93** used FourCCs now have
-native vtables) — the remaining work is the three-row actor focus (`3PHO`/`3RCK`/`3HUM`) and then the
-base/resolver + effect long tail.
+append `PROJECT_HISTORY.md`, and update this handoff. With N1–N5 plus the N2.x / N2.y slices and the actor-focus
+closeout (`3PHO`/`3RCK`/`3HUM`) landed, the campaign's base framework, enemies, combat, vehicles, game-flow, placed
+ranged enemies/trigger hazards, the full friend/NPC cast, the escort actors, the AI mission-trigger volume, the
+phone-booth prop, the placed patrol rocket, and the hidden Humphrey clone-controller are ported (**55/93** used
+FourCCs now have native vtables) — the actor/gameplay focus section is empty and the remaining work is the
+base/resolver + effect long tail (`3NEU`/`C3DSprite`, `3RED`, `3ARR`/`C3DArrow`, `3LIO`, `3OMT`, `3CON`/`3LEA`).
