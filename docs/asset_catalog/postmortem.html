@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Asset Catalog &amp; the Road to Parity — Jimmy Neutron, rebuilt</title>
+<meta name="description" content="Post-mortem of the JN-engine Asset Catalog: what it does, why it changes the native Linux port, and the concrete road to full parity with the 2002 original.">
+<style>
+  :root{
+    --bg:#0d1117; --panel:#161b22; --panel2:#1c2230; --border:#30363d;
+    --text:#e6edf3; --muted:#8b949e; --accent:#58a6ff; --accent2:#3fb950;
+    --warn:#e3b341; --bad:#f0883e; --radius:14px;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    background:radial-gradient(1200px 600px at 50% -10%, #18233a 0%, var(--bg) 55%) fixed;
+    color:var(--text);
+    font:16px/1.62 -apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:860px;margin:0 auto;padding:54px 20px 80px}
+  .back{color:var(--accent);text-decoration:none;font-size:14px;font-weight:600}
+  .back:hover{text-decoration:underline}
+  header{margin:26px 0 36px}
+  .eyebrow{color:var(--accent);font-weight:600;letter-spacing:.08em;text-transform:uppercase;font-size:12px;margin:0 0 12px}
+  h1{font-size:clamp(28px,5vw,42px);line-height:1.12;margin:0 0 16px;font-weight:700;letter-spacing:-.02em}
+  .lede{color:var(--muted);font-size:18px;max-width:680px}
+  .lede strong{color:var(--text);font-weight:600}
+  h2{font-size:13px;text-transform:uppercase;letter-spacing:.09em;color:var(--muted);font-weight:700;margin:48px 0 16px;padding-bottom:10px;border-bottom:1px solid var(--border)}
+  h3{font-size:18px;margin:30px 0 8px;font-weight:650;letter-spacing:-.01em}
+  p{margin:0 0 16px}
+  a{color:var(--accent)}
+  strong{color:var(--text)}
+  em{color:var(--text);font-style:normal;background:rgba(88,166,255,.10);padding:0 4px;border-radius:4px}
+  code{font:13.5px/1.5 ui-monospace,SFMono-Regular,Menlo,monospace;background:#11161f;border:1px solid var(--border);border-radius:5px;padding:1px 6px;color:#c9d6e5}
+  ul{margin:0 0 16px;padding-left:0;list-style:none}
+  ul li{position:relative;padding:6px 0 6px 26px;color:var(--text)}
+  ul li::before{content:"";position:absolute;left:6px;top:14px;width:6px;height:6px;border-radius:50%;background:var(--accent)}
+  ul li b{color:var(--text)}
+  ul li span.m{color:var(--muted)}
+  .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin:8px 0 4px}
+  .stat{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:16px 18px}
+  .stat b{display:block;font-size:26px;font-weight:700;color:var(--accent);letter-spacing:-.02em}
+  .stat span{color:var(--muted);font-size:13px}
+  .stat.good b{color:var(--accent2)} .stat.warn b{color:var(--warn)}
+  .card-cta{display:inline-block;margin:6px 10px 6px 0;background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:11px 16px;text-decoration:none;color:var(--text);font-weight:600;font-size:14px;transition:border-color .15s,transform .15s,background .15s}
+  .card-cta:hover{border-color:var(--accent);transform:translateY(-2px);background:var(--panel2)}
+  .panel{background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);padding:20px 22px;margin:18px 0}
+  .panel h3{margin-top:0}
+  .ladder{counter-reset:step;list-style:none;padding:0;margin:0}
+  .ladder li{position:relative;padding:8px 0 8px 40px;border-bottom:1px solid #232a36}
+  .ladder li:last-child{border-bottom:0}
+  .ladder li::before{counter-increment:step;content:counter(step);position:absolute;left:0;top:8px;width:24px;height:24px;border-radius:50%;background:#11161f;border:1px solid var(--border);color:var(--accent);font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center}
+  .tag{display:inline-block;font-size:11px;font-weight:700;border-radius:999px;padding:2px 9px;border:1px solid;vertical-align:middle;margin-left:6px}
+  .tag.done{color:var(--accent2);border-color:var(--accent2)}
+  .tag.partial{color:var(--warn);border-color:var(--warn)}
+  .tag.open{color:var(--bad);border-color:var(--bad)}
+  blockquote{margin:18px 0;padding:2px 18px;border-left:3px solid var(--accent);color:var(--muted)}
+  blockquote strong{color:var(--text)}
+  footer{margin-top:56px;text-align:center;color:var(--muted);font-size:13px;border-top:1px solid var(--border);padding-top:24px}
+  footer a{color:var(--accent);text-decoration:none}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <a class="back" href="/jn/">&larr; Jimmy Neutron, rebuilt</a>
+  <header>
+    <p class="eyebrow">Post-mortem &middot; June 2026</p>
+    <h1>The Asset Catalog &amp; the road to parity</h1>
+    <p class="lede">The catalog is finished. It is the moment the project stops <em>collecting</em> the game and starts <strong>accounting for</strong> it — every asset now carries its resolution, its texture truth, and the levels that use it. Here is what it does, what it cost, why it reshapes the native&nbsp;Linux port, and the concrete path from "renders Retroville" to <strong>full parity with the 2002 original</strong>.</p>
+  </header>
+
+  <div class="stats">
+    <div class="stat"><b>219</b><span>FourCCs cataloged</span></div>
+    <div class="stat"><b>5,807</b><span>asset files indexed</span></div>
+    <div class="stat good"><b>208/208</b><span>decomp specs</span></div>
+    <div class="stat warn"><b>44</b><span>FourCCs with native behavior</span></div>
+    <div class="stat good"><b>0</b><span>used-in-level FourCCs draw a box</span></div>
+    <div class="stat"><b>4</b><span>genuinely untextured meshes</span></div>
+  </div>
+
+  <h2>What the catalog does</h2>
+  <p>For four years this project pulled <em>everything</em> out of a 2002 Direct3D&nbsp;7 game — 4,900&nbsp;assets, a public <a href="/JN-assets/">download library</a>, 208 reverse-engineered class specs. But the assets were <strong>harvested, not accounted for</strong>. Nothing recorded the one thing the native port actually needs at every step: <em>how is this asset resolved, where does its texture come from, and where in the game is it used?</em></p>
+  <p>The <a href="/JN-assets/catalog/">Asset&nbsp;Catalog</a> is that accounting layer. It is a single deterministic generator that <strong>joins the project's own sources of truth</strong> — the live engine resolver tables, the sprite-canvas map, the behavior table, the class-id table, all 208&nbsp;decomp specs and their asset tables, the decomp ledger, and every one of the 35&nbsp;level files — into <strong>219 per-FourCC resolution rows</strong> and a <strong>5,807-file inventory</strong>, published as a searchable, filterable site. It reads those sources <em>in place</em>; it never re-derives or duplicates them, so it cannot drift from the engine it describes.</p>
+
+  <p>Each FourCC row answers the whole question at once:</p>
+  <ul>
+    <li><b>Identity</b> <span class="m">— the C++ class, its decomp spec + confidence.</span></li>
+    <li><b>Visual</b> <span class="m">— the mesh or sprite the game actually draws, chosen by <em>mirroring the runtime resolver's real order</em>: so trees, balloons and arrows show as the billboards they are, and a <code>3OMT</code> object shows its authored <code>objects.omt</code> shape, not the generic fallback.</span></li>
+    <li><b>Texture truth</b> <span class="m">— resolved in a strict, conservative ladder (below) and tagged with the tier that won, so the source of every pixel is auditable.</span></li>
+    <li><b>Native coverage</b> <span class="m">— whether a runtime behavior vtable exists yet.</span></li>
+    <li><b>Usage</b> <span class="m">— which of the 35 levels place it, how many times, under which object tags — each linking straight into the playable demo at that level.</span></li>
+  </ul>
+
+  <div class="panel">
+    <h3>The texture-truth ladder — never guess</h3>
+    <ol class="ladder">
+      <li><b>Decomp spec</b> — the class's own Assets table names the PNG (highest authority).</li>
+      <li><b>Resolver</b> — an explicit texture path curated into the engine.</li>
+      <li><b>Sprite canvas</b> — a billboard: the authored sprites.omt canvas <em>is</em> the texture.</li>
+      <li><b>ASE bitmap</b> — the mesh's declared bitmap, resolved exactly as the runtime does (a repo path loads directly; a Windows BMP basename remaps via the engine's <code>carl3.bmp&nbsp;&rarr;&nbsp;carl.png</code> digit-strip rule).</li>
+      <li><b>GLB-embedded</b> — the modern mesh carries its own texture.</li>
+      <li><b>Explicitly unresolved</b> — marked, not invented, and listed in the gaps checklist.</li>
+    </ol>
+  </div>
+
+  <h2>Post-mortem — what it cost, what it taught</h2>
+  <p>The catalog was built in one focused pass by a discipline that is worth stating plainly: <strong>join the existing truth, don't re-derive it.</strong> Every datum already lived somewhere authoritative — the resolver in C, the canvas map in a generated header, usage in the level files. The generator's whole job was to <em>connect</em> them. That is why it is cheap to maintain (re-run after any change) and why it cannot lie: it shows exactly what the shipped engine does.</p>
+  <p>Getting that fidelity right forced us to encode the engine's quirks into the catalog rather than approximate them — the precise resolver precedence, the BMP digit-strip rule, the distinction between an OMT-export mesh's repo-relative texture path and a legacy Windows bitmap. The payoff was immediate and a little poetic: <strong>the catalog found its own first bug.</strong></p>
+  <blockquote><strong>The catalog as an audit instrument.</strong> It surfaced that the invisible trigger class <code>C3DTrigger</code> currently resolves to an <em>editor placeholder</em> icon (the "triger" sprite) instead of drawing nothing — a faithfulness question no one had asked, made visible the instant every FourCC's resolution was laid out in one table. The catalog reports the engine honestly; it does not silently "fix" it. That is the point.</blockquote>
+  <p>Validation held throughout: the engine's faithfulness sweep stayed at <strong>0 findings across all 35 levels</strong>, the page loads with zero broken links against the live asset tree, and the committed manifest is a lean 210&nbsp;KB (the heavy file inventory stays regenerable).</p>
+
+  <h2>Why this changes the native port</h2>
+  <p>The port has always had <em>two</em> independent coverage tables, and "implemented" meant something different in each. The catalog is the first artifact that measures both at a glance:</p>
+  <ul>
+    <li><b>Spec coverage <span class="tag done">complete</span></b> <span class="m">— 208/208 gameplay classes have a faithful behavioral spec. The reverse-engineering deliverable is done.</span></li>
+    <li><b>Visual coverage <span class="tag done">effectively complete</span></b> <span class="m">— <strong>not a single FourCC used in any level draws a placeholder box.</strong> 92 resolve to a real mesh or sprite; 40 are intentionally invisible (triggers, cameras, effects); only 4 meshes are genuinely untextured, all sequel-side.</span></li>
+    <li><b>Behavior coverage <span class="tag partial">the frontier</span></b> <span class="m">— only <strong>44 FourCCs (33 vtables)</strong> carry runtime logic. The world <em>looks</em> like Retroville; it does not yet fully <em>act</em> like it.</span></li>
+  </ul>
+  <p>That last line is the whole strategic picture, and the catalog is what makes it legible. It converts the central question of the port — <em>"what is this object, where is it used, and is it ported yet?"</em> — from an afternoon of capture-spelunking into a single lookup. It is, finally, the "role-annotation layer" the project set as its thesis a month ago: found assets are tagged with truth and usage <strong>once</strong>, and every later feature reads the tag instead of re-discovering it.</p>
+  <p>Paired with the faithfulness sweep, the catalog also becomes a <strong>running parity scoreboard</strong>: visual fidelity is held at zero findings, the unresolved checklist names the remaining texture gaps, and the behavior column is the burn-down chart for the rest of the game.</p>
+
+  <h2>The road to full parity</h2>
+  <p>With the visual layer essentially closed, parity is now overwhelmingly a <strong>behavior and game-flow</strong> problem. The work sorts into five tiers, each grounded in what the decomp specs already pin down.</p>
+
+  <h3>1 · The behavior frontier <span class="tag partial">largest lift</span></h3>
+  <ul>
+    <li><b>Enemies</b> — the Yokian family seeks, attacks and dies today; the rest of the roster is inert: Digger, Tank, Tesla, Harrier, enemy aircraft, mine, laser trigger and turret — the natural first consumers of the shared enemy-side projectile path.</li>
+    <li><b>Friends &amp; NPCs</b> — 20 specs, only the player is interactive. Carl patrols; Cindy, Libby, Sheen, Goddard and the townsfolk still stand as static stop-poses.</li>
+    <li><b>Vehicles</b> — the rideable rocket and self-driving traffic work; the full <code>C3DVehicle</code> player-car (six-wheel steering &amp; suspension) and the AI-vehicle children (light cones, contact horns, the sailboat's sine-bob) wait on the effect/Goddard subsystems.</li>
+  </ul>
+
+  <h3>2 · Game-flow completion <span class="tag partial">structural</span></h3>
+  <ul>
+    <li>The full trigger&rarr;multi-camera&rarr;cutscene message chain, the camera-type / view-from-camera enums, and the player-control input lock.</li>
+    <li>A real menu / HUD <strong>text renderer</strong> (today the menu is functional but unstyled).</li>
+    <li><b>The progress-gating counter</b> <span class="tag open">open question</span> — objects gated by <code>RequiredLevel</code> / <code>ExactLevel</code> are env-driven because the original's ~550-range campaign-progress value isn't ground-truthed yet. This is the single most-cited unknown; nailing it unlocks correct quest-spawn and story-gated visibility across the campaign.</li>
+  </ul>
+
+  <h3>3 · The last visual gaps <span class="tag partial">small, bounded</span></h3>
+  <ul>
+    <li>4 untextured meshes (all sequel-side: hovercycle, movable rock, Numey, VR tank) — named in the <a href="/JN-assets/catalog/unresolved.md">unresolved checklist</a>.</li>
+    <li>The <code>C3DTrigger</code> editor-placeholder finding above — decide invisible vs. authored.</li>
+    <li>Per-entity animation — only the player animates today; the stop/walk/attack ASE states exist for every character and need wiring to AI state.</li>
+  </ul>
+
+  <h3>4 · HUD &amp; audio finish <span class="tag partial">harvestable now</span></h3>
+  <ul>
+    <li>HUD digits 3/4/6 — recoverable <em>statically</em> from the alpha container, obsoleting the planned XP recapture — plus the dynamic gauge fill (&larr;&nbsp;health) and the per-tool gadget icon.</li>
+    <li>The rocket engine audio loop + exhaust effect, and general sound/music trigger wiring from the authored indices the catalog already indexes.</li>
+  </ul>
+
+  <h3>5 · Ground-truth tooling <span class="tag open">enabling</span></h3>
+  <ul>
+    <li>The camera no-clip + pose-queue <strong>capture rig</strong> — grab exact object sizes/positions sector-by-sector instead of scanning long captures.</li>
+    <li>Sequel Granny skinned actors — ~350 <code>.grn</code> clips await type-tree/skinning decode to animate the cast.</li>
+  </ul>
+
+  <h2>How we will know it's done</h2>
+  <p>Parity has a definition now, and instruments to measure it. <strong>Visual parity</strong> is the faithfulness sweep at zero findings and the catalog's unresolved list emptied. <strong>Behavior parity</strong> is the catalog's native-coverage column reaching the full placeable-class set — every object that the original makes <em>act</em> doing so here. And the original game's own captured Direct3D&nbsp;7 command stream remains the <strong>validator</strong> of last resort for any motion or pixel in doubt. The catalog doesn't finish the port — but for the first time, it tells us exactly how much is left, and points at each piece of it.</p>
+
+  <p style="margin-top:28px">
+    <a class="card-cta" href="/JN-assets/catalog/">Open the Asset Catalog &rarr;</a>
+    <a class="card-cta" href="/JN-assets/catalog/unresolved.md">Unresolved checklist</a>
+    <a class="card-cta" href="https://github.com/alexscott2718-gif/jn-engine/blob/native-port/docs/native_port_plan.md">Native-port plan</a>
+    <a class="card-cta" href="https://github.com/alexscott2718-gif/jn-engine/blob/native-port/docs/PROJECT_HISTORY.md">Project history</a>
+  </p>
+
+  <footer>
+    A non-commercial fan reverse-engineering &amp; preservation project. <em>Jimmy Neutron: Boy Genius</em> and all original game assets are the property of their respective owners. No original game executables are distributed. &middot; <a href="/jn/">Home</a> &middot; <a href="https://github.com/alexscott2718-gif/jn-engine">GitHub</a>
+  </footer>
+</div>
+</body>
+</html>
