@@ -63,6 +63,10 @@ static int enemy_is_yokian(const char *type) {
            strncmp(type, "3SPY", 4) == 0;
 }
 
+static int enemy_is_instant_ko(const char *type) {
+    return strncmp(type, "3TUR", 4) == 0;
+}
+
 static float ang_wrap(float a) {
     while (a >  (float)M_PI) a -= 2.0f * (float)M_PI;
     while (a < -(float)M_PI) a += 2.0f * (float)M_PI;
@@ -71,12 +75,20 @@ static float ang_wrap(float a) {
 
 int behavior_enemy_take_hit(Entity *e, int dmg) {
     if (!e || !e->alive || !e->visible) return 0;
-    if (!enemy_is_yokian(e->type)) return 0;
-    if (e->user_flag == ENEMY_KNOCKOUT) return 0;  /* already going down */
+    int yokian = enemy_is_yokian(e->type);
+    if (!yokian && !enemy_is_instant_ko(e->type)) return 0;
+    if (yokian && e->user_flag == ENEMY_KNOCKOUT) return 0;  /* already going down */
 
     e->hp -= (float)dmg;
     if (e->hp <= 0.0f) {
         e->hp = 0.0f;
+        if (!yokian) {
+            e->alive = 0;
+            e->visible = 0;
+            e->runtime_flags = 0;
+            printf("[ENEMY] %s '%s' defeated\n", e->type, e->tag);
+            return 1;
+        }
         e->user_flag = ENEMY_KNOCKOUT;
         e->user_float = ENEMY_KO_TIME;
         e->runtime_flags &= ~(ENTITY_FLAG_SOLID | ENTITY_FLAG_TRIGGER);

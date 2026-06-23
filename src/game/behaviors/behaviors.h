@@ -28,6 +28,7 @@ extern const EntityVTable vt_music;       /* 3MUS — C3DMusicTrigger */
 extern const EntityVTable vt_walker;      /* 3CAR — C3DAI patrol walker (Carl) */
 extern const EntityVTable vt_patrolpoint; /* 3PAT — C3DPatrolPoint (nav node) */
 extern const EntityVTable vt_yokian;      /* 3SOL/3GUA/3SPY — C3DYokian family */
+extern const EntityVTable vt_yok_turret;  /* 3TUR — C3DYokTurret ranged enemy */
 extern const EntityVTable vt_projectile;  /* PROJ — shared projectile */
 /* Wave N3 — player combat + pickups family. */
 extern const EntityVTable vt_balloon;        /* 3BAL — C3DBalloon (release/pop) */

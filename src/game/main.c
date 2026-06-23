@@ -1007,6 +1007,42 @@ static void sandbox_reconcile(World *w, Entity *jim) {
     }
 }
 
+static void test_place_player_near_type(World *world, Entity *jim) {
+    const char *type = getenv("JN_TEST_NEAR_TYPE");
+    if (!type || strlen(type) < 4 || !world || !jim) return;
+
+    Entity *best = NULL;
+    float bestd2 = 1.0e30f;
+    for (Entity *e = world->head; e; e = e->next) {
+        if (!e->alive || e == jim) continue;
+        if (strncmp(e->type, type, 4) != 0) continue;
+        float dx = e->x - jim->x;
+        float dz = e->z - jim->z;
+        float d2 = dx * dx + dz * dz;
+        if (d2 < bestd2) {
+            bestd2 = d2;
+            best = e;
+        }
+    }
+    if (!best) {
+        fprintf(stderr, "[test_near] no live %.4s target found\n", type);
+        return;
+    }
+
+    float radius = env_float_default("JN_TEST_NEAR_RADIUS", 220.0f);
+    float dx = jim->x - best->x;
+    float dz = jim->z - best->z;
+    float len = sqrtf(dx * dx + dz * dz);
+    float ux = len > 1.0e-4f ? dx / len : sinf(best->ry);
+    float uz = len > 1.0e-4f ? dz / len : cosf(best->ry);
+    jim->x = best->x + ux * radius;
+    jim->y = best->y;
+    jim->z = best->z + uz * radius;
+    jim->vx = jim->vy = jim->vz = 0.0f;
+    fprintf(stderr, "[test_near] player near %s '%s' at (%.0f, %.0f, %.0f), radius=%.0f\n",
+            best->type, best->tag, jim->x, jim->y, jim->z, radius);
+}
+
 int main(int argc, char **argv) {
     const char *start_level = "level1";
     int want_newgame = 0;
@@ -1434,6 +1470,7 @@ int main(int argc, char **argv) {
     Camera *cam = renderer_camera();
     Entity *jim  = place_player(&world, NULL);
     if (jim) {
+        test_place_player_near_type(&world, jim);
         world.ground_y = jim->y - jim->half_extents[1];
         gamestate_set_spawn(jim->x, jim->y, jim->z);
         printf("Player at (%.1f, %.1f, %.1f), ground_y=%.1f\n",
@@ -1636,7 +1673,8 @@ int main(int argc, char **argv) {
                     /* Yokians (N2) and balloons (N3) are both valid baseball
                        targets — picks the nearest so the test works on either. */
                     if (strncmp(en->type, "3SOL", 4) && strncmp(en->type, "3GUA", 4) &&
-                        strncmp(en->type, "3SPY", 4) && strncmp(en->type, "3BAL", 4)) continue;
+                        strncmp(en->type, "3SPY", 4) && strncmp(en->type, "3TUR", 4) &&
+                        strncmp(en->type, "3BAL", 4)) continue;
                     float dx = en->x - jim->x, dz = en->z - jim->z;
                     float d2 = dx * dx + dz * dz;
                     if (d2 < bestd2) { bestd2 = d2; best = en; }
