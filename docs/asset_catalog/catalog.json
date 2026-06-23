@@ -1,7 +1,7 @@
 {
  "summary": {
-  "generated": "2026-06-23 15:30 UTC",
-  "commit": "7d63bfe",
+  "generated": "2026-06-23 19:24 UTC",
+  "commit": "aea5e0c",
   "counts": {
    "resolution": 219,
    "st_mesh": 73,
@@ -9,10 +9,10 @@
    "st_invisible": 40,
    "st_mesh_untextured": 4,
    "st_no_visual": 87,
-   "native_behaviors": 52,
+   "native_behaviors": 64,
    "used_fourccs": 93,
-   "used_native_behaviors": 40,
-   "used_missing_native_behavior": 53,
+   "used_native_behaviors": 52,
+   "used_missing_native_behavior": 41,
    "decomp_specs": 104,
    "assets_total": 5807,
    "no_usage": 39,
@@ -574,8 +574,8 @@
    "decomp_status": "spec",
    "decomp_confidence": "Medium",
    "family": "enemies_ai",
-   "native_behavior": null,
-   "native_desc": null,
+   "native_behavior": "vt_ai_trigger",
+   "native_desc": "AI/script trigger",
    "tags": [
     "2space1",
     "AI1",
@@ -1092,8 +1092,8 @@
    "decomp_status": null,
    "decomp_confidence": null,
    "family": null,
-   "native_behavior": null,
-   "native_desc": null,
+   "native_behavior": "vt_friend",
+   "native_desc": "Benny (friend NPC)",
    "tags": [
     "Benny1",
     "C3DBENNY"
@@ -2738,8 +2738,8 @@
    "decomp_status": "spec",
    "decomp_confidence": "Medium",
    "family": "player_friends_npcs",
-   "native_behavior": null,
-   "native_desc": null,
+   "native_behavior": "vt_yokian",
+   "native_desc": "Yokian fleet commander",
    "tags": [
     "FLEETC",
     "goobar"
@@ -3516,8 +3516,8 @@
    "decomp_status": "spec",
    "decomp_confidence": "Medium",
    "family": "player_friends_npcs",
-   "native_behavior": null,
-   "native_desc": null,
+   "native_behavior": "vt_friend",
+   "native_desc": "Hugh (friend NPC)",
    "tags": [
     "C3DHUGH"
    ],
@@ -3879,8 +3879,8 @@
    "decomp_status": "spec",
    "decomp_confidence": "Medium",
    "family": "player_friends_npcs",
-   "native_behavior": null,
-   "native_desc": null,
+   "native_behavior": "vt_friend",
+   "native_desc": "Kitty (C3DAI NPC)",
    "tags": [
     "C3DKITTY"
    ],
@@ -4034,8 +4034,8 @@
    "decomp_status": "spec",
    "decomp_confidence": "Medium",
    "family": "player_friends_npcs",
-   "native_behavior": null,
-   "native_desc": null,
+   "native_behavior": "vt_friend",
+   "native_desc": "Libby (friend NPC)",
    "tags": [
     "C3DLIBBY",
     "libby2"
@@ -4589,8 +4589,8 @@
    "decomp_status": null,
    "decomp_confidence": null,
    "family": null,
-   "native_behavior": null,
-   "native_desc": null,
+   "native_behavior": "vt_friend",
+   "native_desc": "Judy (friend NPC)",
    "tags": [
     "C3DJUDY"
    ],
@@ -4977,8 +4977,8 @@
    "decomp_status": "spec",
    "decomp_confidence": "Medium",
    "family": "player_friends_npcs",
-   "native_behavior": null,
-   "native_desc": null,
+   "native_behavior": "vt_friend",
+   "native_desc": "Nick (friend NPC)",
    "tags": [
     "C3DNICK",
     "Nick1",
@@ -6839,8 +6839,8 @@
    "decomp_status": "spec",
    "decomp_confidence": "Medium",
    "family": "player_friends_npcs",
-   "native_behavior": null,
-   "native_desc": null,
+   "native_behavior": "vt_escort",
+   "native_desc": "Pirate (exit escort)",
    "tags": [
     "C3DPIRATE"
    ],
@@ -7559,8 +7559,8 @@
    "decomp_status": "spec",
    "decomp_confidence": "Medium",
    "family": "player_friends_npcs",
-   "native_behavior": null,
-   "native_desc": null,
+   "native_behavior": "vt_friend",
+   "native_desc": "Sheen (friend NPC)",
    "tags": [
     "C3DSHEEN",
     "Sheen1",
@@ -8338,8 +8338,8 @@
    "decomp_status": "spec",
    "decomp_confidence": "Medium",
    "family": "player_friends_npcs",
-   "native_behavior": null,
-   "native_desc": null,
+   "native_behavior": "vt_escort",
+   "native_desc": "Sumo (exit escort)",
    "tags": [
     "C3DSUMO"
    ],
@@ -9278,8 +9278,8 @@
    "decomp_status": "spec",
    "decomp_confidence": "Medium",
    "family": "enemies_ai",
-   "native_behavior": null,
-   "native_desc": null,
+   "native_behavior": "vt_friend",
+   "native_desc": "UltraLord (friend NPC)",
    "tags": [
     "C3DULTRALORD"
    ],

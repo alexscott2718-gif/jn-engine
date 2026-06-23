@@ -830,6 +830,26 @@ plumbing and SCENE-window visibility. The refreshed catalog now reports **93** u
 with native vtables, and **53** used FourCCs still missing behavior. Validation stayed clean: `make`, affected
 `JN_SCREENSHOT` probes, `tools/audit_faithfulness.py` (0 findings), and `tools/qa_web_verify.py` (16/16).
 
+**Wave N2.y actor/NPC coverage (2026-06-23).** A second behavior-lens pass cleared the friend/NPC cast and the
+broadest remaining hole. A shared `vt_friend` ports the `C3DFriends`/`C3DAI` idle leaves — `3NIC` (Nick),
+`3SHE` (Sheen), `3ULT` (UltraLord), `3LIB` (Libby), `3HUG` (Hugh), `3BEN` (Benny), `3MOM` (Judy), and
+`3KIT` (Kitty) — as idle-or-patrol actors on the C3DAI base that turn to watch Jimmy within VisibleRange and
+follow the inherited InitiallyVisible/level gate (talk-reward side effects deferred; TalkTrigger/TaskName fields
+preserved). `3FLE`/`C3DFleetCommander` inherits `C3DYokian`, so it routes to `vt_yokian` (and joins the Yokian
+hit-reaction set). A shared `vt_escort` ports the `C3DSumo` (`3SUM`) / `C3DPirate` (`3PIR`) exit-escort actors:
+Jimmy contact teleports the player to the actor's serialized `StartPoint` marker on a release cooldown (carried
+sequence + inventory-counter gate deferred). The headliner is `3AIT`/`C3DAITrigger` (174 rows / 24 levels), the
+game's AI/script mission-wiring volume: an invisible self-detecting volume that, on player entry, mutates a named
+`AITarget` (hide/show, marker teleport, Y-rotation, patrol-repoint) and dispatches `ToggleObject`/`NextTrigger`.
+It is conservatively gated (arm-on-exit + `TouchActivated` + `ActivateBy`/`IsA` activator gate + `TimesToTrigger`)
+so it stays inert during the stationary 2-tick probes; the 121 chain-dispatched rows stay inert by design (the
+native runtime doesn't model scripted trigger chains yet). A generic string-property bag was added to the `.gam`
+loader (`gam_str()`, the string analogue of the numeric prop bag) for the AITrigger string fields, and a
+`JN_TEST_AITRIG` headless hook force-fires the first eligible trigger (level6 `jimend` teleports the player to
+`jnspot`, verified). The refreshed catalog now reports **93** used FourCCs, **52** with native vtables (up from
+40), and **41** still missing. Validation stayed clean: `make`, `make web`, affected `JN_SCREENSHOT` probes,
+`tools/audit_faithfulness.py` (0 findings across all 35 levels), and `tools/qa_web_verify.py` (16/16).
+
 ---
 
 ## Invariants (don't relitigate these)
