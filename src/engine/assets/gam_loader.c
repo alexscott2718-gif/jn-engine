@@ -178,6 +178,15 @@ int gam_load(World *w, const char *path) {
                        per-instance target tag — share one field. */
                     if (str_val[0] && strcasecmp(str_val, "none") != 0)
                         copy_string(e->activate_target, sizeof(e->activate_target), str_val);
+                } else if (strcmp(prop_name, "TaskName") == 0) {
+                    if (str_val[0] && strcasecmp(str_val, "none") != 0)
+                        copy_string(e->task_name, sizeof(e->task_name), str_val);
+                } else if (strncmp(prop_name, "TalkTrigger", 11) == 0 &&
+                           prop_name[11] >= '0' && prop_name[11] <= '4' &&
+                           prop_name[12] == '\0') {
+                    int idx = prop_name[11] - '0';
+                    if (str_val[0] && strcasecmp(str_val, "none") != 0)
+                        copy_string(e->talk_trigger[idx], sizeof(e->talk_trigger[idx]), str_val);
                 }
 
             } else if (type_id == 3) {

@@ -55,6 +55,10 @@ long game_flow_entity_state(const char *tag);
    itself stays env-driven (see note on game_flow_campaign_active). */
 int  game_flow_progress_level(void);
 
+/* Normalized current level name set by game_flow_enter_level(), or "" before
+   the first level enters. */
+const char *game_flow_current_level(void);
+
 /* Mission counters (CJimmyGame InitGame defaults: lives=5, value=100). */
 int  game_flow_lives(void);
 int  game_flow_mission_value(void);

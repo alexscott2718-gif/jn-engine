@@ -120,6 +120,7 @@ long game_flow_entity_state(const char *tag) {
 
 int game_flow_campaign_active(void) { return g_flow.campaign_active; }
 int game_flow_progress_level(void)  { return g_flow.progress_index; }
+const char *game_flow_current_level(void) { return g_flow.level_name; }
 int game_flow_lives(void)           { return g_flow.lives; }
 int game_flow_mission_value(void)   { return g_flow.mission_value; }
 

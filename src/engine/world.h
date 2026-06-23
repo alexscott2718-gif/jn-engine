@@ -52,6 +52,8 @@ typedef struct Entity {
     char  patrol_point[32];      /* 3MOP/AI: PatrolPoint target marker tag */
     char  next_patrol[32];       /* 3PAT: NextPatrolPoint — next waypoint tag (graph edge) */
     char  activate_target[32];   /* 3BUT/3WAB: ActivateButton -> target ObjectTag */
+    char  task_name[32];         /* CLocalGameObject: TaskName key into CTaskList */
+    char  talk_trigger[5][32];   /* C3DFriends: TalkTrigger0..4 target tags */
     float home[3];               /* behavior scratch: captured spawn position */
     float patrol_to[3];          /* behavior scratch: resolved patrol target */
     struct Entity *link_target;  /* behavior scratch: resolved activate target */
