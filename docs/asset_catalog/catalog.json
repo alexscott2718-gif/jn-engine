@@ -1,7 +1,7 @@
 {
  "summary": {
-  "generated": "2026-06-23 13:38 UTC",
-  "commit": "ea68a60",
+  "generated": "2026-06-23 15:30 UTC",
+  "commit": "7d63bfe",
   "counts": {
    "resolution": 219,
    "st_mesh": 73,
@@ -9,7 +9,10 @@
    "st_invisible": 40,
    "st_mesh_untextured": 4,
    "st_no_visual": 87,
-   "native_behaviors": 44,
+   "native_behaviors": 52,
+   "used_fourccs": 93,
+   "used_native_behaviors": 40,
+   "used_missing_native_behavior": 53,
    "decomp_specs": 104,
    "assets_total": 5807,
    "no_usage": 39,
@@ -1828,8 +1831,8 @@
    "decomp_status": "spec",
    "decomp_confidence": "Medium",
    "family": "player_friends_npcs",
-   "native_behavior": null,
-   "native_desc": null,
+   "native_behavior": "vt_cindy",
+   "native_desc": "Cindy friend NPC",
    "tags": [
     "C3DCINDY"
    ],
@@ -2124,8 +2127,8 @@
    "decomp_status": null,
    "decomp_confidence": null,
    "family": null,
-   "native_behavior": null,
-   "native_desc": null,
+   "native_behavior": "vt_digger",
+   "native_desc": "Digger animated prop",
    "tags": [
     "C3DDIGGER"
    ],
@@ -2477,8 +2480,8 @@
    "decomp_status": null,
    "decomp_confidence": null,
    "family": null,
-   "native_behavior": null,
-   "native_desc": null,
+   "native_behavior": "vt_eye",
+   "native_desc": "Eye patrol actor",
    "tags": [
     "C3DEYE"
    ],
@@ -3444,8 +3447,8 @@
    "decomp_status": "spec",
    "decomp_confidence": "Medium",
    "family": "pickups_items",
-   "native_behavior": null,
-   "native_desc": null,
+   "native_behavior": "vt_hook",
+   "native_desc": "Hook AI target",
    "tags": [
     "HOOK1"
    ],
@@ -3459,7 +3462,7 @@
    "visual": {
     "kind": "mesh",
     "model": "assets/ase/hook.ASE",
-    "texture": null,
+    "texture": "assets/png/fan.png",
     "scale": 1.0,
     "recenter": 0
    },
@@ -3917,8 +3920,8 @@
    "decomp_status": "spec",
    "decomp_confidence": "Medium",
    "family": "enemies_ai",
-   "native_behavior": null,
-   "native_desc": null,
+   "native_behavior": "vt_laser_trigger",
+   "native_desc": "Laser trigger",
    "tags": [
     "C3DLASERTRIGGER"
    ],
@@ -8681,8 +8684,8 @@
    "decomp_status": "spec",
    "decomp_confidence": "Medium",
    "family": "enemies_ai",
-   "native_behavior": null,
-   "native_desc": null,
+   "native_behavior": "vt_tesla",
+   "native_desc": "Tesla hazard",
    "tags": [
     "TESLA4",
     "tesla1",
@@ -9224,8 +9227,8 @@
    "decomp_status": "spec",
    "decomp_confidence": "Medium",
    "family": "enemies_ai",
-   "native_behavior": null,
-   "native_desc": null,
+   "native_behavior": "vt_yok_turret",
+   "native_desc": "Yokian turret",
    "tags": [
     "C3DYOKTURRET",
     "yokturr",
@@ -9610,8 +9613,8 @@
    "decomp_status": "spec",
    "decomp_confidence": "Medium",
    "family": "enemies_ai",
-   "native_behavior": null,
-   "native_desc": null,
+   "native_behavior": "vt_yokian_ship",
+   "native_desc": "Yokian ship",
    "tags": [
     "C3DYOKIANSHIP",
     "SHIP1",

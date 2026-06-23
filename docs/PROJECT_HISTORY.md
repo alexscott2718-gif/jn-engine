@@ -810,6 +810,26 @@ The committed manifest is `docs/asset_catalog/catalog.json` (resolution + summar
 regenerable). This is the "role-annotation layer" thesis from Era 12 realized: found assets are tagged with
 truth + usage once, so per-feature capture spelunking becomes a catalog lookup.
 
+**Asset Catalog behavior lens (2026-06-23).** The catalog generator now also writes
+`docs/asset_catalog/behavior_todo.md`: the formal behavior-coverage query
+`instances > 0 && native_behavior == null`, ranked by `instances * level_count`, with an actor/gameplay focus
+section for the N2.x enemy/NPC wave. The first generated baseline reported **93** used-in-level FourCCs,
+**32** used FourCCs with native vtables, **61** used FourCCs still missing behavior. The lens also records
+enemy-family specs with zero current `.gam` placement — notably `3HAR`/`C3DHarrier`, `3TAN`/`C3DTank`,
+`3MIN`/`C3DMine`, and `3MIS`/`C3DMissile` — so the N2.x wave started with placed targets (`3TUR`, `3TES`,
+`3LAS`, `3YSH`, `3EYE`, etc.) instead of assuming every decomp enemy is authored into a shipped level.
+
+**Wave N2.x placed actor behavior (2026-06-23).** The first behavior-lens pass landed native vtables for the
+placed enemy/actor row: `3TUR`/`C3DYokTurret` fires `PROJ_TEAM_ENEMY` shots through the shared projectile path
+and can be defeated by Jimmy's baseball; `3TES`/`C3DTesla` is an active electric contact hazard; `3LAS`/
+`C3DLaserTrigger` proximity-damages and relays/toggles linked targets; `3YSH` is the placed
+`C3DYokianShip` patrol actor (the shield spec is a runtime helper, not the authored row); `3EYE` patrols through
+the C3DAICar/C3DAI path; `3DIG` is now an animated prop; `3HOO` is an AI hook target with its `fan.png` texture;
+and `3CIN`/`C3DCindy` brings over the first friend/NPC behavior, including `TaskName`/`TalkTrigger0..4` string
+plumbing and SCENE-window visibility. The refreshed catalog now reports **93** used FourCCs, **40** used FourCCs
+with native vtables, and **53** used FourCCs still missing behavior. Validation stayed clean: `make`, affected
+`JN_SCREENSHOT` probes, `tools/audit_faithfulness.py` (0 findings), and `tools/qa_web_verify.py` (16/16).
+
 ---
 
 ## Invariants (don't relitigate these)

@@ -17,9 +17,11 @@ This is a shared, committed campaign — read the shared docs, don't rely on too
 2. `~/jn-engine/docs/native_port_plan.md` — **the execution plan** (§1 implementation
    contract, §3 validation, §4 the waves, §5 sequencing). **Start here.**
 3. `~/jn-engine/docs/PROJECT_HISTORY.md` + `docs/ARCHITECTURE.md` — engine state + invariants.
-4. `~/jn-engine/docs/decomp_ledger.csv` — 208 rows, all `status=spec`; per-class behavior
+4. `~/jn-engine/docs/asset_catalog/behavior_todo.md` — generated behavior coverage lens:
+   used-in-level FourCCs with no native vtable, ranked by `instances * level_count`.
+5. `~/jn-engine/docs/decomp_ledger.csv` — 208 rows, all `status=spec`; per-class behavior
    source of truth is `docs/decomp/<Class>.md`.
-5. Exemplar behaviors before writing any: `src/game/behaviors/behavior_walker.c` (AI + nav),
+6. Exemplar behaviors before writing any: `src/game/behaviors/behavior_walker.c` (AI + nav),
    `behavior_player.c` (physics/input), `behavior_button.c` (activation wiring).
 
 ## Current state (branch: `native-port`)
@@ -81,43 +83,67 @@ This is a shared, committed campaign — read the shared docs, don't rely on too
   progress → the original's ~550-range thresholds is a documented open question (no save-progress ground truth).
   Validation: `--newgame` starts at `level1b` (lives=5); `--menu` auto-confirms New Game → swaps into `level1b`;
   `level1a` sequences its 3 cutscene shots; `audit_faithfulness.py` 0 findings; WASM rebuilt and
-  `qa_web_verify.py` 16/16. Web deploy (`./tools/deploy_wasm.sh`) is the only wave-end step left and is
-  outward-facing — gated on user approval.
-- **Still unimplemented:** the rest of the enemy roster (Digger/Tank/Tesla/Harrier/turret/mine/
-  laser), and friends/NPCs (only the player). ~60 of 208 specs have a doc but no runtime behavior. The big
-  structural waves (N1 base framework, N2 enemies, N3 combat/pickups, N4 vehicles, N5 game-flow) are all landed.
+  `qa_web_verify.py` 16/16. Public WASM deploy remains outward-facing and gated on explicit approval.
+- **Wave N2.x placed actors PARTIAL DONE (2026-06-23):** the first behavior-lens pass landed `3TUR`/
+  `C3DYokTurret` (enemy-side `PROJ_TEAM_ENEMY` shots + baseball defeat), `3TES`/`C3DTesla` (active electric
+  contact hazard), `3LAS`/`C3DLaserTrigger` (proximity damage + relay/toggle target activation), `3YSH`/
+  `C3DYokianShip` (placed patrol actor; **not** the shield helper), `3EYE`/`C3DEYE` (C3DAICar/C3DAI patrol),
+  `3DIG`/`C3DDIGGER`, `3HOO`/`C3DHook`, and `3CIN`/`C3DCindy` (first friend/NPC, with `TaskName` and
+  `TalkTrigger0..4` string plumbing plus SCENE-window visibility). Validation: `make`, affected
+  `JN_SCREENSHOT` probes, `audit_faithfulness.py` 0 findings, and `qa_web_verify.py` 16/16.
+- **Still unimplemented:** the refreshed generated behavior lens reports **53** used-in-level FourCCs with no
+  native behavior (**93** used FourCCs total, **40** used FourCCs with native vtables). The next frontier is the
+  remaining actor/gameplay rows from `docs/asset_catalog/behavior_todo.md`, especially `3AIT`, `3PHO`, `3RCK`,
+  `3HUM`, and the friend/NPC cast. Code-spawned or currently unplaced enemy specs (`3TAN`/`C3DTank`, `3HAR`/
+  `C3DHarrier`, `3MIN`/`C3DMine`, `3MIS`/`C3DMissile`) still have zero current `.gam` rows; treat them as
+  database-spawned/code-spawned/unplaced until separate evidence says otherwise. The big structural waves
+  (N1 base framework, N2 enemies, N3 combat/pickups, N4 vehicles, N5 game-flow) are all landed.
 - Implementation contract is `EntityVTable` in `src/engine/world.h`, registered by FourCC in
   `src/game/entities.c`; per-frame via `entity_update()` (`main.c:1418`); `.gam` params via
   `gam_prop_f/i`. Full contract in plan §1.
 
-## Your task this session: Wave N2.x (remaining enemy roster) + friends/NPCs
-The big structural waves (N1–N5) are landed. The largest remaining *gameplay* gap is the rest of the enemy
-roster and the friend/NPC cast. Hold the decomp discipline — confirm behavior against `docs/decomp/<Class>.md`
-(the decompiled body, not an offset scan), build on the existing N1–N4 modules, and **pick targets from the
-Asset Catalog's behavior column** — `python3 tools/build_asset_catalog.py` then read `docs/asset_catalog/`
-(or the live `exentt.com/JN-assets/catalog/`); it already lists every used-in-level FourCC, its instance count
-× level reach, its visual, and whether a native vtable exists, so the wave is validated on levels that actually
-place each class (no more ad-hoc corpus grepping).
+## Your task this session: continue the behavior_todo actor/NPC queue
+The big structural waves (N1–N5) are landed, and the first placed enemy/actor slice is now covered. The largest
+remaining *gameplay* gap is the rest of the actor/NPC queue. Hold the decomp discipline — confirm behavior
+against `docs/decomp/<Class>.md` (the decompiled body, not an offset scan), build on the existing N1–N4 modules,
+and **pick targets from the generated behavior lens**:
 
-**Remaining enemy roster (consume the existing `behavior_ai.c` + `behavior_projectile.c`):** `C3DDigger`,
-`C3DTank`, `C3DTesla`, `C3DHarrier`, `C3DEnemyAircraft`, `C3DMine`, `C3DLaserTrigger`, `C3DYokTurret`,
-`C3DYokianShip`, plus `C3DHook` (`3HOO`, the level4b AI hook). The **ranged ones** (turret/tank/harrier/tesla)
-are the natural first consumers of **enemy-side `behavior_projectile.c` (`PROJ_TEAM_ENEMY`)** — that path
-already exists from N2 (player side) and just needs an enemy spawner + the player-damage hit branch.
-`C3DMine`/`C3DLaserTrigger` are proximity/trigger damagers (lean on `behavior_trigger_spawn_base`).
+```bash
+python3 tools/build_asset_catalog.py
+sed -n '1,180p' docs/asset_catalog/behavior_todo.md
+```
 
-**Friends / NPCs:** only the player is ported. The `CTaskList` entity-state table (MOM/LIBBY/BENNY/SCENE/
-REACTOR — seeded via `game_flow_entity_state(tag)`) is the mission-actor hook for these; the `3CAM` cutscene
-TargetActAnim/FaceObject and the `SCENE=30` sequencer state are the wiring points.
+`behavior_todo.md` formalizes the strict query (`instances > 0 && native_behavior == null`), ranks by
+`instances * level_count`, and splits out an actor/gameplay focus section. Use it to validate on levels that
+actually place each class. The live catalog remains useful for previews: <https://exentt.com/JN-assets/catalog/>.
+
+**Next actor/gameplay rows from the refreshed lens:**
+- `3AIT` / `C3DAITrigger` — 174 instances, 24 levels. Read the spec carefully; this is now the broadest placed
+  behavior hole and likely owns trigger/AI mission wiring rather than visual movement.
+- `3PHO` / `C3DPHONEBOOTH` — 21 instances, 17 levels.
+- `3RCK` / `C3DRocket` — 9 instances, 5 levels (distinct from the already-rideable `3ROC`/`C3DRocketShip`).
+- `3HUM` / `C3DHumphrey` — 10 instances, 4 levels.
+- Friend/NPC cast: `3FLE`/`C3DFleetCommander`, `3NIC`/`C3DNick`, `3SHE`/`C3DSheen`, `3BEN`/`C3DBENNY`,
+  `3LIB`/`C3DLibby`, `3SUM`/`C3DSumo`, `3HUG`/`C3DHugh`, `3KIT`/`C3DKitty`, `3MOM`/`C3DJUDY`,
+  `3ULT`/`C3DUltraLord`, and `3PIR`/`C3DPirate`.
+
+**Friend / NPC wiring now available:** `C3DCindy` added the shared string plumbing (`Entity.task_name` and
+`Entity.talk_trigger[5]`) plus `game_flow_current_level()`. Continue to use the `CTaskList` entity-state table
+(`game_flow_entity_state(tag)`) for mission-actor visibility/state gates, and lean on `behavior_ai.c` for
+friend/NPC idle/patrol movement before adding per-character special cases.
+
+**Known zero-placement enemy specs:** `3TAN`/`C3DTank`, `3HAR`/`C3DHarrier`, `3MIN`/`C3DMine`, and
+`3MIS`/`C3DMissile` still have specs but zero current `.gam` placement. Keep them in the code-spawned /
+database-spawned / unused bucket until separate evidence says otherwise.
 
 **Two small N5 tails worth picking up:** (1) a real **text renderer** for the menu/HUD (today `menu.c` draws
 bars + logs labels; `C2DInGameMenu` counters print numerals); (2) plumbing the `PlayerControlled` string prop
 onto the entity so cutscenes can lock player input (deferred in N5).
 
-**Done when:** at least the ranged-enemy track fires `PROJ_TEAM_ENEMY` projectiles that damage the player and
-can be defeated, validated against the levels that place them; `tools/audit_faithfulness.py` stays at 0 findings,
-affected levels pass `JN_SCREENSHOT` spot checks, and (wave end) `qa_web_verify.py` 16/16 with a one-line
-PROJECT_HISTORY paragraph + this handoff updated.
+**Done when:** the selected actor/NPC row(s) have native vtables, are validated against levels that actually
+place them, `tools/audit_faithfulness.py` stays at 0 findings, affected levels pass `JN_SCREENSHOT` spot checks,
+and (wave end) `qa_web_verify.py` is still 16/16 with a one-line PROJECT_HISTORY paragraph + this handoff and
+`behavior_todo.md` refreshed.
 
 ## Inner loop (per class)
 1. Read `docs/decomp/<Class>.md` (§Field map, §Per-frame behavior, §Constants). Confirm
@@ -127,12 +153,13 @@ PROJECT_HISTORY paragraph + this handoff updated.
 3. Register the FourCC → vtable in `src/game/entities.c`.
 4. Build (`make`), then validate per plan §3: `JN_SCREENSHOT` on affected levels,
    `tools/audit_faithfulness.py`, and motion-diff vs the marked `.omtc` where dynamics matter.
-5. At wave end, build/deploy the public WASM version with `./tools/deploy_wasm.sh`, then run
-   `python3 tools/qa_web_verify.py`.
+5. At wave end, refresh the catalog (`python3 tools/build_asset_catalog.py`) and run
+   `python3 tools/qa_web_verify.py`. Deploy public WASM only when explicitly requested.
 6. Commit per class: `port(<Class>): <one-line behavior>`.
 
 ## Hard rules
-- Commit ONLY port artifacts: `src/**`, `tools/**`, and (at wave end) `PROJECT_HISTORY.md`.
+- Commit ONLY port artifacts: `src/**`, `tools/**`, and (at wave end) the handoff/catalog docs
+  (`PROJECT_HISTORY.md`, `docs/decomp/_next_session.md`, `docs/asset_catalog/**`).
   There is a large PRE-EXISTING dirty asset tree — do NOT stage or touch it.
 - Don't relitigate settled invariants (matrix convention, `PROJ[3][3]=1`, no X-mirror,
   `canvas_id=Canv+1`, DIFFUSE alpha 0, no fog) — see `PROJECT_HISTORY.md` §Invariants.
@@ -141,9 +168,9 @@ PROJECT_HISTORY paragraph + this handoff updated.
   source of truth.
 
 ## Definition of done for this session
-The ranged-enemy track (turret/tank/harrier/tesla) fires `PROJ_TEAM_ENEMY` projectiles that damage the player
-and can be defeated, validated on the levels that place those FourCCs; the proximity damagers (mine/laser) hurt
-on contact; validation is clean (`audit_faithfulness.py` 0 findings, `JN_SCREENSHOT` spot checks) and per-class
-commits are made on `native-port`. At wave end, rebuild + run `qa_web_verify.py` (16 checks), append a paragraph
-to `PROJECT_HISTORY.md`, and update this handoff. With N1–N5 already landed, the campaign's base framework,
-enemies, combat, vehicles, and game-flow are all ported — this wave fills the remaining enemy/NPC gameplay gap.
+Pick the next actor/gameplay row(s) from `behavior_todo.md`, read each class spec before coding, and land one
+commit per class on `native-port`. Validate each class with `make`, affected-level `JN_SCREENSHOT` checks, and
+`tools/audit_faithfulness.py`; at wave end refresh `behavior_todo.md`, run `tools/qa_web_verify.py` (16 checks),
+append `PROJECT_HISTORY.md`, and update this handoff. With N1–N5 plus the first N2.x slice landed, the campaign's
+base framework, enemies, combat, vehicles, game-flow, placed ranged enemies, placed trigger hazards, and first
+friend NPC are ported — the remaining work is the long tail of actor/NPC behavior coverage.

@@ -12,6 +12,8 @@ it.** It is the project-infrastructure layer the native port needs on top of the
 - **Committed manifest:** [`docs/asset_catalog/catalog.json`](./asset_catalog/catalog.json)
   (resolution rows + summary; the heavy per-file inventory is regenerable, not committed)
 - **Gaps checklist:** [`docs/asset_catalog/unresolved.md`](./asset_catalog/unresolved.md)
+- **Behavior queue:** [`docs/asset_catalog/behavior_todo.md`](./asset_catalog/behavior_todo.md)
+  (used-in-level FourCCs with no native vtable, ranked by instance count x level reach)
 
 ## What it joins
 
@@ -71,7 +73,14 @@ A single searchable/filterable SPA (`index.html`) reading `catalog.json`:
 - **Audio** — every extracted WAV with in-browser playback (via the portal's files).
 
 Summary counts (resolved mesh / sprite / invisible / untextured / no-visual / native
-behaviors / file totals) are shown across the top and recomputed on each run.
+behaviors / used missing behavior / file totals) are shown across the top and recomputed
+on each run.
+
+The generated `behavior_todo.md` file is the native-port behavior coverage lens. It
+formalizes the query `instances > 0 && native_behavior == null`, ranks rows by
+`instances * level_count`, and includes a filtered actor/gameplay section for enemy,
+NPC, vehicle, and pickup behavior waves. Re-run the catalog before choosing behavior
+targets so the queue reflects the current branch.
 
 ## Regenerate & publish
 
