@@ -507,7 +507,8 @@ audio{width:100%;margin-top:6px;height:30px}
 </style></head><body>
 <header>
   <h1>JN Asset Library</h1>
-  <div class=sub><span id=game></span> — extracted assets for reimplementation / preservation · <span id=tot></span></div>
+  <div class=sub><span id=game></span> — extracted assets for reimplementation / preservation · <span id=tot></span>
+   &nbsp;·&nbsp; <a href="catalog/index.html" style="color:#e1c85a;font-weight:700">→ Asset Catalog (resolution &amp; usage)</a></div>
   <div class=bar>
     <button id=catbtn class=catbtn>☰ Categories</button>
     <input id=q type=search placeholder="Search assets by name, category, or path…">

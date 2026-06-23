@@ -790,6 +790,26 @@ spec and the JNvsJN ASE both identify `strato.png` as the C3DRocketShip texture,
 resolver now binds `assets/png/strato.png` explicitly. This keeps the authored rocket hidden in normal audit
 mode but makes the boardable sandbox rocket wear the proper Strato texture.
 
+**Asset Catalog — resolution/usage infrastructure (2026-06-23).** The native port needed a catalog that
+answers *what is this asset and where does the game use it* — not just *here is every extracted file* (which
+the Era-12 Asset Library portal already does). New generator [`tools/build_asset_catalog.py`](./asset_catalog.md)
+deterministically **joins the project's existing sources of truth** — the `entity_visual.c` resolver tables
+(parsed in place), `sprite_chunk_map_generated.h`, `entities.c` behavior table, `_gam_classids.tsv`, the 208
+`docs/decomp/<Class>.md` specs + their Assets tables, `decomp_ledger.csv`, and all 35 `.gam` levels (per-instance
+`SpriteIndex`/`OmtIndex`/`ASEFile`/`PNGFile` usage) — into **219 per-FourCC resolution rows** plus a 5,789-file
+inventory. Each row carries the C++ class + decomp doc/confidence, native-behavior coverage, the primary visual
+(mirroring `entity_visual_resolve()`'s real order, so `3TRE`/`3BAL`/`3ARR` show as the billboards the game
+actually draws and `3OMT` shows its authored `objects.omt` shape, not the Sphere01 fallback), the **texture
+source-truth resolved in a strict conservative order** (decomp → resolver → sprite canvas → ASE `*BITMAP`
+[runtime `carl3.bmp`→`carl.png` rule] → GLB-embedded → explicitly unresolved), and **which levels use it**.
+First run surfaced **0 used-in-level FourCCs with no resolved visual**, **4 genuinely-untextured meshes**
+(all JNvsJN-side), and a 39-class no-usage list — published as `docs/asset_catalog/unresolved.md`. The page is a
+searchable/filterable SPA (`exentt.com/JN-assets/catalog/`, additive — the portal URL is untouched) that reuses
+the portal's thumbnails/3D-viewer/downloads via `../` and adds animated WebP previews for sprite frame sequences.
+The committed manifest is `docs/asset_catalog/catalog.json` (resolution + summary; the heavy file inventory is
+regenerable). This is the "role-annotation layer" thesis from Era 12 realized: found assets are tagged with
+truth + usage once, so per-feature capture spelunking becomes a catalog lookup.
+
 ---
 
 ## Invariants (don't relitigate these)
