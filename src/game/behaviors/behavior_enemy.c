@@ -60,7 +60,8 @@ enum EnemyMode {
 static int enemy_is_yokian(const char *type) {
     return strncmp(type, "3SOL", 4) == 0 ||
            strncmp(type, "3GUA", 4) == 0 ||
-           strncmp(type, "3SPY", 4) == 0;
+           strncmp(type, "3SPY", 4) == 0 ||
+           strncmp(type, "3FLE", 4) == 0;  /* C3DFleetCommander inherits C3DYokian */
 }
 
 static int enemy_is_instant_ko(const char *type) {

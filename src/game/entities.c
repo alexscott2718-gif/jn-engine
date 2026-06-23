@@ -49,6 +49,7 @@ static const EntityTypeInfo entity_types[] = {
     { "3SPY", "Yokian spy",            &vt_yokian    },
     { "3TUR", "Yokian turret",         &vt_yok_turret },
     { "3YSH", "Yokian ship",           &vt_yokian_ship },
+    { "3FLE", "Yokian fleet commander", &vt_yokian      },
     { "3EYE", "Eye patrol actor",      &vt_eye         },
     { "3DIG", "Digger animated prop",  &vt_digger      },
     { "3HOO", "Hook AI target",        &vt_hook        },
