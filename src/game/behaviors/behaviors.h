@@ -55,6 +55,7 @@ extern const EntityVTable vt_cutscene_camera; /* 3CAM — C3DCutSceneCamera (sho
 extern const EntityVTable vt_multi_cutscene;  /* 3MCA — C3DMultiCutSceneCamera (sequencer) */
 /* Actor / gameplay focus rows (post-N5). */
 extern const EntityVTable vt_phonebooth;      /* 3PHO — C3DPhoneBooth (solid contact prop) */
+extern const EntityVTable vt_rocket_ai;       /* 3RCK — C3DRocket (placed C3DAI patrol rocket) */
 
 /* Cutscene runtime (behavior_cutscene.c). 3CAM shots register on spawn; the
    sequence plays through renderer_set_camera_override when requested. Off by
