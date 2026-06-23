@@ -88,6 +88,7 @@ static const EntityTypeInfo entity_types[] = {
     { "3HUM", "Humphrey (clone controller)", &vt_humphrey },
     { "3NEU", "Neutron pickup",        &vt_neutron },
     { "3RED", "Red neutron pickup",    &vt_red_neutron },
+    { "3ARR", "Navigation arrow",      &vt_arrow },
     { NULL, NULL, NULL }
 };
 
