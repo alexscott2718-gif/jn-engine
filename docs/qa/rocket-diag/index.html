@@ -4,158 +4,323 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex, nofollow">
-<title>JN Engine — Rideable Rocket: diagnostic screenshots</title>
+<title>JN Engine Native Port - N1-N5 Update</title>
 <style>
-  :root { color-scheme: dark; }
-  body { background:#0d1117; color:#e8f0f8; font:15px/1.55 system-ui, sans-serif;
-         max-width: 1000px; margin: 0 auto; padding: 24px 18px 80px; }
-  h1 { font-size: 22px; margin: 0 0 4px; }
-  h2 { font-size: 17px; margin: 34px 0 8px; border-bottom:1px solid #243040; padding-bottom:5px; }
-  .sub { color:#8aa0b8; margin: 0 0 8px; }
-  figure { margin: 14px 0 8px; }
-  img { width:100%; border:1px solid #243040; border-radius:6px; display:block; background:#000; }
-  figcaption { color:#9fb3c8; font-size:13px; margin-top:6px; }
-  .grid { display:grid; grid-template-columns: 1fr 1fr; gap:18px; }
-  @media (max-width:720px){ .grid{ grid-template-columns:1fr; } }
-  code { background:#161b22; padding:1px 5px; border-radius:4px; font-size:13px; }
-  table { border-collapse: collapse; width:100%; margin:10px 0; font-size:14px; }
-  th,td { border:1px solid #243040; padding:7px 9px; text-align:left; vertical-align:top; }
-  th { background:#161b22; }
-  .bad { color:#ff8d8d; } .ok { color:#9fe0a0; } .warn { color:#f0c674; }
-  .note { background:#11161d; border:1px solid #243040; border-left:3px solid #4f86c6;
-          padding:10px 13px; border-radius:5px; margin:12px 0; }
-  ul { margin:6px 0 6px 2px; }
+  :root {
+    color-scheme: dark;
+    --bg: #0d1117;
+    --panel: #111820;
+    --panel-2: #151d27;
+    --line: #263344;
+    --text: #e8f0f8;
+    --muted: #9fb0c4;
+    --blue: #70a8ff;
+    --green: #8de0a1;
+    --yellow: #f0c674;
+    --red: #ff8d8d;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font: 15px/1.55 system-ui, -apple-system, Segoe UI, sans-serif;
+  }
+  main {
+    max-width: 1120px;
+    margin: 0 auto;
+    padding: 26px 18px 84px;
+  }
+  h1 { font-size: 28px; line-height: 1.15; margin: 0 0 8px; }
+  h2 {
+    font-size: 19px;
+    margin: 38px 0 12px;
+    padding-bottom: 7px;
+    border-bottom: 1px solid var(--line);
+  }
+  h3 { font-size: 16px; margin: 0 0 8px; }
+  p { margin: 0 0 10px; }
+  a { color: var(--blue); }
+  code {
+    background: #0b1118;
+    border: 1px solid #1e2a39;
+    border-radius: 4px;
+    padding: 1px 5px;
+    font-size: 13px;
+  }
+  img {
+    display: block;
+    width: 100%;
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    background: #000;
+  }
+  figure { margin: 0; }
+  figcaption {
+    color: var(--muted);
+    font-size: 13px;
+    margin-top: 7px;
+  }
+  table {
+    border-collapse: collapse;
+    width: 100%;
+    margin: 12px 0;
+    font-size: 14px;
+  }
+  th, td {
+    border: 1px solid var(--line);
+    padding: 8px 10px;
+    text-align: left;
+    vertical-align: top;
+  }
+  th { background: #151c25; }
+  ul { margin: 8px 0 0 18px; padding: 0; }
+  li { margin: 3px 0; }
+  .sub { color: var(--muted); max-width: 850px; }
+  .hero {
+    display: grid;
+    grid-template-columns: minmax(0, 1.1fr) minmax(320px, 0.9fr);
+    gap: 20px;
+    align-items: start;
+    margin-top: 18px;
+  }
+  .panel {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 15px;
+  }
+  .callout {
+    border-left: 4px solid var(--blue);
+    background: #101722;
+  }
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 18px;
+  }
+  .waves {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 10px;
+    margin-top: 14px;
+  }
+  .wave {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 12px;
+  }
+  .wave strong { display: block; color: #fff; }
+  .wave span { display: block; color: var(--muted); font-size: 13px; margin-top: 3px; }
+  .pill {
+    display: inline-block;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    padding: 2px 8px;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: .03em;
+    margin-right: 6px;
+  }
+  .done { color: var(--green); border-color: rgba(141,224,161,.45); }
+  .open { color: var(--yellow); border-color: rgba(240,198,116,.45); }
+  .fixed { color: var(--green); }
+  .warn { color: var(--yellow); }
+  .bad { color: var(--red); }
+  .muted { color: var(--muted); }
+  .small { font-size: 13px; color: var(--muted); }
+  .quote {
+    background: #0e141c;
+    border: 1px solid var(--line);
+    border-left: 4px solid var(--yellow);
+    border-radius: 7px;
+    padding: 12px 14px;
+    margin: 14px 0;
+  }
+  @media (max-width: 900px) {
+    .hero, .grid { grid-template-columns: 1fr; }
+    .waves { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  }
+  @media (max-width: 560px) {
+    main { padding: 20px 12px 64px; }
+    .waves { grid-template-columns: 1fr; }
+  }
 </style>
 </head>
 <body>
-<h1>Rideable rocket — diagnostic screenshots</h1>
-<p class="sub">Generated 2026-06-23 · headless captures from the native build (level2/level1, sandbox mode).
-These are exactly the frames the engine renders; nothing is staged.</p>
+<main>
+  <h1>JN Engine native port: N1-N5 update</h1>
+  <p class="sub">Updated 2026-06-23. This page summarizes what the native port waves tried to accomplish, what landed, what today's rocket/baseball pass corrected, and where the project moves next.</p>
 
-<div class="note" style="border-left-color:#2c6e2c; background:#11201a;">
-<strong>FIXES APPLIED (2026-06-23)</strong> — decomp-grounded (<code>docs/decomp/C3DRocketShip.md</code>,
-<code>C3DBaseball.md</code>).
-<div class="grid" style="margin-top:12px;">
-  <figure>
-    <img src="img/after-one-rocket.png" alt="One rocket brought to the player on the ground">
-    <figcaption><span class="ok">Fixed:</span> exactly ONE rocket, brought to the player on the
-    ground, non-solid in sandbox &rarr; no underground eject, no duplicate.</figcaption>
-  </figure>
-  <figure>
-    <img src="img/after-jimmy-seated.png" alt="Jimmy seated inside the rocket, flying">
-    <figcaption><span class="ok">Confirmed:</span> Jimmy rides seated inside the rocket; faithful
-    flight climbs (auto-forward + nose-up).</figcaption>
-  </figure>
-</div>
-<p style="margin:10px 0 0;"><strong>Flight (recollection + decomp):</strong> cruises forward on its
-own; <code>SHIFT</code> boosts; <code>Ctrl/Q</code> brake cuts the engine + stops it;
-<code>Down</code>=nose up, <code>Up</code>=nose down (inverted); <code>A/D</code> turn;
-<code>E</code> board/leave. (Engine sound + <code>C3DFireStrato</code> exhaust still deferred.)</p>
-<p style="margin:8px 0 0;"><strong>Baseball:</strong> the real ball sprite (RetainedSprites
-<code>ball0000</code> = <code>0006_32x32d32.png</code>) is wired to <code>PROJ</code> and renders
-(audit + texture-load confirmed). The earlier "diamond" was the wrong file. In head-on chase-cam
-shots the fast ball hides behind Jimmy (thrown straight along the view axis); visible in play.</p>
-</div>
-<hr style="border-color:#243040; margin:22px 0;">
-<p class="sub"><strong>Original diagnosis (before the fixes), for the record:</strong></p>
+  <section class="hero">
+    <div>
+      <div class="panel callout">
+        <h3>What changed today</h3>
+        <p>The recent N1-N5 work made the native C engine the product: shared behavior bases, enemies, tools/projectiles, rideable vehicles, and the first game-flow layer. Today's work was a focused N3/N4 cleanup pass around the rideable rocket sandbox and baseball projectile visuals.</p>
+        <p><span class="pill done">FIXED</span>Rocket sandbox now uses one non-solid rideable rocket, Jimmy stays visible/seated, the thrown baseball uses the retained baseball sprite, and rocket controls are no longer inverted.</p>
+        <p><span class="pill open">NEXT</span>Engine sound, <code>C3DFireStrato</code> exhaust, the nose-horizontal-at-rest cosmetic, remaining enemy roster, and deeper game-flow polish are still ahead.</p>
+      </div>
+      <div class="waves">
+        <div class="wave"><strong>N1</strong><span>Shared bases: animated lifecycle, movement, AI, triggers.</span></div>
+        <div class="wave"><strong>N2</strong><span>First enemy/AI loop plus projectile and health plumbing.</span></div>
+        <div class="wave"><strong>N3</strong><span>Player tools, pickups, baseball projectile, balloon reactions.</span></div>
+        <div class="wave"><strong>N4</strong><span>Rideable rocket and AI vehicle patrols.</span></div>
+        <div class="wave"><strong>N5</strong><span>Task loading, campaign entry, menu shell, cutscene cameras.</span></div>
+      </div>
+    </div>
+    <figure>
+      <img src="img/after-jimmy-seated.png" alt="Jimmy seated inside the rideable rocket during flight">
+      <figcaption><span class="fixed">Today's main visible result:</span> Jimmy remains visible and seated while the player flies the rideable <code>3ROC</code> rocket.</figcaption>
+    </figure>
+  </section>
 
-<div class="note">
-<strong>Purpose:</strong> prove what the engine is actually drawing and pin the root cause of the
-three regressions reported (shoved underground near the rocket, invisible thrown baseball, a second
-rocket), grounded against the decompiled <code>C3DRocketShip</code> / <code>C3DBaseball</code>.
-</div>
+  <h2>Wave Status</h2>
+  <table>
+    <tr><th>Wave</th><th>Purpose</th><th>Status after N1-N5</th><th>What it unblocks</th></tr>
+    <tr>
+      <td><strong>N1</strong></td>
+      <td>Base behavior framework.</td>
+      <td>Shared <code>behavior_base</code>, <code>movement_base</code>, <code>behavior_ai</code>, trigger/pickup overlap, mutable runtime flags. Carl's walker path now proves the AI base.</td>
+      <td>Lets later classes stay thin instead of each one reimplementing lifecycle, movement, or AI plumbing.</td>
+    </tr>
+    <tr>
+      <td><strong>N2</strong></td>
+      <td>Enemies and AI.</td>
+      <td>Yokian soldier/guard/spy subset seeks, attacks, takes baseball hits, and uses player/enemy health through <code>gamestate</code> and <code>behavior_projectile</code>.</td>
+      <td>Combat targets and enemy-side projectile users.</td>
+    </tr>
+    <tr>
+      <td><strong>N3</strong></td>
+      <td>Player combat and pickups.</td>
+      <td>Baseball tool gating, pickup grants, shared player projectile, balloon pop/release behavior, and projectile visual fix for <code>PROJ</code>.</td>
+      <td>Player abilities that can interact with enemies and level objects.</td>
+    </tr>
+    <tr>
+      <td><strong>N4</strong></td>
+      <td>Vehicles.</td>
+      <td>Player boards and flies <code>C3DRocketShip</code>; AI bus/SUV/sailboat-style traffic rides N1 patrol primitives. Today's fix made the rocket usable rather than inverted.</td>
+      <td>Rides, vehicle-specific effects, and later level sequences that depend on vehicle state.</td>
+    </tr>
+    <tr>
+      <td><strong>N5</strong></td>
+      <td>Game-flow and controllers.</td>
+      <td><code>CTaskList</code> loader, <code>CJimmyGame</code> lives/restart/objective bridge, data-driven level table, cutscene-camera registration, and a placeholder menu shell.</td>
+      <td>Campaign progression, menus, cutscene activation, and real objective tracking.</td>
+    </tr>
+  </table>
 
-<h2>1 · Jimmy IS rendered on the rocket (riding)</h2>
-<figure>
-  <img src="img/jimmy-riding.png" alt="Jimmy seated on the rocket while flying">
-  <figcaption>Riding, mid-climb. Jimmy's model is visible in the cockpit area (no longer hidden).
-  The rocket stands vertical here only because it is pitched nose-up — see issue D.</figcaption>
-</figure>
+  <h2>Screenshots</h2>
+  <div class="grid">
+    <figure>
+      <img src="img/n1-level1-baseline.png" alt="Level 1 baseline screenshot after N1 base behavior work">
+      <figcaption><strong>N1 validation:</strong> Level 1 still renders after the behavior-base refactor. This is a runtime sanity screenshot, not a staged beauty shot.</figcaption>
+    </figure>
+    <figure>
+      <img src="img/n1-carl-patrol.png" alt="Level 1b validation screenshot for Carl patrol work">
+      <figcaption><strong>N1 AI base proof:</strong> Carl's patrol was moved onto <code>behavior_ai</code>. Retaken with noclip-style placement at Carl's runtime position so the proof subject is in frame.</figcaption>
+    </figure>
+    <figure>
+      <img src="img/n2-yokian-level6.png" alt="Level 6 native runtime screenshot for enemy coverage">
+      <figcaption><strong>N2 coverage:</strong> Level 6 loads the Yokian/enemy assets and vtables. Retaken with noclip-style placement in the <code>yoksol</code> area; the seek/attack/defeat proof is from the headless combat log path.</figcaption>
+    </figure>
+    <figure>
+      <img src="img/n3-balloon-level2.png" alt="Level 2 native runtime screenshot for pickup and balloon coverage">
+      <figcaption><strong>N3 coverage:</strong> Level 2 carries the pickup/balloon family. The balloon pop path is verified by the baseball test log; this shot shows the loaded level context.</figcaption>
+    </figure>
+    <figure>
+      <img src="img/after-one-rocket.png" alt="One sandbox rocket brought to the player on the ground">
+      <figcaption><strong>N4 rocket fix:</strong> sandbox mode now brings one authored rocket to the player, seats it on the ground, and clears solidity so walking into it no longer shoves Jimmy underground.</figcaption>
+    </figure>
+    <figure>
+      <img src="img/n5-menu.png" alt="N5 placeholder main menu overlay over the live level">
+      <figcaption><strong>N5 menu shell:</strong> the menu route exists over the live level and can enter New Game. The missing readable menu text is an explicit remaining polish item.</figcaption>
+    </figure>
+  </div>
 
-<h2>2 · Walking near the rocket shoves the player underground <span class="bad">(CONFIRMED)</span></h2>
-<div class="grid">
-  <figure>
-    <img src="img/walked-into-underground.png" alt="Camera at ground level, no player visible">
-    <figcaption>After walking into the spawned rocket: ground-skimming view, Jimmy displaced.</figcaption>
-  </figure>
-  <div>
-    <p>Position trace (auto-walk forward into the rocket):</p>
+  <h2>Today's Focus</h2>
+  <div class="panel">
+    <h3>What we tried to accomplish</h3>
+    <p>The goal was to make the N4 rideable rocket usable as a sandbox verification tool while preserving the decomp-grounded N1-N5 behavior structure. That touched N4 directly, but also exposed N3 projectile visuals because the baseball throw path was now important for testing combat and balloons.</p>
     <table>
-      <tr><th>tick</th><th>player Y</th><th>on_ground</th></tr>
-      <tr><td>0</td><td>73 (normal)</td><td>0</td></tr>
-      <tr><td>30</td><td class="bad">−138</td><td>1</td></tr>
-      <tr><td>60…240</td><td class="bad">−138 (stuck)</td><td>1</td></tr>
+      <tr><th>Issue found</th><th>Root cause</th><th>Resolution</th></tr>
+      <tr>
+        <td>Walking near the sandbox rocket pushed Jimmy underground.</td>
+        <td>The spawned/relocated rocket was still solid and overlapped the player's AABB vertically.</td>
+        <td>Use one authored rocket where possible, bring it to the player once, seat it on the ground, and make it non-solid in sandbox mode.</td>
+      </tr>
+      <tr>
+        <td>Two rockets appeared in levels that already had an authored <code>3ROC</code>.</td>
+        <td>The sandbox helper spawned an extra rocket instead of reusing the level's rocket.</td>
+        <td>Prefer the authored rocket. Only spawn a stand-in in the fallback case where a level has no rocket.</td>
+      </tr>
+      <tr>
+        <td>Jimmy disappeared or looked wrong while riding.</td>
+        <td>The original mount path hid or overrode the player too aggressively.</td>
+        <td>Keep Jimmy visible, inert, and snapped to a seat offset on the rocket.</td>
+      </tr>
+      <tr>
+        <td>Thrown baseball had no visible sprite.</td>
+        <td><code>PROJ</code> had gameplay behavior but no visual resolver entry.</td>
+        <td>Map <code>PROJ</code> to the retained baseball sprite from <code>C3DBaseball</code> / RetainedSprites chunk <code>ball0000</code>.</td>
+      </tr>
+      <tr>
+        <td>Rocket flight controls were inverted and difficult to fly.</td>
+        <td>The rocket intentionally mapped Up/Down pitch opposite to player expectation and used the opposite yaw sign from tank-turn movement.</td>
+        <td>Controls are now direct: <code>Up/W</code> nose up, <code>Down/S</code> nose down, <code>Left/A</code> turn left, <code>Right/D</code> turn right.</td>
+      </tr>
     </table>
-    <p><strong>Root cause:</strong> the sandbox rocket is <code>SOLID</code> and is spawned
-    <em>centered at the player's height</em>. The per-axis AABB resolver
-    (<code>physics.c resolve_axis</code>) pushes the player the full half-sum down the Y axis when
-    they penetrate the rocket's vertical span → ejected below the floor.</p>
   </div>
-</div>
 
-<h2>3 · Thrown baseball is invisible <span class="bad">(CONFIRMED)</span></h2>
-<div class="grid">
-  <figure>
-    <img src="img/throw-no-baseball.png" alt="Throw frame with no baseball visible">
-    <figcaption>Immediately after a throw — no baseball anywhere. (Gray slab = the horizontal rocket up close.)</figcaption>
-  </figure>
-  <div>
-    <p><strong>Root cause:</strong> the projectile is a runtime entity of FourCC <code>PROJ</code>,
-    but <code>PROJ</code> has <em>no entry</em> in <code>entity_visual</code>, so
-    <code>entity_visual_resolve()</code> returns 0 and the draw loop skips it. The throw works
-    mechanically (it can hit Yokians/balloons) but renders nothing.</p>
-    <p><strong>Decomp ground truth:</strong> <code>C3DBaseball</code> (<code>3BAS</code>) is a
-    retained sprite — <code>SpriteDatabase="retainedsprites.omt"</code>, <code>SpriteIndex=2</code>,
-    <code>SpriteSize=25</code> (frames <code>ball0000..0003</code>). The asset exists:
-    <code>RetainedSprites_images/0002_64x64d32.png</code>. Fix = draw the projectile as that billboard.</p>
+  <h2>Rocket Diagnostics</h2>
+  <div class="grid">
+    <figure>
+      <img src="img/walked-into-underground.png" alt="Before fix: camera at ground level after player is shoved below the floor">
+      <figcaption><span class="bad">Before:</span> the solid sandbox rocket overlapped Jimmy and the AABB resolver pushed him below the floor.</figcaption>
+    </figure>
+    <figure>
+      <img src="img/level1-spawn.png" alt="Before fix: extra sandbox rocket in level 1">
+      <figcaption><span class="bad">Before:</span> sandbox spawned an extra rocket even when the level already had one.</figcaption>
+    </figure>
+    <figure>
+      <img src="img/throw-no-baseball.png" alt="Before fix: throw frame with no visible baseball">
+      <figcaption><span class="bad">Before:</span> the baseball projectile existed mechanically, but had no <code>entity_visual</code> path.</figcaption>
+    </figure>
+    <figure>
+      <img src="img/spawn-horizontal-rocket.png" alt="Rocket lying horizontal at rest">
+      <figcaption><span class="warn">Still open:</span> at rest the Strato mesh lies nose-horizontal. It is flyable now, but the rest pose still needs a cosmetic orientation pass.</figcaption>
+    </figure>
   </div>
-</div>
 
-<h2>4 · A second rocket <span class="bad">(CONFIRMED — my regression)</span></h2>
-<figure>
-  <img src="img/level1-spawn.png" alt="Spawned rocket lying in front of the player in level 1">
-  <figcaption>Level 1 spawn. The horizontal rocket here is the <em>sandbox-spawned</em> one; level 1
-  also has its own authored rocket elsewhere → two rockets exist.</figcaption>
-</figure>
-<p><strong>Root cause:</strong> to fix "no rocket in level 2," I made sandbox spawn a rocket next to
-the player in <em>every</em> level — including levels that already have an authored
-<code>3ROC</code> (level 1 and level 2 both do). That duplicates it.</p>
+  <h2>Validation</h2>
+  <div class="panel">
+    <p>Today's control and report work was checked with the same native/web path used by the waves:</p>
+    <ul>
+      <li><code>make</code> completed successfully; the SDL_mixer archive warning is the existing link warning.</li>
+      <li><code>make web</code> completed successfully.</li>
+      <li><code>./tools/deploy_wasm.sh</code> published the live web build: <code>jnengine.f669aad8.js</code>, assets <code>9ea0c7d8</code>.</li>
+      <li>Headless screenshot hooks produced the N1, N2, N3, N4, and N5 images shown on this page.</li>
+    </ul>
+  </div>
 
-<h2>D · Bonus: the rocket lies on its side at rest</h2>
-<figure>
-  <img src="img/spawn-horizontal-rocket.png" alt="Rocket lying horizontally on the ground">
-  <figcaption>At rest (pitch 0) the strato mesh lies horizontal — its nose axis is model +Z, drawn
-  yaw-only. It only "stands up" when pitched (issue 1's riding shot). The authored placement
-  presumably carries an upright orientation we are not applying to the spawn.</figcaption>
-</figure>
+  <h2>Where We Move Next</h2>
+  <div class="panel">
+    <h3>Immediate rocket polish</h3>
+    <ul>
+      <li>Wire the deferred engine audio: loop <code>rocket_fly</code> while the engine is on, fire <code>rocket_blast</code> once on ignition, halt immediately on brake/dismount.</li>
+      <li>Add the <code>C3DFireStrato</code> exhaust effect at the tail while thrusting.</li>
+      <li>Fix the rocket's nose-horizontal rest pose without breaking the new direct flight controls.</li>
+    </ul>
+    <h3>Broader N1-N5 follow-up</h3>
+    <ul>
+      <li>Expand N2 beyond the Yokian subset: Digger, Tank, Tesla, Harrier, turrets, mines, and laser triggers.</li>
+      <li>Keep using N3's projectile/tool path as the test surface for enemies and balloons.</li>
+      <li>Turn the N5 menu shell into a readable menu/HUD flow and connect real trigger-driven cutscene activation.</li>
+      <li>Ground-truth progress/task gates before enabling full <code>RequiredLevel</code> / <code>ExactLevel</code> campaign visibility behavior.</li>
+    </ul>
+  </div>
 
-<h2>Decomp vs. the flight model I built</h2>
-<p>The real <code>C3DRocketShip</code> is a <code>C3DFlyingObject</code>: <code>AccelRate=400</code>,
-<code>MaxSpeed=1400</code>, <code>UpRate/DownRate=±650</code>, <code>NewGravity=0</code> — i.e.
-<strong>forward thrust + yaw turn + up/down vertical, no pitch-aiming.</strong> It also owns a
-<code>C3DFireStrato</code> exhaust child and a looping engine sound. My current model pitches the
-nose with W/S, which is <em>not</em> how the original flies — this is the open decision below.</p>
-
-<h2>Fix plan</h2>
-<table>
-  <tr><th>#</th><th>Issue</th><th>Fix</th></tr>
-  <tr><td>1</td><td class="bad">Underground</td>
-      <td>Stop spawning a SOLID box on the player. Spawn only where needed, seat it on the ground
-      (base at terrain, not centered at eye height), and/or keep it non-solid until boarded.</td></tr>
-  <tr><td>2</td><td class="bad">Invisible baseball</td>
-      <td>Give <code>PROJ</code> a visual = retainedsprites chunk-2 baseball billboard
-      (<code>0002_64x64d32.png</code>), size per <code>SpriteSize=25</code>.</td></tr>
-  <tr><td>3</td><td class="bad">Two rockets</td>
-      <td>Don't duplicate: spawn only when the level has no authored <code>3ROC</code>, otherwise
-      relocate/lift the authored one near the player.</td></tr>
-  <tr><td>D</td><td class="warn">Lies horizontal</td>
-      <td>Apply the upright rest orientation the mesh/placement expects.</td></tr>
-  <tr><td>F</td><td class="warn">Flight scheme</td>
-      <td><strong>Decision needed:</strong> match the decomp (forward + turn + up/down, no pitch) vs.
-      keep the W/S pitch model chosen earlier. SPACE = "go"/forward either way.</td></tr>
-</table>
-
-<p class="sub">Engine audio + the <code>C3DFireStrato</code> exhaust effect remain deferred per request
-(noted in <code>docs/native_port_plan.md</code> §6).</p>
+  <p class="small" style="margin-top:28px;">Source references: <code>docs/native_port_plan.md</code>, <code>docs/PROJECT_HISTORY.md</code>, <code>docs/decomp/C3DRocketShip.md</code>, <code>docs/decomp/C3DBaseball.md</code>, and the current native runtime screenshots in this folder.</p>
+</main>
 </body>
 </html>
