@@ -51,6 +51,23 @@ int gam_prop_i(const Entity *e, const char *name, int def) {
     return def;
 }
 
+/* Stash an authored string the named-field mapping didn't claim (skips empty
+   and "none"), so ported behaviors can read it by name (see Entity.strs). */
+static void str_prop_bag_add(Entity *e, const char *name, const char *val) {
+    if (!val[0] || strcasecmp(val, "none") == 0) return;
+    if (e->nstrs >= ENTITY_MAX_STRS) return;
+    GamStr *s = &e->strs[e->nstrs++];
+    snprintf(s->name, sizeof(s->name), "%s", name);
+    snprintf(s->val, sizeof(s->val), "%s", val);
+}
+
+const char *gam_str(const Entity *e, const char *name, const char *def) {
+    if (!e || !name) return def;
+    for (int k = 0; k < e->nstrs; k++)
+        if (strcmp(e->strs[k].name, name) == 0) return e->strs[k].val;
+    return def;
+}
+
 int gam_load(World *w, const char *path) {
     FILE *f = fopen(path, "rb");
     if (!f) { fprintf(stderr, "gam_load: cannot open %s\n", path); return -1; }
@@ -187,6 +204,10 @@ int gam_load(World *w, const char *path) {
                     int idx = prop_name[11] - '0';
                     if (str_val[0] && strcasecmp(str_val, "none") != 0)
                         copy_string(e->talk_trigger[idx], sizeof(e->talk_trigger[idx]), str_val);
+                } else {
+                    /* Unclaimed string -> generic bag (e.g. C3DAITrigger's
+                       AITarget / NextTrigger / ToggleObject / ActivateBy). */
+                    str_prop_bag_add(e, prop_name, str_val);
                 }
 
             } else if (type_id == 3) {

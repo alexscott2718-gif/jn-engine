@@ -31,6 +31,17 @@ typedef struct GamProp {
     int   i;     /* int value   (type-6 props) */
 } GamProp;
 
+/* Generic string-property bag — the string analogue of GamProp. The loader
+   maps well-known string props onto named Entity fields (ObjectTag, PatrolPoint,
+   TalkTrigger*, ...); every other authored non-"none" string is captured here so
+   a ported behavior can read its class's string params by name (e.g.
+   C3DAITrigger's AITarget / NextTrigger / ToggleObject). Read via gam_str(). */
+#define ENTITY_MAX_STRS 12
+typedef struct GamStr {
+    char name[24];
+    char val[40];
+} GamStr;
+
 typedef struct Entity {
     char  type[5];               /* FourCC null-terminated */
     char  tag[64];               /* ObjectTag property */
@@ -81,6 +92,8 @@ typedef struct Entity {
     float hp;                    /* enemy/destructible health points (0 = unset) */
     GamProp props[ENTITY_MAX_PROPS]; /* generic .gam property bag (see above) */
     int    nprops;
+    GamStr strs[ENTITY_MAX_STRS];    /* generic .gam string-property bag */
+    int    nstrs;
     const EntityVTable *vt;
     AseModel *model;
     struct Entity *next;
@@ -90,6 +103,8 @@ typedef struct Entity {
    if the object didn't author it. Defined in assets/gam_loader.c. */
 float gam_prop_f(const Entity *e, const char *name, float def);
 int   gam_prop_i(const Entity *e, const char *name, int def);
+/* Read a captured .gam string property by name, or `def` if absent. */
+const char *gam_str(const Entity *e, const char *name, const char *def);
 
 /* Static-geometry placement extracted from an OMT (e.g. level1.omt).
    Each entry refers to a localized ASE on disk plus the original OMT center.

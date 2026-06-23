@@ -68,6 +68,7 @@ static const EntityTypeInfo entity_types[] = {
     { "3PIR", "Pirate (exit escort)",  &vt_escort      },
     { "3TES", "Tesla hazard",          &vt_tesla     },
     { "3LAS", "Laser trigger",         &vt_laser_trigger },
+    { "3AIT", "AI/script trigger",     &vt_ai_trigger },
     /* Wave N3: player combat + pickups family. */
     { "3BAL", "Balloon (pop for score)", &vt_balloon  },
     { "3BPU", "Baseball pickup",       &vt_baseball_pickup },

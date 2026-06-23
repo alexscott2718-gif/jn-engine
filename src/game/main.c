@@ -1551,6 +1551,16 @@ int main(int argc, char **argv) {
         if (s && *s) n4_ride_tick = atoi(s);
     }
 
+    /* Headless trigger test (Wave N2.x): at warmup tick JN_TEST_AITRIG, force the
+       first eligible TouchActivated 3AIT through its activate core so the
+       C3DAITrigger mission-wiring (hide/teleport/repoint/chain) can be exercised
+       without walking the player through a volume. */
+    int aitrig_test_tick = -1, aitrig_test_done = 0;
+    {
+        const char *s = getenv("JN_TEST_AITRIG");
+        if (s && *s) aitrig_test_tick = atoi(s);
+    }
+
     /* CMainMenu: when the menu is up in a headless screenshot run, auto-confirm
        the default item (New Game) a few ticks after warmup so the menu route is
        exercised end-to-end in CI. JN_MENU_AUTO_TICK overrides the delay. */
@@ -1695,6 +1705,15 @@ int main(int argc, char **argv) {
                                      dx, dy, dz,
                                      PROJ_TEAM_PLAYER, 1200.0f, 100, 4.0f);
                 }
+            }
+
+            /* Headless trigger test: force-fire an eligible C3DAITrigger. */
+            if (aitrig_test_tick >= 0 && !aitrig_test_done &&
+                screenshot_warmup_ticks >= aitrig_test_tick) {
+                aitrig_test_done = 1;
+                Entity *fired = behavior_ai_trigger_test_fire(&world);
+                if (!fired)
+                    fprintf(stderr, "[aitrig_test] no eligible 3AIT found\n");
             }
 
             /* Headless vehicle test: board the nearest rocket, then fly it. */
