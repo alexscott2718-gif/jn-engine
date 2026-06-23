@@ -1,5 +1,6 @@
 #include "entity_visual.h"
 #include "sprite_chunk_map_generated.h"
+#include <math.h>
 #include <string.h>
 #include <strings.h>
 
@@ -560,7 +561,9 @@ static int resolve_sprite_db(const Entity *e, EntityVisual *out) {
     /* chunk id 0 is valid when an explicit database is authored (3TRI icons);
        sprites.omt id 0 is bneu0000, never authored by a .gam. */
     if (e->sprite_index == 0 &&
-        strcasecmp(e->sprite_database, "icons.omt") != 0) return 0;
+        strcasecmp(e->sprite_database, "icons.omt") != 0 &&
+        strncmp(e->type, "3NEU", 4) != 0 &&
+        strncmp(e->type, "3RED", 4) != 0) return 0;
     if (sprite_ref_hidden(e)) {            /* "hidden" canvas -> draw nothing */
         memset(out, 0, sizeof(*out));
         out->invisible = 1;
@@ -587,6 +590,15 @@ static int resolve_sprite_db(const Entity *e, EntityVisual *out) {
             out->tint_b = b >= 0.0f ? b : 1.0f;
             out->tint_a = 0.8f;
         }
+    }
+    if (strncmp(e->type, "3RED", 4) == 0) {
+        float pulse = 0.5f + 0.5f * sinf(e->anim_time * 5.0f);
+        out->tint_r = 1.0f;
+        out->tint_g = 0.2f;
+        out->tint_b = 0.25f + 0.35f * pulse;
+        out->tint_a = 0.8f;
+        out->sprite_size = (e->sprite_size > 1.0f ? e->sprite_size : 90.0f) *
+                           (0.9f + 0.15f * pulse);
     }
     return 1;
 }

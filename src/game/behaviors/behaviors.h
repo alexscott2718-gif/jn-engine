@@ -57,6 +57,8 @@ extern const EntityVTable vt_multi_cutscene;  /* 3MCA — C3DMultiCutSceneCamera
 extern const EntityVTable vt_phonebooth;      /* 3PHO — C3DPhoneBooth (solid contact prop) */
 extern const EntityVTable vt_rocket_ai;       /* 3RCK — C3DRocket (placed C3DAI patrol rocket) */
 extern const EntityVTable vt_humphrey;        /* 3HUM — C3DHumphrey (hidden clone-controller) */
+extern const EntityVTable vt_neutron;         /* 3NEU — C3DNeutron animated pickup sprite */
+extern const EntityVTable vt_red_neutron;     /* 3RED — C3DRedNeutron trigger pickup sprite */
 
 /* Cutscene runtime (behavior_cutscene.c). 3CAM shots register on spawn; the
    sequence plays through renderer_set_camera_override when requested. Off by

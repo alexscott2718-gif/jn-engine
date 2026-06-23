@@ -86,6 +86,8 @@ static const EntityTypeInfo entity_types[] = {
     { "3PHO", "Phone booth (contact prop)", &vt_phonebooth },
     { "3RCK", "AI patrol rocket",      &vt_rocket_ai },
     { "3HUM", "Humphrey (clone controller)", &vt_humphrey },
+    { "3NEU", "Neutron pickup",        &vt_neutron },
+    { "3RED", "Red neutron pickup",    &vt_red_neutron },
     { NULL, NULL, NULL }
 };
 
