@@ -101,6 +101,7 @@ static const EntityTypeInfo entity_types[] = {
     { "3FIS", "Darwin fish (set-dressing creature)", &vt_creature },
     { "3GIR", "Girl-eating plant (set-dressing creature)", &vt_creature },
     { "3SPA", "Spark wire (Tesla contact hazard)",   &vt_tesla },
+    { "3STA", "Stalactite (static terrain prop)",    &vt_stalactite },
     { NULL, NULL, NULL }
 };
 

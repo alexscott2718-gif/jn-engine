@@ -70,6 +70,7 @@ extern const EntityVTable vt_ai_omtobj;       /* 3AIO — C3DAIOmtObj OMT-shape 
 /* Base/effect tail pass 4. */
 extern const EntityVTable vt_light;           /* 3LIG — C3DLight invisible scene light-data row */
 extern const EntityVTable vt_creature;        /* 3FIS/3GIR — C3DDarwinFish/C3DGirlEatingPlant idle set-dressing creatures */
+extern const EntityVTable vt_stalactite;      /* 3STA — C3DStalagtite static terrain prop */
 
 /* Cutscene runtime (behavior_cutscene.c). 3CAM shots register on spawn; the
    sequence plays through renderer_set_camera_override when requested. Off by
