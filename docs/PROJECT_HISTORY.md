@@ -961,6 +961,32 @@ doors swing 0→90.8° / 4.7→95.5°; Level1 degenerate 3ANI draws nothing; Lev
 refreshed catalog reports **93** used FourCCs, **72** with native vtables, **21** still missing. Public WASM was
 deployed.
 
+**Base/resolver + effect long-tail close-out — C3DAI creatures + the gated-prop family (2026-06-23).** The
+lower-reach tail (16 FourCCs) collapsed into two faithful shapes, each spec read first. The three remaining C3DAI
+"set-dressing creature" leaves — `3DIN`/`C3DDino`, `3CML`/`C3DCamel`, `3SPW`/`C3DSparrow` — route to the existing
+`vt_creature` (idle/patrol on the inherited C3DAI base; Sparrow's mesh is level-conditional, already resolved).
+The static prop/effect rows landed on one shared `behavior_prop.c`/`vt_prop` — a gated static prop whose
+*solidity comes strictly from authored `HasCollision`* (1→solid like `3HYD`/`3TOL`/`3CUB`, 0→non-solid like
+`3SPH`/`3TEL`, unset→non-solid so the port never invents an obstacle): `3FLA`/`C3DFlag`, `3HYD`/`C3DHydrant`,
+`3SCR`/`C3DLabScreen`, `3TEL`/`C3DTeleportFX`, `3SPH`/`C3DSphere`, `3CUB`/`C3DCube` (solid invisible block — the
+procedural primitive is a known resolver gap), `3TOL`/`C3DToolChest`, `3OCT`/`C3DOctapuke`, `3MER`/`C3DMerryGo`,
+`3TRA`/`C3DTransRepl`, `3SM1`/`C3DSmoke`, `3FUE`/`C3DRocketFuel`, and `3TRI`/`C3DTrigger`. Every one of those
+classes owns *some* gameplay method (Octapuke's pickup-counter teleport, MerryGo's ride-attach, RocketFuel's
+SCENE manipulation, Trigger's activate-object cascade), but each depends on a subsystem this port hasn't landed
+(SCENE sequencer, scripted-trigger chain, unresolved player slots), so all are faithfully **deferred** — the
+minimal port is the visibility/progress gate + authored collision, with the mesh/sprite already resolved.
+**Record fix (game-owner ground truth):** the shrink ray shrinks certain AI (Dino, Darwin, Humphrey, ...) into
+small *moving pickups* the player collects — which is why those creatures carry `C3DPickupType` and a `HISHRINK`
+frame. The active mechanic stays deferred (the shrink-on-contact transition isn't decompiled and `3SHR` has zero
+`.gam` placements), but the misleading `vt_creature` "no pickup logic" comment was corrected and the truth recorded
+on `C3DShrinkRay`/`C3DDino`/`C3DDarwinFish`/`C3DGirlEatingPlant` specs + `behavior_humphrey.c`. Validation: `make`;
+`JN_SCREENSHOT` on all 12 placing levels (Level1/Level2/Level2b/level2a/level3a/level5/level4b/Level3D/level1c/
+VR04/Level1F/level1b/Level5b — all render, no regression); `tools/audit_faithfulness.py` 0 findings (all 35
+levels); `make web`; `tools/qa_web_verify.py` 16/16. The refreshed catalog reports **93** used FourCCs, **88**
+with native vtables, **5** still missing — and those 5 are exactly the documented deferred rows (`3ROK` origin
+pool, `3YCA`/`3FOW` SCENE-gated, `3SPR` no serialized canvas, `3DAI` origin dummy). The behavior lens's
+actor/gameplay focus section is now empty; the full queue is deferred-only.
+
 ---
 
 ## Invariants (don't relitigate these)

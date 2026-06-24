@@ -1,7 +1,7 @@
 {
  "summary": {
-  "generated": "2026-06-24 01:00 UTC",
-  "commit": "4fef9bf",
+  "generated": "2026-06-24 01:51 UTC",
+  "commit": "5423ef5",
   "counts": {
    "resolution": 219,
    "st_mesh": 73,
@@ -9,10 +9,10 @@
    "st_invisible": 40,
    "st_mesh_untextured": 4,
    "st_no_visual": 87,
-   "native_behaviors": 84,
+   "native_behaviors": 100,
    "used_fourccs": 93,
-   "used_native_behaviors": 72,
-   "used_missing_native_behavior": 21,
+   "used_native_behaviors": 88,
+   "used_missing_native_behavior": 5,
    "decomp_specs": 104,
    "assets_total": 5807,
    "no_usage": 39,
@@ -1888,8 +1888,8 @@
    "decomp_status": "spec",
    "decomp_confidence": "Medium",
    "family": "creatures_one_off_set_dressing",
-   "native_behavior": null,
-   "native_desc": null,
+   "native_behavior": "vt_creature",
+   "native_desc": "Camel (set-dressing creature)",
    "tags": [
     "C3DCAMEL"
    ],
@@ -2033,8 +2033,8 @@
    "decomp_status": "spec",
    "decomp_confidence": "Medium",
    "family": "world_props_terrain",
-   "native_behavior": null,
-   "native_desc": null,
+   "native_behavior": "vt_prop",
+   "native_desc": "Cube (solid invisible block)",
    "tags": [
     "C3DCUBE"
    ],
@@ -2164,8 +2164,8 @@
    "decomp_status": null,
    "decomp_confidence": null,
    "family": null,
-   "native_behavior": null,
-   "native_desc": null,
+   "native_behavior": "vt_creature",
+   "native_desc": "Dino (set-dressing creature)",
    "tags": [
     "C3DDINO"
    ],
@@ -2697,8 +2697,8 @@
    "decomp_status": null,
    "decomp_confidence": null,
    "family": null,
-   "native_behavior": null,
-   "native_desc": null,
+   "native_behavior": "vt_prop",
+   "native_desc": "Flag (static prop)",
    "tags": [
     "C3DFIRESTRATO"
    ],
@@ -2920,8 +2920,8 @@
    "decomp_status": null,
    "decomp_confidence": null,
    "family": null,
-   "native_behavior": null,
-   "native_desc": null,
+   "native_behavior": "vt_prop",
+   "native_desc": "Rocket fuel (pickup sprite)",
    "tags": [
     "C3DROCKETFUEL"
    ],
@@ -3610,8 +3610,8 @@
    "decomp_status": null,
    "decomp_confidence": null,
    "family": null,
-   "native_behavior": null,
-   "native_desc": null,
+   "native_behavior": "vt_prop",
+   "native_desc": "Fire hydrant (static prop)",
    "tags": [
     "HYDRANT2",
     "water1"
@@ -4500,8 +4500,8 @@
    "decomp_status": null,
    "decomp_confidence": null,
    "family": null,
-   "native_behavior": null,
-   "native_desc": null,
+   "native_behavior": "vt_prop",
+   "native_desc": "Merry-go-round (static prop)",
    "tags": [
     "C3DMERRYGO"
    ],
@@ -5112,8 +5112,8 @@
    "decomp_status": null,
    "decomp_confidence": null,
    "family": null,
-   "native_behavior": null,
-   "native_desc": null,
+   "native_behavior": "vt_prop",
+   "native_desc": "Octapuke (set-dressing hazard)",
    "tags": [
     "C3DOCTAPUKE"
    ],
@@ -7496,8 +7496,8 @@
    "decomp_status": "spec",
    "decomp_confidence": "Low",
    "family": "level_game_controllers",
-   "native_behavior": null,
-   "native_desc": null,
+   "native_behavior": "vt_prop",
+   "native_desc": "Lab screen (display prop)",
    "tags": [
     "C3DLABSCREEN"
    ],
@@ -7695,8 +7695,8 @@
    "decomp_status": "spec",
    "decomp_confidence": "Low",
    "family": "effects_triggers_nav_cameras_sound",
-   "native_behavior": null,
-   "native_desc": null,
+   "native_behavior": "vt_prop",
+   "native_desc": "Smoke (effect sprite)",
    "tags": [
     "C3DSMOKE"
    ],
@@ -7977,8 +7977,8 @@
    "decomp_status": "spec",
    "decomp_confidence": "Medium",
    "family": "world_props_terrain",
-   "native_behavior": null,
-   "native_desc": null,
+   "native_behavior": "vt_prop",
+   "native_desc": "Sphere (world prop)",
    "tags": [
     "C3DSPHERE"
    ],
@@ -8095,8 +8095,8 @@
    "decomp_status": null,
    "decomp_confidence": null,
    "family": null,
-   "native_behavior": null,
-   "native_desc": null,
+   "native_behavior": "vt_creature",
+   "native_desc": "Sparrow/vulture (set-dressing creature)",
    "tags": [
     "vulta"
    ],
@@ -8615,8 +8615,8 @@
    "decomp_status": null,
    "decomp_confidence": null,
    "family": null,
-   "native_behavior": null,
-   "native_desc": null,
+   "native_behavior": "vt_prop",
+   "native_desc": "Teleport FX (static effect)",
    "tags": [
     "C3DTELEPORTFX",
     "telfx1",
@@ -8757,8 +8757,8 @@
    "decomp_status": "spec",
    "decomp_confidence": "Medium",
    "family": "world_props_terrain",
-   "native_behavior": null,
-   "native_desc": null,
+   "native_behavior": "vt_prop",
+   "native_desc": "Tool chest (static prop)",
    "tags": [
     "C3DTOOLCHEST"
    ],
@@ -8794,8 +8794,8 @@
    "decomp_status": null,
    "decomp_confidence": null,
    "family": null,
-   "native_behavior": null,
-   "native_desc": null,
+   "native_behavior": "vt_prop",
+   "native_desc": "Trans-replicator (set-dressing prop)",
    "tags": [
     "C3DTRANSLUCENT"
    ],
@@ -9031,8 +9031,8 @@
    "decomp_status": "spec",
    "decomp_confidence": "Medium",
    "family": "base_framework",
-   "native_behavior": null,
-   "native_desc": null,
+   "native_behavior": "vt_prop",
+   "native_desc": "Trigger (base marker, inert)",
    "tags": [
     "POWER3"
    ],

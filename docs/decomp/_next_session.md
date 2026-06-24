@@ -196,38 +196,66 @@ This is a shared, committed campaign — read the shared docs, don't rely on too
   Level1/level2a doors swing 0→90.8°/4.7→95.5°; Level1 degenerate 3ANI draws nothing; Level3 mummydoor stays closed;
   `audit_faithfulness.py` 0 findings (all 35 levels); `make web`; `qa_web_verify.py` 16/16; **public WASM deployed**.
   The refreshed catalog now reports **93** used FourCCs, **72** with native vtables, and **21** still missing.
-- **Still unimplemented:** the refreshed generated behavior lens reports **21** used-in-level FourCCs with no
-  native behavior (**93** used FourCCs total, **72** used FourCCs with native vtables). The actor/gameplay focus
-  section in `docs/asset_catalog/behavior_todo.md` is still **empty** — the remaining holes are base/resolver and
-  effect/prop rows. The top of the queue is now the **deferred** rows (`3ROK`/`C3DRock` origin pool,
-  `3YCA`/`C3DYokCargo` SCENE-gated cargo, `3SPR`/`C3DSprite` no-canvas, plus `3FOW`/`C3DFowl` SCENE-gated and
-  `3DAI`/`C3DAI` origin dummy) — skip them unless new evidence appears (see the pass-3/pass-4 bullets). With `3ANI`
-  and `3SWN` now landed, the next *portable* rows are the lower-reach props/effects (`3FUE`, `3SPH`,
-  `3TEL`, `3DIN`, `3FLA`, `3CUB`, `3HYD`, `3CML`, `3MER`, `3OCT`, `3SCR`, `3SM1`, `3SPW`, `3TOL`, `3TRA`, `3TRI`) —
-  confirm each FourCC→class via `docs/_gam_classids.tsv` (several have a blank lens "Class") before coding.
-  Code-spawned or currently unplaced enemy specs (`3TAN`/
-  `C3DTank`, `3HAR`/`C3DHarrier`, `3MIN`/`C3DMine`, `3MIS`/`C3DMissile`) still have zero current `.gam` rows; treat
-  them as database-spawned/code-spawned/unplaced until separate evidence says otherwise. The big structural waves
-  (N1 base framework, N2 enemies, N3 combat/pickups, N4 vehicles, N5 game-flow) are all landed.
+- **Base/resolver + effect long-tail CLOSE-OUT — C3DAI creatures + the gated-prop family (2026-06-23):** the
+  lower-reach tail (16 FourCCs) landed in two shapes, each spec read first. (1) The three remaining C3DAI
+  "set-dressing creature" leaves — `3DIN`/`C3DDino`, `3CML`/`C3DCamel`, `3SPW`/`C3DSparrow` — route to the existing
+  `vt_creature` (idle/patrol on the inherited C3DAI base; Sparrow's level-conditional vulture mesh already
+  resolves). (2) The static prop/effect rows share one new `behavior_prop.c`/`vt_prop` — a gated static prop whose
+  **solidity comes strictly from authored `HasCollision`** (1→solid `3HYD`/`3TOL`/`3CUB`, 0→non-solid
+  `3SPH`/`3TEL`, unset→non-solid so the port never invents an obstacle): `3FLA`, `3HYD`, `3SCR`, `3TEL`, `3SPH`,
+  `3CUB` (solid invisible block — procedural-primitive visual is a known resolver gap), `3TOL`, `3OCT`, `3MER`,
+  `3TRA`, `3SM1`, `3FUE`, `3TRI`. Each of those owns *some* gameplay method (Octapuke pickup-counter teleport,
+  MerryGo ride-attach, RocketFuel SCENE manip, Trigger activate-object cascade), all **deferred** because they need
+  an unported subsystem (SCENE sequencer, scripted-trigger chain, unresolved player slots); the minimal port is the
+  gate + authored collision over the already-resolved visual. **Record fix (game-owner ground truth):** the shrink
+  ray shrinks certain AI (Dino/Darwin/Humphrey…) into small *moving pickups* (why they carry `C3DPickupType` +
+  a `HISHRINK` frame) — active mechanic still deferred (transition not decompiled, `3SHR` unplaced), but the
+  misleading `vt_creature` "no pickup logic" comment was corrected and the truth recorded on the
+  `C3DShrinkRay`/`C3DDino`/`C3DDarwinFish`/`C3DGirlEatingPlant` specs + `behavior_humphrey.c`. Validation: `make`;
+  `JN_SCREENSHOT` on all 12 placing levels (all render, no regression); `audit_faithfulness.py` 0 findings (all 35
+  levels); `make web`; `qa_web_verify.py` 16/16. Catalog now **93** used FourCCs, **88** native vtables, **5**
+  missing. **Public WASM not yet deployed this pass** (gated on explicit approval).
+- **Still unimplemented:** the refreshed lens reports **5** used-in-level FourCCs with no native behavior (**93**
+  total, **88** with native vtables), and **all 5 are the documented deferred rows** — `3ROK`/`C3DRock` origin pool,
+  `3YCA`/`C3DYokCargo` SCENE-gated cargo, `3SPR`/`C3DSprite` no serialized canvas, `3FOW`/`C3DFowl` SCENE-gated
+  visibility, `3DAI`/`C3DAI` origin dummy. The actor/gameplay focus section of `behavior_todo.md` is **empty** and
+  the full queue is deferred-only. The portable base/resolver + effect long tail is therefore **exhausted**: the
+  next substantive moves are (a) unblocking the deferred rows by porting the **SCENE sequencer** (frees `3YCA`,
+  `3FOW`, and Humphrey's clone reveal) and/or a **runtime-repositioning controller** (`3ROK`) / per-instance ASE
+  resolver work (`3SPR`, `3TRA` visual); (b) the **N5 tails** below; or (c) the deferred **active shrink mechanic**
+  (a new player weapon + projectile + creature shrink→pickup state — see the record-fix specs). Code-spawned /
+  unplaced enemy specs (`3TAN`/`C3DTank`, `3HAR`/`C3DHarrier`, `3MIN`/`C3DMine`, `3MIS`/`C3DMissile`, `3POD`,
+  `3SHR`) still have zero current `.gam` rows. The big structural waves (N1–N5) are all landed.
 - Implementation contract is `EntityVTable` in `src/engine/world.h`, registered by FourCC in
   `src/game/entities.c`; per-frame via `entity_update()` (`main.c:1418`); `.gam` params via
   `gam_prop_f/i`. Full contract in plan §1.
 
-## Your task this session: continue the base/resolver + effect long tail
+## Your task this session: pick the next substantive move (the portable tail is exhausted)
 The big structural waves (N1–N5), the placed enemy/hazard slice (N2.x), the friend/NPC cast + AI mission
-trigger (N2.y), the **actor/gameplay focus closeout (3PHO/3RCK/3HUM)**, four base/effect tail passes
+trigger (N2.y), the **actor/gameplay focus closeout (3PHO/3RCK/3HUM)**, the four base/effect tail passes
 (1: `3NEU`/`3RED`/`3ARR`; 2: `3LIO`/`3OMT`/`3CON`; 3: `3TRO`/`3LEA`/`3TAR`/`3AIO`; 4: `3LIG`/`3FIS`/`3GIR`/
-`3SPA`/`3STA`), and the **animated-sprite + swing-door pass (`3ANI`/`3SWN`)** are all landed. The
-actor/gameplay focus section of the lens is **empty** — the remaining work is the base/resolver + effect/prop
-long tail, now the **lower-reach props/effects** (`3FUE`, `3SPH`, `3TEL`, `3DIN`, `3FLA`, `3CUB`, `3HYD`, `3CML`,
-`3MER`, `3OCT`, `3SCR`, `3SM1`, `3SPW`, `3TOL`, `3TRA`, `3TRI`) — most are static props / one-off set-dressing /
-small effects in the `vt_cone`/`vt_creature`/`vt_static` mould; a few (`3SCR` C3DLabScreen, `3MER` C3DMERRYGO,
-`3OCT` C3DOCTAPUKE) carry real owned methods, and `3TRI`/`C3DTrigger` is the base trigger leaf. Confirm each
-FourCC→class via `docs/_gam_classids.tsv` before coding (several have a blank lens "Class"). The deferred rows
-(`3ROK`, `3YCA`, `3SPR`, `3FOW`, `3DAI`) stay deferred with documented reasons. Hold the decomp discipline —
-confirm behavior against
-`docs/decomp/<Class>.md` (the decompiled body, not an offset scan), build on the existing modules, and **pick
-targets from the lens**:
+`3SPA`/`3STA`), the **animated-sprite + swing-door pass (`3ANI`/`3SWN`)**, and the **long-tail close-out**
+(C3DAI creatures `3DIN`/`3CML`/`3SPW` → `vt_creature`; the gated-prop family `3FLA`/`3HYD`/`3SCR`/`3TEL`/`3SPH`/
+`3CUB`/`3TOL`/`3OCT`/`3MER`/`3TRA`/`3SM1`/`3FUE`/`3TRI` → `vt_prop`) are all landed. **The behavior lens is now
+deferred-only** (`88/93` native vtables; the 5 remaining are `3ROK`/`3YCA`/`3SPR`/`3FOW`/`3DAI`) and the
+actor/gameplay focus section is **empty** — there is no more "just register a leaf" work. Pick ONE of:
+
+1. **Port the SCENE sequencer** — the single highest-leverage unblock. It frees the `3YCA` cargo + `3FOW` fowl
+   visibility gates *and* activates Humphrey's `CLONE1..7` reveal (all three are wired-but-dormant today because
+   SCENE is pinned at the CTaskList table value). Start from `game_flow.c` / `task_loader.c` and the SCENE reads
+   in `behavior_humphrey.c`.
+2. **The N5 tails** — (a) a real **text renderer** for the menu/HUD (today `menu.c` draws bars + logs labels;
+   `C2DInGameMenu` counters print numerals); (b) plumb the `PlayerControlled` string prop onto the entity so
+   cutscenes can lock player input (deferred in N5).
+3. **The deferred active shrink mechanic** — a player shrink-ray tool + `PROJ_TEAM_PLAYER` hit + the creature
+   shrink→moving-pickup state. Bigger than a leaf; the field map / anims are recorded on the shrink-ray + creature
+   specs and `behavior_creature.c`. Confirm scope with the user first (it invents fire-input/scale/scoring the
+   decomp doesn't pin).
+4. **Resolver/positioning gaps** — the per-instance ASE path for `3SPR`/`3TRA` visuals, or a runtime-repositioning
+   controller for the `3ROK` origin pool. These are resolver/controller work, not behavior gaps.
+
+Hold the decomp discipline — confirm behavior against `docs/decomp/<Class>.md` (the decompiled body, not an offset
+scan), build on the existing modules. Re-derive the lens before starting:
 
 ```bash
 python3 tools/build_asset_catalog.py
@@ -235,44 +263,27 @@ sed -n '1,180p' docs/asset_catalog/behavior_todo.md
 ```
 
 `behavior_todo.md` formalizes the strict query (`instances > 0 && native_behavior == null`), ranks by
-`instances * level_count`, and splits out an actor/gameplay focus section (now empty). Use it to validate on
-levels that actually place each class. The live catalog remains useful for previews:
-<https://exentt.com/JN-assets/catalog/>.
+`instances * level_count`, and splits out an actor/gameplay focus section (now empty). The live catalog remains
+useful for previews: <https://exentt.com/JN-assets/catalog/>.
 
-**Deferred rows sit at the top of the raw-reach queue — skip them unless new evidence appears:**
+**The 5 deferred rows stay deferred until their blocker is ported — skip them otherwise:**
 - `3ROK` / `C3DRock` — 99 inst / 1 level (Level5b), all serialized at `(0,0,0)` with `CanMove=1`/`RotateToDest`. A
-  runtime-repositioned pool; no controller that scatters them is ported yet, so drawing the origin pool regresses.
-  A spec exists (`C3DRock`, 1 owned method) — the blocker is *positioning*, not behavior.
-- `3YCA` / `C3DYokCargo` — 11 inst / 8 levels. Per-frame visibility gate keyed on level=="LEV5" + `SCENE>489`; the
-  SCENE sequencer isn't ported (SCENE stays at the CTaskList table value), and the cargo_ship mesh is already
-  visible in 7/8 levels, so a thin port changes almost nothing. Revisit when a SCENE sequencer lands.
+  runtime-repositioned pool; no controller that scatters them is ported, so drawing the origin pool regresses.
+- `3YCA` / `C3DYokCargo` — 11 inst / 8 levels. SCENE-window visibility gate (level=="LEV5" + `SCENE>489`). Needs
+  the SCENE sequencer (move #1); the cargo_ship mesh is already visible in 7/8 levels so a thin port changes little.
 - `3SPR` / `C3DSprite` — 15 inst / 4 levels. Rows carry **zero** serialized `SpriteSize`/`SpriteDatabase`/
-  `SpriteIndex`; the spec's own open question is the default canvas. Drawing it would guess (resolver gap, not a
-  behavior gap; the faithful C3DSprite has no per-frame integrator).
-- `3FOW` / `C3DFowl` — 4 inst / 4 levels. `vfunc_01_265` is a SCENE-window visibility gate (LEV4/LV4A/LV4C only);
-  with SCENE pinned at the CTaskList value a faithful port would **hide** the currently-visible `fowlbase.glb`.
-  Same `3YCA` reasoning — revisit when a SCENE sequencer lands.
-- `3DAI` / `C3DAI` — 4 inst / 2 levels, authored at `(0,0,0)` and invisible. A bare AI-base dummy with no derived
-  behavior; nothing to drive.
+  `SpriteIndex`; the default canvas is the spec's own open question. Resolver gap, not a behavior gap.
+- `3FOW` / `C3DFowl` — 4 inst / 4 levels. SCENE-window visibility gate (LEV4/LV4A/LV4C); a faithful port would
+  **hide** the currently-visible `fowlbase.glb` until the SCENE sequencer lands (move #1).
+- `3DAI` / `C3DAI` — 4 inst / 2 levels, authored at `(0,0,0)` and invisible. A bare AI-base dummy; nothing to drive.
 
-**Next *portable* rows from the refreshed lens (read each spec first):**
-- `3ANI` / `C3DAnimatedSprite` — 6 inst / 3 levels. The one substantive remaining row: a real frame animator
-  (`CPickupType -> C3DTriggerType -> C3DSprite`) that cycles `Sprite1..9` at `FPS` with `Activated`/`Loop`/
-  `InitallyVisible` semantics (full field map in the spec). Currently `invisible` in the resolver, so it needs
-  sprite-resolver plumbing to bind a `sprites.omt` frame (cf. the neutron resolver allowance) **plus** the
-  per-frame animator. Bigger than a decor leaf — budget a dedicated pass.
-- `3SWN` / `C3DSwingDoor` — 7 inst / 5 levels. A **swing door** (per-instance ASEFile/PNGFile; `doorfowl.ASE` is
-  just one door mesh — it is *not* a fowl). `main.c`/`gam_loader.c`/`entity_visual.c` already special-case its
-  per-instance asset load; the gameplay is door-like (cf. `vt_leveldoor`/`vt_door`), so confirm the spec and
-  decide whether to route it through the existing door behavior.
-- Then the lower-reach props/effects round out the tail (`3FUE`, `3SPH`, `3TEL`, `3DIN`, `3FLA`, `3CUB`, `3HYD`,
-  `3CML`, `3MER`, `3OCT`, `3SCR`, `3SM1`, `3SPW`, `3TOL`, `3TRA`, `3TRI`). Confirm each FourCC→class via
-  `docs/_gam_classids.tsv` (the lens "Class" column is blank for several) before coding.
-
-NB on the just-closed tail rows: the `C3DDarwinFish` spec's auto-filled "FourCC: 3DIN" is a generator artifact —
-its asset method registers `darwinwalk/shrink/stop`, matching the lens `3FIS → darwinstop.ASE`, so 3FIS *is*
-C3DDarwinFish (3DIN is the separate `dinostop.ASE` row). Reading the decompiled body (not the Identity header)
-settled it. `3SPA`/`C3DSparkWire` is literally `C3DTesla`-derived, so it reused `vt_tesla` rather than a new file.
+NB on the closed long tail: `vt_prop` (`behavior_prop.c`) is the shared **gated static prop** leaf — visibility/
+progress gate + **solidity strictly from authored `HasCollision`** (1→solid, 0→non-solid, unset→non-solid) over the
+already-resolved visual; every routed class's owned gameplay method is deferred to an unported subsystem (SCENE
+sequencer / scripted-trigger chain / unresolved player slots), documented per-class in the file header. The C3DAI
+"set-dressing creatures" (`3FIS`/`3GIR`/`3DIN`/`3CML`/`3SPW`) share `vt_creature` — and they are **shrink-ray
+targets** (shrink→moving pickup), recorded on their specs + `C3DShrinkRay.md` (the active mechanic is move #3).
+`3SPA`/`C3DSparkWire` is literally `C3DTesla`-derived, so it reuses `vt_tesla` rather than a new file.
 
 **Friend / NPC wiring now available:** `vt_friend` (`behavior_friend.c`) is the shared C3DFriends/C3DAI idle base;
 the talk-reward path is still deferred. The `.gam` loader now has a generic string-prop bag (`gam_str()`) for
