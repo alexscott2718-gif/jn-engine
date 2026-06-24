@@ -286,6 +286,12 @@ talks. The first **C3DGoddard** runtime slice is also landed (`3GOD` companion +
 Goddard/energy AITrigger side effects are still deferred. See `docs/decomp/_scene_sequencer.md` and
 `docs/decomp/C3DGoddard.md` for the full machine.
 
+**Parallel initiative — Ground & World Collision Overhaul (scoped 2026-06-24):** a separate, decomp-faithful
+mesh-collision campaign has its own self-contained kickoff at **`docs/decomp/_next_session_collision.md`** (replace the
+floor-only `world_terrain_height` + safety-floor crutch with a `CollisionWorld` built from each level's `BLOCKING_*`
+collider meshes — mesh ground-follow, wall blocking + slide + step-up, gated by `HasCollision`/`TerrainColl`, and retire
+the procedural `ground.c` plane). Pick it up as its own track when prioritized.
+
 **The live options (no forced default — pick by what unblocks the most, and confirm with the user first):**
 - **(a) C3DGoddard tails / Goddard-energy side effects** — the AITrigger *scripted-control* half is now DONE (the
   `AITarget == C3DGODDARD` rows drive Goddard HOLD/PATROL/FOLLOW via `behavior_goddard_apply_ai_state`). What remains
