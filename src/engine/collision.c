@@ -24,6 +24,7 @@ typedef struct {
     float n[3];                  /* upward-oriented unit normal */
     float xmin, xmax, zmin, zmax;
     float ymin, ymax;
+    unsigned char is_block;      /* from a designed BLOCK/BLOCKING barrier mesh */
 } CollTri;
 
 struct CollisionWorld {
@@ -137,16 +138,56 @@ static void tri_cell_range(const CollisionWorld *cw, const CollTri *t,
     *iz0 = grid_iz(cw, t->zmin); *iz1 = grid_iz(cw, t->zmax);
 }
 
+/* Total XZ-projected area of a mesh's walkable (near-horizontal) triangles. Used
+   to tell a genuine floor/terrain mesh (large walkable surface) from a prop
+   (compact) when a level ships no authored GROUND floor — see collision_build. */
+static float mesh_walkable_area(const AseModel *m) {
+    if (!m || !m->frames || m->vertex_count < 3) return 0.0f;
+    float area = 0.0f;
+    const float *v = m->frames;
+    for (int k = 0; k + 2 < m->vertex_count; k += 3) {
+        const float *a = v + (size_t)(k + 0) * 8u;
+        const float *b = v + (size_t)(k + 1) * 8u;
+        const float *c = v + (size_t)(k + 2) * 8u;
+        float e1[3], e2[3], nrm[3];
+        vsub(b, a, e1); vsub(c, a, e2); vcross(e1, e2, nrm);
+        float len = sqrtf(vdot(nrm, nrm));
+        if (len < 1.0e-6f) continue;
+        if (fabsf(nrm[1] / len) < WALL_NY_MAX) continue;   /* wall, not floor */
+        area += fabsf((b[0]-a[0])*(c[2]-a[2]) - (c[0]-a[0])*(b[2]-a[2])) * 0.5f;
+    }
+    return area;
+}
+
+/* A placement that contributes geometry to the CollisionWorld. Always the
+   GROUND/BLOCK colliders. In levels with NO authored GROUND floor mesh (most
+   non-Retroville levels — see PROJECT_HISTORY Era 15), the walkable floor is a
+   plain visible mesh (station, Plane01, firstroom, a cave shell, ...), so any
+   placement with a large walkable surface is also taken as a collider, giving
+   the player a real floor (and the mesh's own walls) instead of the safety
+   plane. Gated to GROUND-less levels so the Retroville GROUND+BLOCKING setup is
+   untouched. */
+#define FLOOR_AREA_THRESH 1.0e6f
+static int placement_collides(const WorldPlacement *pl, AseModel *m, int has_ground) {
+    if (collision_is_collider(pl->name)) return 1;
+    if (!has_ground && mesh_walkable_area(m) > FLOOR_AREA_THRESH) return 1;
+    return 0;
+}
+
 CollisionWorld *collision_build(const World *w) {
     if (!w || w->placement_count <= 0) return NULL;
+
+    int has_ground = 0;
+    for (int i = 0; i < w->placement_count; i++)
+        if (strncasecmp(w->placements[i].name, "GROUND", 6) == 0) { has_ground = 1; break; }
 
     /* Pass 1: count colliding triangles. */
     int tri_cap = 0;
     for (int i = 0; i < w->placement_count; i++) {
         const WorldPlacement *pl = &w->placements[i];
-        if (!collision_is_collider(pl->name)) continue;
         AseModel *m = model_cache_get(pl->ase_path);
         if (!m || !m->frames || m->vertex_count < 3) continue;
+        if (!placement_collides(pl, m, has_ground)) continue;
         tri_cap += m->vertex_count / 3;
     }
     if (tri_cap == 0) return NULL;
@@ -161,9 +202,10 @@ CollisionWorld *collision_build(const World *w) {
     int tc = 0;
     for (int i = 0; i < w->placement_count; i++) {
         const WorldPlacement *pl = &w->placements[i];
-        if (!collision_is_collider(pl->name)) continue;
         AseModel *m = model_cache_get(pl->ase_path);
         if (!m || !m->frames || m->vertex_count < 3) continue;
+        if (!placement_collides(pl, m, has_ground)) continue;
+        const int is_block = collision_is_invisible(pl->name);
         const float ox = pl->x, oz = -pl->z;   /* placement world translation */
         const float *v = m->frames;
         for (int k = 0; k + 2 < m->vertex_count; k += 3) {
@@ -190,6 +232,7 @@ CollisionWorld *collision_build(const World *w) {
             t->zmax = fmaxf(t->v0[2], fmaxf(t->v1[2], t->v2[2]));
             t->ymin = fminf(t->v0[1], fminf(t->v1[1], t->v2[1]));
             t->ymax = fmaxf(t->v0[1], fmaxf(t->v1[1], t->v2[1]));
+            t->is_block = (unsigned char)is_block;
             if (t->xmin < bx0) bx0 = t->xmin;
             if (t->xmax > bx1) bx1 = t->xmax;
             if (t->zmin < bz0) bz0 = t->zmin;
@@ -399,6 +442,7 @@ int collision_nearest_wall(const CollisionWorld *cw, const float p[3],
             int s = cw->cell_start[c], e = cw->cell_start[c + 1];
             for (int j = s; j < e; j++) {
                 const CollTri *t = &cw->tris[cw->cell_tris[j]];
+                if (!t->is_block) continue;   /* validate designed BLOCK walls only */
                 if (fabsf(t->n[1]) >= MAX_NY) continue;
                 if (t->ymax - t->ymin < MIN_WALL_H) continue;
                 float q[3];

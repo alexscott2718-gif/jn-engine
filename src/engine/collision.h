@@ -64,9 +64,10 @@ void collision_resolve_horizontal(const CollisionWorld *cw,
 float collision_segment(const CollisionWorld *cw,
                         const float p[3], const float q[3], float n[3]);
 
-/* Test/diagnostic: find the TALL wall-like collider triangle (|normal.y| < the
-   wall slope threshold and taller than the step cap) whose surface is closest
-   to p within `search` units. On success writes the closest surface point to
+/* Test/diagnostic: find the TALL near-vertical triangle of a designed BLOCK /
+   BLOCKING barrier (not a terrain/floor mesh — those have finite/tilted faces a
+   head-on synthetic drive legitimately rounds) whose surface is closest to p
+   within `search` units. On success writes the closest surface point to
    out_pt[3], the triangle's outward horizontal unit normal (oriented toward p)
    to out_n[3], the triangle's Y range to out_ymin and out_ymax, and returns 1;
    returns 0 if no qualifying wall is near. Used by the JN_TEST_COLLIDE seam to
