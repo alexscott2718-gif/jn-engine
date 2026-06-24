@@ -1583,6 +1583,15 @@ int main(int argc, char **argv) {
     const char *scene_test_tag = getenv("JN_TEST_SCENE");
     if (scene_test_tag && *scene_test_tag) scene_test_tick = 2;
 
+    /* Headless talk-reward test (JN_TEST_TALK=<friendTag>): a few ticks after
+       warmup, force the friend NPC with this ObjectTag through its talk-reward so
+       its per-character story-progress SCENE write fires (the friend half of the
+       SCENE sequencer). Combine with JN_TEST_SET_SCENE=<gate> (or --newgame) so a
+       CTaskList store is loaded at the friend's gate value. Logs the transition. */
+    int talk_test_tick = -1, talk_test_done = 0;
+    const char *talk_test_tag = getenv("JN_TEST_TALK");
+    if (talk_test_tag && *talk_test_tag) talk_test_tick = 2;
+
     /* Headless visibility report (JN_TEST_VIS=<FourCC>): after warmup, print each
        matching entity's visible flag and the live SCENE — for SCENE-gate
        validation (3FOW/3YCA/3HUM). Fires once. */
@@ -1710,6 +1719,14 @@ int main(int argc, char **argv) {
             sandbox_reconcile(&world, jim);
             input_virtual_board_consume();
 
+            /* Talk (C3DFriends): T talks to the nearest friend in range, running
+               that friend's per-character SCENE talk-reward (the friend half of
+               the SCENE sequencer). Interactive only; headless uses JN_TEST_TALK. */
+            if (jim && input_just_pressed(SDL_SCANCODE_T)) {
+                Entity *f = behavior_friend_talk_nearest(&world);
+                if (f) printf("[TALK] player talked to '%s' (%.4s)\n", f->tag, f->type);
+            }
+
             /* Headless combat test: throw a baseball at the nearest Yokian. */
             if (n2_throw_tick >= 0 && !n2_throw_done &&
                 screenshot_warmup_ticks >= n2_throw_tick && jim) {
@@ -1762,6 +1779,17 @@ int main(int argc, char **argv) {
                 long after = game_flow_entity_state("SCENE");
                 fprintf(stderr, "[scene_test] tag='%s' fired=%s SCENE 0x%lx -> 0x%lx\n",
                         scene_test_tag, fired ? "yes" : "NO", before, after);
+            }
+
+            /* Headless talk-reward test: force the named friend's talk-reward. */
+            if (talk_test_tick >= 0 && !talk_test_done &&
+                screenshot_warmup_ticks >= talk_test_tick) {
+                talk_test_done = 1;
+                long before = game_flow_entity_state("SCENE");
+                Entity *fired = behavior_friend_talk_tag(&world, talk_test_tag);
+                long after = game_flow_entity_state("SCENE");
+                fprintf(stderr, "[talk_test] tag='%s' fired=%s SCENE 0x%lx -> 0x%lx\n",
+                        talk_test_tag, fired ? "yes" : "NO", before, after);
             }
 
             /* Headless visibility report for SCENE-gate validation. */

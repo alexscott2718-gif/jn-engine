@@ -35,6 +35,8 @@ extern const EntityVTable vt_digger;      /* 3DIG — C3DDigger animated prop */
 extern const EntityVTable vt_hook;        /* 3HOO — C3DHook AI hook target */
 extern const EntityVTable vt_cindy;       /* 3CIN — C3DCindy friend NPC */
 extern const EntityVTable vt_friend;      /* 3NIC/3SHE/3ULT/3LIB/3HUG/3BEN/3MOM/3KIT — C3DFriends/C3DAI idle cast */
+Entity *behavior_friend_talk_nearest(World *w);          /* T-key: talk nearest friend */
+Entity *behavior_friend_talk_tag(World *w, const char *tag); /* JN_TEST_TALK headless hook */
 extern const EntityVTable vt_escort;      /* 3SUM/3PIR — C3DSumo/C3DPirate exit-escort actors */
 extern const EntityVTable vt_ai_trigger;  /* 3AIT — C3DAITrigger AI/script mission-wiring volume */
 Entity *behavior_ai_trigger_test_fire(World *w);  /* JN_TEST_AITRIG headless hook */

@@ -224,67 +224,72 @@ This is a shared, committed campaign — read the shared docs, don't rely on too
   append); the patch table in `behavior_ai_trigger.c` (real `ActivateAITrigger` order; reward/counter/menu side
   effects deferred); and the two freed visibility consumers — `3FOW`/`C3DFowl` (per-level SCENE windows) +
   `3YCA`/`C3DYokCargo` (LEV5 `SCENE>489`), both with the `C3DCindy` `SCENE<0 → show` guard so direct `--level`/audit
-  launches (no CTaskList) are unchanged. `3HUM` clone reveal was already wired and now fires. The **talk-reward
-  half** (Carl/Cindy/Benny/… set SCENE at dialog gates) stays deferred with the friend talk system. Validation (all
+  launches (no CTaskList) are unchanged. `3HUM` clone reveal was already wired and now fires. (The **talk-reward
+  half** — Carl/Cindy/Benny/… set SCENE at dialog gates — landed in the next bullet, 2026-06-24.) Validation (all
   against the *visible* result): `--newgame` + real `teleportexplanation` → `SCENE 0x1e→0x23`; real level4c
   `fowlinv` → `SCENE 0x1cc→0x1d6` closes the fowl window (visible→hidden); level5 cargo hides at `0x1e9` / shows at
   `0x1ea`; `SCENE=0x5a` reveals Humphrey + clones (4/4). `audit_faithfulness.py` 0 findings (all 35); `make web`;
   `qa_web_verify.py` 16/16. RE notes: `docs/decomp/_scene_sequencer.md`. Headless seams: `JN_TEST_SCENE=<tag>`,
   `JN_TEST_SET_SCENE=<int>`, `JN_TEST_VIS=<FourCC>`. **Public WASM not deployed** (gated on approval).
+- **Talk-reward path DONE — the friend half of the SCENE writers (2026-06-24):** the OTHER SCENE writer. Each concrete
+  friend leaf overrides `C3DFriends` vtable slot 96 (`StartFriendTalkPulse`) with a `Handle<X>TalkProgressReward` hook
+  that re-reads SCENE and writes the next beat. Recovered from the nine per-character specs and collapsed into one shared
+  FourCC × current-SCENE → new-SCENE table in `behavior_friend.c` (`friend_apply_talk_reward`, mirroring
+  `aitrig_apply_story_progress`): Carl/Cindy/Benny/Libby/Nick/Judy/Sheen write SCENE (full table in
+  `docs/decomp/_scene_sequencer.md` §1); Hugh (tail-jump only) + UltraLord (deferred inventory at `0x186`) write nothing.
+  Driven from ONE centralized entrypoint — **T** talks the nearest in-range friend (`behavior_friend_talk_nearest`,
+  faces the player) — so Cindy (`vt_cindy`) and Carl (`vt_walker`), which keep their own modules, are reached through the
+  same table with no duplication. Writes via `game_flow_set_entity_state` (no-op without a CTaskList), and talk is
+  key/headless-only (never auto), so direct `--level`/audit launches and the 2-tick probes are unaffected. HUD/menu/
+  inventory/counter side effects deferred (same helpers as the AITrigger table). Validation (`JN_TEST_TALK=<tag>`): 7
+  friends advanced their beats; the Nick LV2A conditional verified both ways (level2 `0x8c→0x91`, level2a unchanged); a
+  wrong-beat talk no-ops; `--newgame` advanced Carl `0x32→0x3c`. `audit_faithfulness.py` 0/35; level1/level2 screenshots
+  unchanged; `make web`; `qa_web_verify.py` 16/16. Catalog unchanged at **93/90/3** (enriched existing friend vtables, no
+  new FourCC). **Public WASM not deployed** (gated on approval). Headless seam: `JN_TEST_TALK=<friendTag>`.
 - **Still unimplemented:** the refreshed lens reports **3** used-in-level FourCCs with no native behavior (**93**
   total, **90** with native vtables) — `3ROK`/`C3DRock` origin pool, `3SPR`/`C3DSprite` no serialized canvas, and
   `3DAI`/`C3DAI` origin dummy. These are **resolver/positioning gaps, not SCENE-blocked** (the two SCENE-gated rows
   `3YCA`/`3FOW` are now ported). The actor/gameplay focus section of `behavior_todo.md` is **empty** and the full
-  queue is deferred-only. The next substantive moves are (a) a **runtime-repositioning controller** (`3ROK`
-  origin pool) / per-instance ASE resolver work (`3SPR`, `3TRA` visual); (b) the **N5 tails** below (text renderer /
-  `PlayerControlled` input lock); (c) the **talk-reward path** (the other half of the SCENE writers — drives the
-  remaining story beats once a dialog/talk interaction exists); or (d) the deferred **active shrink mechanic**.
+  queue is deferred-only. Both SCENE writers (player-trigger + friend-talk) are now ported. The next substantive
+  moves are (a) **C3DGoddard** (unblocks the `3MEP` beacon + the dormant Goddard/energy SCENE beats); (b) **combat
+  depth** (AITrigger `AIState`/`AISpeed` → C3DAI state machine; code-spawned `3MIN`/`3MIS`/`3TAN`/`3HAR`); (c) the
+  **N5 tails** (text renderer / `PlayerControlled` input lock — the latter also surfaces the deferred HUD/menu side
+  effects of both SCENE writers); (d) a **runtime-repositioning controller** (`3ROK` origin pool) / per-instance ASE
+  resolver work (`3SPR`, `3TRA` visual); or (e) the deferred **active shrink mechanic**.
   Code-spawned / unplaced enemy specs (`3TAN`/`C3DTank`, `3HAR`/`C3DHarrier`, `3MIN`/`C3DMine`, `3MIS`/`C3DMissile`,
   `3POD`, `3SHR`) still have zero current `.gam` rows. The big structural waves (N1–N5) are all landed.
 - Implementation contract is `EntityVTable` in `src/engine/world.h`, registered by FourCC in
   `src/game/entities.c`; per-frame via `entity_update()` (`main.c:1418`); `.gam` params via
   `gam_prop_f/i`. Full contract in plan §1.
 
-## Your task this session: the talk-reward path (the OTHER half of the SCENE writers)
+## Your task this session: pick one of the remaining live moves (both SCENE writers are now ported)
 The portable behavior tail is exhausted (`90/93` native vtables; the 3 remaining are `3ROK`/`3SPR`/`3DAI`
 resolver/positioning gaps — see the deferred list below, leave them). The structural waves (N1–N5), the
 N2.x/N2.y slices, the actor-focus closeout, the four base/effect tail passes, the `3ANI`/`3SWN` pass, the
-long-tail close-out, and — 2026-06-24 — the **SCENE sequencer** are all landed.
+long-tail close-out, the **SCENE sequencer** (player-trigger half), and — 2026-06-24 — the **talk-reward path**
+(the NPC half of the SCENE writers) are all landed. **Both SCENE writers are now ported**: `behavior_ai_trigger.c`
+(`aitrig_apply_story_progress`) for player triggers, `behavior_friend.c` (`friend_apply_talk_reward`) for friend
+talks. See `docs/decomp/_scene_sequencer.md` for the full machine.
 
-**The SCENE sequencer has two writers; only one is ported.** The player-trigger half
-(`C3DAITrigger::ApplyAITriggerStoryProgress`) shipped 2026-06-24 — see `docs/decomp/_scene_sequencer.md`.
-The OTHER half is **NPC talk-progress rewards**: when the player talks to a friend at the right story beat, the
-friend calls `set_task_state("SCENE", …)` (and sibling counter/inventory writes). Today the whole friend cast
-(`vt_friend`, `behavior_friend.c`) is **idle-only** and the `TalkTrigger0..4`/`TaskName` props are parsed but
-unused. Porting the talk-reward path brings the cast to life AND drives the story beats the AITrigger half can't
-reach — and the mutable task store (`game_flow_set_entity_state`) is already in place to receive the writes.
+**The live options (no forced default — pick by what unblocks the most, and confirm with the user first):**
+- **(a) C3DGoddard** — the strongest follow-on. It unblocks the `3MEP` Goddard beacon AND the SCENE-sequencer beats
+  that are wired-but-dormant because they need Goddard/energy/menu helpers: the `GOGODDARD`/`PUTGODDARD`/`JIMEND`/
+  `RECHARGE` AITrigger rows and the Goddard-gated talk side effects. Read `docs/decomp/C3DGoddard.md` first.
+- **(b) Combat depth** — wire AITrigger `AIState`/`AISpeed` into the C3DAI state machine, and/or the code-spawned
+  enemy specs that have zero `.gam` placement (`3MIN`/`3MIS`/`3TAN`/`3HAR` — they need a spawner/emitter).
+- **(c) Text renderer** for the menu/HUD — today `menu.c` draws bars + logs labels and `C2DInGameMenu` prints
+  numerals; a real glyph renderer would also let the deferred talk/AITrigger counter-popup side effects surface.
+- **(d) `PlayerControlled` input lock** — the `PlayerControlled=="NULL" → force player STOP` path is visible in
+  `ActivateAITrigger`; an N5 tail. Plumb the string prop onto the entity so cutscenes can lock player input.
+- The 3 deferred resolver rows (`3ROK`/`3SPR`/`3DAI`) stay parked — assessed 2026-06-24, none is "free" (3DAI is
+  authored-empty; 3SPR needs the unresolved default-canvas size; 3ROK needs an emitter/repositioning controller).
+- The deferred **active shrink mechanic** (`C3DShrinkRay` → AI become moving pickups) is also still open.
 
-**The decompiled writers (confirm each against `docs/decomp/<Class>.md`, then recover the bodies with
-`tools/ghidra/DumpFunctions.java` exactly as the SCENE sequencer did):**
-- The base is **`C3DFriends`** — read `docs/decomp/C3DFriends.md` FIRST: how a "talk" is initiated (proximity +
-  input? a TalkTrigger volume?), how talk state advances over `TalkState*`/`TalkTrigger0..4`, and the two reward
-  hooks `StartFriendTalkPulse` / `SetFriendState3` (vtable-4 slots **96** and **90**).
-- Per-character reward leaves (each overrides slot 90 and/or 96 and writes SCENE/counters at a specific gate):
-  `C3DCindy` (`004150d0`/`00415120`: `SCENE==0x104 → 0x10e`), `C3DBenny` (`00410760`: `0x73`/`0x8d`/`0x15e`),
-  `C3DLibby` (`0042d020`: `SCENE==0x104` rewards), `C3DNick` (`SCENE==0x7d` counter → `0xa2`), `C3DUltraLord`
-  (`00448620`: `SCENE==390`), `C3DJudy`/`C3DSheen`/`C3DCarl` (switch-set `SCENE`), `C3DHugh` (visibility gate
-  `SCENE>=0xcd`). `set_task_state` is `FUN_0045f990` (already understood). The reward side effects
-  `FUN_004038c0`/`004061d0`/`00406f90` (inventory flags / counter popups / story screens) are the **same deferred
-  HUD/menu helpers** the AITrigger patch table deferred — keep only the SCENE/task-state writes for now.
-
-**Plan:** (1) port the `C3DFriends` talk machinery into `behavior_friend.c` (talk init + state advance + face the
-player), building on `behavior_ai`; (2) split per-character reward leaves out of `vt_friend` (or a shared talk-hook
-table keyed on FourCC + talk state, mirroring `aitrig_apply_story_progress`); (3) wire `game_flow_set_entity_state`
-for the SCENE/counter writes; (4) add a headless `JN_TEST_TALK=<friendTag>` hook (mirror `JN_TEST_SCENE`) that
-forces a friend's talk-reward and asserts the SCENE write; (5) validate the talk advances a beat in campaign mode
-(`--newgame`) and that direct `--level`/audit launches are unchanged.
-
-**If you'd rather not:** the other live options are (a) a real **text renderer** for the menu/HUD; (b) the
-`PlayerControlled` input lock (the `PlayerControlled=="NULL" → force player STOP` path is already visible in
-`ActivateAITrigger`); (c) **C3DGoddard** (unblocks the `3MEP` beacon + the dormant `GOGODDARD`/`JIMEND`/`PUTGODDARD`
-patch-table beats); (d) combat depth (AITrigger `AIState`/`AISpeed` → the C3DAI state machine; code-spawned
-`3MIN`/`3MIS`/`3TAN`/`3HAR`). The 3 deferred resolver rows (`3ROK`/`3SPR`/`3DAI`) stay parked — assessed 2026-06-24,
-none is "free" (3DAI is authored-empty; 3SPR needs the unresolved default-canvas size; 3ROK needs an emitter port).
+**Deferred HUD/menu side effects (carry forward):** both SCENE writers keep ONLY the SCENE/task-state writes. The
+inventory-grid (`FUN_004038c0`), counter-popup (`FUN_004061d0`/`004061b0`/`004061c0`), story-screen (`FUN_00406f90`),
+and energy/Goddard helpers stay deferred until the HUD/menu subsystems land — option (a)/(c) above are the natural
+unblockers. The friend talk-reward table (`friend_apply_talk_reward` in `behavior_friend.c`) documents each deferred
+side effect inline at its gate, so re-enabling them is a localized follow-up.
 
 Hold the decomp discipline — confirm behavior against `docs/decomp/<Class>.md` (the decompiled body, not an offset
 scan), build on the existing modules. Re-derive the lens before starting:
@@ -317,13 +322,12 @@ sequencer / scripted-trigger chain / unresolved player slots), documented per-cl
 targets** (shrink→moving pickup), recorded on their specs + `C3DShrinkRay.md` (the active mechanic is move #3).
 `3SPA`/`C3DSparkWire` is literally `C3DTesla`-derived, so it reuses `vt_tesla` rather than a new file.
 
-**Friend / NPC wiring (this session's task):** `vt_friend` (`behavior_friend.c`) is the shared C3DFriends/C3DAI
-idle base; the talk-reward path is the task above. The `.gam` loader has a generic string-prop bag (`gam_str()`)
-for unclaimed string fields (incl. `TalkTrigger0..4`, already parsed into `Entity.talk_trigger[]`), alongside the
-numeric `gam_prop_f/i`. The mutable task store from the SCENE sequencer (`game_flow_set_entity_state` /
-`game_flow_entity_state(tag)`) is the write/read path for the talk rewards. Lean on `behavior_ai.c` for the
-idle/face-player movement, and mirror `aitrig_apply_story_progress` (`behavior_ai_trigger.c`) for the per-character
-reward table.
+**Friend / NPC wiring (landed 2026-06-24):** `vt_friend` (`behavior_friend.c`) is the shared C3DFriends/C3DAI
+idle base, and the friend talk-reward writer is now ported via `friend_apply_talk_reward` plus the **T** key /
+`JN_TEST_TALK=<friendTag>` entrypoints. The `.gam` loader still preserves the generic string props (`gam_str()`,
+including `TalkTrigger0..4` in `Entity.talk_trigger[]`) for future dialog/TalkTrigger expansion. The mutable task
+store from the SCENE sequencer (`game_flow_set_entity_state` / `game_flow_entity_state(tag)`) is the shared
+SCENE/task-state write/read path for both the AITrigger and friend writers.
 
 **Known zero-placement enemy specs:** `3TAN`/`C3DTank`, `3HAR`/`C3DHarrier`, `3MIN`/`C3DMine`, and
 `3MIS`/`C3DMissile` still have specs but zero current `.gam` placement. Keep them in the code-spawned /
@@ -333,11 +337,11 @@ database-spawned / unused bucket until separate evidence says otherwise.
 bars + logs labels; `C2DInGameMenu` counters print numerals); (2) plumbing the `PlayerControlled` string prop
 onto the entity so cutscenes can lock player input (deferred in N5).
 
-**Done when:** the friend cast can be talked to and a talk at the right beat advances SCENE (validated headlessly
-in campaign mode via `JN_TEST_TALK` + the `SCENE 0xNN -> 0xMM` log), the per-character reward table matches the
-decompiled hooks (deferring only the HUD/menu side effects), `tools/audit_faithfulness.py` stays at 0 findings,
-affected levels pass `JN_SCREENSHOT` spot checks, and (wave end) `qa_web_verify.py` is still 16/16 with a one-line
-PROJECT_HISTORY paragraph + this handoff and `behavior_todo.md` refreshed.
+**Done when:** after choosing a live move above, the implementation matches the relevant decomp spec/body, keeps
+the direct `--level` / audit harness behavior unchanged unless the feature explicitly targets it, and is validated
+with `make`, focused headless probes or screenshots for the affected levels, `tools/audit_faithfulness.py` at 0
+findings, and (wave end) `tools/qa_web_verify.py` at 16/16. Refresh `behavior_todo.md` when the catalog lens
+changes, append a one-line `PROJECT_HISTORY.md` entry, and update this handoff.
 
 ## Inner loop (per class)
 1. Read `docs/decomp/<Class>.md` (§Field map, §Per-frame behavior, §Constants). Confirm
@@ -362,24 +366,16 @@ PROJECT_HISTORY paragraph + this handoff and `behavior_todo.md` refreshed.
   source of truth.
 
 ## Definition of done for this session
-Read `docs/decomp/C3DFriends.md` + the per-character specs first, recover the talk-reward bodies with
-`DumpFunctions.java`, then port the talk-interaction + per-character SCENE/counter reward table (deferring the
-HUD/menu side effects) on `native-port`, one commit per logical unit. Validate with `make`, a `JN_TEST_TALK`
-headless transition in campaign mode, affected-level `JN_SCREENSHOT` checks, and
-`tools/audit_faithfulness.py` (0 findings); at wave end refresh `behavior_todo.md`, run `tools/qa_web_verify.py`
-(16 checks),
-append `PROJECT_HISTORY.md`, and update this handoff. With N1–N5 plus the N2.x / N2.y slices, the actor-focus
-closeout (`3PHO`/`3RCK`/`3HUM`), the base/effect tail passes (1: `3NEU`/`3RED`/`3ARR`; 2: `3LIO`/`3OMT`/`3CON`;
-3: `3TRO`/`3LEA`/`3TAR`/`3AIO`; 4: `3LIG`/`3FIS`/`3GIR`/`3SPA`/`3STA`), and the animated-sprite + swing-door pass
-(`3ANI`/`3SWN`) landed, the campaign's base framework,
-enemies, combat, vehicles, game-flow, placed ranged enemies/trigger hazards, the full friend/NPC cast, the escort
-actors, the AI mission-trigger volume, the phone-booth prop, the placed patrol rocket, the hidden Humphrey
-clone-controller, neutron + red-neutron pickups, nav-arrow sprite gates, light-data rows (3LIO + the OMediaLight
-3LIG), authored OMT-shape props, cone/leaves/shadow sprite decor, the AI OMT prop, the VR trophy win-condition
-pickup, the set-dressing creatures (`3FIS`/`3GIR`), the spark-wire Tesla hazard (`3SPA`), the static
-stalactite prop (`3STA`), the `3ANI` frame animator, the `3SWN` swing door, and — 2026-06-24 — the **SCENE
-sequencer** (task-state store + `C3DAITrigger` story-progress patch table) with its freed `3FOW`/`3YCA` gates are
-ported (**90/93** used FourCCs now have native vtables) — the actor/gameplay focus section is empty and the
-remaining work is resolver/positioning, the N5 tails, the talk-reward path, or the active shrink mechanic. Only
-`3ROK` (origin pool), `3SPR` (no serialized canvas), and `3DAI` (origin dummy) remain deferred with documented
-reasons.
+The previous session's talk-reward task is complete when the friend cast can be talked to and a talk at the right
+beat advances SCENE, the per-character reward table matches the decompiled hooks while deferring only the HUD/menu
+side effects, `tools/audit_faithfulness.py` stays at 0 findings, affected screenshots are unchanged, `make web`
+builds, `tools/qa_web_verify.py` reports 16/16, and `PROJECT_HISTORY.md` + this handoff describe the new state.
+That is the current 2026-06-24 baseline.
+
+With N1–N5 plus the N2.x / N2.y slices, the actor-focus closeout (`3PHO`/`3RCK`/`3HUM`), the base/effect tail
+passes (1: `3NEU`/`3RED`/`3ARR`; 2: `3LIO`/`3OMT`/`3CON`; 3: `3TRO`/`3LEA`/`3TAR`/`3AIO`; 4:
+`3LIG`/`3FIS`/`3GIR`/`3SPA`/`3STA`), the animated-sprite + swing-door pass (`3ANI`/`3SWN`), the **SCENE sequencer**
+(task-state store + `C3DAITrigger` story-progress patch table) with freed `3FOW`/`3YCA` gates, and the friend
+talk-reward writer are ported, **90/93** used FourCCs now have native vtables. The actor/gameplay focus section is
+empty; the remaining substantive work is `C3DGoddard`, combat depth, N5 tails (text renderer / `PlayerControlled`
+input lock), resolver/positioning (`3ROK`/`3SPR`/`3DAI`), or the active shrink mechanic.

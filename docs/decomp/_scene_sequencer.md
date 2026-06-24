@@ -31,12 +31,33 @@ subsystems not yet ported) — they do not affect SCENE or the gates.
 
 ## The writers
 
-### 1. NPC talk-progress rewards (deferred — needs the talk system)
-Carl/Cindy/Benny/Judy/Sheen/Libby/Nick each `set_task_state("SCENE", …)` at
-scripted dialog gates (e.g. Cindy `vfunc_04_096`: at `SCENE==0x104` → `0x10e`;
-Carl: `0x3c`/`0x46`/`0x118`; Benny: `0x73`/`0x8d`/`0x15e`). These fire from the
-friend talk-reward path, which the native port has **not** landed (`vt_friend`
-is idle-only). Not ported here.
+### 1. NPC talk-progress rewards — **PORTED** (2026-06-24)
+Each concrete friend leaf overrides `C3DFriends` vtable slot 96
+(`StartFriendTalkPulse`) with a `Handle<X>TalkProgressReward` hook that re-reads
+SCENE and writes the next beat via `set_task_state`. Recovered from the nine
+per-character specs (`docs/decomp/C3D{Carl,Cindy,Benny,Libby,Nick,Judy,Sheen,
+UltraLord,Hugh}.md`) and collapsed into one shared FourCC × current-SCENE →
+new-SCENE table in `behavior_friend.c` (`friend_apply_talk_reward`, mirroring
+`aitrig_apply_story_progress`):
+
+| FourCC | Friend | SCENE writes (gate → new) |
+|---|---|---|
+| `3CAR` | Carl | `0x32→0x3c`, `0x41→0x46`, `0x10e→0x118` |
+| `3CIN` | Cindy | `0x104→0x10e` |
+| `3BEN` | Benny | `0x6e→0x73`, `0x8c→0x8d`, `0x154→0x15e` |
+| `3LIB` | Libby | `0xff→0x104`, `0x12c→0x136`, `0x15e→0x168`, `0x18f→0x19a` |
+| `3NIC` | Nick | `0x73→0x78`, `0x7d→0x78`, `0x82→0x8c`, `0x8c\|0x8d→0x91` (off LV2A only), `0x96→0x91`, `0xa0→0xa2` |
+| `3MOM` | Judy | `0xc8→0xcd`, `0xd2→0xdc`, `0xe6→0xfa` |
+| `3SHE` | Sheen | `0x118→0x122`, `0x136→0x140`, `0x168→0x17c` |
+| `3HUG` | Hugh | none — slot 96 is a tail-jump to `StartFriendTalkPulse` only |
+| `3ULT` | UltraLord | none — only a deferred inventory write at `SCENE==0x186` |
+
+The talk is driven from one centralized entrypoint (the **T** key → nearest
+friend in range, or `JN_TEST_TALK=<tag>`); the reward turns the friend to face
+the player. The inventory-grid/counter-popup/story-screen side effects
+(`FUN_004038c0`/`004061d0`/`00406f90`/…) are the same HUD/menu helpers deferred
+below. Writes go through `game_flow_set_entity_state` (no-op without a CTaskList),
+so direct `--level`/audit launches are unchanged. Headless seam: `JN_TEST_TALK=<friendTag>`.
 
 ### 2. C3DAITrigger story-progress patch table — **PORTED**
 `C3DAITrigger::ApplyAITriggerStoryProgress` (`FUN_0040caa0`) is a hardcoded

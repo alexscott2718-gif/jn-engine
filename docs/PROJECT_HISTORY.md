@@ -993,8 +993,9 @@ SCENE is a `CTaskList` task-state value with no autonomous driver — it advance
 (`tools/ghidra/DumpFunctions.java`) recovered the get/set task helpers (`FUN_0045fea0` / `FUN_0045f990`) and,
 critically, `C3DAITrigger::ApplyAITriggerStoryProgress` (`FUN_0040caa0`): a hardcoded `ObjectTag × current-SCENE →
 new-SCENE` patch table run when the player trips a story trigger (~25 beats: `teleportexplanation 0x1e→0x23`,
-`fowlinv 0x1cc→0x1d6`, `givekey 0xcd→0xd2`, …). The talk-reward half (Carl/Cindy/Benny/… set SCENE at dialog
-gates) stays deferred with the friend talk system. Landed: a mutable task store (`task_set_entity_state` /
+`fowlinv 0x1cc→0x1d6`, `givekey 0xcd→0xd2`, …). At this checkpoint the talk-reward half (Carl/Cindy/Benny/…
+set SCENE at dialog gates) stayed deferred; it landed in the next entry below. Landed here: a mutable task store
+(`task_set_entity_state` /
 `game_flow_set_entity_state`, faithful to `set_task_state` — writes existing tags, no append), the patch table in
 `behavior_ai_trigger.c` (in the real `ActivateAITrigger` order, reward/counter/menu side effects deferred), and
 the two freed visibility consumers — `3FOW`/`C3DFowl` (per-level SCENE windows) and `3YCA`/`C3DYokCargo` (LEV5
@@ -1006,6 +1007,29 @@ hides at `0x1e9` / shows at `0x1ea`; seeding `SCENE=0x5a` reveals Humphrey + clo
 0 findings (all 35 levels); `make web`; `qa_web_verify.py` 16/16. Catalog now **93** used FourCCs, **90** native
 vtables, **3** missing (`3ROK`/`3SPR`/`3DAI` — resolver/positioning gaps, not SCENE-blocked). RE notes:
 [`decomp/_scene_sequencer.md`](./decomp/_scene_sequencer.md). Public WASM not deployed (gated on approval).
+
+**The talk-reward path — the friend half of the SCENE sequencer (2026-06-24).** The SCENE machine has two writers; the
+AITrigger player-trigger half shipped above. The OTHER half is **NPC talk-progress rewards**: each concrete friend leaf
+overrides `C3DFriends` vtable slot 96 (`StartFriendTalkPulse`) with a `Handle<X>TalkProgressReward` hook that re-reads
+SCENE and writes the next story beat (`docs/decomp/C3DFriends.md` + the nine per-character specs). Recovered the bodies
+and collapsed every SCENE-writing leaf into one shared FourCC × current-SCENE → new-SCENE table in `behavior_friend.c`
+(`friend_apply_talk_reward`, mirroring `aitrig_apply_story_progress`): Carl `0x32→0x3c`/`0x41→0x46`/`0x10e→0x118`, Cindy
+`0x104→0x10e`, Benny `0x6e→0x73`/`0x8c→0x8d`/`0x154→0x15e`, Libby `0xff→0x104`/`0x12c→0x136`/`0x15e→0x168`/`0x18f→0x19a`,
+Nick `0x73/0x7d→0x78`/`0x82→0x8c`/`0x8c|0x8d→0x91` (only off the LV2A race level)/`0x96→0x91`/`0xa0→0xa2`, Judy
+`0xc8→0xcd`/`0xd2→0xdc`/`0xe6→0xfa`, Sheen `0x118→0x122`/`0x136→0x140`/`0x168→0x17c`. Hugh (slot 96 is a tail-jump only)
+and UltraLord (only a deferred inventory write at `0x186`) write no SCENE state and are intentionally absent. The talk
+is driven from one centralized entrypoint — the **T** key talks the nearest friend in range (`behavior_friend_talk_nearest`),
+turning to face the player — so Cindy (`vt_cindy`) and Carl (`vt_walker`), which keep their own modules, are reached
+through the same table without duplicating it. The inventory-grid / counter-popup / story-screen side effects
+(`FUN_004038c0`/`004061d0`/`00406f90`/…) are the same HUD/menu helpers the AITrigger patch table deferred. Writes go
+through `game_flow_set_entity_state`, a no-op with no CTaskList loaded, so direct `--level`/audit launches are unchanged
+and the 2-tick probes never fire a talk (talk is key/headless-only, never auto). Validation (headless `JN_TEST_TALK=<tag>`):
+seven friends advanced their beats (Carl `0x32→0x3c`, Benny `0x6e→0x73`, Libby `0xff→0x104`, Judy `0xc8→0xcd`, Sheen
+`0x118→0x122`, Nick(level2) `0x73→0x78`); the Nick level-conditional verified both ways (level2 `0x8c→0x91`, level2a
+`0x8c→0x8c` unchanged); a wrong-beat talk is a no-op (`0x40→0x40`); `--newgame` campaign mode advances Carl `0x32→0x3c`.
+`audit_faithfulness.py` 0 findings (all 35 levels); level1/level2 `JN_SCREENSHOT` unchanged; `make web`; `qa_web_verify.py`
+16/16. Catalog unchanged at **93/90/3** (the talk reward enriched the existing friend vtables — no new FourCC). Public
+WASM not deployed (gated on approval).
 
 ---
 
