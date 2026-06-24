@@ -105,6 +105,20 @@ void physics_step(World *w, float dt) {
             resolve_axis(e, s, 2);
         }
 
+        /* Mesh wall collision: push the entity out of BLOCKING walls/fences in
+           XZ and slide along faces. Runs after the horizontal integration so
+           the Y settle below samples the floor at the corrected XZ. Curbs and
+           steps under the step cap are NOT walls (the ground-follow rises onto
+           them). Player-only today; generalized to all physics entities with
+           per-object TerrainColl/HasCollision gating in Phase 3. */
+        if (world_collision_enabled() && w->collision) {
+            float pos[3] = { e->x, e->y, e->z };
+            float vel[3] = { e->vx, e->vy, e->vz };
+            collision_resolve_horizontal(w->collision, pos, e->half_extents, vel);
+            e->x = pos[0]; e->z = pos[2];
+            e->vx = vel[0]; e->vz = vel[2];
+        }
+
         int was_on_ground = e->on_ground;
         e->on_ground = 0;
         e->y += e->vy * dt;

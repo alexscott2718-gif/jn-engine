@@ -375,3 +375,53 @@ float collision_segment(const CollisionWorld *cw,
     }
     return best;
 }
+
+int collision_nearest_wall(const CollisionWorld *cw, const float p[3],
+                           float search, float out_pt[3], float out_n[3],
+                           float *out_ymin, float *out_ymax) {
+    if (!cw || cw->tri_count == 0) return 0;
+    const float MIN_WALL_H = 2.0f * STEP_CAP;   /* a genuine blocker, not a curb */
+    /* The test seats the player squarely against the face and drives straight
+       in, so require a NEAR-VERTICAL wall (|n.y| small): a tilted face's surface
+       at the player's height is offset from where the seating puts it, which
+       would make the synthetic drive ride over its edge rather than press the
+       face. The runtime resolve still handles tilted walls; this is only about
+       picking a clean wall to validate against. */
+    const float MAX_NY = 0.15f;
+    int ix0 = grid_ix(cw, p[0] - search), ix1 = grid_ix(cw, p[0] + search);
+    int iz0 = grid_iz(cw, p[2] - search), iz1 = grid_iz(cw, p[2] + search);
+    float best = search * search;
+    const CollTri *bt = NULL;
+    float bq[3] = {0,0,0};
+    for (int jz = iz0; jz <= iz1; jz++)
+        for (int jx = ix0; jx <= ix1; jx++) {
+            int c = jz * cw->nx + jx;
+            int s = cw->cell_start[c], e = cw->cell_start[c + 1];
+            for (int j = s; j < e; j++) {
+                const CollTri *t = &cw->tris[cw->cell_tris[j]];
+                if (fabsf(t->n[1]) >= MAX_NY) continue;
+                if (t->ymax - t->ymin < MIN_WALL_H) continue;
+                float q[3];
+                closest_pt_tri(p, t->v0, t->v1, t->v2, q);
+                float dx=p[0]-q[0], dy=p[1]-q[1], dz=p[2]-q[2];
+                float d2 = dx*dx + dy*dy + dz*dz;
+                if (d2 < best) { best = d2; bt = t; bq[0]=q[0]; bq[1]=q[1]; bq[2]=q[2]; }
+            }
+        }
+    if (!bt) return 0;
+    if (out_pt) { out_pt[0]=bq[0]; out_pt[1]=bq[1]; out_pt[2]=bq[2]; }
+    if (out_ymin) *out_ymin = bt->ymin;
+    if (out_ymax) *out_ymax = bt->ymax;
+    if (out_n) {
+        float nx = bt->n[0], nz = bt->n[2];
+        float l = sqrtf(nx*nx + nz*nz);
+        if (l < 1.0e-4f) { out_n[0]=1.0f; out_n[1]=0.0f; out_n[2]=0.0f; }
+        else {
+            nx/=l; nz/=l;
+            /* Orient outward (toward p) so callers can offset along it. */
+            if ((p[0]-bq[0])*nx + (p[2]-bq[2])*nz < 0.0f) { nx=-nx; nz=-nz; }
+            out_n[0]=nx; out_n[1]=0.0f; out_n[2]=nz;
+        }
+    }
+    return 1;
+}
