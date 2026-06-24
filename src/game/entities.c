@@ -98,6 +98,8 @@ static const EntityTypeInfo entity_types[] = {
     { "3AIO", "AI OMT shape prop",     &vt_ai_omtobj },
     /* Base/effect tail pass 4. */
     { "3LIG", "Scene light (data row)",              &vt_light },
+    { "3FIS", "Darwin fish (set-dressing creature)", &vt_creature },
+    { "3GIR", "Girl-eating plant (set-dressing creature)", &vt_creature },
     { NULL, NULL, NULL }
 };
 
