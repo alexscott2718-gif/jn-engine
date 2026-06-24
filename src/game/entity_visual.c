@@ -437,7 +437,11 @@ static const TypeEntry TYPE_TABLE[] = {
     { "3TOL", { "assets/ase/toolchestclosed.ASE", NULL, 1.0f, 0 } },/* C3DToolChest */
     { "3TRO", { "assets/ase/trophy.ASE",        NULL, 1.0f, 0 } },  /* C3DTrophy (VR levels) */
     { "3SPY", { "assets/ase/yokspy0.ASE",       NULL, 1.0f, 0 } },  /* C3DYokianSpy */
-    { "3FLE", { "assets/ase/yokcaptnstop.ASE",  NULL, 1.0f, 0 } },  /* C3DFleetCommander ("captain") */
+    /* C3DFleetCommander::RegisterFleetCommanderAssets registers HISTOP=
+       commanderstop.ase + comander.png (decomp). The old yokcaptnstop.ASE was
+       the wrong Yokian (the captain) — QA 2026-06-24 l6a "should be yokian
+       fleet commander". */
+    { "3FLE", { "assets/ase/commanderstop.ASE", "assets/png/comander.png", 1.0f, 0 } },
     { "3SPW", { "assets/ase/vulture01.ASE",     NULL, 1.0f, 0 } },  /* level5 vulture (tag "vulta"; class name pending Phase 0) */
     { "3TEL", { "assets/ase/sfxteleport.ASE",   NULL, 1.0f, 0 } },  /* C3DTeleportFX (cutscene teleport ray) */
     /* OMT-container meshes exported via tools/omt_mesh_export.py (the 3DIN/
