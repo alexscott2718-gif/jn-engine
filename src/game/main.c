@@ -1583,6 +1583,12 @@ int main(int argc, char **argv) {
     const char *scene_test_tag = getenv("JN_TEST_SCENE");
     if (scene_test_tag && *scene_test_tag) scene_test_tick = 2;
 
+    /* Headless visibility report (JN_TEST_VIS=<FourCC>): after warmup, print each
+       matching entity's visible flag and the live SCENE — for SCENE-gate
+       validation (3FOW/3YCA/3HUM). Fires once. */
+    int vis_test_done = 0;
+    const char *vis_test_type = getenv("JN_TEST_VIS");
+
     /* Headless swing-door test (3SWN): at warmup tick JN_TEST_SWING, force the
        nearest C3DSwingDoor through its on_trigger so the yaw-swing state machine
        can be exercised without walking the player into the doorway. */
@@ -1756,6 +1762,22 @@ int main(int argc, char **argv) {
                 long after = game_flow_entity_state("SCENE");
                 fprintf(stderr, "[scene_test] tag='%s' fired=%s SCENE 0x%lx -> 0x%lx\n",
                         scene_test_tag, fired ? "yes" : "NO", before, after);
+            }
+
+            /* Headless visibility report for SCENE-gate validation. */
+            if (vis_test_type && strlen(vis_test_type) >= 4 && !vis_test_done &&
+                screenshot_warmup_ticks >= 3) {
+                vis_test_done = 1;
+                long scene = game_flow_entity_state("SCENE");
+                int shown = 0, total = 0;
+                for (Entity *v = world.head; v; v = v->next) {
+                    if (!v->alive || strncmp(v->type, vis_test_type, 4) != 0) continue;
+                    total++; shown += v->visible ? 1 : 0;
+                    fprintf(stderr, "[vis_test] %.4s '%s' visible=%d\n",
+                            v->type, v->tag, v->visible);
+                }
+                fprintf(stderr, "[vis_test] %.4s: %d/%d visible @ SCENE=0x%lx level='%s'\n",
+                        vis_test_type, shown, total, scene, game_flow_current_level());
             }
 
             /* Headless swing-door test: fire the nearest 3SWN's trigger. */

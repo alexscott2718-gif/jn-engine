@@ -125,6 +125,10 @@ static const EntityTypeInfo entity_types[] = {
     { "3SM1", "Smoke (effect sprite)",               &vt_prop },
     { "3FUE", "Rocket fuel (pickup sprite)",         &vt_prop },
     { "3TRI", "Trigger (base marker, inert)",        &vt_prop },
+    /* SCENE-sequencer consumers (unblocked by the task-state story progression
+       — visibility windows in behavior_fowl.c / behavior_cargo.c). */
+    { "3FOW", "Fowl (SCENE-window creature)",        &vt_fowl },
+    { "3YCA", "Yokian cargo (LEV5 SCENE-gated)",     &vt_cargo },
     { NULL, NULL, NULL }
 };
 
