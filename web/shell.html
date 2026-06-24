@@ -168,6 +168,7 @@
     <button id="noclipToggle" type="button">Noclip: Off</button>
     <button id="turboToggle" type="button">Speed: 1x</button>
     <button id="qaToggle" type="button">QA: Off</button>
+    <button id="touchToggle" type="button">Touch: Auto</button>
     <button id="campaignToggle" type="button">Campaign: Off</button>
     <button id="sandboxToggle" type="button">Sandbox: Off</button>
     <button id="toolSelect" type="button">Tool: —</button>
@@ -876,20 +877,39 @@
      in the unit disc; the engine scales speed by its magnitude. Pointer Events
      give us multi-touch (move + jump simultaneously) with one code path. */
   (function () {
-    /* Touch-mode detection. `(pointer: coarse)` alone FALSE-POSITIVES on
-       touchscreen laptops / hybrids — which then hid the keyboard controls and
-       showed the joystick on a real desktop ("stuck in mobile mode"). Require a
-       coarse primary pointer AND no fine pointer anywhere (a mouse/trackpad means
-       keep keyboard+mouse mode). `?touch=1` / `?touch=0` force it either way. */
+    /* Touch-mode resolution. Three modes drive the on-screen controls:
+         'auto' — auto-detect (default). `(pointer: coarse)` alone FALSE-POSITIVES
+                  on touchscreen laptops / hybrids — which then hid the keyboard
+                  controls and showed the joystick on a real desktop (mobile
+                  controls "popping up"). Require a coarse primary pointer AND no
+                  fine pointer anywhere (a mouse/trackpad keeps keyboard+mouse mode).
+         'on'   — force the touch overlay on.
+         'off'  — force it off.
+       Priority: an explicit `?touch=1`/`?touch=0` URL param wins for that load;
+       otherwise the user's persisted choice (localStorage 'jn_touch', set by the
+       Touch toggle button) wins; otherwise 'auto'. The toggle lets a user kill a
+       false-positive — or summon the controls — and have the choice stick. */
+    function detectTouch() {
+      return !!(window.matchMedia &&
+                window.matchMedia('(pointer: coarse)').matches &&
+                !window.matchMedia('(any-pointer: fine)').matches);
+    }
+    function resolveTouch(m) {
+      return m === 'on' ? true : m === 'off' ? false : detectTouch();
+    }
+
     var touchParam = qparams.get('touch');
-    var isTouch;
-    if (touchParam === '1') isTouch = true;
-    else if (touchParam === '0') isTouch = false;
-    else isTouch = !!(window.matchMedia &&
-                      window.matchMedia('(pointer: coarse)').matches &&
-                      !window.matchMedia('(any-pointer: fine)').matches);
-    if (!isTouch) return;            /* desktop: keep keyboard only */
-    document.body.classList.add('touch');
+    var stored = null;
+    try { stored = localStorage.getItem('jn_touch'); } catch (e) {}
+    var mode;
+    if (touchParam === '1') mode = 'on';
+    else if (touchParam === '0') mode = 'off';
+    else if (stored === 'on' || stored === 'off' || stored === 'auto') mode = stored;
+    else mode = 'auto';
+
+    /* Handlers are always wired below (so the toggle can summon controls at
+       runtime); visibility + per-frame input pumping are gated on this flag. */
+    var touchActive = false;
 
     var joy = document.getElementById('joy');
     var nub = document.getElementById('joynub');
@@ -996,12 +1016,39 @@
       ev.preventDefault();
     });
 
+    /* ---- Toggle button: cycle Auto -> On -> Off -> Auto, persisted ---- */
+    var touchButton = document.getElementById('touchToggle');
+    function setTouchLabel() {
+      if (touchButton)
+        touchButton.textContent =
+          mode === 'on' ? 'Touch: On' : mode === 'off' ? 'Touch: Off' : 'Touch: Auto';
+    }
+    function applyTouch(on) {
+      touchActive = !!on;
+      document.body.classList.toggle('touch', touchActive);
+      if (!touchActive) {       /* drop any held stick/fly so it can't linger */
+        mvx = 0; mvy = 0; updateNub(); setMove(0, 0); setFly(0);
+      }
+    }
+    if (touchButton) touchButton.addEventListener('click', function () {
+      mode = mode === 'auto' ? 'on' : mode === 'on' ? 'off' : 'auto';
+      try { localStorage.setItem('jn_touch', mode); } catch (e) {}
+      setTouchLabel();
+      applyTouch(resolveTouch(mode));
+      var c = document.getElementById('canvas'); if (c) c.focus();
+    });
+    setTouchLabel();
+    applyTouch(resolveTouch(mode));
+
     /* Push the stick vector to the engine every animation frame while held.
        Continuous push (not just on move) keeps movement going when the finger
-       is stationary at a deflected position. */
+       is stationary at a deflected position. Gated on touchActive so desktop
+       (controls off) doesn't issue needless ccalls every frame. */
     function pump() {
-      setMove(mvx, mvy);
-      if (flyY !== 0) setFly(flyY);
+      if (touchActive) {
+        setMove(mvx, mvy);
+        if (flyY !== 0) setFly(flyY);
+      }
       requestAnimationFrame(pump);
     }
     requestAnimationFrame(pump);
