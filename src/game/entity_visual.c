@@ -294,7 +294,14 @@ static const TypeEntry TYPE_TABLE[] = {
        canvas-table fix and textured it with canvas 14 (rocketpad) — gray
        boat (2026-06-11 QA #2). */
     { "3SAI", { "assets/glb/omt/SailBoat.glb",  NULL, 1.0f, 0 } },
-    { "3SPH", { "assets/ase/omt/Sphere01.ASE",  NULL, 1.0f, 0 } },
+    /* C3DSphere builds a *procedural* OMedia3DShape + material in InitObject
+       (world_props_terrain) — a collision/terrain sphere, not an authored mesh.
+       Drawing the Max placeholder Sphere01.ASE rendered a disc both reporters
+       read as a stray "fan" (level1 @ ~2081/-3418 and 2055/-3529). Two
+       independent reporters (awefan + lu9, 2026-06-14) confirm nothing visible
+       belongs there; it stays an invisible trigger/collision volume (revealed
+       in --sandbox like the other markers). Also affects Level2b's 2 instances. */
+    { "3SPH", { NULL, NULL, 0.0f, 1 } },
 
     /* Phase 9 — exact 3D meshes (Stage B Ghidra confirmed; bindings fixed by
        the 2026-06-11 QA ticket #2 against the objects.omt 3DSh chunk table). */

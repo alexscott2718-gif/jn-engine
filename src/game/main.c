@@ -663,7 +663,10 @@ static void entity_color(const char *type, float *r, float *g, float *b) {
 static int entity_visual_foot_anchors(const Entity *e) {
     static const char *types[] = {
         "3BEN", "3CAR", "3HUM", "3LIB", "3MOM", "3NIC",
-        "3SHE", "3ULT", "3FOW", "3SPK"
+        "3SHE", "3ULT", "3FOW", "3SPK",
+        /* stop-pose NPCs omitted from the original list -> sank/floated by
+           their negative local-Y bounds (QA 2026-06-14: 3HUG l4a, 3CIN l3d). */
+        "3HUG", "3CIN"
     };
     if (!e) return 0;
     for (size_t i = 0; i < sizeof(types) / sizeof(types[0]); i++) {
