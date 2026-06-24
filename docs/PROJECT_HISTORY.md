@@ -987,6 +987,26 @@ with native vtables, **5** still missing — and those 5 are exactly the documen
 pool, `3YCA`/`3FOW` SCENE-gated, `3SPR` no serialized canvas, `3DAI` origin dummy). The behavior lens's
 actor/gameplay focus section is now empty; the full queue is deferred-only.
 
+**The SCENE sequencer — task-state story progression (2026-06-24).** The portable behavior tail was exhausted, so
+the next move was structural: the SCENE story-progression machine that three deferred consumers were waiting on.
+SCENE is a `CTaskList` task-state value with no autonomous driver — it advances only on story events. RE
+(`tools/ghidra/DumpFunctions.java`) recovered the get/set task helpers (`FUN_0045fea0` / `FUN_0045f990`) and,
+critically, `C3DAITrigger::ApplyAITriggerStoryProgress` (`FUN_0040caa0`): a hardcoded `ObjectTag × current-SCENE →
+new-SCENE` patch table run when the player trips a story trigger (~25 beats: `teleportexplanation 0x1e→0x23`,
+`fowlinv 0x1cc→0x1d6`, `givekey 0xcd→0xd2`, …). The talk-reward half (Carl/Cindy/Benny/… set SCENE at dialog
+gates) stays deferred with the friend talk system. Landed: a mutable task store (`task_set_entity_state` /
+`game_flow_set_entity_state`, faithful to `set_task_state` — writes existing tags, no append), the patch table in
+`behavior_ai_trigger.c` (in the real `ActivateAITrigger` order, reward/counter/menu side effects deferred), and
+the two freed visibility consumers — `3FOW`/`C3DFowl` (per-level SCENE windows) and `3YCA`/`C3DYokCargo` (LEV5
+`SCENE>489`), both using the `C3DCindy` `SCENE<0 → show` guard so a direct `--level`/audit launch (no CTaskList)
+is unchanged. `3HUM`/`C3DHumphrey`'s clone reveal was already wired and now fires. Validation (all against the
+*visible* result): `--newgame` + the real `teleportexplanation` trigger advances `SCENE 0x1e→0x23`; on level4c the
+real `fowlinv` trigger drives `SCENE 0x1cc→0x1d6` and the fowl's window closes (visible→hidden); the level5 cargo
+hides at `0x1e9` / shows at `0x1ea`; seeding `SCENE=0x5a` reveals Humphrey + clones (4/4). `audit_faithfulness.py`
+0 findings (all 35 levels); `make web`; `qa_web_verify.py` 16/16. Catalog now **93** used FourCCs, **90** native
+vtables, **3** missing (`3ROK`/`3SPR`/`3DAI` — resolver/positioning gaps, not SCENE-blocked). RE notes:
+[`decomp/_scene_sequencer.md`](./decomp/_scene_sequencer.md). Public WASM not deployed (gated on approval).
+
 ---
 
 ## Invariants (don't relitigate these)

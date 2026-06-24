@@ -215,17 +215,32 @@ This is a shared, committed campaign — read the shared docs, don't rely on too
   `JN_SCREENSHOT` on all 12 placing levels (all render, no regression); `audit_faithfulness.py` 0 findings (all 35
   levels); `make web`; `qa_web_verify.py` 16/16. Catalog now **93** used FourCCs, **88** native vtables, **5**
   missing. **Public WASM not yet deployed this pass** (gated on explicit approval).
-- **Still unimplemented:** the refreshed lens reports **5** used-in-level FourCCs with no native behavior (**93**
-  total, **88** with native vtables), and **all 5 are the documented deferred rows** — `3ROK`/`C3DRock` origin pool,
-  `3YCA`/`C3DYokCargo` SCENE-gated cargo, `3SPR`/`C3DSprite` no serialized canvas, `3FOW`/`C3DFowl` SCENE-gated
-  visibility, `3DAI`/`C3DAI` origin dummy. The actor/gameplay focus section of `behavior_todo.md` is **empty** and
-  the full queue is deferred-only. The portable base/resolver + effect long tail is therefore **exhausted**: the
-  next substantive moves are (a) unblocking the deferred rows by porting the **SCENE sequencer** (frees `3YCA`,
-  `3FOW`, and Humphrey's clone reveal) and/or a **runtime-repositioning controller** (`3ROK`) / per-instance ASE
-  resolver work (`3SPR`, `3TRA` visual); (b) the **N5 tails** below; or (c) the deferred **active shrink mechanic**
-  (a new player weapon + projectile + creature shrink→pickup state — see the record-fix specs). Code-spawned /
-  unplaced enemy specs (`3TAN`/`C3DTank`, `3HAR`/`C3DHarrier`, `3MIN`/`C3DMine`, `3MIS`/`C3DMissile`, `3POD`,
-  `3SHR`) still have zero current `.gam` rows. The big structural waves (N1–N5) are all landed.
+- **SCENE sequencer DONE — task-state story progression (2026-06-24):** the structural move after the portable tail
+  exhausted. SCENE is a `CTaskList` task-state value with **no autonomous driver** — it advances only on story
+  events. RE (`tools/ghidra/DumpFunctions.java`) recovered the get/set task helpers (`FUN_0045fea0`/`FUN_0045f990`)
+  and `C3DAITrigger::ApplyAITriggerStoryProgress` (`FUN_0040caa0`) — a hardcoded `ObjectTag × current-SCENE →
+  new-SCENE` patch table (~25 beats) run when the player trips a story trigger. Landed: a **mutable task store**
+  (`task_set_entity_state`/`game_flow_set_entity_state`, faithful to `set_task_state` — writes existing tags, no
+  append); the patch table in `behavior_ai_trigger.c` (real `ActivateAITrigger` order; reward/counter/menu side
+  effects deferred); and the two freed visibility consumers — `3FOW`/`C3DFowl` (per-level SCENE windows) +
+  `3YCA`/`C3DYokCargo` (LEV5 `SCENE>489`), both with the `C3DCindy` `SCENE<0 → show` guard so direct `--level`/audit
+  launches (no CTaskList) are unchanged. `3HUM` clone reveal was already wired and now fires. The **talk-reward
+  half** (Carl/Cindy/Benny/… set SCENE at dialog gates) stays deferred with the friend talk system. Validation (all
+  against the *visible* result): `--newgame` + real `teleportexplanation` → `SCENE 0x1e→0x23`; real level4c
+  `fowlinv` → `SCENE 0x1cc→0x1d6` closes the fowl window (visible→hidden); level5 cargo hides at `0x1e9` / shows at
+  `0x1ea`; `SCENE=0x5a` reveals Humphrey + clones (4/4). `audit_faithfulness.py` 0 findings (all 35); `make web`;
+  `qa_web_verify.py` 16/16. RE notes: `docs/decomp/_scene_sequencer.md`. Headless seams: `JN_TEST_SCENE=<tag>`,
+  `JN_TEST_SET_SCENE=<int>`, `JN_TEST_VIS=<FourCC>`. **Public WASM not deployed** (gated on approval).
+- **Still unimplemented:** the refreshed lens reports **3** used-in-level FourCCs with no native behavior (**93**
+  total, **90** with native vtables) — `3ROK`/`C3DRock` origin pool, `3SPR`/`C3DSprite` no serialized canvas, and
+  `3DAI`/`C3DAI` origin dummy. These are **resolver/positioning gaps, not SCENE-blocked** (the two SCENE-gated rows
+  `3YCA`/`3FOW` are now ported). The actor/gameplay focus section of `behavior_todo.md` is **empty** and the full
+  queue is deferred-only. The next substantive moves are (a) a **runtime-repositioning controller** (`3ROK`
+  origin pool) / per-instance ASE resolver work (`3SPR`, `3TRA` visual); (b) the **N5 tails** below (text renderer /
+  `PlayerControlled` input lock); (c) the **talk-reward path** (the other half of the SCENE writers — drives the
+  remaining story beats once a dialog/talk interaction exists); or (d) the deferred **active shrink mechanic**.
+  Code-spawned / unplaced enemy specs (`3TAN`/`C3DTank`, `3HAR`/`C3DHarrier`, `3MIN`/`C3DMine`, `3MIS`/`C3DMissile`,
+  `3POD`, `3SHR`) still have zero current `.gam` rows. The big structural waves (N1–N5) are all landed.
 - Implementation contract is `EntityVTable` in `src/engine/world.h`, registered by FourCC in
   `src/game/entities.c`; per-frame via `entity_update()` (`main.c:1418`); `.gam` params via
   `gam_prop_f/i`. Full contract in plan §1.
@@ -236,14 +251,16 @@ trigger (N2.y), the **actor/gameplay focus closeout (3PHO/3RCK/3HUM)**, the four
 (1: `3NEU`/`3RED`/`3ARR`; 2: `3LIO`/`3OMT`/`3CON`; 3: `3TRO`/`3LEA`/`3TAR`/`3AIO`; 4: `3LIG`/`3FIS`/`3GIR`/
 `3SPA`/`3STA`), the **animated-sprite + swing-door pass (`3ANI`/`3SWN`)**, and the **long-tail close-out**
 (C3DAI creatures `3DIN`/`3CML`/`3SPW` → `vt_creature`; the gated-prop family `3FLA`/`3HYD`/`3SCR`/`3TEL`/`3SPH`/
-`3CUB`/`3TOL`/`3OCT`/`3MER`/`3TRA`/`3SM1`/`3FUE`/`3TRI` → `vt_prop`) are all landed. **The behavior lens is now
-deferred-only** (`88/93` native vtables; the 5 remaining are `3ROK`/`3YCA`/`3SPR`/`3FOW`/`3DAI`) and the
-actor/gameplay focus section is **empty** — there is no more "just register a leaf" work. Pick ONE of:
+`3CUB`/`3TOL`/`3OCT`/`3MER`/`3TRA`/`3SM1`/`3FUE`/`3TRI` → `vt_prop`) are all landed, and the **SCENE sequencer**
+(task-state store + `C3DAITrigger` story-progress patch table + the freed `3FOW`/`3YCA` gates) landed 2026-06-24.
+**The behavior lens is now deferred-only** (`90/93` native vtables; the 3 remaining are `3ROK`/`3SPR`/`3DAI`,
+resolver/positioning gaps) and the actor/gameplay focus section is **empty** — there is no more "just register a
+leaf" work. Pick ONE of:
 
-1. **Port the SCENE sequencer** — the single highest-leverage unblock. It frees the `3YCA` cargo + `3FOW` fowl
-   visibility gates *and* activates Humphrey's `CLONE1..7` reveal (all three are wired-but-dormant today because
-   SCENE is pinned at the CTaskList table value). Start from `game_flow.c` / `task_loader.c` and the SCENE reads
-   in `behavior_humphrey.c`.
+1. **Port the SCENE sequencer** — ✅ **DONE 2026-06-24** (see Current state). The player-driven half landed
+   (mutable task store + the `C3DAITrigger` story-progress patch table); `3YCA`/`3FOW` gates + Humphrey clone
+   reveal are unblocked. The remaining half is the **talk-reward path** (move #2c) — Carl/Cindy/Benny/… set SCENE
+   at dialog gates, which needs a friend/NPC talk interaction the native port hasn't built.
 2. **The N5 tails** — (a) a real **text renderer** for the menu/HUD (today `menu.c` draws bars + logs labels;
    `C2DInGameMenu` counters print numerals); (b) plumb the `PlayerControlled` string prop onto the entity so
    cutscenes can lock player input (deferred in N5).
@@ -266,16 +283,16 @@ sed -n '1,180p' docs/asset_catalog/behavior_todo.md
 `instances * level_count`, and splits out an actor/gameplay focus section (now empty). The live catalog remains
 useful for previews: <https://exentt.com/JN-assets/catalog/>.
 
-**The 5 deferred rows stay deferred until their blocker is ported — skip them otherwise:**
+**The 3 remaining deferred rows stay deferred until their blocker is ported — skip them otherwise:**
 - `3ROK` / `C3DRock` — 99 inst / 1 level (Level5b), all serialized at `(0,0,0)` with `CanMove=1`/`RotateToDest`. A
   runtime-repositioned pool; no controller that scatters them is ported, so drawing the origin pool regresses.
-- `3YCA` / `C3DYokCargo` — 11 inst / 8 levels. SCENE-window visibility gate (level=="LEV5" + `SCENE>489`). Needs
-  the SCENE sequencer (move #1); the cargo_ship mesh is already visible in 7/8 levels so a thin port changes little.
 - `3SPR` / `C3DSprite` — 15 inst / 4 levels. Rows carry **zero** serialized `SpriteSize`/`SpriteDatabase`/
   `SpriteIndex`; the default canvas is the spec's own open question. Resolver gap, not a behavior gap.
-- `3FOW` / `C3DFowl` — 4 inst / 4 levels. SCENE-window visibility gate (LEV4/LV4A/LV4C); a faithful port would
-  **hide** the currently-visible `fowlbase.glb` until the SCENE sequencer lands (move #1).
 - `3DAI` / `C3DAI` — 4 inst / 2 levels, authored at `(0,0,0)` and invisible. A bare AI-base dummy; nothing to drive.
+
+(`3YCA`/`C3DYokCargo` and `3FOW`/`C3DFowl` were on this list as "needs the SCENE sequencer" — both are now ported,
+2026-06-24, because the SCENE sequencer landed. They use the `C3DCindy` `SCENE<0 → show` guard, so a direct
+`--level`/audit launch with no CTaskList is unchanged; the gate only bites in campaign runs.)
 
 NB on the closed long tail: `vt_prop` (`behavior_prop.c`) is the shared **gated static prop** leaf — visibility/
 progress gate + **solidity strictly from authored `HasCollision`** (1→solid, 0→non-solid, unset→non-solid) over the
@@ -339,9 +356,9 @@ actors, the AI mission-trigger volume, the phone-booth prop, the placed patrol r
 clone-controller, neutron + red-neutron pickups, nav-arrow sprite gates, light-data rows (3LIO + the OMediaLight
 3LIG), authored OMT-shape props, cone/leaves/shadow sprite decor, the AI OMT prop, the VR trophy win-condition
 pickup, the set-dressing creatures (`3FIS`/`3GIR`), the spark-wire Tesla hazard (`3SPA`), the static
-stalactite prop (`3STA`), the `3ANI` frame animator, and the `3SWN` swing door are ported (**72/93** used FourCCs
-now have native vtables) — the actor/gameplay focus section is empty and the remaining work is the base/resolver +
-effect long tail. The next *portable* rows are the lower-reach props/effects (`3FUE`, `3SPH`, `3TEL`, `3DIN`,
-`3FLA`, `3CUB`, `3HYD`, `3CML`, `3MER`, `3OCT`, `3SCR`, `3SM1`, `3SPW`, `3TOL`, `3TRA`, `3TRI`); `3ROK`, `3YCA`,
-`3SPR`, `3FOW`, and `3DAI` are deferred with documented reasons (origin pool / unported SCENE gate / no serialized
-canvas / SCENE-gated visibility / origin dummy).
+stalactite prop (`3STA`), the `3ANI` frame animator, the `3SWN` swing door, and — 2026-06-24 — the **SCENE
+sequencer** (task-state store + `C3DAITrigger` story-progress patch table) with its freed `3FOW`/`3YCA` gates are
+ported (**90/93** used FourCCs now have native vtables) — the actor/gameplay focus section is empty and the
+remaining work is resolver/positioning, the N5 tails, the talk-reward path, or the active shrink mechanic. Only
+`3ROK` (origin pool), `3SPR` (no serialized canvas), and `3DAI` (origin dummy) remain deferred with documented
+reasons.

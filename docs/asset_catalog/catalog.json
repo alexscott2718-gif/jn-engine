@@ -1,7 +1,7 @@
 {
  "summary": {
-  "generated": "2026-06-24 01:51 UTC",
-  "commit": "5423ef5",
+  "generated": "2026-06-24 05:44 UTC",
+  "commit": "a4c2b4b",
   "counts": {
    "resolution": 219,
    "st_mesh": 73,
@@ -9,10 +9,10 @@
    "st_invisible": 40,
    "st_mesh_untextured": 4,
    "st_no_visual": 87,
-   "native_behaviors": 100,
+   "native_behaviors": 102,
    "used_fourccs": 93,
-   "used_native_behaviors": 88,
-   "used_missing_native_behavior": 5,
+   "used_native_behaviors": 90,
+   "used_missing_native_behavior": 3,
    "decomp_specs": 104,
    "assets_total": 5807,
    "no_usage": 39,
@@ -2844,8 +2844,8 @@
    "decomp_status": "spec",
    "decomp_confidence": "Medium",
    "family": "creatures_one_off_set_dressing",
-   "native_behavior": null,
-   "native_desc": null,
+   "native_behavior": "vt_fowl",
+   "native_desc": "Fowl (SCENE-window creature)",
    "tags": [
     "C3DFOWL",
     "fowl"
@@ -9517,8 +9517,8 @@
    "decomp_status": null,
    "decomp_confidence": null,
    "family": null,
-   "native_behavior": null,
-   "native_desc": null,
+   "native_behavior": "vt_cargo",
+   "native_desc": "Yokian cargo (LEV5 SCENE-gated)",
    "tags": [
     "C3DYOKCARGO",
     "CARGOSHIP1",
