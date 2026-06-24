@@ -482,7 +482,21 @@ static void configure_safety_floor(World *world, const Entity *jim) {
     if (half_x < 25000.0f) half_x = 25000.0f;
     if (half_z < 25000.0f) half_z = 25000.0f;
 
-    world->safety_floor_enabled = 1;
+    /* Collision overhaul (Phase 1): the mesh CollisionWorld is now the
+       authoritative floor. The safety floor is demoted to a backstop that only
+       activates where there is no collider geometry under the entity. It stays
+       ON by default because most levels' walkable surface is still a plain
+       visible mesh (not a GROUND/BLOCK collider) — only level1/level2/level3a
+       ship a GROUND floor mesh, so disabling it here would drop the player
+       through every other level. Set JN_SAFETY_FLOOR=0 to disable it and test
+       mesh-floor sufficiency per level (the path toward deleting it once the
+       remaining levels gain real collider floors). safety_floor_y/geometry are
+       computed unconditionally so the visible procedural ground keeps drawing
+       at the same height regardless of the gate. */
+    {
+        const char *s = getenv("JN_SAFETY_FLOOR");
+        world->safety_floor_enabled = (s && strcmp(s, "0") == 0) ? 0 : 1;
+    }
     world->safety_floor_y = world->ground_y - 1000.0f;
     world->safety_floor_cx = cx;
     world->safety_floor_cz = cz;
@@ -492,7 +506,8 @@ static void configure_safety_floor(World *world, const Entity *jim) {
     unsigned int ground_tex = tex_cache_get(CANON_GROUND_TEXTURE);
     ground_init(ground_tex, half_x, half_z, cx, cz, 120.0f, 0.0f);
     fprintf(stderr,
-            "[safety_floor] y=%.1f center=(%.0f, %.0f) half=(%.0f, %.0f)\n",
+            "[safety_floor] %s y=%.1f center=(%.0f, %.0f) half=(%.0f, %.0f)\n",
+            world->safety_floor_enabled ? "on" : "off",
             world->safety_floor_y, cx, cz, half_x, half_z);
 }
 
@@ -2078,9 +2093,12 @@ int main(int argc, char **argv) {
         if (clouds_tex) renderer_draw_cloud_dome(clouds_tex, sky_spin);
         if (sky_model)  renderer_draw_sky_dome(sky_model, 0.0f);
 
-        /* Safety floor: drawn beneath the authored OMT level and used by
-           physics only when authored terrain does not catch the player. */
-        ground_draw(world.safety_floor_enabled ? world.safety_floor_y : world.ground_y);
+        /* Procedural ground plane: drawn beneath the authored OMT level (the
+           physics backstop is the separate, env-gated safety floor). Always
+           drawn at safety_floor_y so toggling the physics gate never shifts the
+           visible plane; retiring this plane is Phase 4 of the collision
+           overhaul. */
+        ground_draw(world.safety_floor_y);
 
         /* Pickable scene content: entities + placements (single enumeration
            path shared with the QA pick pass -- see draw_scene). */
