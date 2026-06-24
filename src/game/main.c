@@ -5,6 +5,7 @@
 #include "../engine/audio.h"
 #include "../engine/input.h"
 #include "../engine/physics.h"
+#include "../engine/collision.h"
 #include "../engine/ground.h"
 #include "../engine/canon_data.h"   /* Phase 12: measured ground footprint/topography */
 #include "../engine/phase1_sky_tint.h"  /* Phase 1: measured keyframe-8881 sky + scene tint */
@@ -400,6 +401,11 @@ static int load_level(const LevelDesc *desc, World *world) {
         billboard_overrides_load(desc->billboard_overrides);
     else
         billboard_overrides_load("");
+    /* Build the mesh collision world from the collider placements (GROUND +
+       BLOCKING_* / BLOCK_*). Needs the collider meshes in the cache, which a
+       live GL context provides — same requirement as the render path. */
+    collision_free(world->collision);
+    world->collision = collision_build(world);
     return n;
 }
 
@@ -855,10 +861,11 @@ static void draw_scene(World *world, int jim_model_ok)
            rather than a collider (verified across all 35 levels by the
            faithfulness sweep) — let them draw; skip everything else.
            Skipped before QA registration so an invisible collider can't
-           swallow a pick aimed at its visible twin. */
-        if (strncasecmp(pl->name, "BLOCK", 5) == 0 &&
-            strcasecmp(pl->name, "Blocks_Out") != 0 &&
-            strcasecmp(pl->name, "Blocks_In")  != 0) {  /* level1c authors "Blocking01" */
+           swallow a pick aimed at its visible twin. The invisible-collider set
+           is now the shared collision_is_invisible() predicate (engine/
+           collision.h), keeping the renderer and the CollisionWorld agreed on
+           which placements are collision-only. */
+        if (collision_is_invisible(pl->name)) {  /* level1c authors "Blocking01" */
             audit_line("placement", pl->name, NULL, "collision-skip", NULL, NULL, 0);
             continue;
         }

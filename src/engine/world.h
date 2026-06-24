@@ -135,6 +135,11 @@ typedef struct World {
 
     WorldPlacement *placements;  /* static-geometry array (NULL when none) */
     int             placement_count;
+
+    /* Mesh collision world built from the level's collider placements
+       (BLOCKING_* / BLOCK_* + the visible GROUND floor). NULL until built;
+       owned by the World and freed in world_destroy. See engine/collision.h. */
+    struct CollisionWorld *collision;
 } World;
 
 void    world_init(World *w);

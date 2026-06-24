@@ -1,4 +1,5 @@
 #include "world.h"
+#include "collision.h"
 #include "glad.h"
 #include <stdlib.h>
 #include <string.h>
@@ -14,6 +15,7 @@ void world_init(World *w) {
     w->safety_floor_half_x = 0.0f;
     w->safety_floor_half_z = 0.0f;
     w->placements = NULL; w->placement_count = 0;
+    w->collision = NULL;
 }
 
 Entity *world_add(World *w) {
@@ -38,6 +40,8 @@ void world_destroy(World *w) {
     Entity *e = w->head;
     while (e) { Entity *n = e->next; free(e); e = n; }
     w->head = NULL; w->count = 0;
+    collision_free(w->collision);
+    w->collision = NULL;
     free(w->placements);
     w->placements = NULL; w->placement_count = 0;
     w->safety_floor_enabled = 0;
