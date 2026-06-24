@@ -34,8 +34,8 @@
 | 5 | l1 | 3SAI SAILBOAT1 | GFX | boat floats above river before lab | A | ⬜ TODO (path/anim, not simple anchor) |
 | 6 | l6a | 3BUT C3DBUTTON | PLC | buttons floating + should flash black/red | A+visual | ⬜ TODO |
 | 7 | l6a | 3DOR halldoor01 | OTH | doors should loop opening SFX until stop | I | ⬜ TODO (see lu9-06-12 door[59] precedent) |
-| 8 | l6a | PROJ | MIS | should be plasma blast not baseball | C | ⬜ TODO (enemy-team PROJ visual) |
-| 9 | l6a | 3FLE FLEETC | MIS | should be yokian fleet commander | C | ⬜ TODO (row→yokcaptnstop.ASE; verify it loads) |
+| 8 | l6a | PROJ | MIS | should be plasma blast not baseball | C | ✅ DONE (enemy PROJ→missile.ASE; player keeps baseball) |
+| 9 | l6a | 3FLE FLEETC | MIS | should be yokian fleet commander | C | ✅ DONE (commanderstop.ASE+comander.png) |
 | 10 | l3c | tree04 | TEX | should be level3c/0000_128x128d32 | D | ⬜ TODO (target PNG exists) |
 | 11 | l5 | 3RED C3DREDNEUTRON | SCL | too small; add warped/bouncy sprite anim | F | ⬜ TODO (authored SpriteSize + pulse tick) |
 | 12 | l1c | 3PIC sprite_index:157 | TEX | apple-pie showing fruit bowl | D | ⬜ TODO |
@@ -54,6 +54,12 @@
 
 ## Done so far (commits on native-port)
 - `394bb34` — qa(placement): 3SPH invisible + foot-anchor 3HUG/3CIN. (#1,#2,#3, ground-part of #4)
+- `1a1b3a8` — docs(qa): this handoff.
+- `8daf4a8` — qa(model): 3FLE fleet commander (was yokcaptn). (#9)
+- `93ce52c` — qa(model): enemy PROJ → missile.ASE, player keeps baseball. (#8)
+
+**Reports closed & verified: 8/24** (#1×4 instances, #2, #3, #4-ground, #8, #9).
+Remaining open: #4-pathing, #5, #6, #7, #10–#24.
 
 ## Key facts / how to work
 - **Native build:** `make` (zig toolchain; ~exit 0). **Web build+deploy:** `source ~/emsdk/emsdk_env.sh && ./tools/deploy_wasm.sh` (387MB, slow — do ONCE at finalize).
