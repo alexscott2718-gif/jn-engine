@@ -1,7 +1,7 @@
 {
  "summary": {
-  "generated": "2026-06-24 00:24 UTC",
-  "commit": "1b05b08",
+  "generated": "2026-06-24 01:00 UTC",
+  "commit": "4fef9bf",
   "counts": {
    "resolution": 219,
    "st_mesh": 73,
@@ -9,10 +9,10 @@
    "st_invisible": 40,
    "st_mesh_untextured": 4,
    "st_no_visual": 87,
-   "native_behaviors": 82,
+   "native_behaviors": 84,
    "used_fourccs": 93,
-   "used_native_behaviors": 70,
-   "used_missing_native_behavior": 23,
+   "used_native_behaviors": 72,
+   "used_missing_native_behavior": 21,
    "decomp_specs": 104,
    "assets_total": 5807,
    "no_usage": 39,
@@ -825,8 +825,8 @@
    "decomp_status": "spec",
    "decomp_confidence": "Medium",
    "family": "base_framework",
-   "native_behavior": null,
-   "native_desc": null,
+   "native_behavior": "vt_animsprite",
+   "native_desc": "Animated sprite (frame animator)",
    "tags": [
     "C3DANIMATEDSPRITE",
     "apple",
@@ -8465,8 +8465,8 @@
    "decomp_status": null,
    "decomp_confidence": null,
    "family": null,
-   "native_behavior": null,
-   "native_desc": null,
+   "native_behavior": "vt_swingdoor",
+   "native_desc": "Swing door (timed yaw swing)",
    "tags": [
     "C3DDOORSWING",
     "ldoor",

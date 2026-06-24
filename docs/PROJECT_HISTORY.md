@@ -939,6 +939,28 @@ placing levels (`level1` for `3FIS`/`3GIR`, `level5a` for `3STA`, `level4b` for 
 `tools/audit_faithfulness.py` (0 findings, all 35 levels), `make web`, and `tools/qa_web_verify.py` (16/16).
 Public WASM deploy was not requested.
 
+**Base/resolver tail — animated sprite + swing door (2026-06-23).** The next lens pass cleared the two named
+"portable" rows, both confirmed against their specs first. `3ANI`/`C3DAnimatedSprite` (`behavior_animsprite.c`)
+is the authored `Sprite1..Sprite9` canvas-frame animator (`CPickupType -> C3DTriggerType -> C3DSprite`): it
+cycles the frame list at `FPS` while `Activated`, advancing `e->sprite_index` so main.c's pre-existing 3ANI
+sprite-draw branch renders the live frame, and honors `Loop` (0 = stop & hold, 1 = loop, 2 = loop + re-show) and
+the misspelled `InitallyVisible` initial state; the unported scripted-trigger/pickup-state chain (the carnival
+`3BUT` buttons that `ActivateButton` the `bottles` rows) means runtime state is seeded from the authored
+`Activated`/`InitallyVisible` (3NEU's `NextTrigger` posture). This pass also exposed and fixed a latent loader
+limit: `ENTITY_MAX_PROPS` was 24, but a 3ANI row authors more numeric props than that, so `prop_bag_add` silently
+dropped the *last* ones — `Sprite7..9` — truncating the bottle break sequence to 6 frames; the cap is now 40
+(clears the densest authored row, a ~30-prop level4c `3MCA`). `3SWN`/`C3DSwingDoor` (`behavior_swingdoor.c`) is
+the timed yaw-swing door: an activation seeds a `TimeToOpen` countdown and swings the door about its yaw by
+`OpenSpeed*dt` (a 90° quarter-turn), latching the opposite direction for the next activation — modeled as an
+explicit 4-state phase with a re-trigger cooldown (physics fires `on_trigger` every contact frame). It is
+non-solid like `vt_leveldoor` (our AABB can't rotate with the swing, and the `TouchActivated=0` doors have no
+ported opener), the documented divergence from the original's solid Reset. Validation: per-class `make`;
+`JN_SCREENSHOT`/the new `JN_TEST_SWING` hook (Level3C bottles play the full 177→180→177 sequence; Level1/level2a
+doors swing 0→90.8° / 4.7→95.5°; Level1 degenerate 3ANI draws nothing; Level3 `mummydoor` stays closed);
+`tools/audit_faithfulness.py` (0 findings, all 35 levels); `make web`; `tools/qa_web_verify.py` (16/16). The
+refreshed catalog reports **93** used FourCCs, **72** with native vtables, **21** still missing. Public WASM was
+deployed.
+
 ---
 
 ## Invariants (don't relitigate these)

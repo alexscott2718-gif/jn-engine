@@ -177,16 +177,34 @@ This is a shared, committed campaign — read the shared docs, don't rely on too
   builds), `JN_SCREENSHOT` (`level1` for `3FIS`/`3GIR`, `level5a` for `3STA`, `level4b` for `3SPA`, `level4c` for
   `3LIG`), `audit_faithfulness.py` 0 findings (all 35 levels), `make web`, `qa_web_verify.py` 16/16. The refreshed
   catalog now reports **93** used FourCCs, **70** with native vtables, and **23** still missing.
-- **Still unimplemented:** the refreshed generated behavior lens reports **23** used-in-level FourCCs with no
-  native behavior (**93** used FourCCs total, **70** used FourCCs with native vtables). The actor/gameplay focus
+- **Base/resolver tail — animated sprite + swing door DONE (2026-06-23):** the two named "portable" rows landed,
+  each spec read first. `3ANI`/`C3DAnimatedSprite` (`behavior_animsprite.c`, `vt_animsprite`) cycles the authored
+  `Sprite1..Sprite9` `sprites.omt` frames at `FPS` while `Activated`, advancing `e->sprite_index` so main.c's
+  pre-existing 3ANI sprite-draw branch renders the live frame; it honors `Loop` (0=stop & hold, 1=loop, 2=loop +
+  re-show) and the misspelled `InitallyVisible`, seeding runtime state from the authored `Activated`/`InitallyVisible`
+  (the scripted toggle chain — the carnival `3BUT` buttons that `ActivateButton` the `bottles` rows — is deferred,
+  3NEU's `NextTrigger` posture). **Loader fix:** `ENTITY_MAX_PROPS` 24→40 — a 3ANI row authors more numeric props
+  than the bag held, so `prop_bag_add` silently dropped the *last* ones (`Sprite7..9`), truncating the bottle
+  sequence to 6 frames; 40 clears the densest authored row (~30, a level4c 3MCA). `3SWN`/`C3DSwingDoor`
+  (`behavior_swingdoor.c`, `vt_swingdoor`) is the timed yaw-swing door — an activation seeds a `TimeToOpen` countdown
+  and swings the door by `OpenSpeed*dt` (a 90° quarter-turn), latching the opposite direction for the next activation
+  (modeled as an explicit 4-state phase with a re-trigger cooldown since physics fires `on_trigger` every contact
+  frame). It is **non-solid** like `vt_leveldoor` (the AABB can't rotate with the swing; the `TouchActivated=0`
+  doors — mummydoor, the Level3D retro doors — have no ported opener), the documented divergence from the original's
+  solid Reset; the mesh already drew via main.c's per-instance ASEFile/PNGFile door branch (which applies `e->ry`).
+  Added a `JN_TEST_SWING` headless hook. Validation: per-class `make`; Level3C bottles play 177→180→177 and hold;
+  Level1/level2a doors swing 0→90.8°/4.7→95.5°; Level1 degenerate 3ANI draws nothing; Level3 mummydoor stays closed;
+  `audit_faithfulness.py` 0 findings (all 35 levels); `make web`; `qa_web_verify.py` 16/16; **public WASM deployed**.
+  The refreshed catalog now reports **93** used FourCCs, **72** with native vtables, and **21** still missing.
+- **Still unimplemented:** the refreshed generated behavior lens reports **21** used-in-level FourCCs with no
+  native behavior (**93** used FourCCs total, **72** used FourCCs with native vtables). The actor/gameplay focus
   section in `docs/asset_catalog/behavior_todo.md` is still **empty** — the remaining holes are base/resolver and
   effect/prop rows. The top of the queue is now the **deferred** rows (`3ROK`/`C3DRock` origin pool,
   `3YCA`/`C3DYokCargo` SCENE-gated cargo, `3SPR`/`C3DSprite` no-canvas, plus `3FOW`/`C3DFowl` SCENE-gated and
-  `3DAI`/`C3DAI` origin dummy) — skip them unless new evidence appears (see the pass-3/pass-4 bullets). The next
-  *portable* rows are `3ANI`/`C3DAnimatedSprite` (the real frame animator — needs sprite-resolver plumbing, the
-  most substantive remaining target), `3SWN`/`C3DSwingDoor` (per-instance ASEFile/PNGFile swing door — note it is
-  a **door**, not a fowl, despite the `doorfowl.ASE` mesh), then the lower-reach props/effects (`3FUE`, `3SPH`,
-  `3TEL`, `3DIN`, `3FLA`, `3CUB`, `3HYD`, `3CML`, `3MER`, `3OCT`, `3SCR`, `3SM1`, `3SPW`, `3TOL`, `3TRA`, `3TRI`).
+  `3DAI`/`C3DAI` origin dummy) — skip them unless new evidence appears (see the pass-3/pass-4 bullets). With `3ANI`
+  and `3SWN` now landed, the next *portable* rows are the lower-reach props/effects (`3FUE`, `3SPH`,
+  `3TEL`, `3DIN`, `3FLA`, `3CUB`, `3HYD`, `3CML`, `3MER`, `3OCT`, `3SCR`, `3SM1`, `3SPW`, `3TOL`, `3TRA`, `3TRI`) —
+  confirm each FourCC→class via `docs/_gam_classids.tsv` (several have a blank lens "Class") before coding.
   Code-spawned or currently unplaced enemy specs (`3TAN`/
   `C3DTank`, `3HAR`/`C3DHarrier`, `3MIN`/`C3DMine`, `3MIS`/`C3DMissile`) still have zero current `.gam` rows; treat
   them as database-spawned/code-spawned/unplaced until separate evidence says otherwise. The big structural waves
@@ -197,12 +215,17 @@ This is a shared, committed campaign — read the shared docs, don't rely on too
 
 ## Your task this session: continue the base/resolver + effect long tail
 The big structural waves (N1–N5), the placed enemy/hazard slice (N2.x), the friend/NPC cast + AI mission
-trigger (N2.y), the **actor/gameplay focus closeout (3PHO/3RCK/3HUM)**, and four base/effect tail passes
+trigger (N2.y), the **actor/gameplay focus closeout (3PHO/3RCK/3HUM)**, four base/effect tail passes
 (1: `3NEU`/`3RED`/`3ARR`; 2: `3LIO`/`3OMT`/`3CON`; 3: `3TRO`/`3LEA`/`3TAR`/`3AIO`; 4: `3LIG`/`3FIS`/`3GIR`/
-`3SPA`/`3STA`) are all landed. The actor/gameplay focus section of the lens is **empty** — the remaining work is
-the base/resolver + effect/prop long tail, now headed by `3ANI`/`C3DAnimatedSprite` (the real frame animator —
-the most substantive remaining row; it needs sprite-resolver plumbing so the `Sprite1..9` frame list can drive a
-`sprites.omt` billboard). Hold the decomp discipline — confirm behavior against
+`3SPA`/`3STA`), and the **animated-sprite + swing-door pass (`3ANI`/`3SWN`)** are all landed. The
+actor/gameplay focus section of the lens is **empty** — the remaining work is the base/resolver + effect/prop
+long tail, now the **lower-reach props/effects** (`3FUE`, `3SPH`, `3TEL`, `3DIN`, `3FLA`, `3CUB`, `3HYD`, `3CML`,
+`3MER`, `3OCT`, `3SCR`, `3SM1`, `3SPW`, `3TOL`, `3TRA`, `3TRI`) — most are static props / one-off set-dressing /
+small effects in the `vt_cone`/`vt_creature`/`vt_static` mould; a few (`3SCR` C3DLabScreen, `3MER` C3DMERRYGO,
+`3OCT` C3DOCTAPUKE) carry real owned methods, and `3TRI`/`C3DTrigger` is the base trigger leaf. Confirm each
+FourCC→class via `docs/_gam_classids.tsv` before coding (several have a blank lens "Class"). The deferred rows
+(`3ROK`, `3YCA`, `3SPR`, `3FOW`, `3DAI`) stay deferred with documented reasons. Hold the decomp discipline —
+confirm behavior against
 `docs/decomp/<Class>.md` (the decompiled body, not an offset scan), build on the existing modules, and **pick
 targets from the lens**:
 
@@ -297,16 +320,17 @@ Pick the next base/resolver or effect row(s) from `behavior_todo.md`, read each 
 one commit per class on `native-port`. Validate each class with `make`, affected-level `JN_SCREENSHOT` checks, and
 `tools/audit_faithfulness.py`; at wave end refresh `behavior_todo.md`, run `tools/qa_web_verify.py` (16 checks),
 append `PROJECT_HISTORY.md`, and update this handoff. With N1–N5 plus the N2.x / N2.y slices, the actor-focus
-closeout (`3PHO`/`3RCK`/`3HUM`), and the base/effect tail passes (1: `3NEU`/`3RED`/`3ARR`; 2: `3LIO`/`3OMT`/`3CON`;
-3: `3TRO`/`3LEA`/`3TAR`/`3AIO`; 4: `3LIG`/`3FIS`/`3GIR`/`3SPA`/`3STA`) landed, the campaign's base framework,
+closeout (`3PHO`/`3RCK`/`3HUM`), the base/effect tail passes (1: `3NEU`/`3RED`/`3ARR`; 2: `3LIO`/`3OMT`/`3CON`;
+3: `3TRO`/`3LEA`/`3TAR`/`3AIO`; 4: `3LIG`/`3FIS`/`3GIR`/`3SPA`/`3STA`), and the animated-sprite + swing-door pass
+(`3ANI`/`3SWN`) landed, the campaign's base framework,
 enemies, combat, vehicles, game-flow, placed ranged enemies/trigger hazards, the full friend/NPC cast, the escort
 actors, the AI mission-trigger volume, the phone-booth prop, the placed patrol rocket, the hidden Humphrey
 clone-controller, neutron + red-neutron pickups, nav-arrow sprite gates, light-data rows (3LIO + the OMediaLight
 3LIG), authored OMT-shape props, cone/leaves/shadow sprite decor, the AI OMT prop, the VR trophy win-condition
-pickup, the set-dressing creatures (`3FIS`/`3GIR`), the spark-wire Tesla hazard (`3SPA`), and the static
-stalactite prop (`3STA`) are ported (**70/93** used FourCCs now have native vtables) — the actor/gameplay focus
-section is empty and the remaining work is the base/resolver + effect long tail. The next *portable* rows are
-`3ANI` (the real frame animator — needs sprite-resolver plumbing, the most substantive remaining row) and `3SWN`
-(swing door), plus the lower-reach props/effects; `3ROK`, `3YCA`, `3SPR`, `3FOW`, and `3DAI` are deferred with
-documented reasons (origin pool / unported SCENE gate / no serialized canvas / SCENE-gated visibility / origin
-dummy).
+pickup, the set-dressing creatures (`3FIS`/`3GIR`), the spark-wire Tesla hazard (`3SPA`), the static
+stalactite prop (`3STA`), the `3ANI` frame animator, and the `3SWN` swing door are ported (**72/93** used FourCCs
+now have native vtables) — the actor/gameplay focus section is empty and the remaining work is the base/resolver +
+effect long tail. The next *portable* rows are the lower-reach props/effects (`3FUE`, `3SPH`, `3TEL`, `3DIN`,
+`3FLA`, `3CUB`, `3HYD`, `3CML`, `3MER`, `3OCT`, `3SCR`, `3SM1`, `3SPW`, `3TOL`, `3TRA`, `3TRI`); `3ROK`, `3YCA`,
+`3SPR`, `3FOW`, and `3DAI` are deferred with documented reasons (origin pool / unported SCENE gate / no serialized
+canvas / SCENE-gated visibility / origin dummy).
