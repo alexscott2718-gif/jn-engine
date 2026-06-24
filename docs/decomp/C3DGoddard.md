@@ -16,8 +16,27 @@
 Native slice status (2026-06-24): `behavior_goddard.c` registers a runtime `3GOD` vtable and synthesizes one
 `C3DGODDARD` companion after level load only for campaign runs (or explicit `JN_TEST_GODDARD` probes) when the level
 references Goddard/energy tags. The slice implements the documented disabled-level gate, a conservative Jimmy-follow
-mode (`2`), and the `3MEP` fetch/collect mode (`5`). The full raw mode-vector/orbit/effect helper cluster remains
-deferred.
+mode (`2`), and the `3MEP` fetch/collect mode (`5`).
+
+Goddard-script tail (2026-06-24): the `C3DAITrigger` C3DAI-target branch is now wired for Goddard
+(`behavior_goddard_apply_ai_state`, called from `behavior_ai_trigger.c`). The 30-odd `3AIT` rows whose
+`AITarget == C3DGODDARD` (`SITGODDARD`, `GOGODDARD`, `GODDARDDIS`, `PUTGODDARD`, `movegoddard`, `rescuecat*`, …) carry
+the authored `AIState` / `AISpeed` / `AIPatrol` / `AINewPos` / `AINewRotY`. The generic activation path applies the
+teleport / rotation / patrol-point; the Goddard branch then maps the C3DAI state into Goddard's mode machine so the
+scripted pose isn't yanked back by follow mode:
+
+| Authored | Goddard mode | Behavior |
+|---|---|---|
+| `AIPatrol` set (typ. `AIState 3`, "walk") | `PATROL` | seek the authored `PatrolPoint` chain at the `AISpeed` tuning, advance on arrival |
+| `AIState == 4` (constructor-default "attached") | `FOLLOW` | resume the Jimmy-follow companion state (after the `AINewPos` reposition) |
+| otherwise (`AIState 1`/`2`, "sit") | `HOLD` | stop and hold the placed pose (sit/idle) |
+
+`AISpeed` is the `speed_tuning` field at `0x604` (`!= -1` → write). `AIAnim` (`SIT`/`walk`/`sit`) selection stays
+deferred with the rest of the AITrigger animation wiring. Headless seam: `JN_TEST_SCENE=<ObjectTag>` force-fires a
+Goddard `3AIT` in a campaign run and logs Goddard's mode/pose at fire + 60 ticks later. The full raw
+mode-vector/orbit/effect helper cluster (slots 95–99: `SetGoddardModeVector`/`ApplyGoddardOffsetMotion`/
+`AdvanceGoddardModeState`) remains deferred — the six global static vectors `DAT_004f81b0..DAT_004f8208` are still
+unresolved, so they can't be implemented faithfully yet.
 
 ## Field Map
 

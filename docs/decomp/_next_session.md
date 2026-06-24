@@ -251,14 +251,22 @@ This is a shared, committed campaign — read the shared docs, don't rely on too
   `3DAI`/`C3DAI` origin dummy. These are **resolver/positioning gaps, not SCENE-blocked** (the two SCENE-gated rows
   `3YCA`/`3FOW` are now ported). The actor/gameplay focus section of `behavior_todo.md` is **empty** and the full
   queue is deferred-only. Both SCENE writers (player-trigger + friend-talk) are now ported. A **C3DGoddard runtime
-  slice** is also landed: code-spawned `3GOD`, disabled-level gates, follow/fetch modes, and the `3MEP` beacon. The
-  validation set was `JN_TEST_GODDARD` fetch/collect, direct no-env inert path, `--newgame` campaign spawn, disabled
-  `level1c` hidden path, `audit_faithfulness.py` 0 findings, `make web`, and `qa_web_verify.py` 16/16; public WASM is
-  live at `jnengine.d75fb823.js` / assets `b4e7d620`. The next substantive moves are (a) **C3DGoddard tails** (raw
-  mode vectors/orbit/effects + `GOGODDARD`/`PUTGODDARD`/`JIMEND`/`RECHARGE` AITrigger side effects); (b) **combat
-  depth** (AITrigger `AIState`/`AISpeed` → C3DAI state machine; code-spawned `3MIN`/`3MIS`/`3TAN`/`3HAR`); (c) the
-  **N5 tails** (text renderer / `PlayerControlled` input lock — the latter also surfaces the deferred HUD/menu side
-  effects of both SCENE writers); (d) a
+  slice** is also landed: code-spawned `3GOD`, disabled-level gates, follow/fetch modes, and the `3MEP` beacon. **The
+  C3DGoddard scripted-control tail also landed (2026-06-24):** the `C3DAITrigger` C3DAI-target branch is wired for
+  Goddard (`behavior_goddard_apply_ai_state`, called from `behavior_ai_trigger.c`) — the ~30 `3AIT` rows whose
+  `AITarget == C3DGODDARD` (`SITGODDARD`/`GOGODDARD`/`GODDARDDIS`/`PUTGODDARD`/`movegoddard`/`rescuecat*`/…) now map
+  their authored `AIState`/`AISpeed`/`AIPatrol` into Goddard's mode machine (AIPatrol→PATROL the chain, AIState 4→
+  FOLLOW, else→HOLD), so a scripted teleport/sit/patrol is no longer instantly overridden by follow mode. Validation:
+  `JN_TEST_SCENE=GOGODDARD --newgame` → Goddard patrolled `GODDARDPAT1`→`GODDARDPAT2`; `SITGODDARD`→HOLD at `gstart`;
+  `PUTGODDARD` (Level2) → FOLLOW; `3MEP` fetch unregressed; `audit_faithfulness.py` 0 findings, `make web`,
+  `qa_web_verify.py` 16/16. (`AIAnim` selection + the `flag()`/`menu()`/`counter()` reward side effects of these tags
+  stay deferred to the HUD/menu subsystems.) Public WASM still live at the prior `jnengine.d75fb823.js` / assets
+  `b4e7d620` (this pass not redeployed). The next substantive moves are (a) **remaining C3DGoddard tails** (the raw
+  mode-vector/orbit/effect helper cluster — slots 95–99 — blocked on the unresolved static vectors
+  `DAT_004f81b0..DAT_004f8208`; plus the non-SCENE `JIMEND`/`RECHARGE`/`BONUSSCREEN` energy/menu side effects that need
+  HUD/menu); (b) **combat depth** (the general AITrigger `AIState`/`AISpeed` → C3DAI state machine for *enemies*;
+  code-spawned `3MIN`/`3MIS`/`3TAN`/`3HAR`); (c) the **N5 tails** (text renderer / `PlayerControlled` input lock — the
+  latter also surfaces the deferred HUD/menu side effects of both SCENE writers); (d) a
   **runtime-repositioning controller** (`3ROK` origin pool) / per-instance ASE resolver work (`3SPR`, `3TRA` visual);
   or (e) the deferred **active shrink mechanic**.
   Code-spawned / unplaced enemy specs (`3TAN`/`C3DTank`, `3HAR`/`C3DHarrier`, `3MIN`/`C3DMine`, `3MIS`/`C3DMissile`,
@@ -279,10 +287,13 @@ Goddard/energy AITrigger side effects are still deferred. See `docs/decomp/_scen
 `docs/decomp/C3DGoddard.md` for the full machine.
 
 **The live options (no forced default — pick by what unblocks the most, and confirm with the user first):**
-- **(a) C3DGoddard tails / Goddard-energy side effects** — continue from the runtime slice. The remaining work is the
-  raw mode-vector/orbit/effect helper cluster plus the SCENE-sequencer beats that are wired-but-dormant because they
-  need Goddard/energy/menu helpers: the `GOGODDARD`/`PUTGODDARD`/`JIMEND`/`RECHARGE` AITrigger rows and the
-  Goddard-gated talk side effects. Read `docs/decomp/C3DGoddard.md` first.
+- **(a) C3DGoddard tails / Goddard-energy side effects** — the AITrigger *scripted-control* half is now DONE (the
+  `AITarget == C3DGODDARD` rows drive Goddard HOLD/PATROL/FOLLOW via `behavior_goddard_apply_ai_state`). What remains
+  is (i) the raw mode-vector/orbit/effect helper cluster (slots 95–99: `SetGoddardModeVector`/
+  `ApplyGoddardOffsetMotion`/`AdvanceGoddardModeState`) — **blocked** on the unresolved six static vectors
+  `DAT_004f81b0..DAT_004f8208`, so don't guess them; and (ii) the non-SCENE energy/menu beats (`JIMEND`/`RECHARGE`/
+  `BONUSSCREEN`, the `GOGODDARD` `flag(0,2)+menu(6)` reward) that need the HUD/menu/energy subsystems. Read
+  `docs/decomp/C3DGoddard.md` (Goddard-script tail) first.
 - **(b) Combat depth** — wire AITrigger `AIState`/`AISpeed` into the C3DAI state machine, and/or the code-spawned
   enemy specs that have zero `.gam` placement (`3MIN`/`3MIS`/`3TAN`/`3HAR` — they need a spawner/emitter).
 - **(c) Text renderer** for the menu/HUD — today `menu.c` draws bars + logs labels and `C2DInGameMenu` prints

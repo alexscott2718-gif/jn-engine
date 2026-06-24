@@ -1,21 +1,21 @@
 {
  "summary": {
-  "generated": "2026-06-24 07:38 UTC",
-  "commit": "fb754b8",
+  "generated": "2026-06-24 10:22 UTC",
+  "commit": "ff790dc",
   "counts": {
    "resolution": 219,
-   "st_mesh": 73,
+   "st_mesh": 74,
    "st_sprite": 15,
    "st_invisible": 40,
    "st_mesh_untextured": 4,
-   "st_no_visual": 87,
-   "native_behaviors": 102,
+   "st_no_visual": 86,
+   "native_behaviors": 103,
    "used_fourccs": 93,
    "used_native_behaviors": 90,
    "used_missing_native_behavior": 3,
    "decomp_specs": 104,
    "assets_total": 5807,
-   "no_usage": 39,
+   "no_usage": 40,
    "anim_sequences": 18,
    "mesh-ase": 761,
    "mesh-glb": 2176,
@@ -3099,23 +3099,29 @@
    "decomp_status": "spec",
    "decomp_confidence": "Medium",
    "family": "player_friends_npcs",
-   "native_behavior": null,
-   "native_desc": null,
+   "native_behavior": "vt_goddard",
+   "native_desc": "Goddard companion",
    "tags": [],
    "levels": [],
    "instances": 0,
    "visual": {
-    "kind": "none"
+    "kind": "mesh",
+    "model": "assets/ase/godsit.ASE",
+    "texture": "assets/png/goddard02.png",
+    "scale": 1.0,
+    "recenter": 0
    },
    "variants": [],
    "texture_truth": {
     "resolved": true,
-    "source": "n/a",
-    "value": null,
-    "note": "no visual (trigger/effect/invisible)"
+    "source": "decomp",
+    "value": "assets/png/goddard02.png",
+    "note": "docs/decomp/C3DGoddard.md Assets table"
    },
-   "status": "no_visual_unused",
-   "status_flags": []
+   "status": "mesh",
+   "status_flags": [
+    "no_usage"
+   ]
   },
   {
    "kind": "fourcc",

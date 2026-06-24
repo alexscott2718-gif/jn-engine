@@ -166,6 +166,16 @@ static void aitrig_activate(Entity *e, World *w) {
             snprintf(target->patrol_point, sizeof(target->patrol_point), "%s", patrol);
             snprintf(target->start_point, sizeof(target->start_point), "%s", patrol);
         }
+
+        /* C3DAI-target branch (AIState/AISpeed), scoped to the Goddard companion:
+           route the authored scripted state into Goddard's mode machine so the
+           teleport/sit/patrol just applied isn't yanked back by follow mode. The
+           general AIState/AISpeed -> C3DAI combat state machine (enemies) is a
+           separate move and stays deferred; this is a no-op for non-Goddard
+           targets (docs/decomp/C3DAITrigger.md, docs/decomp/C3DGoddard.md). */
+        behavior_goddard_apply_ai_state(target,
+                                        gam_prop_i(e, "AIState", -1),
+                                        gam_prop_i(e, "AISpeed", -1));
     }
 
     Entity *toggle = aitrig_find_by_tag(w, gam_str(e, "ToggleObject", "none"));

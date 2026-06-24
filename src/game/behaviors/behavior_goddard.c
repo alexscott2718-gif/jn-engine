@@ -28,6 +28,8 @@
 
 #define GODDARD_MODE_FOLLOW       2
 #define GODDARD_MODE_FETCH_CAN    5
+#define GODDARD_MODE_HOLD         1   /* scripted sit/idle: hold the AITrigger pose */
+#define GODDARD_MODE_PATROL       3   /* scripted walk: follow authored PatrolPoint chain */
 #define GODDARD_FOLLOW_DIST     150.0f
 #define GODDARD_FOLLOW_SPEED    220.0f
 #define GODDARD_FETCH_SPEED     450.0f
@@ -148,8 +150,35 @@ static void fetch_target(Entity *e, float dt) {
     }
 }
 
+/* Scripted sit/idle (AIState 1/2): hold the pose the AITrigger placed Goddard in
+   (position + AINewRotY already applied by the generic mutation path). */
+static void goddard_hold(Entity *e) {
+    e->vx = e->vy = e->vz = 0.0f;
+}
+
+/* Scripted walk (AIState 3, AIPatrol set): seek the authored PatrolPoint chain
+   at the AISpeed tuning, advancing on arrival. Mirrors behavior_ai's patrol step
+   but keeps Goddard's own field layout (user_flag = mode, user_float = elapsed)
+   instead of borrowing the shared patrol-state slots. */
+static void goddard_patrol(Entity *e, World *w, float dt) {
+    if (!e->patrol_point[0] || !strcasecmp(e->patrol_point, "none")) {
+        goddard_hold(e);
+        return;
+    }
+    Entity *wp = behavior_ai_find_patrol_point(w, e->patrol_point);
+    if (!wp) { goddard_hold(e); return; }
+
+    float speed = e->move_speed > 0.0f ? e->move_speed : GODDARD_FOLLOW_SPEED;
+    BehaviorAIResult r = behavior_ai_seek_position(e, wp->x, wp->y, wp->z,
+                                                   speed, 50.0f, dt);
+    e->y += (wp->y - e->y) * fminf(dt * 4.0f, 1.0f);
+    if (r == BEHAVIOR_AI_ARRIVED) {
+        const char *next = wp->next_patrol[0] ? wp->next_patrol : "";
+        snprintf(e->patrol_point, sizeof(e->patrol_point), "%s", next);
+    }
+}
+
 static void goddard_on_update(Entity *e, World *w, float dt) {
-    (void)w;
     if (is_disabled_level(game_flow_current_level())) {
         e->visible = 0;
         e->runtime_flags = 0;
@@ -159,10 +188,12 @@ static void goddard_on_update(Entity *e, World *w, float dt) {
     if (!e->visible) return;
 
     e->user_float += dt;  /* goddard_state_elapsed */
-    if (e->user_flag == GODDARD_MODE_FETCH_CAN)
-        fetch_target(e, dt);
-    else
-        follow_player(e, g_player, dt);
+    switch (e->user_flag) {
+        case GODDARD_MODE_FETCH_CAN: fetch_target(e, dt);     break;
+        case GODDARD_MODE_PATROL:    goddard_patrol(e, w, dt); break;
+        case GODDARD_MODE_HOLD:      goddard_hold(e);          break;
+        default:                     follow_player(e, g_player, dt); break;
+    }
 }
 
 const EntityVTable vt_goddard = {
@@ -227,4 +258,30 @@ int behavior_goddard_target_is(Entity *target) {
 int behavior_goddard_mode(void) {
     Entity *g = behavior_goddard_get();
     return g ? g->user_flag : -1;
+}
+
+/* The C3DAI-target branch of C3DAITrigger::ActivateAITrigger, scoped to the
+   Goddard companion. The generic AITrigger path already applied AINewPos
+   (teleport), AINewRotY (rotation), and AIPatrol (-> patrol_point); this routes
+   the authored AIState / AISpeed into Goddard's mode machine so a scripted
+   pose/patrol isn't immediately overridden by follow mode. Faithful to the
+   decompiled body (set_ai_state(AIState) + speed_tuning = AISpeed at 0x604):
+     - AIPatrol set       -> PATROL the authored chain at the AISpeed tuning
+     - AIState == 4       -> FOLLOW (Goddard's constructor-default attached state)
+     - otherwise (1/2)    -> HOLD (sit/idle at the placed pose)
+   AIAnim (SIT/walk/sit) selection stays deferred with the rest of the
+   AITrigger animation wiring. A no-op for any non-Goddard target. Returns 1 if
+   it took effect. */
+int behavior_goddard_apply_ai_state(Entity *g, int ai_state, int ai_speed) {
+    if (!g || behavior_goddard_get() != g) return 0;
+    if (ai_speed != -1) g->move_speed = (float)ai_speed;  /* speed_tuning (0x604) */
+    int mode;
+    if (g->patrol_point[0] && strcasecmp(g->patrol_point, "none") != 0)
+        mode = GODDARD_MODE_PATROL;
+    else if (ai_state == 4)
+        mode = GODDARD_MODE_FOLLOW;
+    else
+        mode = GODDARD_MODE_HOLD;
+    set_mode(g, mode, NULL);
+    return 1;
 }

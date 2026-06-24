@@ -45,6 +45,7 @@ int behavior_goddard_request_mode(Entity *target, int mode);
 int behavior_goddard_release_if_target(Entity *target, int mode);
 int behavior_goddard_target_is(Entity *target);
 int behavior_goddard_mode(void);
+int behavior_goddard_apply_ai_state(Entity *g, int ai_state, int ai_speed); /* 3AIT C3DAI-target branch -> Goddard scripted mode */
 extern const EntityVTable vt_escort;      /* 3SUM/3PIR — C3DSumo/C3DPirate exit-escort actors */
 extern const EntityVTable vt_ai_trigger;  /* 3AIT — C3DAITrigger AI/script mission-wiring volume */
 Entity *behavior_ai_trigger_test_fire(World *w);  /* JN_TEST_AITRIG headless hook */

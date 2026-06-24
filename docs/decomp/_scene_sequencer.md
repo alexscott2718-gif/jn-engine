@@ -90,6 +90,14 @@ in-corpus level placements were confirmed with `strings` over `assets/gam/*.gam`
 | `KITEND1/2/3` | `KITTYn==0` | `KITTYn=10` | level4 | — |
 | `REMOTE`/`PUTGODDARD`/`JIMEND`/`RECHARGE`/`BONUSSCREEN`/`RESTARTGAME` | — | (no SCENE write) | — | Goddard/energy/bonus/reload — deferred |
 
+**Goddard `AITarget` side effect (PORTED, 2026-06-24):** separate from the SCENE patch table, many of these
+Goddard story triggers (`GOGODDARD`/`PUTGODDARD`/`SITGODDARD`/`GODDARDDIS`/`movegoddard`/`rescuecat*`/…) carry
+`AITarget = C3DGODDARD` with the standard C3DAI mutation fields (`AIState`/`AISpeed`/`AIPatrol`/`AINewPos`/
+`AINewRotY`). `behavior_ai_trigger.c` now routes that C3DAI-target branch into Goddard's mode machine
+(`behavior_goddard_apply_ai_state`): `AIPatrol`→PATROL, `AIState 4`→FOLLOW, else→HOLD. See `docs/decomp/C3DGoddard.md`
+(Goddard-script tail). The remaining `flag()`/`menu()`/`counter()` reward side effects of these tags still need the
+HUD/menu subsystems and stay deferred.
+
 ### 3. ActivateObject0..4 state machine (deferred)
 `FindActivateObjectForState` (`FUN_0040c230`) picks the next trigger from
 `ActivateObject0..4` whose `ActivateState*` matches the trigger's internal state

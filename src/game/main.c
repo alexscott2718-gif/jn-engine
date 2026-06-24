@@ -1597,6 +1597,9 @@ int main(int argc, char **argv) {
     int scene_test_tick = -1, scene_test_done = 0;
     const char *scene_test_tag = getenv("JN_TEST_SCENE");
     if (scene_test_tag && *scene_test_tag) scene_test_tick = 2;
+    /* If the fired trigger targets Goddard, re-sample its pose ~60 ticks later so
+       the scripted hold (stays put) vs patrol (walks the chain) is observable. */
+    int goddard_script_sample_tick = -1, goddard_script_sampled = 0;
 
     /* Headless talk-reward test (JN_TEST_TALK=<friendTag>): a few ticks after
        warmup, force the friend NPC with this ObjectTag through its talk-reward so
@@ -1801,6 +1804,25 @@ int main(int argc, char **argv) {
                 long after = game_flow_entity_state("SCENE");
                 fprintf(stderr, "[scene_test] tag='%s' fired=%s SCENE 0x%lx -> 0x%lx\n",
                         scene_test_tag, fired ? "yes" : "NO", before, after);
+                Entity *g = behavior_goddard_get();
+                if (fired && g) {
+                    fprintf(stderr,
+                            "[scene_test] goddard mode=%d pos=(%.0f,%.0f,%.0f) patrol='%s'\n",
+                            behavior_goddard_mode(), g->x, g->y, g->z, g->patrol_point);
+                    goddard_script_sample_tick = screenshot_warmup_ticks + 60;
+                }
+            }
+
+            /* Re-sample Goddard after the scripted AITrigger so motion is visible:
+               HOLD stays at the placed pose, PATROL walks toward the PatrolPoint. */
+            if (goddard_script_sample_tick >= 0 && !goddard_script_sampled &&
+                screenshot_warmup_ticks >= goddard_script_sample_tick) {
+                goddard_script_sampled = 1;
+                Entity *g = behavior_goddard_get();
+                if (g)
+                    fprintf(stderr,
+                            "[scene_test] goddard +60t mode=%d pos=(%.0f,%.0f,%.0f) patrol='%s'\n",
+                            behavior_goddard_mode(), g->x, g->y, g->z, g->patrol_point);
             }
 
             /* Headless talk-reward test: force the named friend's talk-reward. */

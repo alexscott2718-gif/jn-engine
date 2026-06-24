@@ -1048,6 +1048,24 @@ assets `b4e7d620`) live to exentt.com/jn-engine. **Still deferred:** the full ra
 cluster, `3RED`/`3PIC` helper target structs, the `GOGODDARD`/`PUTGODDARD`/`JIMEND`/`RECHARGE` AITrigger side effects,
 and the HUD/menu/energy helpers those paths call.
 
+**C3DGoddard scripted-control tail — the AITrigger Goddard side effect (2026-06-24).** Continuing the Goddard slice,
+the `C3DAITrigger` C3DAI-target branch is now wired for Goddard. Inspecting the binary `.gam` corpus showed ~30 `3AIT`
+rows whose `AITarget == C3DGODDARD` (`SITGODDARD`, `GOGODDARD`, `GODDARDDIS`, `PUTGODDARD`, `movegoddard`,
+`rescuecat*`, level5 `gogoddard`, …) carrying the authored `AIState`/`AISpeed`/`AIPatrol`/`AINewPos`/`AINewRotY`. The
+generic activation path already applied the teleport/rotation/patrol-point, but Goddard's follow loop instantly
+dragged it back toward Jimmy, so scripted Goddard control was a runtime no-op. `behavior_goddard_apply_ai_state`
+(called from `behavior_ai_trigger.c`, scoped to Goddard) now maps the documented C3DAI branch
+(`set_ai_state(AIState)` + `speed_tuning = AISpeed` at `0x604`) into Goddard's mode machine: `AIPatrol` set →
+**PATROL** (walk the authored `PatrolPoint` chain at the speed tuning), `AIState 4` (constructor-default) →
+**FOLLOW**, otherwise (`AIState 1`/`2`, "sit") → **HOLD**. `AIAnim` selection stays deferred with the rest of the
+AITrigger animation wiring; the general `AIState`→C3DAI combat state machine (enemies) stays a separate move. This is
+naturally inert in direct `--level`/audit runs (no `.gam` places a `C3DGODDARD` entity and no Goddard is synthesized
+outside campaign/`JN_TEST_GODDARD`). Validation via the `JN_TEST_SCENE=<ObjectTag>` seam (extended to log Goddard's
+mode/pose at fire and +60 ticks): on `--newgame` (level1b) GOGODDARD → mode 3, Goddard walked to `GODDARDPAT1` and
+advanced to `GODDARDPAT2`; SITGODDARD → mode 1, teleported to `gstart` and held; GODDARDDIS → HOLD in place;
+PUTGODDARD (Level2) → mode 2 FOLLOW; the existing `3MEP` fetch/collect probe was unregressed; `tools/audit_faithfulness.py`
+0 findings (all 35), `make web`, `qa_web_verify.py` 16/16. Public WASM not redeployed this pass (gated on approval).
+
 ---
 
 ## Invariants (don't relitigate these)
