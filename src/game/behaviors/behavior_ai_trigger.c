@@ -27,10 +27,17 @@
  *     marker, AINewRotY Y-rotation, AIPatrol patrol-repoint. Then ToggleObject
  *     and NextTrigger are dispatched by forwarding on_trigger.
  *
+ * SCENE sequencer (2026-06-24): aitrig_apply_story_progress ports
+ * C3DAITrigger::ApplyAITriggerStoryProgress (FUN_0040caa0) — the hardcoded
+ * ObjectTag x current-SCENE -> new-SCENE task-state patch table that drives the
+ * campaign's story progression (docs/decomp/_scene_sequencer.md). The freed gates
+ * (3FOW fowl windows, 3YCA LEV5 cargo, 3HUM clone reveal) read the now-mutable
+ * CTaskList store via game_flow_entity_state.
+ *
  * Deferred (need systems the native port hasn't reached): AIState/AISpeed on the
  * C3DAI state machine, AIAnim/ActivateByAnim animation selection, the
- * ActivateObject0..4 state-gated next-object machine, and the hardcoded
- * story-progress patch table (RESTARTGAME/GIVEKEY/GOGODDARD/...).
+ * ActivateObject0..4 state-gated next-object machine, and the reward-flag /
+ * counter-popup / story-screen side effects of the patch table (HUD/menu subsystems).
  *
  * Scratch layout (Entity):
  *   user_flag  = trigger_count
@@ -38,6 +45,7 @@
  */
 #include "behaviors.h"
 #include "behavior_base.h"
+#include "../game_flow.h"
 #include "../../engine/physics.h"
 #include <math.h>
 #include <stddef.h>
@@ -73,6 +81,64 @@ static int aitrig_player_allowed(Entity *e, World *w) {
     return aitrig_find_by_tag(w, activate_by) == NULL;
 }
 
+/* ApplyAITriggerStoryProgress (FUN_0040caa0): the SCENE sequencer's writer.
+   A hardcoded ObjectTag x current-SCENE -> new-SCENE patch table, applied when
+   the player trips this trigger (docs/decomp/_scene_sequencer.md). Only the SCENE
+   / KITTY task-state writes are ported; the reward-flag / counter-popup / story-
+   screen / Goddard / energy / bonus / NewGame-reload side effects depend on
+   HUD/menu subsystems the native port hasn't landed and are documented-deferred.
+   A no-op unless a CTaskList store is loaded (campaign mode); set_entity_state
+   returns 0 otherwise, so direct `--level` launches are unaffected. */
+static void aitrig_apply_story_progress(Entity *e) {
+    const char *tag = e->tag;
+    if (!tag[0]) return;
+    long scene = game_flow_entity_state("SCENE");
+
+#define AITRIG_SET_SCENE(newv)                                                  \
+    do {                                                                        \
+        if (game_flow_set_entity_state("SCENE", (newv)))                        \
+            printf("[SCENE] '%s' advanced SCENE 0x%lx -> 0x%x\n",               \
+                   tag, scene, (unsigned)(newv));                               \
+    } while (0)
+
+    if      (!strcasecmp(tag, "teleportexplanation") && (scene == 0x1e || scene == 0x1f)) AITRIG_SET_SCENE(0x23);
+    else if (!strcasecmp(tag, "CARLOUT")      && scene == 0x46)  AITRIG_SET_SCENE(0x4b);
+    else if (!strcasecmp(tag, "CALLFROMNICK") && scene == 0x5a)  AITRIG_SET_SCENE(0x64);
+    else if (!strcasecmp(tag, "INVISPART")) {
+        if      (scene == 0xa2)  AITRIG_SET_SCENE(0xa8);
+        else if (scene == 0x1ea) AITRIG_SET_SCENE(500);
+    }
+    else if (!strcasecmp(tag, "GOGODDARD")    && scene == 0xa8)  AITRIG_SET_SCENE(0xaa);
+    else if (!strcasecmp(tag, "ESCAPESHIP")   && scene == 0xac)  AITRIG_SET_SCENE(0xb2);
+    else if (!strcasecmp(tag, "GOINGHOME")    && scene == 0xb2)  AITRIG_SET_SCENE(0xc8);
+    else if (!strcasecmp(tag, "GIVEKEY")      && scene == 0xcd)  AITRIG_SET_SCENE(0xd2);
+    else if (!strcasecmp(tag, "TICKETBOOTH")  && scene == 0x140) AITRIG_SET_SCENE(0x14a);
+    else if (!strcasecmp(tag, "GIVEAUTO")     && scene == 0x14a) AITRIG_SET_SCENE(0x154);
+    else if (!strcasecmp(tag, "CARLDIS")      && scene == 0x17c) AITRIG_SET_SCENE(0x186);
+    else if (!strcasecmp(tag, "GETFUEL4")     && scene == 0x186) AITRIG_SET_SCENE(400);
+    else if (!strcasecmp(tag, "BEAMOFF")      && scene == 0x19a) AITRIG_SET_SCENE(0x1a4);
+    else if (!strcasecmp(tag, "FOWLINV")      && scene == 0x1cc) AITRIG_SET_SCENE(0x1d6);
+    else if (!strcasecmp(tag, "RESCUECARL")   && scene == 0x1e0) AITRIG_SET_SCENE(0x1ea);
+    else if (!strcasecmp(tag, "LANDSHIP")     && scene == 0x1fe) AITRIG_SET_SCENE(0x208);
+    else if (!strcasecmp(tag, "SAVECARL")     && scene == 0x1fe) AITRIG_SET_SCENE(0x208);
+    else if (!strcasecmp(tag, "SEECARL")      && scene == 0x208) AITRIG_SET_SCENE(0x212);
+    else if (!strcasecmp(tag, "ABDUCTED")     && scene == 0x212) AITRIG_SET_SCENE(0x21c);
+    else if (!strcasecmp(tag, "EVADEYOKES")   && scene == 0x21c) AITRIG_SET_SCENE(0x226);
+    else if (!strcasecmp(tag, "KITEND1") && game_flow_entity_state("KITTY1") == 0) {
+        if (game_flow_set_entity_state("KITTY1", 10)) printf("[SCENE] '%s' KITTY1=10\n", tag);
+    }
+    else if (!strcasecmp(tag, "KITEND2") && game_flow_entity_state("KITTY2") == 0) {
+        if (game_flow_set_entity_state("KITTY2", 10)) printf("[SCENE] '%s' KITTY2=10\n", tag);
+    }
+    else if (!strcasecmp(tag, "KITEND3") && game_flow_entity_state("KITTY3") == 0) {
+        if (game_flow_set_entity_state("KITTY3", 10)) printf("[SCENE] '%s' KITTY3=10\n", tag);
+    }
+    /* REMOTE / PUTGODDARD / JIMEND / RECHARGE / BONUSSCREEN / RESTARTGAME write
+       no SCENE state (menu/Goddard/energy/bonus/reload effects) — deferred. */
+
+#undef AITRIG_SET_SCENE
+}
+
 /* The mutate-and-dispatch core (everything after the activator/limit gates).
    Shared by the natural overlap path and the headless test hook. */
 static void aitrig_activate(Entity *e, World *w) {
@@ -105,6 +171,10 @@ static void aitrig_activate(Entity *e, World *w) {
     Entity *toggle = aitrig_find_by_tag(w, gam_str(e, "ToggleObject", "none"));
     if (toggle && toggle->vt && toggle->vt->on_trigger)
         toggle->vt->on_trigger(toggle, g_player);
+
+    /* ActivateAITrigger order: target mutations -> ToggleObject -> story-progress
+       SCENE patch table -> NextTrigger dispatch. */
+    aitrig_apply_story_progress(e);
 
     Entity *next = aitrig_find_by_tag(w, gam_str(e, "NextTrigger", "none"));
     if (next && next->vt && next->vt->on_trigger)
@@ -168,6 +238,21 @@ Entity *behavior_ai_trigger_test_fire(World *w) {
         if (!aitrig_find_by_tag(w, gam_str(e, "AITarget", "none"))) continue;
         int limit = gam_prop_i(e, "TimesToTrigger", -1);
         if (limit != -1 && e->user_flag >= limit) continue;
+        aitrig_activate(e, w);
+        return e;
+    }
+    return NULL;
+}
+
+/* Headless SCENE-sequencer test (JN_TEST_SCENE=<ObjectTag>): force the AITrigger
+   with the given ObjectTag through its activate core (bypassing the touch/arm
+   gates) so the story-progress SCENE write can be exercised in a campaign run.
+   Returns the fired entity, or NULL. */
+Entity *behavior_ai_trigger_fire_tag(World *w, const char *tag) {
+    if (!w || !tag || !tag[0]) return NULL;
+    for (Entity *e = w->head; e; e = e->next) {
+        if (!e->alive || strncmp(e->type, "3AIT", 4) != 0) continue;
+        if (strcasecmp(e->tag, tag) != 0) continue;
         aitrig_activate(e, w);
         return e;
     }

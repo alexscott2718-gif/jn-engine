@@ -47,8 +47,22 @@ int  game_flow_begin_task(const char *task_name, char *out_gam, int gam_size,
 /* Current CTaskList (NULL until a task has been begun). */
 const TaskList *game_flow_task(void);
 
-/* Initial mission state for a task tag (case-insensitive); -1 if absent. */
+/* Current mission state for a task tag (case-insensitive); -1 if absent. The
+   CTaskList store is mutable at runtime, so this reflects SCENE-sequencer writes. */
 long game_flow_entity_state(const char *tag);
+
+/* Advance a mission tag's runtime state (the SCENE-sequencer write path: port of
+   set_task_state / FUN_0045f990). Writes the live CTaskList store, so subsequent
+   game_flow_entity_state reads observe it. Returns 1 if a task is loaded and the
+   tag exists. The object-notify push and reward/objective side effects of the
+   original are deferred (consumers poll). */
+int  game_flow_set_entity_state(const char *tag, long value);
+
+/* Headless test seam (JN_TEST_SET_SCENE): ensure a CTaskList store exists (load
+   the baked NewGame table if none) and write a tag, WITHOUT entering campaign
+   mode or swapping level — so a direct `--level X` launch can exercise the SCENE
+   gates. Not used by normal play. */
+void game_flow_test_seed_state(const char *tag, long value);
 
 /* Campaign progress ordinal (the current level's campaign index). Data only —
    exposed for the HUD / future gate-threshold wiring; the visibility gate

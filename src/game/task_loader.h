@@ -45,7 +45,13 @@ int task_parse_file(const char *path, TaskList *out);
    Returns 1 if any data (parsed or baked) is available. */
 int task_load(const char *name, TaskList *out);
 
-/* Initial state for a mission tag (case-insensitive). Returns -1 if absent. */
+/* Current state for a mission tag (case-insensitive). Returns -1 if absent.
+   The TaskList is the live runtime store, so this reflects any task_set writes. */
 long task_entity_state(const TaskList *t, const char *tag);
+
+/* Write a mission tag's runtime state (case-insensitive). Faithful to
+   set_task_state (FUN_0045f990): writes EXISTING entries only — the original
+   never appends a new tag. Returns 1 if the tag was found and written, else 0. */
+int task_set_entity_state(TaskList *t, const char *tag, long value);
 
 #endif

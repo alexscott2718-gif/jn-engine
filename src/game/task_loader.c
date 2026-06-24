@@ -172,3 +172,16 @@ long task_entity_state(const TaskList *t, const char *tag) {
             return (long)t->entities[i].state;
     return -1;
 }
+
+int task_set_entity_state(TaskList *t, const char *tag, long value) {
+    if (!t || !tag || !tag[0]) return 0;
+    /* Faithful to FUN_0045f990: write an EXISTING entry; never append. SCENE and
+       the KITTY1..3 mission tags are all in the seeded NewGame table, so the
+       story-progress writers always find their target. */
+    for (int i = 0; i < t->entity_count; i++)
+        if (strcasecmp(t->entities[i].tag, tag) == 0) {
+            t->entities[i].state = (unsigned int)value;
+            return 1;
+        }
+    return 0;
+}

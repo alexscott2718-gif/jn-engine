@@ -118,6 +118,19 @@ long game_flow_entity_state(const char *tag) {
     return g_flow.task_loaded ? task_entity_state(&g_flow.task, tag) : -1;
 }
 
+int game_flow_set_entity_state(const char *tag, long value) {
+    if (!g_flow.task_loaded) return 0;
+    return task_set_entity_state(&g_flow.task, tag, value);
+}
+
+void game_flow_test_seed_state(const char *tag, long value) {
+    if (!g_flow.task_loaded) {
+        if (!task_load("NewGame", &g_flow.task)) return;
+        g_flow.task_loaded = 1;   /* store only — campaign mode stays OFF */
+    }
+    task_set_entity_state(&g_flow.task, tag, value);
+}
+
 int game_flow_campaign_active(void) { return g_flow.campaign_active; }
 int game_flow_progress_level(void)  { return g_flow.progress_index; }
 const char *game_flow_current_level(void) { return g_flow.level_name; }

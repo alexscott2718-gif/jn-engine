@@ -1478,6 +1478,20 @@ int main(int argc, char **argv) {
     }
     game_flow_enter_level(current_desc.name);
 
+    /* Headless SCENE-gate test (JN_TEST_SET_SCENE=<int>): seed the SCENE task
+       state (loading a CTaskList store if a direct --level launch has none) so
+       the SCENE-gated visibility leaves (3FOW/3YCA/3HUM) can be exercised at a
+       chosen story value without a full campaign playthrough. No effect on a
+       normal run. */
+    {
+        const char *s = getenv("JN_TEST_SET_SCENE");
+        if (s && *s) {
+            long v = strtol(s, NULL, 0);
+            game_flow_test_seed_state("SCENE", v);
+            printf("[JN_TEST_SET_SCENE] SCENE=0x%lx\n", v);
+        }
+    }
+
     /* Intro cutscene: play the level's scripted 3CAM shots on a real new-game
        (campaign) entry, or on demand via JN_CUTSCENE. A direct `--level X`
        launch (audit + matched-camera validators) leaves campaign mode OFF and
@@ -1560,6 +1574,14 @@ int main(int argc, char **argv) {
         const char *s = getenv("JN_TEST_AITRIG");
         if (s && *s) aitrig_test_tick = atoi(s);
     }
+
+    /* Headless SCENE-sequencer test (JN_TEST_SCENE=<ObjectTag>): a few ticks
+       after warmup, force the AITrigger with this ObjectTag through its activate
+       core so its story-progress SCENE write fires. Use with --newgame so a
+       CTaskList store is loaded. Logs the SCENE transition. */
+    int scene_test_tick = -1, scene_test_done = 0;
+    const char *scene_test_tag = getenv("JN_TEST_SCENE");
+    if (scene_test_tag && *scene_test_tag) scene_test_tick = 2;
 
     /* Headless swing-door test (3SWN): at warmup tick JN_TEST_SWING, force the
        nearest C3DSwingDoor through its on_trigger so the yaw-swing state machine
@@ -1723,6 +1745,17 @@ int main(int argc, char **argv) {
                 Entity *fired = behavior_ai_trigger_test_fire(&world);
                 if (!fired)
                     fprintf(stderr, "[aitrig_test] no eligible 3AIT found\n");
+            }
+
+            /* Headless SCENE-sequencer test: fire the named story trigger. */
+            if (scene_test_tick >= 0 && !scene_test_done &&
+                screenshot_warmup_ticks >= scene_test_tick) {
+                scene_test_done = 1;
+                long before = game_flow_entity_state("SCENE");
+                Entity *fired = behavior_ai_trigger_fire_tag(&world, scene_test_tag);
+                long after = game_flow_entity_state("SCENE");
+                fprintf(stderr, "[scene_test] tag='%s' fired=%s SCENE 0x%lx -> 0x%lx\n",
+                        scene_test_tag, fired ? "yes" : "NO", before, after);
             }
 
             /* Headless swing-door test: fire the nearest 3SWN's trigger. */
