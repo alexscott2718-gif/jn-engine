@@ -1,5 +1,6 @@
 #include "entity_visual.h"
 #include "sprite_chunk_map_generated.h"
+#include "behaviors/behavior_projectile.h"  /* PROJ_TEAM_ENEMY */
 #include <math.h>
 #include <string.h>
 #include <strings.h>
@@ -648,8 +649,18 @@ int entity_visual_resolve(const Entity *e, EntityVisual *out) {
        before — PROJ had no entity_visual entry at all). */
     if (strncmp(e->type, "PROJ", 4) == 0) {
         EntityVisual v = {0};
-        v.sprite_path = "assets/parsed/RetainedSprites/RetainedSprites_images/0006_32x32d32.png";
-        v.sprite_size = 36.0f;
+        if (e->user_flag == PROJ_TEAM_ENEMY) {
+            /* Enemy fire is the Yokian turret's C3DMissile, not a baseball
+               (missile.ase + Missile.png, decomp docs/decomp/C3DMissile.md).
+               QA sandmanfan 2026-06-24 l6a "should be plasma blast instead of
+               baseball" — the turret's energy missile. */
+            v.model_path = "assets/ase/missile.ASE";
+            v.texture_path = "assets/png/Missile.png";
+            v.scale = 1.0f;
+        } else {
+            v.sprite_path = "assets/parsed/RetainedSprites/RetainedSprites_images/0006_32x32d32.png";
+            v.sprite_size = 36.0f;
+        }
         *out = v;
         return 1;
     }
