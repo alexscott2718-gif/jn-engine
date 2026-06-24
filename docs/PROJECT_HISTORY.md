@@ -1086,6 +1086,60 @@ forced by `?touch=1` / off by `?touch=0`. `audit_faithfulness.py` 0 findings, `m
 
 ---
 
+## Era 15 — Mesh collision world: ground, walls, step-up (~June 24)
+
+*Source: `docs/decomp/_next_session_collision.md` (the dedicated collision kickoff).*
+
+**Goal.** Replace the engine's patchwork floor-only collision with a decomp-faithful
+**mesh collision world** built from each level's invisible `BLOCKING_*` / `BLOCK_*`
+collider meshes (plus the visible `GROUND` floor): real ground-follow, walls that
+block, slide, and curb step-up — instead of a single height-sample under the feet
+plus a fall-through "safety floor" plane 1000 units down.
+
+**What landed in code.**
+- **`src/engine/collision.{c,h}` — `CollisionWorld`.** Built once per level from
+  `world->placements`: each collider mesh's triangles are baked into world space in
+  the renderer/physics OMT basis `(x, 0, -z)` behind a **uniform XZ grid** (CSR
+  cell→triangle list) so per-frame queries stay cheap natively *and* in WASM. API:
+  `collision_ground_height` (highest surface under a point within the step cap, +
+  normal), `collision_resolve_horizontal` (closest-point sphere push out of wall
+  triangles + slide + step gate), `collision_segment` (Möller–Trumbore raycast).
+  Stored on `World`, built in `load_level`, freed in `world_destroy`.
+- **Unified collider naming.** `collision_is_collider` (CollisionWorld membership) +
+  `collision_is_invisible` (renderer skip) are the single source of truth, replacing
+  the split `physics.c:placement_is_collider` vs the inline `main.c` BLOCK-skip. The
+  visible playground toys `Blocks_Out`/`Blocks_In` are excluded (they have their own
+  `BLOCKING12_monkeybars` collider).
+- **Physics rewire.** `physics_step` ground-follows via `collision_ground_height` and
+  pushes the player out of walls via `collision_resolve_horizontal` after the
+  horizontal integration. Curbs whose top is within the step cap are picked up by
+  ground-follow (step-up); taller faces read as walls — same model, both behaviors.
+  Per-entity `entity_terrain_collides` gate honors `TerrainColl==0`/`HasCollision==0`
+  (forward-looking; only the player carries `ENTITY_FLAG_PHYSICS` today).
+- **`JN_TEST_COLLIDE` headless seam** asserts land-on-mesh + wall-clamp; 17/17 levels
+  pass (with `JN_SAFETY_FLOOR=0` the player stays on the real GROUND mesh in
+  level1/2/3a). `audit_faithfulness.py` 0 findings; `make web` + `qa_web_verify.py`
+  16/16.
+
+**What we learned (the load-bearing finding).** **Only `level1`, `level2`, and
+`level3a` ship a `GROUND` floor mesh.** Every other level's *walkable surface is the
+procedural `ground.c` plane sitting on the safety floor* — there is no GROUND/BLOCK
+collider under the player there (the `BLOCK*` meshes are buildings/fences, not the
+ground). So the safety floor could **not** simply be deleted; it was demoted to an
+env-gated backstop (`JN_SAFETY_FLOOR`, default ON; the mesh floor always wins where
+it exists) rather than removed. Fully retiring it — and **Phase 4 (retire the
+procedural ground)** — is blocked until the GROUND-less levels gain a real walkable
+collider mesh. Phase 4 was therefore **not** executed (it moves audited pixels and is
+deploy-gated); it stays open with this caveat documented.
+
+**Dead end / open.** Phase 4 as originally scoped ("stop drawing the plane where OMT
+terrain covers the play area") only applies to the 3 GROUND levels — and there the
+plane is already occluded by `GROUND.glb`, so retiring it is near-invisible. The real
+prerequisite is identifying/authoring each level's walkable floor collider. Tracked in
+`docs/decomp/_next_session_collision.md`.
+
+---
+
 ## Invariants (don't relitigate these)
 
 Paid for with measured evidence. Changing one needs *new* measurement, not argument.

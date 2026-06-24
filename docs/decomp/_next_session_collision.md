@@ -8,6 +8,30 @@
 You are working in `/home/scotty/jn-engine` on branch `native-port`. This is a faithful
 reimplementation: the decomp specs + authored `.gam`/OMT data are ground truth.
 
+## STATUS — Phases 0–3 DONE, Phase 4 BLOCKED (updated 2026-06-24)
+- **Phase 0 ✅** `src/engine/collision.{c,h}` — `CollisionWorld` (XZ-grid triangle world from
+  GROUND + BLOCKING_*/BLOCK_* colliders, minus the visible `Blocks_In/Out` toys). Unified
+  `collision_is_collider` / `collision_is_invisible` predicates. Commit `a7256be`.
+- **Phase 1 ✅** mesh ground-follow via `collision_ground_height`; old `world_terrain_height` deleted.
+  Safety floor demoted to an env-gated backstop (`JN_SAFETY_FLOOR`, default **ON**). Commit `c55186d`.
+- **Phase 2 ✅** walls + slide + step-up via `collision_resolve_horizontal`; `JN_TEST_COLLIDE` headless
+  seam (17/17 levels pass). Commit `2041177`.
+- **Phase 3 ✅** per-entity `entity_terrain_collides` gate (`TerrainColl==0`/`HasCollision==0` pass
+  through; player always collides). Forward-looking — only the player has `ENTITY_FLAG_PHYSICS`. Commit `f81517d`.
+- **Phase 4 ⛔ BLOCKED — do NOT execute without addressing this first.** **Only `level1`, `level2`,
+  `level3a` ship a `GROUND` floor mesh.** Every other level's walkable surface is the procedural
+  `ground.c` plane on the safety floor — there is **no GROUND/BLOCK collider under the player** there.
+  So (a) the safety floor can't be deleted (it's the de-facto floor for ~22 levels), and (b) retiring
+  the procedural ground would drop those levels into a sky-void. The real prerequisite is giving the
+  GROUND-less levels a walkable collider mesh (the "include visible floor meshes" idea, but per-level
+  and evidence-driven). Until then Phase 4 only meaningfully applies to the 3 GROUND levels, where the
+  plane is already occluded by `GROUND.glb` (near-invisible to retire). Phase 4 also moves audited
+  pixels and its public deploy is gated on explicit user approval.
+
+Everything below is the **original kickoff** (kept for context). Validation gates that DID run for
+Phases 0–3: `make` clean, `JN_TEST_COLLIDE` 17/17, `audit_faithfulness.py` 0 findings, `make web` +
+`qa_web_verify.py` 16/16.
+
 ## Orient yourself first (read in this order)
 1. `~/AGENTS.md` (== `~/CLAUDE.md`) — machine/workflow conventions, anti-silo policy.
 2. `docs/native_port_plan.md` §1 implementation contract + §3 validation; `docs/PROJECT_HISTORY.md`
