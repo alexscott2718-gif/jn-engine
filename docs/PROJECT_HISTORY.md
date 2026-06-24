@@ -918,6 +918,27 @@ builds), `JN_SCREENSHOT` on placing levels (`Level1` for `3LEA`+`3AIO`, `Level3C
 `3TRO`), `tools/audit_faithfulness.py` (0 findings, all 35 levels), `make web`, and `tools/qa_web_verify.py`
 (16/16). Public WASM deploy was not requested.
 
+**Base/effect tail pass 4 — light, set-dressing creatures, spark wire, stalactite (2026-06-23).** Five more
+used-in-level FourCCs cleared, each spec read first. `3LIG`/`C3DLight` (`behavior_light.c`) is the OMediaLight
+scene-light data row — twelve authored light props but no visual/collision/per-frame body; native lighting is
+measured OFF, so it's an inert gated data row (sibling of `behavior_lightobj.c`/`3LIO`) with no invented lighting
+side effect. `3FIS`/`C3DDarwinFish` + `3GIR`/`C3DGirlEatingPlant` share `vt_creature` (`behavior_creature.c`):
+both `C3DEnemy -> C3DPickupType -> C3DAI` "creatures one off set dressing" leaves own *no* per-frame method (only
+an asset registrar), so the port is the inherited C3DAI idle-or-patrol base (non-solid, InitiallyVisible/level
+gate) with no combat/pickup logic — the `vt_friend` idiom without the look-at/talk plumbing. `3SPA`/`C3DSparkWire`
+is a `C3DTesla` derivative (ItemActive electric contact hazard), so it routes to the existing `vt_tesla` with no
+new module. `3STA`/`C3DStalagtite` (`behavior_stalactite.c`) is a `C3DAnimated` terrain prop whose owned methods
+are a trigger-activated drop/relay (unported scripted-trigger dispatch), so the faithful minimal port is a
+static, non-solid, gated hanging prop. The refreshed lens reports **93** used FourCCs, **70** with native vtables
+(up from 65), and **23** still missing; the actor/gameplay focus section stays empty. Deferred with documented
+reasons: `3FOW`/`C3DFowl` (SCENE-gated visibility like `3YCA` — the `vfunc_01_265` gate would hide a
+currently-visible mesh since the SCENE sequencer isn't ported), `3ANI`/`C3DAnimatedSprite` (a real `Sprite1..9`
+frame animator that needs sprite-resolver plumbing — the next substantive target), and `3DAI`/`C3DAI` (bare
+AI-base dummy authored at the origin). Validation: per-class `make` (each commit builds), `JN_SCREENSHOT` on
+placing levels (`level1` for `3FIS`/`3GIR`, `level5a` for `3STA`, `level4b` for `3SPA`, `level4c` for `3LIG`),
+`tools/audit_faithfulness.py` (0 findings, all 35 levels), `make web`, and `tools/qa_web_verify.py` (16/16).
+Public WASM deploy was not requested.
+
 ---
 
 ## Invariants (don't relitigate these)

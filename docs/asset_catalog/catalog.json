@@ -1,7 +1,7 @@
 {
  "summary": {
-  "generated": "2026-06-23 21:17 UTC",
-  "commit": "0ea7933",
+  "generated": "2026-06-24 00:24 UTC",
+  "commit": "1b05b08",
   "counts": {
    "resolution": 219,
    "st_mesh": 73,
@@ -9,10 +9,10 @@
    "st_invisible": 40,
    "st_mesh_untextured": 4,
    "st_no_visual": 87,
-   "native_behaviors": 77,
+   "native_behaviors": 82,
    "used_fourccs": 93,
-   "used_native_behaviors": 65,
-   "used_missing_native_behavior": 28,
+   "used_native_behaviors": 70,
+   "used_missing_native_behavior": 23,
    "decomp_specs": 104,
    "assets_total": 5807,
    "no_usage": 39,
@@ -2644,8 +2644,8 @@
    "decomp_status": null,
    "decomp_confidence": null,
    "family": null,
-   "native_behavior": null,
-   "native_desc": null,
+   "native_behavior": "vt_creature",
+   "native_desc": "Darwin fish (set-dressing creature)",
    "tags": [
     "C3DDARWINFISH"
    ],
@@ -3055,8 +3055,8 @@
    "decomp_status": null,
    "decomp_confidence": null,
    "family": null,
-   "native_behavior": null,
-   "native_desc": null,
+   "native_behavior": "vt_creature",
+   "native_desc": "Girl-eating plant (set-dressing creature)",
    "tags": [
     "C3DGIRLEATINGPLANT",
     "cd",
@@ -4080,8 +4080,8 @@
    "decomp_status": "spec",
    "decomp_confidence": "Medium",
    "family": "world_props_terrain",
-   "native_behavior": null,
-   "native_desc": null,
+   "native_behavior": "vt_light",
+   "native_desc": "Scene light (data row)",
    "tags": [
     "C3DLIGHT"
    ],
@@ -7929,8 +7929,8 @@
    "decomp_status": null,
    "decomp_confidence": null,
    "family": null,
-   "native_behavior": null,
-   "native_desc": null,
+   "native_behavior": "vt_tesla",
+   "native_desc": "Spark wire (Tesla contact hazard)",
    "tags": [
     "C3DSPARKWIRE",
     "WIRE01",
@@ -8202,8 +8202,8 @@
    "decomp_status": null,
    "decomp_confidence": null,
    "family": null,
-   "native_behavior": null,
-   "native_desc": null,
+   "native_behavior": "vt_stalactite",
+   "native_desc": "Stalactite (static terrain prop)",
    "tags": [
     "STALAG05",
     "stalag01",
