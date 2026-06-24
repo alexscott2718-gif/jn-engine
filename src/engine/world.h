@@ -23,8 +23,13 @@ typedef struct EntityVTable {
    Entity fields; every other authored float/int property is captured here so a
    ported behavior can read its class's parameters (e.g. FanSpeed, SteamPeriod,
    MusicIndex0) by name. This is the porting surface for the Neutron.exe gameplay
-   classes — see docs/decomp/<Class>.md for each class's validated property set. */
-#define ENTITY_MAX_PROPS 24
+   classes — see docs/decomp/<Class>.md for each class's validated property set.
+   Sized above the worst-case authored numeric-prop count (~30, a level4c 3MCA
+   row; C3DAnimatedSprite's 9 Sprite slots + state also exceed 24). When the bag
+   overflows, prop_bag_add silently drops the *last*-authored props — which for
+   3ANI are Sprite7..9, truncating the frame list — so keep this comfortably
+   above the densest row. */
+#define ENTITY_MAX_PROPS 40
 typedef struct GamProp {
     char  name[24];
     float f;     /* float value (type-3 props) */

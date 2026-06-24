@@ -102,6 +102,8 @@ static const EntityTypeInfo entity_types[] = {
     { "3GIR", "Girl-eating plant (set-dressing creature)", &vt_creature },
     { "3SPA", "Spark wire (Tesla contact hazard)",   &vt_tesla },
     { "3STA", "Stalactite (static terrain prop)",    &vt_stalactite },
+    /* Base/resolver long tail. */
+    { "3ANI", "Animated sprite (frame animator)",    &vt_animsprite },
     { NULL, NULL, NULL }
 };
 
