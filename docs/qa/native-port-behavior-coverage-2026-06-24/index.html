@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Native Port - Behavior Coverage + SCENE story + web fixes - jn-engine</title>
+<style>
+* { box-sizing:border-box; margin:0; padding:0; }
+body { font-family:Monaco,Menlo,"Ubuntu Mono",monospace; background:#0d0d0d; color:#dedede; line-height:1.55; padding:24px 16px; }
+.wrap { max-width:1080px; margin:0 auto; }
+h1 { font-size:1.45rem; color:#fff; margin-bottom:4px; }
+h2 { font-size:1.08rem; color:#7ec8ff; border-bottom:1px solid #2a2a2a; padding-bottom:6px; margin:34px 0 12px; }
+h3 { font-size:0.98rem; color:#fff; margin-bottom:2px; }
+p { margin:10px 0; color:#c8c8c8; }
+a { color:#7ec8ff; text-decoration:none; }
+a:hover { text-decoration:underline; }
+.sub { color:#888; font-size:0.84rem; }
+.badge { display:inline-block; border-radius:4px; padding:1px 8px; font-size:0.74rem; vertical-align:middle; }
+.green { background:#143a14; color:#7dde7d; border:1px solid #2c6e2c; }
+.blue { background:#1d2c3d; color:#9ecbff; border:1px solid #2c5a8a; }
+.amber { background:#33280e; color:#e6c66f; border:1px solid #6c5720; }
+.red { background:#3a1414; color:#ff9a9a; border:1px solid #7a2a2a; }
+table { width:100%; border-collapse:collapse; margin:14px 0; font-size:0.82rem; }
+th,td { text-align:left; padding:7px 8px; border-bottom:1px solid #242424; vertical-align:top; }
+th { color:#9a9a9a; font-weight:normal; }
+td code { color:#d9c08a; }
+.card { background:#141414; border:1px solid #262626; border-radius:8px; padding:18px; margin:22px 0; }
+.meta { color:#888; font-size:0.8rem; margin-bottom:10px; }
+.fix { border-left:3px solid #2c6e2c; background:#0d160d; border-radius:0 6px 6px 0; color:#afd0af; padding:8px 12px; margin:12px 0; font-size:0.88rem; }
+.note { border-left:3px solid #6c5720; background:#181409; border-radius:0 6px 6px 0; color:#d8c184; padding:8px 12px; margin:12px 0; font-size:0.88rem; }
+pre { overflow-x:auto; background:#0a0a0a; border:1px solid #242424; border-radius:6px; padding:10px 12px; font-size:0.76rem; color:#b8c8b8; margin:10px 0; }
+.footer { color:#777; border-top:1px solid #2a2a2a; margin-top:40px; padding-top:12px; font-size:0.8rem; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<h1>Native Port - Behavior Coverage, the SCENE story machine, and the browser build <span class="badge green">SHIPPED</span></h1>
+<p class="sub">Changelog &middot; 2026-06-24 &middot; branch <code>native-port</code>. Picks up where the <a href="/jn-engine/qa/native-port-n1-n5-2026-06-22/">N1&ndash;N5 changelog</a> left off. With the structural waves done (the engine <em>plays</em> the levels), this past day's work was about <strong>breadth</strong>: giving the individual game objects their real behavior, wiring the campaign's story-progression machine, and making the browser build actually expose both.</p>
+
+<h2>Summary</h2>
+<p>After waves N1&ndash;N5 the engine had the skeleton &mdash; bases, enemies, pickups, vehicles, and the game-flow/menu layer &mdash; but most of the ~90 distinct object types placed in the levels were still inert props. This past day closed almost all of that gap, driven by a single instrument: the new <strong>resolution/usage-aware Asset Catalog</strong>, whose strict query (&ldquo;authored in a level, but no native behavior&rdquo;, ranked by reach) gave an objective worklist. Working down it took the count of <strong>used-in-level FourCCs with a native behavior from the low-30s to 90 of 93</strong> &mdash; the last three are documented resolver/positioning gaps, not behavior gaps. On top of that breadth, two structural pieces landed: the <strong>SCENE sequencer</strong> (the campaign's story-progress state machine, with both of its writers) and the first <strong>C3DGoddard companion</strong> slice. Finally, the <strong>browser build</strong> got a Campaign toggle and a real keyboard-input fix so the story and the talk system are reachable on the web. Every step held the same gate: <code>tools/audit_faithfulness.py</code> at <strong>0 findings</strong> across all 35 levels, and a WASM rebuild verified by <code>tools/qa_web_verify.py</code> (16 browser checks).</p>
+
+<table>
+<tr><th>area</th><th>what landed</th><th>result</th></tr>
+<tr><td><span class="badge blue">Coverage</span></td><td>Per-FourCC behavior, worked off the Asset Catalog lens</td><td>used-in-level native behaviors <strong>~30 &rarr; 90 / 93</strong></td></tr>
+<tr><td><span class="badge blue">SCENE</span></td><td>Task-state story sequencer + both writers (triggers &amp; talk)</td><td>campaign story beats advance; gated actors appear/hide on cue</td></tr>
+<tr><td><span class="badge blue">Goddard</span></td><td><code>C3DGoddard</code> companion + <code>3MEP</code> fetch + scripted control</td><td>follows Jimmy, fetches cans, obeys scripted sit/patrol triggers</td></tr>
+<tr><td><span class="badge green">Web</span></td><td>Campaign toggle button + keyboard-input fix + touch-mode fix</td><td>story &amp; talk now reachable in the browser; <strong>live</strong></td></tr>
+</table>
+
+<h2>The instrument: a resolution/usage-aware Asset Catalog</h2>
+<div class="card">
+<div class="meta"><code>tools/build_asset_catalog.py</code> &middot; the worklist behind everything below</div>
+<p>Rather than guess what to port next, the catalog cross-references every FourCC's <em>visual resolution</em> (which mesh/sprite/canvas it draws) with its <em>level usage</em> (how many instances, in how many levels) and its <em>native behavior</em> (which vtable, if any). The behavior worklist is then a strict query &mdash; <code>instances &gt; 0 AND native_behavior IS NULL</code> &mdash; ranked by <code>instances &times; level_count</code> so the highest-reach gaps come first. Each class is then read from its decompiled spec (<code>docs/decomp/&lt;Class&gt;.md</code>) and ported to match, not invented. The catalog is browsable at <a href="/JN-assets/catalog/">exentt.com/JN-assets/catalog</a>.</p>
+<pre>catalog lens (end of this pass): 93 used FourCCs &middot; 90 native vtables &middot; 3 remaining
+remaining 3 = 3ROK / 3SPR / 3DAI  (resolver/positioning gaps, not behavior gaps)</pre>
+</div>
+
+<h2>Behavior coverage &mdash; working down the lens <span class="badge green">DONE</span></h2>
+<p>Dozens of classes ported in themed passes, each one read from its decomp spec first and committed per class. Every pass ended on a clean faithfulness sweep.</p>
+
+<table>
+<tr><th>pass</th><th>classes (FourCC)</th><th>shape</th></tr>
+<tr><td>Placed actors (N2.x)</td><td><code>3TUR</code> turret, <code>3TES</code> tesla, <code>3LAS</code> laser, <code>3YSH</code>, <code>3EYE</code>, <code>3DIG</code>, <code>3HOO</code>, <code>3CIN</code> Cindy</td><td>active hazards + patrol actors + the first friend NPC</td></tr>
+<tr><td>NPC / friend cast (N2.y)</td><td><code>vt_friend</code>: Nick/Sheen/UltraLord/Libby/Hugh/Benny/Judy/Kitty; <code>3FLE</code>&rarr;Yokian; <code>3SUM</code>/<code>3PIR</code> escorts; <code>3AIT</code> AITrigger</td><td>idle/patrol NPCs that watch Jimmy; the AI/script mission-wiring volume</td></tr>
+<tr><td>Actor-focus closeout</td><td><code>3PHO</code> phone booth, <code>3RCK</code> placed patrol rocket, <code>3HUM</code> Humphrey</td><td>solid contact prop, autonomous toy rocket, hidden clone-controller</td></tr>
+<tr><td>Base/effect tails (4 passes)</td><td><code>3NEU</code>/<code>3RED</code>/<code>3ARR</code>, <code>3LIO</code>/<code>3OMT</code>/<code>3CON</code>, <code>3TRO</code>/<code>3LEA</code>/<code>3TAR</code>/<code>3AIO</code>, <code>3LIG</code>/<code>3FIS</code>/<code>3GIR</code>/<code>3SPA</code>/<code>3STA</code></td><td>neutron pickups, light/OMT data rows, decor billboards, set-dressing creatures</td></tr>
+<tr><td>Animated sprite + door</td><td><code>3ANI</code> sprite-frame animator, <code>3SWN</code> timed swing door</td><td>carnival bottle animations; quarter-turn yaw doors</td></tr>
+<tr><td>Long-tail close-out</td><td><code>vt_creature</code> (Dino/Camel/Sparrow&hellip;) + new <code>vt_prop</code> (<code>3HYD</code>/<code>3CUB</code>/<code>3TOL</code>/<code>3SPH</code>/<code>3TEL</code>/&hellip;)</td><td>shared C3DAI creatures; one gated static-prop leaf, solidity strictly from authored <code>HasCollision</code></td></tr>
+</table>
+<div class="note">Discipline throughout: where a class's gameplay method needs a subsystem the port hasn't reached yet (a scripted-trigger chain, the SCENE sequencer before it landed, an unported player slot), the minimal faithful port is the visibility/collision gate over the already-correct visual &mdash; documented per class &mdash; rather than an invented mechanic. A game-owner correction also landed: the shrink ray turns certain AI (Dino/Darwin/Humphrey&hellip;) into small <em>moving pickups</em>, which is why those classes carry a pickup base; the active transition is still deferred.</div>
+
+<h2>The SCENE sequencer &mdash; the campaign's story machine <span class="badge green">DONE</span></h2>
+<div class="card">
+<div class="meta"><code>task_loader.c</code> store &middot; <code>game_flow.c</code> accessors &middot; <code>behavior_ai_trigger.c</code> + <code>behavior_friend.c</code> writers &middot; docs/decomp/_scene_sequencer.md</div>
+<p><code>SCENE</code> is one tag in the <code>CTaskList</code> task-state table &mdash; the campaign's story-progress counter, seeded to <code>30</code> at New Game. It has <strong>no autonomous driver</strong>; it only moves when a story event writes it. Reverse-engineering recovered the two writers and they are now both ported:</p>
+<p><strong>1. Player triggers.</strong> <code>C3DAITrigger::ApplyAITriggerStoryProgress</code> is a hardcoded <code>ObjectTag &times; current-SCENE &rarr; new-SCENE</code> patch table (~25 beats) run when the player trips a story-trigger volume. <strong>2. Friend talks.</strong> Each friend's talk-pulse re-reads SCENE and writes the next beat, collapsed into one shared table driven from a single entry point (the <strong>T</strong> key &rarr; nearest friend).</p>
+<p>Two previously-deferred consumers are now freed by the live store: <code>3FOW</code>/<code>C3DFowl</code> (per-level SCENE windows) and <code>3YCA</code>/<code>C3DYokCargo</code> (LEV5 <code>SCENE&gt;489</code>), plus <code>3HUM</code>'s clone reveal at <code>SCENE==0x5a</code>. Every gate treats &ldquo;no task loaded&rdquo; as &ldquo;show&rdquo;, so a direct <code>--level</code> / audit launch is unchanged &mdash; the gates only bite in a real campaign run.</p>
+<div class="fix">Validated against the <em>visible</em> result: New Game &rarr; tripping <code>teleportexplanation</code> advanced <code>SCENE 0x1e&rarr;0x23</code>; talking to friends advanced their beats (Carl <code>0x32&rarr;0x3c</code>, &hellip;); level4c <code>fowlinv</code> closed the fowl window (visible&rarr;hidden); <code>SCENE=0x5a</code> revealed Humphrey + 4 clones.</div>
+<pre>[SCENE] 'teleportexplanation' advanced SCENE 0x1e -> 0x23
+[TALK] 'C3DCARL' (3CAR) advanced SCENE 0x32 -> 0x3c</pre>
+</div>
+
+<h2>C3DGoddard &mdash; Jimmy's companion <span class="badge green">DONE</span></h2>
+<div class="card">
+<div class="meta"><code>behavior_goddard.c</code> &middot; <code>3GOD</code> (code-spawned) &middot; docs/decomp/C3DGoddard.md</div>
+<p>Goddard has no <code>.gam</code> rows &mdash; the original spawns him in code &mdash; so the native engine synthesizes one <code>C3DGODDARD</code> companion after level load, but only in a campaign run (or an explicit test probe) and only when the level data references him. He honors the documented disabled-level table (he stays hidden in <code>level1c</code>/<code>1d</code>/<code>4a</code>/<code>6a</code>/<code>6</code>/<code>7</code>/<code>vr06</code>), <strong>follows Jimmy</strong> at a short offset, and runs the first re-activated mechanic: the <code>3MEP</code> metal-can beacon asks Goddard to <strong>fetch</strong> a can within range, after which he collects it and returns to follow.</p>
+<p>The <strong>scripted-control tail</strong> then wired the <code>C3DAITrigger</code> branch that targets him: the ~30 <code>3AIT</code> rows with <code>AITarget == C3DGODDARD</code> (<code>SITGODDARD</code>, <code>GOGODDARD</code>, <code>PUTGODDARD</code>, &hellip;) now drive his mode &mdash; <strong>patrol</strong> an authored point chain, <strong>follow</strong>, or <strong>hold</strong> a scripted sit pose &mdash; so a cutscene that places or walks Goddard isn't instantly overridden by his follow loop.</p>
+<div class="fix">New Game: <code>GOGODDARD</code> &rarr; Goddard walked <code>GODDARDPAT1 &rarr; GODDARDPAT2</code>; <code>SITGODDARD</code> &rarr; teleported to <code>gstart</code> and held; the <code>3MEP</code> fetch/collect/return path was un-regressed.</div>
+</div>
+
+<h2>The browser build &mdash; campaign + keyboard, made reachable <span class="badge green">LIVE</span></h2>
+<div class="card">
+<div class="meta"><code>web/shell.html</code>, <code>gamestate.c</code>, <code>game_flow.c</code>, <code>input.c</code>, <code>behavior_player.c</code></div>
+<p>All of the story work above was invisible in the browser, because campaign mode was only reachable from the command line and a real input bug silenced the talk key.</p>
+<p><strong>Campaign toggle.</strong> A new <strong>Campaign</strong> button (and a <code>?newgame=1</code> URL) begins the New Game task at runtime &mdash; campaign mode on, SCENE seeded &mdash; and swaps into <code>level1b</code>; toggling off returns to free-roam. So the story progression and the friend talk-rewards can now actually be played in-browser.</p>
+<div class="fix">A real input bug, fixed: <code>input_just_pressed()</code> aliased SDL's live keyboard array, which the browser updates <em>asynchronously</em> between frames &mdash; so for any held key <code>previous == current</code> and the &ldquo;just pressed&rdquo; edge was never seen. Keyboard jump / throw / respawn / <strong>talk</strong> all silently did nothing in the browser (only held-key movement and the event-based B key worked). The input layer now keeps its own per-frame snapshot, so edge-triggered keys work in both the native and web builds. The <strong>T</strong> key (talk to the nearest friend) was also un-bound from a redundant turbo toggle (the Speed button keeps that), and now reports the nearest friend's distance so it's observable.</div>
+<div class="note">Also hardened the touch/mobile detection: it keyed only on <code>(pointer: coarse)</code>, which false-positives on touchscreen laptops and got the page &ldquo;stuck in mobile mode&rdquo; (hiding the keyboard controls). It now requires a coarse primary pointer <em>and</em> no fine pointer, with a <code>?touch=0</code> / <code>?touch=1</code> override.</div>
+<p class="sub">Verified against the live deployed build in headless Chromium: <code>?newgame=1</code> &rarr; Campaign: On at <code>level1b</code>; a real keydown fires <code>[TALK]</code> and does <em>not</em> toggle turbo; the Campaign button round-trips On/Off with the level swaps logged.</p>
+</div>
+
+<h2>Validation gate (every step)</h2>
+<pre>make                                        # native build
+python3 tools/audit_faithfulness.py         # 0 findings across all 35 levels
+python3 tools/build_asset_catalog.py        # refresh the coverage lens
+make web
+python3 tools/qa_web_verify.py              # 16/16 browser checks
+./tools/deploy_wasm.sh                       # publish to exentt.com/jn-engine</pre>
+<p class="sub">Live build: <code>jnengine.4072385b.js</code>, assets <code>9059fbe5</code>. Each class is committed individually on the <code>native-port</code> branch.</p>
+
+<div class="footer">
+Coverage lens now <strong>90 / 93</strong> used FourCCs with native behavior (remaining: <code>3ROK</code> origin pool, <code>3SPR</code> no serialized canvas, <code>3DAI</code> origin dummy &mdash; resolver/positioning gaps).
+&middot; Full narrative: <a href="https://github.com/alexscott2718-gif/jn-engine/blob/native-port/docs/PROJECT_HISTORY.md">PROJECT_HISTORY.md</a>
+&middot; SCENE machine: <a href="https://github.com/alexscott2718-gif/jn-engine/blob/native-port/docs/decomp/_scene_sequencer.md">_scene_sequencer.md</a>
+&middot; Previous: <a href="/jn-engine/qa/native-port-n1-n5-2026-06-22/">N1&ndash;N5 changelog</a>
+&middot; <a href="/jn-engine/">Play the browser build</a>
+</div>
+
+</div>
+</body>
+</html>
