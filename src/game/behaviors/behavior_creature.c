@@ -1,23 +1,35 @@
-/* behavior_creature.c — C3DDarwinFish (3FIS) / C3DGirlEatingPlant (3GIR).
+/* behavior_creature.c — the C3DAI "set-dressing creature" leaves:
+ *   3FIS C3DDarwinFish, 3GIR C3DGirlEatingPlant, 3DIN C3DDino
+ *        (C3DEnemy -> C3DPickupType -> C3DAI), and
+ *   3CML C3DCamel, 3SPW C3DSparrow (plain C3DAI -> C3DAnimated).
  *
- * Shared native behavior for the "creatures one off set dressing" leaves that
- * derive from C3DEnemy -> C3DPickupType -> C3DAI (docs/decomp/C3DDarwinFish.md,
- * C3DGirlEatingPlant.md). Despite the C3DEnemy ancestry, neither leaf owns a
- * per-frame method: the only owned override is the asset registrar
- * (vfunc_04_067) that binds the walk/shrink/stop animation set
- * (darwinwalk/darwinshrink/darwinstop, plantwalk/plantshrink/plantwait). Their
- * runtime behavior is therefore purely the inherited C3DAI movement base — idle
- * in place, or patrol if the row authored a PatrolPoint — with no combat,
- * projectile, or pickup logic (family = creatures_one_off_set_dressing,
- * background set-dressing).
+ * Their only owned override is the asset registrar (vfunc_04_067 / vfunc_01_259)
+ * that binds a walk/shrink/stop animation set — e.g. dinowalk/dinoshrink/dinostop,
+ * darwinwalk/darwinshrink/darwinstop, plantwalk/plantshrink/plantwait — plus a
+ * scale. None owns a per-frame method, so runtime behavior is the inherited C3DAI
+ * movement base: idle in place, or patrol if a PatrolPoint is authored. Camel and
+ * Sparrow are plain C3DAI (no pickup ancestry); Sparrow's mesh is level-conditional
+ * (vulture in LEV5), already resolved by entity_visual.c.
  *
- * Native model (a faithful subset of the inherited C3DAI base, matching the
- * vt_friend idiom without the friend-specific look-at / talk plumbing):
+ * SHRINK / PICKUP (faithfulness note, game-owner ground truth 2026-06-23): these
+ * creatures are NOT inert set-dressing. The shrink ray, fired at certain of them
+ * (Dino, Darwin, Humphrey, ...), shrinks them — they play HISHRINK, scale down, and
+ * become small MOVING pickups the player can collect. That is exactly why the chain
+ * carries C3DPickupType (the global pickup-state table) and why each registers a
+ * HISHRINK frame. The ACTIVE mechanic is deferred, not denied: the shrink-on-contact
+ * -> HISHRINK -> moving-pickup transition body is not decompiled (C3DShrinkRay only
+ * animates the ray; 3SHR has zero .gam placements), so wiring it would invent the
+ * fire input / scale / scoring. Per user direction (2026-06-23) we only record the
+ * truth here; see docs/decomp/C3DShrinkRay.md + PROJECT_HISTORY.
+ *
+ * Native model (the inherited C3DAI base, matching the vt_friend idiom without the
+ * friend look-at / talk plumbing):
  *   - Spawn through behavior_ai_spawn_patrol (C3DAI patrol base).
  *   - Idle in place; patrol between nav nodes if a PatrolPoint is authored.
  *   - Visibility follows the inherited C3DAnimated InitiallyVisible / level gate.
  *   - Non-solid: these are background creatures, not collidable props.
- * entity_visual.c already resolves the stop meshes (darwinstop/plantstop).
+ * entity_visual.c already resolves the stop meshes (dinostop/darwinstop/plantstop/
+ * camel Box01/vulture01).
  */
 #include "behavior_ai.h"
 #include <stddef.h>

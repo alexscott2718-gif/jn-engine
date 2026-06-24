@@ -69,11 +69,12 @@ extern const EntityVTable vt_shadow;          /* 3TAR — C3DShadow sprite decor
 extern const EntityVTable vt_ai_omtobj;       /* 3AIO — C3DAIOmtObj OMT-shape prop */
 /* Base/effect tail pass 4. */
 extern const EntityVTable vt_light;           /* 3LIG — C3DLight invisible scene light-data row */
-extern const EntityVTable vt_creature;        /* 3FIS/3GIR — C3DDarwinFish/C3DGirlEatingPlant idle set-dressing creatures */
+extern const EntityVTable vt_creature;        /* 3FIS/3GIR/3DIN/3CML/3SPW — C3DAI idle set-dressing creatures (shrink-targets; active shrink mechanic deferred) */
 extern const EntityVTable vt_stalactite;      /* 3STA — C3DStalagtite static terrain prop */
 /* Base/resolver long tail. */
 extern const EntityVTable vt_animsprite;      /* 3ANI — C3DAnimatedSprite sprites.omt frame animator */
 extern const EntityVTable vt_swingdoor;       /* 3SWN — C3DSwingDoor timed yaw-swing door */
+extern const EntityVTable vt_prop;            /* 3FLA/3HYD/3SCR/3TEL/3SPH/3CUB/3TOL/3OCT/3MER/3TRA/3SM1/3FUE/3TRI — gated static prop/effect leaves (owned gameplay deferred) */
 
 /* Cutscene runtime (behavior_cutscene.c). 3CAM shots register on spawn; the
    sequence plays through renderer_set_camera_override when requested. Off by

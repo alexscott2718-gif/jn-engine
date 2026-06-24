@@ -105,6 +105,26 @@ static const EntityTypeInfo entity_types[] = {
     /* Base/resolver long tail. */
     { "3ANI", "Animated sprite (frame animator)",    &vt_animsprite },
     { "3SWN", "Swing door (timed yaw swing)",        &vt_swingdoor },
+    /* C3DAI set-dressing creatures (shared vt_creature; shrink-targets, see
+       behavior_creature.c — active shrink->pickup mechanic deferred). */
+    { "3DIN", "Dino (set-dressing creature)",        &vt_creature },
+    { "3CML", "Camel (set-dressing creature)",       &vt_creature },
+    { "3SPW", "Sparrow/vulture (set-dressing creature)", &vt_creature },
+    /* Gated static prop / effect long tail (shared vt_prop; owned gameplay
+       deferred to unported subsystems — see behavior_prop.c). */
+    { "3FLA", "Flag (static prop)",                  &vt_prop },
+    { "3HYD", "Fire hydrant (static prop)",          &vt_prop },
+    { "3SCR", "Lab screen (display prop)",           &vt_prop },
+    { "3TEL", "Teleport FX (static effect)",         &vt_prop },
+    { "3SPH", "Sphere (world prop)",                 &vt_prop },
+    { "3CUB", "Cube (solid invisible block)",        &vt_prop },
+    { "3TOL", "Tool chest (static prop)",            &vt_prop },
+    { "3OCT", "Octapuke (set-dressing hazard)",      &vt_prop },
+    { "3MER", "Merry-go-round (static prop)",        &vt_prop },
+    { "3TRA", "Trans-replicator (set-dressing prop)", &vt_prop },
+    { "3SM1", "Smoke (effect sprite)",               &vt_prop },
+    { "3FUE", "Rocket fuel (pickup sprite)",         &vt_prop },
+    { "3TRI", "Trigger (base marker, inert)",        &vt_prop },
     { NULL, NULL, NULL }
 };
 
