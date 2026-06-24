@@ -1561,6 +1561,15 @@ int main(int argc, char **argv) {
         if (s && *s) aitrig_test_tick = atoi(s);
     }
 
+    /* Headless swing-door test (3SWN): at warmup tick JN_TEST_SWING, force the
+       nearest C3DSwingDoor through its on_trigger so the yaw-swing state machine
+       can be exercised without walking the player into the doorway. */
+    int swing_test_tick = -1, swing_test_done = 0;
+    {
+        const char *s = getenv("JN_TEST_SWING");
+        if (s && *s) swing_test_tick = atoi(s);
+    }
+
     /* CMainMenu: when the menu is up in a headless screenshot run, auto-confirm
        the default item (New Game) a few ticks after warmup so the menu route is
        exercised end-to-end in CI. JN_MENU_AUTO_TICK overrides the delay. */
@@ -1714,6 +1723,26 @@ int main(int argc, char **argv) {
                 Entity *fired = behavior_ai_trigger_test_fire(&world);
                 if (!fired)
                     fprintf(stderr, "[aitrig_test] no eligible 3AIT found\n");
+            }
+
+            /* Headless swing-door test: fire the nearest 3SWN's trigger. */
+            if (swing_test_tick >= 0 && !swing_test_done && jim &&
+                screenshot_warmup_ticks >= swing_test_tick) {
+                swing_test_done = 1;
+                Entity *best = NULL; float bestd2 = 1e30f;
+                for (Entity *d = world.head; d; d = d->next) {
+                    if (!d->alive || strncmp(d->type, "3SWN", 4)) continue;
+                    float dx = d->x - jim->x, dz = d->z - jim->z;
+                    float d2 = dx * dx + dz * dz;
+                    if (d2 < bestd2) { bestd2 = d2; best = d; }
+                }
+                if (best && best->vt && best->vt->on_trigger) {
+                    fprintf(stderr, "[swing_test] firing '%s' ry=%.1f\n",
+                            best->tag, best->ry);
+                    best->vt->on_trigger(best, jim);
+                } else {
+                    fprintf(stderr, "[swing_test] no 3SWN found\n");
+                }
             }
 
             /* Headless vehicle test: board the nearest rocket, then fly it. */

@@ -104,6 +104,7 @@ static const EntityTypeInfo entity_types[] = {
     { "3STA", "Stalactite (static terrain prop)",    &vt_stalactite },
     /* Base/resolver long tail. */
     { "3ANI", "Animated sprite (frame animator)",    &vt_animsprite },
+    { "3SWN", "Swing door (timed yaw swing)",        &vt_swingdoor },
     { NULL, NULL, NULL }
 };
 
