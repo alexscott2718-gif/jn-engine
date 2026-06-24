@@ -70,8 +70,8 @@ static void player_on_update(Entity *e, World *w, float dt) {
     }
     if (input_just_pressed(SDL_SCANCODE_N))
         input_toggle_noclip();
-    if (input_just_pressed(SDL_SCANCODE_T))
-        input_toggle_turbo();
+    /* Turbo (sticky speed boost) is toggled via the "Speed" UI button
+       (input_toggle_turbo); T is reserved for talk-to-friend in main.c. */
     int noclip = input_noclip_enabled();
     /* Turbo (sticky) stacks with the held SHIFT run. */
     float speed = PLAYER_MOVE_SPEED;

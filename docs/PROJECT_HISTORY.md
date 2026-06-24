@@ -1066,6 +1066,24 @@ advanced to `GODDARDPAT2`; SITGODDARD → mode 1, teleported to `gstart` and hel
 PUTGODDARD (Level2) → mode 2 FOLLOW; the existing `3MEP` fetch/collect probe was unregressed; `tools/audit_faithfulness.py`
 0 findings (all 35), `make web`, `qa_web_verify.py` 16/16. Public WASM not redeployed this pass (gated on approval).
 
+**Web campaign toggle + the T-key (talk) web-input fix (2026-06-24).** Two player-facing web-build gaps. (1) Campaign
+mode (CTaskList / SCENE story progression) was only reachable via the CLI `--newgame`, so the browser build never ran
+the story or the friend talk-rewards. Added a **Campaign** toggle button (and a `?newgame=1`/`?campaign=1` URL param)
+wired to new exports `gamestate_toggle_campaign_web` / `gamestate_campaign_active_web` + `game_flow_end_campaign`: ON
+begins the NewGame task (campaign on, SCENE seeded) and runtime-swaps to `level1b`; OFF returns to free-roam `level1`.
+(2) The **T key (talk to nearest friend) did nothing in the browser** — root cause was a real input bug:
+`input_just_pressed()` aliased SDL's live keyboard array, which emscripten updates *asynchronously* between frames, so
+`keys_previous == keys_current` for held keys and the press edge was never seen (keyboard jump/throw/respawn/talk all
+silently no-op'd in the browser; only held-key movement and the `SDL_KEYDOWN` event path for B worked). Fixed
+`input.c` to keep its own per-frame snapshot (copy, not alias) so edge detection works in both builds. T was also
+double-bound (it toggled turbo in `behavior_player.c`, duplicating the Speed button) — dropped the redundant binding so
+T is talk-only, and added a nearest-friend-distance log so the key is observable. Finally, touch/mobile mode keyed only
+on `(pointer: coarse)`, which false-positives on touchscreen laptops ("stuck in mobile mode", hiding the keyboard
+controls) — hardened to require a coarse primary pointer **and** no fine pointer, with a `?touch=0/1` override.
+Validated in headless Chromium (Playwright): campaign button toggles On/Off with the level swaps logged; a realistic
+keydown fires `[TALK]` and does not toggle turbo; the Speed button still toggles turbo; touch mode is off by default /
+forced by `?touch=1` / off by `?touch=0`. `audit_faithfulness.py` 0 findings, `make web`, `qa_web_verify.py` 16/16.
+
 ---
 
 ## Invariants (don't relitigate these)

@@ -189,16 +189,6 @@ static void friend_snap_face_player(Entity *e) {
     e->ry = atan2f(-dx, -dz);
 }
 
-/* Is `e` a C3DFriends-family NPC the player can talk to right now? */
-static int friend_is_talkable(const Entity *e) {
-    if (!e || !e->alive || !e->visible) return 0;
-    if (!friend_is_talk_fourcc(e->type)) return 0;
-    Entity *p = g_player;
-    if (!p || !p->alive) return 0;
-    float dx = p->x - e->x, dz = p->z - e->z;
-    return dx * dx + dz * dz <= FRIEND_TALK_RANGE * FRIEND_TALK_RANGE;
-}
-
 /* ActivateFriendTalkTrigger -> StartFriendTalkPulse: turn to the player and run
    the per-character talk-reward. Returns 1 if a SCENE write landed. */
 static int friend_talk(Entity *e) {
@@ -206,20 +196,31 @@ static int friend_talk(Entity *e) {
     return friend_apply_talk_reward(e);
 }
 
-/* T-key path: talk to the nearest talkable friend. Returns it, or NULL. */
+/* T-key path: talk to the nearest talkable friend. Returns it, or NULL. Always
+   logs an outcome so the key is observable: who was talked to (the per-character
+   reward logs separately if a SCENE beat advanced), or — when nobody is in range
+   — the nearest friend and how far away it is, so the player knows to walk over. */
 Entity *behavior_friend_talk_nearest(World *w) {
     Entity *p = g_player;
     if (!w || !p) return NULL;
-    Entity *best = NULL;
-    float bestd2 = 1e30f;
+    Entity *best = NULL, *nearest = NULL;
+    float bestd2 = 1e30f, nearestd2 = 1e30f;
+    const float range2 = FRIEND_TALK_RANGE * FRIEND_TALK_RANGE;
     for (Entity *e = w->head; e; e = e->next) {
-        if (!friend_is_talkable(e)) continue;
+        if (!e->alive || !e->visible || !friend_is_talk_fourcc(e->type)) continue;
         float dx = p->x - e->x, dz = p->z - e->z;
         float d2 = dx * dx + dz * dz;
-        if (d2 < bestd2) { bestd2 = d2; best = e; }
+        if (d2 < nearestd2) { nearestd2 = d2; nearest = e; }
+        if (d2 <= range2 && d2 < bestd2) { bestd2 = d2; best = e; }
     }
-    if (best) (void)friend_talk(best);
-    return best;
+    if (best) { (void)friend_talk(best); return best; }
+    if (nearest)
+        printf("[TALK] no friend in range; nearest is '%s' (%.4s) %.0f units away "
+               "(need <= %.0f)\n", nearest->tag, nearest->type,
+               sqrtf(nearestd2), FRIEND_TALK_RANGE);
+    else
+        printf("[TALK] no talkable friends in this level\n");
+    return NULL;
 }
 
 /* JN_TEST_TALK=<ObjectTag> headless hook: force the friend with this tag through

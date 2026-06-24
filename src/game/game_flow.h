@@ -44,6 +44,10 @@ void game_flow_enter_level(const char *level_name);
 int  game_flow_begin_task(const char *task_name, char *out_gam, int gam_size,
                           float out_spawn[3]);
 
+/* End the campaign: campaign mode OFF, task store unloaded (SCENE writes go
+   inert again). Used by the web "Campaign" toggle to return to free-roam. */
+void game_flow_end_campaign(void);
+
 /* Current CTaskList (NULL until a task has been begun). */
 const TaskList *game_flow_task(void);
 

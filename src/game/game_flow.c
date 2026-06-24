@@ -132,6 +132,16 @@ void game_flow_test_seed_state(const char *tag, long value) {
 }
 
 int game_flow_campaign_active(void) { return g_flow.campaign_active; }
+
+void game_flow_end_campaign(void) {
+    /* Drop back to free-roam: campaign mode off, task store unloaded (so SCENE
+       reads/writes go inert again). Mission counters are left as-is; the next
+       direct level entry treats the session as non-campaign. */
+    g_flow.campaign_active = 0;
+    g_flow.task_loaded     = 0;
+    g_flow.mission_active  = 0;
+    printf("[JIMMYGAME] campaign ended -> free-roam\n");
+}
 int game_flow_progress_level(void)  { return g_flow.progress_index; }
 const char *game_flow_current_level(void) { return g_flow.level_name; }
 int game_flow_lives(void)           { return g_flow.lives; }

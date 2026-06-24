@@ -8,7 +8,10 @@
 #define EMSCRIPTEN_KEEPALIVE
 #endif
 
-static const Uint8 *keys_current = NULL;
+/* Both are our OWN per-frame snapshots (copied from SDL each frame), NOT a live
+   pointer into SDL's internal array. The copy is what makes input_just_pressed()
+   work in the emscripten/web build — see input_update(). */
+static Uint8 keys_current[SDL_NUM_SCANCODES];
 static Uint8 keys_previous[SDL_NUM_SCANCODES];
 static int num_keys = 0;
 static int input_initialized = 0;
@@ -23,11 +26,13 @@ static int   g_noclip_enabled = 0;
 static int   g_turbo_enabled  = 0;
 
 int input_init(void) {
-    keys_current = SDL_GetKeyboardState(&num_keys);
-    if (!keys_current) {
+    const Uint8 *state = SDL_GetKeyboardState(&num_keys);
+    if (!state) {
         fprintf(stderr, "SDL_GetKeyboardState failed\n");
         return 0;
     }
+    if (num_keys > SDL_NUM_SCANCODES) num_keys = SDL_NUM_SCANCODES;
+    memset(keys_current, 0, sizeof(keys_current));
     memset(keys_previous, 0, sizeof(keys_previous));
     input_initialized = 1;
     printf("Input subsystem initialized\n");
@@ -46,15 +51,20 @@ int input_just_pressed(SDL_Scancode code) {
 
 void input_update(void) {
     if (!input_initialized) return;
-    /* Snapshot the prior frame's key states, THEN pump fresh OS/browser events
-       so this frame's keyboard array is current before any consumer reads it.
-       Without the pump here, the only event poll happens later in the frame
-       (after the update phase), so keys_current == keys_previous at read time
-       and input_just_pressed() can never see an edge — held keys (input_is_down)
-       still work, which is why movement worked but jump/throw/board did not. */
+    /* Snapshot last frame's state, pump fresh OS/browser events, THEN copy the
+       live SDL keyboard array into our own buffer. The copy is essential: in the
+       emscripten/web build the SDL keyboard state is updated ASYNCHRONOUSLY by
+       DOM key callbacks between frames, so aliasing the live pointer (the old
+       behavior) meant keys_previous already reflected the held key at copy time
+       — keys_previous == keys_current — and input_just_pressed() never saw an
+       edge. Keyboard jump/throw/respawn/talk all silently no-op'd in the browser
+       (only input_is_down held-key movement and the SDL_KEYDOWN event path for B
+       worked). A per-frame copy gives a stable previous/current pair in both
+       builds. */
     memcpy(keys_previous, keys_current, num_keys);
     SDL_PumpEvents();
-    keys_current = SDL_GetKeyboardState(NULL);
+    const Uint8 *live = SDL_GetKeyboardState(NULL);
+    if (live) memcpy(keys_current, live, num_keys);
 }
 
 void input_destroy(void) {

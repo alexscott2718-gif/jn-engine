@@ -168,6 +168,7 @@
     <button id="noclipToggle" type="button">Noclip: Off</button>
     <button id="turboToggle" type="button">Speed: 1x</button>
     <button id="qaToggle" type="button">QA: Off</button>
+    <button id="campaignToggle" type="button">Campaign: Off</button>
     <button id="sandboxToggle" type="button">Sandbox: Off</button>
     <button id="toolSelect" type="button">Tool: —</button>
   </div>
@@ -189,7 +190,7 @@
       </div>
     </div>
   </div>
-  <div id="controls">WASD move · SPACE jump/up · Ctrl/Q down · SHIFT run · E board/leave rocket · F use active tool · R respawn · B report · drag = orbit · <a id="qaHowto" href="https://exentt.com/jn/qa-howto.html" target="_blank" rel="noopener">how to report bugs</a></div>
+  <div id="controls">WASD move · SPACE jump/up · Ctrl/Q down · SHIFT run · E board/leave rocket · F use active tool · T talk to friend · R respawn · B report · drag = orbit · <a id="qaHowto" href="https://exentt.com/jn/qa-howto.html" target="_blank" rel="noopener">how to report bugs</a></div>
   <div id="sandboxBanner"></div>
   <div id="note">
     Native WebGL2 rebuild using original GAM/OMT data.
@@ -493,6 +494,10 @@
   /* ?menu=1 — open the CMainMenu title/level-select over the level (Up/Down +
      Enter; New Game -> level1b). */
   var menuMode = qparams.get('menu') === '1';
+  /* ?newgame=1 (alias ?campaign=1) — start in campaign mode (CTaskList / SCENE
+     story progression) at the NewGame start level, same as the CLI --newgame.
+     The Campaign button below also toggles this at runtime without a reload. */
+  var newgameMode = qparams.get('newgame') === '1' || qparams.get('campaign') === '1';
   (function () {
     var b = document.getElementById('sandboxBanner');
     if (!b) return;
@@ -639,6 +644,36 @@
     }
     if (tries > 0) setTimeout(function () { syncToolLabel(tries - 1); }, 500);
   })(30);
+
+  /* Campaign toggle: turns on the CTaskList / SCENE story progression at runtime
+     (ON swaps into the NewGame start level; OFF returns to free-roam level1) so
+     story triggers + the T-key friend talk-rewards actually advance. Mirrors the
+     ?newgame=1 URL param but without a reload. */
+  var campaignBtn = document.getElementById('campaignToggle');
+  function setCampaignButton(on) {
+    campaignBtn.textContent = on ? 'Campaign: On' : 'Campaign: Off';
+  }
+  campaignBtn.addEventListener('click', function () {
+    if (!Module || !Module.ccall) return;
+    try {
+      setCampaignButton(!!Module.ccall('gamestate_toggle_campaign_web', 'number', [], []));
+      document.getElementById('canvas').focus();
+    } catch (e) {
+      console.warn('[campaign] toggle ccall failed (stale cached build?)', e);
+    }
+  });
+  /* Initial label: campaign may already be on (?newgame=1). Keep polling for a
+     few seconds — Module.ccall can become available a frame or two BEFORE main()
+     runs game_flow_begin_task, so a single early read would latch a stale "Off".
+     Runtime changes after this come from the button, which sets the label
+     directly. */
+  setCampaignButton(newgameMode);
+  (function syncCampaignLabel(tries) {
+    if (Module && Module.ccall) {
+      try { setCampaignButton(!!Module.ccall('gamestate_campaign_active_web', 'number', [], [])); } catch (e) {}
+    }
+    if (tries > 0) setTimeout(function () { syncCampaignLabel(tries - 1); }, 500);
+  })(12);
 
   var statusEl = document.getElementById('status');
   var canvasEl = document.getElementById('canvas');
@@ -809,6 +844,7 @@
       var a = ['--level', selectedLevel];
       if (sandboxMode) a.push('--sandbox');
       if (menuMode) a.push('--menu');
+      if (newgameMode) a.push('--newgame');
       return a;
     })(),
     canvas: (function () {
@@ -840,8 +876,18 @@
      in the unit disc; the engine scales speed by its magnitude. Pointer Events
      give us multi-touch (move + jump simultaneously) with one code path. */
   (function () {
-    var isTouch = window.matchMedia &&
-                  window.matchMedia('(pointer: coarse)').matches;
+    /* Touch-mode detection. `(pointer: coarse)` alone FALSE-POSITIVES on
+       touchscreen laptops / hybrids — which then hid the keyboard controls and
+       showed the joystick on a real desktop ("stuck in mobile mode"). Require a
+       coarse primary pointer AND no fine pointer anywhere (a mouse/trackpad means
+       keep keyboard+mouse mode). `?touch=1` / `?touch=0` force it either way. */
+    var touchParam = qparams.get('touch');
+    var isTouch;
+    if (touchParam === '1') isTouch = true;
+    else if (touchParam === '0') isTouch = false;
+    else isTouch = !!(window.matchMedia &&
+                      window.matchMedia('(pointer: coarse)').matches &&
+                      !window.matchMedia('(any-pointer: fine)').matches);
     if (!isTouch) return;            /* desktop: keep keyboard only */
     document.body.classList.add('touch');
 

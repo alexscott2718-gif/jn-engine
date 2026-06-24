@@ -127,6 +127,30 @@ void gamestate_cycle_active_tool_web(void) { gamestate_cycle_active_tool(); }
 EMSCRIPTEN_KEEPALIVE
 const char *gamestate_active_tool_tag_web(void) { return gamestate_active_tool_tag(); }
 
+/* Campaign toggle for the web build (the CLI uses --newgame). ON: begin the
+   NewGame task (turns on campaign mode + seeds the SCENE store) and queue a
+   runtime swap to its start level (level1b); the main loop's swap drain loads
+   it. OFF: end the campaign and return to free-roam level1. Returns the new
+   campaign-on state. */
+EMSCRIPTEN_KEEPALIVE
+int gamestate_toggle_campaign_web(void) {
+    if (game_flow_campaign_active()) {
+        game_flow_end_campaign();
+        gamestate_request_level_swap("level1", "");
+        return 0;
+    }
+    char ng[64] = {0};
+    if (game_flow_begin_task("NewGame", ng, sizeof ng, NULL) && ng[0])
+        gamestate_request_level_swap(ng, "");
+    else
+        gamestate_request_level_swap("level1b", "");  /* baked NewGame start */
+    printf("[CAMPAIGN] ON (web toggle)\n");
+    return 1;
+}
+
+EMSCRIPTEN_KEEPALIVE
+int gamestate_campaign_active_web(void) { return game_flow_campaign_active(); }
+
 void gamestate_item_added(void) {
     g_state.items_total++;
 }
