@@ -63,6 +63,19 @@ static int world_collision_enabled(void) {
     return cached;
 }
 
+/* Whether an entity participates in world (terrain + wall) collision. Mirrors
+   the SOLID-clearing done by behavior_prop.c / behavior_ai_omtobj.c: an object
+   with TerrainColl==0 (terrain/collision hooks disabled) or HasCollision==0 is
+   non-colliding and should pass through the mesh world. The player always
+   collides. Only the player currently carries ENTITY_FLAG_PHYSICS, so this is
+   forward-looking for when NPCs/enemies/vehicles gain physics. */
+static int entity_terrain_collides(const Entity *e) {
+    if (e->runtime_flags & ENTITY_FLAG_PLAYER) return 1;
+    if (gam_prop_i(e, "TerrainColl",  -1) == 0) return 0;
+    if (gam_prop_i(e, "HasCollision", -1) == 0) return 0;
+    return 1;
+}
+
 static int world_safety_floor_height(const World *w, float x, float z, float *out_y) {
     if (!w->safety_floor_enabled) return 0;
     if (fabsf(x - w->safety_floor_cx) > w->safety_floor_half_x) return 0;
@@ -87,6 +100,8 @@ void physics_step(World *w, float dt) {
             continue;
         }
 
+        const int terrain = entity_terrain_collides(e);
+
         e->vy -= PHYSICS_GRAVITY * dt;
         if (e->vy < -PHYSICS_MAX_FALL) e->vy = -PHYSICS_MAX_FALL;
 
@@ -109,9 +124,9 @@ void physics_step(World *w, float dt) {
            XZ and slide along faces. Runs after the horizontal integration so
            the Y settle below samples the floor at the corrected XZ. Curbs and
            steps under the step cap are NOT walls (the ground-follow rises onto
-           them). Player-only today; generalized to all physics entities with
-           per-object TerrainColl/HasCollision gating in Phase 3. */
-        if (world_collision_enabled() && w->collision) {
+           them). Gated by entity_terrain_collides so TerrainColl==0 /
+           HasCollision==0 objects pass through (player always collides). */
+        if (terrain && world_collision_enabled() && w->collision) {
             float pos[3] = { e->x, e->y, e->z };
             float vel[3] = { e->vx, e->vy, e->vz };
             collision_resolve_horizontal(w->collision, pos, e->half_extents, vel);
@@ -127,7 +142,7 @@ void physics_step(World *w, float dt) {
             if (!(s->runtime_flags & ENTITY_FLAG_SOLID)) continue;
             resolve_axis(e, s, 1);
         }
-        if (!e->on_ground) {
+        if (terrain && !e->on_ground) {
             float terrain_y = 0.0f;
             float feet_y = e->y - e->half_extents[1];
             /* Mesh ground-follow: highest collider surface under the feet at or
