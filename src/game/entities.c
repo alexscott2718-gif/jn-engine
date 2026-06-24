@@ -96,6 +96,8 @@ static const EntityTypeInfo entity_types[] = {
     { "3LEA", "Leaves sprite decor",   &vt_leaves },
     { "3TAR", "Shadow sprite decor",   &vt_shadow },
     { "3AIO", "AI OMT shape prop",     &vt_ai_omtobj },
+    /* Base/effect tail pass 4. */
+    { "3LIG", "Scene light (data row)",              &vt_light },
     { NULL, NULL, NULL }
 };
 

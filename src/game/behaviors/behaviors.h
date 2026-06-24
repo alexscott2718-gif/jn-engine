@@ -67,6 +67,8 @@ extern const EntityVTable vt_trophy;          /* 3TRO — C3DVRTrophy win-condit
 extern const EntityVTable vt_leaves;          /* 3LEA — C3DLeaves sprite decor */
 extern const EntityVTable vt_shadow;          /* 3TAR — C3DShadow sprite decor */
 extern const EntityVTable vt_ai_omtobj;       /* 3AIO — C3DAIOmtObj OMT-shape prop */
+/* Base/effect tail pass 4. */
+extern const EntityVTable vt_light;           /* 3LIG — C3DLight invisible scene light-data row */
 
 /* Cutscene runtime (behavior_cutscene.c). 3CAM shots register on spawn; the
    sequence plays through renderer_set_camera_override when requested. Off by
