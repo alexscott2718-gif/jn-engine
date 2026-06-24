@@ -13,6 +13,12 @@
 
 `C3DGoddard` is the Goddard companion/NPC leaf over `C3DAI`. It has no direct `3GOD` or `DOG3` object-type rows in the generated `.gam` schema, but it is referenced by trigger/camera data through tags such as `C3DGODDARD`. The class is therefore documented as an engine-spawned AI companion with fixed constructor defaults, fixed animation assets, mode/path helpers, and player interaction logic.
 
+Native slice status (2026-06-24): `behavior_goddard.c` registers a runtime `3GOD` vtable and synthesizes one
+`C3DGODDARD` companion after level load only for campaign runs (or explicit `JN_TEST_GODDARD` probes) when the level
+references Goddard/energy tags. The slice implements the documented disabled-level gate, a conservative Jimmy-follow
+mode (`2`), and the `3MEP` fetch/collect mode (`5`). The full raw mode-vector/orbit/effect helper cluster remains
+deferred.
+
 ## Field Map
 
 Offsets below are byte offsets from the primary `C3DAI`/Goddard pointer used by vtable-1 methods unless marked `outer`. Vtable-4 hooks commonly enter with the outer allocation pointer, so those fields keep the `outer` marker until full structs are applied.
@@ -168,16 +174,21 @@ The generated `.gam` schema has no direct object-type section for `3GOD` or `DOG
 
 Confidence: Medium
 
-Validation: Static Ghidra, local `objdump` over `/home/scotty/xp-jnbg-original/Neutron.exe`, and `.gam` schema cross-check only; not runtime-validated.
+Validation: Static Ghidra, local `objdump` over `/home/scotty/xp-jnbg-original/Neutron.exe`, `.gam` schema cross-check,
+and native runtime probes for the 2026-06-24 slice (`JN_TEST_GODDARD` fetch/collect, direct no-env inert path,
+campaign `--newgame` spawn, disabled `level1c` hidden path).
 
 Open questions:
 - Apply full `C3DGoddard` structs so primary-pointer fields and outer vtable-4 fields stop overlapping ambiguously around `0x904..0x9c8`.
 - Resolve the constructor-created helper object classes at primary offsets `0x8d4`, `0x904`, and `0x908`.
 - Name the six Goddard modes and the global static vectors behind `DAT_004f81b0..DAT_004f8208`; they look runtime-initialized or BSS-backed in the PE image.
 - Identify whether effect id `0xcc` is sound, particle, or another runtime handle class.
-- Runtime-check which `PostLoadGoddard` branch corresponds to visible/active versus hidden/disabled before marking the class `validated`.
+- Reconcile the native follow/fetch seam with the original helper/effect state machine before marking the full class `validated`.
 
 ## Notes
 
 - Evidence: `DumpClass.java C3DGoddard /tmp/decomp_C3DGoddard.md` (`slots=396`, `owned_methods=5`, `offsets=0`), `DumpFunctions.java /tmp/decomp_C3DGoddard_funcs.md`, and local `objdump` windows over `0041c810..0041ee20` plus `0042ab50`.
 - Goddard's `3GOD` registration is present in the binary even though the current `.gam` corpus has no direct object rows for it; treat it as a runtime companion object unless later runtime validation finds hidden placement data.
+- Native validation (2026-06-24): `JN_TEST_GODDARD=1 --level level1` spawned a probe can, drove mode `5`, collected the
+  can, and released mode `2`; direct `--level level1` without the env hook emitted no Goddard markers; `--newgame`
+  spawned Goddard in `level1b`; `level1c` kept the companion invisible.

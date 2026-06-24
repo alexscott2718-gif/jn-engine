@@ -1031,6 +1031,23 @@ seven friends advanced their beats (Carl `0x32→0x3c`, Benny `0x6e→0x73`, Lib
 16/16. Catalog unchanged at **93/90/3** (the talk reward enriched the existing friend vtables — no new FourCC). Public
 WASM not deployed (gated on approval).
 
+**C3DGoddard runtime companion slice (2026-06-24).** Goddard now has a native `3GOD` vtable and a conservative
+runtime-spawn path: `behavior_goddard.c` synthesizes one `C3DGODDARD` companion after level load only in campaign
+runs (or the explicit `JN_TEST_GODDARD` probe) and only when the level data references Goddard/energy tags such as
+`C3DGODDARD`, `GOGODDARD`, `PUTGODDARD`, `JIMEND`, `RECHARGE`, or `GODDARDDIS`. It applies the original
+`PostLoadGoddard` disabled-level table (`level1c`, `level1d`, `level4a`, `level6a`, `level6`, `level7`, `vr06`),
+binds the documented `godsit.ASE` + `goddard02.png` assets, and exposes a small mode API for other behaviors. The
+first consumer is the previously-deferred `C3DMetalPickup` beacon: `3MEP` now hard-wires the metal-can sprite
+(`sprites.omt`, chunk 18, size 50), requests Goddard mode `5` when the can is within 1300 units, lets Goddard seek
+and trigger the can, then releases mode `2` back to Jimmy-follow on collection or timeout. Validation:
+`JN_TEST_GODDARD=1` on level1 collected the probe can and returned to mode 2; a normal direct `--level level1`
+screenshot emitted no Goddard markers; `--newgame` spawned Goddard in campaign `level1b`; `level1c` kept the
+companion invisible under the disabled table; `make`, `make web`, `qa_web_verify.py` 16/16, and
+`tools/audit_faithfulness.py` stayed clean. `./tools/deploy_wasm.sh` published the build (`jnengine.d75fb823.js`,
+assets `b4e7d620`) live to exentt.com/jn-engine. **Still deferred:** the full raw mode-vector/orbit/effect helper
+cluster, `3RED`/`3PIC` helper target structs, the `GOGODDARD`/`PUTGODDARD`/`JIMEND`/`RECHARGE` AITrigger side effects,
+and the HUD/menu/energy helpers those paths call.
+
 ---
 
 ## Invariants (don't relitigate these)

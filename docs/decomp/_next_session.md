@@ -55,8 +55,8 @@ This is a shared, committed campaign — read the shared docs, don't rely on too
   `[BALLOON] popped … (+69 pts)`, N2 defeat un-regressed, `audit_faithfulness.py` 0 findings,
   `qa_web_verify.py` 16/16. `JN_TEST_BASEBALL=1` grants the baseball; the headless `JN_TEST_THROW` hook
   now also targets the nearest `3BAL`. Deferred: `3SHR`/`3GRA`/`3BUB`/`3BAS` (0 instances; props/effects/
-  objects, not pickup→ability) and `3HOO` (an AI object → N2 track); `3MEP`'s Goddard beacon waits on
-  `C3DGoddard`.
+  objects, not pickup→ability) and `3HOO` (an AI object → N2 track). The `3MEP` Goddard beacon is now live
+  through the later C3DGoddard runtime slice.
 - **Wave N4 DONE (vehicles):** `behavior_vehicle.c`. `vt_rocket` (`3ROC` C3DRocketShip, placed every level)
   is **player-rideable** — walk in + **E** to board, fly via N1 `behavior_flying_update_base` (move keys +
   SPACE/CTRL), **E** to dismount; the rocket integrates its own position (not a `PHYSICS` entity) and snaps
@@ -250,31 +250,39 @@ This is a shared, committed campaign — read the shared docs, don't rely on too
   total, **90** with native vtables) — `3ROK`/`C3DRock` origin pool, `3SPR`/`C3DSprite` no serialized canvas, and
   `3DAI`/`C3DAI` origin dummy. These are **resolver/positioning gaps, not SCENE-blocked** (the two SCENE-gated rows
   `3YCA`/`3FOW` are now ported). The actor/gameplay focus section of `behavior_todo.md` is **empty** and the full
-  queue is deferred-only. Both SCENE writers (player-trigger + friend-talk) are now ported. The next substantive
-  moves are (a) **C3DGoddard** (unblocks the `3MEP` beacon + the dormant Goddard/energy SCENE beats); (b) **combat
+  queue is deferred-only. Both SCENE writers (player-trigger + friend-talk) are now ported. A **C3DGoddard runtime
+  slice** is also landed: code-spawned `3GOD`, disabled-level gates, follow/fetch modes, and the `3MEP` beacon. The
+  validation set was `JN_TEST_GODDARD` fetch/collect, direct no-env inert path, `--newgame` campaign spawn, disabled
+  `level1c` hidden path, `audit_faithfulness.py` 0 findings, `make web`, and `qa_web_verify.py` 16/16; public WASM is
+  live at `jnengine.d75fb823.js` / assets `b4e7d620`. The next substantive moves are (a) **C3DGoddard tails** (raw
+  mode vectors/orbit/effects + `GOGODDARD`/`PUTGODDARD`/`JIMEND`/`RECHARGE` AITrigger side effects); (b) **combat
   depth** (AITrigger `AIState`/`AISpeed` → C3DAI state machine; code-spawned `3MIN`/`3MIS`/`3TAN`/`3HAR`); (c) the
   **N5 tails** (text renderer / `PlayerControlled` input lock — the latter also surfaces the deferred HUD/menu side
-  effects of both SCENE writers); (d) a **runtime-repositioning controller** (`3ROK` origin pool) / per-instance ASE
-  resolver work (`3SPR`, `3TRA` visual); or (e) the deferred **active shrink mechanic**.
+  effects of both SCENE writers); (d) a
+  **runtime-repositioning controller** (`3ROK` origin pool) / per-instance ASE resolver work (`3SPR`, `3TRA` visual);
+  or (e) the deferred **active shrink mechanic**.
   Code-spawned / unplaced enemy specs (`3TAN`/`C3DTank`, `3HAR`/`C3DHarrier`, `3MIN`/`C3DMine`, `3MIS`/`C3DMissile`,
   `3POD`, `3SHR`) still have zero current `.gam` rows. The big structural waves (N1–N5) are all landed.
 - Implementation contract is `EntityVTable` in `src/engine/world.h`, registered by FourCC in
   `src/game/entities.c`; per-frame via `entity_update()` (`main.c:1418`); `.gam` params via
   `gam_prop_f/i`. Full contract in plan §1.
 
-## Your task this session: pick one of the remaining live moves (both SCENE writers are now ported)
+## Your task this session: pick one of the remaining live moves
 The portable behavior tail is exhausted (`90/93` native vtables; the 3 remaining are `3ROK`/`3SPR`/`3DAI`
 resolver/positioning gaps — see the deferred list below, leave them). The structural waves (N1–N5), the
 N2.x/N2.y slices, the actor-focus closeout, the four base/effect tail passes, the `3ANI`/`3SWN` pass, the
 long-tail close-out, the **SCENE sequencer** (player-trigger half), and — 2026-06-24 — the **talk-reward path**
 (the NPC half of the SCENE writers) are all landed. **Both SCENE writers are now ported**: `behavior_ai_trigger.c`
 (`aitrig_apply_story_progress`) for player triggers, `behavior_friend.c` (`friend_apply_talk_reward`) for friend
-talks. See `docs/decomp/_scene_sequencer.md` for the full machine.
+talks. The first **C3DGoddard** runtime slice is also landed (`3GOD` companion + `3MEP` fetch beacon), but the
+Goddard/energy AITrigger side effects are still deferred. See `docs/decomp/_scene_sequencer.md` and
+`docs/decomp/C3DGoddard.md` for the full machine.
 
 **The live options (no forced default — pick by what unblocks the most, and confirm with the user first):**
-- **(a) C3DGoddard** — the strongest follow-on. It unblocks the `3MEP` Goddard beacon AND the SCENE-sequencer beats
-  that are wired-but-dormant because they need Goddard/energy/menu helpers: the `GOGODDARD`/`PUTGODDARD`/`JIMEND`/
-  `RECHARGE` AITrigger rows and the Goddard-gated talk side effects. Read `docs/decomp/C3DGoddard.md` first.
+- **(a) C3DGoddard tails / Goddard-energy side effects** — continue from the runtime slice. The remaining work is the
+  raw mode-vector/orbit/effect helper cluster plus the SCENE-sequencer beats that are wired-but-dormant because they
+  need Goddard/energy/menu helpers: the `GOGODDARD`/`PUTGODDARD`/`JIMEND`/`RECHARGE` AITrigger rows and the
+  Goddard-gated talk side effects. Read `docs/decomp/C3DGoddard.md` first.
 - **(b) Combat depth** — wire AITrigger `AIState`/`AISpeed` into the C3DAI state machine, and/or the code-spawned
   enemy specs that have zero `.gam` placement (`3MIN`/`3MIS`/`3TAN`/`3HAR` — they need a spawner/emitter).
 - **(c) Text renderer** for the menu/HUD — today `menu.c` draws bars + logs labels and `C2DInGameMenu` prints
@@ -366,16 +374,17 @@ changes, append a one-line `PROJECT_HISTORY.md` entry, and update this handoff.
   source of truth.
 
 ## Definition of done for this session
-The previous session's talk-reward task is complete when the friend cast can be talked to and a talk at the right
-beat advances SCENE, the per-character reward table matches the decompiled hooks while deferring only the HUD/menu
-side effects, `tools/audit_faithfulness.py` stays at 0 findings, affected screenshots are unchanged, `make web`
-builds, `tools/qa_web_verify.py` reports 16/16, and `PROJECT_HISTORY.md` + this handoff describe the new state.
-That is the current 2026-06-24 baseline.
+The current Goddard slice is complete when campaign level loads synthesize a `3GOD` companion only when the level data
+references Goddard (or `JN_TEST_GODDARD` is set), the documented disabled levels keep it hidden, `3MEP` can request
+mode 5 and collect/release back to mode 2, direct `--level` audit/screenshot launches remain unchanged,
+`tools/audit_faithfulness.py` stays at 0 findings, `make web` builds, `tools/qa_web_verify.py` reports 16/16, and
+`PROJECT_HISTORY.md` + this handoff describe the new state. That is the current 2026-06-24 baseline.
 
 With N1–N5 plus the N2.x / N2.y slices, the actor-focus closeout (`3PHO`/`3RCK`/`3HUM`), the base/effect tail
 passes (1: `3NEU`/`3RED`/`3ARR`; 2: `3LIO`/`3OMT`/`3CON`; 3: `3TRO`/`3LEA`/`3TAR`/`3AIO`; 4:
 `3LIG`/`3FIS`/`3GIR`/`3SPA`/`3STA`), the animated-sprite + swing-door pass (`3ANI`/`3SWN`), the **SCENE sequencer**
-(task-state store + `C3DAITrigger` story-progress patch table) with freed `3FOW`/`3YCA` gates, and the friend
-talk-reward writer are ported, **90/93** used FourCCs now have native vtables. The actor/gameplay focus section is
-empty; the remaining substantive work is `C3DGoddard`, combat depth, N5 tails (text renderer / `PlayerControlled`
-input lock), resolver/positioning (`3ROK`/`3SPR`/`3DAI`), or the active shrink mechanic.
+(task-state store + `C3DAITrigger` story-progress patch table) with freed `3FOW`/`3YCA` gates, the friend
+talk-reward writer, and the first `C3DGoddard` runtime slice are ported, **90/93** used FourCCs now have native
+vtables. The actor/gameplay focus section is empty; the remaining substantive work is C3DGoddard tails, combat depth,
+N5 tails (text renderer / `PlayerControlled` input lock), resolver/positioning (`3ROK`/`3SPR`/`3DAI`), or the active
+shrink mechanic.

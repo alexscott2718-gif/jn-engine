@@ -37,6 +37,14 @@ extern const EntityVTable vt_cindy;       /* 3CIN — C3DCindy friend NPC */
 extern const EntityVTable vt_friend;      /* 3NIC/3SHE/3ULT/3LIB/3HUG/3BEN/3MOM/3KIT — C3DFriends/C3DAI idle cast */
 Entity *behavior_friend_talk_nearest(World *w);          /* T-key: talk nearest friend */
 Entity *behavior_friend_talk_tag(World *w, const char *tag); /* JN_TEST_TALK headless hook */
+extern const EntityVTable vt_goddard;     /* 3GOD — C3DGoddard runtime companion/controller */
+void behavior_goddard_reset(void);
+Entity *behavior_goddard_ensure(World *w, const char *level_name);
+Entity *behavior_goddard_get(void);
+int behavior_goddard_request_mode(Entity *target, int mode);
+int behavior_goddard_release_if_target(Entity *target, int mode);
+int behavior_goddard_target_is(Entity *target);
+int behavior_goddard_mode(void);
 extern const EntityVTable vt_escort;      /* 3SUM/3PIR — C3DSumo/C3DPirate exit-escort actors */
 extern const EntityVTable vt_ai_trigger;  /* 3AIT — C3DAITrigger AI/script mission-wiring volume */
 Entity *behavior_ai_trigger_test_fire(World *w);  /* JN_TEST_AITRIG headless hook */

@@ -167,11 +167,12 @@ The `player_controller` name above is descriptive, not final. The target field a
 
 Confidence: Medium
 
-Validation: Static Ghidra class dump, `DumpFunctions.java` constructor/cleanup output, local `objdump` over raw update/touch slots and destructor thunks, string table checks, `.gam` schema cross-check, `C3DGoddard` mode-control cross-check, and parsed `sprites.omt` metadata only; not runtime-validated.
+Validation: Static Ghidra class dump, `DumpFunctions.java` constructor/cleanup output, local `objdump` over raw update/touch slots and destructor thunks, string table checks, `.gam` schema cross-check, `C3DGoddard` mode-control cross-check, parsed `sprites.omt` metadata, and the 2026-06-24 native `JN_TEST_GODDARD` fetch/collect probe.
 
 Open questions:
 - Name the active-player controller field and prove whether it is always Goddard, a gadget controller, or a level-specific helper.
-- Name controller modes `2` and `5` from runtime behavior.
+- Name controller modes `2` and `5` from original symbols/behavior (the native seam currently treats them as
+  follow/release and fetch-can respectively).
 - Identify the exact meaning of the active-player inherited scalar/state call with `5.0` on collection.
 - Runtime-check how `3MEP` objects are spawned or enabled, since no current `.gam` row serializes them.
 - Create proper Ghidra functions for raw targets `0042eac0` and `0042ed60`, then re-run `DumpClass` so ownership and offset extraction include the leaf behavior.
@@ -180,3 +181,6 @@ Open questions:
 
 - Evidence: `DumpClass.java C3DMetalPickup /tmp/decomp_C3DMetalPickup.md` (`slots=335`, `owned_methods=0`, `offsets=0`), `DumpFunctions.java /tmp/decomp_C3DMetalPickup_raw.md`, local objdump windows `0042e8e0..0042ef90`, string scans, `C3DGoddard` mode-control notes, and parsed sprite metadata.
 - `_gam_classids.tsv` already maps `3MEP -> C3DMetalPickup()` from the previous `C3DBubblePickup` correction. No `tools/gam_schema.py` regeneration was needed because the current `.gam` corpus has no `3MEP` instances.
+- Native validation (2026-06-24): the probe-spawned `3MEP` used `sprites.omt` chunk 18/size 50, requested Goddard
+  mode `5` within the scan radius, accepted `3GOD` as collector, hid/removed itself, and released Goddard back to
+  mode `2`.

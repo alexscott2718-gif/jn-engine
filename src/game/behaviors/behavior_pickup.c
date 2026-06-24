@@ -18,6 +18,8 @@
 #include "../gamestate.h"
 #include "../../engine/audio.h"
 #include <stddef.h>
+#include <stdio.h>
+#include <string.h>
 
 /* Shared collect: grant a tool (NULL = score-only), play a sound (<0 = none),
    award Points, hide. Idempotent via user_flag. */
@@ -57,10 +59,61 @@ static void helmet_trigger(Entity *e, Entity *by) {
     (void)by; pickup_collect(e, "helmet", NULL, -1);
 }
 /* C3DMetalPickup (3MEP): metal-can collectible -> score. The Goddard fetch
-   beacon (controller mode 5/2 within 1300 units) is deferred until C3DGoddard
-   is ported in a later wave. */
+   beacon requests C3DGoddard mode 5 within 1300 units, and releases mode 2 on
+   collection or timeout. Scratch: user_float=scan_timer, move_speed=fetch
+   request timeout, move_vert=post-release holdoff. */
+static void metal_pickup_spawn(Entity *e, World *w) {
+    pickup_spawn(e, w);
+    snprintf(e->sprite_database, sizeof(e->sprite_database), "%s", "sprites.omt");
+    e->sprite_index = 18;      /* cans64 */
+    e->sprite_size = 50.0f;
+    e->half_extents[0] = 50.0f;
+    e->half_extents[1] = 50.0f;
+    e->half_extents[2] = 50.0f;
+    e->user_float = 0.0f;
+    e->move_speed = 0.0f;
+    e->move_vert = 0.0f;
+}
+
+static void metal_pickup_update(Entity *e, World *w, float dt) {
+    (void)w;
+    if (!e->alive || !e->visible || e->user_flag) return;
+
+    if (e->move_vert > 0.0f) {
+        e->move_vert -= dt;
+        if (e->move_vert < 0.0f) e->move_vert = 0.0f;
+        return;
+    }
+
+    if (e->move_speed > 0.0f) {
+        e->move_speed -= dt;
+        if (e->move_speed <= 0.0f) {
+            if (behavior_goddard_target_is(e)) {
+                behavior_goddard_release_if_target(e, 2);
+                e->move_vert = 6.0f;
+            }
+            e->move_speed = 0.0f;
+        }
+    }
+
+    e->user_float += dt;
+    if (e->user_float < 1.0f) return;
+    e->user_float = 0.0f;
+
+    Entity *g = behavior_goddard_get();
+    if (!g || !g->visible) return;
+    float dx = g->x - e->x, dy = g->y - e->y, dz = g->z - e->z;
+    if (dx * dx + dy * dy + dz * dz <= 1300.0f * 1300.0f) {
+        if (behavior_goddard_request_mode(e, 5))
+            e->move_speed = 10.0f;
+    }
+}
+
 static void metal_pickup_trigger(Entity *e, Entity *by) {
-    (void)by; pickup_collect(e, NULL, NULL, -1);
+    if (by && by != g_player && strncmp(by->type, "3GOD", 4) != 0) return;
+    pickup_collect(e, NULL, NULL, -1);
+    behavior_goddard_release_if_target(e, 2);
+    e->move_speed = 0.0f;
 }
 
 #define DEF_PICKUP_VT(name, trig)                                       \
@@ -70,4 +123,9 @@ static void metal_pickup_trigger(Entity *e, Entity *by) {
 DEF_PICKUP_VT(vt_baseball_pickup, baseball_pickup_trigger);
 DEF_PICKUP_VT(vt_bubble_pickup,   bubble_pickup_trigger);
 DEF_PICKUP_VT(vt_helmet,          helmet_trigger);
-DEF_PICKUP_VT(vt_metal_pickup,    metal_pickup_trigger);
+const EntityVTable vt_metal_pickup = {
+    .on_spawn   = metal_pickup_spawn,
+    .on_update  = metal_pickup_update,
+    .on_trigger = metal_pickup_trigger,
+    .flags      = ENTITY_FLAG_TRIGGER
+};

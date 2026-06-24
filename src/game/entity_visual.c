@@ -244,6 +244,7 @@ static const TypeEntry TYPE_TABLE[] = {
        (decomp C3DKitty.md); the ASE itself carries no usable bitmap. */
     { "3KIT", { "assets/ase/catsit.ASE",      "assets/png/cat.png", 1.0f, 0 } },
     { "3NIC", { "assets/ase/nickstop.ASE",    NULL, 1.0f, 0 } },
+    { "3GOD", { "assets/ase/godsit.ASE",      "assets/png/goddard02.png", 1.0f, 0 } },
     /* Yokian guard/soldier ASEs carry no material bitmap; the classes attach
        yokguard.png / yoksold.png in code (decomp C3DYokianGuard.md /
        C3DYokianSoldier.md). Without the explicit texture every guard and

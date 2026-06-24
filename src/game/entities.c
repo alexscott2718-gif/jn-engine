@@ -63,6 +63,7 @@ static const EntityTypeInfo entity_types[] = {
     { "3BEN", "Benny (friend NPC)",    &vt_friend      },
     { "3MOM", "Judy (friend NPC)",     &vt_friend      },
     { "3KIT", "Kitty (C3DAI NPC)",     &vt_friend      },
+    { "3GOD", "Goddard companion",     &vt_goddard     },
     /* C3DAnimated exit-escort actors (touch -> StartPoint teleport). */
     { "3SUM", "Sumo (exit escort)",    &vt_escort      },
     { "3PIR", "Pirate (exit escort)",  &vt_escort      },

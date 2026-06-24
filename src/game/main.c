@@ -1007,6 +1007,20 @@ static void sandbox_reconcile(World *w, Entity *jim) {
     }
 }
 
+static void goddard_reconcile_after_level_load(World *w, const char *level_name) {
+    Entity *g = behavior_goddard_ensure(w, level_name);
+    if (!g || !env_enabled("JN_TEST_GODDARD")) return;
+    if (g->visible) {
+        Entity *can = entity_spawn(w, "3MEP", "test_metal_can",
+                                   g->x + 55.0f, g->y, g->z);
+        if (can) {
+            fprintf(stderr,
+                    "[goddard_test] spawned metal can at (%.0f, %.0f, %.0f)\n",
+                    can->x, can->y, can->z);
+        }
+    }
+}
+
 static void test_place_player_near_type(World *world, Entity *jim) {
     const char *type = getenv("JN_TEST_NEAR_TYPE");
     if (!type || strlen(type) < 4 || !world || !jim) return;
@@ -1477,6 +1491,7 @@ int main(int argc, char **argv) {
                jim->x, jim->y, jim->z, world.ground_y);
     }
     game_flow_enter_level(current_desc.name);
+    goddard_reconcile_after_level_load(&world, current_desc.name);
 
     /* Headless SCENE-gate test (JN_TEST_SET_SCENE=<int>): seed the SCENE task
        state (loading a CTaskList store if a direct --level launch has none) so
@@ -1591,6 +1606,13 @@ int main(int argc, char **argv) {
     int talk_test_tick = -1, talk_test_done = 0;
     const char *talk_test_tag = getenv("JN_TEST_TALK");
     if (talk_test_tag && *talk_test_tag) talk_test_tick = 2;
+
+    /* Headless Goddard/3MEP probe: when JN_TEST_GODDARD=1 is set, the level
+       load path synthesizes C3DGoddard plus one nearby 3MEP can. Let the can's
+       one-second beacon request mode 5, then report whether Goddard collected
+       and released back to mode 2. */
+    int goddard_test_tick = -1, goddard_test_done = 0;
+    if (env_enabled("JN_TEST_GODDARD")) goddard_test_tick = 90;
 
     /* Headless visibility report (JN_TEST_VIS=<FourCC>): after warmup, print each
        matching entity's visible flag and the live SCENE — for SCENE-gate
@@ -1792,6 +1814,24 @@ int main(int argc, char **argv) {
                         talk_test_tag, fired ? "yes" : "NO", before, after);
             }
 
+            if (goddard_test_tick >= 0 && !goddard_test_done &&
+                screenshot_warmup_ticks >= goddard_test_tick) {
+                goddard_test_done = 1;
+                Entity *g = behavior_goddard_get();
+                Entity *can = NULL;
+                for (Entity *e = world.head; e; e = e->next) {
+                    if (strcasecmp(e->tag, "test_metal_can") == 0) {
+                        can = e; break;
+                    }
+                }
+                fprintf(stderr,
+                        "[goddard_test] present=%s visible=%d mode=%d can_alive=%d target_is_can=%d\n",
+                        g ? "yes" : "NO", g ? g->visible : 0,
+                        behavior_goddard_mode(),
+                        can ? can->alive : 0,
+                        can ? behavior_goddard_target_is(can) : 0);
+            }
+
             /* Headless visibility report for SCENE-gate validation. */
             if (vis_test_type && strlen(vis_test_type) >= 4 && !vis_test_done &&
                 screenshot_warmup_ticks >= 3) {
@@ -1897,6 +1937,8 @@ int main(int argc, char **argv) {
                             gamestate_set_spawn(jim->x, jim->y, jim->z);
                         }
                         game_flow_enter_level(swap_desc.name);
+                        behavior_goddard_reset();
+                        goddard_reconcile_after_level_load(&world, swap_desc.name);
                         configure_safety_floor(&world, jim);
                         asset_cache_purge_stale();
                         printf("[SWAP] post-purge cache: %d tex, %d models\n",
