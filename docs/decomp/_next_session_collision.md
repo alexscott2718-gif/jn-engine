@@ -18,15 +18,24 @@ reimplementation: the decomp specs + authored `.gam`/OMT data are ground truth.
   seam (17/17 levels pass). Commit `2041177`.
 - **Phase 3 ✅** per-entity `entity_terrain_collides` gate (`TerrainColl==0`/`HasCollision==0` pass
   through; player always collides). Forward-looking — only the player has `ENTITY_FLAG_PHYSICS`. Commit `f81517d`.
-- **Phase 4 ⛔ BLOCKED — do NOT execute without addressing this first.** **Only `level1`, `level2`,
-  `level3a` ship a `GROUND` floor mesh.** Every other level's walkable surface is the procedural
-  `ground.c` plane on the safety floor — there is **no GROUND/BLOCK collider under the player** there.
-  So (a) the safety floor can't be deleted (it's the de-facto floor for ~22 levels), and (b) retiring
-  the procedural ground would drop those levels into a sky-void. The real prerequisite is giving the
-  GROUND-less levels a walkable collider mesh (the "include visible floor meshes" idea, but per-level
-  and evidence-driven). Until then Phase 4 only meaningfully applies to the 3 GROUND levels, where the
-  plane is already occluded by `GROUND.glb` (near-invisible to retire). Phase 4 also moves audited
-  pixels and its public deploy is gated on explicit user approval.
+- **Phase 4 prerequisite ✅ DONE (commit `31d8aa0`) — walkable floor colliders for GROUND-less levels.**
+  Finding: **only `level1`, `level2`, `level3a` ship a `GROUND` floor mesh**; every other level's
+  walkable surface is a plain visible mesh (`station`, `Plane0x`, `firstroom`, `cell`, `BIGCAVE`,
+  `blockworld`, …). `collision_build` now auto-includes — *only in levels with no `GROUND` mesh* — any
+  placement whose walkable (near-horizontal) surface area > `FLOOR_AREA_THRESH` (1.0M units²), so the
+  player stands on the real floor; compact props stay non-colliding and Retroville (has GROUND) is
+  untouched. `CollTri.is_block` (from `collision_is_invisible`) keeps the wall probe validating only
+  designed barriers. **24/24 playable levels now land on a real mesh floor** with the safety floor off
+  (`JN_TEST_COLLIDE` + visual). `audit` 0, `make web` + `qa_web_verify` 16/16. (level1f = credits, high
+  spawn that falls — not a playable floor.)
+- **Phase 4 proper ⛔ STILL OPEN (now unblocked) — retire the procedural ground / delete the safety
+  floor.** Not yet executed: it moves audited pixels, its public deploy is gated on explicit user
+  approval, and deleting the safety floor outright needs **per-level roam validation** (confirm each
+  level's floor mesh covers the whole play area, not just the spawn) to avoid fall-through at mesh
+  gaps. The safety floor stays the gated backstop (`JN_SAFETY_FLOOR`, default ON; mesh floor wins where
+  it exists). With the floor colliders in, the procedural plane is now occluded almost everywhere
+  (player stands on real geometry above it), so retiring it should be near-invisible — but verify per
+  level + re-baseline the audit before flipping anything.
 
 Everything below is the **original kickoff** (kept for context). Validation gates that DID run for
 Phases 0–3: `make` clean, `JN_TEST_COLLIDE` 17/17, `audit_faithfulness.py` 0 findings, `make web` +

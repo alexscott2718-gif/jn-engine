@@ -1122,21 +1122,34 @@ plus a fall-through "safety floor" plane 1000 units down.
   16/16.
 
 **What we learned (the load-bearing finding).** **Only `level1`, `level2`, and
-`level3a` ship a `GROUND` floor mesh.** Every other level's *walkable surface is the
-procedural `ground.c` plane sitting on the safety floor* — there is no GROUND/BLOCK
-collider under the player there (the `BLOCK*` meshes are buildings/fences, not the
-ground). So the safety floor could **not** simply be deleted; it was demoted to an
-env-gated backstop (`JN_SAFETY_FLOOR`, default ON; the mesh floor always wins where
-it exists) rather than removed. Fully retiring it — and **Phase 4 (retire the
-procedural ground)** — is blocked until the GROUND-less levels gain a real walkable
-collider mesh. Phase 4 was therefore **not** executed (it moves audited pixels and is
-deploy-gated); it stays open with this caveat documented.
+`level3a` ship a `GROUND` floor mesh.** Every other level's *walkable surface is a
+plain visible mesh* (a `station` floor, a `Plane0x` slab, a `firstroom`/`cell`
+interior, a `BIGCAVE`/`blockworld` shell) — there is no GROUND/BLOCK collider under
+the player there (the `BLOCK*` meshes are buildings/fences, not the ground), so the
+player was standing on the procedural `ground.c` plane + safety floor.
 
-**Dead end / open.** Phase 4 as originally scoped ("stop drawing the plane where OMT
-terrain covers the play area") only applies to the 3 GROUND levels — and there the
-plane is already occluded by `GROUND.glb`, so retiring it is near-invisible. The real
-prerequisite is identifying/authoring each level's walkable floor collider. Tracked in
-`docs/decomp/_next_session_collision.md`.
+**Walkable floor colliders for GROUND-less levels (the prerequisite, landed).** Rather
+than hand-author a floor per level, `collision_build` now auto-includes, *in levels
+with no authored `GROUND` mesh*, any placement whose **walkable (near-horizontal)
+surface area exceeds `FLOOR_AREA_THRESH` (1.0M units²)** — i.e. the level's real
+terrain/room/cave floor mesh — while compact props stay non-colliding. Retroville
+(has `GROUND`) is untouched, so its clean GROUND+BLOCKING setup and the faithfulness
+audit are unchanged. Each `CollTri` carries an `is_block` flag (set from
+`collision_is_invisible`) so the `JN_TEST_COLLIDE` wall probe only validates *designed*
+BLOCK/BLOCKING barriers, not a terrain mesh's finite/tilted faces. Result: **24/24
+playable levels now stand on a real mesh floor** with the safety floor disabled
+(verified `JN_TEST_COLLIDE` land + visually — level5a/6/7 render the player on their
+real metal/cave floors); collision tri counts stay modest (≤ ~2.6k, e.g. level5).
+`audit_faithfulness.py` 0 findings; `make web` + `qa_web_verify.py` 16/16. (level1f is
+the credits sequence — a high spawn that falls; not a playable floor.)
+
+**Still open — the actual Phase 4 (retire the procedural ground / delete the safety
+floor).** Now *unblocked* by the floor colliders, but not yet executed: it moves
+audited pixels and its public deploy is gated on explicit user approval, and deleting
+the safety floor outright needs per-level roam validation (the floor mesh must cover
+the whole play area, not just the spawn) to avoid fall-through at mesh-floor gaps. The
+safety floor remains the gated backstop (`JN_SAFETY_FLOOR`, default ON; the mesh floor
+always wins where it exists). Tracked in `docs/decomp/_next_session_collision.md`.
 
 ---
 
