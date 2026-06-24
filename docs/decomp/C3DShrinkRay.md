@@ -13,6 +13,10 @@
 
 `C3DShrinkRay` is a concrete animated 3D shrink-ray object. It binds `ray.ase`, loads three texture frames (`ray0000..ray0002.png`), and its per-frame override cycles the active texture slot every `0.1` seconds. The executable registers FourCC `3SHR`, but no `3SHR` objects appear in the current `.gam` corpus.
 
+## Runtime-confirmed behavior (game owner, 2026-06-23)
+
+Answers the open question below ("does any contact code use `C3DSHRINKRAY` for shrink effects"): **yes.** Fired at certain AI (Dino, Darwin fish, Humphrey, ...), the ray **shrinks** the target — which then plays `HISHRINK`, scales down, and becomes a small **moving pickup** the player can collect. Those targets derive from `C3DEnemy -> C3DPickupType -> C3DAI` and each registers a `HISHRINK` frame (`dinoshrink`/`darwinshrink`/`plantshrink`/Humphrey's `HISHRINK`). This class only animates the ray object itself; the shrink-on-contact → shrink → pickup transition lives in an unported hit/contact path, and `3SHR` has zero `.gam` placements, so the native port records this and defers the active mechanic. See `src/game/behaviors/behavior_creature.c` and `src/game/behaviors/behavior_humphrey.c`.
+
 ## Field Map
 
 Offsets are byte offsets from the primary active `C3DShrinkRay` pointer used by slot-1 methods. Constructor writes are `0xc0` higher in outer allocation space.

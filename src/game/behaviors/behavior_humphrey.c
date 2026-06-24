@@ -27,6 +27,12 @@
  * Deferred: the clone slot-0x124 toggle, Humphrey's C3DEnemy chase/attack combat,
  * and the shrink/grow animation set (HISHRINK/HIGROW/...) — none are reachable
  * until the SCENE sequencer is ported, so they are intentionally not wired here.
+ *
+ * Shrink note (game-owner ground truth 2026-06-23): like the C3DAI creature leaves,
+ * Humphrey is a shrink-ray target — the shrink ray makes him small and he becomes a
+ * moving pickup (hence C3DPickupType in the chain + the HISHRINK frame). The active
+ * mechanic is deferred for the same reason (un-decompiled transition; 3SHR unplaced);
+ * recorded in docs/decomp/C3DShrinkRay.md + behavior_creature.c.
  */
 #include "behaviors.h"
 #include "behavior_base.h"

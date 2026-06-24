@@ -14,6 +14,10 @@
 
 `C3DDino` is a placeable **creatures one off set dressing** object (family `creatures_one_off_set_dressing`, wave 9). It walks the class vtable with 1 owned method; its `.gam`-driven parameters and assets are registered in `InitObject` and listed below.
 
+## Runtime-confirmed behavior (game owner, 2026-06-23)
+
+This class is a **shrink-ray target**, not inert set-dressing. The shrink ray (`C3DShrinkRay`/`3SHR`) shrinks it: it plays `HISHRINK` (`dinoshrink.ASE`, registered by `vfunc_04_067`), scales down, and becomes a small **moving pickup** the player can collect — which is exactly why the chain carries `C3DPickupType` (the global pickup-state table `DAT_004f8438`). The shrink-on-contact → `HISHRINK` → moving-pickup transition body is not decompiled (`C3DShrinkRay` only animates the ray; `3SHR` has zero `.gam` placements), so the native port records this truth and defers the active mechanic. See `docs/decomp/C3DShrinkRay.md` and `src/game/behaviors/behavior_creature.c`.
+
 ## Field Map (registered `.gam` properties)
 
 No own `.gam` properties registered in `InitObject` (inherits its parent's property set, or is created at runtime rather than placed). See `docs/gam_schema.md` for any inherited properties.
