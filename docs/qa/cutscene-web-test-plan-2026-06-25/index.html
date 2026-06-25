@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cutscene Web Test Harness Plan - jn-engine</title>
+<style>
+* { box-sizing:border-box; margin:0; padding:0; }
+body { font-family:Monaco,Menlo,"Ubuntu Mono",monospace; background:#0d0d0d; color:#dedede; line-height:1.55; padding:24px 16px; }
+.wrap { max-width:1080px; margin:0 auto; }
+h1 { font-size:1.45rem; color:#fff; margin-bottom:4px; }
+h2 { font-size:1.08rem; color:#7ec8ff; border-bottom:1px solid #2a2a2a; padding-bottom:6px; margin:34px 0 12px; }
+h3 { font-size:0.98rem; color:#fff; margin:18px 0 4px; }
+p { margin:10px 0; color:#c8c8c8; }
+a { color:#7ec8ff; text-decoration:none; }
+a:hover { text-decoration:underline; }
+code { color:#d9c08a; }
+.sub { color:#888; font-size:0.84rem; }
+.badge { display:inline-block; border-radius:4px; padding:1px 8px; font-size:0.74rem; vertical-align:middle; }
+.green { background:#143a14; color:#7dde7d; border:1px solid #2c6e2c; }
+.blue { background:#1d2c3d; color:#9ecbff; border:1px solid #2c5a8a; }
+.amber { background:#33280e; color:#e6c66f; border:1px solid #6c5720; }
+.grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:12px; margin:18px 0; }
+.stat { background:#141414; border:1px solid #262626; border-radius:8px; padding:16px; }
+.stat strong { display:block; color:#fff; font-size:1.3rem; line-height:1.1; margin-bottom:4px; }
+.stat span { color:#999; font-size:0.8rem; }
+.card { background:#141414; border:1px solid #262626; border-radius:8px; padding:18px; margin:22px 0; }
+.note { border-left:3px solid #6c5720; background:#181409; border-radius:0 6px 6px 0; color:#d8c184; padding:8px 12px; margin:12px 0; font-size:0.88rem; }
+.fix { border-left:3px solid #2c6e2c; background:#0d160d; border-radius:0 6px 6px 0; color:#afd0af; padding:8px 12px; margin:12px 0; font-size:0.88rem; }
+table { width:100%; border-collapse:collapse; margin:14px 0; font-size:0.82rem; }
+th,td { text-align:left; padding:8px 9px; border-bottom:1px solid #242424; vertical-align:top; }
+th { color:#9a9a9a; font-weight:normal; }
+pre { overflow-x:auto; background:#0a0a0a; border:1px solid #242424; border-radius:6px; padding:10px 12px; font-size:0.76rem; color:#b8c8b8; margin:10px 0; }
+ul { margin:10px 0 10px 22px; color:#c8c8c8; }
+li { margin:4px 0; }
+.footer { color:#777; border-top:1px solid #2a2a2a; margin-top:40px; padding-top:12px; font-size:0.8rem; }
+@media (max-width:760px) { .grid { grid-template-columns:1fr; } body { padding:18px 12px; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<h1>Cutscene Web Test Harness Plan <span class="badge blue">PLANNED</span></h1>
+<p class="sub">2026-06-25 &middot; branch <code>native-port</code> &middot; source plan <code>docs/cutscene_web_test_plan.md</code></p>
+
+<h2>Goal</h2>
+<p>Generate a testable cutscene catalog from shipped <code>.gam</code> data and make those cutscenes playable on demand from the public web deploy via a button/menu. This is for QA: no campaign progression required, no normal auto-play, and no disruption to the faithfulness audit.</p>
+
+<div class="grid">
+  <div class="stat"><strong>3CAM</strong><span>shot directors already registered at runtime</span></div>
+  <div class="stat"><strong>3MCA</strong><span>named sequencers need catalog support</span></div>
+  <div class="stat"><strong>Web button</strong><span>new explicit QA playback path</span></div>
+</div>
+
+<h2>Current State</h2>
+<table>
+<tr><th>Area</th><th>Status</th></tr>
+<tr><td><code>behavior_cutscene.c</code></td><td>Registers every <code>3CAM</code> and can play all registered shots in placement order via <code>cutscene_request_intro()</code>.</td></tr>
+<tr><td>Web shell</td><td>No cutscene button/menu yet; no exported wasm function for explicit playback.</td></tr>
+<tr><td>Sequencing gap</td><td>Runtime does not yet model named <code>3MCA</code> sequences such as <code>needpasscard</code> or <code>neutron1a</code>.</td></tr>
+</table>
+
+<h2>Data Snapshot</h2>
+<table>
+<tr><th>Level</th><th>Cutscene rows</th></tr>
+<tr><td><code>Level1.gam</code></td><td>14 <code>3CAM</code>, 19 <code>3MCA</code></td></tr>
+<tr><td><code>level1b.gam</code></td><td>13 <code>3CAM</code>, 12 <code>3MCA</code></td></tr>
+<tr><td><code>Level3D.gam</code></td><td>2 <code>3CAM</code>, 3 <code>3MCA</code></td></tr>
+<tr><td><code>Level4.gam</code></td><td>12 <code>3CAM</code>, 10 <code>3MCA</code></td></tr>
+<tr><td><code>Level6.gam</code></td><td>3 <code>3CAM</code>, 5 <code>3MCA</code></td></tr>
+</table>
+
+<div class="note"><strong>Known visual risk:</strong> Goddard's texture is either incorrect or not mapped properly. Goddard-targeted shots should be exposed by this harness, but the texture/mapping defect should be tracked separately from camera sequencing.</div>
+
+<h2>Implementation Phases</h2>
+<div class="card">
+<h3>Phase 1 - Catalog</h3>
+<p>Add <code>tools/build_cutscene_catalog.py</code> to parse every <code>.gam</code> and emit a reviewable catalog. First pass can list each <code>3MCA</code> and standalone <code>3CAM</code>, with targets and a <code>goddard_related</code> flag.</p>
+<pre>{
+  "level1b": [
+    {
+      "tag": "neutron1a",
+      "type": "3MCA",
+      "shots": ["LABEXP1", "LABEXP2", "WATCHGODDARD"],
+      "targets": ["JIM1", "goddardpat2", "C3DGODDARD"],
+      "goddard_related": true
+    }
+  ]
+}</pre>
+</div>
+
+<div class="card">
+<h3>Phase 2 - Runtime API</h3>
+<p>Extend <code>behavior_cutscene.c</code> from one placement-order sequence into web-callable playback:</p>
+<ul>
+<li><code>cutscene_request_first_web()</code> for the first deploy.</li>
+<li><code>cutscene_count_web()</code>, <code>cutscene_request_web(index)</code>, <code>cutscene_active_web()</code>, and <code>cutscene_stop_web()</code> for the selectable menu.</li>
+<li>Keep direct level loads audit-safe: cutscenes play only when explicitly requested.</li>
+</ul>
+</div>
+
+<div class="card">
+<h3>Phase 3 - Web UI</h3>
+<p>Add a compact top-bar control in <code>web/shell.html</code>: a cutscene selector plus Play/Stop. It must work without Campaign mode and return focus to the canvas after clicks.</p>
+</div>
+
+<div class="card">
+<h3>Phase 4 - Fidelity</h3>
+<p>After button-driven playback works, improve sequencing: derive true <code>3MCA -> 3CAM</code> membership, play sounds, apply target animations, honor player-control locks, implement <code>FaceObject</code>, and decode <code>CameraType</code>/<code>ViewFromCamera</code>.</p>
+</div>
+
+<h2>Validation</h2>
+<pre>make
+python3 tools/audit_faithfulness.py
+source ~/emsdk/emsdk_env.sh && make web
+python3 tools/qa_web_verify.py</pre>
+<table>
+<tr><th>New test</th><th>Expected result</th></tr>
+<tr><td>Native <code>JN_CUTSCENE=1 ./jnengine --level level1b</code></td><td>Logs registered shots and starts playback.</td></tr>
+<tr><td>Web Playwright cutscene button test</td><td>Click Play, see active state / <code>[CUTSCENE]</code> log, canvas nonblank, Stop returns to gameplay camera.</td></tr>
+<tr><td>Catalog validation</td><td>Every catalog entry records present/missing targets explicitly.</td></tr>
+</table>
+
+<h2>Recommended First Cut</h2>
+<ol>
+<li>Add the catalog generator.</li>
+<li>Add one exported function: <code>cutscene_request_first_web()</code>.</li>
+<li>Add a single <code>Play Cutscene</code> button for the current level.</li>
+<li>Verify on <code>level1b</code> and <code>Level3D</code>.</li>
+<li>Then expand to a selectable cutscene menu.</li>
+</ol>
+
+<div class="footer">
+Related: <a href="/jn-engine/qa/native-port-motion-path-2026-06-25/">motion/path follow-up</a>
+&middot; Demo: <a href="/jn-engine/">/jn-engine/</a>
+</div>
+
+</div>
+</body>
+</html>

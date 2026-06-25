@@ -43,14 +43,14 @@ pre { overflow-x:auto; background:#0a0a0a; border:1px solid #242424; border-radi
 <div class="wrap">
 
 <h1>Native Port - Motion/Path QA Pass <span class="badge green">SHIPPED</span></h1>
-<p class="sub">Summary page &middot; 2026-06-25 &middot; branch <code>native-port</code>. This page covers the follow-up after the behavior-lens close-out: completing the recommended motion/path track, closing the level1 sailboat float and level3d Cindy pathing reports, updating the handoffs, and deploying the refreshed web build.</p>
+<p class="sub">Summary page &middot; 2026-06-25 &middot; branch <code>native-port</code>. This page covers the follow-up after the behavior-lens close-out: closing the level1 sailboat float, documenting the incomplete level3d Cindy path/location work, updating the handoffs, and deploying the refreshed web build.</p>
 
 <h2>What Changed</h2>
-<p>The next recommended track was motion/path fidelity. It closed both non-audio reports left in the QA backlog: #5, where the level1 sailboat floated above the river, and #4, where level3d Cindy kept walking a synthetic return path after her authored route ended.</p>
+<p>The next recommended track was motion/path fidelity. It closed #5, where the level1 sailboat floated above the river. #4 remains incomplete: Cindy is still not in the correct location, even though one native-only patrol-loop mismatch was found and corrected.</p>
 
 <div class="grid">
-  <div class="stat"><strong>#4 + #5 closed</strong><span>motion/path tail complete</span></div>
-  <div class="stat"><strong>19 / 24</strong><span>QA backlog reports fixed/verified</span></div>
+  <div class="stat"><strong>#5 closed</strong><span>#4 Cindy deferred</span></div>
+  <div class="stat"><strong>18 / 24</strong><span>QA backlog reports fixed/verified</span></div>
   <div class="stat"><strong>0 findings</strong><span>faithfulness audit across 35 levels</span></div>
 </div>
 
@@ -77,25 +77,25 @@ pre { overflow-x:auto; background:#0a0a0a; border:1px solid #242424; border-radi
 </table>
 <div class="note">The boat route issue is closed: the earlier off-river concern was a bounds-reading error, and the visual float is fixed by the water anchor.</div>
 
-<h2>Cindy Fix</h2>
+<h2>Cindy Status</h2>
 <p>The level3d Cindy row authors a short terminal route: <code>c1 -> c2 -> none</code>. Native Cindy reused the generic patrol config with <code>loop_to_start=1</code>, so after reaching <code>c2</code> it synthesized a return to <code>c1</code>. That made Cindy ping-pong through a path the data did not author.</p>
 <div class="card">
 <div class="meta"><code>src/game/behaviors/behavior_cindy.c</code></div>
 <p><code>vt_cindy</code> now sets <code>loop_to_start=0</code>. Routes that should loop already say so in the authored data, for example level4's <code>CINDY7 -> CINDY1</code>. Routes ending in <code>none</code> now terminate.</p>
-<div class="fix">Result: after a 900-tick warmup, Cindy is stopped at the authored terminal platform instead of walking back through the chain.</div>
+<div class="note">This is only a partial correction. The user confirmed Cindy is still not in the correct location, so #4 remains incomplete/deferred until original/capture placement evidence is available.</div>
 </div>
 <figure>
   <img src="img/cindy-after.png" alt="Level3D Cindy stopped at her authored terminal patrol point after the path fix">
-  <figcaption>After: Cindy stops at the terminal <code>c2</code> platform. The native-only return loop is gone.</figcaption>
+  <figcaption>Partial after-shot: the synthetic return loop is gone, but this does not validate Cindy's final location.</figcaption>
 </figure>
-<div class="note">The motion/path tail is now complete. The remaining QA backlog category is Group I audio, which still needs a desktop/noVNC session for by-ear confirmation.</div>
+<div class="note">Remaining QA backlog: #4 Cindy location/pathing and Group I audio. New user priority is the <a href="/jn-engine/qa/cutscene-web-test-plan-2026-06-25/">cutscene web test harness</a>.</div>
 
 <h2>Published Outputs</h2>
 <table>
 <tr><th>Output</th><th>URL</th><th>Status</th></tr>
 <tr><td>Browser demo</td><td><a href="/jn-engine/">/jn-engine/</a></td><td><span class="badge green">live</span> <code>jnengine.aef9117b.js</code>, assets <code>63737d29</code></td></tr>
 <tr><td>This summary</td><td><a href="/jn-engine/qa/native-port-motion-path-2026-06-25/">/jn-engine/qa/native-port-motion-path-2026-06-25/</a></td><td><span class="badge green">published</span></td></tr>
-<tr><td>Updated campaign ledger</td><td><a href="/jn-engine/qa/native-port-behavior-coverage-2026-06-24/">/jn-engine/qa/native-port-behavior-coverage-2026-06-24/</a></td><td><span class="badge green">updated</span> #4/#5 motion-path tail closed</td></tr>
+<tr><td>Updated campaign ledger</td><td><a href="/jn-engine/qa/native-port-behavior-coverage-2026-06-24/">/jn-engine/qa/native-port-behavior-coverage-2026-06-24/</a></td><td><span class="badge green">updated</span> #5 closed, #4 deferred</td></tr>
 </table>
 
 <h2>Validation</h2>
@@ -110,7 +110,7 @@ python3 tools/qa_web_verify.py
 <tr><th>Gate</th><th>Result</th></tr>
 <tr><td>Native build</td><td><span class="badge green">pass</span> existing SDL2_mixer archive warning only</td></tr>
 <tr><td>Aimed screenshot</td><td><span class="badge green">pass</span> sailboat seated on river</td></tr>
-<tr><td>Cindy route screenshot</td><td><span class="badge green">pass</span> terminal route stops instead of looping</td></tr>
+<tr><td>Cindy route screenshot</td><td><span class="badge amber">partial</span> terminal route stops, but location remains incorrect</td></tr>
 <tr><td>Route bounds audit</td><td><span class="badge green">pass</span> all <code>BOAT2..boat7</code> waypoints inside <code>ncwater</code></td></tr>
 <tr><td>Faithfulness audit</td><td><span class="badge green">pass</span> 0 findings, 0 waived, 0 new across 35 levels</td></tr>
 <tr><td>Web build</td><td><span class="badge green">pass</span> 387 MB asset bundle warning only</td></tr>
@@ -121,10 +121,10 @@ python3 tools/qa_web_verify.py
 <h2>Docs Updated</h2>
 <table>
 <tr><th>Path</th><th>Purpose</th></tr>
-<tr><td><code>docs/qa/qa_backlog_campaign_handoff.md</code></td><td>#4 and #5 closed; route audits corrected; remaining open work updated to audio</td></tr>
-<tr><td><code>docs/continuation_options.md</code></td><td>motion/path marked done; next recommendation moved to audio</td></tr>
-<tr><td><code>docs/PROJECT_HISTORY.md</code></td><td>boat water-anchor and Cindy route checkpoints added</td></tr>
-<tr><td><code>docs/qa/native-port-behavior-coverage-2026-06-24/</code></td><td>public campaign page updated from 17/24 to 19/24</td></tr>
+<tr><td><code>docs/qa/qa_backlog_campaign_handoff.md</code></td><td>#5 closed; #4 marked incomplete/deferred; remaining open work updated</td></tr>
+<tr><td><code>docs/continuation_options.md</code></td><td>next recommendation moved to cutscene web testing</td></tr>
+<tr><td><code>docs/PROJECT_HISTORY.md</code></td><td>boat water-anchor checkpoint added; Cindy reopened; Goddard visual issue noted</td></tr>
+<tr><td><code>docs/qa/native-port-behavior-coverage-2026-06-24/</code></td><td>public campaign page corrected to 18/24</td></tr>
 </table>
 
 <div class="footer">

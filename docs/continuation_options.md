@@ -1,7 +1,7 @@
 # Continuation Options — where the jn-engine native port can go next
 
 > **Purpose:** a decision menu for the next session (or contributor). Written 2026-06-25,
-> right after the QA backlog campaign shipped and the motion/path follow-up moved it to 19/24 closed.
+> right after the QA backlog campaign shipped and the boat follow-up moved it to 18/24 closed.
 > It enumerates
 > the open work tracks with their effort / impact / prerequisites / entry points so you can
 > *pick* rather than re-derive. This is a pointer doc — the authoritative state still lives in
@@ -16,7 +16,8 @@
   its hidden/non-solid resolver output.
 - **Story machine:** the SCENE sequencer (both writers) + the C3DGoddard companion slice are in.
 - **Web build:** live at `exentt.com/jn-engine` (`jnengine.aef9117b.js`, assets `63737d29`), Campaign toggle reachable, `qa_web_verify.py` 16/16.
-- **QA backlog:** 19/24 fixed, 2 WONTFIX-as-faithful; remaining open work is Group I audio (#18–24).
+- **QA backlog:** 18/24 fixed, 2 WONTFIX-as-faithful; remaining open work is #4 Cindy location/pathing and Group I audio (#18–24).
+- **Known visual issue:** Goddard's texture is either incorrect or mapped incorrectly; carry this as a QA/art-fidelity item.
 - **Gates that must stay green every change:** `make` → `python3 tools/audit_faithfulness.py`
   (0 findings / 35 levels) → `make web` → `python3 tools/qa_web_verify.py` (16/16) → `./tools/deploy_wasm.sh`.
 
@@ -24,24 +25,26 @@
 
 | # | Track | Effort | Impact | Headless-verifiable? |
 |---|-------|--------|--------|----------------------|
-| A | Finish the QA backlog tail (motion/path #4,#5) | Done | Motion/path reports closed | Yes |
+| A | Finish the QA backlog tail (#4 Cindy + audio) | Med–High | Closes remaining community reports | Mixed |
 | B | Group I audio (#18–24) + audio-faithfulness pass | High | Closes reports + new subsystem | **No — needs by-ear/desktop** |
 | C | Close the behavior lens to 93/93 (`3ROK`/`3SPR`/`3DAI`) | Done | Breadth milestone complete | Yes |
 | D | Deferred gameplay mechanics (shrink-ray, fruit-fill, …) | High | Real gameplay, not just visuals | Partly |
 | E | Campaign playthrough hardening (end-to-end) | High | The game becomes *completable* | Partly |
-| F | Motion/path fidelity (boat water + Cindy path) | Done | Float/stray-class reports closed | Yes |
+| F | Motion/path fidelity (Cindy location/path) | Med–High | Fixes remaining non-audio QA report | Yes (screenshots) |
+| I | Cutscene test harness for web deploy | Med | Makes scripted scenes inspectable on demand | Yes |
 | G | Collision containment (open-shell houses, walls) | Med | Stops out-of-bounds / see-inside | Yes |
 | H | Contributor / capture-rig tasks (asset truth) | Med | Exact sizes/textures, offloadable | N/A (tooling) |
 
 ---
 
-### A. Finish the QA backlog tail — motion/path (#4, #5) — DONE 2026-06-25
+### A. Finish the QA backlog tail — Cindy + audio
 - **#5 l1 boat (3SAI) is closed:** `3SAI` now visually anchors to the `ncwater*` surface while the
   authored gameplay Y stays intact. The prior "off-river" concern was corrected by auditing actual
   `ncwater` mesh bounds; the whole `BOAT2 -> boat7` chain is inside the river mesh.
-- **#4 l3d Cindy (3CIN) is closed:** grounding was already fixed, and `vt_cindy` now honors terminal
-  patrol routes (`c1 -> c2 -> none`) instead of synthesizing a return loop. Cindy routes that should
-  loop already encode it explicitly (`CINDY7 -> CINDY1`).
+- **#4 l3d Cindy (3CIN) is incomplete/deferred:** grounding is fixed and native no longer synthesizes
+  a `c2 -> c1` return loop, but the user confirmed Cindy is still not in the correct location. Reopen
+  this only with original/capture comparison of the `3CIN` row and its `c1/c2` patrol markers.
+- **Group I audio (#18–24)** remains open and needs desktop/noVNC by-ear verification.
 
 ### B. Group I audio (#18–24) + an audio-faithfulness pass
 The remaining audio reports, plus the broader gap they expose.
@@ -75,6 +78,8 @@ active mechanic isn't live). Turning these on is where the project shifts from "
   (game-owner ground truth); the classes already carry a pickup base, the transition is deferred.
 - **Fruit-fill / "Apple Pie%"** (the real story behind QA #12): the fruit-bowl→pie mechanic.
 - **Goddard** fetch/scripted-control is in; further companion behaviors (per `C3DGoddard.md`) remain.
+- **Goddard texture/mapping:** current Goddard rendering appears to use an incorrect texture or UV map.
+  Treat as a visual fidelity bug, likely in `entity_visual.c` asset selection or the GLB/ASE texture export.
 - Each needs its decomp spec read first and a subsystem (effects/timers/inventory) that may not be ported.
 
 ### E. Campaign playthrough hardening
@@ -84,10 +89,16 @@ completion conditions, checkpoints, and the cutscene/trigger chains that gate pr
 highest-impact "is it a game yet?" track. Entry points: `game_flow.c`, `task_loader.c`,
 `behavior_ai_trigger.c`, `behavior_load.c`, `behavior_checkpoint.c`, `behavior_cutscene.c`.
 
-### F. Motion/path fidelity (boat water + Cindy path) — DONE 2026-06-25
+### F. Motion/path fidelity (Cindy location/path)
 The water-surface query is in place for `3SAI`, the level1 boat route has been audited inside the
-river bounds, and Cindy now follows authored patrol termination. General patrol cleanup can still
-happen opportunistically, but the QA motion/path tail is closed.
+river bounds, and Cindy now follows authored patrol termination. The open problem is Cindy's actual
+location/path in level3d, which still does not match expected gameplay. Defer until original/capture
+evidence can be compared against `Level3D.gam` plus any C3DAI state-6 placement behavior.
+
+### I. Cutscene test harness for web deploy
+Plan lives in [`cutscene_web_test_plan.md`](./cutscene_web_test_plan.md). Goal: generate a per-level
+cutscene catalog from `3MCA`/`3CAM` data and expose a web button/menu so cutscenes can be played on
+demand for QA without requiring campaign progression.
 
 ### G. Collision containment
 The #13 investigation surfaced this: background houses are open-bottomed facades (faithful), but the
@@ -105,9 +116,9 @@ Offloadable, self-contained data-truth work that doesn't block the engine:
 ---
 
 ## Recommended ordering (opinion, not a mandate)
-1. **B (audio)** — the only QA backlog category left; batch it for a session where a **desktop/noVNC** is available for by-ear checks. Until
-   then only the resolution-path instrumentation is verifiable.
+1. **I (cutscene web test harness)** — current user priority; make scripted scenes playable on demand from the web deploy.
 2. **E (campaign playthrough)** — the biggest "is it a game" jump; do it once the actors are all present.
-3. **D / G / H** — opportunistic; D when a mechanic is specifically requested, G/H as polish.
+3. **B (audio)** — batch it for a session where a **desktop/noVNC** is available for by-ear checks.
+4. **F (Cindy location) / D / G / H** — defer Cindy until original/capture evidence is available; D/G/H opportunistic.
 
-> If you want to clear the QA board: **B audio** is next, preferably in a desktop/noVNC session.
+> Current priority from the user: plan and then build **I cutscene web test harness**.
