@@ -1273,7 +1273,10 @@ performance, shell hygiene) lives in the repo's `CLAUDE.md` and in
   `(0,240,max(100,500-35*t))`, type 3 `(200,240,max(100,700-55*t))`, type 4
   `(-200,190,max(100,700-55*t))`; look-at is target position plus `LookatVOffsetN - 60` on Y. Ported
   selector playback to this recovered table and removed the previous target-name `3CAM` template lookup
-  for `3MCA` sequences. `3CAM` `ViewFromCamera` remains open for standalone shot playback.
+  for `3MCA` sequences. `3CAM` `ViewFromCamera` remains open for standalone shot playback. Verified
+  `make`, `audit_faithfulness.py` (0 findings / 35 levels), `make web`, `qa_web_verify.py` (16/16),
+  and targeted local Playwright on `level1b` proving `LABEXP3` starts 7 shots and plays
+  `voiceneighborhood.omt[46]` for 5.18s. Deployed live as `jnengine.d46fd728.js`, assets `52fd4db4`.
 
 ---
 

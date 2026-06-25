@@ -15,7 +15,7 @@
   `3ROK`/`3SPR`/`3DAI` resolver/positioning tail is explicitly native-inert, preserving
   its hidden/non-solid resolver output.
 - **Story machine:** the SCENE sequencer (both writers) + the C3DGoddard companion slice are in.
-- **Web build:** live at `exentt.com/jn-engine` (`jnengine.d46fd728.js`, assets `b6836ee8`), Campaign toggle reachable, `qa_web_verify.py` 16/16.
+- **Web build:** live at `exentt.com/jn-engine` (`jnengine.d46fd728.js`, assets `52fd4db4`), Campaign toggle reachable, `qa_web_verify.py` 16/16.
 - **QA backlog:** 18/24 fixed, 2 WONTFIX-as-faithful; remaining open work is #4 Cindy location/pathing and Group I audio (#18–24).
 - **Cutscene harness:** first cut implemented. Catalog lists 114 `3MCA` cutscenes, 136 `3CAM` shot directors,
   and 362 authored audio steps; web shell has per-level selector plus Play/Stop.
