@@ -59,11 +59,17 @@
 - `93ce52c` — qa(model): enemy PROJ → missile.ASE, player keeps baseball. (#8)
 
 - `c075353` — qa(tex): gate l1 tree billboard to level1 family. (#10)
-- (pending commit) — qa: 3RED size floor + bigger pulse (#11); handoff updates.
+- `a573ad8` — qa(3RED): bigger red neutrons + more visible bounce (#11) + handoff.
+- `965cf54` — docs(qa): handoff (Group C done).
 
 **Reports closed & verified: 11/24** (#1×4, #2, #3, #4-ground, #8, #9, #10, #11).
 **#12 apple-pie = WONTFIX-as-bug** (authored fruit bowl; pie is a deferred mechanic).
 Remaining open: #4-pathing, #5, #6, #7, #13–#24 (incl. all of Group I audio).
+
+**Regression gate PASSED at session-1 end:** `python3 tools/audit_faithfulness.py` →
+**0 findings / 0 NEW across all 24 levels** with all 11-report changes in. Native `make`
+clean. **NOT yet web-deployed** and **no `docs/qa/<reporter>` pages written yet** — that is
+the Finalize step (see below), deliberately deferred so the whole batch deploys once.
 
 ## Key facts / how to work
 - **Native build:** `make` (zig toolchain; ~exit 0). **Web build+deploy:** `source ~/emsdk/emsdk_env.sh && ./tools/deploy_wasm.sh` (387MB, slow — do ONCE at finalize).
@@ -76,10 +82,61 @@ Remaining open: #4-pathing, #5, #6, #7, #13–#24 (incl. all of Group I audio).
 - **Verification gates (finalize):** `make`; `python3 tools/audit_faithfulness.py`; `make web`; `./tools/deploy_wasm.sh`; `python3 tools/qa_web_verify.py`.
 - **Deliverables per ticket:** tracked `docs/qa/<reporter>-YYYY-MM-DD/index.html` (dark mono template — copy from `docs/qa/sandmanfan-2026-06-12b/`), mirror to `/var/www/jn-engine/qa/...`. Then update `docs/PROJECT_HISTORY.md`.
 
-## Resume here
-Next tractable items (authored-data, low risk, screenshot-verifiable):
-1. **tree04 texture** (#10) — add level3c texture override.
-2. **3RED size+pulse** (#11) — use authored SpriteSize; implement pulse in neutron tick.
-3. **3FLE / PROJ** (#9,#8) — verify yokcaptnstop.ASE loads; add enemy plasma PROJ visual.
-Then heavier waves: **E** orientation, **G** house02 geometry, **H** l1b placement, **I** audio.
-Docs pages + single web deploy at the very end (Group `Finalize`, task #14).
+## Audio-group (Group I) investigation notes — already done, do NOT re-derive
+The audio system (read before touching #18–#24):
+- **Per-level music:** `main.c:~639` calls `audio_set_music_db(start->music_database, MusicIndex)`
+  from the level's start object. Music DBs are named `music<area>` (e.g. `musicneighborhood`,
+  `musicjimmyshouse`), parsed under `assets/parsed/music*/`.
+- **`C3DSoundEffect` (3SOU)** = `behavior_soundfx.c`: proximity positional sound. Ambient loop
+  **DOES halt on radius exit** (L61–64) and one-shots consume `TimesToTrigger`. So 3SOU is **not**
+  the l3a "never stops / stacks" source.
+- **`C3DMusicTrigger` (3MUS)** = `behavior_music.c`: proximity music switch; `audio_set_music_db`
+  **replaces** current music (doesn't stack). Also not an obvious stacking source.
+- **#23 l1a shrink-ray-as-music:** the level1a start object's `MusicDatabase`/`MusicIndex` did not
+  surface via a plain `grep` of `level1a.gam` (binary). Likely the start object authors a wrong/voice
+  DB (shrink sounds live in `voiceship`/`loadsfx`/`voicepractice`, e.g. `0020_shrinkray.wav`), OR the
+  music handle resolution falls back to a sfx DB. **Next:** dump the resolved music db+index at
+  runtime (instrument `audio_set_music_db`, or print `selected_start->music_database`+MusicIndex in
+  `main.c`), compare to the intended `music*` DB for level1a's area, fix the data/resolution.
+- **#22 l3a ride-track stacking:** not 3SOU/3MUS (above). Look for a looping ride/track sound started
+  by `behavior_ride.c` or a level3a-specific emitter that lacks a stop-on-exit; the "stack on re-entry"
+  means a new channel each entry with no halt. Find the emitter near the l3a spawn (137,119,827).
+- **#7 l6a 3DOR door loop SFX:** precedent exists — the lu9-06-12 work added `soundeffects.omt[59]`
+  "Door opening loop" on open for sliding doors (`behavior_door.c`/swingdoor). Check whether l6a
+  `halldoor01` uses that path; the ask is "loop until movement stops".
+- **#18–#21 l1c furniture sounds (piano/TV/radio/toilet/bed):** these are **room placements**
+  (LRoom/MBEDROOM1/BATHROOM/HALLWAY glbs), not 3SOU entities — so no proximity emitter exists.
+  This is a **feature**: either author/synthesize positional emitters at those props, or find whether
+  the original uses C3DSoundEffect rows we're not placing. Largest/most speculative of the audio set.
+
+## Resume here (Session 2)
+**Order of attack (tractable → hard):**
+1. **#14 3JIM l1 lab-facing (ORI)** — ⚠️ DELICATE: spawn facing was flipped repeatedly by the
+   rotation-sign work and `qa_web_verify.py` has a sky-click probe aimed at the current spawn. If you
+   change spawn yaw, RE-AIM that probe. Confirm against authored `JIM1` rotation + house/lab geometry.
+2. **#15 3BUT n03 l3c (ORI)** and **#6 3BUT l6a float + flash black/red** — button orientation +
+   a flashing material animation (look at `behavior_button.c`; "flash" is a per-frame color pulse like
+   3RED's). #6 float = check authored Y vs floor (foot-anchor doesn't apply to buttons).
+3. **#16/#17 l1b 3ARR + 3PIC** — 3ARR arrow misplaced (should sit above Goddard's bowl) + a wrong
+   lab-water teleport; 3PIC missing coin pickup. Placement/authored-data.
+4. **#5 3SAI boat (l1)** + **#4 3CIN pathing/wall-clip (l3d)** — both motion/path, harder; likely
+   need behavior work (boat follows a spline; Cindy path). Lower priority.
+5. **#13 house02 floor missing (l1)** — OMT geometry: the floor mesh under house02 isn't drawn
+   (untextured-skip? or absent from the placement set). Check the audit `untextured-skip`/`mesh-missing`
+   lines for house02-area placements at level1.
+6. **Group I audio** per the notes above.
+
+## Finalize (Group `Finalize`, task #14) — RUN ONCE WHEN A BATCH IS READY
+1. `make` → `python3 tools/audit_faithfulness.py` (expect 0 findings).
+2. `source ~/emsdk/emsdk_env.sh && ./tools/deploy_wasm.sh` (387MB; outward-facing — the user
+   pre-authorized deploying the QA fixes, but confirm before the FIRST public deploy of this batch).
+3. `python3 tools/qa_web_verify.py` (16/16).
+4. Build tracked resolution pages **per reporter** (4 of them): `docs/qa/sandmanfan-2026-06-24/`,
+   `docs/qa/awefan-2026-06-14/`, `docs/qa/awefan-2026-06-14b/` (level1b), `docs/qa/lu9-2026-06-14/`.
+   Copy the dark-mono template from `docs/qa/sandmanfan-2026-06-12b/index.html`. Use before/after
+   shots from the reporter cameras (the `tools/qa_shot.sh` invocations are in this campaign's history;
+   "before" needs a stash/revert build or a preserved binary). Mirror each to
+   `/var/www/jn-engine/qa/<folder>/`; `diff -qr` to confirm.
+5. Update `docs/PROJECT_HISTORY.md` with the new invariants (3SPH invisible; foot-anchor 3HUG/3CIN;
+   l1 tree billboard gated to level1 family; 3FLE=commander; enemy PROJ=missile; red-neutron floor).
+6. Push `native-port`.
