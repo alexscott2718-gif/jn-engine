@@ -42,8 +42,8 @@
 | 13 | l1 | house02 | GFX | floor under house missing entirely | G | ⬜ TODO (OMT geometry) |
 | 14 | l1 | 3JIM JIM1 | ORI | faces lab not house on lab-exit | E | ✅ DONE (STRT yaw copied on spawn) |
 | 15 | l3c | 3BUT n03 | ORI | orientation off | E | ✅ DONE (authored button mesh + tint pulse) |
-| 16 | l1b | 3ARR C3DARROW | PLC | misplaced (should be over Goddard bowl); lab-water teleport wrong | H | 🔎 IN PROGRESS (see Session-2 handoff notes below) |
-| 17 | l1b | 3PIC C3DPICKUPITEM | PLC | missing coin pickup (only bone) | H | 🔎 IN PROGRESS / likely validation-close (coin+bone visible in current build; see notes) |
+| 16 | l1b | 3ARR C3DARROW | PLC | misplaced (should be over Goddard bowl); lab-water teleport wrong | H | 🛠️ FIX IMPLEMENTED, UNCOMMITTED (make + audit 0; see WIP notes) |
+| 17 | l1b | 3PIC C3DPICKUPITEM | PLC | missing coin pickup (only bone) | H | ✅ VALIDATED (coin+bone visible; no code change needed) |
 | 18 | l1c | LRoom | OTH | piano + TV proximity sound | I | ⬜ TODO (audio feature) |
 | 19 | l1c | MBEDROOM1 | OTH | radio proximity sound | I | ⬜ TODO |
 | 20 | l1c | BATHROOM | OTH | toilet/sink proximity sound | I | ⬜ TODO |
@@ -63,10 +63,51 @@
 - `965cf54` — docs(qa): handoff (Group C done).
 - `e026d18` — qa(spawn): apply start-point yaw on level loads. (#14)
 - `3e312af` — qa(button): draw authored button meshes and color pulse. (#6,#15)
+- `48052f6` — docs(qa): refresh level1b handoff.
 
-**Reports closed & verified: 14/24** (#1×4, #2, #3, #4-ground, #6, #8, #9, #10, #11, #14, #15).
+## Current WIP — DO NOT LOSE (uncommitted as of usage checkpoint)
+There are **uncommitted code changes** for #16 in:
+- `src/game/behaviors/behavior_base.{c,h}`
+- `src/game/behaviors/behavior_arrow.c`
+- `src/game/behaviors/behavior_load.c`
+- `src/game/main.c`
+
+WIP behavior:
+- Adds `behavior_required_task_gate_allows()`:
+  - If a campaign task store exists, evaluates `RequiredTask`/`RequiredLevel`/`ExactLevel`
+    against that task state (e.g. `SCENE`).
+  - If no task store exists, direct `--level` behavior stays unchanged unless
+    `JN_PROGRESS_LEVEL` is explicitly set.
+- `3ARR` uses that gate, so campaign-only arrows hide until the authored story threshold.
+- `LOAD` uses authored `Radius` instead of the hard-coded 60-unit trigger cube and refreshes
+  its trigger flag from the task gate each frame; `on_trigger` also guards the gate.
+- `main.c` draws a **scoped** `pickup-arrow` over the level1b `gdish` hidden trigger only
+  (`3PIC`, hidden chunk 106, `ShowArrow=1`, `RequiredPicNum=4`, `ToggleObject=refill`,
+  `NextTrigger=godeat`). This deliberately does **not** change the global chunk-106 hidden
+  rule, so level1 hydrant/nests/pads/boatl remain invisible referent triggers.
+
+Validation already run on the WIP:
+- `make` passed.
+- `/tmp/l1b_goddard_bowl_after.png` shows the yellow arrow over the Goddard dish.
+- `--newgame` audit at seeded `SCENE=30` shows row 44/46 `RequiredLevel=65` lab-water
+  `LOAD`/`3ARR` are gated, while row 90 `gdish` emits `kind=pickup-arrow`.
+- `JN_AUDIT=1 --level Level1` regression probe shows level1 `hydrant`, `nest1`, `nest2`,
+  `boatl`, `pad`, `pad2` remain `kind=hidden`, with no `pickup-arrow`.
+- `python3 tools/audit_faithfulness.py` passed:
+  `0 findings (0 waived, 0 NEW) -> build/audit_faithfulness.json`; level1b summary includes
+  `pickup-arrow=1`.
+
+Next session should:
+1. Review the WIP diff.
+2. Optionally take one more focused screenshot/probe:
+   `bash tools/qa_shot.sh /tmp/l1b_goddard_bowl_after.png -133 80 196 -133 80 650 level1b 450`
+   and/or the `--newgame` audit above.
+3. Update this handoff statuses if satisfied, then commit the WIP code with a root-cause
+   message for #16 and note #17 as validation-closed.
+
+**Reports closed & verified: 15/24** (#1×4, #2, #3, #4-ground, #6, #8, #9, #10, #11, #14, #15, #17-by-validation).
 **#12 apple-pie = WONTFIX-as-bug** (authored fruit bowl; pie is a deferred mechanic).
-Remaining open: #4-pathing, #5, #7, #13, #16–#24 (incl. all of Group I audio).
+Remaining open: #4-pathing, #5, #7, #13, #16 WIP, #18–#24 (incl. all of Group I audio).
 
 **Regression gate PASSED at session-1 end:** `python3 tools/audit_faithfulness.py` →
 **0 findings / 0 NEW across all 24 levels** with all 11-report changes in. Native `make`
@@ -129,7 +170,7 @@ The audio system (read before touching #18–#24):
    `/tmp/button_l3c_n03_before_close.png` → `/tmp/button_l3c_n03_after_close.png`; audit logs
    resolve l6a to `assets/ase/buttonupship.ASE` and l3c n03 to `assets/ase/buttonup.ASE`.
    `python3 tools/audit_faithfulness.py` stayed 0 findings.
-3. 🔎 **#16/#17 l1b 3ARR + 3PIC** — active investigation; no code commit yet.
+3. 🛠️ **#16/#17 l1b 3ARR + 3PIC** — #16 code implemented but uncommitted; #17 validated current build.
    Read specs: `docs/decomp/CLoadLevel.md`, `docs/decomp/C3DArrow.md`,
    `docs/decomp/C3DPickupItem.md`, `docs/decomp/C3DGoddard.md`.
 
@@ -165,6 +206,8 @@ The audio system (read before touching #18–#24):
      visible at the lab/neighborhood marker.
    - `/tmp/l1b_goddard_bowl.png` — bowl/cushion shot; blue `GODDARD` dish visible,
      but no `ShowArrow` marker above the hidden `gdish` trigger yet.
+   - `/tmp/l1b_goddard_bowl_after.png` — WIP after-shot; yellow arrow now appears
+     over the `GODDARD` dish.
    - `/tmp/l1b_coin_bone_close1.png`, `/tmp/l1b_coin_bone_close2.png`,
      `/tmp/l1b_coin_bone_close3.png` — tight shots around rows 120/122. Current build
      visibly draws the coin and bone side by side (one angle frames both cleanly).
@@ -172,24 +215,17 @@ The audio system (read before touching #18–#24):
      `assets/parsed/sprites/sprites_images/0080_64x64d32.png` and row 122 as
      `assets/parsed/sprites/sprites_images/0115_64x64d16.png`.
 
-   **Likely root causes / safe fix boundary:**
+   **Implemented root causes / safe fix boundary:**
    - `CLoadLevel.md` states the proximity/prerequisite test checks `RequiredTask` /
-     `RequiredLevel` / `ExactLevel` before activation. Native `behavior_load.c`
-     currently ignores those gates and uses hard-coded `60,60,60` trigger extents
-     instead of authored `Radius`. Fix candidate: make `LOAD` use `Radius`, and
-     gate activation on the named task state when a campaign task store is loaded
-     (fallback to current direct `--level` behavior unless explicit `JN_PROGRESS_LEVEL`
-     is set). Apply the same task-state gate to `C3DArrow` visibility.
-   - For the Goddard-bowl arrow, do **not** undo the global chunk-106 hidden-canvas
-     rule from the 2026-06-12 QA page. Instead draw a separate indicator only for
-     active hidden `3PIC` triggers that explicitly author `ShowArrow=1` and have
-     a real interaction requirement. `gdish` is the target (`RequiredPicNum=4`);
-     broad “all hidden pickups get arrows” would clutter known-valid invisible
-     referents such as level1 hydrant/nests/pads.
-   - #17 may not need code: the current native build already draws the coin and
-     bone via the sprite DB. Close only after one final screenshot/audit pass, and
-     note that the old symptom was either pre-existing resolver state or a bad
-     camera/framing of the shelf area.
+     `RequiredLevel` / `ExactLevel` before activation. WIP code now makes `LOAD`
+     use `Radius`, and gates activation on the named task state when a campaign
+     task store is loaded. Direct `--level` behavior stays unchanged unless
+     `JN_PROGRESS_LEVEL` is set. `3ARR` uses the same gate.
+   - For the Goddard-bowl arrow, WIP code does **not** undo the global chunk-106
+     hidden-canvas rule from the 2026-06-12 QA page. It draws a separate indicator
+     only for the authored `gdish` interaction shape described above.
+   - #17 needs no code: current native build already draws the coin and bone via
+     the sprite DB; close as validation-only.
 4. **#5 3SAI boat (l1)** + **#4 3CIN pathing/wall-clip (l3d)** — both motion/path, harder; likely
    need behavior work (boat follows a spline; Cindy path). Lower priority.
 5. **#13 house02 floor missing (l1)** — OMT geometry: the floor mesh under house02 isn't drawn
