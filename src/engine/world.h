@@ -41,7 +41,7 @@ typedef struct GamProp {
    TalkTrigger*, ...); every other authored non-"none" string is captured here so
    a ported behavior can read its class's string params by name (e.g.
    C3DAITrigger's AITarget / NextTrigger / ToggleObject). Read via gam_str(). */
-#define ENTITY_MAX_STRS 12
+#define ENTITY_MAX_STRS 32
 typedef struct GamStr {
     char name[24];
     char val[40];

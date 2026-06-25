@@ -22,6 +22,7 @@ DEST="/var/www/jn-engine"
 
 # 1. Build with the emsdk active.
 source "$HOME/emsdk/emsdk_env.sh" > /dev/null 2>&1
+python3 "$REPO/tools/build_cutscene_catalog.py"
 make -C "$REPO" web
 
 # 2. Content hashes. JS gets its own; wasm+data share one asset-version tag
@@ -37,6 +38,7 @@ sudo cp "$REPO/web/jnengine.html" "$DEST/jnengine.html"
 sudo cp "$REPO/web/jnengine.js"   "$DEST/jnengine.${HASH}.js"
 sudo cp "$REPO/web/jnengine.wasm" "$DEST/jnengine.${AVER}.wasm"
 sudo cp "$REPO/web/jnengine.data" "$DEST/jnengine.${AVER}.data"
+sudo cp "$REPO/web/cutscene_catalog.json" "$DEST/cutscene_catalog.json"
 # Keep an unhashed jnengine.js around for tooling that probes the canonical
 # filename, but the HTML references the hashed one.
 sudo cp "$REPO/web/jnengine.js"   "$DEST/jnengine.js"

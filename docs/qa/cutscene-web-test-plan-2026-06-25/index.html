@@ -40,24 +40,24 @@ li { margin:4px 0; }
 <body>
 <div class="wrap">
 
-<h1>Cutscene Web Test Harness Plan <span class="badge blue">PLANNED</span></h1>
+<h1>Cutscene Web Test Harness <span class="badge green">FIRST CUT SHIPPED</span></h1>
 <p class="sub">2026-06-25 &middot; branch <code>native-port</code> &middot; source plan <code>docs/cutscene_web_test_plan.md</code></p>
 
 <h2>Goal</h2>
 <p>Generate a testable cutscene catalog from shipped <code>.gam</code> data and make those cutscenes playable on demand from the public web deploy via a button/menu. This is for QA: no campaign progression required, no normal auto-play, and no disruption to the faithfulness audit.</p>
 
 <div class="grid">
-  <div class="stat"><strong>3CAM</strong><span>shot directors already registered at runtime</span></div>
-  <div class="stat"><strong>3MCA</strong><span>named sequencers need catalog support</span></div>
-  <div class="stat"><strong>Web button</strong><span>new explicit QA playback path</span></div>
+  <div class="stat"><strong>114</strong><span>selectable 3MCA cutscenes</span></div>
+  <div class="stat"><strong>136</strong><span>3CAM shot directors cataloged</span></div>
+  <div class="stat"><strong>362</strong><span>authored audio steps attached</span></div>
 </div>
 
 <h2>Current State</h2>
 <table>
 <tr><th>Area</th><th>Status</th></tr>
-<tr><td><code>behavior_cutscene.c</code></td><td>Registers every <code>3CAM</code> and can play all registered shots in placement order via <code>cutscene_request_intro()</code>.</td></tr>
-<tr><td>Web shell</td><td>No cutscene button/menu yet; no exported wasm function for explicit playback.</td></tr>
-<tr><td>Sequencing gap</td><td>Runtime does not yet model named <code>3MCA</code> sequences such as <code>needpasscard</code> or <code>neutron1a</code>.</td></tr>
+<tr><td><code>tools/build_cutscene_catalog.py</code></td><td>Lists every found <code>3MCA</code> cutscene and <code>3CAM</code> shot director, including targets, Goddard flags, and audio handles.</td></tr>
+<tr><td><code>behavior_cutscene.c</code></td><td>Registers <code>3MCA</code> sequences by placement order and exposes indexed web playback plus active/stop APIs.</td></tr>
+<tr><td>Web shell</td><td>Loads <code>cutscene_catalog.json</code>, shows a per-level dropdown, and provides Play/Stop buttons.</td></tr>
 </table>
 
 <h2>Data Snapshot</h2>
@@ -69,13 +69,14 @@ li { margin:4px 0; }
 <tr><td><code>Level4.gam</code></td><td>12 <code>3CAM</code>, 10 <code>3MCA</code></td></tr>
 <tr><td><code>Level6.gam</code></td><td>3 <code>3CAM</code>, 5 <code>3MCA</code></td></tr>
 </table>
+<p>Full published catalog: <a href="/jn-engine/qa/cutscene-catalog-2026-06-25/">/jn-engine/qa/cutscene-catalog-2026-06-25/</a>. Runtime JSON: <a href="/jn-engine/cutscene_catalog.json">/jn-engine/cutscene_catalog.json</a>.</p>
 
 <div class="note"><strong>Known visual risk:</strong> Goddard's texture is either incorrect or not mapped properly. Goddard-targeted shots should be exposed by this harness, but the texture/mapping defect should be tracked separately from camera sequencing.</div>
 
 <h2>Implementation Phases</h2>
 <div class="card">
-<h3>Phase 1 - Catalog</h3>
-<p>Add <code>tools/build_cutscene_catalog.py</code> to parse every <code>.gam</code> and emit a reviewable catalog. First pass can list each <code>3MCA</code> and standalone <code>3CAM</code>, with targets and a <code>goddard_related</code> flag.</p>
+<h3>Phase 1 - Catalog <span class="badge green">DONE</span></h3>
+<p><code>tools/build_cutscene_catalog.py</code> parses every <code>.gam</code> and emits review/web catalogs. Each <code>3MCA</code> row carries its indexed targets, camera types, look offsets, and <code>SoundDatabase</code>/<code>SoundIndexN</code> audio handles.</p>
 <pre>{
   "level1b": [
     {
@@ -90,23 +91,23 @@ li { margin:4px 0; }
 </div>
 
 <div class="card">
-<h3>Phase 2 - Runtime API</h3>
-<p>Extend <code>behavior_cutscene.c</code> from one placement-order sequence into web-callable playback:</p>
+<h3>Phase 2 - Runtime API <span class="badge green">DONE</span></h3>
+<p><code>behavior_cutscene.c</code> now supports web-callable indexed <code>3MCA</code> playback:</p>
 <ul>
-<li><code>cutscene_request_first_web()</code> for the first deploy.</li>
-<li><code>cutscene_count_web()</code>, <code>cutscene_request_web(index)</code>, <code>cutscene_active_web()</code>, and <code>cutscene_stop_web()</code> for the selectable menu.</li>
+<li><code>cutscene_count_web()</code>, <code>cutscene_request_web(index)</code>, <code>cutscene_active_web()</code>, and <code>cutscene_stop_web()</code>.</li>
+<li>Each cutscene step starts its authored <code>SoundDatabase</code>/<code>SoundIndexN</code> audio handle.</li>
 <li>Keep direct level loads audit-safe: cutscenes play only when explicitly requested.</li>
 </ul>
 </div>
 
 <div class="card">
-<h3>Phase 3 - Web UI</h3>
-<p>Add a compact top-bar control in <code>web/shell.html</code>: a cutscene selector plus Play/Stop. It must work without Campaign mode and return focus to the canvas after clicks.</p>
+<h3>Phase 3 - Web UI <span class="badge green">DONE</span></h3>
+<p><code>web/shell.html</code> has a compact Cutscene selector plus Play/Stop. It works without Campaign mode and returns focus to the canvas after clicks.</p>
 </div>
 
 <div class="card">
 <h3>Phase 4 - Fidelity</h3>
-<p>After button-driven playback works, improve sequencing: derive true <code>3MCA -> 3CAM</code> membership, play sounds, apply target animations, honor player-control locks, implement <code>FaceObject</code>, and decode <code>CameraType</code>/<code>ViewFromCamera</code>.</p>
+<p>Next work: tune exact camera modes against original capture, apply target animations, honor player-control locks, implement <code>FaceObject</code>, and continue tracking Goddard texture/mapping separately.</p>
 </div>
 
 <h2>Validation</h2>
@@ -116,18 +117,17 @@ source ~/emsdk/emsdk_env.sh && make web
 python3 tools/qa_web_verify.py</pre>
 <table>
 <tr><th>New test</th><th>Expected result</th></tr>
-<tr><td>Native <code>JN_CUTSCENE=1 ./jnengine --level level1b</code></td><td>Logs registered shots and starts playback.</td></tr>
-<tr><td>Web Playwright cutscene button test</td><td>Click Play, see active state / <code>[CUTSCENE]</code> log, canvas nonblank, Stop returns to gameplay camera.</td></tr>
-<tr><td>Catalog validation</td><td>Every catalog entry records present/missing targets explicitly.</td></tr>
+<tr><td>Catalog generation</td><td>114 <code>3MCA</code>, 136 <code>3CAM</code>, 362 audio steps across 32 levels.</td></tr>
+<tr><td>Web Playwright cutscene button test</td><td><code>level1b</code> dropdown has 12 cutscenes; wasm registers 12 sequences; Play activates; Stop returns inactive.</td></tr>
+<tr><td>Regression gates</td><td><code>make</code>, faithfulness audit, <code>make web</code>, and <code>qa_web_verify.py</code> pass.</td></tr>
 </table>
 
-<h2>Recommended First Cut</h2>
+<h2>Recommended Next Cut</h2>
 <ol>
-<li>Add the catalog generator.</li>
-<li>Add one exported function: <code>cutscene_request_first_web()</code>.</li>
-<li>Add a single <code>Play Cutscene</code> button for the current level.</li>
-<li>Verify on <code>level1b</code> and <code>Level3D</code>.</li>
-<li>Then expand to a selectable cutscene menu.</li>
+<li>Inspect representative cutscenes by eye and ear on the public deploy.</li>
+<li>Tune exact <code>CameraType</code>/<code>ViewFromCamera</code> behavior against original capture.</li>
+<li>Apply target animations and player-control locks.</li>
+<li>Fix or explicitly disposition Goddard texture/mapping separately from sequencing.</li>
 </ol>
 
 <div class="footer">

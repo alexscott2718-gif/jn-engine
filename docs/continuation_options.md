@@ -15,8 +15,10 @@
   `3ROK`/`3SPR`/`3DAI` resolver/positioning tail is explicitly native-inert, preserving
   its hidden/non-solid resolver output.
 - **Story machine:** the SCENE sequencer (both writers) + the C3DGoddard companion slice are in.
-- **Web build:** live at `exentt.com/jn-engine` (`jnengine.aef9117b.js`, assets `63737d29`), Campaign toggle reachable, `qa_web_verify.py` 16/16.
+- **Web build:** live at `exentt.com/jn-engine` (`jnengine.d46fd728.js`, assets `ce4be1e9`), Campaign toggle reachable, `qa_web_verify.py` 16/16.
 - **QA backlog:** 18/24 fixed, 2 WONTFIX-as-faithful; remaining open work is #4 Cindy location/pathing and Group I audio (#18–24).
+- **Cutscene harness:** first cut implemented. Catalog lists 114 `3MCA` cutscenes, 136 `3CAM` shot directors,
+  and 362 authored audio steps; web shell has per-level selector plus Play/Stop.
 - **Known visual issue:** Goddard's texture is either incorrect or mapped incorrectly; carry this as a QA/art-fidelity item.
 - **Gates that must stay green every change:** `make` → `python3 tools/audit_faithfulness.py`
   (0 findings / 35 levels) → `make web` → `python3 tools/qa_web_verify.py` (16/16) → `./tools/deploy_wasm.sh`.
@@ -31,7 +33,8 @@
 | D | Deferred gameplay mechanics (shrink-ray, fruit-fill, …) | High | Real gameplay, not just visuals | Partly |
 | E | Campaign playthrough hardening (end-to-end) | High | The game becomes *completable* | Partly |
 | F | Motion/path fidelity (Cindy location/path) | Med–High | Fixes remaining non-audio QA report | Yes (screenshots) |
-| I | Cutscene test harness for web deploy | Med | Makes scripted scenes inspectable on demand | Yes |
+| I | Cutscene test harness for web deploy | First cut done | Makes scripted scenes inspectable on demand | Yes |
+| J | Cutscene fidelity review/tuning | Med–High | Turns harness playback into faithful scenes | Mixed |
 | G | Collision containment (open-shell houses, walls) | Med | Stops out-of-bounds / see-inside | Yes |
 | H | Contributor / capture-rig tasks (asset truth) | Med | Exact sizes/textures, offloadable | N/A (tooling) |
 
@@ -96,9 +99,15 @@ location/path in level3d, which still does not match expected gameplay. Defer un
 evidence can be compared against `Level3D.gam` plus any C3DAI state-6 placement behavior.
 
 ### I. Cutscene test harness for web deploy
-Plan lives in [`cutscene_web_test_plan.md`](./cutscene_web_test_plan.md). Goal: generate a per-level
-cutscene catalog from `3MCA`/`3CAM` data and expose a web button/menu so cutscenes can be played on
-demand for QA without requiring campaign progression.
+First cut is implemented. `tools/build_cutscene_catalog.py` generates source/web catalogs and a public
+catalog page. The web shell loads `cutscene_catalog.json`, shows all current-level `3MCA` sequences in a
+dropdown, and calls wasm Play/Stop controls. Runtime playback starts each step's authored
+`SoundDatabase`/`SoundIndexN` handle. Source plan lives in [`cutscene_web_test_plan.md`](./cutscene_web_test_plan.md).
+
+### J. Cutscene fidelity review/tuning
+Now that cutscenes are playable on demand, review representative scenes by eye/ear and tune fidelity:
+exact `CameraType`/`ViewFromCamera` behavior, target animations, player-control locks, `FaceObject`, and
+audio timing/overlap. Keep Goddard texture/mapping as a separate visual bug, not a sequencing bug.
 
 ### G. Collision containment
 The #13 investigation surfaced this: background houses are open-bottomed facades (faithful), but the
@@ -116,9 +125,9 @@ Offloadable, self-contained data-truth work that doesn't block the engine:
 ---
 
 ## Recommended ordering (opinion, not a mandate)
-1. **I (cutscene web test harness)** — current user priority; make scripted scenes playable on demand from the web deploy.
+1. **J (cutscene fidelity review/tuning)** — the harness exists; use it to inspect scenes and tune camera/audio/animations.
 2. **E (campaign playthrough)** — the biggest "is it a game" jump; do it once the actors are all present.
 3. **B (audio)** — batch it for a session where a **desktop/noVNC** is available for by-ear checks.
 4. **F (Cindy location) / D / G / H** — defer Cindy until original/capture evidence is available; D/G/H opportunistic.
 
-> Current priority from the user: plan and then build **I cutscene web test harness**.
+> Current state: **I cutscene web test harness** first cut is built; next cut is fidelity review/tuning.

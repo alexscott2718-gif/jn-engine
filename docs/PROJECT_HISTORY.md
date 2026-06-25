@@ -1143,13 +1143,16 @@ placement, `c1/c2` patrol markers, and any original C3DAI state-6 placement beha
 not mapped properly. Track this as a visual fidelity bug, likely in `entity_visual.c` asset selection, the Goddard
 GLB/ASE material binding, or the texture-export/UV path. Do not treat Goddard's current render as validated.
 
-**Cutscene web test harness planned (2026-06-25).** Next user priority is to generate a cutscene catalog and make
-cutscenes playable on demand from the web deploy via button/menu. Current runtime can register `3CAM` shots and play
-all registered shots in placement order through `cutscene_request_intro()`, but it does not yet expose a web-callable
-request function or model named `3MCA` sequences. Plan: add `tools/build_cutscene_catalog.py`, generate a per-level
-catalog from `3MCA`/`3CAM` rows, expose a small wasm API (`cutscene_request_first_web()` first, then indexed
-selection/stop/active), and add a compact web-shell Play/Stop control. Public plan:
-`/jn-engine/qa/cutscene-web-test-plan-2026-06-25/`; source plan: `docs/cutscene_web_test_plan.md`.
+**Cutscene web test harness first cut (2026-06-25).** Generated a full `.gam` cutscene catalog and wired it into the
+web deploy. `tools/build_cutscene_catalog.py` now lists every found selectable `3MCA` cutscene plus `3CAM` shot
+directors: 114 `3MCA`, 136 `3CAM`, and 362 authored audio steps across 32 levels. The runtime now registers `3MCA`
+sequences by placement order and exposes wasm controls (`cutscene_request_web(index)`, `cutscene_count_web()`,
+`cutscene_active_web()`, `cutscene_stop_web()`); the web shell loads `cutscene_catalog.json`, shows a per-level
+cutscene dropdown, and Play/Stop buttons. Audio is attached per scene step from `SoundDatabase` + `SoundIndexN` and
+started when that step begins. Validation: `make`, `audit_faithfulness.py` 0 findings / 35 levels, `make web`,
+`qa_web_verify.py`, and a targeted Playwright check for `level1b` (12 dropdown entries, 12 wasm sequences, Play active,
+Stop inactive). Public catalog: `/jn-engine/qa/cutscene-catalog-2026-06-25/`; source plan:
+`docs/cutscene_web_test_plan.md`. Deployed live as `jnengine.d46fd728.js`, assets `ce4be1e9`.
 
 ---
 

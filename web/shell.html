@@ -34,12 +34,16 @@
   #controls a:hover { color: #e8f0f8; }
   #levelnav { display: flex; align-items: center; justify-content: center; gap: 8px;
               flex-wrap: wrap; max-width: 980px; }
-  #levelnav button, #levelSelect {
+  #levelnav button, #levelSelect, #cutsceneSelect {
     background: #151b22; color: #c8d0d8; border: 1px solid #273241;
     border-radius: 4px; padding: 5px 8px; font: 12px system-ui, sans-serif;
   }
+  #cutsceneSelect { max-width: 260px; }
   #levelnav button { cursor: pointer; }
-  #levelnav button:hover, #levelSelect:hover { border-color: #53677f; }
+  #levelnav button:disabled, #levelnav select:disabled {
+    opacity: 0.55; cursor: default;
+  }
+  #levelnav button:hover, #levelSelect:hover, #cutsceneSelect:hover { border-color: #53677f; }
   #levelLinks { display: flex; flex-wrap: wrap; justify-content: center;
                 gap: 5px; max-width: 980px; }
   #levelLinks a {
@@ -172,6 +176,11 @@
     <button id="campaignToggle" type="button">Campaign: Off</button>
     <button id="sandboxToggle" type="button">Sandbox: Off</button>
     <button id="toolSelect" type="button">Tool: —</button>
+    <select id="cutsceneSelect" aria-label="Cutscene selector" disabled>
+      <option>Cutscenes loading...</option>
+    </select>
+    <button id="cutscenePlay" type="button" disabled>Play Cutscene</button>
+    <button id="cutsceneStop" type="button" disabled>Stop</button>
   </div>
   <div id="levelLinks"></div>
   <div id="status">Loading…</div>
@@ -555,6 +564,78 @@
       goLevel(PLAYABLE_LEVELS[(i + 1) % PLAYABLE_LEVELS.length]);
     });
   })();
+
+  var cutsceneSelect = document.getElementById('cutsceneSelect');
+  var cutscenePlay = document.getElementById('cutscenePlay');
+  var cutsceneStop = document.getElementById('cutsceneStop');
+  var cutsceneScenes = [];
+
+  function cutsceneAudioLabel(scene) {
+    var n = 0;
+    if (scene && scene.shots) {
+      scene.shots.forEach(function (shot) { if (shot.has_audio) n++; });
+    }
+    return n ? ' · audio ' + n + '/' + scene.shots.length : ' · no audio';
+  }
+  function setCutsceneDisabled(message) {
+    cutsceneScenes = [];
+    cutsceneSelect.innerHTML = '';
+    var opt = document.createElement('option');
+    opt.textContent = message;
+    cutsceneSelect.appendChild(opt);
+    cutsceneSelect.disabled = true;
+    cutscenePlay.disabled = true;
+    cutsceneStop.disabled = true;
+  }
+  function populateCutsceneSelect(catalog) {
+    var level = selectedLevel.toLowerCase();
+    var data = catalog && catalog.levels && catalog.levels[level];
+    if (!data || !data.cutscenes || !data.cutscenes.length) {
+      setCutsceneDisabled('No cutscenes in level');
+      return;
+    }
+    cutsceneScenes = data.cutscenes;
+    cutsceneSelect.innerHTML = '';
+    cutsceneScenes.forEach(function (scene) {
+      var opt = document.createElement('option');
+      opt.value = scene.index;
+      opt.textContent = scene.tag + ' (' + scene.shots.length + ' shots'
+        + cutsceneAudioLabel(scene) + ')';
+      if (scene.goddard_related) opt.textContent += ' · Goddard';
+      cutsceneSelect.appendChild(opt);
+    });
+    cutsceneSelect.disabled = false;
+    cutscenePlay.disabled = false;
+    cutsceneStop.disabled = false;
+  }
+  fetch('cutscene_catalog.json', { cache: 'no-store' })
+    .then(function (r) {
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      return r.json();
+    })
+    .then(populateCutsceneSelect)
+    .catch(function (e) {
+      console.warn('[cutscene] catalog load failed', e);
+      setCutsceneDisabled('Cutscene catalog unavailable');
+    });
+  cutscenePlay.addEventListener('click', function () {
+    if (!Module || !Module.ccall || cutsceneSelect.disabled) return;
+    var index = parseInt(cutsceneSelect.value, 10);
+    try {
+      var ok = Module.ccall('cutscene_request_web', 'number', ['number'], [index]);
+      if (!ok) console.warn('[cutscene] runtime rejected sequence index', index);
+      document.getElementById('canvas').focus();
+    } catch (e) {
+      console.warn('[cutscene] play ccall failed (stale cached build?)', e);
+    }
+  });
+  cutsceneStop.addEventListener('click', function () {
+    if (!Module || !Module.ccall) return;
+    try {
+      Module.ccall('cutscene_stop_web', null, [], []);
+      document.getElementById('canvas').focus();
+    } catch (e) {}
+  });
 
   var noclipButton = document.getElementById('noclipToggle');
   function setNoclipButton(enabled) {

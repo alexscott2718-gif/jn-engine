@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cutscene Catalog - jn-engine</title>
+<style>
+* { box-sizing:border-box; margin:0; padding:0; }
+body { font-family:Monaco,Menlo,"Ubuntu Mono",monospace; background:#0d0d0d; color:#dedede; line-height:1.5; padding:24px 16px; }
+.wrap { max-width:1180px; margin:0 auto; }
+h1 { font-size:1.45rem; color:#fff; margin-bottom:4px; }
+h2 { font-size:1.08rem; color:#7ec8ff; border-bottom:1px solid #2a2a2a; padding-bottom:6px; margin:30px 0 12px; }
+p { margin:10px 0; color:#c8c8c8; }
+a { color:#7ec8ff; text-decoration:none; }
+a:hover { text-decoration:underline; }
+code { color:#d9c08a; }
+.sub,.muted { color:#888; font-size:0.84rem; }
+.grid { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:12px; margin:18px 0; }
+.stat { background:#141414; border:1px solid #262626; border-radius:8px; padding:16px; }
+.stat strong { display:block; color:#fff; font-size:1.3rem; line-height:1.1; margin-bottom:4px; }
+.stat span { color:#999; font-size:0.8rem; }
+.note { border-left:3px solid #6c5720; background:#181409; border-radius:0 6px 6px 0; color:#d8c184; padding:8px 12px; margin:12px 0; font-size:0.88rem; }
+.badge { display:inline-block; border-radius:4px; padding:1px 7px; font-size:0.72rem; vertical-align:middle; }
+.amber { background:#33280e; color:#e6c66f; border:1px solid #6c5720; }
+table { width:100%; border-collapse:collapse; margin:14px 0; font-size:0.8rem; }
+th,td { text-align:left; padding:7px 8px; border-bottom:1px solid #242424; vertical-align:top; }
+th { color:#9a9a9a; font-weight:normal; position:sticky; top:0; background:#0d0d0d; }
+.footer { color:#777; border-top:1px solid #2a2a2a; margin-top:34px; padding-top:12px; font-size:0.8rem; }
+@media (max-width:760px) { .grid { grid-template-columns:1fr 1fr; } body { padding:18px 10px; } table { font-size:0.72rem; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>Cutscene Catalog <span class="badge amber">GAM-derived</span></h1>
+<p class="sub">Generated 2026-06-25T14:35:54+00:00 &middot; source <code>assets/gam/*.gam</code> &middot; JSON <a href="/jn-engine/cutscene_catalog.json">/jn-engine/cutscene_catalog.json</a></p>
+<p>This page lists every selectable <code>3MCA</code> cutscene found in the shipped <code>.gam</code> corpus. The web demo uses the same catalog to populate the Cutscene dropdown.</p>
+<div class="grid">
+  <div class="stat"><strong>32</strong><span>levels with cutscene rows</span></div>
+  <div class="stat"><strong>114</strong><span>3MCA selectable cutscenes</span></div>
+  <div class="stat"><strong>136</strong><span>3CAM shot directors</span></div>
+  <div class="stat"><strong>362</strong><span>authored audio steps</span></div>
+</div>
+<div class="note">Goddard-tagged entries are flagged because Goddard has a known texture/mapping risk. Camera sequencing and Goddard material fidelity should be validated separately.</div>
+<h2>All Cutscenes</h2>
+<table>
+<tr><th>Level</th><th>#</th><th>Tag</th><th>Shots</th><th>Audio</th><th>Targets</th></tr>
+<tr><td><code>level1</code></td><td>0</td><td><code>sewerpart</code></td><td>6</td><td><code>voiceneighborhood.omt</code> [53, 56, 57, 55, 54, 58]</td><td>JIM1, Sheen1, JIM1, Sheen1, JIM1, c3dsheen</td></tr>
+<tr><td><code>level1</code></td><td>1</td><td><code>requestkey</code></td><td>8</td><td><code>voiceneighborhood.omt</code> [35, 28, 29, 30, 31, 32, 33, 34]</td><td>JIM1, C3DJUDY, JIM1, C3DJUDY, JIM1, C3DJUDY, JIM1, C3DJUDY</td></tr>
+<tr><td><code>level1</code></td><td>2</td><td><code>gotkey</code></td><td>2</td><td><code>voiceneighborhood.omt</code> [24, 25]</td><td>JIM1, C3DJUDY</td></tr>
+<tr><td><code>level1</code></td><td>3</td><td><code>withwrench</code></td><td>2</td><td><code>voiceneighborhood.omt</code> [26, 27]</td><td>JIM1, C3DJUDY</td></tr>
+<tr><td><code>level1</code></td><td>4</td><td><code>neutron1b</code></td><td>6</td><td><code>voiceneighborhood.omt</code> [9, 8, 7, 6, 5, 4]</td><td>Jim1, C3dCarl, Jim1, C3dCarl, Jim1, C3dCarl</td></tr>
+<tr><td><code>level1</code></td><td>5</td><td><code>neutron1c</code></td><td>5</td><td><code>voiceneighborhood.omt</code> [3, 2, 1, 20, 23]</td><td>Jim1, C3DCARL, Jim1, C3DCARL, jim1</td></tr>
+<tr><td><code>level1</code></td><td>6</td><td><code>phone1</code> <span class="badge amber">Goddard</span></td><td>8</td><td><code>voiceneighborhood.omt</code> [17, 18, 12, 19, 21, 22, 13, 14]</td><td>Jim1, C3DGODDARD, Jim1, Benny1, Benny1, Benny1, Jim1, Benny1</td></tr>
+<tr><td><code>level1</code></td><td>7</td><td><code>seecindy</code></td><td>4</td><td><code>voiceneighborhood.omt</code> [59, 77, 76, 75]</td><td>Jim1, C3DLIBBY, Jim1, C3DLIBBY</td></tr>
+<tr><td><code>level1</code></td><td>8</td><td><code>seesheen</code></td><td>6</td><td><code>voiceneighborhood.omt</code> [74, 60, 72, 73, 71, 61]</td><td>Jim1, c3dlibby, c3dlibby, jim1, c3dlibby, c3dlibby</td></tr>
+<tr><td><code>level1</code></td><td>9</td><td><code>sheencandybar</code></td><td>5</td><td><code>voiceneighborhood.omt</code> [70, 62, 69, 68, 67]</td><td>Jim1, C3DLIBBY, c3dlibby, jim1, c3dlibby</td></tr>
+<tr><td><code>level1</code></td><td>10</td><td><code>phone2a</code></td><td>4</td><td><code>voiceneighborhood.omt</code> [21, 15, 16, 21]</td><td>benny1, jim1, benny1, benny1</td></tr>
+<tr><td><code>level1</code></td><td>11</td><td><code>rlaunch</code></td><td>1</td><td><code>loadsfx.omt</code> [96]</td><td>Jim1</td></tr>
+<tr><td><code>level1</code></td><td>12</td><td><code>turnoff</code></td><td>1</td><td><code>loadsfx.omt</code> [44]</td><td>hwater</td></tr>
+<tr><td><code>level1</code></td><td>13</td><td><code>turnoff2</code></td><td>1</td><td><code>loadsfx.omt</code> [44]</td><td>hydrant2</td></tr>
+<tr><td><code>level1</code></td><td>14</td><td><code>nest2b</code></td><td>1</td><td><code>loadsfx.omt</code> [48]</td><td>sr1</td></tr>
+<tr><td><code>level1</code></td><td>15</td><td><code>nest1b</code></td><td>1</td><td><code>loadsfx.omt</code> [48]</td><td>egg1b</td></tr>
+<tr><td><code>level1</code></td><td>16</td><td><code>launch2b</code></td><td>1</td><td><code>loadsfx.omt</code> [96]</td><td>jim1</td></tr>
+<tr><td><code>level1</code></td><td>17</td><td><code>fhydrant1</code></td><td>1</td><td><code>loadsfx.omt</code> [44]</td><td>hydrant</td></tr>
+<tr><td><code>level1</code></td><td>18</td><td><code>shrink2d</code></td><td>4</td><td><code>voiceneighborhood.omt</code> [95, 94, 96, 90]</td><td>clone1, clone2, clone4, all</td></tr>
+<tr><td><code>level1a</code></td><td>0</td><td><code>subway1</code> <span class="badge amber">Goddard</span></td><td>2</td><td><code>voicedowntown.omt</code> [36, 41]</td><td>Jim1, c3dgoddard</td></tr>
+<tr><td><code>level1a</code></td><td>1</td><td><code>subway5</code> <span class="badge amber">Goddard</span></td><td>1</td><td><code>voicedowntown.omt</code> [37]</td><td>c3dgoddard</td></tr>
+<tr><td><code>level1a</code></td><td>2</td><td><code>gotpart2</code></td><td>1</td><td><code>voicedowntown.omt</code> [44]</td><td>Jim1</td></tr>
+<tr><td><code>level1b</code></td><td>0</td><td><code>neutron1a</code></td><td>5</td><td><code>voiceneighborhood.omt</code> [0, 88, 87, 10, 85]</td><td>JIM1, C3DCARL, c3dcarl, jim1, c3dcarl</td></tr>
+<tr><td><code>level1b</code></td><td>1</td><td><code>LABEXP3</code></td><td>7</td><td><code>voiceneighborhood.omt</code> [46, 45, 44, 88, 43, 42, 41]</td><td>C3DCARL, JIM1, C3DCARL, c3dcarl, jim1, c3dcarl, jim1</td></tr>
+<tr><td><code>level1b</code></td><td>2</td><td><code>labexp3b</code> <span class="badge amber">Goddard</span></td><td>2</td><td><code>voiceneighborhood.omt</code> [40, 39]</td><td>c3dgoddard, jim1</td></tr>
+<tr><td><code>level1b</code></td><td>3</td><td><code>godeat</code> <span class="badge amber">Goddard</span></td><td>1</td><td><code>loadsfx.omt</code> [16]</td><td>jim1</td></tr>
+<tr><td><code>level1b</code></td><td>4</td><td><code>godeat3</code> <span class="badge amber">Goddard</span></td><td>2</td><td><code>loadsfx.omt</code> [5, 40]</td><td>jim1, c3dgoddard</td></tr>
+<tr><td><code>level1b</code></td><td>5</td><td><code>dino1cam3</code></td><td>1</td><td><code>loadsfx.omt</code> [26]</td><td>Jim1</td></tr>
+<tr><td><code>level1b</code></td><td>6</td><td><code>plant1cam</code></td><td>3</td><td><code>loadsfx.omt</code> [54, 88, 26]</td><td>jim1, plant1, jim1</td></tr>
+<tr><td><code>level1b</code></td><td>7</td><td><code>plant2cam</code></td><td>3</td><td><code>loadsfx.omt</code> [54, 88, 26]</td><td>jim1, plant2, jim1</td></tr>
+<tr><td><code>level1b</code></td><td>8</td><td><code>plant3cam</code></td><td>3</td><td><code>loadsfx.omt</code> [54, 88, 26]</td><td>jim1, plant3, jim1</td></tr>
+<tr><td><code>level1b</code></td><td>9</td><td><code>jimend</code></td><td>1</td><td><code>voiceneighborhood.omt</code> [37]</td><td>jim1</td></tr>
+<tr><td><code>level1b</code></td><td>10</td><td><code>recharge2</code></td><td>2</td><td><code>voiceneighborhood.omt</code> [100, 99]</td><td>vox2, jim1</td></tr>
+<tr><td><code>level1b</code></td><td>11</td><td><code>godeat4</code> <span class="badge amber">Goddard</span></td><td>1</td><td><code>loadsfx.omt</code> [38]</td><td>c3dgoddard</td></tr>
+<tr><td><code>level1c</code></td><td colspan="5"><span class="muted">No 3MCA cutscenes; 2 standalone 3CAM shot director(s)</span></td></tr>
+<tr><td><code>level1d</code></td><td>0</td><td><code>yokians22</code></td><td>4</td><td><code>voiceship.omt</code> [6, 24, 23, 0]</td><td>goobar, lackie, goobar, lackie</td></tr>
+<tr><td><code>level1d</code></td><td>1</td><td><code>bt1b</code></td><td>1</td><td><code>voiceship.omt</code> [2]</td><td>goobar</td></tr>
+<tr><td><code>level1d</code></td><td>2</td><td><code>yokians4</code></td><td>2</td><td><code>voiceship.omt</code> [19, 18]</td><td>lackie, goobar</td></tr>
+<tr><td><code>level1d</code></td><td>3</td><td><code>yokians2back2</code></td><td>4</td><td><code>voiceship.omt</code> [6, 24, 23, 0]</td><td>goobar, lackie, goobar, lackie</td></tr>
+<tr><td><code>level1e</code></td><td>0</td><td><code>yokians22</code></td><td>4</td><td><code>voiceship.omt</code> [6, 24, 23, 0]</td><td>goobar, captain, goobar, captain</td></tr>
+<tr><td><code>level1e</code></td><td>1</td><td><code>yokians4</code></td><td>2</td><td><code>voiceship.omt</code> [19, 18]</td><td>captain, goobar</td></tr>
+<tr><td><code>level1e</code></td><td>2</td><td><code>yokians4e</code></td><td>5</td><td><code>voiceship.omt</code> [17, 16, 15, 14, 13]</td><td>captain, goobar, jimmy, captain, goobar</td></tr>
+<tr><td><code>level1e</code></td><td>3</td><td><code>zap</code></td><td>3</td><td><code>voiceship.omt</code> [12, 54, 0]</td><td>captain, soldier1, Soldier1</td></tr>
+<tr><td><code>level1e</code></td><td>4</td><td><code>azap</code></td><td>1</td><td><code>voiceship.omt</code> [12]</td><td>captain</td></tr>
+<tr><td><code>level1e</code></td><td>5</td><td><code>yokians5</code></td><td>6</td><td><code>voiceship.omt</code> [11, 10, 9, 8, 7, 25]</td><td>goobar, second, c3dcindy, goobar, c3dcindy, goobar</td></tr>
+<tr><td><code>level1e</code></td><td>6</td><td><code>rockspace2b</code></td><td>2</td><td><code>voiceship.omt</code> [62, 60]</td><td>captain, goobar</td></tr>
+<tr><td><code>level1f</code></td><td colspan="5"><span class="muted">No 3MCA cutscenes; 2 standalone 3CAM shot director(s)</span></td></tr>
+<tr><td><code>level2</code></td><td>0</td><td><code>goinside</code></td><td>6</td><td><code>voiceschool.omt</code> [33, 32, 1, 31, 30, 1]</td><td>Jim1, C3DBENNY, c3dbenny, jim1, c3dbenny, c3dbenny</td></tr>
+<tr><td><code>level2</code></td><td>1</td><td><code>gohome</code></td><td>6</td><td><code>voiceschool.omt</code> [0, 36, 1, 35, 34, 1]</td><td>Jim1, C3DBENNY, c3dbenny, jim1, c3dbenny, c3dbenny</td></tr>
+<tr><td><code>level2</code></td><td>2</td><td><code>gototrack</code></td><td>4</td><td><code>voiceschool.omt</code> [44, 1, 45, 1]</td><td>Jim1, C3DBENNY, C3DBENNY, C3DBENNY</td></tr>
+<tr><td><code>level2</code></td><td>3</td><td><code>project</code></td><td>4</td><td><code>voiceschool.omt</code> [43, 40, 41, 42]</td><td>Jim1, fowl1, Jim1, fowl1</td></tr>
+<tr><td><code>level2</code></td><td>4</td><td><code>inhaler</code></td><td>4</td><td><code>voiceschool.omt</code> [49, 47, 48, 46]</td><td>Jim1, Carl3, Jim1, Carl3</td></tr>
+<tr><td><code>level2</code></td><td>5</td><td><code>exchange</code></td><td>5</td><td><code>voiceschool.omt</code> [54, 51, 52, 53, 50]</td><td>Jim1, Sheen2, Jim1, Sheen2, JIm1</td></tr>
+<tr><td><code>level2</code></td><td>6</td><td><code>libbysheen</code></td><td>6</td><td><code>voiceschool.omt</code> [58, 1, 56, 57, 55, 1]</td><td>Jim1, C3DBENNY, c3dbenny, jim1, c3dbenny, C3DBENNY</td></tr>
+<tr><td><code>level2</code></td><td>7</td><td><code>rlaunch</code></td><td>1</td><td><code>loadsfx.omt</code> [96]</td><td>rocket</td></tr>
+<tr><td><code>level2</code></td><td>8</td><td><code>rokexp</code></td><td>1</td><td><code>loadsfx.omt</code> [98]</td><td>rocket</td></tr>
+<tr><td><code>level2</code></td><td>9</td><td><code>nestcam</code></td><td>1</td><td><code>loadsfx.omt</code> [48]</td><td>nest1</td></tr>
+<tr><td><code>level2</code></td><td>10</td><td><code>nest2cam2</code></td><td>1</td><td><code>loadsfx.omt</code> [48]</td><td>nest2</td></tr>
+<tr><td><code>level2</code></td><td>11</td><td><code>rescuecat2</code> <span class="badge amber">Goddard</span></td><td>4</td><td><code>loadsfx.omt</code> [89, 16, 3, 72]</td><td>jim1, jim1, c3dkitty, c3dgoddard</td></tr>
+<tr><td><code>level2</code></td><td>12</td><td><code>rescuecat6</code></td><td>1</td><td><code>loadsfx.omt</code> [88]</td><td>jim1</td></tr>
+<tr><td><code>level2a</code></td><td>0</td><td><code>race1</code></td><td>7</td><td><code>voiceschool.omt</code> [25, 14, 6, 5, 4, 3, 2]</td><td>JIM1, Nick1, JIM1, Nick1, JIM1, Nick1, JIM1</td></tr>
+<tr><td><code>level2a</code></td><td>1</td><td><code>loserace1</code></td><td>4</td><td><code>voiceschool.omt</code> [37, 24, 23, 22]</td><td>Jim1, Nick1, Jim1, Nick1</td></tr>
+<tr><td><code>level2a</code></td><td>2</td><td><code>winrace1</code></td><td>5</td><td><code>voiceschool.omt</code> [21, 20, 19, 18, 59]</td><td>JIM1, Nick1, JIM1, Nick1, JIM1</td></tr>
+<tr><td><code>level2b</code></td><td>0</td><td><code>race2</code></td><td>2</td><td><code>voiceschool.omt</code> [17, 16]</td><td>Jim1, Nick2</td></tr>
+<tr><td><code>level2b</code></td><td>1</td><td><code>winrace2</code></td><td>4</td><td><code>voiceschool.omt</code> [10, 9, 8, 7]</td><td>Jim1, Nick2, Jim1, Nick2</td></tr>
+<tr><td><code>level2b</code></td><td>2</td><td><code>race2again</code></td><td>4</td><td><code>voiceschool.omt</code> [15, 13, 12, 11]</td><td>Jim1, Nick2, Jim1, Nick2</td></tr>
+<tr><td><code>level3</code></td><td>0</td><td><code>UTALK</code></td><td>8</td><td><code>voiceretroland.omt</code> [7, 6, 5, 4, 3, 2, 1, 25]</td><td>JIM1, C3DULTRALORD, JIM1, C3DULTRALORD, JIM1, C3DULTRALORD, JIM1, C3DULTRALORD</td></tr>
+<tr><td><code>level3</code></td><td>1</td><td><code>ultralord</code></td><td>8</td><td><code>voiceretroland.omt</code> [7, 6, 5, 4, 1, 25, 55, 56]</td><td>Jim1, C3DUltralord, Jim1, C3DUltralord, Jim1, C3DUltralord, C3DULTRALORD, C3DULTRALORD</td></tr>
+<tr><td><code>level3</code></td><td>2</td><td><code>getstaken</code></td><td>4</td><td><code>voiceretroland.omt</code> [34, 42, 41, 40]</td><td>jim1, carl4, jim1, carl4</td></tr>
+<tr><td><code>level3</code></td><td>3</td><td><code>getfuel</code></td><td>4</td><td><code>voiceretroland.omt</code> [38, 37, 36, 35]</td><td>Jim1, C3DUltralord, Jim1, C3DUltralord</td></tr>
+<tr><td><code>level3</code></td><td>4</td><td><code>carlbeam4</code></td><td>1</td><td><code>voiceretroland.omt</code> [39]</td><td>jim1</td></tr>
+<tr><td><code>level3</code></td><td>5</td><td><code>getfuel3</code></td><td>1</td><td><code>voiceretroland.omt</code> [43]</td><td>jim1</td></tr>
+<tr><td><code>level3c</code></td><td>0</td><td><code>needcindy</code></td><td>6</td><td><code>voiceretroland.omt</code> [13, 12, 11, 10, 9, 8]</td><td>Jim1, Libby2, Jim1, Libby2, Jim1, Libby2</td></tr>
+<tr><td><code>level3d</code></td><td>0</td><td><code>needpasscard</code></td><td>4</td><td><code>voiceretroland.omt</code> [14, 17, 16, 15]</td><td>Jim1, c3dcindy, jim1, c3dcindy</td></tr>
+<tr><td><code>level3d</code></td><td>1</td><td><code>cin4</code></td><td>1</td><td><code>voiceretroland.omt</code> [50]</td><td>jim1</td></tr>
+<tr><td><code>level3d</code></td><td>2</td><td><code>acin2</code></td><td>1</td><td><code>voiceretroland.omt</code> [54]</td><td>c3dcindy</td></tr>
+<tr><td><code>level4</code></td><td>0</td><td><code>getclaw</code></td><td>5</td><td><code>voicedowntown.omt</code> [0, 22, 21, 20, 19]</td><td>JIM1, C3DCINDY, JIM1, C3DCINDY, c3dcindy</td></tr>
+<tr><td><code>level4</code></td><td>1</td><td><code>bentrig</code></td><td>4</td><td><code>voicedowntown.omt</code> [27, 25, 26, 24]</td><td>JIM1, c3dbenny, JIM1, c3dbenny</td></tr>
+<tr><td><code>level4</code></td><td>2</td><td><code>ufo</code></td><td>4</td><td><code>voicedowntown.omt</code> [31, 30, 29, 35]</td><td>Jim1, fowl, jim1, fowl</td></tr>
+<tr><td><code>level4</code></td><td>3</td><td><code>givetickets</code></td><td>2</td><td><code>voicedowntown.omt</code> [2, 1]</td><td>Jim1, sheen3</td></tr>
+<tr><td><code>level4</code></td><td>4</td><td><code>launch</code></td><td>1</td><td><code>loadsfx.omt</code> [96]</td><td>pad</td></tr>
+<tr><td><code>level4</code></td><td>5</td><td><code>launch2b</code></td><td>1</td><td><code>loadsfx.omt</code> [96]</td><td>jim1</td></tr>
+<tr><td><code>level4</code></td><td>6</td><td><code>launch3c</code></td><td>1</td><td><code>loadsfx.omt</code> [96]</td><td>pad3</td></tr>
+<tr><td><code>level4</code></td><td>7</td><td><code>catlook</code></td><td>2</td><td><code>loadsfx.omt</code> [11, 2]</td><td>c3dkitty, c3dkitty</td></tr>
+<tr><td><code>level4</code></td><td>8</td><td><code>rescue2</code> <span class="badge amber">Goddard</span></td><td>3</td><td><code>loadsfx.omt</code> [2, 90, 55]</td><td>c3dkitty, jim1, c3dgoddard</td></tr>
+<tr><td><code>level4</code></td><td>9</td><td><code>rescue6</code></td><td>1</td><td><code>loadsfx.omt</code> [88]</td><td>jim1</td></tr>
+<tr><td><code>level4a</code></td><td>0</td><td><code>gotkey</code></td><td>4</td><td><code>voicedowntown.omt</code> [11, 10, 9, 8]</td><td>JIM1, c3dhugh, JIM1, C3DHUGH</td></tr>
+<tr><td><code>level4b</code></td><td>0</td><td><code>pp1</code> <span class="badge amber">Goddard</span></td><td>3</td><td><code>voicepowerplant.omt</code> [14, 10, 11]</td><td>Jim1, C3DGODDARD, Jim1</td></tr>
+<tr><td><code>level4b</code></td><td>1</td><td><code>ppe</code> <span class="badge amber">Goddard</span></td><td>2</td><td><code>voicepowerplant.omt</code> [13, 9]</td><td>Jim1, C3DGODDARD</td></tr>
+<tr><td><code>level4c</code></td><td>0</td><td><code>powerplant</code></td><td>4</td><td><code>voicepowerplant.omt</code> [0, 3, 2, 1]</td><td>Jim1, C3DFowl, Jim1, C3DFowl</td></tr>
+<tr><td><code>level4d</code></td><td>0</td><td><code>ending1</code></td><td>6</td><td><code>voicedowntown.omt</code> [17, 5, 4, 13, 3, 14]</td><td>bar, c3dhugh, c3djudy, fowl, c3dcarl, c3dlibby</td></tr>
+<tr><td><code>level4d</code></td><td>1</td><td><code>ending2</code></td><td>6</td><td><code>voicedowntown.omt</code> [16, 12, 6, 7, 15, 18]</td><td>c3dultralord, c3dsheen, c3dbenny, c3dnick, c3dcindy, jim1</td></tr>
+<tr><td><code>level5</code></td><td>0</td><td><code>2spacea</code> <span class="badge amber">Goddard</span></td><td>3</td><td><code>voicepowerplant.omt</code> [35, 34, 44]</td><td>JIM1, C3DGODDARD, c3dgoddard</td></tr>
+<tr><td><code>level5</code></td><td>1</td><td><code>launch</code></td><td>1</td><td><code>loadsfx.omt</code> [96]</td><td>jim1</td></tr>
+<tr><td><code>level5</code></td><td>2</td><td><code>launch1b</code></td><td>1</td><td><code>loadsfx.omt</code> [96]</td><td>jim1</td></tr>
+<tr><td><code>level5</code></td><td>3</td><td><code>invisibility1</code></td><td>1</td><td><code>voicepowerplant.omt</code> [37]</td><td>jim1</td></tr>
+<tr><td><code>level5a</code></td><td>0</td><td><code>ending</code></td><td>1</td><td><code>voicedemo.omt</code> [2]</td><td>jim1</td></tr>
+<tr><td><code>level5b</code></td><td>0</td><td><code>seecarl5</code></td><td>2</td><td><code>voiceship.omt</code> [45, 44]</td><td>jim1, ship1</td></tr>
+<tr><td><code>level6</code></td><td>0</td><td><code>evadeyokes2</code></td><td>4</td><td><code>voiceship.omt</code> [29, 28, 27, 49]</td><td>Jim1, Jim1, point, Jim1</td></tr>
+<tr><td><code>level6</code></td><td>1</td><td><code>evadeyokes</code></td><td>2</td><td><code>voiceship.omt</code> [31, 30]</td><td>second, fleetc</td></tr>
+<tr><td><code>level6</code></td><td>2</td><td><code>king</code></td><td>6</td><td><code>voiceship.omt</code> [42, 41, 40, 39, 38, 37]</td><td>Jim1, Fleetc, c3dcindy, Fleetc, jim1, fleetc</td></tr>
+<tr><td><code>level6</code></td><td>3</td><td><code>king2</code></td><td>2</td><td><code>voiceship.omt</code> [33, 34]</td><td>jim1, fleetc</td></tr>
+<tr><td><code>level6</code></td><td>4</td><td><code>jend5</code></td><td>2</td><td><code>voiceship.omt</code> [36, 35]</td><td>Jim1, fleetc</td></tr>
+<tr><td><code>level6a</code></td><td>0</td><td><code>king</code></td><td>6</td><td><code>voiceship.omt</code> [42, 41, 40, 39, 38, 37]</td><td>Jim1, Fleetc, c3dcindy, Fleetc, jim1, fleetc</td></tr>
+<tr><td><code>level6a</code></td><td>1</td><td><code>king2</code></td><td>2</td><td><code>voiceship.omt</code> [33, 34]</td><td>jim1, fleetc</td></tr>
+<tr><td><code>level6a</code></td><td>2</td><td><code>jend5</code></td><td>2</td><td><code>voiceship.omt</code> [36, 35]</td><td>Jim1, fleetc</td></tr>
+<tr><td><code>level7</code></td><td>0</td><td><code>C3DMULTICUTSCENE</code></td><td>0</td><td><code>none</code> [-]</td><td>-</td></tr>
+<tr><td><code>level7</code></td><td>1</td><td><code>escapeship1</code></td><td>3</td><td><code>voicepowerplant.omt</code> [33, 32, 31]</td><td>Jim1, Jim1, DOOR</td></tr>
+<tr><td><code>level7</code></td><td>2</td><td><code>goinghome1</code></td><td>4</td><td><code>voicepowerplant.omt</code> [30, 29, 28]</td><td>Jim1, Jim1, Jim1, Jim1</td></tr>
+<tr><td><code>vr01</code></td><td>0</td><td><code>bu</code></td><td>3</td><td><code>voicepractice.omt</code> [24, 23, 22]</td><td>b1, b2, Jim1</td></tr>
+<tr><td><code>vr02</code></td><td>0</td><td><code>rs</code></td><td>4</td><td><code>voicepractice.omt</code> [28, 27, 26, 25]</td><td>rs1, rs2, rs3, Jim1</td></tr>
+<tr><td><code>vr03</code></td><td>0</td><td><code>inv</code></td><td>3</td><td><code>voicepractice.omt</code> [21, 20, 37]</td><td>Jim1, jim1, jim1</td></tr>
+<tr><td><code>vr04</code></td><td colspan="5"><span class="muted">No 3MCA cutscenes; 12 standalone 3CAM shot director(s)</span></td></tr>
+<tr><td><code>vr05</code></td><td>0</td><td><code>scooter</code> <span class="badge amber">Goddard</span></td><td>6</td><td><code>voicepractice.omt</code> [11, 10, 9, 8, 7, 6]</td><td>jim1, sc, jim1, c3dgoddard, sc2, jim1</td></tr>
+<tr><td><code>vr06</code></td><td>0</td><td><code>remote</code> <span class="badge amber">Goddard</span></td><td>3</td><td><code>voicepractice.omt</code> [39, 40, 41]</td><td>jim1, jim1, godremote</td></tr>
+<tr><td><code>vr07</code></td><td>0</td><td><code>bb1</code></td><td>5</td><td><code>voicepractice.omt</code> [36, 19, 35, 33, 34]</td><td>bb, Jim1, bb, b2, bb</td></tr>
+<tr><td><code>vr08</code></td><td>0</td><td><code>gr</code></td><td>4</td><td><code>voicepractice.omt</code> [32, 31, 30, 29]</td><td>gr1, gr2, gr3, Jim1</td></tr>
+</table>
+<div class="footer">
+Demo: <a href="/jn-engine/">/jn-engine/</a> &middot;
+Plan: <a href="/jn-engine/qa/cutscene-web-test-plan-2026-06-25/">cutscene web test harness</a>
+</div>
+</div>
+</body>
+</html>
