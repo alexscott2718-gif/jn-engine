@@ -1208,6 +1208,9 @@ performance, shell hygiene) lives in the repo's `CLAUDE.md` and in
 
 ## Where to go next
 
+- **Continuation menu (start here):** [`continuation_options.md`](./continuation_options.md) — the
+  open work tracks (QA tail, audio, behavior-lens close-out, mechanics, campaign playthrough, motion/path,
+  containment, contributor tasks) with effort/impact/prereqs and a recommended ordering.
 - **The active campaign — native Linux port:** [`native_port_plan.md`](./native_port_plan.md)
   (the five waves) and [`decomp/_next_session.md`](./decomp/_next_session.md) (kickoff handoff).
 - **Understand the code as it stands today:** [`ARCHITECTURE.md`](./ARCHITECTURE.md).
