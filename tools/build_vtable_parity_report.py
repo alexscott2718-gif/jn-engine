@@ -95,8 +95,8 @@ OVERRIDES: dict[str, list[Override]] = {
         Override(
             "camera / cutscene",
             "must-link",
-            "3CAM is the standalone shot director; native now plumbs ViewFromCamera, FaceObject, Jimmy TargetAct/DeactAnim, and PlayerControlled locking, but exact enum/input semantics are not proven.",
-            "Decode exact ViewFromCamera/CameraType enum behavior and validate activation/deactivation slots against level1b LABEXP3 plus Goddard/Cindy scenes.",
+            "3CAM per-frame camera enum is DECODED from Neutron.exe 00415f90 (slot 245) and linked: CameraType==2 static, ViewFromCamera==0 orbit, else dolly, dist=clamp(InitialDist-ZoomSpeed*t,Min,Max). Remaining open: non-player TargetActAnim/LoopActAnim/TargetDeactAnim dispatch, PlayerControlled restore timing, and the activation message source.",
+            "Link generic non-player actor animation routing and validate PlayerControlled lock/restore against level1b LABEXP3 plus Goddard/Cindy scenes (by-eye on desktop/noVNC).",
             "src/game/behaviors/behavior_cutscene.c",
         )
     ],

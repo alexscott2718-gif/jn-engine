@@ -53,6 +53,7 @@ typedef struct {
     char  player_controlled[32]; /* PlayerControlled script string */
     int   sound_index;       /* SoundIndex within sound_db */
     float offset[3];         /* TargOffsetX/Y/Z */
+    float cam_pos[3];        /* the 3CAM object's own placed world position */
     float initial_dist;      /* InitialDist */
     float min_dist, max_dist;/* distance clamp */
     float zoom_speed;        /* ZoomSpeed (distance ease rate) */
@@ -92,7 +93,6 @@ static struct {
     int   playing;
     int   cur;               /* active shot index */
     float shot_t;            /* time in the current shot */
-    float dist;              /* eased distance toward the target */
     float shot_duration;     /* duration of the current active shot */
     int   audio_channel;      /* active per-shot audio channel, or -1 */
     int   playing_sequence_index;
@@ -165,6 +165,11 @@ static void cam_on_spawn(Entity *e, World *w) {
     /* CameraTarget is mapped onto activate_target by the .gam loader. */
     cutscene_copy(s->target, sizeof(s->target), e->activate_target);
     cutscene_copy(s->sound_db, sizeof(s->sound_db), e->sound_database);
+    /* The 3CAM's own placement defines the framing direction for CameraType==2
+       (static) and the ViewFromCamera!=0 dolly mode (Neutron.exe 00415f90). */
+    s->cam_pos[0] = e->x;
+    s->cam_pos[1] = e->y;
+    s->cam_pos[2] = e->z;
     cutscene_copy(s->face_object, sizeof(s->face_object),
                   gam_str(e, "FaceObject", ""));
     cutscene_copy(s->target_act_anim, sizeof(s->target_act_anim),
@@ -247,17 +252,6 @@ static void mca_on_spawn(Entity *e, World *w) {
 
 /* ---- Runtime ------------------------------------------------------------ */
 
-static float cutscene_desired_dist(const CutSceneShot *s) {
-    float want = s->initial_dist * 0.45f;
-    if (want < 220.0f) want = 220.0f;
-    if (want > 760.0f) want = 760.0f;
-    if (s->min_dist > 0.0f && want < s->min_dist * 0.45f)
-        want = s->min_dist * 0.45f;
-    if (s->max_dist > 0.0f && want > s->max_dist * 0.65f)
-        want = s->max_dist * 0.65f;
-    return want;
-}
-
 static void cutscene_mca_local_offset(int camera_type, float t, float out[3]) {
     float z;
     switch (camera_type) {
@@ -330,7 +324,6 @@ static void cutscene_start_active(int sequence_index, const char *label) {
     g_cut.playing = 1;
     g_cut.cur = 0;
     g_cut.shot_t = 0.0f;
-    g_cut.dist = cutscene_desired_dist(&g_cut.active[0]);
     g_cut.shot_duration = g_cut.active[0].hold_seconds;
     g_cut.playing_sequence_index = sequence_index;
     g_cut.shot_started = 0;
@@ -449,36 +442,58 @@ static void cutscene_deactivate_current(World *w) {
     cutscene_apply_player_anim(target, s->target_deact_anim);
 }
 
-static float cutscene_3cam_azimuth(const CutSceneShot *s, const Entity *target) {
-    float yaw = target ? target->ry : 0.0f;
-    switch (s ? s->view_from_camera : 1) {
-    case 0: yaw += CUTSCENE_PI; break;       /* face the actor from the front */
-    case 2: yaw += CUTSCENE_PI * 0.5f; break;/* right side */
-    case 3: yaw -= CUTSCENE_PI * 0.5f; break;/* left side */
-    case 1:
-    default:
-        break;                               /* behind target */
-    }
-
-    /* Some shipped 3CAM rows leave ViewFromCamera at the common default and
-       express the side view through CameraType. The exact native enum is still
-       open, so this keeps the authored side hints alive without touching the
-       recovered 3MCA table. */
-    if (s && s->view_from_camera == 1) {
-        if (s->camera_type == 2) yaw += CUTSCENE_PI * 0.5f;
-        else if (s->camera_type == 3) yaw -= CUTSCENE_PI * 0.5f;
-    }
-    return yaw;
+/* Eased framing distance, recovered from Neutron.exe 00415f90:
+   dist = InitialDist - ZoomSpeed*t, then floored to MinDist and ceiled to
+   MaxDist in that order (so a shipped row with MinDist>MaxDist pins to MaxDist,
+   matching the original clamp sequence). */
+static float cutscene_3cam_dist(const CutSceneShot *s, float t) {
+    float d = s->initial_dist - s->zoom_speed * t;
+    if (d < s->min_dist) d = s->min_dist;   /* floor = MinDist */
+    if (d > s->max_dist) d = s->max_dist;   /* ceiling = MaxDist */
+    return d;
 }
 
-static void cutscene_3cam_look_point(const Entity *target, const CutSceneShot *s,
-                                     float *lx, float *ly, float *lz) {
-    float local[3] = { s->offset[0], s->offset[1], s->offset[2] };
-    float world[3];
-    entity_local_to_world(target, local, world);
-    *lx = world[0];
-    *ly = world[1] + s->look_voffset;
-    *lz = world[2];
+/* Standalone 3CAM camera placement, decoded from C3DCutSceneCamera's per-frame
+   update (Neutron.exe vtable slot 245 -> 00415f90). Three modes:
+     CameraType==2     -> static: camera at the 3CAM's own placement, look at
+                          the raw target position.
+     ViewFromCamera==0 -> orbit: camera at target-local (offX, offY, dist),
+                          look at target + (0, LookVoffset, 0).
+     else (VFC!=0)     -> dolly: framed = target-local (offX, offY, offZ);
+                          camera = framed + normalize(camPlacement - framed)*dist;
+                          look at framed.
+   The CameraType==2 test precedes the ViewFromCamera test in the original. */
+static void cutscene_3cam_place(const CutSceneShot *s, const Entity *target,
+                                float t, float cam[3], float look[3]) {
+    if (s->camera_type == 2) {
+        cam[0] = s->cam_pos[0]; cam[1] = s->cam_pos[1]; cam[2] = s->cam_pos[2];
+        look[0] = target->x; look[1] = target->y; look[2] = target->z;
+        return;
+    }
+
+    float dist = cutscene_3cam_dist(s, t);
+
+    if (s->view_from_camera == 0) {
+        float local[3] = { s->offset[0], s->offset[1], dist };
+        entity_local_to_world(target, local, cam);
+        look[0] = target->x;
+        look[1] = target->y + s->look_voffset;
+        look[2] = target->z;
+        return;
+    }
+
+    /* dolly: hold the camera along the authored placement->framed-point ray. */
+    float framed[3];
+    entity_local_to_world(target, s->offset, framed);
+    float dx = s->cam_pos[0] - framed[0];
+    float dy = s->cam_pos[1] - framed[1];
+    float dz = s->cam_pos[2] - framed[2];
+    float len = sqrtf(dx * dx + dy * dy + dz * dz);
+    if (len > 0.0001f) { dx /= len; dy /= len; dz /= len; }
+    cam[0] = framed[0] + dx * dist;
+    cam[1] = framed[1] + dy * dist;
+    cam[2] = framed[2] + dz * dist;
+    look[0] = framed[0]; look[1] = framed[1]; look[2] = framed[2];
 }
 
 int cutscene_player_control_locked(void) {
@@ -518,14 +533,10 @@ void cutscene_update(Camera *cam, World *w, float dt) {
             ly = target->y + s->look_voffset - 60.0f;
             lz = target->z;
         } else {
-            float want = cutscene_desired_dist(s);
-            g_cut.dist += (want - g_cut.dist) * (s->zoom_speed * dt);
-            cutscene_3cam_look_point(target, s, &lx, &ly, &lz);
-
-            float az = cutscene_3cam_azimuth(s, target);
-            cx = lx + sinf(az) * g_cut.dist;
-            cz = lz - cosf(az) * g_cut.dist;
-            cy = ly + g_cut.dist * 0.18f;
+            float cam[3], look[3];
+            cutscene_3cam_place(s, target, g_cut.shot_t, cam, look);
+            cx = cam[0]; cy = cam[1]; cz = cam[2];
+            lx = look[0]; ly = look[1]; lz = look[2];
         }
 
         cam->pos[0] = cx;
@@ -551,7 +562,6 @@ void cutscene_update(Camera *cam, World *w, float dt) {
             printf("[CUTSCENE] sequence complete -> return to gameplay camera\n");
             return;
         }
-        g_cut.dist = cutscene_desired_dist(&g_cut.active[g_cut.cur]);
         printf("[CUTSCENE] shot %d/%d target='%s'\n",
                g_cut.cur + 1, g_cut.active_count, g_cut.active[g_cut.cur].target);
         cutscene_play_current_audio();

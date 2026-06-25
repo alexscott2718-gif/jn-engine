@@ -3,6 +3,37 @@
 Date: 2026-06-25
 Branch: `native-port`
 
+## Progress log (most recent first)
+
+- **2026-06-25 (in progress) — 3CAM camera enum DECODED + linked.** The standalone
+  `3CAM` per-frame camera update was recovered from `Neutron.exe`: primary vtable
+  `00497bec` slot **245** → `00415f90`. Field→offset map and the three camera modes
+  are written up in `docs/decomp/C3DCutSceneCamera.md` ("Per-frame camera update").
+  Model: `dist = clamp(InitialDist − ZoomSpeed·t, MinDist, MaxDist)`; **CameraType==2**
+  ⇒ static (camera at the 3CAM's own placement, look at target); **ViewFromCamera==0**
+  ⇒ orbit (camera at `target⊗(offX,offY,dist)`, look `target+(0,LookVoffset,0)`);
+  **else** ⇒ dolly (`framed=target⊗offset`; `cam=framed+normalize(camPlacement−framed)·dist`;
+  look `framed`). Validated against shipped data (136 rows: VFC {1:121,0:9,3:6},
+  CT {0:95,2:16,3:15,1:10}). Linked in `behavior_cutscene.c`
+  (`cutscene_3cam_place`/`cutscene_3cam_dist`); the guessed `cutscene_3cam_azimuth`
+  is removed. 3CAM shots now store the object's own placement (`cam_pos`). The 3MCA
+  table path is untouched. Also removed the now-dead pre-decode distance heuristic
+  (`cutscene_desired_dist` + the write-only `g_cut.dist` field), which the decoded
+  `cutscene_3cam_dist` fully replaces. **Gates green:** `make` clean,
+  `audit_faithfulness.py` 0/35, `make web` clean, `qa_web_verify.py` 16/16. Headless
+  faithfulness check: the shipped-data distribution reproduces exactly (136 `3CAM`
+  rows: VFC {1:121,0:9,3:6}, CT {0:95,2:16,3:15,1:10}) and the dolly math yields
+  finite/sane camera+look for the real level1b rows (LABEXP1 eases 900→840 via
+  ZoomSpeed; LABEXP3A static @500). Committed + deployed. **NB:** level1b `LABEXP3`
+  is a **3MCA** (sequencer, untouched here), not a standalone 3CAM — the level1b
+  standalone-3CAM rows are LABEXP1/LABEXP2/LABEXP3A (all dolly). By-eye/by-ear
+  validation on desktop/noVNC (a Goddard + a Cindy scene) still pending — visual QA
+  is the user gate.
+- **NOTE from user (2026-06-25):** the web cutscene **selector list is NOT
+  definitive** — cutscenes are still missing from `build_cutscene_catalog.py`. See
+  task: audit the catalog enumeration for dropped scenes (trigger-only fired scenes,
+  non-3MCA sources, per-level gaps).
+
 ## Goal
 
 Start the vtable parity campaign: identify and then link the decomp vtables that
@@ -90,10 +121,16 @@ Report columns:
 
 Continue the cutscene stack without scene-specific overrides:
 
-1. Decode/prove exact `C3DCutSceneCamera` standalone `3CAM` `ViewFromCamera` /
-   `CameraType` enum behavior.
-2. Link generic non-player actor animation routing for `TargetActAnim`,
-   `LoopActAnim`, and `TargetDeactAnim`.
+1. ✅ **DONE 2026-06-25** — Decoded exact `C3DCutSceneCamera` standalone `3CAM`
+   `ViewFromCamera` / `CameraType` enum behavior from `Neutron.exe` (`00415f90`),
+   linked in `behavior_cutscene.c`. See the Progress log above and
+   `docs/decomp/C3DCutSceneCamera.md`.
+2. **NEXT** — Link generic non-player actor animation routing for `TargetActAnim`,
+   `LoopActAnim`, and `TargetDeactAnim` (currently only `g_player` poses are applied;
+   Goddard/Cindy/Friends targets get no cutscene animation). Entry: decode the
+   `vfunc_03_056`/`vfunc_03_057` animation dispatch in `C3DMultiCutSceneCamera.md`
+   (the `IsA("C3DANIMATED")` → `[vtbl+0xe0]` play-anim path) and the equivalent in
+   the `00415f90`/deactivate path; native entry `cutscene_apply_player_anim`.
 3. Validate `PlayerControlled` `NULL`/`none`/`JIM1` cutscene input lock/unlock
    and restore timing.
 4. Validate with:

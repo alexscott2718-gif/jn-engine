@@ -69,6 +69,66 @@ each frame while active:
     ease distance toward target by ZoomSpeed
 ```
 
+## Per-frame camera update (recovered 2026-06-25)
+
+The primary vtable (`00497bec`) slot **245** (`+0x3d4`) points to the real
+per-frame camera update at **`00415f90`** — the analogue of the `3MCA` update at
+`00430da0`. Ghidra had not function-defined it during the generated spec pass;
+recovered here by `objdump` over `/home/scotty/xp-jnbg-original/Neutron.exe`.
+
+`InitObject` (`00415d70`) registers each property to a fixed runtime offset on the
+object (`this`). The offsets used by the update are:
+
+| Runtime offset | Property | Note |
+|---:|---|---|
+| `+0x8b8` | (runtime) active byte | shot is live when non-zero |
+| `+0x8b4` | (runtime) audio handle | shot ends when this stops playing |
+| `+0x8bc` | (runtime) resolved `CameraTarget` ptr | object framed |
+| `+0x8f0` | (runtime) shot timer | `+= dt` each frame |
+| `+0x8c0/0x8c4/0x8c8` | `TargOffsetX/Y/Z` | target-local framing offset |
+| `+0x8d0` | `ViewFromCamera` | mode select (see below) |
+| `+0x8d4` | `LookVoffset` | added to target Y in orbit look |
+| `+0x8dc` | `CameraType` | `==2` ⇒ static camera |
+| `+0x8e0` | `ZoomSpeed` | distance rate (often negative ⇒ pull back) |
+| `+0x8e4` | `MaxDist` | ceiling clamp |
+| `+0x8e8` | `MinDist` | floor clamp |
+| `+0x8ec` | `InitialDist` | base distance |
+
+Each frame, while the shot's audio is still playing:
+
+```
+dist = InitialDist - ZoomSpeed*t      # t = shot timer in seconds
+dist = max(dist, MinDist)             # floor first
+dist = min(dist, MaxDist)             # then ceiling  (MinDist>MaxDist pins to MaxDist)
+
+if CameraType == 2:                   # tested first, overrides ViewFromCamera
+    camera = self.world_position      # the 3CAM object's own placement
+    look   = target.world_position
+elif ViewFromCamera == 0:             # orbit
+    camera = target.transform_local(TargOffsetX, TargOffsetY, dist)   # [target+0x384]
+    look   = (target.x, target.y + LookVoffset, target.z)
+else:                                 # ViewFromCamera != 0 -> dolly
+    framed = target.transform_local(TargOffsetX, TargOffsetY, TargOffsetZ)
+    camera = framed + normalize(self.world_position - framed) * dist
+    look   = framed
+```
+
+`transform_local` is the target object's full world transform applied to a local
+point (`vtable +0x384`); `+0x310` returns a world position. When the shot's audio
+completes the update resumes the previous target's AI, plays `TargetDeactAnim`,
+clears the active byte, and advances. A global-flag branch at `004160f1`
+(`0x509853`/`0x4f8182`/`0x4f83e4` …) handles a player **skip** path that halts
+audio and force-deactivates; it does not affect the framing math above.
+
+Shipped-data distribution across the 136 `3CAM` rows (validates the model):
+`ViewFromCamera` = {1:121, 0:9, 3:6}; `CameraType` = {0:95, 2:16, 3:15, 1:10}.
+Dominant combo is `(ViewFromCamera=1, CameraType=0)` (85 rows) → the dolly mode.
+
+Native port: linked in `src/game/behaviors/behavior_cutscene.c`
+(`cutscene_3cam_place` / `cutscene_3cam_dist`), exercised by the standalone-3CAM
+playback path (`playing_sequence_index < 0`). The `3MCA` sequencer path keeps its
+own recovered `CameraTypeN` table and is untouched.
+
 ## Validation
 
 19/19 registered properties confirmed present in shipped `.gam` data for `3CAM`
@@ -76,10 +136,14 @@ each frame while active:
 runtime-validated against captured cutscene playback.
 
 Open questions:
-- Decode the inherited update slot that performs the framing/zoom each frame and the
-  exact `CameraType`/`ViewFromCamera` enumerations.
+- ~~Decode the inherited update slot that performs the framing/zoom each frame and
+  the exact `CameraType`/`ViewFromCamera` enumerations.~~ **DONE 2026-06-25** — see
+  *Per-frame camera update* above (slot 245 → `00415f90`).
 - Confirm how a shot is activated/deactivated (message from `C3DMultiCutSceneCamera`
-  vs. `CTrigger`).
+  vs. `CTrigger`). The update self-deactivates when the shot audio completes;
+  the activation message source is still to be pinned.
+- Decode the exact `transform_local` helper (`target` vtable `+0x384`) — the native
+  port approximates it with a yaw-only transform (shared with the `3MCA` path).
 
 ## Notes
 

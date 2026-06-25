@@ -1303,6 +1303,24 @@ performance, shell hygiene) lives in the repo's `CLAUDE.md` and in
   `PlayerControlled` restore timing remain open. Verified `make`, `audit_faithfulness.py`
   (0 findings / 35 levels), `make web`, and `qa_web_verify.py` (16/16).
 
+- **2026-06-25 3CAM camera enum decoded from the binary and linked.**
+  Recovered the standalone `C3DCutSceneCamera` per-frame camera update from
+  `Neutron.exe` (primary vtable `00497bec` slot **245** → `00415f90`), replacing the
+  previous slice's guessed `cutscene_3cam_azimuth`. Decoded model (written up in
+  `docs/decomp/C3DCutSceneCamera.md`): `dist = clamp(InitialDist − ZoomSpeed·t,
+  MinDist, MaxDist)` with three modes — **CameraType==2** static (camera at the 3CAM's
+  own placement, look at target), **ViewFromCamera==0** orbit (`target⊗(offX,offY,dist)`,
+  look `target+(0,LookVoffset,0)`), and **else** dolly (`framed=target⊗offset`;
+  `cam=framed+normalize(camPlacement−framed)·dist`; look `framed`). Validated against
+  shipped data (136 `3CAM` rows: VFC {1:121,0:9,3:6}, CT {0:95,2:16,3:15,1:10}). Linked
+  in `behavior_cutscene.c` (`cutscene_3cam_place`/`cutscene_3cam_dist`); 3CAM shots now
+  store the object's own placement. The `3MCA` table path is untouched. Gates green:
+  `make`, `audit_faithfulness.py` (0/35), `make web`, `qa_web_verify.py`. Still open for
+  this parity track: non-player actor animation routing, `PlayerControlled` restore
+  timing, the activation message source, and the **incomplete cutscene selector list**
+  (user-reported — `build_cutscene_catalog.py` is dropping scenes). By-eye/by-ear
+  validation (level1b `LABEXP3`, a Goddard and a Cindy scene) still pending on desktop/noVNC.
+
 ---
 
 ## Where to go next
