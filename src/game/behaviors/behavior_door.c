@@ -34,6 +34,17 @@ static void door_on_spawn(Entity *e, World *w) {
     e->home[1] = e->y;         /* closed/base Y; update writes base + rise */
     e->user_flag = 0;          /* 0=closed, 1=opening, 2=open-wait, 3=closing */
     e->user_float = 0.0f;      /* current rise (additive to base y) */
+    e->home[2] = -1.0f;        /* looping open-SFX channel (-1 = none) */
+}
+
+/* Stop the looping "door opening" SFX (soundeffects.omt[59]) once the door
+   stops moving. QA 2026-06-24 #7 (l6a halldoor01): the open sound must loop
+   while the door is in motion and cut out when it stops, not play one-shot. */
+static void door_halt_open_loop(Entity *e) {
+    if (e->home[2] >= 0.0f) {
+        audio_channel_halt((int)e->home[2]);
+        e->home[2] = -1.0f;
+    }
 }
 
 static void door_on_update(Entity *e, World *w, float dt) {
@@ -46,6 +57,7 @@ static void door_on_update(Entity *e, World *w, float dt) {
             e->user_float = rise;
             e->user_flag = 2;
             e->home[0] = 0.0f;
+            door_halt_open_loop(e);   /* door reached fully-open -> stop loop */
             printf("[DOOR] open (tag='%s')\n", e->tag);
         }
         e->y = e->home[1] + e->user_float;
@@ -71,7 +83,11 @@ static void door_on_trigger(Entity *e, Entity *by) {
     (void)by;
     if (e->user_flag == 0) {
         e->user_flag = 1;
-        audio_play_db("soundeffects.omt", DOOR_OPEN_SOUND, 0, 96);
+        /* Loop the open SFX (-1) for the duration of the opening motion; it is
+           halted in door_on_update when the door latches fully-open. */
+        door_halt_open_loop(e);   /* guard against a stale channel */
+        e->home[2] = (float)audio_play_db("soundeffects.omt",
+                                          DOOR_OPEN_SOUND, -1, 96);
         printf("[DOOR] opening (tag='%s')\n", e->tag);
     }
 }
