@@ -1278,6 +1278,18 @@ performance, shell hygiene) lives in the repo's `CLAUDE.md` and in
   and targeted local Playwright on `level1b` proving `LABEXP3` starts 7 shots and plays
   `voiceneighborhood.omt[46]` for 5.18s. Deployed live as `jnengine.d46fd728.js`, assets `52fd4db4`.
 
+- **2026-06-25 Vtable parity campaign planned and published.**
+  Follow-up planning reframed "how many decomp vtables are linked?" into a more useful metric:
+  which must-link parity systems are native-linked, faithfully ported, still approximated, deferred,
+  or unused. The plan explicitly treats **menus/UI flow** as its own parity domain, alongside
+  camera/cutscene, player movement, inventory/items/gadgets, progression/objectives, trigger/story
+  sequencing, animation/actor pose, AI/pathing, vehicles/special movement, and cosmetic/deferred work.
+  Added [`vtable_parity_plan.md`](./vtable_parity_plan.md), fresh-session handoff
+  [`vtable_parity_handoff.md`](./vtable_parity_handoff.md), and a brief public page at
+  `/jn-engine/qa/vtable-parity-plan-2026-06-25/`. The first implementation deliverable is a generated
+  `docs/vtable_linkage_audit.md`, then continuing camera/cutscene linkage before player/menu/progression
+  work.
+
 ---
 
 ## Where to go next
@@ -1285,6 +1297,10 @@ performance, shell hygiene) lives in the repo's `CLAUDE.md` and in
 - **Continuation menu (start here):** [`continuation_options.md`](./continuation_options.md) — the
   open work tracks (QA tail, audio, mechanics, campaign playthrough, motion/path,
   containment, contributor tasks) with effort/impact/prereqs and a recommended ordering.
+- **Vtable parity campaign:** [`vtable_parity_plan.md`](./vtable_parity_plan.md) and
+  [`vtable_parity_handoff.md`](./vtable_parity_handoff.md) — the current plan for linking the raw
+  decomp vtables that control camera, player feel, menus, inventory/tools, progression, triggers,
+  animation, AI/pathing, and vehicles.
 - **The active campaign — native Linux port:** [`native_port_plan.md`](./native_port_plan.md)
   (the five waves) and [`decomp/_next_session.md`](./decomp/_next_session.md) (kickoff handoff).
 - **Understand the code as it stands today:** [`ARCHITECTURE.md`](./ARCHITECTURE.md).

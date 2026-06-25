@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Vtable Parity Plan - jn-engine</title>
+<style>
+* { box-sizing:border-box; margin:0; padding:0; }
+body { font-family:Monaco,Menlo,"Ubuntu Mono",monospace; background:#0d0d0d; color:#dedede; line-height:1.52; padding:24px 16px; }
+.wrap { max-width:1160px; margin:0 auto; }
+h1 { font-size:1.5rem; color:#fff; margin-bottom:4px; }
+h2 { font-size:1.05rem; color:#7ec8ff; border-bottom:1px solid #2a2a2a; padding-bottom:6px; margin:30px 0 12px; }
+h3 { font-size:0.94rem; color:#f1f1f1; margin:18px 0 6px; }
+p { margin:10px 0; color:#c8c8c8; }
+a { color:#7ec8ff; text-decoration:none; }
+a:hover { text-decoration:underline; }
+code { color:#d9c08a; }
+.sub,.muted { color:#888; font-size:0.84rem; }
+.grid { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:12px; margin:18px 0; }
+.stat { background:#141414; border:1px solid #262626; border-radius:8px; padding:15px; }
+.stat strong { display:block; color:#fff; font-size:1.26rem; line-height:1.1; margin-bottom:4px; }
+.stat span { color:#999; font-size:0.8rem; }
+.note { border-left:3px solid #6c5720; background:#181409; border-radius:0 6px 6px 0; color:#d8c184; padding:9px 12px; margin:14px 0; font-size:0.88rem; }
+.badge { display:inline-block; border-radius:4px; padding:1px 7px; font-size:0.72rem; vertical-align:middle; }
+.blue { background:#102536; color:#9fd8ff; border:1px solid #244861; }
+.amber { background:#33280e; color:#e6c66f; border:1px solid #6c5720; }
+.green { background:#102e1c; color:#8ee6a2; border:1px solid #285e36; }
+table { width:100%; border-collapse:collapse; margin:14px 0; font-size:0.8rem; }
+th,td { text-align:left; padding:8px 8px; border-bottom:1px solid #242424; vertical-align:top; }
+th { color:#9a9a9a; font-weight:normal; background:#0d0d0d; }
+ol { margin:10px 0 10px 22px; color:#c8c8c8; }
+li { margin:6px 0; }
+.cards { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:12px; margin:14px 0; }
+.card { background:#141414; border:1px solid #262626; border-radius:8px; padding:13px; }
+.card p { font-size:0.82rem; margin:6px 0 0; color:#aaa; }
+.footer { color:#777; border-top:1px solid #2a2a2a; margin-top:34px; padding-top:12px; font-size:0.8rem; }
+@media (max-width:860px) { .grid,.cards { grid-template-columns:1fr 1fr; } table { font-size:0.72rem; } }
+@media (max-width:620px) { .grid,.cards { grid-template-columns:1fr; } body { padding:18px 10px; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>Vtable Parity Plan <span class="badge blue">native-port</span></h1>
+<p class="sub">Published 2026-06-25 &middot; source docs: <code>vtable_parity_plan.md</code> and <code>vtable_parity_handoff.md</code></p>
+
+<p>This plan narrows the decomp work to the vtables that control visible game feel:
+camera, player movement, menus, inventory/tools, progression, triggers, animation,
+AI/pathing, and vehicles. The target is parity where manual generation would drift
+from the original game.</p>
+
+<div class="grid">
+  <div class="stat"><strong>93 / 93</strong><span>used FourCCs have native vtables</span></div>
+  <div class="stat"><strong>208</strong><span>decomp ledger class rows to classify</span></div>
+  <div class="stat"><strong>10</strong><span>parity domains</span></div>
+  <div class="stat"><strong>1st</strong><span>deliverable is a linkage audit</span></div>
+</div>
+
+<div class="note">Success is not measured by raw vtable percentage. The useful metric is how many
+must-link parity systems are native-linked, faithfully ported, or still manually approximated.</div>
+
+<h2>Parity Domains</h2>
+<table>
+<tr><th>Domain</th><th>Core classes</th><th>Why it matters</th></tr>
+<tr><td>Camera / cutscene</td><td><code>C3DMultiCutSceneCamera</code>, <code>C3DCutSceneCamera</code>, <code>C3DCamera</code>, <code>CViewPort</code></td><td>Framing, camera motion, actor/audio timing.</td></tr>
+<tr><td>Player movement</td><td><code>C3DPlayer</code>, <code>C3DJimmy</code></td><td>Tank controls, acceleration, stopping, camera coupling, ladders/fences/fall states.</td></tr>
+<tr><td>Menus / UI flow</td><td><code>CMainMenu</code>, <code>CMenuElement</code>, <code>C2DInGameMenu</code>, <code>CGameType</code></td><td>Main menu, pause, HUD/menu transitions, restart, input locks, selection flow.</td></tr>
+<tr><td>Inventory / items / gadgets</td><td><code>CPickupType</code>, <code>C3DPickupType</code>, <code>C3DPickupItem</code>, <code>C3DShrinkRay</code>, <code>C3DToolChest</code></td><td>Pickup state, gadget selection, usable tools, tool animations, item-triggered actions.</td></tr>
+<tr><td>Progression / objectives</td><td><code>CGameType</code>, <code>CJimmyGame</code>, <code>CTaskList</code>, <code>CLoadLevel</code>, <code>C3DCheckPoint</code></td><td>Task gates, mission completion, level transitions, death/restart, checkpoints.</td></tr>
+<tr><td>Triggers / story sequencing</td><td><code>CTrigger</code>, <code>C3DTriggerType</code>, <code>C3DAITrigger</code>, <code>C3DMusicTrigger</code></td><td>Authored activation graph for scenes, audio, AI, tasks, and scripted control.</td></tr>
+<tr><td>Animation / actor pose</td><td><code>C3DAnimated</code>, <code>C3DFriends</code>, <code>C3DGoddard</code>, <code>C3DCindy</code>, <code>C3DYokianSpy</code></td><td>Facing, talk states, texture-page flips, animation-ended callbacks.</td></tr>
+<tr><td>AI / pathing</td><td><code>C3DAI</code>, <code>C3DPatrolPoint</code>, friend/NPC/enemy leaves</td><td>NPC placement, pathing, facing, attacks, patrol arrival behavior.</td></tr>
+<tr><td>Vehicles / special movement</td><td><code>C3DVehicle</code>, <code>C3DCar</code>, <code>C3DJeep</code>, <code>C3DRocketShip</code>, <code>C3DSailBoat</code></td><td>Steering, wheels, suspension, camera overrides, engine/looping sounds.</td></tr>
+<tr><td>Cosmetic / deferred</td><td>Static props and unused helpers</td><td>Keep low-impact or unused code out of the critical path.</td></tr>
+</table>
+
+<h2>Recommended Order</h2>
+<ol>
+  <li>Build <code>docs/vtable_linkage_audit.md</code> from the decomp ledger.</li>
+  <li>Continue camera/cutscene linkage: finish <code>3CAM</code> <code>ViewFromCamera</code>, actor facing, animation hooks, and <code>PlayerControlled</code>.</li>
+  <li>Deepen <code>C3DPlayer</code> movement/camera slots that define tank-control feel.</li>
+  <li>Audit and link menus/UI flow: <code>CMainMenu</code>, <code>CMenuElement</code>, <code>C2DInGameMenu</code>, pause/restart/input locks.</li>
+  <li>Audit inventory/items/gadgets and progression/objectives.</li>
+  <li>Then link trigger graph semantics, animation pose, AI/pathing, and vehicles.</li>
+</ol>
+
+<h2>First Implementation Slice</h2>
+<div class="cards">
+  <div class="card"><h3>Audit</h3><p>Create <code>tools/build_vtable_parity_report.py</code> and classify classes as linked, approximated, must-link, deferred, unused, or faithful-wontfix.</p></div>
+  <div class="card"><h3>Cutscenes</h3><p>Decode standalone <code>3CAM</code> <code>ViewFromCamera</code>, then link target animations, facing, and player-control locks.</p></div>
+  <div class="card"><h3>Validation</h3><p>Use the web selector plus XP/noVNC or video timestamps as evidence. Avoid scene-specific overrides unless explicitly approved.</p></div>
+</div>
+
+<h2>Known Carry-Forward Issues</h2>
+<table>
+<tr><th>Issue</th><th>Status</th></tr>
+<tr><td>Cindy location/pathing</td><td><span class="badge amber">incomplete/deferred</span> Needs original-game evidence or decomp proof before changing again.</td></tr>
+<tr><td>Goddard texture/mapping</td><td><span class="badge amber">open</span> Track under animation/actor-pose and asset visual fidelity.</td></tr>
+<tr><td>Remaining audio reports</td><td><span class="badge amber">open</span> Need desktop/noVNC by-ear validation; xvfb has no audio device.</td></tr>
+<tr><td>Behavior routing breadth</td><td><span class="badge green">complete</span> 93 / 93 used FourCCs have native vtables; semantic parity remains the work.</td></tr>
+</table>
+
+<div class="footer">
+Demo: <a href="/jn-engine/">/jn-engine/</a> &middot;
+Cutscene catalog: <a href="/jn-engine/qa/cutscene-catalog-2026-06-25/">catalog</a> &middot;
+Full plan: <code>docs/vtable_parity_plan.md</code> &middot;
+Handoff: <code>docs/vtable_parity_handoff.md</code>
+</div>
+</div>
+</body>
+</html>

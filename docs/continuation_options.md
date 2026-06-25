@@ -20,6 +20,10 @@
 - **Cutscene harness:** first cut implemented. Catalog lists 114 `3MCA` cutscenes, 136 `3CAM` shot directors,
   and 362 authored audio steps; web shell has per-level selector plus Play/Stop.
 - **Known visual issue:** Goddard's texture is either incorrect or mapped incorrectly; carry this as a QA/art-fidelity item.
+- **Vtable parity plan:** the next decomp-driven campaign is documented in
+  [`vtable_parity_plan.md`](./vtable_parity_plan.md), with a fresh-session handoff in
+  [`vtable_parity_handoff.md`](./vtable_parity_handoff.md). Menus/UI flow, inventory/items/gadgets,
+  and progression/objectives are first-class parity domains alongside camera/player/animation/AI.
 - **Gates that must stay green every change:** `make` → `python3 tools/audit_faithfulness.py`
   (0 findings / 35 levels) → `make web` → `python3 tools/qa_web_verify.py` (16/16) → `./tools/deploy_wasm.sh`.
 
@@ -35,6 +39,7 @@
 | F | Motion/path fidelity (Cindy location/path) | Med–High | Fixes remaining non-audio QA report | Yes (screenshots) |
 | I | Cutscene test harness for web deploy | First cut done | Makes scripted scenes inspectable on demand | Yes |
 | J | Cutscene fidelity review/tuning | Med–High | Turns harness playback into faithful scenes | Mixed |
+| K | Vtable parity campaign | High | Targets core feel systems that cannot be hand-guessed | Partly |
 | G | Collision containment (open-shell houses, walls) | Med | Stops out-of-bounds / see-inside | Yes |
 | H | Contributor / capture-rig tasks (asset truth) | Med | Exact sizes/textures, offloadable | N/A (tooling) |
 
@@ -109,6 +114,14 @@ Now that cutscenes are playable on demand, review representative scenes by eye/e
 exact `CameraType`/`ViewFromCamera` behavior, target animations, player-control locks, `FaceObject`, and
 audio timing/overlap. Keep Goddard texture/mapping as a separate visual bug, not a sequencing bug.
 
+### K. Vtable parity campaign
+The next structural decomp campaign is to classify and then link the vtables that control core feel:
+camera/cutscene, player movement, **menus/UI flow**, inventory/items/gadgets, progression/objectives,
+triggers/story sequencing, animation/actor pose, AI/pathing, and vehicles/special movement. The full
+plan lives in [`vtable_parity_plan.md`](./vtable_parity_plan.md); the fresh-session start point is
+[`vtable_parity_handoff.md`](./vtable_parity_handoff.md). The first deliverable should be
+`tools/build_vtable_parity_report.py` plus `docs/vtable_linkage_audit.md`, not a blind porting pass.
+
 ### G. Collision containment
 The #13 investigation surfaced this: background houses are open-bottomed facades (faithful), but the
 free camera / player can see inside because there's no wall collision keeping them out. A containment
@@ -125,9 +138,10 @@ Offloadable, self-contained data-truth work that doesn't block the engine:
 ---
 
 ## Recommended ordering (opinion, not a mandate)
-1. **J (cutscene fidelity review/tuning)** — the harness exists; use it to inspect scenes and tune camera/audio/animations.
-2. **E (campaign playthrough)** — the biggest "is it a game" jump; do it once the actors are all present.
-3. **B (audio)** — batch it for a session where a **desktop/noVNC** is available for by-ear checks.
-4. **F (Cindy location) / D / G / H** — defer Cindy until original/capture evidence is available; D/G/H opportunistic.
+1. **K (vtable parity campaign)** — start with the audit, then use it to drive cutscene/player/menu/progression linkage.
+2. **J (cutscene fidelity review/tuning)** — the harness exists; use it to inspect scenes and tune camera/audio/animations.
+3. **E (campaign playthrough)** — the biggest "is it a game" jump; do it once the actors are all present.
+4. **B (audio)** — batch it for a session where a **desktop/noVNC** is available for by-ear checks.
+5. **F (Cindy location) / D / G / H** — defer Cindy until original/capture evidence is available; D/G/H opportunistic.
 
 > Current state: **I cutscene web test harness** first cut is built; next cut is fidelity review/tuning.
