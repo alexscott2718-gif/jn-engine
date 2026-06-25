@@ -314,7 +314,23 @@ Why deferred (not a quick guess):
    #23 (l1a shrink-ray-as-music), #24 (l1 RocketPad voice line). Remember audio can't be
    heard headless — see the Audio verification note in the status block above.
 
-## Finalize (Group `Finalize`, task #14) — RUN ONCE WHEN A BATCH IS READY
+## Finalize — ✅ DONE 2026-06-25 (Session 2 Claude)
+The batch was finalized and deployed:
+- `make` clean + `python3 tools/audit_faithfulness.py` → **0 findings / 35 levels**.
+- `./tools/deploy_wasm.sh` → **live** at `exentt.com/jn-engine` (`jnengine.5d94b61e.js`, assets `d489c38d`).
+- `python3 tools/qa_web_verify.py` → **16/16**.
+- **Resolution page:** per the user's direction, the per-reporter pages were **consolidated into one
+  summary section** on the existing changelog `docs/qa/native-port-behavior-coverage-2026-06-24/index.html`
+  (report ledger + notable-fix cards + WONTFIX-faithful + open tail), mirrored to
+  `/var/www/jn-engine/qa/native-port-behavior-coverage-2026-06-24/` (diff-clean) and verified publicly reachable.
+- `docs/PROJECT_HISTORY.md` updated with the campaign entry + new invariants.
+- `native-port` **pushed** to origin (commit `c7db832`).
+- Forward-looking next-work menu written: `docs/continuation_options.md`.
+
+Open items remaining for a future session: #4 (Cindy pathing), #5 (boat), #18–24 (Group I audio —
+needs a desktop/noVNC session for by-ear verification). See the per-report findings above.
+
+## Finalize (original checklist — kept for reference) — RUN ONCE WHEN A BATCH IS READY
 1. `make` → `python3 tools/audit_faithfulness.py` (expect 0 findings).
 2. `source ~/emsdk/emsdk_env.sh && ./tools/deploy_wasm.sh` (387MB; outward-facing — the user
    pre-authorized deploying the QA fixes, but confirm before the FIRST public deploy of this batch).
