@@ -991,8 +991,16 @@ static void draw_scene(World *world, int jim_model_ok)
         /* QA annotation: one ID per placement; a tree's trunk mesh and crown
            billboard share it, so clicking either picks the tree. */
         qa_register_placement(pl, pl->x, 0.0f, -pl->z);
+        /* The trunk+crown billboard is a LEVEL1 construction: level1.omt bark
+           canvas, the level1 capture-measured crown (tex_052e7090) and size
+           table. Other levels ship proper per-level tree glbs
+           (assets/glb/omt/<level>/tree*.glb) with their own canvas textures, so
+           forcing level1's crown onto them was wrong (QA 2026-06-24 l3c tree04
+           "should be level3c/0000_128x128d32"). Restrict the billboard to the
+           level1 family; everyone else falls through to the textured glb mesh. */
         if (!env_enabled("JN_DISABLE_TREE_BILLBOARDS") &&
-            strncmp(pl->name, "tree", 4) == 0) {
+            strncmp(pl->name, "tree", 4) == 0 &&
+            strncmp(game_flow_current_level(), "level1", 6) == 0) {
             /* Full scattered tree = bark TRUNK mesh (base at ground) + a
                camera-facing green-crown CANOPY billboard sitting on the
                trunk top. The trunk mesh's own canvas mis-resolves to a fence
