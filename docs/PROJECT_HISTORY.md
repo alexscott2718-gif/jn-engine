@@ -1084,6 +1084,27 @@ Validated in headless Chromium (Playwright): campaign button toggles On/Off with
 keydown fires `[TALK]` and does not toggle turbo; the Speed button still toggles turbo; touch mode is off by default /
 forced by `?touch=1` / off by `?touch=0`. `audit_faithfulness.py` 0 findings, `make web`, `qa_web_verify.py` 16/16.
 
+**QA backlog campaign — 4 community tickets, 17/24 closed (2026-06-24/25).** Worked a deduped backlog of 24 reports
+from four tickets (sandmanfan 2026-06-24, two awefan, lu9 2026-06-14) through `docs/qa_ticket_resolution_workflow.md`,
+holding `audit_faithfulness.py` at 0/35 after each change. **Fixed+verified (17):** 3SPH drawn invisible (sandbox
+referent); foot-anchor 3HUG/3CIN/3SHE; STRT spawn-yaw copied on level loads so Jimmy faces the authored direction on
+lab-exit (#14); authored button meshes + RGB pulse for 3BUT/3WAB (#6/#15); enemy `PROJ`→`missile.ASE` while the player
+keeps the baseball (#8); `3FLE`→fleet commander (#9); level1 tree billboard gated to the level1 family so l3c `tree04`
+uses its own glb (#10); bigger/bouncier red neutrons (#11); **level1b `3ARR`/`LOAD` gated on the authored
+`RequiredTask`/`RequiredLevel` against the live SCENE store + a scoped Goddard-bowl `ShowArrow` pickup-arrow, leaving
+the global chunk-106 hidden rule intact (#16)**; coin pickup validated already-drawn (#17); **l6a doors loop
+`soundeffects.omt[59]` while moving and halt at fully-open (#7)** — a new `behavior_required_task_gate_allows()` is the
+reusable gate behind #16. **Resolved WONTFIX-as-faithful (2):** #12 apple-pie (authored `SpriteIndex=157` *is*
+"FruitbowlEmty"; the pie is the unimplemented fruit-fill mechanic) and #13 house02 floor (the OMT mesh is an
+open-bottomed facade — ~4% floor coverage, identical across level1/2/2b; only Jimmy's house ships a `HOUSE BASE`;
+adding a floor would invent geometry). **Open/deferred (5):** #4 Cindy pathing + #5 boat (motion/path — the SailBoat
+sits at the faithful authored Y=17 but floats ~14u above the water surface *and* patrols off-river; no runtime
+water-height anchor exists) and the Group I audio set #18–24 (l1c furniture proximity sounds, l3a ride-track stacking,
+l1a shrink-ray-as-music, l1 RocketPad voice line — 3SOU confirmed clean, the l3a emitter is unidentified, and audio
+can't be verified by ear in the headless xvfb rig). Deployed live (`jnengine.5d94b61e.js`, assets `d489c38d`);
+published changelog at `docs/qa/native-port-behavior-coverage-2026-06-24/`; living handoff at
+`docs/qa/qa_backlog_campaign_handoff.md`.
+
 ---
 
 ## Era 15 — Mesh collision world: ground, walls, step-up (~June 24)

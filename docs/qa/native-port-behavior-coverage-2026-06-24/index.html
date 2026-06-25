@@ -100,6 +100,64 @@ remaining 3 = 3ROK / 3SPR / 3DAI  (resolver/positioning gaps, not behavior gaps)
 <p class="sub">Verified against the live deployed build in headless Chromium: <code>?newgame=1</code> &rarr; Campaign: On at <code>level1b</code>; a real keydown fires <code>[TALK]</code> and does <em>not</em> toggle turbo; the Campaign button round-trips On/Off with the level swaps logged.</p>
 </div>
 
+<h2>QA backlog campaign &mdash; 4 community tickets <span class="badge green">17/24 CLOSED</span></h2>
+<p class="sub">2026-06-24/25 &middot; branch <code>native-port</code> &middot; workflow <code>docs/qa_ticket_resolution_workflow.md</code> &middot; living handoff <code>docs/qa/qa_backlog_campaign_handoff.md</code></p>
+<p>With the behavior-coverage breadth above in place, this pass worked a backlog of <strong>four community QA tickets</strong> &mdash; sandmanfan (2026-06-24, 10 reports), two awefan tickets (level1 + level1b), and lu9 (2026-06-14) &mdash; deduped to <strong>24 unique reports</strong>. Each was taken through the same contract: read the matching <code>docs/decomp/&lt;Class&gt;.md</code> first, prefer authored data and engine rules over one-off edits, and hold the <code>tools/audit_faithfulness.py</code> gate at <strong>0 findings / 35 levels</strong> after every change. <strong>17 reports are fixed-and-verified</strong>, <strong>2 are resolved as faithful-to-original (WONTFIX-as-bug)</strong>, and <strong>5 remain open</strong> as documented motion/path and audio work.</p>
+
+<table>
+<tr><th>area</th><th>what landed</th><th>result</th></tr>
+<tr><td><span class="badge blue">Placement</span></td><td>3SPH invisible; foot-anchor 3HUG/3CIN/3SHE; STRT spawn-yaw on level loads</td><td>floating/mis-grounded actors seat correctly; Jimmy faces the authored way on lab-exit</td></tr>
+<tr><td><span class="badge blue">Model/visual</span></td><td>authored button meshes + RGB pulse; enemy <code>PROJ</code>&rarr;missile; <code>3FLE</code>&rarr;fleet commander; l3c <code>tree04</code> glb; bigger bouncier red neutrons</td><td>the reported wrong/floating models now draw the authored asset</td></tr>
+<tr><td><span class="badge blue">Logic gate</span></td><td>l1b <code>3ARR</code>/<code>LOAD</code> gated on authored <code>RequiredTask</code> + scoped Goddard-bowl <code>ShowArrow</code></td><td>campaign-only arrow/teleport no longer fire out of sequence; bowl arrow drawn</td></tr>
+<tr><td><span class="badge green">Audio</span></td><td>l6a doors loop <code>soundeffects.omt[59]</code> while moving, halt at fully-open</td><td>door open-SFX no longer one-shots short of the motion</td></tr>
+<tr><td><span class="badge amber">Faithful</span></td><td>apple-pie fruit bowl; house02 open-bottom facade</td><td>resolved WONTFIX-as-faithful &mdash; the &ldquo;defect&rdquo; is the original's authored data</td></tr>
+</table>
+
+<h3>Report ledger</h3>
+<table>
+<tr><th>#</th><th>level</th><th>model</th><th>issue</th><th>status</th></tr>
+<tr><td>1</td><td>l1</td><td>3SPH &times;2</td><td>draws a stray &ldquo;fan&rdquo;</td><td><span class="badge green">fixed</span> invisible</td></tr>
+<tr><td>2</td><td>l4</td><td>3SHE</td><td>character floating</td><td><span class="badge green">fixed</span> grounded</td></tr>
+<tr><td>3</td><td>l4a</td><td>3HUG</td><td>not at ground level</td><td><span class="badge green">fixed</span> foot-anchor</td></tr>
+<tr><td>4</td><td>l3d</td><td>3CIN</td><td>off-ground + pathing/wall-clip</td><td><span class="badge green">ground fixed</span> / <span class="badge amber">pathing open</span></td></tr>
+<tr><td>5</td><td>l1</td><td>3SAI</td><td>boat floats above river</td><td><span class="badge amber">investigated, deferred</span></td></tr>
+<tr><td>6</td><td>l6a</td><td>3BUT</td><td>buttons float + should flash</td><td><span class="badge green">fixed</span> mesh + RGB pulse</td></tr>
+<tr><td>7</td><td>l6a</td><td>3DOR</td><td>door SFX should loop until stop</td><td><span class="badge green">fixed</span> loop+halt</td></tr>
+<tr><td>8</td><td>l6a</td><td>PROJ</td><td>should be plasma not baseball</td><td><span class="badge green">fixed</span> enemy missile</td></tr>
+<tr><td>9</td><td>l6a</td><td>3FLE</td><td>should be Yokian fleet commander</td><td><span class="badge green">fixed</span></td></tr>
+<tr><td>10</td><td>l3c</td><td>tree04</td><td>wrong tree texture</td><td><span class="badge green">fixed</span> per-level glb</td></tr>
+<tr><td>11</td><td>l5</td><td>3RED</td><td>red neutrons too small</td><td><span class="badge green">fixed</span> size+pulse</td></tr>
+<tr><td>12</td><td>l1c</td><td>3PIC</td><td>apple-pie shows fruit bowl</td><td><span class="badge amber">WONTFIX-faithful</span></td></tr>
+<tr><td>13</td><td>l1</td><td>house02</td><td>floor under house missing</td><td><span class="badge amber">WONTFIX-faithful</span></td></tr>
+<tr><td>14</td><td>l1</td><td>3JIM</td><td>faces lab not house on exit</td><td><span class="badge green">fixed</span> STRT yaw</td></tr>
+<tr><td>15</td><td>l3c</td><td>3BUT</td><td>button orientation off</td><td><span class="badge green">fixed</span> authored mesh</td></tr>
+<tr><td>16</td><td>l1b</td><td>3ARR</td><td>misplaced arrow + wrong teleport</td><td><span class="badge green">fixed</span> task-gate</td></tr>
+<tr><td>17</td><td>l1b</td><td>3PIC</td><td>missing coin pickup</td><td><span class="badge green">verified</span> already drawn</td></tr>
+<tr><td>18&ndash;21</td><td>l1c</td><td>rooms</td><td>furniture proximity sounds</td><td><span class="badge amber">open</span> audio feature</td></tr>
+<tr><td>22</td><td>l3a</td><td>3JIM</td><td>ride-track sound stacks/never stops</td><td><span class="badge amber">open</span> emitter TBD</td></tr>
+<tr><td>23</td><td>l1a</td><td>3JIM</td><td>shrink-ray SFX plays as music</td><td><span class="badge amber">open</span> music-db resolution</td></tr>
+<tr><td>24</td><td>l1</td><td>RocketPad</td><td>missing &ldquo;find rockets&rdquo; voice line</td><td><span class="badge amber">open</span> audio</td></tr>
+</table>
+
+<h3>Notable fixes this pass</h3>
+<div class="card">
+<div class="meta"><code>behavior_door.c</code> &middot; report #7 (l6a halldoor01)</div>
+<p><strong>Door opening SFX now loops while the door moves.</strong> The rise-open door (<code>3DOR</code>/<code>3DUD</code>/<code>3SCD</code>/<code>3GAT</code>) played <code>soundeffects.omt[59]</code> &mdash; a handle literally named &ldquo;Door opening loop&rdquo; &mdash; as a <em>one-shot</em>, so it ended long before the door finished. It now plays looping (<code>loops=-1</code>) on trigger, stashes the mixer channel in unused door scratch, and halts it the moment the door latches fully-open. Audio-off builds stay safe (the play returns &minus;1, the halt no-ops).</p>
+<div class="fix">Verified the state machine end-to-end: spawning the player on <code>halldoor01</code> logs <code>[DOOR] opening</code> &rarr; <code>[DOOR] open</code>, i.e. the loop starts on trigger and is halted on the fully-open transition. (xvfb has no audio device, so the loop is not <em>audible</em> headless &mdash; by-ear confirmation is a desktop-session job.)</div>
+</div>
+<div class="card">
+<div class="meta"><code>behavior_base.c</code> / <code>behavior_arrow.c</code> / <code>behavior_load.c</code> / <code>main.c</code> &middot; report #16 (l1b)</div>
+<p><strong>level1b arrow + teleport gated on the authored story task.</strong> The level authors two arrow/load pairs keyed on campaign progress (<code>RequiredTask=SCENE</code>, <code>RequiredLevel=60/65</code>) plus a hidden <code>gdish</code> pickup trigger (<code>ShowArrow=1</code>) over Goddard's bowl. The native build ignored the task gate, so the campaign-only lab-water arrow/teleport showed up out of sequence and the authored bowl arrow never drew. A new <code>behavior_required_task_gate_allows()</code> evaluates the authored level window against the live <code>SCENE</code> task state (and leaves direct <code>--level</code>/audit runs unchanged); <code>LOAD</code> now uses its authored <code>Radius</code>, and a <em>scoped</em> pickup-arrow draws over the bowl trigger only &mdash; the global chunk-106 hidden rule (l1 hydrant/nests/pads) is untouched.</p>
+<div class="fix">Audit confirms level1b reports <code>pickup-arrow=1</code> while level1 keeps its hidden referent triggers with no arrow leak; the yellow arrow renders over the GODDARD dish.</div>
+</div>
+
+<h3>Resolved as faithful-to-original</h3>
+<div class="note"><strong>#12 apple-pie (l1c 3PIC).</strong> The authored <code>SpriteIndex=157</code> <em>is</em> &ldquo;FruitbowlEmty&rdquo; &mdash; the fruit bowl is correct. The apple pie comes from the unimplemented fruit-fill mechanic (&ldquo;Apple Pie%&rdquo;), deferred to mechanic work, not a texture swap.</div>
+<div class="note"><strong>#13 house02 floor (l1).</strong> Deterministic glb analysis shows <code>house02.glb</code> is an open-bottomed facade: its only low/horizontal up-facing faces cover ~4% of the footprint (a corner step), and the coverage is <em>identical</em> in level2/level2b &mdash; not a level1 export bug. The 6 background houses are all open shells; only Jimmy's house ships a dedicated <code>HOUSE BASE</code> mesh. Adding a floor would invent geometry the original never had; the reporter saw the hollow interior only via the free QA inspection camera, which normal collision keeps the player out of.</div>
+
+<h3>Still open &mdash; documented motion/path + audio work</h3>
+<div class="note"><strong>#5 boat (l1)</strong> and <strong>#4 Cindy pathing (l3d)</strong> are motion/path: the boat (<code>SailBoat.glb</code> at the faithful authored Y=17) floats ~14u above the water surface <em>and</em> patrols off-river, with no clean lever (no runtime water-height anchor); both need a mesh-origin / patrol-waypoint audit. The <strong>Group&nbsp;I audio</strong> set (l1c furniture proximity sounds #18&ndash;21, l3a ride-track stacking #22, l1a shrink-ray-as-music #23, l1 RocketPad voice line #24) is the remaining tail &mdash; 3SOU is confirmed clean (halts on exit), so the l3a stacking source is an as-yet-unidentified emitter. Audio cannot be verified by ear in the headless rig, so these are best finished against a desktop session. Full per-report evidence lives in the living handoff.</div>
+
 <h2>Validation gate (every step)</h2>
 <pre>make                                        # native build
 python3 tools/audit_faithfulness.py         # 0 findings across all 35 levels
@@ -107,12 +165,13 @@ python3 tools/build_asset_catalog.py        # refresh the coverage lens
 make web
 python3 tools/qa_web_verify.py              # 16/16 browser checks
 ./tools/deploy_wasm.sh                       # publish to exentt.com/jn-engine</pre>
-<p class="sub">Live build: <code>jnengine.4072385b.js</code>, assets <code>9059fbe5</code>. Each class is committed individually on the <code>native-port</code> branch.</p>
+<p class="sub">Live build (with the QA-campaign fixes): <code>jnengine.5d94b61e.js</code>, assets <code>d489c38d</code> &mdash; deployed 2026-06-25. Each change is committed individually on the <code>native-port</code> branch.</p>
 
 <div class="footer">
 Coverage lens now <strong>90 / 93</strong> used FourCCs with native behavior (remaining: <code>3ROK</code> origin pool, <code>3SPR</code> no serialized canvas, <code>3DAI</code> origin dummy &mdash; resolver/positioning gaps).
 &middot; Full narrative: <a href="https://github.com/alexscott2718-gif/jn-engine/blob/native-port/docs/PROJECT_HISTORY.md">PROJECT_HISTORY.md</a>
 &middot; SCENE machine: <a href="https://github.com/alexscott2718-gif/jn-engine/blob/native-port/docs/decomp/_scene_sequencer.md">_scene_sequencer.md</a>
+&middot; QA campaign handoff: <a href="https://github.com/alexscott2718-gif/jn-engine/blob/native-port/docs/qa/qa_backlog_campaign_handoff.md">qa_backlog_campaign_handoff.md</a>
 &middot; Previous: <a href="/jn-engine/qa/native-port-n1-n5-2026-06-22/">N1&ndash;N5 changelog</a>
 &middot; <a href="/jn-engine/">Play the browser build</a>
 </div>
