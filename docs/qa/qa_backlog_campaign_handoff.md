@@ -39,7 +39,7 @@
 | 10 | l3c | tree04 | TEX | should be level3c/0000_128x128d32 | D | ✅ DONE (gated l1 tree billboard; glb mesh now used) |
 | 11 | l5 | 3RED C3DREDNEUTRON | SCL | too small; add warped/bouncy sprite anim | F | ✅ DONE (unauthored floor 100→170; pulse ±7%→±17%). NB: 170 is a chosen visibility floor (level5 authors no SpriteSize); confirm against original via XP VNC if exact size matters. |
 | 12 | l1c | 3PIC sprite_index:157 | TEX | apple-pie showing fruit bowl | D | ⚠️ WONTFIX-AS-BUG: authored SpriteIndex=157 IS "FruitbowlEmty" (faithful). Apple pie comes from the unimplemented fruit-fill mechanic ("Apple Pie%"). Deferred to mechanic work, not a texture swap. |
-| 13 | l1 | house02 | GFX | floor under house missing entirely | G | ⬜ TODO (OMT geometry) |
+| 13 | l1 | house02 | GFX | floor under house missing entirely | G | ⚠️ WONTFIX-AS-FAITHFUL: house02 is an open-bottomed facade in the source OMT (verified — see findings). Adding a floor invents geometry. |
 | 14 | l1 | 3JIM JIM1 | ORI | faces lab not house on lab-exit | E | ✅ DONE (STRT yaw copied on spawn) |
 | 15 | l3c | 3BUT n03 | ORI | orientation off | E | ✅ DONE (authored button mesh + tint pulse) |
 | 16 | l1b | 3ARR C3DARROW | PLC | misplaced (should be over Goddard bowl); lab-water teleport wrong | H | ✅ DONE (committed `a502aa5`: task-gate 3ARR/LOAD + scoped gdish ShowArrow) |
@@ -101,7 +101,8 @@ Validation re-run before commit (Session 2):
 **Reports closed & verified: 16/24** (#1×4, #2, #3, #4-ground, #6, #8, #9, #10, #11, #14,
 #15, #16, #17-by-validation).
 **#12 apple-pie = WONTFIX-as-bug** (authored fruit bowl; pie is a deferred mechanic).
-Remaining open: #4-pathing, #5, #7, #13, #18–#24 (incl. all of Group I audio).
+**#13 house02 floor = WONTFIX-as-faithful** (open-bottomed facade in source OMT; see findings above).
+Remaining open: #4-pathing, #5, #7, #18–#24 (incl. all of Group I audio).
 
 **Regression gate PASSED at session-1 end:** `python3 tools/audit_faithfulness.py` →
 **0 findings / 0 NEW across all 24 levels** with all 11-report changes in. Native `make`
@@ -145,6 +146,30 @@ The audio system (read before touching #18–#24):
   (LRoom/MBEDROOM1/BATHROOM/HALLWAY glbs), not 3SOU entities — so no proximity emitter exists.
   This is a **feature**: either author/synthesize positional emitters at those props, or find whether
   the original uses C3DSoundEffect rows we're not placing. Largest/most speculative of the audio set.
+
+## #13 house02 floor — INVESTIGATED 2026-06-25 (Session 2 Claude): WONTFIX-as-faithful
+Root finding: `house02.glb` is an **open-bottomed facade** in the source OMT data, not a
+bug. Evidence (deterministic glb geometry analysis, `assets/glb/omt/`):
+- `house02.glb` (level1) = 3 textured material groups, 216 verts; the only low/horizontal
+  up-facing faces cover **~4% of the footprint** (one corner step), i.e. there is **no
+  floor** spanning the footprint. The house renders completely from every exterior angle.
+- **Not a level1 export bug:** level2's `house02.glb` has the **identical** 4% coverage;
+  level2b's is 3%. The mesh ships floorless everywhere it appears.
+- **Authoring pattern:** the 6 background houses (`house01`–`house06`) + `jhouse01`/`JHOUSE`
+  are all open-shell facades; only Jimmy's house has a dedicated `HOUSE BASE` mesh. Retroville
+  background houses are non-enterable facades by design.
+- The current texture-override file `assets/native/level1_texture_overrides_groundtruth.txt`
+  is **unused** (no source reads it; Phase C retired it — glbs embed their own OMT-canvas
+  textures). So the floor is not a missing-texture skip either; the geometry simply isn't there.
+
+Resolution: the absent floor is **faithful to the source**; adding one would invent geometry
+the original game never had. The reporter (lu9) only saw the hollow interior via the **free QA
+inspection camera** flying inside the shell — normal gameplay collision keeps the player out,
+so the missing floor is never visible in play. Mirrors #12 (apple-pie fruit bowl) as
+WONTFIX-as-faithful. *Optional future follow-up (not done, not a geometry fix):* wall collision
+so the QA/player camera can't enter the shell — deferred as it risks changing collision
+faithfulness and wasn't asked for. No reporter camera was recoverable for #13 (lu9 ticket not in
+Drive/Gmail); investigation used the structural geometry evidence above instead.
 
 ## Resume here (Session 2)
 **Order of attack (tractable → hard):**
@@ -224,9 +249,10 @@ The audio system (read before touching #18–#24):
      the sprite DB; close as validation-only.
 4. **#5 3SAI boat (l1)** + **#4 3CIN pathing/wall-clip (l3d)** — both motion/path, harder; likely
    need behavior work (boat follows a spline; Cindy path). Lower priority.
-5. **#13 house02 floor missing (l1)** — OMT geometry: the floor mesh under house02 isn't drawn
-   (untextured-skip? or absent from the placement set). Check the audit `untextured-skip`/`mesh-missing`
-   lines for house02-area placements at level1.
+5. ✅ **#13 house02 floor missing (l1)** — RESOLVED WONTFIX-as-faithful. house02 is an
+   open-bottomed facade in the source OMT (4% floor coverage, identical across level1/2/2b;
+   only Jimmy's house gets a `HOUSE BASE`). Adding a floor invents geometry. See the
+   "#13 house02 floor — INVESTIGATED" section above for the full evidence.
 6. **Group I audio** per the notes above.
 
 ## Finalize (Group `Finalize`, task #14) — RUN ONCE WHEN A BATCH IS READY
