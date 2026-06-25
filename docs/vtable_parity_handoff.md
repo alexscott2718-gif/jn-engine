@@ -34,8 +34,13 @@ sed -n '1,180p' docs/decomp/CGameType.md
 - Semantic parity is not complete. Many native behaviors are approximations or
   partial links.
 - Cutscene web harness exists and is deployed.
-- `3MCA` CameraType has been partly recovered from `C3DMultiCutSceneCamera`.
-- Standalone `3CAM` `ViewFromCamera` remains open.
+- `tools/build_vtable_parity_report.py` generates
+  `docs/vtable_linkage_audit.md`; current audit counts are 35 `must-link`, 109
+  `approximated`, 63 `defer`, and 3 `unused`.
+- `3MCA` CameraType has been recovered from `C3DMultiCutSceneCamera`.
+- Standalone `3CAM` now consumes `ViewFromCamera`, `FaceObject`, Jimmy
+  `TargetActAnim`/`TargetDeactAnim`, and `PlayerControlled` locking, but exact
+  enum behavior, non-player actor animation, and restore timing remain open.
 - Menus are a first-class parity domain:
   - `CMainMenu`
   - `CMenuElement`
@@ -56,15 +61,19 @@ sed -n '1,180p' docs/decomp/CGameType.md
 - Cindy location/pathing remains incomplete and should stay deferred until original
   evidence or decomp proof confirms her correct state.
 - Goddard texture/mapping is a known visual fidelity issue.
+- Jimmy/Carl vehicle insertion and vehicle-specific poses/animations are a
+  visual-fidelity dependency for vehicle parity; Carl stays must-link until decomp
+  or original-game evidence proves the correct pose/offset path.
 
-## Recommended first task
+## Completed first task
 
-Build the audit report before changing behavior.
+The audit report exists. Run this after changing the audit generator:
 
-Create `tools/build_vtable_parity_report.py` and generate
-`docs/vtable_linkage_audit.md`.
+```bash
+python3 tools/build_vtable_parity_report.py
+```
 
-Minimum report columns:
+Report columns:
 
 - parity domain
 - class
@@ -77,45 +86,22 @@ Minimum report columns:
 - native entry point, if any
 - next action
 
-Start with simple rule-based classification from `docs/decomp_ledger.csv`:
+## Recommended next implementation slice
 
-- camera/cutscene:
-  - `C3DMultiCutSceneCamera`, `C3DCutSceneCamera`, `C3DCamera`, `CViewPort`
-- player movement:
-  - `C3DPlayer`, `C3DJimmy`, `C3DFlyingObject`
-- menus/UI flow:
-  - `CMainMenu`, `CMenuElement`, `C2DInGameMenu`, `CGameType`
-- inventory/items/gadgets:
-  - `CPickupType`, `C3DPickupType`, `C3DPickupItem`, `C3DToolChest`,
-    `C3DShrinkRay`, `C3DGraplingHook`, pickup leaves
-- progression/objectives:
-  - `CGameType`, `CJimmyGame`, `CTaskList`, `CLoadLevel`, `C3DStartPoint`,
-    `C3DCheckPoint`, `CLevel*Game`
-- triggers/story sequencing:
-  - `CTrigger`, `C3DTriggerType`, `C3DAITrigger`, `C3DMusicTrigger`,
-    `C3DSoundEffect`
-- animation/actor pose:
-  - `C3DAnimated`, `C3DFriends`, `C3DGoddard`, `C3DCarl`, `C3DCindy`,
-    `C3DYokianSpy`
-- AI/pathing:
-  - `C3DAI`, `C3DPatrolPoint`, friend/NPC/enemy AI leaves
-- vehicles/special movement:
-  - `C3DVehicle`, `C3DCar`, `C3DJeep`, `C3DRocketShip`, `C3DFlyingObject`,
-    `C3DSailBoat`
+Continue the cutscene stack without scene-specific overrides:
 
-Then hand-curate the first "Top 25 must-link functions" list from the plan.
-
-## Recommended first implementation slice
-
-After the audit exists, continue the cutscene stack:
-
-1. Decode `C3DCutSceneCamera` standalone `3CAM` `ViewFromCamera`.
-2. Link `TargetActAnim`, `LoopActAnim`, `TargetDeactAnim`, and `FaceObject`.
-3. Link `PlayerControlled` cutscene input lock/unlock.
+1. Decode/prove exact `C3DCutSceneCamera` standalone `3CAM` `ViewFromCamera` /
+   `CameraType` enum behavior.
+2. Link generic non-player actor animation routing for `TargetActAnim`,
+   `LoopActAnim`, and `TargetDeactAnim`.
+3. Validate `PlayerControlled` `NULL`/`none`/`JIM1` cutscene input lock/unlock
+   and restore timing.
 4. Validate with:
    - `level1b` `LABEXP3`
    - one Goddard-tagged cutscene
    - one Cindy-tagged cutscene
+5. Keep Jimmy/Carl vehicle insertion poses on the vehicle track; do not guess
+   Carl's vehicle offsets without decomp or original-game evidence.
 
 Avoid scene-specific camera overrides unless the user explicitly authorizes them.
 The project preference is to recover the original system from decomp and use

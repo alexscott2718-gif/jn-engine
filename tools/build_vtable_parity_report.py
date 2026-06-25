@@ -86,8 +86,8 @@ OVERRIDES: dict[str, list[Override]] = {
         Override(
             "camera / cutscene",
             "must-link",
-            "3MCA sequencing owns cutscene shot order, CameraTypeN local offsets, TargetAnimN, audio step timing, and PlayerControlled locks; current runtime is partial.",
-            "Decode/link the remaining sequencer activation path after 3CAM ViewFromCamera and target animation semantics are pinned.",
+            "3MCA sequencing owns cutscene shot order, CameraTypeN local offsets, TargetAnimN, audio step timing, and PlayerControlled locks; native now carries these fields but remains partial.",
+            "Validate sequencer activation/deactivation timing and resolve non-player TargetAnimN dispatch after the 3CAM enum is pinned.",
             "src/game/behaviors/behavior_cutscene.c",
         )
     ],
@@ -95,8 +95,8 @@ OVERRIDES: dict[str, list[Override]] = {
         Override(
             "camera / cutscene",
             "must-link",
-            "3CAM is the standalone shot director; ViewFromCamera, FaceObject, TargetActAnim/LoopActAnim/TargetDeactAnim, and input lock semantics are still open.",
-            "Decode ViewFromCamera and activation/deactivation update slots, then validate against level1b LABEXP3 plus Goddard/Cindy scenes.",
+            "3CAM is the standalone shot director; native now plumbs ViewFromCamera, FaceObject, Jimmy TargetAct/DeactAnim, and PlayerControlled locking, but exact enum/input semantics are not proven.",
+            "Decode exact ViewFromCamera/CameraType enum behavior and validate activation/deactivation slots against level1b LABEXP3 plus Goddard/Cindy scenes.",
             "src/game/behaviors/behavior_cutscene.c",
         )
     ],
@@ -113,8 +113,8 @@ OVERRIDES: dict[str, list[Override]] = {
         Override(
             "player movement",
             "must-link",
-            "Concrete player owns active-controller, gadget/action locks, level timers, and runtime handles on top of C3DPlayer.",
-            "Repair raw function boundaries for UpdateJimmyFrame/UpdateJimmyActiveController and link input/gadget mode dispatch.",
+            "Concrete player owns active-controller, gadget/action locks, level timers, vehicle insertion pose, and runtime handles on top of C3DPlayer.",
+            "Repair raw function boundaries for UpdateJimmyFrame/UpdateJimmyActiveController and link input/gadget/vehicle mode dispatch.",
             "src/game/behaviors/behavior_player.c; src/game/player_anim.c",
         ),
         Override(
@@ -339,6 +339,15 @@ OVERRIDES: dict[str, list[Override]] = {
             "src/game/behaviors/behavior_goddard.c; src/game/entity_visual.c",
         )
     ],
+    "C3DCarl": [
+        Override(
+            "animation / actor pose",
+            "must-link",
+            "Carl has friend/action animation states and likely vehicle-specific insertion/pose requirements; the native walker path does not prove those visual states.",
+            "Link Carl's action/vehicle pose routing, especially any vehicle insertion offsets and movement animations shared with C3DVehicle scenes.",
+            "src/game/behaviors/behavior_walker.c; src/game/entity_visual.c",
+        )
+    ],
     "C3DCindy": [
         Override(
             "AI / pathing",
@@ -370,8 +379,8 @@ OVERRIDES: dict[str, list[Override]] = {
         Override(
             "vehicles / special movement",
             "must-link",
-            "Vehicle base owns steering, wheel solver, speed integrator, vehicle camera, and input predicates.",
-            "Define raw vehicle helper functions and link camera/drive-state/wheel transform clusters before tuning vehicles.",
+            "Vehicle base owns steering, wheel solver, speed integrator, vehicle camera, input predicates, and rider insertion/pose fidelity for Jimmy/Carl.",
+            "Define raw vehicle helper functions and link camera/drive-state/wheel transform/rider-insertion clusters before tuning vehicles.",
             "src/game/behaviors/behavior_vehicle.c",
         )
     ],
@@ -406,16 +415,16 @@ OVERRIDES: dict[str, list[Override]] = {
 
 
 TOP25 = [
-    ("1", "camera / cutscene", "C3DMultiCutSceneCamera sequencer", "3MCA CameraTypeN/TargetAnimN/SoundIndexN/PlayerControlled", "Partial native runtime; CameraType table partly recovered.", "Decode/link sequencer activation and player-lock timing."),
-    ("2", "camera / cutscene", "C3DCutSceneCamera::ViewFromCamera", "3CAM ViewFromCamera, CameraType, offsets, zoom/distance", "Open; native has framing approximation.", "Decode standalone 3CAM ViewFromCamera before scene-specific tuning."),
-    ("3", "camera / cutscene", "C3DCutSceneCamera target/facing slots", "TargetActAnim, LoopActAnim, TargetDeactAnim, FaceObject", "Documented fields; runtime dispatch not linked.", "Link target animation, actor facing, and deactivate cleanup."),
+    ("1", "camera / cutscene", "C3DMultiCutSceneCamera sequencer", "3MCA CameraTypeN/TargetAnimN/SoundIndexN/PlayerControlled", "Partial native runtime; CameraType table and field plumbing are linked, but timing semantics remain open.", "Validate activation/deactivation timing and non-player TargetAnimN dispatch."),
+    ("2", "camera / cutscene", "C3DCutSceneCamera::ViewFromCamera", "3CAM ViewFromCamera, CameraType, offsets, zoom/distance", "Native consumes ViewFromCamera, but exact enum behavior is not proven.", "Decode standalone 3CAM ViewFromCamera before scene-specific tuning."),
+    ("3", "camera / cutscene", "C3DCutSceneCamera target/facing slots", "TargetActAnim, LoopActAnim, TargetDeactAnim, FaceObject", "FaceObject and Jimmy target animations are partially plumbed; non-player actor animation remains open.", "Link generic actor animation routing and deactivate cleanup semantics."),
     ("4", "player movement", "C3DPlayer::UpdatePlayerState", "00437940", "Native player is simple tank-control approximation.", "Port main update gate and mode/animation dispatch."),
     ("5", "player movement", "C3DPlayer::DispatchPlayerModeCamera", "00438a60", "Manual follow camera currently stands in.", "Link player_mode camera dispatch and camera bump timing."),
     ("6", "player movement", "C3DPlayer::UpdateWalkingCameraA", "00438bc0", "Large movement/camera helper unlinked.", "Port walk-speed, edge/vertical state, and DAT_00509a50 updates."),
     ("7", "player movement", "C3DPlayer::UpdateWalkingCameraB", "00439900", "Companion helper unlinked.", "Port acceleration/deceleration, turn latches, and probe updates."),
     ("8", "player movement", "C3DPlayer::UpdateSittingOrSmoothCamera", "0043a120", "Smooth/sitting camera path unlinked.", "Port smoothing offsets and turn-input camera behavior."),
     ("9", "player movement", "C3DPlayer motion/animation callbacks", "0043a420, 0043a5d0, 0043a750, 0043a900", "Rotate/project/stop/AnimEnded cluster is not linked.", "Port rotate-to-target, noisy camera target, stop, and fence/ladder completion."),
-    ("10", "player movement", "C3DJimmy active controller", "00424600, 00425870, 00426030", "Raw Jimmy action/gadget/input cluster only partially understood.", "Repair function boundaries and link active-player/gadget locks."),
+    ("10", "player movement", "C3DJimmy active controller", "00424600, 00425870, 00426030", "Raw Jimmy action/gadget/input/vehicle-mode cluster only partially understood.", "Repair function boundaries and link active-player/gadget locks plus vehicle insertion poses."),
     ("11", "menus / UI flow", "CMainMenu menu manager", "LoadMyMenu/displayMenu/Activating Item traces", "Routing table known; screen graph and audio cues unlinked.", "Decode front-end screen graph, New Game, VR, Quit, and menu sounds."),
     ("12", "menus / UI flow", "CMenuElement::UpdateItemLogic", "0045e650", "Rollover/dispatch polarity not validated.", "Link hit/active state, target dispatch, cursor, and activation sound."),
     ("13", "menus / UI flow", "C2DInGameMenu HUD/death path", "00406690 plus 00402b40..00407490 helpers", "HUD draw constants known; flow helpers raw.", "Link counters, pause/death/restart/game-over producers."),
@@ -430,7 +439,7 @@ TOP25 = [
     ("22", "triggers / story sequencing", "CTrigger/C3DTriggerType core graph", "0047dfa0, 00447a70", "Proximity and NextTrigger decoded; concrete action binding open.", "Map enter/exit slots, watched-target registration, Toggle/Fade consumers."),
     ("23", "triggers / story sequencing", "C3DAITrigger/music/sound activation", "C3DAITrigger, C3DMusicTrigger, C3DSoundEffect", "SCENE subset linked; audio/ActivateObject/AIAnim graph incomplete.", "Link full activation graph after task/menu/HUD side effects are named."),
     ("24", "animation / actor pose", "C3DAnimated and actor pose callbacks", "0040e050, 0040dd90, animation-ended hooks", "Base loader/gates known; pose callbacks and material slots need names.", "Link animation completion, actor facing, talk/idle/action transitions; keep Goddard texture issue tracked."),
-    ("25", "AI / pathing; vehicles / special movement", "C3DAI/C3DPatrolPoint/C3DVehicle feel clusters", "00408bc0..0040a6d0, 00434ea0, 00465220..00467f70", "AI pathing and vehicle integrators are raw/approximated.", "Link AI state helpers, patrol arrival, steering/wheel/camera helpers; defer Cindy until evidence."),
+    ("25", "AI / pathing; vehicles / special movement", "C3DAI/C3DPatrolPoint/C3DVehicle/C3DCarl feel clusters", "00408bc0..0040a6d0, 00434ea0, 00465220..00467f70", "AI pathing, Carl action poses, vehicle integrators, and rider insertion are raw/approximated.", "Link AI state helpers, patrol arrival, steering/wheel/camera/rider-insertion helpers; defer Cindy until evidence."),
 ]
 
 

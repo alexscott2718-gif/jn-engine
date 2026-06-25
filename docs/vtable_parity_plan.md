@@ -20,11 +20,18 @@ visible or playable mismatch.
 - Web build: live at `https://exentt.com/jn-engine/`.
 - Cutscene harness: first cut exists, with 114 selectable `3MCA` cutscenes, 136
   `3CAM` shot directors, and 362 authored audio steps.
+- Vtable audit: `tools/build_vtable_parity_report.py` generates
+  `docs/vtable_linkage_audit.md` from `docs/decomp_ledger.csv` plus curated
+  overrides.
 - Known open parity issues:
   - cutscene camera/actor fidelity is incomplete.
-  - standalone `3CAM` `ViewFromCamera` is still open.
-  - `TargetActAnim`, `LoopActAnim`, `TargetDeactAnim`, `FaceObject`, and
-    `PlayerControlled` need deeper linkage.
+  - standalone `3CAM` now consumes `ViewFromCamera`, but the exact enum behavior
+    is not proven against the original.
+  - `FaceObject`, Jimmy `TargetActAnim`/`TargetDeactAnim`, and cutscene input
+    lock are partially plumbed; non-player actor animation, `LoopActAnim`, and
+    unlock/restore timing need deeper linkage.
+  - Jimmy/Carl vehicle insertion and vehicle-specific poses/animations are a
+    visual-fidelity dependency for vehicle parity.
   - Cindy location/pathing remains incomplete and deferred pending original-game
     evidence.
   - Goddard's texture is either incorrect or mapped incorrectly.
@@ -107,10 +114,11 @@ Primary classes and docs:
 Known targets:
 
 - Validate recovered `3MCA` `CameraTypeN` target-local offset table.
-- Decode standalone `3CAM` `ViewFromCamera`.
-- Link actor facing and look-at semantics without scene-specific overrides.
-- Link `TargetActAnim`, `LoopActAnim`, and `TargetDeactAnim`.
-- Link `PlayerControlled` and input unlock/restore timing.
+- Decode exact standalone `3CAM` `ViewFromCamera` / `CameraType` enum behavior.
+- Validate actor facing and look-at semantics without scene-specific overrides.
+- Link non-player `TargetActAnim`, `LoopActAnim`, and `TargetDeactAnim`.
+- Validate `PlayerControlled` `NULL`/`none`/`JIM1` semantics and input
+  unlock/restore timing.
 - Keep camera step duration tied to sound duration where the original does so.
 
 Validation:
@@ -142,6 +150,8 @@ Must-link/deepen:
 - `C3DPlayer::ProjectNoisyCameraTarget` at `0043a5d0`.
 - `C3DPlayer::StopPlayerMotion` at `0043a750`.
 - `C3DPlayer::OnPlayerAnimEnded` at `0043a900`.
+- `C3DJimmy` vehicle/action insertion state, including the pose split between
+  on-foot movement and vehicle-specific animations.
 
 Validation:
 
@@ -380,11 +390,13 @@ Validation:
      relevant class/function.
    - include a "Top 25 must-link functions" section.
 
-3. First implementation slice
-   - continue `C3DMultiCutSceneCamera` / `C3DCutSceneCamera` linkage.
-   - decode `3CAM` `ViewFromCamera`.
-   - add target animation/facing/player-control linkage.
+3. Next implementation slice
+   - prove exact `3CAM` `ViewFromCamera` / `CameraType` enum behavior.
+   - link generic non-player target animation and `LoopActAnim` semantics.
+   - validate `PlayerControlled` `NULL`/`none`/`JIM1` lock/unlock timing.
    - validate with `level1b` `LABEXP3` plus at least one Goddard and one Cindy scene.
+   - keep Jimmy/Carl vehicle insertion poses on the vehicle track; do not guess
+     Carl's vehicle offsets without decomp or original-game evidence.
 
 ## Required gates
 

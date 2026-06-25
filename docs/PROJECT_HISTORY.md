@@ -1290,6 +1290,19 @@ performance, shell hygiene) lives in the repo's `CLAUDE.md` and in
   `docs/vtable_linkage_audit.md`, then continuing camera/cutscene linkage before player/menu/progression
   work.
 
+- **2026-06-25 Vtable audit and first cutscene linkage slice.**
+  Added `tools/build_vtable_parity_report.py` and generated `docs/vtable_linkage_audit.md`. Current
+  audit counts are 35 `must-link`, 109 `approximated`, 63 `defer`, and 3 `unused`; Carl was promoted
+  to must-link because Jimmy/Carl vehicle insertion and vehicle-specific poses/animations are visual
+  fidelity dependencies for vehicle parity. Ported the first native cutscene field-plumbing slice:
+  standalone `3CAM` now carries `ViewFromCamera`, `FaceObject`, `TargetActAnim`, `TargetDeactAnim`,
+  `LoopActAnim`, `PlayerControlled`, and `DeactivateInv`; `3MCA` active shots carry
+  `TargetAnimN`/`TargetDeactAnim`/`PlayerControlled`; Jimmy cutscene poses use `jimtalk`,
+  `jimbuttons`, and `jimheadshrink`; and vehicle riding uses `jimdrive` instead of an idle pose.
+  Exact `3CAM` enum behavior, non-player actor animation dispatch, `LoopActAnim`, and
+  `PlayerControlled` restore timing remain open. Verified `make`, `audit_faithfulness.py`
+  (0 findings / 35 levels), `make web`, and `qa_web_verify.py` (16/16).
+
 ---
 
 ## Where to go next

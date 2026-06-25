@@ -61,11 +61,20 @@ static int player_near_swing(World *w, const Entity *p) {
 
 static void player_on_update(Entity *e, World *w, float dt) {
     /* Riding a vehicle: it drives and positions us at the seat (see
-       behavior_vehicle.c). Suppress on-foot control; hold the idle pose so the
-       visible, seated Jimmy reads as riding rather than running in place. */
+       behavior_vehicle.c). Suppress on-foot control and hold the authored
+       driving pose so the visible, seated Jimmy reads as riding. */
     if (behavior_vehicle_riding()) {
-        e->user_flag = (int)PA_IDLE;
-        player_anim_advance(PA_IDLE, dt);
+        e->user_flag = (int)PA_DRIVE;
+        player_anim_advance(PA_DRIVE, dt);
+        return;
+    }
+
+    int cut_pose = cutscene_player_anim_override();
+    if (cut_pose >= 0 || cutscene_player_control_locked()) {
+        PlayerAnim anim = (cut_pose >= 0) ? (PlayerAnim)cut_pose : PA_IDLE;
+        e->vx = e->vz = 0.0f;
+        e->user_flag = (int)anim;
+        player_anim_advance(anim, dt);
         return;
     }
     if (input_just_pressed(SDL_SCANCODE_N))

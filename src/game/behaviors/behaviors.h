@@ -102,6 +102,8 @@ int  cutscene_sequence_count(void);
 int  cutscene_active(void);
 void cutscene_stop(void);
 void cutscene_update(Camera *cam, World *w, float dt);
+int  cutscene_player_control_locked(void);   /* active shot suppresses player input */
+int  cutscene_player_anim_override(void);    /* PlayerAnim id, or -1 when none */
 
 /* The currently-controlled player; resolved at spawn. NULL until first 3JIM resolved. */
 extern Entity *g_player;

@@ -14,7 +14,11 @@ typedef enum {
     PA_PICKUP    = 7,
     PA_SWING     = 8,   /* contextual: near a playground swing (3SWN) */
     PA_LADDER    = 9,   /* contextual: on a ladder (dormant — no Level-1 ladder) */
-    PA_COUNT     = 10
+    PA_TALK      = 10,  /* cutscene/dialogue target pose */
+    PA_BUTTONS   = 11,  /* cutscene control-panel pose */
+    PA_SHRINK    = 12,  /* shrink-ray target pose */
+    PA_DRIVE     = 13,  /* seated/riding pose for vehicles */
+    PA_COUNT     = 14
 } PlayerAnim;
 
 typedef struct {

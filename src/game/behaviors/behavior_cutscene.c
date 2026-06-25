@@ -16,11 +16,16 @@
  * matched-camera validators — which drive this same render loop — are
  * unaffected. 3MCA's CameraType table is recovered from Neutron.exe 00430da0:
  * each step chooses a target-local camera offset, transforms it through the
- * current target, then looks at target.y + LookatVOffset - 60. */
+ * current target, then looks at target.y + LookatVOffset - 60. Standalone
+ * 3CAM now carries the authored ViewFromCamera, FaceObject, TargetActAnim,
+ * TargetDeactAnim, LoopActAnim, PlayerControlled, and DeactivateInv fields;
+ * ViewFromCamera is still a first-pass native interpretation until the exact
+ * original enum is decoded. */
 
 #include "behaviors.h"
 #include "behavior_base.h"
 #include "../../engine/audio.h"
+#include "../player_anim.h"
 #include <math.h>
 #include <string.h>
 #include <strings.h>
@@ -31,6 +36,7 @@
 #define CUTSCENE_MAX_STEPS 8
 #define CUTSCENE_DEFAULT_SHOT_SECONDS 3.0f
 #define CUTSCENE_AUDIO_PAD_SECONDS 0.35f
+#define CUTSCENE_PI 3.14159265358979323846f
 
 #ifdef __EMSCRIPTEN__
 #include <emscripten.h>
@@ -41,6 +47,10 @@
 typedef struct {
     char  target[24];        /* CameraTarget tag (resolved at play time) */
     char  sound_db[64];      /* SoundDatabase for the shot/step */
+    char  face_object[64];   /* FaceObject tag turned toward target */
+    char  target_act_anim[32];   /* TargetActAnim / TargetAnimN */
+    char  target_deact_anim[32]; /* TargetDeactAnim */
+    char  player_controlled[32]; /* PlayerControlled script string */
     int   sound_index;       /* SoundIndex within sound_db */
     float offset[3];         /* TargOffsetX/Y/Z */
     float initial_dist;      /* InitialDist */
@@ -49,6 +59,9 @@ typedef struct {
     float look_voffset;      /* LookVoffset */
     float hold_seconds;      /* per-step hold, usually audio length + pad */
     int   camera_type;       /* CameraType, currently used only as framing hint */
+    int   view_from_camera;  /* ViewFromCamera mode (0..3 in shipped data) */
+    int   loop_act_anim;     /* LoopActAnim */
+    int   deactivate_inv;    /* DeactivateInv */
 } CutSceneShot;
 
 typedef struct {
@@ -62,8 +75,11 @@ typedef struct {
 typedef struct {
     char tag[64];
     char sound_db[64];
+    char target_deact_anim[32];
+    char player_controlled[32];
     CutSceneStep steps[CUTSCENE_MAX_STEPS];
     int count;
+    int deactivate_inv;
 } CutSceneSequence;
 
 static struct {
@@ -80,12 +96,50 @@ static struct {
     float shot_duration;     /* duration of the current active shot */
     int   audio_channel;      /* active per-shot audio channel, or -1 */
     int   playing_sequence_index;
+    int   shot_started;
 } g_cut;
 
 void cutscene_reset(void) {
     memset(&g_cut, 0, sizeof(g_cut));
     g_cut.audio_channel = -1;
     g_cut.playing_sequence_index = -1;
+}
+
+static int cutscene_is_none(const char *s) {
+    return !s || !s[0] || strcasecmp(s, "none") == 0 ||
+           strcasecmp(s, "null") == 0;
+}
+
+static int cutscene_tags_match(const char *a, const char *b) {
+    return a && b && a[0] && b[0] && strcasecmp(a, b) == 0;
+}
+
+static void cutscene_copy(char *dst, size_t dst_size, const char *src) {
+    if (!dst || dst_size == 0) return;
+    snprintf(dst, dst_size, "%s", src ? src : "");
+}
+
+static int cutscene_anim_to_player_pose(const char *anim) {
+    if (cutscene_is_none(anim)) return -1;
+    if (strcasecmp(anim, "STOP") == 0 || strcasecmp(anim, "IDLE") == 0)
+        return PA_IDLE;
+    if (strcasecmp(anim, "TALK") == 0)
+        return PA_TALK;
+    if (strcasecmp(anim, "BUTTONS") == 0)
+        return PA_BUTTONS;
+    if (strcasecmp(anim, "SHRINK") == 0)
+        return PA_SHRINK;
+    if (strcasecmp(anim, "WALK") == 0 || strcasecmp(anim, "RUN") == 0)
+        return PA_RUN;
+    if (strcasecmp(anim, "LEFT") == 0)
+        return PA_LEFT;
+    if (strcasecmp(anim, "RIGHT") == 0)
+        return PA_RIGHT;
+    if (strcasecmp(anim, "JUMP") == 0)
+        return PA_JUMP;
+    if (strcasecmp(anim, "FALL") == 0)
+        return PA_FALL;
+    return -1;
 }
 
 /* ---- 3CAM: register a shot on spawn ------------------------------------- */
@@ -109,8 +163,16 @@ static void cam_on_spawn(Entity *e, World *w) {
     CutSceneShot *s = prepend_shot();
     if (!s) return;
     /* CameraTarget is mapped onto activate_target by the .gam loader. */
-    snprintf(s->target, sizeof(s->target), "%s", e->activate_target);
-    snprintf(s->sound_db, sizeof(s->sound_db), "%s", e->sound_database);
+    cutscene_copy(s->target, sizeof(s->target), e->activate_target);
+    cutscene_copy(s->sound_db, sizeof(s->sound_db), e->sound_database);
+    cutscene_copy(s->face_object, sizeof(s->face_object),
+                  gam_str(e, "FaceObject", ""));
+    cutscene_copy(s->target_act_anim, sizeof(s->target_act_anim),
+                  gam_str(e, "TargetActAnim", ""));
+    cutscene_copy(s->target_deact_anim, sizeof(s->target_deact_anim),
+                  gam_str(e, "TargetDeactAnim", ""));
+    cutscene_copy(s->player_controlled, sizeof(s->player_controlled),
+                  gam_str(e, "PlayerControlled", ""));
     s->sound_index = gam_prop_i(e, "SoundIndex", -1);
     s->offset[0]    = gam_prop_f(e, "TargOffsetX", 0.0f);
     s->offset[1]    = gam_prop_f(e, "TargOffsetY", 0.0f);
@@ -122,6 +184,9 @@ static void cam_on_spawn(Entity *e, World *w) {
     s->look_voffset = gam_prop_f(e, "LookVoffset", 0.0f);
     s->hold_seconds = CUTSCENE_DEFAULT_SHOT_SECONDS;
     s->camera_type  = gam_prop_i(e, "CameraType", 0);
+    s->view_from_camera = gam_prop_i(e, "ViewFromCamera", 1);
+    s->loop_act_anim = gam_prop_i(e, "LoopActAnim", 0);
+    s->deactivate_inv = gam_prop_i(e, "DeactivateInv", 0);
 }
 
 /* ---- 3MCA: sequencer presence ------------------------------------------- */
@@ -143,8 +208,13 @@ static void mca_on_spawn(Entity *e, World *w) {
 
     CutSceneSequence *seq = prepend_sequence();
     if (!seq) return;
-    snprintf(seq->tag, sizeof(seq->tag), "%s", e->tag[0] ? e->tag : "3MCA");
-    snprintf(seq->sound_db, sizeof(seq->sound_db), "%s", e->sound_database);
+    cutscene_copy(seq->tag, sizeof(seq->tag), e->tag[0] ? e->tag : "3MCA");
+    cutscene_copy(seq->sound_db, sizeof(seq->sound_db), e->sound_database);
+    cutscene_copy(seq->target_deact_anim, sizeof(seq->target_deact_anim),
+                  gam_str(e, "TargetDeactAnim", ""));
+    cutscene_copy(seq->player_controlled, sizeof(seq->player_controlled),
+                  gam_str(e, "PlayerControlled", ""));
+    seq->deactivate_inv = gam_prop_i(e, "DeactivateInv", 0);
 
     for (int i = 0; i < CUTSCENE_MAX_STEPS; i++) {
         char key[32];
@@ -152,16 +222,15 @@ static void mca_on_spawn(Entity *e, World *w) {
         const char *target = gam_str(e, key, NULL);
         snprintf(key, sizeof(key), "SoundIndex%d", i);
         int sound_index = gam_prop_i(e, key, -1);
-        if ((!target || !target[0] || strcasecmp(target, "none") == 0 ||
-             strcasecmp(target, "null") == 0) && sound_index < 0)
+        if (cutscene_is_none(target) && sound_index < 0)
             continue;
         if (seq->count >= CUTSCENE_MAX_STEPS) break;
 
         CutSceneStep *step = &seq->steps[seq->count++];
-        snprintf(step->target, sizeof(step->target), "%s", target ? target : "");
+        cutscene_copy(step->target, sizeof(step->target), target);
         snprintf(key, sizeof(key), "TargetAnim%d", i);
-        snprintf(step->target_anim, sizeof(step->target_anim), "%s",
-                 gam_str(e, key, ""));
+        cutscene_copy(step->target_anim, sizeof(step->target_anim),
+                      gam_str(e, key, ""));
         step->sound_index = sound_index;
         snprintf(key, sizeof(key), "CameraType%d", i);
         step->camera_type = gam_prop_i(e, key, 0);
@@ -264,6 +333,7 @@ static void cutscene_start_active(int sequence_index, const char *label) {
     g_cut.dist = cutscene_desired_dist(&g_cut.active[0]);
     g_cut.shot_duration = g_cut.active[0].hold_seconds;
     g_cut.playing_sequence_index = sequence_index;
+    g_cut.shot_started = 0;
     printf("[CUTSCENE] play %s: %d shot(s)\n",
            label ? label : "sequence", g_cut.active_count);
     cutscene_play_current_audio();
@@ -275,6 +345,7 @@ void cutscene_stop(void) {
     g_cut.cur = 0;
     g_cut.shot_t = 0.0f;
     g_cut.playing_sequence_index = -1;
+    g_cut.shot_started = 0;
 }
 
 void cutscene_request_intro(void) {
@@ -302,7 +373,13 @@ int cutscene_request_index(int index) {
         CutSceneStep *step = &seq->steps[i];
         CutSceneShot *dst = &g_cut.active[g_cut.active_count++];
         memset(dst, 0, sizeof(*dst));
-        snprintf(dst->target, sizeof(dst->target), "%s", step->target);
+        cutscene_copy(dst->target, sizeof(dst->target), step->target);
+        cutscene_copy(dst->target_act_anim, sizeof(dst->target_act_anim),
+                      step->target_anim);
+        cutscene_copy(dst->target_deact_anim, sizeof(dst->target_deact_anim),
+                      seq->target_deact_anim);
+        cutscene_copy(dst->player_controlled, sizeof(dst->player_controlled),
+                      seq->player_controlled);
         dst->offset[0] = 0.0f;
         dst->offset[1] = 0.0f;
         dst->offset[2] = 0.0f;
@@ -311,10 +388,13 @@ int cutscene_request_index(int index) {
         dst->max_dist = 900.0f;
         dst->zoom_speed = 8.0f;
         dst->hold_seconds = CUTSCENE_DEFAULT_SHOT_SECONDS;
-        snprintf(dst->sound_db, sizeof(dst->sound_db), "%s", seq->sound_db);
+        cutscene_copy(dst->sound_db, sizeof(dst->sound_db), seq->sound_db);
         dst->sound_index = step->sound_index;
         dst->look_voffset = step->look_voffset;
         dst->camera_type = step->camera_type;
+        dst->view_from_camera = 1;
+        dst->loop_act_anim = 1;
+        dst->deactivate_inv = seq->deactivate_inv;
     }
 
     cutscene_start_active(index, seq->tag);
@@ -331,11 +411,101 @@ static Entity *find_by_tag(World *w, const char *tag) {
     return NULL;
 }
 
+static CutSceneShot *cutscene_current_shot(void) {
+    if (!g_cut.playing || g_cut.cur < 0 || g_cut.cur >= g_cut.active_count)
+        return NULL;
+    return &g_cut.active[g_cut.cur];
+}
+
+static void cutscene_face_object(World *w, const CutSceneShot *s, Entity *target) {
+    if (!w || !s || !target || cutscene_is_none(s->face_object)) return;
+    Entity *face = find_by_tag(w, s->face_object);
+    if (!face || face == target) return;
+    float dx = target->x - face->x;
+    float dz = target->z - face->z;
+    if (fabsf(dx) + fabsf(dz) < 0.001f) return;
+    face->ry = atan2f(-dx, -dz);
+}
+
+static void cutscene_apply_player_anim(Entity *target, const char *anim) {
+    if (!target || target != g_player) return;
+    int pose = cutscene_anim_to_player_pose(anim);
+    if (pose < 0) return;
+    target->user_flag = pose;
+    player_anim_advance((PlayerAnim)pose, 0.0f);
+}
+
+static void cutscene_activate_current(World *w, Entity *target) {
+    CutSceneShot *s = cutscene_current_shot();
+    if (!s) return;
+    cutscene_face_object(w, s, target);
+    cutscene_apply_player_anim(target, s->target_act_anim);
+}
+
+static void cutscene_deactivate_current(World *w) {
+    CutSceneShot *s = cutscene_current_shot();
+    if (!s || !w) return;
+    Entity *target = find_by_tag(w, s->target);
+    cutscene_apply_player_anim(target, s->target_deact_anim);
+}
+
+static float cutscene_3cam_azimuth(const CutSceneShot *s, const Entity *target) {
+    float yaw = target ? target->ry : 0.0f;
+    switch (s ? s->view_from_camera : 1) {
+    case 0: yaw += CUTSCENE_PI; break;       /* face the actor from the front */
+    case 2: yaw += CUTSCENE_PI * 0.5f; break;/* right side */
+    case 3: yaw -= CUTSCENE_PI * 0.5f; break;/* left side */
+    case 1:
+    default:
+        break;                               /* behind target */
+    }
+
+    /* Some shipped 3CAM rows leave ViewFromCamera at the common default and
+       express the side view through CameraType. The exact native enum is still
+       open, so this keeps the authored side hints alive without touching the
+       recovered 3MCA table. */
+    if (s && s->view_from_camera == 1) {
+        if (s->camera_type == 2) yaw += CUTSCENE_PI * 0.5f;
+        else if (s->camera_type == 3) yaw -= CUTSCENE_PI * 0.5f;
+    }
+    return yaw;
+}
+
+static void cutscene_3cam_look_point(const Entity *target, const CutSceneShot *s,
+                                     float *lx, float *ly, float *lz) {
+    float local[3] = { s->offset[0], s->offset[1], s->offset[2] };
+    float world[3];
+    entity_local_to_world(target, local, world);
+    *lx = world[0];
+    *ly = world[1] + s->look_voffset;
+    *lz = world[2];
+}
+
+int cutscene_player_control_locked(void) {
+    CutSceneShot *s = cutscene_current_shot();
+    if (!s) return 0;
+    /* Non-none values such as JIM1 are preserved as an unresolved original
+       player-control target. NULL/none mean the native port owns Jimmy during
+       the shot. */
+    return cutscene_is_none(s->player_controlled);
+}
+
+int cutscene_player_anim_override(void) {
+    CutSceneShot *s = cutscene_current_shot();
+    if (!s || !g_player || !cutscene_tags_match(s->target, g_player->tag))
+        return -1;
+    return cutscene_anim_to_player_pose(s->target_act_anim);
+}
+
 void cutscene_update(Camera *cam, World *w, float dt) {
     if (!g_cut.playing || !cam || !w) return;
 
     CutSceneShot *s = &g_cut.active[g_cut.cur];
     Entity *target = find_by_tag(w, s->target);
+    if (!g_cut.shot_started) {
+        cutscene_activate_current(w, target);
+        g_cut.shot_started = 1;
+    }
 
     if (target) {
         float cx, cy, cz, lx, ly, lz;
@@ -348,22 +518,13 @@ void cutscene_update(Camera *cam, World *w, float dt) {
             ly = target->y + s->look_voffset - 60.0f;
             lz = target->z;
         } else {
-            float tx = target->x + s->offset[0];
-            float ty = target->y + s->offset[1];
-            float tz = target->z + s->offset[2];
-
-            /* 3CAM fallback for intro-shot playback until ViewFromCamera is
-               decoded. 3MCA selector playback uses the recovered table above. */
             float want = cutscene_desired_dist(s);
             g_cut.dist += (want - g_cut.dist) * (s->zoom_speed * dt);
-            lx = tx; ly = ty + s->look_voffset; lz = tz;
+            cutscene_3cam_look_point(target, s, &lx, &ly, &lz);
 
-            float front = target->ry;
-            float shoulder = ((s->camera_type & 1) ? 0.45f : -0.45f);
-            float sx = sinf(front + 1.5707963f) * shoulder * g_cut.dist;
-            float sz = -cosf(front + 1.5707963f) * shoulder * g_cut.dist;
-            cx = lx + sinf(front) * g_cut.dist + sx;
-            cz = lz - cosf(front) * g_cut.dist + sz;
+            float az = cutscene_3cam_azimuth(s, target);
+            cx = lx + sinf(az) * g_cut.dist;
+            cz = lz - cosf(az) * g_cut.dist;
             cy = ly + g_cut.dist * 0.18f;
         }
 
@@ -381,8 +542,10 @@ void cutscene_update(Camera *cam, World *w, float dt) {
 
     g_cut.shot_t += dt;
     if (g_cut.shot_t >= g_cut.shot_duration) {
+        cutscene_deactivate_current(w);
         g_cut.cur++;
         g_cut.shot_t = 0.0f;
+        g_cut.shot_started = 0;
         if (g_cut.cur >= g_cut.active_count) {
             cutscene_stop();
             printf("[CUTSCENE] sequence complete -> return to gameplay camera\n");
