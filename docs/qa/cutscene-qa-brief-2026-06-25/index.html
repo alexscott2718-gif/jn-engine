@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cutscene QA Brief - jn-engine</title>
+<style>
+* { box-sizing:border-box; margin:0; padding:0; }
+body { font-family:Monaco,Menlo,"Ubuntu Mono",monospace; background:#0d0d0d; color:#dedede; line-height:1.5; padding:24px 16px; }
+.wrap { max-width:880px; margin:0 auto; }
+h1 { font-size:1.45rem; color:#fff; margin-bottom:4px; }
+h2 { font-size:1.05rem; color:#7ec8ff; border-bottom:1px solid #2a2a2a; padding-bottom:6px; margin:28px 0 12px; }
+p { margin:10px 0; color:#c8c8c8; }
+a { color:#7ec8ff; text-decoration:none; }
+a:hover { text-decoration:underline; }
+code { color:#d9c08a; }
+.sub { color:#888; font-size:0.84rem; }
+.lead { color:#e4e4e4; font-size:0.96rem; }
+.grid { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:12px; margin:18px 0; }
+.stat { background:#141414; border:1px solid #262626; border-radius:8px; padding:14px; }
+.stat strong { display:block; color:#fff; font-size:1.3rem; line-height:1.1; margin-bottom:4px; }
+.stat span { color:#999; font-size:0.78rem; }
+ol, ul { margin:10px 0 10px 22px; }
+li { margin:6px 0; color:#c8c8c8; }
+kbd { background:#23272e; border:1px solid #3a4250; border-bottom-width:2px; border-radius:4px; padding:0 6px; color:#e8f0f8; font-size:0.82rem; }
+.modes td:first-child { color:#9fd6ff; white-space:nowrap; }
+.note { border-left:3px solid #6c5720; background:#181409; border-radius:0 6px 6px 0; color:#d8c184; padding:9px 12px; margin:14px 0; font-size:0.88rem; }
+.ok { border-left:3px solid #2f6f3a; background:#0e1810; color:#a6d9ad; }
+table { width:100%; border-collapse:collapse; margin:12px 0; font-size:0.84rem; }
+th,td { text-align:left; padding:7px 9px; border-bottom:1px solid #242424; vertical-align:top; }
+th { color:#9a9a9a; font-weight:normal; }
+.cta { display:inline-block; margin:6px 8px 6px 0; padding:8px 16px; background:#1c2836; border:1px solid #3a536f; border-radius:6px; color:#cfe6ff; }
+.cta:hover { border-color:#5f86b0; text-decoration:none; }
+.footer { color:#777; border-top:1px solid #2a2a2a; margin-top:34px; padding-top:12px; font-size:0.8rem; }
+@media (max-width:680px) { .grid { grid-template-columns:1fr 1fr; } body { padding:18px 10px; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<h1>Cutscene QA &mdash; Quick Brief</h1>
+<p class="sub">Updated 2026-06-25 &middot; for community QA testers &middot; jn-engine browser demo</p>
+
+<p class="lead">The in-game cutscene cameras now run on the <strong>original game's recovered
+framing math</strong> (decoded from <code>Neutron.exe</code>, not guessed). This page is the
+2-minute version: what to watch, and what's already known so you don't refile it.</p>
+
+<div class="grid">
+  <div class="stat"><strong>114</strong><span>selectable cutscenes</span></div>
+  <div class="stat"><strong>32</strong><span>levels with scenes</span></div>
+  <div class="stat"><strong>3</strong><span>camera modes</span></div>
+  <div class="stat"><strong>8</strong><span>report categories</span></div>
+</div>
+
+<h2>How to test (about a minute)</h2>
+<ol>
+  <li>Open the <a href="/jn-engine/">Boy&nbsp;Genius browser demo</a> (desktop browser is best).</li>
+  <li>Pick a level from the <strong>level</strong> dropdown, then a scene from the
+      <strong>Cutscene</strong> dropdown, and press <strong>Play&nbsp;Cutscene</strong>.</li>
+  <li>Watch the camera framing. Press <strong>Stop</strong> to end early, or pick another scene.</li>
+  <li>See something wrong? Press <kbd>B</kbd>, click the object, describe it (below).</li>
+</ol>
+
+<h2>What "correct" looks like</h2>
+<p>Every scene uses one of three camera modes. None of them should snap, jitter, clip
+through the ground, or point away from the actor who is talking:</p>
+<table class="modes">
+  <tr><th>Mode</th><th>What you should see</th></tr>
+  <tr><td>Static</td><td>Camera holds a fixed spot and looks at the framed actor &mdash; like a mounted security cam.</td></tr>
+  <tr><td>Orbit</td><td>Camera sits at a fixed offset around the actor and frames them head-on; smooth, no spin.</td></tr>
+  <tr><td>Dolly</td><td>Camera eases <em>in or out</em> along a straight line during the shot (the most common mode). The push/pull should be slow and steady, never a jump.</td></tr>
+</table>
+<p>Audio should match the shot: the right voice line plays, and the shot ends roughly when
+the line finishes. Multi-shot scenes should cut cleanly from one framing to the next.</p>
+
+<h2>Worth flagging</h2>
+<ul>
+  <li>Camera ends up <strong>underground, inside a wall, or facing empty space</strong>.</li>
+  <li>A <strong>visible jump/snap</strong> in the camera mid-shot (not a deliberate cut between shots).</li>
+  <li>The <strong>wrong actor</strong> is framed, or the talking actor is off-screen.</li>
+  <li>Audio plays the wrong line, cuts off early, or the shot hangs long after the line ends.</li>
+  <li>An actor in the scene is in a <strong>frozen / wrong pose</strong> while talking.</li>
+</ul>
+
+<h2>Already known &mdash; please don't refile</h2>
+<div class="note">
+  <ul style="margin:2px 0 2px 18px;">
+    <li><strong>Non-player actors don't animate during cutscenes yet</strong> (Goddard, Cindy,
+        Friends stand still). Camera + audio are the focus right now; actor animation is the next slice.</li>
+    <li><strong>Goddard's texture / mapping</strong> is a known visual issue tracked separately.</li>
+    <li><strong>Cindy's location / path</strong> is incomplete and intentionally on hold.</li>
+    <li><strong>No audio?</strong> Some browsers need a click first, or block autoplay &mdash; that's the
+        browser, not the scene.</li>
+  </ul>
+</div>
+
+<h2>How to report</h2>
+<p>Reports go straight from the demo &mdash; no account, no install:</p>
+<ol>
+  <li>Press <kbd>B</kbd> (or the <strong>QA</strong> button) to turn report mode on.</li>
+  <li>Click the object that's wrong. A tag pins to the top-right.</li>
+  <li>Click the tag, pick a <strong>category</strong>
+      (<code>PLC</code> placement, <code>ORI</code> orientation, <code>SCL</code> scale,
+      <code>ANI</code> animation, <code>TEX</code> texture, <code>MIS</code> missing,
+      <code>GFX</code> glitch, <code>OTH</code> other), and type what's wrong.</li>
+  <li>When done, <strong>export</strong> the session and send it in. Full walkthrough:
+      <a href="https://exentt.com/jn/qa-howto.html">2-minute reporting guide</a>.</li>
+</ol>
+<div class="note ok">Cutscene-camera reports: use <code>PLC</code> (camera in the wrong spot) or
+<code>GFX</code> (snap / clipping / wrong framing), and name the <strong>level + scene</strong> you
+picked from the dropdowns so it can be reproduced.</div>
+
+<div class="footer">
+  <a class="cta" href="/jn-engine/">▶ Play the demo</a>
+  <a class="cta" href="/jn-engine/qa/cutscene-catalog-2026-06-25/">Full cutscene catalog</a>
+  <a class="cta" href="https://exentt.com/jn/qa-howto.html">How to report bugs</a>
+  <br>
+  <p class="sub" style="margin-top:14px;">A non-commercial fan reverse-engineering &amp; preservation project.
+  Cutscene camera math recovered from the original game binary; captures/video used only as validation.</p>
+</div>
+
+</div>
+</body>
+</html>
