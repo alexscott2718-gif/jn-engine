@@ -35,9 +35,13 @@ static void button_on_trigger(Entity *e, Entity *by) {
         e->link_target->vt->on_trigger(e->link_target, by);
 }
 
+static void button_on_update(Entity *e, World *w, float dt) {
+    (void)behavior_animated_update_base(e, w, dt);
+}
+
 const EntityVTable vt_button = {
     .on_spawn   = button_on_spawn,
-    .on_update  = NULL,
+    .on_update  = button_on_update,
     .on_trigger = button_on_trigger,
     .flags      = ENTITY_FLAG_TRIGGER,
 };

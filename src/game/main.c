@@ -676,6 +676,59 @@ static int entity_visual_foot_anchors(const Entity *e) {
     return 0;
 }
 
+static float clamp01(float v) {
+    if (v < 0.0f) return 0.0f;
+    if (v > 1.0f) return 1.0f;
+    return v;
+}
+
+static int draw_authored_button(const Entity *e) {
+    if (!e || (strcmp(e->type, "3BUT") != 0 && strcmp(e->type, "3WAB") != 0))
+        return 0;
+
+    const char *fallback_up = strcmp(e->type, "3WAB") == 0
+        ? "buttondown.ASE" : "buttonup.ASE";
+    const char *mesh_name = e->user_flag
+        ? gam_str(e, "Down.ase", "buttondown.ASE")
+        : gam_str(e, "Up.ase", fallback_up);
+
+    char mesh_path[160];
+    if (!mesh_name || !mesh_name[0] ||
+        !asset_path_ci(mesh_path, sizeof(mesh_path), "assets/ase", mesh_name)) {
+        audit_line("entity", e->type, e->tag, "mesh-missing",
+                   mesh_name ? mesh_name : "(button)", NULL, 0);
+        return 0;
+    }
+
+    AseModel *m = model_cache_get(mesh_path);
+    if (!m) {
+        audit_line("entity", e->type, e->tag, "mesh-missing",
+                   mesh_path, NULL, 0);
+        return 0;
+    }
+
+    unsigned int tex = 0;
+    const char *png_name = gam_str(e, "UpDown.Png", NULL);
+    char tex_path[160];
+    if (png_name && png_name[0] &&
+        asset_path_ci(tex_path, sizeof(tex_path), "assets/png", png_name)) {
+        tex = tex_cache_get(tex_path);
+    }
+
+    float red   = clamp01(gam_prop_f(e, "Red",   1.0f));
+    float green = clamp01(gam_prop_f(e, "Green", 1.0f));
+    float blue  = clamp01(gam_prop_f(e, "Blue",  1.0f));
+    float pulse = 0.5f + 0.5f * sinf(e->anim_time * 6.2831853f * 2.0f);
+    renderer_set_model_tint(red * pulse, green * pulse, blue * pulse);
+    renderer_set_hide_untextured_groups(0);
+    renderer_draw_model(m, tex, e->x, e->y, e->z, e->ry, 1.0f);
+    renderer_set_hide_untextured_groups(1);
+    renderer_set_model_tint(1.0f, 1.0f, 1.0f);
+
+    audit_line("entity", e->type, e->tag, "mesh", mesh_path, m, tex);
+    return 1;
+}
+
 /* Draw every pickable scene object: entities, then static OMT placements.
    This is the single enumeration path shared by the main render pass and the
    QA pick pass (docs/qa_annotate_plan.md) -- object N here must be object N
@@ -720,6 +773,9 @@ static void draw_scene(World *world, int jim_model_ok)
         /* QA annotation: every drawable entity registers here so the pick
            pass and the main pass assign identical IDs. */
         qa_register_entity(e);
+
+        if (draw_authored_button(e))
+            continue;
 
         /* Player: dedicated anim path. */
         if (jim_model_ok && strcmp(e->type, "3JIM") == 0) {

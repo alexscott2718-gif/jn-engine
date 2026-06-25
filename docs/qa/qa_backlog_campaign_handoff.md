@@ -32,7 +32,7 @@
 | 3 | l4a | 3HUG C3DHUGH | PLC | not at ground level | A | ✅ DONE (added to foot-anchor) |
 | 4 | l3d | 3CIN C3DCINDY | OTH | off-ground + pathing/wall-clip | A | ⚠️ PARTIAL (ground ✅; pathing/clip TODO) |
 | 5 | l1 | 3SAI SAILBOAT1 | GFX | boat floats above river before lab | A | ⬜ TODO (path/anim, not simple anchor) |
-| 6 | l6a | 3BUT C3DBUTTON | PLC | buttons floating + should flash black/red | A+visual | ⬜ TODO |
+| 6 | l6a | 3BUT C3DBUTTON | PLC | buttons floating + should flash black/red | A+visual | ✅ DONE (authored ship ASE + RGB pulse) |
 | 7 | l6a | 3DOR halldoor01 | OTH | doors should loop opening SFX until stop | I | ⬜ TODO (see lu9-06-12 door[59] precedent) |
 | 8 | l6a | PROJ | MIS | should be plasma blast not baseball | C | ✅ DONE (enemy PROJ→missile.ASE; player keeps baseball) |
 | 9 | l6a | 3FLE FLEETC | MIS | should be yokian fleet commander | C | ✅ DONE (commanderstop.ASE+comander.png) |
@@ -41,7 +41,7 @@
 | 12 | l1c | 3PIC sprite_index:157 | TEX | apple-pie showing fruit bowl | D | ⚠️ WONTFIX-AS-BUG: authored SpriteIndex=157 IS "FruitbowlEmty" (faithful). Apple pie comes from the unimplemented fruit-fill mechanic ("Apple Pie%"). Deferred to mechanic work, not a texture swap. |
 | 13 | l1 | house02 | GFX | floor under house missing entirely | G | ⬜ TODO (OMT geometry) |
 | 14 | l1 | 3JIM JIM1 | ORI | faces lab not house on lab-exit | E | ✅ DONE (STRT yaw copied on spawn) |
-| 15 | l3c | 3BUT n03 | ORI | orientation off | E | ⬜ TODO |
+| 15 | l3c | 3BUT n03 | ORI | orientation off | E | ✅ DONE (authored button mesh + tint pulse) |
 | 16 | l1b | 3ARR C3DARROW | PLC | misplaced (should be over Goddard bowl); lab-water teleport wrong | H | ⬜ TODO |
 | 17 | l1b | 3PIC C3DPICKUPITEM | PLC | missing coin pickup (only bone) | H | ⬜ TODO |
 | 18 | l1c | LRoom | OTH | piano + TV proximity sound | I | ⬜ TODO (audio feature) |
@@ -61,10 +61,12 @@
 - `c075353` — qa(tex): gate l1 tree billboard to level1 family. (#10)
 - `a573ad8` — qa(3RED): bigger red neutrons + more visible bounce (#11) + handoff.
 - `965cf54` — docs(qa): handoff (Group C done).
+- `e026d18` — qa(spawn): apply start-point yaw on level loads. (#14)
+- current button fix — qa(button): draw authored button meshes and color pulse. (#6,#15)
 
-**Reports closed & verified: 12/24** (#1×4, #2, #3, #4-ground, #8, #9, #10, #11, #14).
+**Reports closed & verified: 14/24** (#1×4, #2, #3, #4-ground, #6, #8, #9, #10, #11, #14, #15).
 **#12 apple-pie = WONTFIX-as-bug** (authored fruit bowl; pie is a deferred mechanic).
-Remaining open: #4-pathing, #5, #6, #7, #13, #15–#24 (incl. all of Group I audio).
+Remaining open: #4-pathing, #5, #7, #13, #16–#24 (incl. all of Group I audio).
 
 **Regression gate PASSED at session-1 end:** `python3 tools/audit_faithfulness.py` →
 **0 findings / 0 NEW across all 24 levels** with all 11-report changes in. Native `make`
@@ -117,9 +119,16 @@ The audio system (read before touching #18–#24):
    explicit QA camera/facing. Verified `JN_TEST_SWAP=level1.gam:riverlab` lands at authored
    `ry=1.571`; `python3 tools/audit_faithfulness.py` stayed 0 findings. No `qa_web_verify.py` probe
    re-aim needed because default level1 `PHONEBOOTH` and `3JIM` already share the same 220° yaw.
-2. **#15 3BUT n03 l3c (ORI)** and **#6 3BUT l6a float + flash black/red** — button orientation +
-   a flashing material animation (look at `behavior_button.c`; "flash" is a per-frame color pulse like
-   3RED's). #6 float = check authored Y vs floor (foot-anchor doesn't apply to buttons).
+2. ✅ **#15 3BUT n03 l3c (ORI)** and **#6 3BUT l6a float + flash black/red** — root cause:
+   native drew every `3BUT` through the FourCC fallback `buttonup.ASE`, ignoring per-row
+   `Up.ase`/`Down.ase`/`UpDown.Png` and the `Red`/`Green`/`Blue` lit colour. Level6a authors
+   `buttonupship.ase`, whose local origin/shape fixes the floating/tiny white-post look; l3c
+   authors `buttonup.ase`. Fix adds a scoped model tint, advances button `anim_time`, and draws
+   `3BUT`/`3WAB` from authored mesh+texture with an RGB pulse. Verified before/after pixels:
+   `/tmp/button_l6a_before_close.png` → `/tmp/button_l6a_after_close.png` and
+   `/tmp/button_l3c_n03_before_close.png` → `/tmp/button_l3c_n03_after_close.png`; audit logs
+   resolve l6a to `assets/ase/buttonupship.ASE` and l3c n03 to `assets/ase/buttonup.ASE`.
+   `python3 tools/audit_faithfulness.py` stayed 0 findings.
 3. **#16/#17 l1b 3ARR + 3PIC** — 3ARR arrow misplaced (should sit above Goddard's bowl) + a wrong
    lab-water teleport; 3PIC missing coin pickup. Placement/authored-data.
 4. **#5 3SAI boat (l1)** + **#4 3CIN pathing/wall-clip (l3d)** — both motion/path, harder; likely

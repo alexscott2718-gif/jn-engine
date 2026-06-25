@@ -258,6 +258,7 @@ static int g_lit_loc_scene_tint = -1;
 static int g_lit_loc_alpha_cutout = -1, g_lit_loc_alpha_threshold = -1;
 static int g_lit_loc_colorkey_on = -1, g_lit_loc_colorkey = -1, g_lit_loc_colorkey_tol = -1;
 static float g_scene_tint[3] = { 1.0f, 1.0f, 1.0f };
+static float g_model_tint[3] = { 1.0f, 1.0f, 1.0f };
 /* Foliage chroma-key: the 2D_Trees boundary walls bake an opaque sky-blue
  * background (RGB 57,148,198) the original keyed to transparent. */
 static int   g_colorkey_on = 0;
@@ -550,6 +551,12 @@ void renderer_set_scene_tint(float r, float g, float b) {
     g_scene_tint[0] = r;
     g_scene_tint[1] = g;
     g_scene_tint[2] = b;
+}
+
+void renderer_set_model_tint(float r, float g, float b) {
+    g_model_tint[0] = r;
+    g_model_tint[1] = g;
+    g_model_tint[2] = b;
 }
 
 void renderer_set_hide_untextured_groups(int enable) {
@@ -846,7 +853,10 @@ void renderer_draw_model_matrix(const AseModel *m, unsigned int texture_id_overr
         if (!group_tex && tr == 0.0f && tg == 0.0f && tb == 0.0f) continue;
         if (!group_tex && g_hide_untextured_groups) continue;
 
-        glUniform3f(g_lit_loc_tint, tr, tg, tb);
+        glUniform3f(g_lit_loc_tint,
+                    tr * g_model_tint[0],
+                    tg * g_model_tint[1],
+                    tb * g_model_tint[2]);
         if (group_tex) {
             glUniform1i(g_lit_loc_hastex, 1);
             glBindTexture(GL_TEXTURE_2D, group_tex);
