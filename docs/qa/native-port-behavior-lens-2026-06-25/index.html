@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Native Port - Behavior Lens 93/93 Close-out - jn-engine</title>
+<style>
+* { box-sizing:border-box; margin:0; padding:0; }
+body { font-family:Monaco,Menlo,"Ubuntu Mono",monospace; background:#0d0d0d; color:#dedede; line-height:1.55; padding:24px 16px; }
+.wrap { max-width:1080px; margin:0 auto; }
+h1 { font-size:1.45rem; color:#fff; margin-bottom:4px; }
+h2 { font-size:1.08rem; color:#7ec8ff; border-bottom:1px solid #2a2a2a; padding-bottom:6px; margin:34px 0 12px; }
+h3 { font-size:0.98rem; color:#fff; margin:18px 0 4px; }
+p { margin:10px 0; color:#c8c8c8; }
+a { color:#7ec8ff; text-decoration:none; }
+a:hover { text-decoration:underline; }
+code { color:#d9c08a; }
+.sub { color:#888; font-size:0.84rem; }
+.badge { display:inline-block; border-radius:4px; padding:1px 8px; font-size:0.74rem; vertical-align:middle; }
+.green { background:#143a14; color:#7dde7d; border:1px solid #2c6e2c; }
+.blue { background:#1d2c3d; color:#9ecbff; border:1px solid #2c5a8a; }
+.amber { background:#33280e; color:#e6c66f; border:1px solid #6c5720; }
+table { width:100%; border-collapse:collapse; margin:14px 0; font-size:0.82rem; }
+th,td { text-align:left; padding:8px 9px; border-bottom:1px solid #242424; vertical-align:top; }
+th { color:#9a9a9a; font-weight:normal; }
+.grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:12px; margin:18px 0; }
+.stat { background:#141414; border:1px solid #262626; border-radius:8px; padding:16px; }
+.stat strong { display:block; color:#fff; font-size:1.45rem; line-height:1.1; margin-bottom:4px; }
+.stat span { color:#999; font-size:0.8rem; }
+.card { background:#141414; border:1px solid #262626; border-radius:8px; padding:18px; margin:22px 0; }
+.meta { color:#888; font-size:0.8rem; margin-bottom:10px; }
+.fix { border-left:3px solid #2c6e2c; background:#0d160d; border-radius:0 6px 6px 0; color:#afd0af; padding:8px 12px; margin:12px 0; font-size:0.88rem; }
+.note { border-left:3px solid #6c5720; background:#181409; border-radius:0 6px 6px 0; color:#d8c184; padding:8px 12px; margin:12px 0; font-size:0.88rem; }
+pre { overflow-x:auto; background:#0a0a0a; border:1px solid #242424; border-radius:6px; padding:10px 12px; font-size:0.76rem; color:#b8c8b8; margin:10px 0; }
+.footer { color:#777; border-top:1px solid #2a2a2a; margin-top:40px; padding-top:12px; font-size:0.8rem; }
+@media (max-width:760px) { .grid { grid-template-columns:1fr; } body { padding:18px 12px; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<h1>Native Port - Behavior Lens 93/93 Close-out <span class="badge green">SHIPPED</span></h1>
+<p class="sub">Summary page &middot; 2026-06-25 &middot; branch <code>native-port</code> &middot; commit <code>7236ee8</code>. This page covers the continuation after the QA backlog campaign: closing the final Asset Catalog behavior-lens tail, validating it, and publishing the refreshed demo/catalog.</p>
+
+<h2>What Changed</h2>
+<p>The previous session left the native port at <strong>90 / 93</strong> used-in-level FourCCs with native vtables. The three remaining rows were not missing gameplay systems; they were resolver/positioning edge cases where drawing or moving the entities would have invented behavior. This pass made that decision explicit in code with a small native-inert vtable, refreshed the generated catalog, verified the full native and browser gates, and deployed the results.</p>
+
+<div class="grid">
+  <div class="stat"><strong>93 / 93</strong><span>used FourCCs now have native vtables</span></div>
+  <div class="stat"><strong>0</strong><span>used FourCCs missing native behavior</span></div>
+  <div class="stat"><strong>0 findings</strong><span>faithfulness audit across 35 levels</span></div>
+</div>
+
+<h2>The Fix</h2>
+<div class="card">
+<div class="meta"><code>src/game/behaviors/behavior_resolver_inert.c</code> + <code>src/game/entities.c</code></div>
+<p>Added <code>vt_resolver_inert</code>, a deliberately hidden, non-solid, side-effect-free native behavior for the three final rows. The important part is that this is <em>not</em> a guess at their eventual visuals or controllers. It preserves the existing resolver output while making the coverage decision visible to the engine and the generated catalog.</p>
+<table>
+<tr><th>FourCC</th><th>Class</th><th>Why native-inert is correct now</th></tr>
+<tr><td><code>3ROK</code></td><td><code>C3DRock</code></td><td>99 Level5b pool rows, all authored at <code>(0,0,0)</code>. The original positions them at runtime through a controller that is not ported yet, so drawing/colliding the origin pool would be wrong.</td></tr>
+<tr><td><code>3SPR</code></td><td><code>C3DSprite</code></td><td>15 rows across 4 levels, but they serialize no <code>SpriteSize</code>, <code>SpriteDatabase</code>, or <code>SpriteIndex</code>. The default canvas/size is still an evidence question.</td></tr>
+<tr><td><code>3DAI</code></td><td><code>C3DAI</code></td><td>4 bare AI-base rows with no useful authored fields or fixed visual asset. They stay dummy framework rows instead of inventing AI motion.</td></tr>
+</table>
+<div class="fix">Result: <code>docs/asset_catalog/behavior_todo.md</code> now reports <strong>93 used FourCCs, 93 with native vtables, 0 missing native behavior</strong>.</div>
+</div>
+
+<h2>Published Outputs</h2>
+<table>
+<tr><th>Output</th><th>URL</th><th>Status</th></tr>
+<tr><td>Browser demo</td><td><a href="/jn-engine/">/jn-engine/</a></td><td><span class="badge green">live</span> <code>jnengine.c5a9383b.js</code>, assets <code>1473068a</code></td></tr>
+<tr><td>Asset Catalog</td><td><a href="/JN-assets/catalog/">/JN-assets/catalog/</a></td><td><span class="badge green">live</span> summary verified as <code>93 93 0</code></td></tr>
+<tr><td>This summary</td><td><a href="/jn-engine/qa/native-port-behavior-lens-2026-06-25/">/jn-engine/qa/native-port-behavior-lens-2026-06-25/</a></td><td><span class="badge green">published</span></td></tr>
+</table>
+
+<h2>Validation</h2>
+<pre>make
+python3 tools/verify_behaviors.py
+python3 tools/build_asset_catalog.py
+python3 tools/audit_faithfulness.py
+make web
+python3 tools/qa_web_verify.py
+./tools/deploy_wasm.sh
+sudo ./tools/deploy_asset_catalog.sh</pre>
+
+<table>
+<tr><th>Gate</th><th>Result</th></tr>
+<tr><td>Native build</td><td><span class="badge green">pass</span> existing SDL2_mixer archive warning only</td></tr>
+<tr><td>Behavior classifier</td><td><span class="badge green">pass</span> 18 checked mappings, 0 mismatches</td></tr>
+<tr><td>Asset Catalog</td><td><span class="badge green">pass</span> 93 used, 93 native, 0 missing</td></tr>
+<tr><td>Faithfulness audit</td><td><span class="badge green">pass</span> 0 findings, 0 waived, 0 new across 35 levels</td></tr>
+<tr><td>Web build</td><td><span class="badge green">pass</span> 387 MB asset bundle warning only</td></tr>
+<tr><td>Browser QA</td><td><span class="badge green">pass</span> all 16 QA web checks passed</td></tr>
+<tr><td>Public URL checks</td><td><span class="badge green">pass</span> demo HTML references <code>jnengine.c5a9383b.js</code>; live catalog reports <code>93 93 0</code></td></tr>
+</table>
+
+<h2>What This Means</h2>
+<p>The behavior breadth milestone is closed. The generated behavior queue no longer has any used-in-level FourCCs without a native vtable, and the remaining work is now more substantive than catalog breadth: motion/path fidelity, campaign playthrough hardening, audio, deferred mechanics, collision containment, and later resolver-controller work for things like the rock pool if ground truth becomes available.</p>
+
+<div class="note">Recommended next track from the updated handoff: <strong>Track F / A</strong> - motion/path fidelity for the boat and Cindy pathing tail. Audio remains best handled in a desktop/noVNC session because the headless xvfb rig has no audio device.</div>
+
+<h2>Code And Docs Touched</h2>
+<table>
+<tr><th>Path</th><th>Purpose</th></tr>
+<tr><td><code>src/game/behaviors/behavior_resolver_inert.c</code></td><td>new native-inert vtable</td></tr>
+<tr><td><code>src/game/behaviors/behaviors.h</code></td><td>declares <code>vt_resolver_inert</code></td></tr>
+<tr><td><code>src/game/entities.c</code></td><td>registers <code>3ROK</code>, <code>3SPR</code>, <code>3DAI</code></td></tr>
+<tr><td><code>docs/asset_catalog/*</code></td><td>refreshed generated catalog/checklist</td></tr>
+<tr><td><code>docs/continuation_options.md</code></td><td>marks Track C done, recommends motion/path next</td></tr>
+<tr><td><code>docs/decomp/_next_session.md</code></td><td>updates the kickoff handoff to 93/93</td></tr>
+<tr><td><code>docs/PROJECT_HISTORY.md</code></td><td>adds the behavior-lens close-out entry</td></tr>
+</table>
+
+<div class="footer">
+Commit: <a href="https://github.com/alexscott2718-gif/jn-engine/commit/7236ee8"><code>7236ee8</code></a>
+&middot; Previous summary: <a href="/jn-engine/qa/native-port-behavior-coverage-2026-06-24/">behavior coverage + QA campaign</a>
+&middot; Play: <a href="/jn-engine/">browser demo</a>
+&middot; Catalog: <a href="/JN-assets/catalog/">Asset Catalog</a>
+</div>
+
+</div>
+</body>
+</html>
