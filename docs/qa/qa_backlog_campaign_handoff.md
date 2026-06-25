@@ -36,9 +36,9 @@
 | 7 | l6a | 3DOR halldoor01 | OTH | doors should loop opening SFX until stop | I | ⬜ TODO (see lu9-06-12 door[59] precedent) |
 | 8 | l6a | PROJ | MIS | should be plasma blast not baseball | C | ✅ DONE (enemy PROJ→missile.ASE; player keeps baseball) |
 | 9 | l6a | 3FLE FLEETC | MIS | should be yokian fleet commander | C | ✅ DONE (commanderstop.ASE+comander.png) |
-| 10 | l3c | tree04 | TEX | should be level3c/0000_128x128d32 | D | ⬜ TODO (target PNG exists) |
-| 11 | l5 | 3RED C3DREDNEUTRON | SCL | too small; add warped/bouncy sprite anim | F | ⬜ TODO (authored SpriteSize + pulse tick) |
-| 12 | l1c | 3PIC sprite_index:157 | TEX | apple-pie showing fruit bowl | D | ⬜ TODO |
+| 10 | l3c | tree04 | TEX | should be level3c/0000_128x128d32 | D | ✅ DONE (gated l1 tree billboard; glb mesh now used) |
+| 11 | l5 | 3RED C3DREDNEUTRON | SCL | too small; add warped/bouncy sprite anim | F | ✅ DONE (unauthored floor 100→170; pulse ±7%→±17%). NB: 170 is a chosen visibility floor (level5 authors no SpriteSize); confirm against original via XP VNC if exact size matters. |
+| 12 | l1c | 3PIC sprite_index:157 | TEX | apple-pie showing fruit bowl | D | ⚠️ WONTFIX-AS-BUG: authored SpriteIndex=157 IS "FruitbowlEmty" (faithful). Apple pie comes from the unimplemented fruit-fill mechanic ("Apple Pie%"). Deferred to mechanic work, not a texture swap. |
 | 13 | l1 | house02 | GFX | floor under house missing entirely | G | ⬜ TODO (OMT geometry) |
 | 14 | l1 | 3JIM JIM1 | ORI | faces lab not house on lab-exit | E | ⬜ TODO (spawn facing) |
 | 15 | l3c | 3BUT n03 | ORI | orientation off | E | ⬜ TODO |
@@ -58,8 +58,12 @@
 - `8daf4a8` — qa(model): 3FLE fleet commander (was yokcaptn). (#9)
 - `93ce52c` — qa(model): enemy PROJ → missile.ASE, player keeps baseball. (#8)
 
-**Reports closed & verified: 8/24** (#1×4 instances, #2, #3, #4-ground, #8, #9).
-Remaining open: #4-pathing, #5, #6, #7, #10–#24.
+- `c075353` — qa(tex): gate l1 tree billboard to level1 family. (#10)
+- (pending commit) — qa: 3RED size floor + bigger pulse (#11); handoff updates.
+
+**Reports closed & verified: 11/24** (#1×4, #2, #3, #4-ground, #8, #9, #10, #11).
+**#12 apple-pie = WONTFIX-as-bug** (authored fruit bowl; pie is a deferred mechanic).
+Remaining open: #4-pathing, #5, #6, #7, #13–#24 (incl. all of Group I audio).
 
 ## Key facts / how to work
 - **Native build:** `make` (zig toolchain; ~exit 0). **Web build+deploy:** `source ~/emsdk/emsdk_env.sh && ./tools/deploy_wasm.sh` (387MB, slow — do ONCE at finalize).

@@ -610,8 +610,10 @@ static int resolve_sprite_db(const Entity *e, EntityVisual *out) {
         out->tint_g = 0.2f;
         out->tint_b = 0.25f + 0.35f * pulse;
         out->tint_a = 0.8f;
-        out->sprite_size = (e->sprite_size > 1.0f ? e->sprite_size : 90.0f) *
-                           (0.9f + 0.15f * pulse);
+        /* More pronounced "bouncy" warp on the sprite plane (QA 2026-06-24 l5
+           asked for it to read clearly); ~±17% about the base size. */
+        out->sprite_size = (e->sprite_size > 1.0f ? e->sprite_size : 170.0f) *
+                           (0.82f + 0.34f * pulse);
     }
     return 1;
 }

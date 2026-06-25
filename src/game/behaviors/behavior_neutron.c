@@ -69,6 +69,12 @@ static void neutron_spawn(Entity *e, World *w) {
 static void red_neutron_spawn(Entity *e, World *w) {
     behavior_trigger_spawn_base(e, 50.0f, 50.0f, 50.0f);
     neutron_use_runtime_sprite(e);
+    /* Red neutrons are headline collectibles. Level rows that don't author a
+       SpriteSize fall to the 100 default — the low end of the measured
+       100..1300 range (docs/decomp/C3DSprite.md) — which read too small from a
+       distance (QA sandmanfan 2026-06-24 l5). Raise the floor for unauthored
+       reds so they stay visible; authored larger sizes are kept. */
+    if (e->sprite_size < 170.0f) e->sprite_size = 170.0f;
     float radius = gam_prop_f(e, "Radius", RED_NEUTRON_RADIUS);
     if (radius <= 0.0f) radius = RED_NEUTRON_RADIUS;
     e->half_extents[0] = radius;
