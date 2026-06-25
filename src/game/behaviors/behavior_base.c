@@ -1,6 +1,8 @@
 #include "behavior_base.h"
+#include "../game_flow.h"
 #include <stdlib.h>
 #include <string.h>
+#include <strings.h>
 
 int behavior_progress_gate_enabled(void) {
     static int cached = -1;
@@ -16,10 +18,7 @@ int behavior_progress_level(void) {
     return (s && s[0]) ? atoi(s) : 0;
 }
 
-static int animated_level_gate_allows(const Entity *e) {
-    if (!behavior_progress_gate_enabled()) return 1;
-
-    int level = behavior_progress_level();
+static int level_window_allows(const Entity *e, int level) {
     int exact = gam_prop_i(e, "ExactLevel", -1);
     int required = gam_prop_i(e, "RequiredLevel", -1);
     int remove = gam_prop_i(e, "RemoveLevel", -1);
@@ -27,6 +26,26 @@ static int animated_level_gate_allows(const Entity *e) {
     if (exact != -1) return level == exact;
     if (required == -1) return 0;
     return required <= level && (remove == -1 || level < remove);
+}
+
+static int animated_level_gate_allows(const Entity *e) {
+    if (!behavior_progress_gate_enabled()) return 1;
+    return level_window_allows(e, behavior_progress_level());
+}
+
+int behavior_required_task_gate_allows(const Entity *e) {
+    if (!e) return 0;
+
+    const char *task = gam_str(e, "RequiredTask", NULL);
+    if (task && task[0] && strcasecmp(task, "none") != 0) {
+        long state = game_flow_entity_state(task);
+        if (state >= 0) return level_window_allows(e, (int)state);
+    }
+
+    if (behavior_progress_gate_enabled())
+        return level_window_allows(e, behavior_progress_level());
+
+    return 1;
 }
 
 static int animated_initially_visible_allows(const Entity *e) {

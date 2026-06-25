@@ -35,6 +35,7 @@
 #include <stdlib.h>
 #include <math.h>
 #include <string.h>
+#include <strings.h>
 #include <ctype.h>
 #include <zlib.h>
 #include <SDL.h>
@@ -729,6 +730,30 @@ static int draw_authored_button(const Entity *e) {
     return 1;
 }
 
+static int draw_goddard_dish_arrow(const Entity *e) {
+    if (!e || strcmp(e->type, "3PIC") != 0) return 0;
+    if (!sprite_ref_hidden(e)) return 0;
+    if (gam_prop_i(e, "ShowArrow", -1) != 1) return 0;
+    if (gam_prop_i(e, "RequiredPicNum", -1) != 4) return 0;
+    const char *toggle = gam_str(e, "ToggleObject", NULL);
+    const char *next = gam_str(e, "NextTrigger", NULL);
+    if (!toggle || strcasecmp(toggle, "refill") != 0 ||
+        !next || strcasecmp(next, "godeat") != 0)
+        return 0;
+
+    const char *arrow = sprite_chunk_path(33);  /* sprites.omt "arrow" */
+    unsigned int tex = arrow ? tex_cache_get(arrow) : 0;
+    if (!tex) {
+        audit_line("entity", e->type, e->tag, "sprite-unresolved",
+                   arrow, NULL, 0);
+        return 1;
+    }
+    renderer_draw_billboard(tex, e->x, e->y + 180.0f, e->z,
+                            200.0f, 200.0f, 0.0f, 0.0f, 0.0f, 0.0f);
+    audit_line("entity", e->type, e->tag, "pickup-arrow", arrow, NULL, tex);
+    return 1;
+}
+
 /* Draw every pickable scene object: entities, then static OMT placements.
    This is the single enumeration path shared by the main render pass and the
    QA pick pass (docs/qa_annotate_plan.md) -- object N here must be object N
@@ -884,6 +909,8 @@ static void draw_scene(World *world, int jim_model_ok)
                pickup trigger whose visible referent is level geometry or a
                separate entity (2026-06-12 QA #3 — hydrant/nests/boat). */
             if (sprite_ref_hidden(e)) {
+                if (draw_goddard_dish_arrow(e))
+                    continue;
                 audit_line("entity", e->type, e->tag, "hidden", NULL, NULL, 0);
                 continue;
             }

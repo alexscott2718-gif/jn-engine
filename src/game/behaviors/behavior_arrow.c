@@ -11,10 +11,14 @@
 static void arrow_on_spawn(Entity *e, World *w) {
     (void)w;
     behavior_animated_spawn_base(e);
+    if (!behavior_required_task_gate_allows(e))
+        e->visible = 0;
 }
 
 static void arrow_on_update(Entity *e, World *w, float dt) {
-    (void)behavior_animated_update_base(e, w, dt);
+    if (!behavior_animated_update_base(e, w, dt)) return;
+    if (!behavior_required_task_gate_allows(e))
+        e->visible = 0;
 }
 
 const EntityVTable vt_arrow = {
