@@ -1263,6 +1263,18 @@ The full operating-rules list (renderer debugging, XP proxy workflow, capture-pi
 performance, shell hygiene) lives in the repo's `CLAUDE.md` and in
 [`claude_code_failure_patterns.md`](./claude_code_failure_patterns.md).
 
+- **2026-06-25 Cutscene camera decomp deepening — `3MCA` CameraType table recovered.**
+  User testing against a YouTube reference for `level1b` `LABEXP3` showed the web cutscene camera was
+  closer but still did not face Carl correctly; the first Carl shot should face Carl and slowly pan/creep
+  while pointing slightly down. Instead of adding scene overrides, Ghidra/objdump was used on
+  `Neutron.exe` around `C3DMultiCutSceneCamera` slot targets `00430da0`, `00431750`, and `004311f0`.
+  Finding: `3MCA` does not borrow `3CAM` templates by matching target names, and `CameraTypeN` is a
+  target-local offset table: type 0 `(0,40,200)`, type 1 `(0,140,max(100,300-15*t))`, type 2
+  `(0,240,max(100,500-35*t))`, type 3 `(200,240,max(100,700-55*t))`, type 4
+  `(-200,190,max(100,700-55*t))`; look-at is target position plus `LookatVOffsetN - 60` on Y. Ported
+  selector playback to this recovered table and removed the previous target-name `3CAM` template lookup
+  for `3MCA` sequences. `3CAM` `ViewFromCamera` remains open for standalone shot playback.
+
 ---
 
 ## Where to go next

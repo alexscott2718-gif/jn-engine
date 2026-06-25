@@ -14,10 +14,9 @@
  * placeable objects until the sequence is requested. Playback is OFF by default
  * (cutscene_request_intro is opt-in) so the faithfulness audit and the
  * matched-camera validators — which drive this same render loop — are
- * unaffected. The per-shot framing math matches the spec's interpreted
- * on-activate behavior; full trigger-graph activation (CTrigger -> 3MCA -> 3CAM
- * messaging) and the CameraType/ViewFromCamera enums are deferred open
- * questions in the spec. */
+ * unaffected. 3MCA's CameraType table is recovered from Neutron.exe 00430da0:
+ * each step chooses a target-local camera offset, transforms it through the
+ * current target, then looks at target.y + LookatVOffset - 60. */
 
 #include "behaviors.h"
 #include "behavior_base.h"
@@ -179,20 +178,6 @@ static void mca_on_spawn(Entity *e, World *w) {
 
 /* ---- Runtime ------------------------------------------------------------ */
 
-static int is_real_target(const char *target) {
-    return target && target[0] &&
-           strcasecmp(target, "none") != 0 &&
-           strcasecmp(target, "null") != 0;
-}
-
-static const CutSceneShot *find_shot_template(const char *target) {
-    if (!is_real_target(target)) return NULL;
-    for (int i = 0; i < g_cut.count; i++)
-        if (strcasecmp(g_cut.shots[i].target, target) == 0)
-            return &g_cut.shots[i];
-    return NULL;
-}
-
 static float cutscene_desired_dist(const CutSceneShot *s) {
     float want = s->initial_dist * 0.45f;
     if (want < 220.0f) want = 220.0f;
@@ -202,6 +187,43 @@ static float cutscene_desired_dist(const CutSceneShot *s) {
     if (s->max_dist > 0.0f && want > s->max_dist * 0.65f)
         want = s->max_dist * 0.65f;
     return want;
+}
+
+static void cutscene_mca_local_offset(int camera_type, float t, float out[3]) {
+    float z;
+    switch (camera_type) {
+    case 1:
+        z = 300.0f - 15.0f * t;
+        if (z < 100.0f) z = 100.0f;
+        out[0] = 0.0f; out[1] = 140.0f; out[2] = z;
+        break;
+    case 2:
+        z = 500.0f - 35.0f * t;
+        if (z < 100.0f) z = 100.0f;
+        out[0] = 0.0f; out[1] = 240.0f; out[2] = z;
+        break;
+    case 3:
+        z = 700.0f - 55.0f * t;
+        if (z < 100.0f) z = 100.0f;
+        out[0] = 200.0f; out[1] = 240.0f; out[2] = z;
+        break;
+    case 4:
+        z = 700.0f - 55.0f * t;
+        if (z < 100.0f) z = 100.0f;
+        out[0] = -200.0f; out[1] = 190.0f; out[2] = z;
+        break;
+    case 0:
+    default:
+        out[0] = 0.0f; out[1] = 40.0f; out[2] = 200.0f;
+        break;
+    }
+}
+
+static void entity_local_to_world(const Entity *e, const float local[3], float out[3]) {
+    float c = cosf(e->ry), s = sinf(e->ry);
+    out[0] = e->x + local[0] * c + local[2] * s;
+    out[1] = e->y + local[1];
+    out[2] = e->z - local[0] * s + local[2] * c;
 }
 
 static void cutscene_halt_audio(void) {
@@ -279,21 +301,16 @@ int cutscene_request_index(int index) {
     for (int i = 0; i < seq->count && g_cut.active_count < CUTSCENE_MAX_STEPS; i++) {
         CutSceneStep *step = &seq->steps[i];
         CutSceneShot *dst = &g_cut.active[g_cut.active_count++];
-        const CutSceneShot *tmpl = find_shot_template(step->target);
         memset(dst, 0, sizeof(*dst));
-        if (tmpl) {
-            *dst = *tmpl;
-        } else {
-            snprintf(dst->target, sizeof(dst->target), "%s", step->target);
-            dst->offset[0] = 0.0f;
-            dst->offset[1] = 0.0f;
-            dst->offset[2] = 0.0f;
-            dst->initial_dist = 520.0f;
-            dst->min_dist = 220.0f;
-            dst->max_dist = 900.0f;
-            dst->zoom_speed = 8.0f;
-            dst->hold_seconds = CUTSCENE_DEFAULT_SHOT_SECONDS;
-        }
+        snprintf(dst->target, sizeof(dst->target), "%s", step->target);
+        dst->offset[0] = 0.0f;
+        dst->offset[1] = 0.0f;
+        dst->offset[2] = 0.0f;
+        dst->initial_dist = 520.0f;
+        dst->min_dist = 220.0f;
+        dst->max_dist = 900.0f;
+        dst->zoom_speed = 8.0f;
+        dst->hold_seconds = CUTSCENE_DEFAULT_SHOT_SECONDS;
         snprintf(dst->sound_db, sizeof(dst->sound_db), "%s", seq->sound_db);
         dst->sound_index = step->sound_index;
         dst->look_voffset = step->look_voffset;
@@ -321,28 +338,34 @@ void cutscene_update(Camera *cam, World *w, float dt) {
     Entity *target = find_by_tag(w, s->target);
 
     if (target) {
-        float tx = target->x + s->offset[0];
-        float ty = target->y + s->offset[1];
-        float tz = target->z + s->offset[2];
+        float cx, cy, cz, lx, ly, lz;
+        if (g_cut.playing_sequence_index >= 0) {
+            float local[3], world[3];
+            cutscene_mca_local_offset(s->camera_type, g_cut.shot_t, local);
+            entity_local_to_world(target, local, world);
+            cx = world[0]; cy = world[1]; cz = world[2];
+            lx = target->x;
+            ly = target->y + s->look_voffset - 60.0f;
+            lz = target->z;
+        } else {
+            float tx = target->x + s->offset[0];
+            float ty = target->y + s->offset[1];
+            float tz = target->z + s->offset[2];
 
-        /* The authored distance fields are tuned for the original D3D camera
-           path and read too wide in the native QA harness. Keep their relative
-           intent, but pull in enough that dialogue targets are readable. */
-        float want = cutscene_desired_dist(s);
-        g_cut.dist += (want - g_cut.dist) * (s->zoom_speed * dt);
+            /* 3CAM fallback for intro-shot playback until ViewFromCamera is
+               decoded. 3MCA selector playback uses the recovered table above. */
+            float want = cutscene_desired_dist(s);
+            g_cut.dist += (want - g_cut.dist) * (s->zoom_speed * dt);
+            lx = tx; ly = ty + s->look_voffset; lz = tz;
 
-        /* Look point: the target with the vertical look offset applied. */
-        float lx = tx, ly = ty + s->look_voffset, lz = tz;
-
-        /* Place the camera in front of the current speaker, with a small
-           CameraType-dependent shoulder offset, then look back at the target. */
-        float front = target->ry;
-        float shoulder = ((s->camera_type & 1) ? 0.45f : -0.45f);
-        float sx = sinf(front + 1.5707963f) * shoulder * g_cut.dist;
-        float sz = -cosf(front + 1.5707963f) * shoulder * g_cut.dist;
-        float cx = lx + sinf(front) * g_cut.dist + sx;
-        float cz = lz - cosf(front) * g_cut.dist + sz;
-        float cy = ly + g_cut.dist * 0.18f;
+            float front = target->ry;
+            float shoulder = ((s->camera_type & 1) ? 0.45f : -0.45f);
+            float sx = sinf(front + 1.5707963f) * shoulder * g_cut.dist;
+            float sz = -cosf(front + 1.5707963f) * shoulder * g_cut.dist;
+            cx = lx + sinf(front) * g_cut.dist + sx;
+            cz = lz - cosf(front) * g_cut.dist + sz;
+            cy = ly + g_cut.dist * 0.18f;
+        }
 
         cam->pos[0] = cx;
         cam->pos[1] = cy;

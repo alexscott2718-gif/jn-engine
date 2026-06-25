@@ -385,6 +385,39 @@ void __thiscall C3DMultiCutSceneCamera::vfunc_03_057(C3DMultiCutSceneCamera *thi
 }
 ```
 
+### Per-frame camera update deepening (2026-06-25)
+
+The fourth-vtable raw target at `00430da0` is a real per-frame `3MCA` update
+routine that Ghidra had not function-defined during the generated spec pass.
+Local `objdump` over `/home/scotty/xp-jnbg-original/Neutron.exe` shows the
+following behavior:
+
+- If active, it adds `dt` into the per-shot timer at `+0xde0`.
+- It checks the active audio handle with `FUN_0047d890`; when audio completes it
+  deactivates the current step, advances the step index, and activates the next
+  step through `vfunc_03_056`.
+- `vfunc_03_056` resolves `CameraTargetN`, starts `SoundIndexN`, applies
+  `TargetAnimN`, and resets the per-shot timer.
+- `vfunc_03_057` handles `ToggleObject`, resumes AI for the previous target,
+  stops the sound database, and applies `TargetDeactAnim`.
+- The camera pose is **not** derived from the speaker's facing with a generic
+  shoulder offset. It uses `CameraTypeN` to choose a target-local camera offset,
+  transforms that offset through the target object (`target` vtable `+0x384`),
+  then looks at the target position with `LookatVOffsetN - 60` applied to Y.
+
+Recovered `CameraTypeN` table from the jump table at `004311d0`:
+
+| CameraType | Local camera offset `(x, y, z)` |
+|---:|---|
+| 0 / default | `(0, 40, 200)` |
+| 1 | `(0, 140, max(100, 300 - 15*t))` |
+| 2 | `(0, 240, max(100, 500 - 35*t))` |
+| 3 | `(200, 240, max(100, 700 - 55*t))` |
+| 4 | `(-200, 190, max(100, 700 - 55*t))` |
+
+`t` is the current step timer in seconds. This explains the slow pan/creep during
+dialogue shots such as `level1b` `LABEXP3` (`CameraType0 = 2`).
+
 ## Assets
 
 No direct ASE/PNG/anim references in `InitObject` (inherited visual path or runtime-assigned).
@@ -400,7 +433,8 @@ Confidence: Medium
 Validation: Ghidra `DumpClass.java C3DMultiCutSceneCamera` (owned methods decompiled); `.gam` properties and assets resolved from the `InitObject` registrar calls with strings read directly from `Neutron.exe`. `.gam` value ranges cross-referenced via `docs/gam_schema.md`. Behavioral prose is derived from the decompiled bodies above; not runtime-validated.
 
 Open questions:
-- Confirm the gameplay semantics of the per-frame/owned override method(s) beyond the decompiled control flow.
+- Decode the exact helper behind target vtable `+0x384` beyond the target-local
+  transform interpretation above.
 - Pin the constructor address and class-id immediate (FourCC).
 
 ## Notes

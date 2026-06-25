@@ -130,7 +130,7 @@ After the harness is usable, improve the actual generated cutscenes:
 - Apply `TargetActAnim`, `LoopActAnim`, and `TargetDeactAnim`.
 - Honor `PlayerControlled` / input lock.
 - Implement `FaceObject`.
-- Decode `CameraType` and `ViewFromCamera`.
+- Finish standalone `3CAM` `ViewFromCamera` decoding; `3MCA` `CameraTypeN` is now decoded from `00430da0`.
 - Verify Goddard-targeted shots after the texture/mapping issue is fixed or explicitly documented.
 
 ## Validation Gates
@@ -161,6 +161,6 @@ Manual visual checks:
 ## Recommended Next Cut
 
 1. Manually inspect representative cutscenes by ear/eye on the public deploy.
-2. Tune exact camera modes (`CameraType`, `ViewFromCamera`) against original capture.
+2. Tune/validate the recovered `3MCA` camera modes against original capture and decode `3CAM` `ViewFromCamera`.
 3. Apply target animations and player-control locks.
 4. Continue tracking Goddard texture/mapping separately from camera sequencing.
