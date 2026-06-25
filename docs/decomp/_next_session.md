@@ -246,11 +246,12 @@ This is a shared, committed campaign — read the shared docs, don't rely on too
   wrong-beat talk no-ops; `--newgame` advanced Carl `0x32→0x3c`. `audit_faithfulness.py` 0/35; level1/level2 screenshots
   unchanged; `make web`; `qa_web_verify.py` 16/16. Catalog unchanged at **93/90/3** (enriched existing friend vtables, no
   new FourCC). **Public WASM not deployed** (gated on approval). Headless seam: `JN_TEST_TALK=<friendTag>`.
-- **Still unimplemented:** the refreshed lens reports **3** used-in-level FourCCs with no native behavior (**93**
-  total, **90** with native vtables) — `3ROK`/`C3DRock` origin pool, `3SPR`/`C3DSprite` no serialized canvas, and
-  `3DAI`/`C3DAI` origin dummy. These are **resolver/positioning gaps, not SCENE-blocked** (the two SCENE-gated rows
-  `3YCA`/`3FOW` are now ported). The actor/gameplay focus section of `behavior_todo.md` is **empty** and the full
-  queue is deferred-only. Both SCENE writers (player-trigger + friend-talk) are now ported. A **C3DGoddard runtime
+- **Behavior lens closed (2026-06-25):** the refreshed lens reports **0** used-in-level FourCCs with no native
+  behavior (**93** total, **93** with native vtables). The former tail — `3ROK`/`C3DRock` origin pool,
+  `3SPR`/`C3DSprite` no serialized canvas, and bare `3DAI`/`C3DAI` origin dummy — is now routed to
+  `vt_resolver_inert`, preserving hidden/non-solid resolver output without inventing placement, canvas defaults, or
+  AI motion. The actor/gameplay focus section of `behavior_todo.md` is **empty**. Both SCENE writers
+  (player-trigger + friend-talk) are now ported. A **C3DGoddard runtime
   slice** is also landed: code-spawned `3GOD`, disabled-level gates, follow/fetch modes, and the `3MEP` beacon. **The
   C3DGoddard scripted-control tail also landed (2026-06-24):** the `C3DAITrigger` C3DAI-target branch is wired for
   Goddard (`behavior_goddard_apply_ai_state`, called from `behavior_ai_trigger.c`) — the ~30 `3AIT` rows whose
@@ -260,8 +261,8 @@ This is a shared, committed campaign — read the shared docs, don't rely on too
   `JN_TEST_SCENE=GOGODDARD --newgame` → Goddard patrolled `GODDARDPAT1`→`GODDARDPAT2`; `SITGODDARD`→HOLD at `gstart`;
   `PUTGODDARD` (Level2) → FOLLOW; `3MEP` fetch unregressed; `audit_faithfulness.py` 0 findings, `make web`,
   `qa_web_verify.py` 16/16. (`AIAnim` selection + the `flag()`/`menu()`/`counter()` reward side effects of these tags
-  stay deferred to the HUD/menu subsystems.) Public WASM still live at the prior `jnengine.d75fb823.js` / assets
-  `b4e7d620` (this pass not redeployed). The next substantive moves are (a) **remaining C3DGoddard tails** (the raw
+  stay deferred to the HUD/menu subsystems.) Public WASM is now live at `jnengine.c5a9383b.js` / assets
+  `1473068a` after the 93/93 resolver-inert close-out. The next substantive moves are (a) **remaining C3DGoddard tails** (the raw
   mode-vector/orbit/effect helper cluster — slots 95–99 — blocked on the unresolved static vectors
   `DAT_004f81b0..DAT_004f8208`; plus the non-SCENE `JIMEND`/`RECHARGE`/`BONUSSCREEN` energy/menu side effects that need
   HUD/menu); (b) **combat depth** (the general AITrigger `AIState`/`AISpeed` → C3DAI state machine for *enemies*;
@@ -276,8 +277,8 @@ This is a shared, committed campaign — read the shared docs, don't rely on too
   `gam_prop_f/i`. Full contract in plan §1.
 
 ## Your task this session: pick one of the remaining live moves
-The portable behavior tail is exhausted (`90/93` native vtables; the 3 remaining are `3ROK`/`3SPR`/`3DAI`
-resolver/positioning gaps — see the deferred list below, leave them). The structural waves (N1–N5), the
+The portable behavior tail is exhausted (`93/93` used FourCCs have native vtables; the former `3ROK`/`3SPR`/`3DAI`
+resolver/positioning tail is explicit native-inert). The structural waves (N1–N5), the
 N2.x/N2.y slices, the actor-focus closeout, the four base/effect tail passes, the `3ANI`/`3SWN` pass, the
 long-tail close-out, the **SCENE sequencer** (player-trigger half), and — 2026-06-24 — the **talk-reward path**
 (the NPC half of the SCENE writers) are all landed. **Both SCENE writers are now ported**: `behavior_ai_trigger.c`
@@ -306,8 +307,6 @@ the procedural `ground.c` plane). Pick it up as its own track when prioritized.
   numerals; a real glyph renderer would also let the deferred talk/AITrigger counter-popup side effects surface.
 - **(d) `PlayerControlled` input lock** — the `PlayerControlled=="NULL" → force player STOP` path is visible in
   `ActivateAITrigger`; an N5 tail. Plumb the string prop onto the entity so cutscenes can lock player input.
-- The 3 deferred resolver rows (`3ROK`/`3SPR`/`3DAI`) stay parked — assessed 2026-06-24, none is "free" (3DAI is
-  authored-empty; 3SPR needs the unresolved default-canvas size; 3ROK needs an emitter/repositioning controller).
 - The deferred **active shrink mechanic** (`C3DShrinkRay` → AI become moving pickups) is also still open.
 
 **Deferred HUD/menu side effects (carry forward):** both SCENE writers keep ONLY the SCENE/task-state writes. The
@@ -328,12 +327,11 @@ sed -n '1,180p' docs/asset_catalog/behavior_todo.md
 `instances * level_count`, and splits out an actor/gameplay focus section (now empty). The live catalog remains
 useful for previews: <https://exentt.com/JN-assets/catalog/>.
 
-**The 3 remaining deferred rows stay deferred until their blocker is ported — skip them otherwise:**
-- `3ROK` / `C3DRock` — 99 inst / 1 level (Level5b), all serialized at `(0,0,0)` with `CanMove=1`/`RotateToDest`. A
-  runtime-repositioned pool; no controller that scatters them is ported, so drawing the origin pool regresses.
-- `3SPR` / `C3DSprite` — 15 inst / 4 levels. Rows carry **zero** serialized `SpriteSize`/`SpriteDatabase`/
-  `SpriteIndex`; the default canvas is the spec's own open question. Resolver gap, not a behavior gap.
-- `3DAI` / `C3DAI` — 4 inst / 2 levels, authored at `(0,0,0)` and invisible. A bare AI-base dummy; nothing to drive.
+**Resolver-inert close-out:** `3ROK`/`C3DRock`, `3SPR`/`C3DSprite`, and bare `3DAI`/`C3DAI` now route to
+`vt_resolver_inert`. That vtable is intentionally hidden, non-solid, and side-effect-free:
+- `3ROK` remains a Level5b runtime-positioned origin pool until a real scatter/controller path is ported.
+- `3SPR` remains hidden until the unresolved default canvas/size question has ground truth.
+- `3DAI` remains an inert bare AI-base dummy because the current rows author no useful fields or fixed asset.
 
 (`3YCA`/`C3DYokCargo` and `3FOW`/`C3DFowl` were on this list as "needs the SCENE sequencer" — both are now ported,
 2026-06-24, because the SCENE sequencer landed. They use the `C3DCindy` `SCENE<0 → show` guard, so a direct
@@ -401,7 +399,7 @@ With N1–N5 plus the N2.x / N2.y slices, the actor-focus closeout (`3PHO`/`3RCK
 passes (1: `3NEU`/`3RED`/`3ARR`; 2: `3LIO`/`3OMT`/`3CON`; 3: `3TRO`/`3LEA`/`3TAR`/`3AIO`; 4:
 `3LIG`/`3FIS`/`3GIR`/`3SPA`/`3STA`), the animated-sprite + swing-door pass (`3ANI`/`3SWN`), the **SCENE sequencer**
 (task-state store + `C3DAITrigger` story-progress patch table) with freed `3FOW`/`3YCA` gates, the friend
-talk-reward writer, and the first `C3DGoddard` runtime slice are ported, **90/93** used FourCCs now have native
-vtables. The actor/gameplay focus section is empty; the remaining substantive work is C3DGoddard tails, combat depth,
-N5 tails (text renderer / `PlayerControlled` input lock), resolver/positioning (`3ROK`/`3SPR`/`3DAI`), or the active
-shrink mechanic.
+talk-reward writer, the first `C3DGoddard` runtime slice, and the resolver-inert close-out are ported, **93/93** used
+FourCCs now have native vtables. The actor/gameplay focus section is empty; the remaining substantive work is
+C3DGoddard tails, combat depth, N5 tails (text renderer / `PlayerControlled` input lock), campaign playthrough
+hardening, QA motion/path, audio, or the active shrink mechanic.

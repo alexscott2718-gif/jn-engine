@@ -126,6 +126,11 @@ static const EntityTypeInfo entity_types[] = {
     { "3SM1", "Smoke (effect sprite)",               &vt_prop },
     { "3FUE", "Rocket fuel (pickup sprite)",         &vt_prop },
     { "3TRI", "Trigger (base marker, inert)",        &vt_prop },
+    /* Resolver/positioning tail: native-inert rows whose visuals deliberately
+       remain hidden until a faithful placement/canvas source exists. */
+    { "3ROK", "Rock pool (runtime-positioned, hidden)", &vt_resolver_inert },
+    { "3SPR", "Base sprite (unresolved canvas)",     &vt_resolver_inert },
+    { "3DAI", "Bare AI-base dummy",                  &vt_resolver_inert },
     /* SCENE-sequencer consumers (unblocked by the task-state story progression
        — visibility windows in behavior_fowl.c / behavior_cargo.c). */
     { "3FOW", "Fowl (SCENE-window creature)",        &vt_fowl },

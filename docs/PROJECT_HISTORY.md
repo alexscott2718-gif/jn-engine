@@ -1105,6 +1105,19 @@ can't be verified by ear in the headless xvfb rig). Deployed live (`jnengine.5d9
 published changelog at `docs/qa/native-port-behavior-coverage-2026-06-24/`; living handoff at
 `docs/qa/qa_backlog_campaign_handoff.md`.
 
+**Behavior-lens close-out — 93/93 used FourCCs have native vtables (2026-06-25).** The final three strict
+`behavior_todo.md` rows were resolver/positioning-only, so they landed as an explicit native-inert vtable rather
+than guessed visuals or movement. `3ROK`/`C3DRock` remains hidden/non-solid because its 99 Level5b rows are an
+origin-positioned runtime pool; `3SPR`/`C3DSprite` remains hidden/non-solid because the current rows serialize no
+`SpriteSize`/`SpriteDatabase`/`SpriteIndex`; bare `3DAI`/`C3DAI` remains hidden/non-solid because its rows carry no
+useful authored fields or fixed asset. The new `behavior_resolver_inert.c` preserves the existing invisible resolver
+output while making the decision explicit in `entities.c`. Refreshed Asset Catalog: **93 used-in-level FourCCs, 93
+with native vtables, 0 missing native behavior**. Validation: `make`, `tools/verify_behaviors.py`,
+`tools/build_asset_catalog.py`, `tools/audit_faithfulness.py` (0 findings / 35 levels), `make web`, and
+`tools/qa_web_verify.py` (16/16). `./tools/deploy_wasm.sh` published the build (`jnengine.c5a9383b.js`, assets
+`1473068a`) live to exentt.com/jn-engine, and `tools/deploy_asset_catalog.sh` published the refreshed 93/93 catalog
+to `exentt.com/JN-assets/catalog/`.
+
 ---
 
 ## Era 15 — Mesh collision world: ground, walls, step-up (~June 24)
@@ -1209,7 +1222,7 @@ performance, shell hygiene) lives in the repo's `CLAUDE.md` and in
 ## Where to go next
 
 - **Continuation menu (start here):** [`continuation_options.md`](./continuation_options.md) — the
-  open work tracks (QA tail, audio, behavior-lens close-out, mechanics, campaign playthrough, motion/path,
+  open work tracks (QA tail, audio, mechanics, campaign playthrough, motion/path,
   containment, contributor tasks) with effort/impact/prereqs and a recommended ordering.
 - **The active campaign — native Linux port:** [`native_port_plan.md`](./native_port_plan.md)
   (the five waves) and [`decomp/_next_session.md`](./decomp/_next_session.md) (kickoff handoff).

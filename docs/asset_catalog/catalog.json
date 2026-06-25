@@ -1,18 +1,18 @@
 {
  "summary": {
-  "generated": "2026-06-24 10:22 UTC",
-  "commit": "ff790dc",
+  "generated": "2026-06-25 09:03 UTC",
+  "commit": "30e6177",
   "counts": {
    "resolution": 219,
-   "st_mesh": 74,
+   "st_mesh": 73,
    "st_sprite": 15,
-   "st_invisible": 40,
+   "st_invisible": 41,
    "st_mesh_untextured": 4,
    "st_no_visual": 86,
-   "native_behaviors": 103,
+   "native_behaviors": 106,
    "used_fourccs": 93,
-   "used_native_behaviors": 90,
-   "used_missing_native_behavior": 3,
+   "used_native_behaviors": 93,
+   "used_missing_native_behavior": 0,
    "decomp_specs": 104,
    "assets_total": 5807,
    "no_usage": 40,
@@ -2092,8 +2092,8 @@
    "decomp_status": "spec",
    "decomp_confidence": "Medium",
    "family": "base_framework",
-   "native_behavior": null,
-   "native_desc": null,
+   "native_behavior": "vt_resolver_inert",
+   "native_desc": "Bare AI-base dummy",
    "tags": [],
    "levels": [
     {
@@ -2765,8 +2765,8 @@
    "instances": 4,
    "visual": {
     "kind": "mesh",
-    "model": "assets/ase/yokcaptnstop.ASE",
-    "texture": null,
+    "model": "assets/ase/commanderstop.ASE",
+    "texture": "assets/png/comander.png",
     "scale": 1.0,
     "recenter": 0
    },
@@ -7309,8 +7309,8 @@
    "decomp_status": null,
    "decomp_confidence": null,
    "family": null,
-   "native_behavior": null,
-   "native_desc": null,
+   "native_behavior": "vt_resolver_inert",
+   "native_desc": "Rock pool (runtime-positioned, hidden)",
    "tags": [
     "C3DROCK"
    ],
@@ -8000,20 +8000,16 @@
    ],
    "instances": 3,
    "visual": {
-    "kind": "mesh",
-    "model": "assets/ase/omt/Sphere01.ASE",
-    "texture": null,
-    "scale": 1.0,
-    "recenter": 0
+    "kind": "invisible"
    },
    "variants": [],
    "texture_truth": {
     "resolved": true,
-    "source": "ase_bitmap_path",
-    "value": "assets/parsed/objects/objects_images/0017_128x128d32.png",
-    "note": "ASE *BITMAP repo path (OMT export)"
+    "source": "n/a",
+    "value": null,
+    "note": "no visual (trigger/effect/invisible)"
    },
-   "status": "mesh",
+   "status": "invisible",
    "status_flags": []
   },
   {
@@ -8056,8 +8052,8 @@
    "decomp_status": "spec",
    "decomp_confidence": "Medium",
    "family": "base_framework",
-   "native_behavior": null,
-   "native_desc": null,
+   "native_behavior": "vt_resolver_inert",
+   "native_desc": "Base sprite (unresolved canvas)",
    "tags": [
     "C3DSPRITE"
    ],

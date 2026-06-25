@@ -9,11 +9,12 @@
 > [`qa/qa_backlog_campaign_handoff.md`](./qa/qa_backlog_campaign_handoff.md).
 
 ## State at a glance (2026-06-25)
-- **Branch:** `native-port`, pushed to origin, working tree clean.
-- **Behavior coverage:** 90 / 93 used-in-level FourCCs have a native vtable (remaining
-  `3ROK`/`3SPR`/`3DAI` are resolver/positioning gaps, not behavior gaps).
+- **Branch:** `native-port`.
+- **Behavior coverage:** 93 / 93 used-in-level FourCCs have a native vtable. The former
+  `3ROK`/`3SPR`/`3DAI` resolver/positioning tail is explicitly native-inert, preserving
+  its hidden/non-solid resolver output.
 - **Story machine:** the SCENE sequencer (both writers) + the C3DGoddard companion slice are in.
-- **Web build:** live at `exentt.com/jn-engine` (`jnengine.5d94b61e.js`, assets `d489c38d`), Campaign toggle reachable, `qa_web_verify.py` 16/16.
+- **Web build:** live at `exentt.com/jn-engine` (`jnengine.c5a9383b.js`, assets `1473068a`), Campaign toggle reachable, `qa_web_verify.py` 16/16.
 - **QA backlog:** 17/24 fixed, 2 WONTFIX-as-faithful, **5 still open** (below).
 - **Gates that must stay green every change:** `make` → `python3 tools/audit_faithfulness.py`
   (0 findings / 35 levels) → `make web` → `python3 tools/qa_web_verify.py` (16/16) → `./tools/deploy_wasm.sh`.
@@ -24,7 +25,7 @@
 |---|-------|--------|--------|----------------------|
 | A | Finish the QA backlog tail (motion/path #4,#5) | Med–High | Closes community reports | Yes (screenshots) |
 | B | Group I audio (#18–24) + audio-faithfulness pass | High | Closes reports + new subsystem | **No — needs by-ear/desktop** |
-| C | Close the behavior lens to 93/93 (`3ROK`/`3SPR`/`3DAI`) | Med | Completes the breadth milestone | Yes |
+| C | Close the behavior lens to 93/93 (`3ROK`/`3SPR`/`3DAI`) | Done | Breadth milestone complete | Yes |
 | D | Deferred gameplay mechanics (shrink-ray, fruit-fill, …) | High | Real gameplay, not just visuals | Partly |
 | E | Campaign playthrough hardening (end-to-end) | High | The game becomes *completable* | Partly |
 | F | Motion/path fidelity (patrol waypoints + water anchor) | Med–High | Fixes a whole class of float/stray bugs | Yes |
@@ -62,11 +63,12 @@ The remaining audio reports, plus the broader gap they expose.
   Entry points: `audio.c`, `behavior_soundfx.c`, `behavior_music.c`, the level start-object music wiring
   in `main.c`.
 
-### C. Close the behavior lens to 93/93
-The Asset Catalog's last three used-in-level FourCCs without a clean native vtable are
+### C. Close the behavior lens to 93/93 — DONE 2026-06-25
+The Asset Catalog's last three used-in-level FourCCs without a clean native vtable were
 **resolver/positioning gaps, not behavior gaps**: `3ROK` (origin pool), `3SPR` (no serialized canvas),
-`3DAI` (origin dummy). Finishing them marks the breadth milestone complete. Entry points:
-`tools/build_asset_catalog.py` (the lens), `entity_visual.c`, the decomp notes for each class.
+`3DAI` (origin dummy). They now route to `vt_resolver_inert`, which keeps them hidden/non-solid
+instead of inventing placement, canvas defaults, or AI motion. `behavior_todo.md` now reports
+93 used FourCCs, 93 with native vtables, 0 missing.
 
 ### D. Deferred gameplay mechanics
 Several mechanics were faithfully **deferred** (the port records the fact + gates the visual, but the
@@ -109,13 +111,11 @@ Offloadable, self-contained data-truth work that doesn't block the engine:
 ---
 
 ## Recommended ordering (opinion, not a mandate)
-1. **C (close the lens to 93/93)** — small, finishes a milestone, fully headless-verifiable.
-2. **F (motion/path systems)** — fixes #5 + #4 *and* prevents recurrence; the highest leverage of the
+1. **F (motion/path systems)** — fixes #5 + #4 *and* prevents recurrence; the highest leverage of the
    QA-adjacent work, and screenshot-verifiable.
-3. **E (campaign playthrough)** — the biggest "is it a game" jump; do it once the actors are all present.
-4. **B (audio)** — batch it for a session where a **desktop/noVNC** is available for by-ear checks; until
+2. **E (campaign playthrough)** — the biggest "is it a game" jump; do it once the actors are all present.
+3. **B (audio)** — batch it for a session where a **desktop/noVNC** is available for by-ear checks; until
    then only the resolution-path instrumentation is verifiable.
-5. **D / G / H** — opportunistic; D when a mechanic is specifically requested, G/H as polish.
+4. **D / G / H** — opportunistic; D when a mechanic is specifically requested, G/H as polish.
 
-> If you only have a short session and want a clean win: **Track C**. If you want to clear the QA board:
-> **Track F then A**, leaving **B** for when audio can actually be heard.
+> If you want to clear the QA board: **Track F then A**, leaving **B** for when audio can actually be heard.

@@ -87,6 +87,7 @@ extern const EntityVTable vt_stalactite;      /* 3STA — C3DStalagtite static t
 extern const EntityVTable vt_animsprite;      /* 3ANI — C3DAnimatedSprite sprites.omt frame animator */
 extern const EntityVTable vt_swingdoor;       /* 3SWN — C3DSwingDoor timed yaw-swing door */
 extern const EntityVTable vt_prop;            /* 3FLA/3HYD/3SCR/3TEL/3SPH/3CUB/3TOL/3OCT/3MER/3TRA/3SM1/3FUE/3TRI — gated static prop/effect leaves (owned gameplay deferred) */
+extern const EntityVTable vt_resolver_inert;  /* 3ROK/3SPR/3DAI — native inert rows whose unresolved visual/positioning stays hidden */
 /* SCENE-sequencer consumers (freed by the task-state story progression). */
 extern const EntityVTable vt_fowl;            /* 3FOW — C3DFowl per-level SCENE-window creature */
 extern const EntityVTable vt_cargo;           /* 3YCA — C3DYokCargo LEV5 SCENE-gated cargo prop */
