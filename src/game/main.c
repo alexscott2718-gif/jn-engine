@@ -677,6 +677,44 @@ static int entity_visual_foot_anchors(const Entity *e) {
     return 0;
 }
 
+static int water_surface_at(const World *world, float x, float z, float *out_y) {
+    if (!world || !out_y) return 0;
+    int found = 0;
+    float best_y = -1.0e30f;
+
+    for (int i = 0; i < world->placement_count; i++) {
+        const WorldPlacement *pl = &world->placements[i];
+        if (strncasecmp(pl->name, "ncwater", 7) != 0)
+            continue;
+
+        AseModel *m = model_cache_get(pl->ase_path);
+        if (!m) continue;
+
+        /* Static world placements draw at authored X/Y and flipped Z; water
+           meshes bake their surface height in local vertices. */
+        float min_x = pl->x + m->min[0];
+        float max_x = pl->x + m->max[0];
+        float draw_z = -pl->z;
+        float min_z = draw_z + m->min[2];
+        float max_z = draw_z + m->max[2];
+        if (x < min_x || x > max_x || z < min_z || z > max_z)
+            continue;
+
+        if (!found || m->max[1] > best_y) {
+            best_y = m->max[1];
+            found = 1;
+        }
+    }
+
+    if (!found) return 0;
+    *out_y = best_y;
+    return 1;
+}
+
+static int entity_visual_water_anchors(const Entity *e) {
+    return e && strncmp(e->type, "3SAI", 4) == 0;
+}
+
 static float clamp01(float v) {
     if (v < 0.0f) return 0.0f;
     if (v > 1.0f) return 1.0f;
@@ -993,6 +1031,11 @@ static void draw_scene(World *world, int jim_model_ok)
                         dx -= (m->min[0] + m->max[0]) * 0.5f * sc;
                         dy -= (m->min[1] + m->max[1]) * 0.5f * sc;
                         dz -= (m->min[2] + m->max[2]) * 0.5f * sc;
+                    }
+                    if (entity_visual_water_anchors(e)) {
+                        float water_y = 0.0f;
+                        if (water_surface_at(world, e->x, e->z, &water_y))
+                            dy = water_y - m->min[1] * sc;
                     }
                     if (entity_visual_foot_anchors(e) && m->min[1] < 0.0f)
                         dy -= m->min[1] * sc;

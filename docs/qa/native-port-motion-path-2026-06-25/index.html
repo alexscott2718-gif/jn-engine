@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Native Port - Motion/Path QA Pass - jn-engine</title>
+<style>
+* { box-sizing:border-box; margin:0; padding:0; }
+body { font-family:Monaco,Menlo,"Ubuntu Mono",monospace; background:#0d0d0d; color:#dedede; line-height:1.55; padding:24px 16px; }
+.wrap { max-width:1080px; margin:0 auto; }
+h1 { font-size:1.45rem; color:#fff; margin-bottom:4px; }
+h2 { font-size:1.08rem; color:#7ec8ff; border-bottom:1px solid #2a2a2a; padding-bottom:6px; margin:34px 0 12px; }
+h3 { font-size:0.98rem; color:#fff; margin:18px 0 4px; }
+p { margin:10px 0; color:#c8c8c8; }
+a { color:#7ec8ff; text-decoration:none; }
+a:hover { text-decoration:underline; }
+code { color:#d9c08a; }
+.sub { color:#888; font-size:0.84rem; }
+.badge { display:inline-block; border-radius:4px; padding:1px 8px; font-size:0.74rem; vertical-align:middle; }
+.green { background:#143a14; color:#7dde7d; border:1px solid #2c6e2c; }
+.blue { background:#1d2c3d; color:#9ecbff; border:1px solid #2c5a8a; }
+.amber { background:#33280e; color:#e6c66f; border:1px solid #6c5720; }
+.grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:12px; margin:18px 0; }
+.stat { background:#141414; border:1px solid #262626; border-radius:8px; padding:16px; }
+.stat strong { display:block; color:#fff; font-size:1.45rem; line-height:1.1; margin-bottom:4px; }
+.stat span { color:#999; font-size:0.8rem; }
+.card { background:#141414; border:1px solid #262626; border-radius:8px; padding:18px; margin:22px 0; }
+.meta { color:#888; font-size:0.8rem; margin-bottom:10px; }
+.fix { border-left:3px solid #2c6e2c; background:#0d160d; border-radius:0 6px 6px 0; color:#afd0af; padding:8px 12px; margin:12px 0; font-size:0.88rem; }
+.note { border-left:3px solid #6c5720; background:#181409; border-radius:0 6px 6px 0; color:#d8c184; padding:8px 12px; margin:12px 0; font-size:0.88rem; }
+table { width:100%; border-collapse:collapse; margin:14px 0; font-size:0.82rem; }
+th,td { text-align:left; padding:8px 9px; border-bottom:1px solid #242424; vertical-align:top; }
+th { color:#9a9a9a; font-weight:normal; }
+figure { margin:18px 0; background:#111; border:1px solid #262626; border-radius:8px; overflow:hidden; }
+img { display:block; width:100%; height:auto; }
+figcaption { color:#aaa; font-size:0.8rem; padding:8px 10px; border-top:1px solid #262626; }
+pre { overflow-x:auto; background:#0a0a0a; border:1px solid #242424; border-radius:6px; padding:10px 12px; font-size:0.76rem; color:#b8c8b8; margin:10px 0; }
+.footer { color:#777; border-top:1px solid #2a2a2a; margin-top:40px; padding-top:12px; font-size:0.8rem; }
+@media (max-width:760px) { .grid { grid-template-columns:1fr; } body { padding:18px 12px; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<h1>Native Port - Motion/Path QA Pass <span class="badge green">SHIPPED</span></h1>
+<p class="sub">Summary page &middot; 2026-06-25 &middot; branch <code>native-port</code>. This page covers the follow-up after the behavior-lens close-out: starting the recommended motion/path track, closing the level1 sailboat float, correcting the route diagnosis, updating the handoffs, and deploying the refreshed web build.</p>
+
+<h2>What Changed</h2>
+<p>The next recommended track was motion/path fidelity. The first item was QA #5: the level1 sailboat was visibly floating above the river. The entity's authored gameplay height was already faithful, so the fix stays in the renderer: draw <code>3SAI</code> with the sailboat hull seated on the static <code>ncwater*</code> surface without changing its authored position, AI state, or patrol route.</p>
+
+<div class="grid">
+  <div class="stat"><strong>#5 closed</strong><span>boat now seats on the water</span></div>
+  <div class="stat"><strong>18 / 24</strong><span>QA backlog reports fixed/verified</span></div>
+  <div class="stat"><strong>0 findings</strong><span>faithfulness audit across 35 levels</span></div>
+</div>
+
+<figure>
+  <img src="img/boat-after.png" alt="Level1 sailboat seated on the river after the water-anchor fix">
+  <figcaption>After: aimed native screenshot at the reported level1 boat area. The sailboat hull is seated on the river surface.</figcaption>
+</figure>
+
+<h2>The Fix</h2>
+<div class="card">
+<div class="meta"><code>src/game/main.c</code></div>
+<p>Added a narrow <code>water_surface_at()</code> helper that scans static placements named <code>ncwater*</code>. Static placement meshes draw at authored X, flipped Z, and world Y=0; their water height is baked into the mesh vertices. The helper uses each water mesh's draw-space X/Z bounds and local max-Y surface, then <code>3SAI</code> draws with <code>SailBoat.glb</code>'s local min-Y placed on that surface.</p>
+<div class="fix">The entity still keeps its authored <code>PositionY=17</code>. This is a visual seat correction, not a gameplay rewrite.</div>
+</div>
+
+<h2>Route Audit</h2>
+<p>The previous handoff said the sailboat also patrolled off the river. That was based on water placement centers, not mesh extents. The corrected audit shows the whole authored route is inside the river mesh.</p>
+<table>
+<tr><th>Evidence</th><th>Value</th></tr>
+<tr><td><code>ncwater</code> draw-space bounds</td><td>X <code>-4419.5..11706.0</code>, Z <code>-7296.8..-2524.6</code>, surface Y <code>-11.25</code></td></tr>
+<tr><td><code>SAILBOAT1</code> spawn</td><td><code>(458.2, 17.0, -4838.5)</code></td></tr>
+<tr><td>Patrol chain</td><td><code>BOAT2 -> boat3 -> boat4 -> boat5 -> boat6 -> boat7 -> WAIT</code></td></tr>
+<tr><td>Farthest reported point</td><td><code>boat7 (11144.6, -5635.7)</code>, still inside <code>ncwater</code></td></tr>
+</table>
+<div class="note">The remaining motion/path item is #4 Cindy pathing/wall-clip. The continuation menu now points there first; audio remains a desktop/noVNC track because headless xvfb has no audio device.</div>
+
+<h2>Published Outputs</h2>
+<table>
+<tr><th>Output</th><th>URL</th><th>Status</th></tr>
+<tr><td>Browser demo</td><td><a href="/jn-engine/">/jn-engine/</a></td><td><span class="badge green">live</span> <code>jnengine.aef9117b.js</code>, assets <code>a36b1109</code></td></tr>
+<tr><td>This summary</td><td><a href="/jn-engine/qa/native-port-motion-path-2026-06-25/">/jn-engine/qa/native-port-motion-path-2026-06-25/</a></td><td><span class="badge green">published</span></td></tr>
+<tr><td>Updated campaign ledger</td><td><a href="/jn-engine/qa/native-port-behavior-coverage-2026-06-24/">/jn-engine/qa/native-port-behavior-coverage-2026-06-24/</a></td><td><span class="badge green">updated</span> #5 no longer deferred</td></tr>
+</table>
+
+<h2>Validation</h2>
+<pre>make
+bash tools/qa_shot.sh /tmp/l1_boat_anchor_after.png 458 17 -4840 1300 140 -4350 level1 400
+python3 tools/audit_faithfulness.py
+make web
+python3 tools/qa_web_verify.py
+./tools/deploy_wasm.sh</pre>
+<table>
+<tr><th>Gate</th><th>Result</th></tr>
+<tr><td>Native build</td><td><span class="badge green">pass</span> existing SDL2_mixer archive warning only</td></tr>
+<tr><td>Aimed screenshot</td><td><span class="badge green">pass</span> sailboat seated on river</td></tr>
+<tr><td>Route bounds audit</td><td><span class="badge green">pass</span> all <code>BOAT2..boat7</code> waypoints inside <code>ncwater</code></td></tr>
+<tr><td>Faithfulness audit</td><td><span class="badge green">pass</span> 0 findings, 0 waived, 0 new across 35 levels</td></tr>
+<tr><td>Web build</td><td><span class="badge green">pass</span> 387 MB asset bundle warning only</td></tr>
+<tr><td>Browser QA</td><td><span class="badge green">pass</span> all 16 QA web checks passed</td></tr>
+<tr><td>Public URL check</td><td><span class="badge green">pass</span> live page references <code>jnengine.aef9117b.js</code></td></tr>
+</table>
+
+<h2>Docs Updated</h2>
+<table>
+<tr><th>Path</th><th>Purpose</th></tr>
+<tr><td><code>docs/qa/qa_backlog_campaign_handoff.md</code></td><td>#5 closed, route audit corrected, remaining open work updated</td></tr>
+<tr><td><code>docs/continuation_options.md</code></td><td>next recommended work path moved to Cindy pathing</td></tr>
+<tr><td><code>docs/PROJECT_HISTORY.md</code></td><td>boat water-anchor checkpoint added</td></tr>
+<tr><td><code>docs/qa/native-port-behavior-coverage-2026-06-24/</code></td><td>public campaign page updated from 17/24 to 18/24</td></tr>
+</table>
+
+<div class="footer">
+Previous summary: <a href="/jn-engine/qa/native-port-behavior-lens-2026-06-25/">behavior lens 93/93 close-out</a>
+&middot; Play: <a href="/jn-engine/">browser demo</a>
+&middot; Campaign ledger: <a href="/jn-engine/qa/native-port-behavior-coverage-2026-06-24/">QA backlog campaign</a>
+</div>
+
+</div>
+</body>
+</html>

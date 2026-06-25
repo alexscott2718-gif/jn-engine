@@ -31,7 +31,7 @@
 | 2 | l4 | 3SHE sheen3 | PLC | character floating | A | ✅ DONE (already grounded, verified) |
 | 3 | l4a | 3HUG C3DHUGH | PLC | not at ground level | A | ✅ DONE (added to foot-anchor) |
 | 4 | l3d | 3CIN C3DCINDY | OTH | off-ground + pathing/wall-clip | A | ⚠️ PARTIAL (ground ✅; pathing/clip TODO) |
-| 5 | l1 | 3SAI SAILBOAT1 | GFX | boat floats above river before lab | A | ⏸️ INVESTIGATED, DEFERRED (two coupled issues: ~14u vertical float vs water + patrol strays off-river; no clean faithful quick-fix — see findings) |
+| 5 | l1 | 3SAI SAILBOAT1 | GFX | boat floats above river before lab | A | ✅ DONE (`3SAI` visual anchors to `ncwater*` surface; patrol route audited inside water bounds) |
 | 6 | l6a | 3BUT C3DBUTTON | PLC | buttons floating + should flash black/red | A+visual | ✅ DONE (authored ship ASE + RGB pulse) |
 | 7 | l6a | 3DOR halldoor01 | OTH | doors should loop opening SFX until stop | I | ✅ DONE (`1e0d9d4`: loop soundeffects.omt[59] while moving, halt at fully-open) |
 | 8 | l6a | PROJ | MIS | should be plasma blast not baseball | C | ✅ DONE (enemy PROJ→missile.ASE; player keeps baseball) |
@@ -100,11 +100,11 @@ Validation re-run before commit (Session 2):
   (hydrant/nests/pads/boatl stay invisible referent triggers) — the gdish indicator is
   scoped to level1b only.
 
-**Reports closed & verified: 17/24** (#1×4, #2, #3, #4-ground, #6, #7, #8, #9, #10, #11, #14,
+**Reports closed & verified: 18/24** (#1×4, #2, #3, #4-ground, #5, #6, #7, #8, #9, #10, #11, #14,
 #15, #16, #17-by-validation).
 **#12 apple-pie = WONTFIX-as-bug** (authored fruit bowl; pie is a deferred mechanic).
 **#13 house02 floor = WONTFIX-as-faithful** (open-bottomed facade in source OMT; see findings above).
-Remaining open: #4-pathing, #5, #18–#24 (the rest of Group I audio: #18–#22, #23, #24).
+Remaining open: #4-pathing and #18–#24 (the rest of Group I audio: #18–#22, #23, #24).
 
 > **Audio verification note (carry forward):** xvfb has **no audio device**
 > ("Audio subsystem unavailable: dsp: No such audio device"), so Group I audio fixes
@@ -183,7 +183,7 @@ so the QA/player camera can't enter the shell — deferred as it risks changing 
 faithfulness and wasn't asked for. No reporter camera was recoverable for #13 (lu9 ticket not in
 Drive/Gmail); investigation used the structural geometry evidence above instead.
 
-## #5 3SAI boat — INVESTIGATED 2026-06-25 (Session 2 Claude): DEFERRED (two coupled issues)
+## #5 3SAI boat — FIXED 2026-06-25 (Session 3 Codex): water visual anchor + route audit
 Read the decomp first (`docs/decomp/C3DSailBoat.md`). Findings:
 - The boat renders as the **`SailBoat.glb` model** (entity_visual L297, `3SAI` -> SailBoat.glb;
   177 verts, NOT a sprite), drawn via `renderer_draw_model` at the entity's `e->y`.
@@ -192,27 +192,28 @@ Read the decomp first (`docs/decomp/C3DSailBoat.md`). Findings:
   (±5 tilt in AI states 2/3) is **deferred** in `behavior_vehicle.c` and is not a height change.
 - `SailBoat.glb` local Y span is **[-14.2, 127.4]**, so at world Y=17 the **hull bottom sits at
   world ≈ 2.8**. The `ncwater.glb` surface (top) is at world **≈ -11.25** (mesh max Y; placement
-  draws at Y=0 + baked verts). => the hull floats **~14u above the water surface**. (Issue 1.)
-- The reporter's runtime `pos.x ≈ 11025` is **well beyond all three level1 water meshes**
-  (`ncwater`/`ncwater2`/`ncwater3` are at X≈3643/7220), and `vt_ai_vehicle` patrols the authored
-  PatrolPoint chain (`BOAT2`...) at speed 400 via `behavior_ai_update_patrol` (seeks the full 3D
-  `wp->{x,y,z}`). So the boat also **wanders off the river onto land** -> "pathing needs
-  adjustment". (Issue 2.)
+  draws at Y=0 + baked verts). => the hull floated **~14u above the water surface**.
 
-Why deferred (not a quick guess):
-- Issue 1 has no clean faithful lever: authored Y=17 is correct, water surface -11.25 is the
-  OMT-baked value, and there is **no runtime water-height query** to foot-anchor a boat to a
-  water surface (the existing `entity_visual_foot_anchors()` snaps mesh-min<0 entities to GROUND
-  Y=0, which over water would still leave ~11u and isn't the river surface). A fix is either a
-  SailBoat.glb vertical-origin correction (needs checking our export vs the original mesh) or a
-  new water-surface anchor — both bigger than a one-liner.
-- Issue 2 needs the authored `BOAT2` waypoint chain audited against the original's on-river path;
-  our generic patrol may be following waypoints the original constrained differently.
-- **Next session:** verify the SailBoat.glb vertical origin against `assets/ase/omt/SailBoat.ASE`
-  / the original OMT chunk 13; dump the resolved patrol waypoints for SAILBOAT1 in level1 and
-  compare to the river geometry. Reporter cam (sandmanfan): entity (11024.9,17,-5639.6),
-  cam (11108.7,85.9,-5054.9), yaw -0.1848. Spawn-area shot that shows the float:
-  `/tmp/l1_boat_a.png` (`bash tools/qa_shot.sh OUT 458 17 -4840 1300 140 -4350 level1 400`).
+Fix:
+- Added a narrow renderer-side water query in `src/game/main.c`: scan static placements named
+  `ncwater*`, use their draw-space X/Z AABB and baked local max-Y as the water surface, and anchor
+  `3SAI` by placing `SailBoat.glb`'s local min-Y on that surface.
+- The entity's authored/gameplay Y remains unchanged; this is a visual seat correction, not a
+  patrol/state rewrite.
+
+Route audit correction:
+- The earlier "off-river" concern was based on water placement centers, not mesh extents. Actual
+  draw-space `ncwater` bounds are X **-4419.5..11706.0**, Z **-7296.8..-2524.6**, surface Y **-11.25**.
+- `SAILBOAT1` starts at `(458.2,17.0,-4838.5)`, and the authored `BOAT2 -> boat7` chain is all
+  inside `ncwater`: `BOAT2 (2562.9,-6170.7)`, `boat3 (4312.9,-6552.8)`,
+  `boat4 (6563.5,-6917.6)`, `boat5 (8270.8,-6485.4)`, `boat6 (10109.9,-5626.1)`,
+  `boat7 (11144.6,-5635.7)`.
+
+Validation:
+- `bash tools/qa_shot.sh /tmp/l1_boat_anchor_after.png 458 17 -4840 1300 140 -4350 level1 400`
+  shows the boat seated on the river.
+- Full native/web regression gates passed, and the refreshed web build is live as
+  `jnengine.aef9117b.js`, assets `a36b1109`.
 
 ## #22/#23 audio — refined findings (Session 2 Claude, not yet fixed)
 - **#22 l3a ride-track stacking:** re-confirmed `behavior_soundfx.c` (3SOU) is **clean** — its
@@ -227,7 +228,7 @@ Why deferred (not a quick guess):
   xvfb. Trace the *resolved db+index* by instrumenting the resolution path (or print
   `start->music_database`+MusicIndex in `main.c`) rather than relying on the mixer logs.
 
-## Resume here (Session 2)
+## Resume here (current)
 **Order of attack (tractable → hard):**
 1. ✅ **#14 3JIM l1 lab-facing (ORI)** — root cause: `place_player()` resolved the selected
    `STRT` marker but copied only its position, leaving Jimmy's stale level default yaw after
@@ -303,13 +304,15 @@ Why deferred (not a quick guess):
      only for the authored `gdish` interaction shape described above.
    - #17 needs no code: current native build already draws the coin and bone via
      the sprite DB; close as validation-only.
-4. **#5 3SAI boat (l1)** + **#4 3CIN pathing/wall-clip (l3d)** — both motion/path, harder; likely
-   need behavior work (boat follows a spline; Cindy path). Lower priority.
-5. ✅ **#13 house02 floor missing (l1)** — RESOLVED WONTFIX-as-faithful. house02 is an
+4. ✅ **#5 3SAI boat (l1)** — DONE. `3SAI` now visually anchors to the `ncwater*` surface, and
+   the authored `BOAT2 -> boat7` patrol route was audited inside the actual `ncwater` mesh bounds.
+5. **#4 3CIN pathing/wall-clip (l3d)** — next recommended motion/path item. Grounding is already
+   fixed; compare the remaining path/clip behavior against `docs/decomp/C3DCindy.md`.
+6. ✅ **#13 house02 floor missing (l1)** — RESOLVED WONTFIX-as-faithful. house02 is an
    open-bottomed facade in the source OMT (4% floor coverage, identical across level1/2/2b;
    only Jimmy's house gets a `HOUSE BASE`). Adding a floor invents geometry. See the
    "#13 house02 floor — INVESTIGATED" section above for the full evidence.
-6. **Group I audio** per the notes above. **#7 (l6a door loop) is ✅ DONE** (`1e0d9d4`).
+7. **Group I audio** per the notes above. **#7 (l6a door loop) is ✅ DONE** (`1e0d9d4`).
    Remaining audio: #18–#21 (l1c furniture proximity sounds), #22 (l3a ride-track stacking),
    #23 (l1a shrink-ray-as-music), #24 (l1 RocketPad voice line). Remember audio can't be
    heard headless — see the Audio verification note in the status block above.
@@ -317,7 +320,7 @@ Why deferred (not a quick guess):
 ## Finalize — ✅ DONE 2026-06-25 (Session 2 Claude)
 The batch was finalized and deployed:
 - `make` clean + `python3 tools/audit_faithfulness.py` → **0 findings / 35 levels**.
-- `./tools/deploy_wasm.sh` → **live** at `exentt.com/jn-engine` (`jnengine.5d94b61e.js`, assets `d489c38d`).
+- `./tools/deploy_wasm.sh` → **live** at `exentt.com/jn-engine` (currently `jnengine.aef9117b.js`, assets `a36b1109` after the #5 follow-up).
 - `python3 tools/qa_web_verify.py` → **16/16**.
 - **Resolution page:** per the user's direction, the per-reporter pages were **consolidated into one
   summary section** on the existing changelog `docs/qa/native-port-behavior-coverage-2026-06-24/index.html`

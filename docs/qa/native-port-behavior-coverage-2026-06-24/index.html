@@ -100,15 +100,16 @@ remaining 3 = 3ROK / 3SPR / 3DAI  (resolver/positioning gaps, not behavior gaps)
 <p class="sub">Verified against the live deployed build in headless Chromium: <code>?newgame=1</code> &rarr; Campaign: On at <code>level1b</code>; a real keydown fires <code>[TALK]</code> and does <em>not</em> toggle turbo; the Campaign button round-trips On/Off with the level swaps logged.</p>
 </div>
 
-<h2>QA backlog campaign &mdash; 4 community tickets <span class="badge green">17/24 CLOSED</span></h2>
+<h2>QA backlog campaign &mdash; 4 community tickets <span class="badge green">18/24 CLOSED</span></h2>
 <p class="sub">2026-06-24/25 &middot; branch <code>native-port</code> &middot; workflow <code>docs/qa_ticket_resolution_workflow.md</code> &middot; living handoff <code>docs/qa/qa_backlog_campaign_handoff.md</code></p>
-<p>With the behavior-coverage breadth above in place, this pass worked a backlog of <strong>four community QA tickets</strong> &mdash; sandmanfan (2026-06-24, 10 reports), two awefan tickets (level1 + level1b), and lu9 (2026-06-14) &mdash; deduped to <strong>24 unique reports</strong>. Each was taken through the same contract: read the matching <code>docs/decomp/&lt;Class&gt;.md</code> first, prefer authored data and engine rules over one-off edits, and hold the <code>tools/audit_faithfulness.py</code> gate at <strong>0 findings / 35 levels</strong> after every change. <strong>17 reports are fixed-and-verified</strong>, <strong>2 are resolved as faithful-to-original (WONTFIX-as-bug)</strong>, and <strong>5 remain open</strong> as documented motion/path and audio work.</p>
+<p>With the behavior-coverage breadth above in place, this pass worked a backlog of <strong>four community QA tickets</strong> &mdash; sandmanfan (2026-06-24, 10 reports), two awefan tickets (level1 + level1b), and lu9 (2026-06-14) &mdash; deduped to <strong>24 unique reports</strong>. Each was taken through the same contract: read the matching <code>docs/decomp/&lt;Class&gt;.md</code> first, prefer authored data and engine rules over one-off edits, and hold the <code>tools/audit_faithfulness.py</code> gate at <strong>0 findings / 35 levels</strong> after every change. <strong>18 reports are fixed-and-verified</strong>, <strong>2 are resolved as faithful-to-original (WONTFIX-as-bug)</strong>, and <strong>4 remain open</strong> as documented Cindy pathing and audio work.</p>
 
 <table>
 <tr><th>area</th><th>what landed</th><th>result</th></tr>
 <tr><td><span class="badge blue">Placement</span></td><td>3SPH invisible; foot-anchor 3HUG/3CIN/3SHE; STRT spawn-yaw on level loads</td><td>floating/mis-grounded actors seat correctly; Jimmy faces the authored way on lab-exit</td></tr>
 <tr><td><span class="badge blue">Model/visual</span></td><td>authored button meshes + RGB pulse; enemy <code>PROJ</code>&rarr;missile; <code>3FLE</code>&rarr;fleet commander; l3c <code>tree04</code> glb; bigger bouncier red neutrons</td><td>the reported wrong/floating models now draw the authored asset</td></tr>
 <tr><td><span class="badge blue">Logic gate</span></td><td>l1b <code>3ARR</code>/<code>LOAD</code> gated on authored <code>RequiredTask</code> + scoped Goddard-bowl <code>ShowArrow</code></td><td>campaign-only arrow/teleport no longer fire out of sequence; bowl arrow drawn</td></tr>
+<tr><td><span class="badge blue">Motion/path</span></td><td>l1 <code>3SAI</code> seats <code>SailBoat.glb</code> on the <code>ncwater*</code> surface; route bounds audited</td><td>boat no longer floats above the river; the reported patrol route is inside the water mesh</td></tr>
 <tr><td><span class="badge green">Audio</span></td><td>l6a doors loop <code>soundeffects.omt[59]</code> while moving, halt at fully-open</td><td>door open-SFX no longer one-shots short of the motion</td></tr>
 <tr><td><span class="badge amber">Faithful</span></td><td>apple-pie fruit bowl; house02 open-bottom facade</td><td>resolved WONTFIX-as-faithful &mdash; the &ldquo;defect&rdquo; is the original's authored data</td></tr>
 </table>
@@ -120,7 +121,7 @@ remaining 3 = 3ROK / 3SPR / 3DAI  (resolver/positioning gaps, not behavior gaps)
 <tr><td>2</td><td>l4</td><td>3SHE</td><td>character floating</td><td><span class="badge green">fixed</span> grounded</td></tr>
 <tr><td>3</td><td>l4a</td><td>3HUG</td><td>not at ground level</td><td><span class="badge green">fixed</span> foot-anchor</td></tr>
 <tr><td>4</td><td>l3d</td><td>3CIN</td><td>off-ground + pathing/wall-clip</td><td><span class="badge green">ground fixed</span> / <span class="badge amber">pathing open</span></td></tr>
-<tr><td>5</td><td>l1</td><td>3SAI</td><td>boat floats above river</td><td><span class="badge amber">investigated, deferred</span></td></tr>
+<tr><td>5</td><td>l1</td><td>3SAI</td><td>boat floats above river</td><td><span class="badge green">fixed</span> water anchor + route audit</td></tr>
 <tr><td>6</td><td>l6a</td><td>3BUT</td><td>buttons float + should flash</td><td><span class="badge green">fixed</span> mesh + RGB pulse</td></tr>
 <tr><td>7</td><td>l6a</td><td>3DOR</td><td>door SFX should loop until stop</td><td><span class="badge green">fixed</span> loop+halt</td></tr>
 <tr><td>8</td><td>l6a</td><td>PROJ</td><td>should be plasma not baseball</td><td><span class="badge green">fixed</span> enemy missile</td></tr>
@@ -155,8 +156,8 @@ remaining 3 = 3ROK / 3SPR / 3DAI  (resolver/positioning gaps, not behavior gaps)
 <div class="note"><strong>#12 apple-pie (l1c 3PIC).</strong> The authored <code>SpriteIndex=157</code> <em>is</em> &ldquo;FruitbowlEmty&rdquo; &mdash; the fruit bowl is correct. The apple pie comes from the unimplemented fruit-fill mechanic (&ldquo;Apple Pie%&rdquo;), deferred to mechanic work, not a texture swap.</div>
 <div class="note"><strong>#13 house02 floor (l1).</strong> Deterministic glb analysis shows <code>house02.glb</code> is an open-bottomed facade: its only low/horizontal up-facing faces cover ~4% of the footprint (a corner step), and the coverage is <em>identical</em> in level2/level2b &mdash; not a level1 export bug. The 6 background houses are all open shells; only Jimmy's house ships a dedicated <code>HOUSE BASE</code> mesh. Adding a floor would invent geometry the original never had; the reporter saw the hollow interior only via the free QA inspection camera, which normal collision keeps the player out of.</div>
 
-<h3>Still open &mdash; documented motion/path + audio work</h3>
-<div class="note"><strong>#5 boat (l1)</strong> and <strong>#4 Cindy pathing (l3d)</strong> are motion/path: the boat (<code>SailBoat.glb</code> at the faithful authored Y=17) floats ~14u above the water surface <em>and</em> patrols off-river, with no clean lever (no runtime water-height anchor); both need a mesh-origin / patrol-waypoint audit. The <strong>Group&nbsp;I audio</strong> set (l1c furniture proximity sounds #18&ndash;21, l3a ride-track stacking #22, l1a shrink-ray-as-music #23, l1 RocketPad voice line #24) is the remaining tail &mdash; 3SOU is confirmed clean (halts on exit), so the l3a stacking source is an as-yet-unidentified emitter. Audio cannot be verified by ear in the headless rig, so these are best finished against a desktop session. Full per-report evidence lives in the living handoff.</div>
+<h3>Still open &mdash; documented Cindy pathing + audio work</h3>
+<div class="note"><strong>#5 boat (l1) is closed</strong>: <code>3SAI</code> now seats on the <code>ncwater*</code> surface, and the earlier off-river concern was corrected by auditing the actual water mesh bounds; <code>BOAT2</code> through <code>boat7</code> are inside <code>ncwater</code>. The remaining motion/path item is <strong>#4 Cindy pathing (l3d)</strong>. The <strong>Group&nbsp;I audio</strong> set (l1c furniture proximity sounds #18&ndash;21, l3a ride-track stacking #22, l1a shrink-ray-as-music #23, l1 RocketPad voice line #24) is the remaining audio tail &mdash; 3SOU is confirmed clean (halts on exit), so the l3a stacking source is an as-yet-unidentified emitter. Audio cannot be verified by ear in the headless rig, so these are best finished against a desktop session. Full per-report evidence lives in the living handoff.</div>
 
 <h2>Validation gate (every step)</h2>
 <pre>make                                        # native build
@@ -165,7 +166,7 @@ python3 tools/build_asset_catalog.py        # refresh the coverage lens
 make web
 python3 tools/qa_web_verify.py              # 16/16 browser checks
 ./tools/deploy_wasm.sh                       # publish to exentt.com/jn-engine</pre>
-<p class="sub">Live build (with the QA-campaign fixes): <code>jnengine.5d94b61e.js</code>, assets <code>d489c38d</code> &mdash; deployed 2026-06-25. Each change is committed individually on the <code>native-port</code> branch.</p>
+<p class="sub">Live build (with the QA-campaign fixes): <code>jnengine.aef9117b.js</code>, assets <code>a36b1109</code> &mdash; deployed 2026-06-25. Each change is committed individually on the <code>native-port</code> branch.</p>
 
 <div class="footer">
 Coverage lens now <strong>90 / 93</strong> used FourCCs with native behavior (remaining: <code>3ROK</code> origin pool, <code>3SPR</code> no serialized canvas, <code>3DAI</code> origin dummy &mdash; resolver/positioning gaps).
