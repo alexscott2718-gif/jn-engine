@@ -25,6 +25,10 @@ int  audio_play_ex(int sound_id, int loops, int gain);
    gameplay SFX. */
 int  audio_play_db(const char *db, int handle, int loops, int gain);
 
+/* Best-effort duration for an authored OMT audio handle, in seconds. Returns
+   0 when audio is unavailable or the handle/path cannot be resolved. */
+float audio_duration_db(const char *db, int handle);
+
 /* Adjust / stop a previously returned channel. No-ops on invalid channels. */
 void audio_channel_gain(int channel, int gain);
 void audio_channel_halt(int channel);

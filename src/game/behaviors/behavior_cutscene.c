@@ -30,7 +30,8 @@
 #define CUTSCENE_MAX_SHOTS 32
 #define CUTSCENE_MAX_SEQUENCES 32
 #define CUTSCENE_MAX_STEPS 8
-#define CUTSCENE_SHOT_SECONDS 2.5f   /* per-shot hold; sequencer cadence */
+#define CUTSCENE_DEFAULT_SHOT_SECONDS 3.0f
+#define CUTSCENE_AUDIO_PAD_SECONDS 0.35f
 
 #ifdef __EMSCRIPTEN__
 #include <emscripten.h>
@@ -47,6 +48,7 @@ typedef struct {
     float min_dist, max_dist;/* distance clamp */
     float zoom_speed;        /* ZoomSpeed (distance ease rate) */
     float look_voffset;      /* LookVoffset */
+    float hold_seconds;      /* per-step hold, usually audio length + pad */
     int   camera_type;       /* CameraType, currently used only as framing hint */
 } CutSceneShot;
 
@@ -76,6 +78,7 @@ static struct {
     int   cur;               /* active shot index */
     float shot_t;            /* time in the current shot */
     float dist;              /* eased distance toward the target */
+    float shot_duration;     /* duration of the current active shot */
     int   audio_channel;      /* active per-shot audio channel, or -1 */
     int   playing_sequence_index;
 } g_cut;
@@ -88,6 +91,15 @@ void cutscene_reset(void) {
 
 /* ---- 3CAM: register a shot on spawn ------------------------------------- */
 
+static CutSceneShot *prepend_shot(void) {
+    if (g_cut.count >= CUTSCENE_MAX_SHOTS) return NULL;
+    memmove(&g_cut.shots[1], &g_cut.shots[0],
+            sizeof(g_cut.shots[0]) * (size_t)g_cut.count);
+    g_cut.count++;
+    memset(&g_cut.shots[0], 0, sizeof(g_cut.shots[0]));
+    return &g_cut.shots[0];
+}
+
 static void cam_on_spawn(Entity *e, World *w) {
     (void)w;
     /* Inert placeable: no mesh, no collision. The shot is data for the runtime. */
@@ -95,8 +107,8 @@ static void cam_on_spawn(Entity *e, World *w) {
     e->visible = 0;
     e->runtime_flags &= ~(ENTITY_FLAG_SOLID | ENTITY_FLAG_TRIGGER);
 
-    if (g_cut.count >= CUTSCENE_MAX_SHOTS) return;
-    CutSceneShot *s = &g_cut.shots[g_cut.count];
+    CutSceneShot *s = prepend_shot();
+    if (!s) return;
     /* CameraTarget is mapped onto activate_target by the .gam loader. */
     snprintf(s->target, sizeof(s->target), "%s", e->activate_target);
     snprintf(s->sound_db, sizeof(s->sound_db), "%s", e->sound_database);
@@ -109,11 +121,20 @@ static void cam_on_spawn(Entity *e, World *w) {
     s->max_dist     = gam_prop_f(e, "MaxDist", 4000.0f);
     s->zoom_speed   = gam_prop_f(e, "ZoomSpeed", 1.0f);
     s->look_voffset = gam_prop_f(e, "LookVoffset", 0.0f);
+    s->hold_seconds = CUTSCENE_DEFAULT_SHOT_SECONDS;
     s->camera_type  = gam_prop_i(e, "CameraType", 0);
-    g_cut.count++;
 }
 
 /* ---- 3MCA: sequencer presence ------------------------------------------- */
+
+static CutSceneSequence *prepend_sequence(void) {
+    if (g_cut.seq_count >= CUTSCENE_MAX_SEQUENCES) return NULL;
+    memmove(&g_cut.seqs[1], &g_cut.seqs[0],
+            sizeof(g_cut.seqs[0]) * (size_t)g_cut.seq_count);
+    g_cut.seq_count++;
+    memset(&g_cut.seqs[0], 0, sizeof(g_cut.seqs[0]));
+    return &g_cut.seqs[0];
+}
 
 static void mca_on_spawn(Entity *e, World *w) {
     (void)w;
@@ -121,8 +142,8 @@ static void mca_on_spawn(Entity *e, World *w) {
     e->visible = 0;
     e->runtime_flags &= ~(ENTITY_FLAG_SOLID | ENTITY_FLAG_TRIGGER);
 
-    if (g_cut.seq_count >= CUTSCENE_MAX_SEQUENCES) return;
-    CutSceneSequence *seq = &g_cut.seqs[g_cut.seq_count];
+    CutSceneSequence *seq = prepend_sequence();
+    if (!seq) return;
     snprintf(seq->tag, sizeof(seq->tag), "%s", e->tag[0] ? e->tag : "3MCA");
     snprintf(seq->sound_db, sizeof(seq->sound_db), "%s", e->sound_database);
 
@@ -149,8 +170,11 @@ static void mca_on_spawn(Entity *e, World *w) {
         step->look_voffset = gam_prop_f(e, key, 100.0f);
     }
 
-    if (seq->count > 0)
-        g_cut.seq_count++;
+    if (seq->count <= 0) {
+        memmove(&g_cut.seqs[0], &g_cut.seqs[1],
+                sizeof(g_cut.seqs[0]) * (size_t)(g_cut.seq_count - 1));
+        g_cut.seq_count--;
+    }
 }
 
 /* ---- Runtime ------------------------------------------------------------ */
@@ -169,6 +193,17 @@ static const CutSceneShot *find_shot_template(const char *target) {
     return NULL;
 }
 
+static float cutscene_desired_dist(const CutSceneShot *s) {
+    float want = s->initial_dist * 0.45f;
+    if (want < 220.0f) want = 220.0f;
+    if (want > 760.0f) want = 760.0f;
+    if (s->min_dist > 0.0f && want < s->min_dist * 0.45f)
+        want = s->min_dist * 0.45f;
+    if (s->max_dist > 0.0f && want > s->max_dist * 0.65f)
+        want = s->max_dist * 0.65f;
+    return want;
+}
+
 static void cutscene_halt_audio(void) {
     if (g_cut.audio_channel >= 0) {
         audio_channel_halt(g_cut.audio_channel);
@@ -181,12 +216,19 @@ static void cutscene_play_current_audio(void) {
     if (!g_cut.playing || g_cut.cur < 0 || g_cut.cur >= g_cut.active_count)
         return;
     CutSceneShot *s = &g_cut.active[g_cut.cur];
+    float duration = 0.0f;
     if (s->sound_index >= 0) {
+        duration = audio_duration_db(s->sound_db, s->sound_index);
         g_cut.audio_channel = audio_play_db(s->sound_db, s->sound_index, 0, 128);
-        printf("[CUTSCENE] audio %s[%d] channel=%d\n",
+        printf("[CUTSCENE] audio %s[%d] duration=%.2fs channel=%d\n",
                s->sound_db[0] ? s->sound_db : "soundeffects.omt",
-               s->sound_index, g_cut.audio_channel);
+               s->sound_index, duration, g_cut.audio_channel);
     }
+    if (duration > 0.0f)
+        s->hold_seconds = duration + CUTSCENE_AUDIO_PAD_SECONDS;
+    if (s->hold_seconds < CUTSCENE_DEFAULT_SHOT_SECONDS)
+        s->hold_seconds = CUTSCENE_DEFAULT_SHOT_SECONDS;
+    g_cut.shot_duration = s->hold_seconds;
 }
 
 static void cutscene_start_active(int sequence_index, const char *label) {
@@ -197,7 +239,8 @@ static void cutscene_start_active(int sequence_index, const char *label) {
     g_cut.playing = 1;
     g_cut.cur = 0;
     g_cut.shot_t = 0.0f;
-    g_cut.dist = g_cut.active[0].initial_dist;
+    g_cut.dist = cutscene_desired_dist(&g_cut.active[0]);
+    g_cut.shot_duration = g_cut.active[0].hold_seconds;
     g_cut.playing_sequence_index = sequence_index;
     printf("[CUTSCENE] play %s: %d shot(s)\n",
            label ? label : "sequence", g_cut.active_count);
@@ -245,10 +288,11 @@ int cutscene_request_index(int index) {
             dst->offset[0] = 0.0f;
             dst->offset[1] = 0.0f;
             dst->offset[2] = 0.0f;
-            dst->initial_dist = 900.0f;
-            dst->min_dist = 250.0f;
-            dst->max_dist = 1800.0f;
+            dst->initial_dist = 520.0f;
+            dst->min_dist = 220.0f;
+            dst->max_dist = 900.0f;
             dst->zoom_speed = 8.0f;
+            dst->hold_seconds = CUTSCENE_DEFAULT_SHOT_SECONDS;
         }
         snprintf(dst->sound_db, sizeof(dst->sound_db), "%s", seq->sound_db);
         dst->sound_index = step->sound_index;
@@ -281,21 +325,24 @@ void cutscene_update(Camera *cam, World *w, float dt) {
         float ty = target->y + s->offset[1];
         float tz = target->z + s->offset[2];
 
-        /* Ease the framing distance toward InitialDist at ZoomSpeed, clamped. */
-        float want = s->initial_dist;
-        if (want < s->min_dist) want = s->min_dist;
-        if (want > s->max_dist) want = s->max_dist;
+        /* The authored distance fields are tuned for the original D3D camera
+           path and read too wide in the native QA harness. Keep their relative
+           intent, but pull in enough that dialogue targets are readable. */
+        float want = cutscene_desired_dist(s);
         g_cut.dist += (want - g_cut.dist) * (s->zoom_speed * dt);
 
         /* Look point: the target with the vertical look offset applied. */
         float lx = tx, ly = ty + s->look_voffset, lz = tz;
 
-        /* Place the camera back from the look point along a fixed framing
-           bearing and derive yaw/pitch to look at it (Camera has no look-at). */
-        float bearing = 0.6f + 0.45f * (float)(s->camera_type & 3);
-        float cx = lx - sinf(bearing) * g_cut.dist;
-        float cz = lz - cosf(bearing) * g_cut.dist;
-        float cy = ly + g_cut.dist * 0.35f;
+        /* Place the camera in front of the current speaker, with a small
+           CameraType-dependent shoulder offset, then look back at the target. */
+        float front = target->ry;
+        float shoulder = ((s->camera_type & 1) ? 0.45f : -0.45f);
+        float sx = sinf(front + 1.5707963f) * shoulder * g_cut.dist;
+        float sz = -cosf(front + 1.5707963f) * shoulder * g_cut.dist;
+        float cx = lx + sinf(front) * g_cut.dist + sx;
+        float cz = lz - cosf(front) * g_cut.dist + sz;
+        float cy = ly + g_cut.dist * 0.18f;
 
         cam->pos[0] = cx;
         cam->pos[1] = cy;
@@ -310,7 +357,7 @@ void cutscene_update(Camera *cam, World *w, float dt) {
     }
 
     g_cut.shot_t += dt;
-    if (g_cut.shot_t >= CUTSCENE_SHOT_SECONDS) {
+    if (g_cut.shot_t >= g_cut.shot_duration) {
         g_cut.cur++;
         g_cut.shot_t = 0.0f;
         if (g_cut.cur >= g_cut.active_count) {
@@ -318,7 +365,7 @@ void cutscene_update(Camera *cam, World *w, float dt) {
             printf("[CUTSCENE] sequence complete -> return to gameplay camera\n");
             return;
         }
-        g_cut.dist = g_cut.active[g_cut.cur].initial_dist;
+        g_cut.dist = cutscene_desired_dist(&g_cut.active[g_cut.cur]);
         printf("[CUTSCENE] shot %d/%d target='%s'\n",
                g_cut.cur + 1, g_cut.active_count, g_cut.active[g_cut.cur].target);
         cutscene_play_current_audio();

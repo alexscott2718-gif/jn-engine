@@ -1154,6 +1154,16 @@ started when that step begins. Validation: `make`, `audit_faithfulness.py` 0 fin
 Stop inactive). Public catalog: `/jn-engine/qa/cutscene-catalog-2026-06-25/`; source plan:
 `docs/cutscene_web_test_plan.md`. Deployed live as `jnengine.d46fd728.js`, assets `ce4be1e9`.
 
+**Cutscene selector/timing/framing follow-up (2026-06-25).** User testing found three harness-fidelity issues:
+selected titles did not match the played cutscene, voice clips were cut off by the fixed 2.5s shot cadence, and
+dialogue framing was too distant/off-angle. Root causes/fixes: `world_add()` prepends entities, so cutscene runtime
+registration now prepends `3MCA`/`3CAM` rows to restore forward `.gam`/catalog order; cutscene steps now query the
+resolved `SoundDatabase`/`SoundIndexN` WAV duration and hold until clip length + pad; camera distance is pulled into a
+readable dialogue range and placed in front of the speaking target using authored yaw plus a small shoulder offset.
+Validation: `make`, faithfulness audit 0 findings / 35 levels, `make web`, `qa_web_verify.py`, and targeted Playwright
+on `level1b` proving dropdown `neutron1a` starts runtime `neutron1a`, resolves first clip duration 4.14s, and stays
+active after 1.5s. Deployed live as `jnengine.d46fd728.js`, assets `b6836ee8`.
+
 ---
 
 ## Era 15 — Mesh collision world: ground, walls, step-up (~June 24)

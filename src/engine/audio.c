@@ -206,6 +206,29 @@ int audio_play_db(const char *db, int handle, int loops, int gain) {
     return channel;
 }
 
+float audio_duration_db(const char *db, int handle) {
+    if (!audio_initialized) return 0.0f;
+    if (handle < 0) return 0.0f;
+
+    char path[256];
+    if (!resolve_audio_handle(db, handle, 0, path, sizeof(path)))
+        return 0.0f;
+    Mix_Chunk *chunk = load_chunk_cached(path);
+    if (!chunk) return 0.0f;
+
+    int freq = 0;
+    Uint16 format = 0;
+    int channels = 0;
+    if (!Mix_QuerySpec(&freq, &format, &channels) || freq <= 0 || channels <= 0)
+        return 0.0f;
+
+    int bits = SDL_AUDIO_BITSIZE(format);
+    if (bits <= 0) bits = 16;
+    float bytes_per_second = (float)freq * (float)channels * ((float)bits / 8.0f);
+    if (bytes_per_second <= 0.0f) return 0.0f;
+    return (float)chunk->alen / bytes_per_second;
+}
+
 void audio_channel_gain(int channel, int gain) {
     if (!audio_initialized || channel < 0) return;
     if (gain < 0)   gain = 0;
