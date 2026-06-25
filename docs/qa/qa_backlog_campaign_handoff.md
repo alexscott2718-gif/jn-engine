@@ -42,7 +42,7 @@
 | 13 | l1 | house02 | GFX | floor under house missing entirely | G | ⬜ TODO (OMT geometry) |
 | 14 | l1 | 3JIM JIM1 | ORI | faces lab not house on lab-exit | E | ✅ DONE (STRT yaw copied on spawn) |
 | 15 | l3c | 3BUT n03 | ORI | orientation off | E | ✅ DONE (authored button mesh + tint pulse) |
-| 16 | l1b | 3ARR C3DARROW | PLC | misplaced (should be over Goddard bowl); lab-water teleport wrong | H | 🛠️ FIX IMPLEMENTED, UNCOMMITTED (make + audit 0; see WIP notes) |
+| 16 | l1b | 3ARR C3DARROW | PLC | misplaced (should be over Goddard bowl); lab-water teleport wrong | H | ✅ DONE (committed `a502aa5`: task-gate 3ARR/LOAD + scoped gdish ShowArrow) |
 | 17 | l1b | 3PIC C3DPICKUPITEM | PLC | missing coin pickup (only bone) | H | ✅ VALIDATED (coin+bone visible; no code change needed) |
 | 18 | l1c | LRoom | OTH | piano + TV proximity sound | I | ⬜ TODO (audio feature) |
 | 19 | l1c | MBEDROOM1 | OTH | radio proximity sound | I | ⬜ TODO |
@@ -64,15 +64,18 @@
 - `e026d18` — qa(spawn): apply start-point yaw on level loads. (#14)
 - `3e312af` — qa(button): draw authored button meshes and color pulse. (#6,#15)
 - `48052f6` — docs(qa): refresh level1b handoff.
+- `e1d519b` — docs(qa): checkpoint level1b WIP.
+- `a502aa5` — qa(l1b): gate 3ARR/LOAD on authored RequiredTask + Goddard-bowl ShowArrow. (#16; #17 closed-by-validation)
 
-## Current WIP — DO NOT LOSE (uncommitted as of usage checkpoint)
-There are **uncommitted code changes** for #16 in:
+## #16 — COMMITTED (`a502aa5`, 2026-06-25 — Session 2 Claude)
+Formerly WIP; the uncommitted #16 changes were reviewed, rebuilt, regression-audited, and
+committed. Code in:
 - `src/game/behaviors/behavior_base.{c,h}`
 - `src/game/behaviors/behavior_arrow.c`
 - `src/game/behaviors/behavior_load.c`
 - `src/game/main.c`
 
-WIP behavior:
+Behavior (as shipped):
 - Adds `behavior_required_task_gate_allows()`:
   - If a campaign task store exists, evaluates `RequiredTask`/`RequiredLevel`/`ExactLevel`
     against that task state (e.g. `SCENE`).
@@ -86,28 +89,19 @@ WIP behavior:
   `NextTrigger=godeat`). This deliberately does **not** change the global chunk-106 hidden
   rule, so level1 hydrant/nests/pads/boatl remain invisible referent triggers.
 
-Validation already run on the WIP:
-- `make` passed.
-- `/tmp/l1b_goddard_bowl_after.png` shows the yellow arrow over the Goddard dish.
-- `--newgame` audit at seeded `SCENE=30` shows row 44/46 `RequiredLevel=65` lab-water
-  `LOAD`/`3ARR` are gated, while row 90 `gdish` emits `kind=pickup-arrow`.
-- `JN_AUDIT=1 --level Level1` regression probe shows level1 `hydrant`, `nest1`, `nest2`,
-  `boatl`, `pad`, `pad2` remain `kind=hidden`, with no `pickup-arrow`.
-- `python3 tools/audit_faithfulness.py` passed:
-  `0 findings (0 waived, 0 NEW) -> build/audit_faithfulness.json`; level1b summary includes
-  `pickup-arrow=1`.
+Validation re-run before commit (Session 2):
+- Forced rebuild of all changed TUs → `make` exit 0 (only the pre-existing benign
+  SDL2_mixer archive-member linker warning).
+- `python3 tools/audit_faithfulness.py` → `0 findings (0 waived, 0 NEW)` across 24 levels;
+  level1b summary now reports `pickup-arrow=1`.
+- Regression: level1 audit summary has **no** `pickup-arrow` key and keeps `hidden=7`
+  (hydrant/nests/pads/boatl stay invisible referent triggers) — the gdish indicator is
+  scoped to level1b only.
 
-Next session should:
-1. Review the WIP diff.
-2. Optionally take one more focused screenshot/probe:
-   `bash tools/qa_shot.sh /tmp/l1b_goddard_bowl_after.png -133 80 196 -133 80 650 level1b 450`
-   and/or the `--newgame` audit above.
-3. Update this handoff statuses if satisfied, then commit the WIP code with a root-cause
-   message for #16 and note #17 as validation-closed.
-
-**Reports closed & verified: 15/24** (#1×4, #2, #3, #4-ground, #6, #8, #9, #10, #11, #14, #15, #17-by-validation).
+**Reports closed & verified: 16/24** (#1×4, #2, #3, #4-ground, #6, #8, #9, #10, #11, #14,
+#15, #16, #17-by-validation).
 **#12 apple-pie = WONTFIX-as-bug** (authored fruit bowl; pie is a deferred mechanic).
-Remaining open: #4-pathing, #5, #7, #13, #16 WIP, #18–#24 (incl. all of Group I audio).
+Remaining open: #4-pathing, #5, #7, #13, #18–#24 (incl. all of Group I audio).
 
 **Regression gate PASSED at session-1 end:** `python3 tools/audit_faithfulness.py` →
 **0 findings / 0 NEW across all 24 levels** with all 11-report changes in. Native `make`
@@ -170,8 +164,10 @@ The audio system (read before touching #18–#24):
    `/tmp/button_l3c_n03_before_close.png` → `/tmp/button_l3c_n03_after_close.png`; audit logs
    resolve l6a to `assets/ase/buttonupship.ASE` and l3c n03 to `assets/ase/buttonup.ASE`.
    `python3 tools/audit_faithfulness.py` stayed 0 findings.
-3. 🛠️ **#16/#17 l1b 3ARR + 3PIC** — #16 code implemented but uncommitted; #17 validated current build.
-   Read specs: `docs/decomp/CLoadLevel.md`, `docs/decomp/C3DArrow.md`,
+3. ✅ **#16/#17 l1b 3ARR + 3PIC** — DONE. #16 committed `a502aa5` (task-gate 3ARR/LOAD +
+   scoped gdish ShowArrow arrow); #17 closed by validation (current build already draws
+   the coin + bone). See the "#16 — COMMITTED" section above for the shipped behavior +
+   re-run validation. Specs read: `docs/decomp/CLoadLevel.md`, `docs/decomp/C3DArrow.md`,
    `docs/decomp/C3DPickupItem.md`, `docs/decomp/C3DGoddard.md`.
 
    **Important evidence already gathered (do not re-derive):**
