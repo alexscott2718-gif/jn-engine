@@ -42,8 +42,8 @@
 | 13 | l1 | house02 | GFX | floor under house missing entirely | G | ⬜ TODO (OMT geometry) |
 | 14 | l1 | 3JIM JIM1 | ORI | faces lab not house on lab-exit | E | ✅ DONE (STRT yaw copied on spawn) |
 | 15 | l3c | 3BUT n03 | ORI | orientation off | E | ✅ DONE (authored button mesh + tint pulse) |
-| 16 | l1b | 3ARR C3DARROW | PLC | misplaced (should be over Goddard bowl); lab-water teleport wrong | H | ⬜ TODO |
-| 17 | l1b | 3PIC C3DPICKUPITEM | PLC | missing coin pickup (only bone) | H | ⬜ TODO |
+| 16 | l1b | 3ARR C3DARROW | PLC | misplaced (should be over Goddard bowl); lab-water teleport wrong | H | 🔎 IN PROGRESS (see Session-2 handoff notes below) |
+| 17 | l1b | 3PIC C3DPICKUPITEM | PLC | missing coin pickup (only bone) | H | 🔎 IN PROGRESS / likely validation-close (coin+bone visible in current build; see notes) |
 | 18 | l1c | LRoom | OTH | piano + TV proximity sound | I | ⬜ TODO (audio feature) |
 | 19 | l1c | MBEDROOM1 | OTH | radio proximity sound | I | ⬜ TODO |
 | 20 | l1c | BATHROOM | OTH | toilet/sink proximity sound | I | ⬜ TODO |
@@ -62,7 +62,7 @@
 - `a573ad8` — qa(3RED): bigger red neutrons + more visible bounce (#11) + handoff.
 - `965cf54` — docs(qa): handoff (Group C done).
 - `e026d18` — qa(spawn): apply start-point yaw on level loads. (#14)
-- current button fix — qa(button): draw authored button meshes and color pulse. (#6,#15)
+- `3e312af` — qa(button): draw authored button meshes and color pulse. (#6,#15)
 
 **Reports closed & verified: 14/24** (#1×4, #2, #3, #4-ground, #6, #8, #9, #10, #11, #14, #15).
 **#12 apple-pie = WONTFIX-as-bug** (authored fruit bowl; pie is a deferred mechanic).
@@ -129,8 +129,67 @@ The audio system (read before touching #18–#24):
    `/tmp/button_l3c_n03_before_close.png` → `/tmp/button_l3c_n03_after_close.png`; audit logs
    resolve l6a to `assets/ase/buttonupship.ASE` and l3c n03 to `assets/ase/buttonup.ASE`.
    `python3 tools/audit_faithfulness.py` stayed 0 findings.
-3. **#16/#17 l1b 3ARR + 3PIC** — 3ARR arrow misplaced (should sit above Goddard's bowl) + a wrong
-   lab-water teleport; 3PIC missing coin pickup. Placement/authored-data.
+3. 🔎 **#16/#17 l1b 3ARR + 3PIC** — active investigation; no code commit yet.
+   Read specs: `docs/decomp/CLoadLevel.md`, `docs/decomp/C3DArrow.md`,
+   `docs/decomp/C3DPickupItem.md`, `docs/decomp/C3DGoddard.md`.
+
+   **Important evidence already gathered (do not re-derive):**
+   - `level1b.gam` row 5 `LOAD LABTONEIGH`: source `(25.533840,103.201248,1043.947876)`,
+     runtime `(25.534,103.201,-1043.948)`, `LevelName=level1.gam`, `StartPoint=level1`,
+     `RequiredTask=SCENE`, `RequiredLevel=60`, `ExactLevel=-1`, `Radius=200`.
+   - `level1b.gam` row 6 `3ARR C3DARROW`: source `(25.924206,276.528595,921.510315)`,
+     runtime `(25.924,276.529,-921.510)`, `SpriteIndex=33`, `SpriteSize=200`,
+     `RequiredTask=none`, `RequiredLevel=0`. This is the visible lab/neighborhood
+     marker, not the Goddard bowl marker.
+   - `level1b.gam` row 44 `LOAD C3DLOADLEVEL`: source `(3797.720703,-1045.024292,-3314.142090)`,
+     runtime `(3797.721,-1045.024,3314.142)`, `LevelName=level1.gam`,
+     `StartPoint=riverlab`, `RequiredTask=scene`, `RequiredLevel=65`, `Radius=250`.
+   - `level1b.gam` row 46 `3ARR C3DARROW`: source `(3799.482178,-839.430786,-3184.649414)`,
+     runtime `(3799.482,-839.431,3184.649)`, `SpriteIndex=33`, `SpriteSize=200`,
+     `RequiredTask=scene`, `RequiredLevel=65`.
+   - `level1b.gam` row 90 `3PIC gdish`: source `(-133.129089,23.234327,-196.291321)`,
+     runtime about `(-133,19/23,196)`, `SpriteIndex=106` (hidden canvas),
+     `ShowArrow=1`, `RequiredPicNum=4`, `Radius=200`, `InitallyActive=1`,
+     `ToggleObject=refill`, `NextTrigger=godeat`. Native correctly hides chunk 106,
+     but currently does **not** draw the authored `ShowArrow` indicator, which
+     explains the reporter seeing only the separate lab arrow instead of an arrow
+     above Goddard's bowl.
+   - `level1b.gam` row 120 `3PIC C3DPICKUPITEM`: runtime about `(1672.997,256.013,213.418)`,
+     `SpriteIndex=52` (`sprites.omt` chunk 52 = `2coin0000`), `SpriteSize=50`,
+     `RequiredLevel=140`, `InitallyActive=1`.
+   - `level1b.gam` row 122 `3PIC C3DPICKUPITEM`: runtime about `(1675.123,256.136,136.934)`,
+     `SpriteIndex=104` (`bone`), `SpriteSize=50`, `RequiredLevel=-1`, `InitallyActive=1`.
+
+   **Visual/audit artifacts already captured:**
+   - `/tmp/l1b_arrow_first.png` — direct shot of row 6 lab marker; yellow down-arrow
+     visible at the lab/neighborhood marker.
+   - `/tmp/l1b_goddard_bowl.png` — bowl/cushion shot; blue `GODDARD` dish visible,
+     but no `ShowArrow` marker above the hidden `gdish` trigger yet.
+   - `/tmp/l1b_coin_bone_close1.png`, `/tmp/l1b_coin_bone_close2.png`,
+     `/tmp/l1b_coin_bone_close3.png` — tight shots around rows 120/122. Current build
+     visibly draws the coin and bone side by side (one angle frames both cleanly).
+   - `JN_AUDIT=1 ... --level level1b` already logged row 120 as
+     `assets/parsed/sprites/sprites_images/0080_64x64d32.png` and row 122 as
+     `assets/parsed/sprites/sprites_images/0115_64x64d16.png`.
+
+   **Likely root causes / safe fix boundary:**
+   - `CLoadLevel.md` states the proximity/prerequisite test checks `RequiredTask` /
+     `RequiredLevel` / `ExactLevel` before activation. Native `behavior_load.c`
+     currently ignores those gates and uses hard-coded `60,60,60` trigger extents
+     instead of authored `Radius`. Fix candidate: make `LOAD` use `Radius`, and
+     gate activation on the named task state when a campaign task store is loaded
+     (fallback to current direct `--level` behavior unless explicit `JN_PROGRESS_LEVEL`
+     is set). Apply the same task-state gate to `C3DArrow` visibility.
+   - For the Goddard-bowl arrow, do **not** undo the global chunk-106 hidden-canvas
+     rule from the 2026-06-12 QA page. Instead draw a separate indicator only for
+     active hidden `3PIC` triggers that explicitly author `ShowArrow=1` and have
+     a real interaction requirement. `gdish` is the target (`RequiredPicNum=4`);
+     broad “all hidden pickups get arrows” would clutter known-valid invisible
+     referents such as level1 hydrant/nests/pads.
+   - #17 may not need code: the current native build already draws the coin and
+     bone via the sprite DB. Close only after one final screenshot/audit pass, and
+     note that the old symptom was either pre-existing resolver state or a bad
+     camera/framing of the shelf area.
 4. **#5 3SAI boat (l1)** + **#4 3CIN pathing/wall-clip (l3d)** — both motion/path, harder; likely
    need behavior work (boat follows a spline; Cindy path). Lower priority.
 5. **#13 house02 floor missing (l1)** — OMT geometry: the floor mesh under house02 isn't drawn
