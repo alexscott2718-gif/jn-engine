@@ -31,7 +31,7 @@
 | 2 | l4 | 3SHE sheen3 | PLC | character floating | A | ✅ DONE (already grounded, verified) |
 | 3 | l4a | 3HUG C3DHUGH | PLC | not at ground level | A | ✅ DONE (added to foot-anchor) |
 | 4 | l3d | 3CIN C3DCINDY | OTH | off-ground + pathing/wall-clip | A | ⚠️ PARTIAL (ground ✅; pathing/clip TODO) |
-| 5 | l1 | 3SAI SAILBOAT1 | GFX | boat floats above river before lab | A | ⬜ TODO (path/anim, not simple anchor) |
+| 5 | l1 | 3SAI SAILBOAT1 | GFX | boat floats above river before lab | A | ⏸️ INVESTIGATED, DEFERRED (two coupled issues: ~14u vertical float vs water + patrol strays off-river; no clean faithful quick-fix — see findings) |
 | 6 | l6a | 3BUT C3DBUTTON | PLC | buttons floating + should flash black/red | A+visual | ✅ DONE (authored ship ASE + RGB pulse) |
 | 7 | l6a | 3DOR halldoor01 | OTH | doors should loop opening SFX until stop | I | ✅ DONE (`1e0d9d4`: loop soundeffects.omt[59] while moving, halt at fully-open) |
 | 8 | l6a | PROJ | MIS | should be plasma blast not baseball | C | ✅ DONE (enemy PROJ→missile.ASE; player keeps baseball) |
@@ -182,6 +182,50 @@ WONTFIX-as-faithful. *Optional future follow-up (not done, not a geometry fix):*
 so the QA/player camera can't enter the shell — deferred as it risks changing collision
 faithfulness and wasn't asked for. No reporter camera was recoverable for #13 (lu9 ticket not in
 Drive/Gmail); investigation used the structural geometry evidence above instead.
+
+## #5 3SAI boat — INVESTIGATED 2026-06-25 (Session 2 Claude): DEFERRED (two coupled issues)
+Read the decomp first (`docs/decomp/C3DSailBoat.md`). Findings:
+- The boat renders as the **`SailBoat.glb` model** (entity_visual L297, `3SAI` -> SailBoat.glb;
+  177 verts, NOT a sprite), drawn via `renderer_draw_model` at the entity's `e->y`.
+- **Authored Y = 17** (decomp `PositionY=17`; the reporter's `pos.y=17` confirms our runtime
+  keeps the faithful authored height — we are NOT mis-placing it). The SailBoat sine-bob
+  (±5 tilt in AI states 2/3) is **deferred** in `behavior_vehicle.c` and is not a height change.
+- `SailBoat.glb` local Y span is **[-14.2, 127.4]**, so at world Y=17 the **hull bottom sits at
+  world ≈ 2.8**. The `ncwater.glb` surface (top) is at world **≈ -11.25** (mesh max Y; placement
+  draws at Y=0 + baked verts). => the hull floats **~14u above the water surface**. (Issue 1.)
+- The reporter's runtime `pos.x ≈ 11025` is **well beyond all three level1 water meshes**
+  (`ncwater`/`ncwater2`/`ncwater3` are at X≈3643/7220), and `vt_ai_vehicle` patrols the authored
+  PatrolPoint chain (`BOAT2`...) at speed 400 via `behavior_ai_update_patrol` (seeks the full 3D
+  `wp->{x,y,z}`). So the boat also **wanders off the river onto land** -> "pathing needs
+  adjustment". (Issue 2.)
+
+Why deferred (not a quick guess):
+- Issue 1 has no clean faithful lever: authored Y=17 is correct, water surface -11.25 is the
+  OMT-baked value, and there is **no runtime water-height query** to foot-anchor a boat to a
+  water surface (the existing `entity_visual_foot_anchors()` snaps mesh-min<0 entities to GROUND
+  Y=0, which over water would still leave ~11u and isn't the river surface). A fix is either a
+  SailBoat.glb vertical-origin correction (needs checking our export vs the original mesh) or a
+  new water-surface anchor — both bigger than a one-liner.
+- Issue 2 needs the authored `BOAT2` waypoint chain audited against the original's on-river path;
+  our generic patrol may be following waypoints the original constrained differently.
+- **Next session:** verify the SailBoat.glb vertical origin against `assets/ase/omt/SailBoat.ASE`
+  / the original OMT chunk 13; dump the resolved patrol waypoints for SAILBOAT1 in level1 and
+  compare to the river geometry. Reporter cam (sandmanfan): entity (11024.9,17,-5639.6),
+  cam (11108.7,85.9,-5054.9), yaw -0.1848. Spawn-area shot that shows the float:
+  `/tmp/l1_boat_a.png` (`bash tools/qa_shot.sh OUT 458 17 -4840 1300 140 -4350 level1 400`).
+
+## #22/#23 audio — refined findings (Session 2 Claude, not yet fixed)
+- **#22 l3a ride-track stacking:** re-confirmed `behavior_soundfx.c` (3SOU) is **clean** — its
+  ambient loop halts on radius exit (L61-64) and one-shots consume `TimesToTrigger`, so 3SOU is
+  NOT the stacking source. The only other looping emitters are `behavior_music.c`
+  (`audio_set_music_db` *replaces*, no stack) and `behavior_door.c` (now halts, #7). The l3a
+  ride-track looping emitter is **still unidentified** — it is not one of the ported looping
+  behaviors, so it's likely the level's music/ride lifecycle (re-entry restarts without halting)
+  or an unported ride emitter. Needs an l3a runtime audio trace to pin the source.
+- **Headless audio caveat (applies to #22-#24):** xvfb has no audio device, so `audio_play_db`
+  returns -1 before its `[AUDIO] play` print — you cannot observe what plays from stderr in
+  xvfb. Trace the *resolved db+index* by instrumenting the resolution path (or print
+  `start->music_database`+MusicIndex in `main.c`) rather than relying on the mixer logs.
 
 ## Resume here (Session 2)
 **Order of attack (tractable → hard):**
