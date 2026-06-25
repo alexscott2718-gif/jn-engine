@@ -30,7 +30,7 @@
 | 1 | l1 | 3SPH ×2 | PLC/GFX | draws a "fan"; shouldn't be there (awefan+lu9) | B | ✅ DONE (invisible) |
 | 2 | l4 | 3SHE sheen3 | PLC | character floating | A | ✅ DONE (already grounded, verified) |
 | 3 | l4a | 3HUG C3DHUGH | PLC | not at ground level | A | ✅ DONE (added to foot-anchor) |
-| 4 | l3d | 3CIN C3DCINDY | OTH | off-ground + pathing/wall-clip | A | ⚠️ PARTIAL (ground ✅; pathing/clip TODO) |
+| 4 | l3d | 3CIN C3DCINDY | OTH | off-ground + pathing/wall-clip | A | ✅ DONE (grounded; route now honors `NextPatrolPoint=none` instead of looping) |
 | 5 | l1 | 3SAI SAILBOAT1 | GFX | boat floats above river before lab | A | ✅ DONE (`3SAI` visual anchors to `ncwater*` surface; patrol route audited inside water bounds) |
 | 6 | l6a | 3BUT C3DBUTTON | PLC | buttons floating + should flash black/red | A+visual | ✅ DONE (authored ship ASE + RGB pulse) |
 | 7 | l6a | 3DOR halldoor01 | OTH | doors should loop opening SFX until stop | I | ✅ DONE (`1e0d9d4`: loop soundeffects.omt[59] while moving, halt at fully-open) |
@@ -100,11 +100,11 @@ Validation re-run before commit (Session 2):
   (hydrant/nests/pads/boatl stay invisible referent triggers) — the gdish indicator is
   scoped to level1b only.
 
-**Reports closed & verified: 18/24** (#1×4, #2, #3, #4-ground, #5, #6, #7, #8, #9, #10, #11, #14,
+**Reports closed & verified: 19/24** (#1×4, #2, #3, #4, #5, #6, #7, #8, #9, #10, #11, #14,
 #15, #16, #17-by-validation).
 **#12 apple-pie = WONTFIX-as-bug** (authored fruit bowl; pie is a deferred mechanic).
 **#13 house02 floor = WONTFIX-as-faithful** (open-bottomed facade in source OMT; see findings above).
-Remaining open: #4-pathing and #18–#24 (the rest of Group I audio: #18–#22, #23, #24).
+Remaining open: Group I audio (#18–#24: #18–#22, #23, #24).
 
 > **Audio verification note (carry forward):** xvfb has **no audio device**
 > ("Audio subsystem unavailable: dsp: No such audio device"), so Group I audio fixes
@@ -183,6 +183,26 @@ so the QA/player camera can't enter the shell — deferred as it risks changing 
 faithfulness and wasn't asked for. No reporter camera was recoverable for #13 (lu9 ticket not in
 Drive/Gmail); investigation used the structural geometry evidence above instead.
 
+## #4 3CIN Cindy — FIXED 2026-06-25 (Session 3 Codex): authored patrol termination
+Grounding was already fixed in `394bb34` by adding `3CIN` to the foot-anchor set. The remaining
+pathing/wall-clip part came from a native-only patrol mismatch:
+
+- `Level3D.gam` authors Cindy as `AIState=6`, `PatrolPoint=c1`.
+- The authored route is short and terminal: `c1 -> c2 -> none`.
+- Native `vt_cindy` reused the generic patrol config with `loop_to_start=1`, so after reaching
+  `c2` it synthesized a return to `c1`. That made Cindy ping-pong through a route the data did not
+  author and was the likely source of the reported wall/path clip.
+
+Fix:
+- `src/game/behaviors/behavior_cindy.c` now sets `loop_to_start=0`. Cindy routes that should loop
+  already encode that explicitly, e.g. level4's `CINDY7 -> CINDY1`; short routes ending in `none`
+  now terminate.
+
+Validation:
+- `QA_WARMUP=900 bash tools/qa_shot.sh /tmp/l3d_cindy_loop_after.png 858 5 -389 1250 150 -900 level3d 500`
+  shows Cindy stopped at the authored terminal platform instead of walking back through the chain.
+- `python3 tools/audit_faithfulness.py` stayed at 0 findings / 35 levels.
+
 ## #5 3SAI boat — FIXED 2026-06-25 (Session 3 Codex): water visual anchor + route audit
 Read the decomp first (`docs/decomp/C3DSailBoat.md`). Findings:
 - The boat renders as the **`SailBoat.glb` model** (entity_visual L297, `3SAI` -> SailBoat.glb;
@@ -213,7 +233,7 @@ Validation:
 - `bash tools/qa_shot.sh /tmp/l1_boat_anchor_after.png 458 17 -4840 1300 140 -4350 level1 400`
   shows the boat seated on the river.
 - Full native/web regression gates passed, and the refreshed web build is live as
-  `jnengine.aef9117b.js`, assets `a36b1109`.
+  `jnengine.aef9117b.js`, assets `63737d29`.
 
 ## #22/#23 audio — refined findings (Session 2 Claude, not yet fixed)
 - **#22 l3a ride-track stacking:** re-confirmed `behavior_soundfx.c` (3SOU) is **clean** — its
@@ -306,8 +326,8 @@ Validation:
      the sprite DB; close as validation-only.
 4. ✅ **#5 3SAI boat (l1)** — DONE. `3SAI` now visually anchors to the `ncwater*` surface, and
    the authored `BOAT2 -> boat7` patrol route was audited inside the actual `ncwater` mesh bounds.
-5. **#4 3CIN pathing/wall-clip (l3d)** — next recommended motion/path item. Grounding is already
-   fixed; compare the remaining path/clip behavior against `docs/decomp/C3DCindy.md`.
+5. ✅ **#4 3CIN pathing/wall-clip (l3d)** — DONE. Grounding was already fixed; the remaining native
+   patrol mismatch was the synthetic loop from `c2 -> c1`, now removed.
 6. ✅ **#13 house02 floor missing (l1)** — RESOLVED WONTFIX-as-faithful. house02 is an
    open-bottomed facade in the source OMT (4% floor coverage, identical across level1/2/2b;
    only Jimmy's house gets a `HOUSE BASE`). Adding a floor invents geometry. See the
@@ -320,7 +340,7 @@ Validation:
 ## Finalize — ✅ DONE 2026-06-25 (Session 2 Claude)
 The batch was finalized and deployed:
 - `make` clean + `python3 tools/audit_faithfulness.py` → **0 findings / 35 levels**.
-- `./tools/deploy_wasm.sh` → **live** at `exentt.com/jn-engine` (currently `jnengine.aef9117b.js`, assets `a36b1109` after the #5 follow-up).
+- `./tools/deploy_wasm.sh` → **live** at `exentt.com/jn-engine` (currently `jnengine.aef9117b.js`, assets `63737d29` after the #5 follow-up).
 - `python3 tools/qa_web_verify.py` → **16/16**.
 - **Resolution page:** per the user's direction, the per-reporter pages were **consolidated into one
   summary section** on the existing changelog `docs/qa/native-port-behavior-coverage-2026-06-24/index.html`
@@ -330,8 +350,8 @@ The batch was finalized and deployed:
 - `native-port` **pushed** to origin (commit `c7db832`).
 - Forward-looking next-work menu written: `docs/continuation_options.md`.
 
-Open items remaining for a future session: #4 (Cindy pathing), #5 (boat), #18–24 (Group I audio —
-needs a desktop/noVNC session for by-ear verification). See the per-report findings above.
+Open items remaining for a future session: #18–24 (Group I audio — needs a desktop/noVNC
+session for by-ear verification). See the per-report findings above.
 
 ## Finalize (original checklist — kept for reference) — RUN ONCE WHEN A BATCH IS READY
 1. `make` → `python3 tools/audit_faithfulness.py` (expect 0 findings).

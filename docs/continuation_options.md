@@ -1,7 +1,7 @@
 # Continuation Options — where the jn-engine native port can go next
 
 > **Purpose:** a decision menu for the next session (or contributor). Written 2026-06-25,
-> right after the QA backlog campaign shipped and the follow-up boat fix moved it to 18/24 closed.
+> right after the QA backlog campaign shipped and the motion/path follow-up moved it to 19/24 closed.
 > It enumerates
 > the open work tracks with their effort / impact / prerequisites / entry points so you can
 > *pick* rather than re-derive. This is a pointer doc — the authoritative state still lives in
@@ -15,8 +15,8 @@
   `3ROK`/`3SPR`/`3DAI` resolver/positioning tail is explicitly native-inert, preserving
   its hidden/non-solid resolver output.
 - **Story machine:** the SCENE sequencer (both writers) + the C3DGoddard companion slice are in.
-- **Web build:** live at `exentt.com/jn-engine` (`jnengine.aef9117b.js`, assets `a36b1109`), Campaign toggle reachable, `qa_web_verify.py` 16/16.
-- **QA backlog:** 18/24 fixed, 2 WONTFIX-as-faithful, **4 still open** (below).
+- **Web build:** live at `exentt.com/jn-engine` (`jnengine.aef9117b.js`, assets `63737d29`), Campaign toggle reachable, `qa_web_verify.py` 16/16.
+- **QA backlog:** 19/24 fixed, 2 WONTFIX-as-faithful; remaining open work is Group I audio (#18–24).
 - **Gates that must stay green every change:** `make` → `python3 tools/audit_faithfulness.py`
   (0 findings / 35 levels) → `make web` → `python3 tools/qa_web_verify.py` (16/16) → `./tools/deploy_wasm.sh`.
 
@@ -24,27 +24,24 @@
 
 | # | Track | Effort | Impact | Headless-verifiable? |
 |---|-------|--------|--------|----------------------|
-| A | Finish the QA backlog tail (Cindy path #4) | Med–High | Closes the remaining motion/path report | Yes (screenshots) |
+| A | Finish the QA backlog tail (motion/path #4,#5) | Done | Motion/path reports closed | Yes |
 | B | Group I audio (#18–24) + audio-faithfulness pass | High | Closes reports + new subsystem | **No — needs by-ear/desktop** |
 | C | Close the behavior lens to 93/93 (`3ROK`/`3SPR`/`3DAI`) | Done | Breadth milestone complete | Yes |
 | D | Deferred gameplay mechanics (shrink-ray, fruit-fill, …) | High | Real gameplay, not just visuals | Partly |
 | E | Campaign playthrough hardening (end-to-end) | High | The game becomes *completable* | Partly |
-| F | Motion/path fidelity (Cindy path + patrol follow-up) | Med–High | Fixes the remaining float/stray-class bug | Yes |
+| F | Motion/path fidelity (boat water + Cindy path) | Done | Float/stray-class reports closed | Yes |
 | G | Collision containment (open-shell houses, walls) | Med | Stops out-of-bounds / see-inside | Yes |
 | H | Contributor / capture-rig tasks (asset truth) | Med | Exact sizes/textures, offloadable | N/A (tooling) |
 
 ---
 
-### A. Finish the QA backlog tail — motion/path (#4)
-The remaining non-audio open report has full evidence already gathered in the QA handoff (decomp read,
-repro cameras, screenshots).
+### A. Finish the QA backlog tail — motion/path (#4, #5) — DONE 2026-06-25
 - **#5 l1 boat (3SAI) is closed:** `3SAI` now visually anchors to the `ncwater*` surface while the
   authored gameplay Y stays intact. The prior "off-river" concern was corrected by auditing actual
   `ncwater` mesh bounds; the whole `BOAT2 -> boat7` chain is inside the river mesh.
-- **#4 l3d Cindy (3CIN):** ground already fixed; the open part is pathing/wall-clip — needs the Cindy
-  path/behavior compared against `docs/decomp/C3DCindy.md`.
-- **Overlap with Track F** — the water-surface anchor piece is done; the remaining work is path/clip
-  behavior. Entry points: `behavior_cindy.c`, `behavior_friend.c`, `behavior_ai.c`, collision queries.
+- **#4 l3d Cindy (3CIN) is closed:** grounding was already fixed, and `vt_cindy` now honors terminal
+  patrol routes (`c1 -> c2 -> none`) instead of synthesizing a return loop. Cindy routes that should
+  loop already encode it explicitly (`CINDY7 -> CINDY1`).
 
 ### B. Group I audio (#18–24) + an audio-faithfulness pass
 The remaining audio reports, plus the broader gap they expose.
@@ -87,12 +84,10 @@ completion conditions, checkpoints, and the cutscene/trigger chains that gate pr
 highest-impact "is it a game yet?" track. Entry points: `game_flow.c`, `task_loader.c`,
 `behavior_ai_trigger.c`, `behavior_load.c`, `behavior_checkpoint.c`, `behavior_cutscene.c`.
 
-### F. Motion/path fidelity (Cindy path + patrol follow-up)
-A focused systems track that subsumes the remaining pathing bug reports. The water-surface query is
-now in place for `3SAI`, and the level1 boat route has been audited inside the river bounds. The
-remaining high-leverage piece is Cindy's authored path/wall-clip behavior, then any generalized patrol
-follow-up that falls out of that comparison. Entry points: `behavior_cindy.c`, `behavior_friend.c`,
-`behavior_ai.c`, collision queries.
+### F. Motion/path fidelity (boat water + Cindy path) — DONE 2026-06-25
+The water-surface query is in place for `3SAI`, the level1 boat route has been audited inside the
+river bounds, and Cindy now follows authored patrol termination. General patrol cleanup can still
+happen opportunistically, but the QA motion/path tail is closed.
 
 ### G. Collision containment
 The #13 investigation surfaced this: background houses are open-bottomed facades (faithful), but the
@@ -110,10 +105,9 @@ Offloadable, self-contained data-truth work that doesn't block the engine:
 ---
 
 ## Recommended ordering (opinion, not a mandate)
-1. **A/F (Cindy pathing)** — #5's boat float is closed; finish #4's path/wall-clip behavior next.
-2. **E (campaign playthrough)** — the biggest "is it a game" jump; do it once the actors are all present.
-3. **B (audio)** — batch it for a session where a **desktop/noVNC** is available for by-ear checks; until
+1. **B (audio)** — the only QA backlog category left; batch it for a session where a **desktop/noVNC** is available for by-ear checks. Until
    then only the resolution-path instrumentation is verifiable.
-4. **D / G / H** — opportunistic; D when a mechanic is specifically requested, G/H as polish.
+2. **E (campaign playthrough)** — the biggest "is it a game" jump; do it once the actors are all present.
+3. **D / G / H** — opportunistic; D when a mechanic is specifically requested, G/H as polish.
 
-> If you want to clear the QA board: finish **A/F Cindy pathing**, leaving **B** for when audio can actually be heard.
+> If you want to clear the QA board: **B audio** is next, preferably in a desktop/noVNC session.

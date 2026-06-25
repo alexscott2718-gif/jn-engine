@@ -57,7 +57,9 @@ static void cindy_on_update(Entity *e, World *w, float dt) {
     const BehaviorAIPatrolConfig cfg = {
         .speed = CINDY_WALK_SPEED,
         .arrive_radius = CINDY_ARRIVE_RADIUS,
-        .loop_to_start = 1,
+        /* Cindy's routes encode loops explicitly (level4 CINDY7 -> CINDY1).
+           Short routes ending in "none" should terminate instead of ping-pong. */
+        .loop_to_start = 0,
     };
     (void)behavior_ai_update_patrol(e, w, &cfg, dt);
 }

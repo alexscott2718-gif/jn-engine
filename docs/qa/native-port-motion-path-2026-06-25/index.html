@@ -43,14 +43,14 @@ pre { overflow-x:auto; background:#0a0a0a; border:1px solid #242424; border-radi
 <div class="wrap">
 
 <h1>Native Port - Motion/Path QA Pass <span class="badge green">SHIPPED</span></h1>
-<p class="sub">Summary page &middot; 2026-06-25 &middot; branch <code>native-port</code>. This page covers the follow-up after the behavior-lens close-out: starting the recommended motion/path track, closing the level1 sailboat float, correcting the route diagnosis, updating the handoffs, and deploying the refreshed web build.</p>
+<p class="sub">Summary page &middot; 2026-06-25 &middot; branch <code>native-port</code>. This page covers the follow-up after the behavior-lens close-out: completing the recommended motion/path track, closing the level1 sailboat float and level3d Cindy pathing reports, updating the handoffs, and deploying the refreshed web build.</p>
 
 <h2>What Changed</h2>
-<p>The next recommended track was motion/path fidelity. The first item was QA #5: the level1 sailboat was visibly floating above the river. The entity's authored gameplay height was already faithful, so the fix stays in the renderer: draw <code>3SAI</code> with the sailboat hull seated on the static <code>ncwater*</code> surface without changing its authored position, AI state, or patrol route.</p>
+<p>The next recommended track was motion/path fidelity. It closed both non-audio reports left in the QA backlog: #5, where the level1 sailboat floated above the river, and #4, where level3d Cindy kept walking a synthetic return path after her authored route ended.</p>
 
 <div class="grid">
-  <div class="stat"><strong>#5 closed</strong><span>boat now seats on the water</span></div>
-  <div class="stat"><strong>18 / 24</strong><span>QA backlog reports fixed/verified</span></div>
+  <div class="stat"><strong>#4 + #5 closed</strong><span>motion/path tail complete</span></div>
+  <div class="stat"><strong>19 / 24</strong><span>QA backlog reports fixed/verified</span></div>
   <div class="stat"><strong>0 findings</strong><span>faithfulness audit across 35 levels</span></div>
 </div>
 
@@ -59,7 +59,7 @@ pre { overflow-x:auto; background:#0a0a0a; border:1px solid #242424; border-radi
   <figcaption>After: aimed native screenshot at the reported level1 boat area. The sailboat hull is seated on the river surface.</figcaption>
 </figure>
 
-<h2>The Fix</h2>
+<h2>Boat Fix</h2>
 <div class="card">
 <div class="meta"><code>src/game/main.c</code></div>
 <p>Added a narrow <code>water_surface_at()</code> helper that scans static placements named <code>ncwater*</code>. Static placement meshes draw at authored X, flipped Z, and world Y=0; their water height is baked into the mesh vertices. The helper uses each water mesh's draw-space X/Z bounds and local max-Y surface, then <code>3SAI</code> draws with <code>SailBoat.glb</code>'s local min-Y placed on that surface.</p>
@@ -75,19 +75,33 @@ pre { overflow-x:auto; background:#0a0a0a; border:1px solid #242424; border-radi
 <tr><td>Patrol chain</td><td><code>BOAT2 -> boat3 -> boat4 -> boat5 -> boat6 -> boat7 -> WAIT</code></td></tr>
 <tr><td>Farthest reported point</td><td><code>boat7 (11144.6, -5635.7)</code>, still inside <code>ncwater</code></td></tr>
 </table>
-<div class="note">The remaining motion/path item is #4 Cindy pathing/wall-clip. The continuation menu now points there first; audio remains a desktop/noVNC track because headless xvfb has no audio device.</div>
+<div class="note">The boat route issue is closed: the earlier off-river concern was a bounds-reading error, and the visual float is fixed by the water anchor.</div>
+
+<h2>Cindy Fix</h2>
+<p>The level3d Cindy row authors a short terminal route: <code>c1 -> c2 -> none</code>. Native Cindy reused the generic patrol config with <code>loop_to_start=1</code>, so after reaching <code>c2</code> it synthesized a return to <code>c1</code>. That made Cindy ping-pong through a path the data did not author.</p>
+<div class="card">
+<div class="meta"><code>src/game/behaviors/behavior_cindy.c</code></div>
+<p><code>vt_cindy</code> now sets <code>loop_to_start=0</code>. Routes that should loop already say so in the authored data, for example level4's <code>CINDY7 -> CINDY1</code>. Routes ending in <code>none</code> now terminate.</p>
+<div class="fix">Result: after a 900-tick warmup, Cindy is stopped at the authored terminal platform instead of walking back through the chain.</div>
+</div>
+<figure>
+  <img src="img/cindy-after.png" alt="Level3D Cindy stopped at her authored terminal patrol point after the path fix">
+  <figcaption>After: Cindy stops at the terminal <code>c2</code> platform. The native-only return loop is gone.</figcaption>
+</figure>
+<div class="note">The motion/path tail is now complete. The remaining QA backlog category is Group I audio, which still needs a desktop/noVNC session for by-ear confirmation.</div>
 
 <h2>Published Outputs</h2>
 <table>
 <tr><th>Output</th><th>URL</th><th>Status</th></tr>
-<tr><td>Browser demo</td><td><a href="/jn-engine/">/jn-engine/</a></td><td><span class="badge green">live</span> <code>jnengine.aef9117b.js</code>, assets <code>a36b1109</code></td></tr>
+<tr><td>Browser demo</td><td><a href="/jn-engine/">/jn-engine/</a></td><td><span class="badge green">live</span> <code>jnengine.aef9117b.js</code>, assets <code>63737d29</code></td></tr>
 <tr><td>This summary</td><td><a href="/jn-engine/qa/native-port-motion-path-2026-06-25/">/jn-engine/qa/native-port-motion-path-2026-06-25/</a></td><td><span class="badge green">published</span></td></tr>
-<tr><td>Updated campaign ledger</td><td><a href="/jn-engine/qa/native-port-behavior-coverage-2026-06-24/">/jn-engine/qa/native-port-behavior-coverage-2026-06-24/</a></td><td><span class="badge green">updated</span> #5 no longer deferred</td></tr>
+<tr><td>Updated campaign ledger</td><td><a href="/jn-engine/qa/native-port-behavior-coverage-2026-06-24/">/jn-engine/qa/native-port-behavior-coverage-2026-06-24/</a></td><td><span class="badge green">updated</span> #4/#5 motion-path tail closed</td></tr>
 </table>
 
 <h2>Validation</h2>
 <pre>make
 bash tools/qa_shot.sh /tmp/l1_boat_anchor_after.png 458 17 -4840 1300 140 -4350 level1 400
+QA_WARMUP=900 bash tools/qa_shot.sh /tmp/l3d_cindy_loop_after.png 858 5 -389 1250 150 -900 level3d 500
 python3 tools/audit_faithfulness.py
 make web
 python3 tools/qa_web_verify.py
@@ -96,6 +110,7 @@ python3 tools/qa_web_verify.py
 <tr><th>Gate</th><th>Result</th></tr>
 <tr><td>Native build</td><td><span class="badge green">pass</span> existing SDL2_mixer archive warning only</td></tr>
 <tr><td>Aimed screenshot</td><td><span class="badge green">pass</span> sailboat seated on river</td></tr>
+<tr><td>Cindy route screenshot</td><td><span class="badge green">pass</span> terminal route stops instead of looping</td></tr>
 <tr><td>Route bounds audit</td><td><span class="badge green">pass</span> all <code>BOAT2..boat7</code> waypoints inside <code>ncwater</code></td></tr>
 <tr><td>Faithfulness audit</td><td><span class="badge green">pass</span> 0 findings, 0 waived, 0 new across 35 levels</td></tr>
 <tr><td>Web build</td><td><span class="badge green">pass</span> 387 MB asset bundle warning only</td></tr>
@@ -106,10 +121,10 @@ python3 tools/qa_web_verify.py
 <h2>Docs Updated</h2>
 <table>
 <tr><th>Path</th><th>Purpose</th></tr>
-<tr><td><code>docs/qa/qa_backlog_campaign_handoff.md</code></td><td>#5 closed, route audit corrected, remaining open work updated</td></tr>
-<tr><td><code>docs/continuation_options.md</code></td><td>next recommended work path moved to Cindy pathing</td></tr>
-<tr><td><code>docs/PROJECT_HISTORY.md</code></td><td>boat water-anchor checkpoint added</td></tr>
-<tr><td><code>docs/qa/native-port-behavior-coverage-2026-06-24/</code></td><td>public campaign page updated from 17/24 to 18/24</td></tr>
+<tr><td><code>docs/qa/qa_backlog_campaign_handoff.md</code></td><td>#4 and #5 closed; route audits corrected; remaining open work updated to audio</td></tr>
+<tr><td><code>docs/continuation_options.md</code></td><td>motion/path marked done; next recommendation moved to audio</td></tr>
+<tr><td><code>docs/PROJECT_HISTORY.md</code></td><td>boat water-anchor and Cindy route checkpoints added</td></tr>
+<tr><td><code>docs/qa/native-port-behavior-coverage-2026-06-24/</code></td><td>public campaign page updated from 17/24 to 19/24</td></tr>
 </table>
 
 <div class="footer">

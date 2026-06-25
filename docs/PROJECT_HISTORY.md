@@ -1084,10 +1084,10 @@ Validated in headless Chromium (Playwright): campaign button toggles On/Off with
 keydown fires `[TALK]` and does not toggle turbo; the Speed button still toggles turbo; touch mode is off by default /
 forced by `?touch=1` / off by `?touch=0`. `audit_faithfulness.py` 0 findings, `make web`, `qa_web_verify.py` 16/16.
 
-**QA backlog campaign — 4 community tickets, 18/24 closed (2026-06-24/25).** Worked a deduped backlog of 24 reports
+**QA backlog campaign — 4 community tickets, 19/24 closed (2026-06-24/25).** Worked a deduped backlog of 24 reports
 from four tickets (sandmanfan 2026-06-24, two awefan, lu9 2026-06-14) through `docs/qa_ticket_resolution_workflow.md`,
-holding `audit_faithfulness.py` at 0/35 after each change. **Fixed+verified (18):** 3SPH drawn invisible (sandbox
-referent); foot-anchor 3HUG/3CIN/3SHE; STRT spawn-yaw copied on level loads so Jimmy faces the authored direction on
+holding `audit_faithfulness.py` at 0/35 after each change. **Fixed+verified (19):** 3SPH drawn invisible (sandbox
+referent); foot-anchor 3HUG/3CIN/3SHE plus Cindy's terminal patrol route honored; STRT spawn-yaw copied on level loads so Jimmy faces the authored direction on
 lab-exit (#14); authored button meshes + RGB pulse for 3BUT/3WAB (#6/#15); enemy `PROJ`→`missile.ASE` while the player
 keeps the baseball (#8); `3FLE`→fleet commander (#9); level1 tree billboard gated to the level1 family so l3c `tree04`
 uses its own glb (#10); bigger/bouncier red neutrons (#11); **level1b `3ARR`/`LOAD` gated on the authored
@@ -1098,7 +1098,7 @@ the global chunk-106 hidden rule intact (#16)**; coin pickup validated already-d
 reusable gate behind #16. **Resolved WONTFIX-as-faithful (2):** #12 apple-pie (authored `SpriteIndex=157` *is*
 "FruitbowlEmty"; the pie is the unimplemented fruit-fill mechanic) and #13 house02 floor (the OMT mesh is an
 open-bottomed facade — ~4% floor coverage, identical across level1/2/2b; only Jimmy's house ships a `HOUSE BASE`;
-adding a floor would invent geometry). **Open/deferred (4):** #4 Cindy pathing and the Group I audio set #18–24
+adding a floor would invent geometry). **Open/deferred:** the Group I audio set #18–24
 (l1c furniture proximity sounds, l3a ride-track stacking, l1a shrink-ray-as-music, l1 RocketPad voice line — 3SOU confirmed clean, the l3a emitter is unidentified, and audio
 can't be verified by ear in the headless xvfb rig). Deployed live (`jnengine.5d94b61e.js`, assets `d489c38d`);
 published changelog at `docs/qa/native-port-behavior-coverage-2026-06-24/`; living handoff at
@@ -1125,10 +1125,19 @@ over static placements named `ncwater*`, and `3SAI` draws with its local min-Y s
 gameplay position/patrol state unchanged. The suspected "off-river" half was corrected: actual `ncwater` draw-space
 bounds are X -4419.5..11706.0 and Z -7296.8..-2524.6, so the entire authored `BOAT2 -> boat7` chain, including the
 reporter's far x ~= 11145 point, is inside the river mesh. Validation included an aimed screenshot at
-`/tmp/l1_boat_anchor_after.png`, `make`, and the full faithfulness/web gates before deploy; the living handoff and
-continuation menu now point at Cindy pathing as the remaining motion/path item. The refreshed web build is live as
-`jnengine.aef9117b.js`, assets `a36b1109`, and the public motion/path summary is published at
+`/tmp/l1_boat_anchor_after.png`, `make`, and the full faithfulness/web gates before deploy; the living handoff
+recorded Cindy as the remaining motion/path item, which the next pass then closed. The refreshed web build is live as
+`jnengine.aef9117b.js`, assets `63737d29`, and the public motion/path summary is published at
 `/jn-engine/qa/native-port-motion-path-2026-06-25/`.
+
+**Level3D Cindy patrol termination — QA #4 closed (2026-06-25).** The remaining motion/path ticket was not another
+grounding problem: `3CIN` was already foot-anchored. `Level3D.gam` authors Cindy with `AIState=6` and a terminal
+route `c1 -> c2 -> none`, but native `vt_cindy` had reused the generic patrol config with `loop_to_start=1`, causing
+a synthetic return from `c2` to `c1`. `behavior_cindy.c` now sets `loop_to_start=0`; Cindy routes that should loop
+already encode that explicitly, e.g. level4's `CINDY7 -> CINDY1`. Long-warmup screenshots confirm the change:
+before, Cindy was walking back through the route; after, she stops at the authored terminal platform. `make` and
+`audit_faithfulness.py` stayed green (0 findings / 35 levels). With #4 and #5 closed, the QA motion/path tail is done;
+the continuation menu now recommends Group I audio next.
 
 ---
 
