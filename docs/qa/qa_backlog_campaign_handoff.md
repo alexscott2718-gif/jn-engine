@@ -40,7 +40,7 @@
 | 11 | l5 | 3RED C3DREDNEUTRON | SCL | too small; add warped/bouncy sprite anim | F | ✅ DONE (unauthored floor 100→170; pulse ±7%→±17%). NB: 170 is a chosen visibility floor (level5 authors no SpriteSize); confirm against original via XP VNC if exact size matters. |
 | 12 | l1c | 3PIC sprite_index:157 | TEX | apple-pie showing fruit bowl | D | ⚠️ WONTFIX-AS-BUG: authored SpriteIndex=157 IS "FruitbowlEmty" (faithful). Apple pie comes from the unimplemented fruit-fill mechanic ("Apple Pie%"). Deferred to mechanic work, not a texture swap. |
 | 13 | l1 | house02 | GFX | floor under house missing entirely | G | ⬜ TODO (OMT geometry) |
-| 14 | l1 | 3JIM JIM1 | ORI | faces lab not house on lab-exit | E | ⬜ TODO (spawn facing) |
+| 14 | l1 | 3JIM JIM1 | ORI | faces lab not house on lab-exit | E | ✅ DONE (STRT yaw copied on spawn) |
 | 15 | l3c | 3BUT n03 | ORI | orientation off | E | ⬜ TODO |
 | 16 | l1b | 3ARR C3DARROW | PLC | misplaced (should be over Goddard bowl); lab-water teleport wrong | H | ⬜ TODO |
 | 17 | l1b | 3PIC C3DPICKUPITEM | PLC | missing coin pickup (only bone) | H | ⬜ TODO |
@@ -62,9 +62,9 @@
 - `a573ad8` — qa(3RED): bigger red neutrons + more visible bounce (#11) + handoff.
 - `965cf54` — docs(qa): handoff (Group C done).
 
-**Reports closed & verified: 11/24** (#1×4, #2, #3, #4-ground, #8, #9, #10, #11).
+**Reports closed & verified: 12/24** (#1×4, #2, #3, #4-ground, #8, #9, #10, #11, #14).
 **#12 apple-pie = WONTFIX-as-bug** (authored fruit bowl; pie is a deferred mechanic).
-Remaining open: #4-pathing, #5, #6, #7, #13–#24 (incl. all of Group I audio).
+Remaining open: #4-pathing, #5, #6, #7, #13, #15–#24 (incl. all of Group I audio).
 
 **Regression gate PASSED at session-1 end:** `python3 tools/audit_faithfulness.py` →
 **0 findings / 0 NEW across all 24 levels** with all 11-report changes in. Native `make`
@@ -111,9 +111,12 @@ The audio system (read before touching #18–#24):
 
 ## Resume here (Session 2)
 **Order of attack (tractable → hard):**
-1. **#14 3JIM l1 lab-facing (ORI)** — ⚠️ DELICATE: spawn facing was flipped repeatedly by the
-   rotation-sign work and `qa_web_verify.py` has a sky-click probe aimed at the current spawn. If you
-   change spawn yaw, RE-AIM that probe. Confirm against authored `JIM1` rotation + house/lab geometry.
+1. ✅ **#14 3JIM l1 lab-facing (ORI)** — root cause: `place_player()` resolved the selected
+   `STRT` marker but copied only its position, leaving Jimmy's stale level default yaw after
+   level-load swaps. Fix copies the full `STRT` rotation unless `JN_DEMO_SPAWN_XYZ` is preserving an
+   explicit QA camera/facing. Verified `JN_TEST_SWAP=level1.gam:riverlab` lands at authored
+   `ry=1.571`; `python3 tools/audit_faithfulness.py` stayed 0 findings. No `qa_web_verify.py` probe
+   re-aim needed because default level1 `PHONEBOOTH` and `3JIM` already share the same 220° yaw.
 2. **#15 3BUT n03 l3c (ORI)** and **#6 3BUT l6a float + flash black/red** — button orientation +
    a flashing material animation (look at `behavior_button.c`; "flash" is a per-frame color pulse like
    3RED's). #6 float = check authored Y vs floor (foot-anchor doesn't apply to buttons).

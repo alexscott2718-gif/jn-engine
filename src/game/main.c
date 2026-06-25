@@ -628,10 +628,11 @@ static Entity *place_player(World *world, const char *start_point) {
             if (strcasecmp(e->tag, want) == 0) {
                 if (!preserve_position) {
                     jim->x = e->x; jim->y = e->y; jim->z = e->z;
+                    jim->rx = e->rx; jim->ry = e->ry; jim->rz = e->rz;
                 }
                 selected_start = e;
-                printf("[SPAWN] using STRT '%s' at (%.1f, %.1f, %.1f)\n",
-                       e->tag, e->x, e->y, e->z);
+                printf("[SPAWN] using STRT '%s' at (%.1f, %.1f, %.1f) ry=%.2f\n",
+                       e->tag, e->x, e->y, e->z, e->ry);
                 break;
             }
         }
