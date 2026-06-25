@@ -33,7 +33,7 @@
 | 4 | l3d | 3CIN C3DCINDY | OTH | off-ground + pathing/wall-clip | A | ⚠️ PARTIAL (ground ✅; pathing/clip TODO) |
 | 5 | l1 | 3SAI SAILBOAT1 | GFX | boat floats above river before lab | A | ⬜ TODO (path/anim, not simple anchor) |
 | 6 | l6a | 3BUT C3DBUTTON | PLC | buttons floating + should flash black/red | A+visual | ✅ DONE (authored ship ASE + RGB pulse) |
-| 7 | l6a | 3DOR halldoor01 | OTH | doors should loop opening SFX until stop | I | ⬜ TODO (see lu9-06-12 door[59] precedent) |
+| 7 | l6a | 3DOR halldoor01 | OTH | doors should loop opening SFX until stop | I | ✅ DONE (`1e0d9d4`: loop soundeffects.omt[59] while moving, halt at fully-open) |
 | 8 | l6a | PROJ | MIS | should be plasma blast not baseball | C | ✅ DONE (enemy PROJ→missile.ASE; player keeps baseball) |
 | 9 | l6a | 3FLE FLEETC | MIS | should be yokian fleet commander | C | ✅ DONE (commanderstop.ASE+comander.png) |
 | 10 | l3c | tree04 | TEX | should be level3c/0000_128x128d32 | D | ✅ DONE (gated l1 tree billboard; glb mesh now used) |
@@ -66,6 +66,8 @@
 - `48052f6` — docs(qa): refresh level1b handoff.
 - `e1d519b` — docs(qa): checkpoint level1b WIP.
 - `a502aa5` — qa(l1b): gate 3ARR/LOAD on authored RequiredTask + Goddard-bowl ShowArrow. (#16; #17 closed-by-validation)
+- `0ecbba1` — docs(qa): #13 house02 floor = WONTFIX-as-faithful (open-bottom facade).
+- `1e0d9d4` — qa(l6a): loop the door-opening SFX while the door moves. (#7)
 
 ## #16 — COMMITTED (`a502aa5`, 2026-06-25 — Session 2 Claude)
 Formerly WIP; the uncommitted #16 changes were reviewed, rebuilt, regression-audited, and
@@ -98,11 +100,21 @@ Validation re-run before commit (Session 2):
   (hydrant/nests/pads/boatl stay invisible referent triggers) — the gdish indicator is
   scoped to level1b only.
 
-**Reports closed & verified: 16/24** (#1×4, #2, #3, #4-ground, #6, #8, #9, #10, #11, #14,
+**Reports closed & verified: 17/24** (#1×4, #2, #3, #4-ground, #6, #7, #8, #9, #10, #11, #14,
 #15, #16, #17-by-validation).
 **#12 apple-pie = WONTFIX-as-bug** (authored fruit bowl; pie is a deferred mechanic).
 **#13 house02 floor = WONTFIX-as-faithful** (open-bottomed facade in source OMT; see findings above).
-Remaining open: #4-pathing, #5, #7, #18–#24 (incl. all of Group I audio).
+Remaining open: #4-pathing, #5, #18–#24 (the rest of Group I audio: #18–#22, #23, #24).
+
+> **Audio verification note (carry forward):** xvfb has **no audio device**
+> ("Audio subsystem unavailable: dsp: No such audio device"), so Group I audio fixes
+> cannot be *heard* in a headless run — only the state machine / code path is
+> verifiable there (e.g. #7's `[DOOR] opening`→`[DOOR] open` trace). **By-ear
+> confirmation is a desktop-session (noVNC) job.** `audio_play_db` returns -1 and
+> `audio_channel_halt` no-ops when audio is unavailable, so audio-off builds stay safe.
+> Consistency follow-up (not done, not reported): the 3SWN swing door
+> (`behavior_swingdoor.c`) still plays handle 59 one-shot; same loop treatment could be
+> applied if a reporter flags it.
 
 **Regression gate PASSED at session-1 end:** `python3 tools/audit_faithfulness.py` →
 **0 findings / 0 NEW across all 24 levels** with all 11-report changes in. Native `make`
@@ -253,7 +265,10 @@ Drive/Gmail); investigation used the structural geometry evidence above instead.
    open-bottomed facade in the source OMT (4% floor coverage, identical across level1/2/2b;
    only Jimmy's house gets a `HOUSE BASE`). Adding a floor invents geometry. See the
    "#13 house02 floor — INVESTIGATED" section above for the full evidence.
-6. **Group I audio** per the notes above.
+6. **Group I audio** per the notes above. **#7 (l6a door loop) is ✅ DONE** (`1e0d9d4`).
+   Remaining audio: #18–#21 (l1c furniture proximity sounds), #22 (l3a ride-track stacking),
+   #23 (l1a shrink-ray-as-music), #24 (l1 RocketPad voice line). Remember audio can't be
+   heard headless — see the Audio verification note in the status block above.
 
 ## Finalize (Group `Finalize`, task #14) — RUN ONCE WHEN A BATCH IS READY
 1. `make` → `python3 tools/audit_faithfulness.py` (expect 0 findings).
