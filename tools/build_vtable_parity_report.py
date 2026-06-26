@@ -86,8 +86,8 @@ OVERRIDES: dict[str, list[Override]] = {
         Override(
             "camera / cutscene",
             "must-link",
-            "3MCA sequencing owns cutscene shot order, CameraTypeN local offsets, TargetAnimN, audio step timing, and PlayerControlled locks; native now carries these fields but remains partial.",
-            "Validate sequencer activation/deactivation timing and resolve non-player TargetAnimN dispatch after the 3CAM enum is pinned.",
+            "3MCA sequencing owns cutscene shot order, CameraTypeN local offsets, TargetAnimN, audio step timing, and PlayerControlled locks; native carries these fields, and TargetAnimN now dispatches to known non-player actor ASE clips.",
+            "Validate sequencer activation/deactivation timing, PlayerControlled restore, and actor animation by-eye on level1b LABEXP3 plus Goddard/Cindy scenes.",
             "src/game/behaviors/behavior_cutscene.c",
         )
     ],
@@ -95,8 +95,8 @@ OVERRIDES: dict[str, list[Override]] = {
         Override(
             "camera / cutscene",
             "must-link",
-            "3CAM per-frame camera enum is DECODED from Neutron.exe 00415f90 (slot 245) and linked: CameraType==2 static, ViewFromCamera==0 orbit, else dolly, dist=clamp(InitialDist-ZoomSpeed*t,Min,Max). Remaining open: non-player TargetActAnim/LoopActAnim/TargetDeactAnim dispatch, PlayerControlled restore timing, and the activation message source.",
-            "Link generic non-player actor animation routing and validate PlayerControlled lock/restore against level1b LABEXP3 plus Goddard/Cindy scenes (by-eye on desktop/noVNC).",
+            "3CAM per-frame camera enum is DECODED from Neutron.exe 00415f90 (slot 245) and linked: CameraType==2 static, ViewFromCamera==0 orbit, else dolly, dist=clamp(InitialDist-ZoomSpeed*t,Min,Max). TargetActAnim/LoopActAnim/TargetDeactAnim now dispatch to Jimmy poses or known non-player actor ASE clips. Remaining open: PlayerControlled restore timing and activation message source.",
+            "Validate PlayerControlled lock/restore and target animation timing against level1b LABEXP3 plus Goddard/Cindy scenes (by-eye on desktop/noVNC).",
             "src/game/behaviors/behavior_cutscene.c",
         )
     ],
@@ -415,9 +415,9 @@ OVERRIDES: dict[str, list[Override]] = {
 
 
 TOP25 = [
-    ("1", "camera / cutscene", "C3DMultiCutSceneCamera sequencer", "3MCA CameraTypeN/TargetAnimN/SoundIndexN/PlayerControlled", "Partial native runtime; CameraType table and field plumbing are linked, but timing semantics remain open.", "Validate activation/deactivation timing and non-player TargetAnimN dispatch."),
-    ("2", "camera / cutscene", "C3DCutSceneCamera::ViewFromCamera", "3CAM ViewFromCamera, CameraType, offsets, zoom/distance", "Native consumes ViewFromCamera, but exact enum behavior is not proven.", "Decode standalone 3CAM ViewFromCamera before scene-specific tuning."),
-    ("3", "camera / cutscene", "C3DCutSceneCamera target/facing slots", "TargetActAnim, LoopActAnim, TargetDeactAnim, FaceObject", "FaceObject and Jimmy target animations are partially plumbed; non-player actor animation remains open.", "Link generic actor animation routing and deactivate cleanup semantics."),
+    ("1", "camera / cutscene", "C3DMultiCutSceneCamera sequencer", "3MCA CameraTypeN/TargetAnimN/SoundIndexN/PlayerControlled", "Partial native runtime; CameraType table, field plumbing, selector enumeration, and non-player TargetAnimN visual dispatch are linked, but timing semantics remain open.", "Validate activation/deactivation timing, PlayerControlled restore, and actor animation by-eye."),
+    ("2", "camera / cutscene", "C3DCutSceneCamera::ViewFromCamera", "3CAM ViewFromCamera, CameraType, offsets, zoom/distance", "Standalone 3CAM enum behavior is decoded and linked from Neutron.exe 00415f90.", "Validate remaining activation source and restore timing before scene-specific tuning."),
+    ("3", "camera / cutscene", "C3DCutSceneCamera target/facing slots", "TargetActAnim, LoopActAnim, TargetDeactAnim, FaceObject", "FaceObject and target animation dispatch are plumbed for Jimmy plus known non-player actor ASE clips; exact animation-ended callbacks remain open.", "Validate deactivate cleanup semantics and unknown actor aliases."),
     ("4", "player movement", "C3DPlayer::UpdatePlayerState", "00437940", "Native player is simple tank-control approximation.", "Port main update gate and mode/animation dispatch."),
     ("5", "player movement", "C3DPlayer::DispatchPlayerModeCamera", "00438a60", "Manual follow camera currently stands in.", "Link player_mode camera dispatch and camera bump timing."),
     ("6", "player movement", "C3DPlayer::UpdateWalkingCameraA", "00438bc0", "Large movement/camera helper unlinked.", "Port walk-speed, edge/vertical state, and DAT_00509a50 updates."),

@@ -89,6 +89,9 @@ typedef struct Entity {
     int   visible;               /* runtime draw/update gate; default true */
     unsigned int runtime_flags;   /* mutable copy of EntityVTable.flags */
     float anim_time;              /* shared animated-object clock */
+    char  cutscene_model[160];    /* current cutscene-selected actor ASE, if any */
+    char  cutscene_texture[160];  /* texture paired with cutscene_model, if any */
+    int   cutscene_anim_loop;     /* authored LoopActAnim / sequence loop flag */
     float move_speed;             /* shared movement-base horizontal speed */
     float move_vert;              /* shared movement-base vertical velocity */
     float move_lean;              /* shared movement-base lean angle */

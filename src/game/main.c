@@ -853,6 +853,47 @@ static void draw_scene(World *world, int jim_model_ok)
             continue;
         }
 
+        /* Cutscene target animation dispatch for non-player C3DANIMATED actors.
+           The original calls the target's play-animation vfunc by alias; the
+           native cutscene behavior records the resolved shipped ASE clip here. */
+        if (e->cutscene_model[0]) {
+            AseModel *m = model_cache_get(e->cutscene_model);
+            unsigned int tex = e->cutscene_texture[0]
+                ? tex_cache_get(e->cutscene_texture) : 0;
+            if (m) {
+                renderer_set_hide_untextured_groups(0);
+                if (m->frame_count > 1) {
+                    float fps = m->framespeed > 0.0f ? m->framespeed : 10.0f;
+                    float frame_pos = e->anim_time * fps;
+                    int last = m->frame_count - 1;
+                    int base = (int)floorf(frame_pos);
+                    int a, b;
+                    float lerp = frame_pos - floorf(frame_pos);
+                    if (e->cutscene_anim_loop) {
+                        a = base % m->frame_count;
+                        b = (a + 1) % m->frame_count;
+                    } else if (base >= last) {
+                        a = last;
+                        b = last;
+                        lerp = 0.0f;
+                    } else {
+                        a = base;
+                        b = base + 1;
+                    }
+                    renderer_draw_model_anim(m, tex, e->x, e->y, e->z,
+                                             e->ry, 1.0f, a, b, lerp);
+                } else {
+                    renderer_draw_model(m, tex, e->x, e->y, e->z, e->ry, 1.0f);
+                }
+                renderer_set_hide_untextured_groups(1);
+                audit_line("entity", e->type, e->tag, "cutscene-anim",
+                           e->cutscene_model, m, tex);
+                continue;
+            }
+            audit_line("entity", e->type, e->tag, "cutscene-anim-missing",
+                       e->cutscene_model, NULL, tex);
+        }
+
         /* 3ASE (C3DASEObj): generic per-object mesh named by the GAM's
            ASEStop/ASEWalk, textured by PNGFile. Meshes live under
            assets/ase/jnvsjn/ (lowercased on import). */

@@ -5,6 +5,24 @@ Branch: `native-port`
 
 ## Progress log (most recent first)
 
+- **2026-06-26 — cutscene selector enumeration AUDITED + non-player actor
+  animation dispatch linked.** `tools/build_cutscene_catalog.py` now emits typed
+  selector entries for both `3MCA` sequencers and standalone `3CAM` shot directors
+  instead of treating `3CAM` as review-only. Current catalog: **250 selector
+  entries** across 32 levels (**114 `3MCA` + 136 `3CAM`**); **126 standalone
+  `3CAM` rows** are referenced by trigger-style properties, explaining the missing
+  scenes in the old web selector. The web dropdown now calls typed runtime entry
+  `cutscene_request_catalog_web(kind,index)`; `kind=1` plays one standalone `3CAM`
+  via `cutscene_request_shot_index`. Cutscene target animation dispatch now follows
+  the original `IsA("C3DANIMATED")` → play-animation intent at native level:
+  Jimmy still uses `PlayerAnim`, while known non-player actor targets switch to
+  shipped ASE clips for authored aliases (`TargetActAnim`, `TargetAnimN`,
+  `LoopActAnim`, `TargetDeactAnim`). This is a visual dispatch link, not a full
+  animation-ended callback/AI restore proof. **Gates so far:** `make` clean,
+  `audit_faithfulness.py` 0 findings / 35 levels, `make web` clean,
+  `qa_web_verify.py` 16/16, and a targeted Playwright selector check confirmed
+  `level1b` exposes 25 entries with both `3MCA` and `3CAM`, and
+  `3CAM LABEXP1` starts through `cutscene_request_catalog_web`.
 - **2026-06-25 (in progress) — 3CAM camera enum DECODED + linked.** The standalone
   `3CAM` per-frame camera update was recovered from `Neutron.exe`: primary vtable
   `00497bec` slot **245** → `00415f90`. Field→offset map and the three camera modes
@@ -69,9 +87,10 @@ sed -n '1,180p' docs/decomp/CGameType.md
   `docs/vtable_linkage_audit.md`; current audit counts are 35 `must-link`, 109
   `approximated`, 63 `defer`, and 3 `unused`.
 - `3MCA` CameraType has been recovered from `C3DMultiCutSceneCamera`.
-- Standalone `3CAM` now consumes `ViewFromCamera`, `FaceObject`, Jimmy
-  `TargetActAnim`/`TargetDeactAnim`, and `PlayerControlled` locking, but exact
-  enum behavior, non-player actor animation, and restore timing remain open.
+- Standalone `3CAM` now consumes decoded `ViewFromCamera`/`CameraType`, `FaceObject`,
+  Jimmy and known non-player actor `TargetActAnim`/`TargetDeactAnim`, `LoopActAnim`,
+  and `PlayerControlled` locking. Restore timing, activation source, and animation
+  completion callbacks remain open.
 - Menus are a first-class parity domain:
   - `CMainMenu`
   - `CMenuElement`
@@ -125,12 +144,11 @@ Continue the cutscene stack without scene-specific overrides:
    `ViewFromCamera` / `CameraType` enum behavior from `Neutron.exe` (`00415f90`),
    linked in `behavior_cutscene.c`. See the Progress log above and
    `docs/decomp/C3DCutSceneCamera.md`.
-2. **NEXT** — Link generic non-player actor animation routing for `TargetActAnim`,
-   `LoopActAnim`, and `TargetDeactAnim` (currently only `g_player` poses are applied;
-   Goddard/Cindy/Friends targets get no cutscene animation). Entry: decode the
-   `vfunc_03_056`/`vfunc_03_057` animation dispatch in `C3DMultiCutSceneCamera.md`
-   (the `IsA("C3DANIMATED")` → `[vtbl+0xe0]` play-anim path) and the equivalent in
-   the `00415f90`/deactivate path; native entry `cutscene_apply_player_anim`.
+2. ✅ **DONE 2026-06-26** — Link generic non-player actor animation routing for
+   `TargetActAnim`, `LoopActAnim`, and `TargetDeactAnim` at the native visual
+   dispatch level. Entry: `vfunc_03_056`/`vfunc_03_057` in
+   `C3DMultiCutSceneCamera.md` (`IsA("C3DANIMATED")` → `[vtbl+0xe0]` play-anim);
+   native entry is now `cutscene_apply_target_anim`.
 3. Validate `PlayerControlled` `NULL`/`none`/`JIM1` cutscene input lock/unlock
    and restore timing.
 4. Validate with:

@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """Build a reviewable cutscene catalog from shipped GAM files.
 
-3MCA rows are the selectable cutscenes. Each row owns up to eight indexed
-camera/audio targets. 3CAM rows are listed as shot directors for review and as
-fallback camera framing data used by the native runtime.
+3MCA rows are authored multi-shot cutscene sequencers. 3CAM rows are standalone
+shot directors: some act as intro/fallback shots, some are trigger-fired by the
+script graph, and none should be silently dropped from the web selector audit.
 """
 
 import argparse
@@ -16,6 +16,18 @@ from gam_parser import parse_gam
 
 
 GODDARD_TERMS = ("GODDARD", "GOD", "GDISH", "GOGODDARD", "PUTGODDARD", "GODDARDDIS")
+REF_PROPS = {
+    "NextTrigger",
+    "ToggleObject",
+    "ActivateButton",
+    "SwitchObject",
+    "Next",
+    "AITarget",
+    "ActivateBy",
+    "CallObjectTag",
+}
+for i in range(5):
+    REF_PROPS.add(f"ActivateObject{i}")
 
 
 def norm_level(path: Path) -> str:
@@ -110,6 +122,7 @@ def build_mca(obj, index):
         "fade_time": as_float(p.get("FadeTime"), 0.0),
         "shots": shots,
         "goddard_related": goddard_related(tag, sound_db, *targets),
+        "trigger_references": [],
     }
 
 
@@ -145,7 +158,69 @@ def build_cam(obj, index):
         "max_dist": as_float(p.get("MaxDist"), 4000.0),
         "initial_dist": as_float(p.get("InitialDist"), 400.0),
         "goddard_related": goddard_related(tag, target, sound_db),
+        "trigger_references": [],
     }
+
+
+def iter_references(obj):
+    p = obj["properties"]
+    source_tag = clean_str(p.get("ObjectTag", ""))
+    for key, val in p.items():
+        if key not in REF_PROPS:
+            continue
+        if is_none(val):
+            continue
+        yield {
+            "source_type": obj["type"],
+            "source_tag": source_tag,
+            "property": key,
+            "target": clean_str(val),
+        }
+
+
+def attach_trigger_references(parsed, scenes_by_tag):
+    for obj in parsed["objects"]:
+        for ref in iter_references(obj):
+            target = ref["target"].lower()
+            scene = scenes_by_tag.get(target)
+            if scene is not None:
+                scene["trigger_references"].append(ref)
+
+
+def build_selector_entries(cutscenes, cameras):
+    entries = []
+    for scene in cutscenes:
+        e = {
+            "selector_index": len(entries),
+            "runtime_kind": 0,
+            "runtime_index": scene["index"],
+            "type": "3MCA",
+            "tag": scene["tag"],
+            "label": scene["label"],
+            "shots": len(scene["shots"]),
+            "audio_steps": sum(1 for shot in scene["shots"] if shot["has_audio"]),
+            "targets": scene["targets"],
+            "goddard_related": scene["goddard_related"],
+            "triggered": bool(scene["trigger_references"]),
+        }
+        entries.append(e)
+    for cam in cameras:
+        target = cam["camera_target"] if not is_none(cam["camera_target"]) else "-"
+        e = {
+            "selector_index": len(entries),
+            "runtime_kind": 1,
+            "runtime_index": cam["index"],
+            "type": "3CAM",
+            "tag": cam["tag"],
+            "label": f"{cam['tag']} -> {target}",
+            "shots": 1,
+            "audio_steps": 1 if cam["has_audio"] else 0,
+            "targets": [] if is_none(cam["camera_target"]) else [cam["camera_target"]],
+            "goddard_related": cam["goddard_related"],
+            "triggered": bool(cam["trigger_references"]),
+        }
+        entries.append(e)
+    return entries
 
 
 def build_catalog(gam_dir: Path):
@@ -153,6 +228,8 @@ def build_catalog(gam_dir: Path):
     total_cutscenes = 0
     total_shots = 0
     total_audio_steps = 0
+    total_selector_entries = 0
+    total_triggered_3cam = 0
 
     for path in sorted(gam_dir.glob("*.gam"), key=lambda p: p.name.lower()):
         parsed = parse_gam(path)
@@ -167,8 +244,20 @@ def build_catalog(gam_dir: Path):
         if not cutscenes and not cameras:
             continue
 
+        scenes_by_tag = {}
+        for scene in cutscenes:
+            if scene["tag"]:
+                scenes_by_tag[scene["tag"].lower()] = scene
+        for cam in cameras:
+            if cam["tag"]:
+                scenes_by_tag[cam["tag"].lower()] = cam
+        attach_trigger_references(parsed, scenes_by_tag)
+        selector_entries = build_selector_entries(cutscenes, cameras)
+
         total_cutscenes += len(cutscenes)
         total_shots += len(cameras)
+        total_selector_entries += len(selector_entries)
+        total_triggered_3cam += sum(1 for cam in cameras if cam["trigger_references"])
         total_audio_steps += sum(
             1 for c in cutscenes for shot in c["shots"] if shot["has_audio"]
         )
@@ -177,11 +266,16 @@ def build_catalog(gam_dir: Path):
             "magic": parsed["magic"],
             "cutscene_count": len(cutscenes),
             "shot_director_count": len(cameras),
+            "selector_entry_count": len(selector_entries),
+            "triggered_shot_director_count": sum(
+                1 for cam in cameras if cam["trigger_references"]
+            ),
             "audio_step_count": sum(
                 1 for c in cutscenes for shot in c["shots"] if shot["has_audio"]
             ),
             "goddard_related": any(c["goddard_related"] for c in cutscenes)
             or any(c["goddard_related"] for c in cameras),
+            "selector_entries": selector_entries,
             "cutscenes": cutscenes,
             "shot_directors": cameras,
         }
@@ -194,6 +288,8 @@ def build_catalog(gam_dir: Path):
             "levels": len(levels),
             "cutscenes": total_cutscenes,
             "shot_directors": total_shots,
+            "selector_entries": total_selector_entries,
+            "triggered_shot_directors": total_triggered_3cam,
             "audio_steps": total_audio_steps,
         },
         "levels": levels,
@@ -206,33 +302,35 @@ def write_markdown(catalog, path: Path):
         "",
         f"Generated: {catalog['generated_at']}",
         "",
-        "| Level | 3MCA cutscenes | 3CAM shot directors | Audio steps | Notes |",
-        "|---|---:|---:|---:|---|",
+        "| Level | Selector entries | 3MCA | 3CAM | Triggered 3CAM | Audio steps | Notes |",
+        "|---|---:|---:|---:|---:|---:|---|",
     ]
     for level, data in catalog["levels"].items():
         note = "Goddard-related" if data["goddard_related"] else ""
         lines.append(
-            f"| `{level}` | {data['cutscene_count']} | "
-            f"{data['shot_director_count']} | {data['audio_step_count']} | {note} |"
+            f"| `{level}` | {data['selector_entry_count']} | "
+            f"{data['cutscene_count']} | {data['shot_director_count']} | "
+            f"{data['triggered_shot_director_count']} | "
+            f"{data['audio_step_count']} | {note} |"
         )
 
-    lines.extend(["", "## Per-Level Cutscenes", ""])
+    lines.extend(["", "## Per-Level Selector Entries", ""])
     for level, data in catalog["levels"].items():
         lines.append(f"### `{level}` ({data['gam']})")
-        if not data["cutscenes"]:
+        if not data["selector_entries"]:
             lines.append("")
-            lines.append("_No `3MCA` rows. Standalone `3CAM` rows are listed in JSON only._")
+            lines.append("_No selector entries._")
             lines.append("")
             continue
         lines.append("")
-        lines.append("| # | tag | shots | audio | targets |")
-        lines.append("|---:|---|---:|---|---|")
-        for scene in data["cutscenes"]:
-            audio = ", ".join(str(i) for i in scene["audio_indices"]) or "-"
+        lines.append("| # | type | tag | shots | audio steps | targets | source |")
+        lines.append("|---:|---|---|---:|---:|---|---|")
+        for scene in data["selector_entries"]:
             targets = ", ".join(scene["targets"]) or "-"
+            source = "triggered" if scene["triggered"] else "authored"
             lines.append(
-                f"| {scene['index']} | `{scene['tag']}` | {len(scene['shots'])} | "
-                f"`{scene['sound_database']}` [{audio}] | {targets} |"
+                f"| {scene['selector_index']} | `{scene['type']}` | `{scene['tag']}` | "
+                f"{scene['shots']} | {scene['audio_steps']} | {targets} | {source} |"
             )
         lines.append("")
     path.write_text("\n".join(lines).rstrip() + "\n")
@@ -242,27 +340,28 @@ def write_html(catalog, path: Path):
     path.parent.mkdir(parents=True, exist_ok=True)
     rows = []
     for level, data in catalog["levels"].items():
-        if not data["cutscenes"]:
+        if not data["selector_entries"]:
             rows.append(
                 "<tr>"
                 f"<td><code>{html.escape(level)}</code></td>"
-                "<td colspan=\"5\"><span class=\"muted\">No 3MCA cutscenes; "
-                f"{data['shot_director_count']} standalone 3CAM shot director(s)</span></td>"
+                "<td colspan=\"6\"><span class=\"muted\">No cutscene selector entries</span></td>"
                 "</tr>"
             )
             continue
-        for scene in data["cutscenes"]:
-            audio = ", ".join(str(i) for i in scene["audio_indices"]) or "-"
+        for scene in data["selector_entries"]:
             targets = ", ".join(scene["targets"]) or "-"
             god = " <span class=\"badge amber\">Goddard</span>" if scene["goddard_related"] else ""
+            source = "triggered" if scene["triggered"] else "authored"
             rows.append(
                 "<tr>"
                 f"<td><code>{html.escape(level)}</code></td>"
-                f"<td>{scene['index']}</td>"
+                f"<td>{scene['selector_index']}</td>"
+                f"<td><code>{html.escape(scene['type'])}</code></td>"
                 f"<td><code>{html.escape(scene['tag'])}</code>{god}</td>"
-                f"<td>{len(scene['shots'])}</td>"
-                f"<td><code>{html.escape(scene['sound_database'])}</code> [{html.escape(audio)}]</td>"
+                f"<td>{scene['shots']}</td>"
+                f"<td>{scene['audio_steps']}</td>"
                 f"<td>{html.escape(targets)}</td>"
+                f"<td>{html.escape(source)}</td>"
                 "</tr>"
             )
 
@@ -302,17 +401,17 @@ th {{ color:#9a9a9a; font-weight:normal; position:sticky; top:0; background:#0d0
 <div class="wrap">
 <h1>Cutscene Catalog <span class="badge amber">GAM-derived</span></h1>
 <p class="sub">Generated {html.escape(catalog['generated_at'])} &middot; source <code>assets/gam/*.gam</code> &middot; JSON <a href="/jn-engine/cutscene_catalog.json">/jn-engine/cutscene_catalog.json</a></p>
-<p>This page lists every selectable <code>3MCA</code> cutscene found in the shipped <code>.gam</code> corpus. The web demo uses the same catalog to populate the Cutscene dropdown.</p>
+<p>This page lists selector-audited <code>3MCA</code> sequencers and standalone <code>3CAM</code> shot directors found in the shipped <code>.gam</code> corpus. The web demo uses the same catalog to populate the Cutscene dropdown.</p>
 <div class="grid">
   <div class="stat"><strong>{totals['levels']}</strong><span>levels with cutscene rows</span></div>
-  <div class="stat"><strong>{totals['cutscenes']}</strong><span>3MCA selectable cutscenes</span></div>
+  <div class="stat"><strong>{totals['selector_entries']}</strong><span>selector entries</span></div>
   <div class="stat"><strong>{totals['shot_directors']}</strong><span>3CAM shot directors</span></div>
-  <div class="stat"><strong>{totals['audio_steps']}</strong><span>authored audio steps</span></div>
+  <div class="stat"><strong>{totals['triggered_shot_directors']}</strong><span>trigger-referenced 3CAM rows</span></div>
 </div>
-<div class="note">Goddard-tagged entries are flagged because Goddard has a known texture/mapping risk. Camera sequencing and Goddard material fidelity should be validated separately.</div>
+<div class="note">Selector audit includes standalone 3CAM rows so trigger-only scenes and non-3MCA cutscene sources are visible. Goddard-tagged entries are flagged because Goddard has a known texture/mapping risk.</div>
 <h2>All Cutscenes</h2>
 <table>
-<tr><th>Level</th><th>#</th><th>Tag</th><th>Shots</th><th>Audio</th><th>Targets</th></tr>
+<tr><th>Level</th><th>#</th><th>Type</th><th>Tag</th><th>Shots</th><th>Audio</th><th>Targets</th><th>Source</th></tr>
 {chr(10).join(rows)}
 </table>
 <div class="footer">
@@ -344,8 +443,10 @@ def main():
     write_html(catalog, Path(args.html_out))
     print(
         "Cutscene catalog: "
-        f"{catalog['totals']['cutscenes']} 3MCA, "
+        f"{catalog['totals']['selector_entries']} selector entries "
+        f"({catalog['totals']['cutscenes']} 3MCA, "
         f"{catalog['totals']['shot_directors']} 3CAM, "
+        f"{catalog['totals']['triggered_shot_directors']} trigger-referenced 3CAM), "
         f"{catalog['totals']['audio_steps']} audio steps "
         f"across {catalog['totals']['levels']} levels"
     )

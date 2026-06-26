@@ -18,17 +18,19 @@ visible or playable mismatch.
 - Used-in-level behavior routing: 93 / 93 FourCCs have native vtables.
 - Decomp ledger: 208 class rows, all currently spec-level.
 - Web build: live at `https://exentt.com/jn-engine/`.
-- Cutscene harness: first cut exists, with 114 selectable `3MCA` cutscenes, 136
-  `3CAM` shot directors, and 362 authored audio steps.
+- Cutscene harness: selector-audited catalog exists, with 250 selector entries
+  across 32 levels: 114 `3MCA` sequencers plus 136 standalone `3CAM` shot
+  directors, 126 of those `3CAM` rows trigger-referenced, and 362 authored
+  `3MCA` audio steps.
 - Vtable audit: `tools/build_vtable_parity_report.py` generates
   `docs/vtable_linkage_audit.md` from `docs/decomp_ledger.csv` plus curated
   overrides.
 - Known open parity issues:
   - cutscene camera/actor fidelity is incomplete.
-  - standalone `3CAM` now consumes `ViewFromCamera`, but the exact enum behavior
-    is not proven against the original.
-  - `FaceObject`, Jimmy `TargetActAnim`/`TargetDeactAnim`, and cutscene input
-    lock are partially plumbed; non-player actor animation, `LoopActAnim`, and
+  - standalone `3CAM` decoded `ViewFromCamera`/`CameraType` behavior is linked,
+    but activation source and restore timing still need proof.
+  - `FaceObject`, Jimmy target animation, and known non-player actor animation
+    dispatch are plumbed; animation-ended callbacks, unknown aliases, and
     unlock/restore timing need deeper linkage.
   - Jimmy/Carl vehicle insertion and vehicle-specific poses/animations are a
     visual-fidelity dependency for vehicle parity.

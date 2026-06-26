@@ -571,8 +571,12 @@
   var cutsceneScenes = [];
 
   function cutsceneAudioLabel(scene) {
+    if (scene && typeof scene.audio_steps === 'number') {
+      return scene.audio_steps ? ' · audio ' + scene.audio_steps + '/' + scene.shots
+                               : ' · no audio';
+    }
     var n = 0;
-    if (scene && scene.shots) {
+    if (scene && Array.isArray(scene.shots)) {
       scene.shots.forEach(function (shot) { if (shot.has_audio) n++; });
     }
     return n ? ' · audio ' + n + '/' + scene.shots.length : ' · no audio';
@@ -590,16 +594,30 @@
   function populateCutsceneSelect(catalog) {
     var level = selectedLevel.toLowerCase();
     var data = catalog && catalog.levels && catalog.levels[level];
-    if (!data || !data.cutscenes || !data.cutscenes.length) {
+    var entries = data && data.selector_entries && data.selector_entries.length
+      ? data.selector_entries
+      : (data && data.cutscenes ? data.cutscenes.map(function (scene) {
+          return {
+            runtime_kind: 0,
+            runtime_index: scene.index,
+            type: '3MCA',
+            tag: scene.tag,
+            shots: scene.shots.length,
+            audio_steps: scene.shots.filter(function (shot) { return shot.has_audio; }).length,
+            goddard_related: scene.goddard_related
+          };
+        }) : []);
+    if (!entries.length) {
       setCutsceneDisabled('No cutscenes in level');
       return;
     }
-    cutsceneScenes = data.cutscenes;
+    cutsceneScenes = entries;
     cutsceneSelect.innerHTML = '';
     cutsceneScenes.forEach(function (scene) {
       var opt = document.createElement('option');
-      opt.value = scene.index;
-      opt.textContent = scene.tag + ' (' + scene.shots.length + ' shots'
+      opt.value = scene.runtime_kind + ':' + scene.runtime_index;
+      opt.textContent = scene.type + ' ' + scene.tag + ' (' + scene.shots + ' shot'
+        + (scene.shots === 1 ? '' : 's')
         + cutsceneAudioLabel(scene) + ')';
       if (scene.goddard_related) opt.textContent += ' · Goddard';
       cutsceneSelect.appendChild(opt);
@@ -620,10 +638,13 @@
     });
   cutscenePlay.addEventListener('click', function () {
     if (!Module || !Module.ccall || cutsceneSelect.disabled) return;
-    var index = parseInt(cutsceneSelect.value, 10);
+    var parts = String(cutsceneSelect.value).split(':');
+    var kind = parseInt(parts[0], 10) || 0;
+    var index = parseInt(parts[1], 10) || 0;
     try {
-      var ok = Module.ccall('cutscene_request_web', 'number', ['number'], [index]);
-      if (!ok) console.warn('[cutscene] runtime rejected sequence index', index);
+      var ok = Module.ccall('cutscene_request_catalog_web', 'number',
+                            ['number', 'number'], [kind, index]);
+      if (!ok) console.warn('[cutscene] runtime rejected entry', kind, index);
       document.getElementById('canvas').focus();
     } catch (e) {
       console.warn('[cutscene] play ccall failed (stale cached build?)', e);

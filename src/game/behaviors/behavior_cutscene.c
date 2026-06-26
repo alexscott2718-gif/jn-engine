@@ -18,9 +18,11 @@
  * each step chooses a target-local camera offset, transforms it through the
  * current target, then looks at target.y + LookatVOffset - 60. Standalone
  * 3CAM now carries the authored ViewFromCamera, FaceObject, TargetActAnim,
- * TargetDeactAnim, LoopActAnim, PlayerControlled, and DeactivateInv fields;
- * ViewFromCamera is still a first-pass native interpretation until the exact
- * original enum is decoded. */
+ * TargetDeactAnim, LoopActAnim, PlayerControlled, and DeactivateInv fields.
+ * 3CAM's CameraType/ViewFromCamera enum is recovered from Neutron.exe 00415f90.
+ * Target animation dispatch follows the original C3DANIMATED path at the
+ * semantic level: Jimmy uses the dedicated player pose system, while other
+ * actors switch to known shipped ASE clips by animation alias. */
 
 #include "behaviors.h"
 #include "behavior_base.h"
@@ -140,6 +142,125 @@ static int cutscene_anim_to_player_pose(const char *anim) {
     if (strcasecmp(anim, "FALL") == 0)
         return PA_FALL;
     return -1;
+}
+
+typedef struct {
+    const char *fourcc;
+    const char *anim;
+    const char *model_path;
+    const char *texture_path;
+} CutSceneActorAnim;
+
+static const CutSceneActorAnim ACTOR_ANIMS[] = {
+    { "3CAR", "STOP",   "assets/ase/carlstop.ASE",      NULL },
+    { "3CAR", "IDLE",   "assets/ase/carlstop.ASE",      NULL },
+    { "3CAR", "WALK",   "assets/ase/carlwalk.ASE",      NULL },
+    { "3CAR", "TALK",   "assets/ase/carltalk.ASE",      NULL },
+    { "3CAR", "TELE",   "assets/ase/carlteleport.ASE",  NULL },
+    { "3CAR", "CHEER",  "assets/ase/carlcheer.ASE",     NULL },
+    { "3CAR", "INHALE", "assets/ase/carlinhale.ASE",    NULL },
+
+    { "3BEN", "STOP",   "assets/ase/bennystop.ASE",     NULL },
+    { "3BEN", "IDLE",   "assets/ase/bennystop.ASE",     NULL },
+    { "3BEN", "WALK",   "assets/ase/bennywalk.ASE",     NULL },
+    { "3BEN", "TALK",   "assets/ase/bennytalk.ASE",     NULL },
+    { "3BEN", "PHONE",  "assets/ase/bennyphone.ASE",    NULL },
+    { "3BEN", "WIPE",   "assets/ase/bennywipe.ASE",     NULL },
+    { "3BEN", "WPHONE", "assets/ase/bennywipephone.ASE", NULL },
+
+    { "3CIN", "STOP",   "assets/ase/cindstop.ASE",      "assets/png/cindy.png" },
+    { "3CIN", "IDLE",   "assets/ase/cindstop.ASE",      "assets/png/cindy.png" },
+    { "3CIN", "WALK",   "assets/ase/cindwalk.ASE",      "assets/png/cindy.png" },
+    { "3CIN", "TALK",   "assets/ase/cindtalk.ASE",      "assets/png/cindy.png" },
+    { "3CIN", "TELE",   "assets/ase/cindteleport.ASE",  "assets/png/cindy.png" },
+    { "3CIN", "CHEER",  "assets/ase/cindycheer.ASE",    "assets/png/cindy.png" },
+    { "3CIN", "WAVE",   "assets/ase/cindwave.ASE",      "assets/png/cindy.png" },
+
+    { "3FOW", "STOP",   "assets/ase/fowlstop.ASE",      NULL },
+    { "3FOW", "IDLE",   "assets/ase/fowlstop.ASE",      NULL },
+    { "3FOW", "WALK",   "assets/ase/fowlwalk.ASE",      NULL },
+    { "3FOW", "TALK",   "assets/ase/fowltalk.ASE",      NULL },
+    { "3FOW", "TELE",   "assets/ase/fowlteleport.ASE",  NULL },
+    { "3FOW", "CHEER",  "assets/ase/fowlcheer.ASE",     NULL },
+
+    { "3GOD", "STOP",   "assets/ase/godsit.ASE",        "assets/png/goddard02.png" },
+    { "3GOD", "IDLE",   "assets/ase/godsit.ASE",        "assets/png/goddard02.png" },
+    { "3GOD", "SIT",    "assets/ase/godsit.ASE",        "assets/png/goddard02.png" },
+    { "3GOD", "RUN",    "assets/ase/godrun.ASE",        "assets/png/goddard02.png" },
+    { "3GOD", "WALK",   "assets/ase/godrun.ASE",        "assets/png/goddard02.png" },
+    { "3GOD", "BARK",   "assets/ase/godbark.ASE",       "assets/png/goddard02.png" },
+    { "3GOD", "EAT",    "assets/ase/godeat.ASE",        "assets/png/goddard02.png" },
+    { "3GOD", "GROWL",  "assets/ase/godgrowl.ASE",      "assets/png/goddard02.png" },
+    { "3GOD", "POINT",  "assets/ase/godpoint.ASE",      "assets/png/goddard02.png" },
+    { "3GOD", "WAG",    "assets/ase/godwag.ASE",        "assets/png/goddard02.png" },
+    { "3GOD", "DEAD",   "assets/ase/goddead.ASE",       "assets/png/goddard02.png" },
+    { "3GOD", "FLY",    "assets/ase/godfly.ASE",        "assets/png/goddard02.png" },
+    { "3GOD", "ROCKET", "assets/ase/godrocket.ASE",     "assets/png/goddard02.png" },
+
+    { "3GUA", "WALK",   "assets/ase/guardwalk.ASE",     "assets/png/yokguard.png" },
+    { "3GUA", "STOP",   "assets/ase/guardatak.ASE",     "assets/png/yokguard.png" },
+    { "3GUA", "ATTACK", "assets/ase/guardatak.ASE",     "assets/png/yokguard.png" },
+    { "3GUA", "SHRINK", "assets/ase/guardshrink.ASE",   "assets/png/yokguard.png" },
+
+    { "3HUG", "STOP",   "assets/ase/hughstop.ASE",      NULL },
+    { "3HUG", "IDLE",   "assets/ase/hughstop.ASE",      NULL },
+    { "3HUG", "WALK",   "assets/ase/hughwalk.ASE",      NULL },
+    { "3HUG", "TALK",   "assets/ase/hughtalk.ASE",      NULL },
+    { "3HUG", "COUNT",  "assets/ase/hughcount.ASE",     NULL },
+
+    { "3KIT", "STOP",   "assets/ase/catsit.ASE",        "assets/png/cat.png" },
+    { "3KIT", "IDLE",   "assets/ase/catsit.ASE",        "assets/png/cat.png" },
+    { "3KIT", "SIT",    "assets/ase/catsit.ASE",        "assets/png/cat.png" },
+    { "3KIT", "TALK",   "assets/ase/cattalk.ASE",       "assets/png/cat.png" },
+
+    { "3LIB", "STOP",   "assets/ase/libystop.ASE",      NULL },
+    { "3LIB", "IDLE",   "assets/ase/libystop.ASE",      NULL },
+    { "3LIB", "WALK",   "assets/ase/libywalk.ASE",      NULL },
+    { "3LIB", "RUN",    "assets/ase/libyrun.ASE",       NULL },
+    { "3LIB", "TALK",   "assets/ase/libytalk.ASE",      NULL },
+    { "3LIB", "PHONE",  "assets/ase/libbyphone.ASE",    NULL },
+    { "3LIB", "WAVE",   "assets/ase/libywave.ASE",      NULL },
+
+    { "3MOM", "STOP",   "assets/ase/judystop.ASE",      NULL },
+    { "3MOM", "IDLE",   "assets/ase/judystop.ASE",      NULL },
+    { "3MOM", "WALK",   "assets/ase/judywalk.ASE",      NULL },
+    { "3MOM", "TALK",   "assets/ase/judytalk.ASE",      NULL },
+    { "3MOM", "FIX",    "assets/ase/judyfix.ASE",       NULL },
+
+    { "3NIC", "STOP",   "assets/ase/nickstop.ASE",      NULL },
+    { "3NIC", "IDLE",   "assets/ase/nickstop.ASE",      NULL },
+    { "3NIC", "WALK",   "assets/ase/nickwalk.ASE",      NULL },
+    { "3NIC", "TALK",   "assets/ase/nicktalk.ASE",      NULL },
+    { "3NIC", "WAVE",   "assets/ase/nickwave.ASE",      NULL },
+    { "3NIC", "COIN",   "assets/ase/nickcoin.ASE",      NULL },
+    { "3NIC", "SKATE",  "assets/ase/nickskate1.ASE",    NULL },
+
+    { "3SHE", "STOP",   "assets/ase/shenstop.ASE",      NULL },
+    { "3SHE", "IDLE",   "assets/ase/shenstop.ASE",      NULL },
+    { "3SHE", "WALK",   "assets/ase/shenwalk.ASE",      NULL },
+    { "3SHE", "TALK",   "assets/ase/shentalk.ASE",      NULL },
+
+    { "3SOL", "WALK",   "assets/ase/soldwalk.ASE",      "assets/png/yoksold.png" },
+    { "3SOL", "STOP",   "assets/ase/soldwalk.ASE",      "assets/png/yoksold.png" },
+
+    { "3ULT", "STOP",   "assets/ase/ultrastop.ASE",     NULL },
+    { "3ULT", "IDLE",   "assets/ase/ultrastop.ASE",     NULL },
+    { "3ULT", "WALK",   "assets/ase/ultrawalk.ASE",     NULL },
+    { "3ULT", "TALK",   "assets/ase/ultratalk.ASE",     NULL },
+    { "3ULT", "GIVE",   "assets/ase/ultragive.ASE",     NULL },
+    { "3ULT", "FLEX",   "assets/ase/ultraflex.ASE",     NULL },
+    { "3ULT", "WHISPER","assets/ase/ultrawhisper.ASE",  NULL },
+};
+
+static const CutSceneActorAnim *cutscene_actor_anim(const Entity *target,
+                                                    const char *anim) {
+    if (!target || cutscene_is_none(anim)) return NULL;
+    for (size_t i = 0; i < sizeof(ACTOR_ANIMS) / sizeof(ACTOR_ANIMS[0]); i++) {
+        if (strncmp(target->type, ACTOR_ANIMS[i].fourcc, 4) == 0 &&
+            strcasecmp(anim, ACTOR_ANIMS[i].anim) == 0)
+            return &ACTOR_ANIMS[i];
+    }
+    return NULL;
 }
 
 /* ---- 3CAM: register a shot on spawn ------------------------------------- */
@@ -394,6 +515,19 @@ int cutscene_request_index(int index) {
     return 1;
 }
 
+int cutscene_request_shot_index(int index) {
+    if (index < 0 || index >= g_cut.count) {
+        printf("[CUTSCENE] invalid standalone shot index %d (count=%d)\n",
+               index, g_cut.count);
+        return 0;
+    }
+    g_cut.active_count = 1;
+    g_cut.active[0] = g_cut.shots[index];
+    cutscene_start_active(-1, g_cut.shots[index].target[0] ? g_cut.shots[index].target
+                                                           : "3CAM");
+    return 1;
+}
+
 int cutscene_active(void) { return g_cut.playing; }
 
 static Entity *find_by_tag(World *w, const char *tag) {
@@ -420,8 +554,19 @@ static void cutscene_face_object(World *w, const CutSceneShot *s, Entity *target
     face->ry = atan2f(-dx, -dz);
 }
 
-static void cutscene_apply_player_anim(Entity *target, const char *anim) {
-    if (!target || target != g_player) return;
+static void cutscene_apply_target_anim(Entity *target, const char *anim, int loop) {
+    if (!target || cutscene_is_none(anim)) return;
+    if (target != g_player) {
+        const CutSceneActorAnim *a = cutscene_actor_anim(target, anim);
+        if (!a) return;
+        cutscene_copy(target->cutscene_model, sizeof(target->cutscene_model),
+                      a->model_path);
+        cutscene_copy(target->cutscene_texture, sizeof(target->cutscene_texture),
+                      a->texture_path);
+        target->cutscene_anim_loop = loop ? 1 : 0;
+        target->anim_time = 0.0f;
+        return;
+    }
     int pose = cutscene_anim_to_player_pose(anim);
     if (pose < 0) return;
     target->user_flag = pose;
@@ -432,14 +577,14 @@ static void cutscene_activate_current(World *w, Entity *target) {
     CutSceneShot *s = cutscene_current_shot();
     if (!s) return;
     cutscene_face_object(w, s, target);
-    cutscene_apply_player_anim(target, s->target_act_anim);
+    cutscene_apply_target_anim(target, s->target_act_anim, s->loop_act_anim);
 }
 
 static void cutscene_deactivate_current(World *w) {
     CutSceneShot *s = cutscene_current_shot();
     if (!s || !w) return;
     Entity *target = find_by_tag(w, s->target);
-    cutscene_apply_player_anim(target, s->target_deact_anim);
+    cutscene_apply_target_anim(target, s->target_deact_anim, 1);
 }
 
 /* Eased framing distance, recovered from Neutron.exe 00415f90:
@@ -570,6 +715,12 @@ void cutscene_update(Camera *cam, World *w, float dt) {
 
 EMSCRIPTEN_KEEPALIVE
 int cutscene_request_web(int index) { return cutscene_request_index(index); }
+
+EMSCRIPTEN_KEEPALIVE
+int cutscene_request_catalog_web(int kind, int index) {
+    return kind == 1 ? cutscene_request_shot_index(index)
+                     : cutscene_request_index(index);
+}
 
 EMSCRIPTEN_KEEPALIVE
 int cutscene_count_web(void) { return cutscene_sequence_count(); }

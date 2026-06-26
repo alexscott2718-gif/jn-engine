@@ -98,6 +98,7 @@ extern const EntityVTable vt_cargo;           /* 3YCA — C3DYokCargo LEV5 SCENE
 void cutscene_reset(void);                    /* clear registered shots (per level) */
 void cutscene_request_intro(void);            /* begin playing the level's shots */
 int  cutscene_request_index(int index);       /* play a registered 3MCA sequence */
+int  cutscene_request_shot_index(int index);  /* play one registered standalone 3CAM */
 int  cutscene_sequence_count(void);
 int  cutscene_active(void);
 void cutscene_stop(void);

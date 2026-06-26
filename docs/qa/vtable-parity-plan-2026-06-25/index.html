@@ -25,6 +25,7 @@ code { color:#d9c08a; }
 .blue { background:#102536; color:#9fd8ff; border:1px solid #244861; }
 .amber { background:#33280e; color:#e6c66f; border:1px solid #6c5720; }
 .green { background:#102e1c; color:#8ee6a2; border:1px solid #285e36; }
+.qa { border-left:3px solid #285e36; background:#0f1d13; border-radius:0 6px 6px 0; color:#b8e8c2; padding:10px 12px; margin:14px 0; font-size:0.88rem; }
 table { width:100%; border-collapse:collapse; margin:14px 0; font-size:0.8rem; }
 th,td { text-align:left; padding:8px 8px; border-bottom:1px solid #242424; vertical-align:top; }
 th { color:#9a9a9a; font-weight:normal; background:#0d0d0d; }
@@ -48,11 +49,20 @@ camera, player movement, menus, inventory/tools, progression, triggers, animatio
 AI/pathing, and vehicles. The target is parity where manual generation would drift
 from the original game.</p>
 
+<div class="qa"><strong>QA update, 2026-06-26:</strong> the cutscene selector now
+lists both authored <code>3MCA</code> sequences and standalone <code>3CAM</code>
+shot directors. Current catalog: <strong>250 selector entries</strong>
+(114 <code>3MCA</code> + 136 <code>3CAM</code>), including 126 trigger-referenced
+standalone shots that were previously easy to miss. Please spot-check Goddard,
+Cindy, and friend/NPC scenes for camera framing, target pose changes, and whether
+the scene returns cleanly to gameplay. Known remaining risks: exact restore timing,
+animation-ended callbacks, and Goddard material fidelity.</div>
+
 <div class="grid">
   <div class="stat"><strong>93 / 93</strong><span>used FourCCs have native vtables</span></div>
   <div class="stat"><strong>208</strong><span>decomp ledger class rows to classify</span></div>
-  <div class="stat"><strong>10</strong><span>parity domains</span></div>
-  <div class="stat"><strong>1st</strong><span>deliverable is a linkage audit</span></div>
+  <div class="stat"><strong>250</strong><span>cutscene selector entries</span></div>
+  <div class="stat"><strong>0 / 35</strong><span>faithfulness audit findings</span></div>
 </div>
 
 <div class="note">Success is not measured by raw vtable percentage. The useful metric is how many
@@ -75,8 +85,9 @@ must-link parity systems are native-linked, faithfully ported, or still manually
 
 <h2>Recommended Order</h2>
 <ol>
-  <li>Build <code>docs/vtable_linkage_audit.md</code> from the decomp ledger.</li>
-  <li>Continue camera/cutscene linkage: finish <code>3CAM</code> <code>ViewFromCamera</code>, actor facing, animation hooks, and <code>PlayerControlled</code>.</li>
+  <li><span class="badge green">Done</span> Build <code>docs/vtable_linkage_audit.md</code> from the decomp ledger.</li>
+  <li><span class="badge green">Done</span> Decode and link standalone <code>3CAM</code> camera enum behavior, selector enumeration, actor facing, and known actor animation hooks.</li>
+  <li>Validate cutscene restore timing, <code>PlayerControlled</code>, and actor animation by eye/ear on desktop/noVNC.</li>
   <li>Deepen <code>C3DPlayer</code> movement/camera slots that define tank-control feel.</li>
   <li>Audit and link menus/UI flow: <code>CMainMenu</code>, <code>CMenuElement</code>, <code>C2DInGameMenu</code>, pause/restart/input locks.</li>
   <li>Audit inventory/items/gadgets and progression/objectives.</li>
@@ -86,8 +97,8 @@ must-link parity systems are native-linked, faithfully ported, or still manually
 <h2>First Implementation Slice</h2>
 <div class="cards">
   <div class="card"><h3>Audit</h3><p>Create <code>tools/build_vtable_parity_report.py</code> and classify classes as linked, approximated, must-link, deferred, unused, or faithful-wontfix.</p></div>
-  <div class="card"><h3>Cutscenes</h3><p>Decode standalone <code>3CAM</code> <code>ViewFromCamera</code>, then link target animations, facing, and player-control locks.</p></div>
-  <div class="card"><h3>Validation</h3><p>Use the web selector plus XP/noVNC or video timestamps as evidence. Avoid scene-specific overrides unless explicitly approved.</p></div>
+  <div class="card"><h3>Cutscenes</h3><p>Selector now exposes <code>3MCA</code> and standalone <code>3CAM</code>. Known actor target animations switch to shipped ASE clips; timing still needs eyes-on QA.</p></div>
+  <div class="card"><h3>Validation</h3><p>Use the web selector plus desktop/noVNC or video timestamps as evidence. Avoid scene-specific overrides unless explicitly approved.</p></div>
 </div>
 
 <h2>Known Carry-Forward Issues</h2>
