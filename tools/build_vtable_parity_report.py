@@ -10,6 +10,8 @@ from __future__ import annotations
 
 import csv
 import re
+import subprocess
+import sys
 from collections import Counter, defaultdict
 from dataclasses import dataclass
 from datetime import date
@@ -69,6 +71,7 @@ VALID_STATUSES = {
     "defer",
     "unused",
     "wontfix-faithful",
+    "linked-blocked",
 }
 
 
@@ -776,6 +779,8 @@ def main() -> int:
     print(f"rows: {len(rows)}")
     counts = Counter(r["status"] for r in rows)
     print("status counts: " + ", ".join(f"{k}={counts[k]}" for k in sorted(counts)))
+    # Linked-parity gate: a `linked` claim is only trusted with a green oracle.
+    subprocess.run([sys.executable, str(REPO / "tools" / "check_linkage_certificates.py")], check=True)
     return 0
 
 

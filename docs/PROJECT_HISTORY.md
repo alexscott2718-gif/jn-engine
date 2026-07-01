@@ -1343,3 +1343,32 @@ performance, shell hygiene) lives in the repo's `CLAUDE.md` and in
 
 *This is a living document. When an era closes or a dead end is revived-and-killed
 again, add it here rather than spawning another one-off doc.*
+
+## Linked-parity branch kickoff (2026-07-01)
+
+Cut branch `linked` off `native-port` to run a focused campaign: move
+vtable-parity rows from `approximated`/`must-link` to **`linked`** (native behavior
+provably follows the recovered decompiled body) using **only static/headless
+evidence — no gameplay, no QA**. Rationale: the vtable audit has 0 rows at `linked`;
+"faithful" was previously gated on by-eye/by-ear QA, which a coding model cannot run.
+
+The load-bearing decision is a machine-enforced definition of `linked` — the
+**Linkage Certificate** (L1 body recovered, L2 1:1 transcription, L3 green headless
+oracle, L4 no hand-tuned magic, L5 non-regression). Enforced by:
+
+- `docs/linkage_certificates.csv` — manifest, one row per `(class, aspect)`.
+- `tools/linkage_oracles/` — the L3 proofs (contract in `README.md`, template in
+  `example_oracle.py`).
+- `tools/check_linkage_certificates.py` — the gate: a `linked` row needs an existing
+  `linkage_doc` + an `oracle` that runs green; a `linked-blocked` row needs a note.
+  Emits `docs/linkage_progress.md`. `--selftest` proves the gate catches a bad oracle.
+- `tools/build_vtable_parity_report.py` now calls the gate at the end of `main()`, so
+  the audit can't be regenerated while a `linked` claim is uncertified.
+
+Honest target = 100% of the *statically-linkable* subset. Rows whose only ground
+truth is visual/aural are seeded as `linked-blocked` and return to `native-port`:
+`C3DPlayer` free-roam feel, `C3DGoddard` texture/UV, `C3DCindy` location/pathing,
+`C3DSoundEffect` by-ear mix, `C3DCarl` vehicle rider pose. Player *logic* stays
+linkable via a headless input-trace oracle; only the *feel* is blocked. Full plan:
+`docs/linked_parity_plan.md`. On completion, merge `linked -> native-port` and close
+the `linked-blocked` residual with QA there.

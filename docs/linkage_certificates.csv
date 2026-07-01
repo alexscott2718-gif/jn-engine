@@ -1,0 +1,6 @@
+class,aspect,domain,status,oracle,linkage_doc,note
+C3DPlayer,free-roam-feel,player movement,linked-blocked,,docs/decomp/C3DPlayer.md,"Free-roam movement FEEL (accel curve and turn response as experienced) can only be confirmed by-eye or against a capture-with-input trace. The state-machine LOGIC is separately linkable via a headless input-trace oracle; feel confirmation returns to native-port."
+C3DGoddard,texture-uv,animation / actor pose,linked-blocked,,docs/decomp/C3DGoddard.md,"Goddard texture/UV correctness is an art-fidelity issue with no headless oracle; needs capture/original comparison on native-port."
+C3DCindy,location-pathing,AI / pathing,linked-blocked,,docs/decomp/C3DCindy.md,"Cindy's correct location/patrol state is unresolved and requires original-game or capture evidence; do not guess. Returns to native-port."
+C3DSoundEffect,by-ear-mix,triggers / story sequencing,linked-blocked,,docs/decomp/C3DSoundEffect.md,"Audio timbre/mix/by-ear correctness needs desktop/noVNC listening; the dispatch/trigger LOGIC is separately linkable. Returns to native-port."
+C3DCarl,vehicle-rider-pose,vehicles / special movement,linked-blocked,,docs/decomp/C3DCarl.md,"Carl's vehicle insertion pose/offset needs decomp proof or capture evidence; the vehicle integrator MATH is separately linkable. Returns to native-port."
