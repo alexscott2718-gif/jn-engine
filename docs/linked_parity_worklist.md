@@ -60,7 +60,7 @@ contract in `docs/linked_parity_plan.md` (Linkage Certificate L1-L5).
 - [x] **CJimmyGame / initgame-seed** -- DONE (this commit; seed only, win-bridge + death flow not decompiled, see doc). — `game_flow.c` <-> `InitGame` (lives=5,
   mission_value=100, level-clear -> `level_objective_met`). Reproduce seed + win-bridge
   transitions. `docs/decomp/CJimmyGame.md`.
-- [ ] **C3DStartPoint / spawn + C3DCheckPoint / progress** — `00442740` / `00414410`
+- [~] **C3DStartPoint / spawn + C3DCheckPoint / progress** -- FLAGGED, both linked-blocked (2026-07-02; harness cost for spawn, deliberate divergence for progress -- see docs). — `00442740` / `00414410`
   <-> `behavior_checkpoint.c`. `docs/decomp/C3DStartPoint.md`, `C3DCheckPoint.md`.
 - [ ] **C3DPatrolPoint / on-arrive + AI patrol** — `00434ea0` <-> `behavior_ai.c`.
   Patrol arrival/next-select/facing math over shipped PatrolPoint chains.

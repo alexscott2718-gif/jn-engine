@@ -1490,3 +1490,34 @@ libc-only + task_loader.c, no stubs needed) and asserts a zero pre-seed
 baseline, the exact post-seed constants, and idempotent re-seeding.
 Scoreboard: 6 linked, 6 linked-blocked. Next: C3DStartPoint/spawn +
 C3DCheckPoint/progress.
+
+
+## linked branch: C3DStartPoint/spawn + C3DCheckPoint/progress flagged, both linked-blocked (2026-07-02)
+
+Investigated the next worklist row and flagged both halves rather than force a
+certification -- for two different reasons, worth distinguishing.
+
+C3DStartPoint/spawn: place_player (src/game/main.c) turned out to be a genuine,
+faithful partial port of the decompiled PlacePlayer (00442740) -- STRT tag
+match (case-insensitive), position+rotation teleport, MusicDatabase/MusicIndex
+selection all check out against the recovered body. Blocked purely on harness
+cost: place_player is static inside the 2,480-line main.c (the full game
+loop -- window/GL/audio init, physics, render loop), and reaching it headless
+the way the cutscene-camera oracles reached behavior_cutscene.c's statics
+(#include the whole file into a driver TU) would mean stubbing that entire
+init path. Extracting just the STRT-matching loop into its own testable
+function is a legitimate option for a future pass but is a production-code
+refactor with its own review cost, out of scope here. ViewportP*/ViewportR*
+camera pose and StartTrigger remain unported gaps, independent of this.
+
+C3DCheckPoint/progress: the opposite situation. vt_checkpoint
+(behavior_checkpoint.c) is a deliberate simplification -- its own comment says
+it matches the original's checkpoint-progression FEEL via a last-touched-wins
+respawn relocation, with none of UpdateCheckPoint's (00414410) actual
+FINISHLINE/race-timer/HUD-draw logic present. Same shape as CJimmyGame's
+win-bridge exclusion: a working native behavior the project chose not to make
+1:1 with the recovered body, so there's no fidelity claim to certify.
+
+Recorded both as linked-blocked in docs/linkage_certificates.csv with the
+distinct reasoning, and struck the worklist row. Scoreboard: 6 linked, 8
+linked-blocked. Next: C3DPatrolPoint/on-arrive + AI patrol.

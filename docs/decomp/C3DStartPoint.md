@@ -95,3 +95,44 @@ Open questions:
 - Hand-deepened from the decompiled bodies (supersedes the generated skeleton). The
   spawn anchor for `CTaskList` / `C3DJimmy` (`StartPoint` property; see
   [`CTaskList.md`](./CTaskList.md)).
+
+## Native Linkage (linked-parity branch)
+
+Aspect: **`spawn`** — status `linked-blocked`.
+Certificate: `docs/linkage_certificates.csv`.
+
+Investigated 2026-07-02 (linked-parity pass). The native `place_player`
+(`src/game/main.c`) is a genuine, meaningful partial port of the decompiled
+`PlacePlayer` (`00442740`) — not inert, not a deliberate divergence:
+
+- Resolves the requested `StartPoint` tag against placed `STRT` entities via
+  a case-insensitive name match (`strcasecmp`), same as the decompiled
+  `IsA("C3DPLAYER")`-gated lookup by name.
+- Teleports the player to the matched start point's own world transform
+  (position **and** rotation), matching "place the player at this
+  transform."
+- Selects `MusicDatabase`/`MusicIndex` from the matched start point,
+  matching the decompiled music wiring.
+
+Not ported: the `ViewportPx/Py/Pz`/`ViewportRx/Ry/Rz` initial **camera** pose
+(a separate pose from the player's own transform — `place_player` never
+applies it to any camera) and `StartTrigger` (one-shot trigger on spawn).
+
+**Blocked on harness cost, not on missing decompiled body or a deliberate
+divergence** (unlike `C3DAnimated`/`ase-deserialization` or
+`CJimmyGame`/the win-bridge exclusion). `place_player` is `static` inside
+`src/game/main.c` (2,480 lines — the full game loop: window/GL context init,
+audio init, physics stepping, the render loop). Reaching it for a headless L3
+oracle the way the cutscene-camera oracles reached `behavior_cutscene.c`'s
+statics (`#include`-ing the whole file into a driver TU) would require
+stubbing the entire windowing/GL/audio initialization path — impractical for
+one linkage row. The alternative, extracting the STRT-matching loop into its
+own small testable function, is a legitimate option for a **future** pass but
+is a production-code refactor with its own review/regression cost, out of
+scope for this one.
+
+### Not covered / open
+
+- No L3 oracle this pass — see above.
+- `ViewportP*`/`ViewportR*` (camera pose) and `StartTrigger` are unported
+  gaps, independent of the linkage-certification question.

@@ -90,3 +90,34 @@ Open questions:
 - Evidence: `DumpClass.java C3DCheckPoint /tmp/dumps2/decomp_C3DCheckPoint.md`.
 - Hand-deepened from the decompiled bodies (supersedes the generated skeleton). The
   timed-level finish mechanism; pairs with the VR/race `CLevelVR*` controllers.
+
+## Native Linkage (linked-parity branch)
+
+Aspect: **`progress`** — status `linked-blocked`.
+Certificate: `docs/linkage_certificates.csv`.
+
+Investigated 2026-07-02 (linked-parity pass). The native `vt_checkpoint`
+(`src/game/behaviors/behavior_checkpoint.c`) is a **deliberate
+simplification**, not a port of the decompiled `UpdateCheckPoint`
+(`00414410`): its own header comment says it matches "the original's
+checkpoint-progression *feel*" via a "last-touched wins" respawn-point
+relocation on trigger. It has no `FINISHLINE` name check, no race-timer gate
+(`DAT_004eefc8`), no `FUN_004073b0` finish call, and no HUD time draw
+(`FUN_00468660`) — none of the decompiled body's actual logic is present to
+diff against.
+
+This is the same shape as `CJimmyGame`'s win-bridge exclusion
+(`docs/decomp/CJimmyGame.md`): a real, working native behavior that the
+project intentionally chose *not* to make 1:1 with the recovered body. No
+oracle would prove anything here — there's no claim of fidelity to certify.
+Porting the actual `FINISHLINE`/race-timer/HUD mechanism (which would also
+need `FUN_004073b0`/`DAT_004eefc8` recovered further, per the doc's Open
+Questions) is real behavior-porting work, out of scope for a
+linkage-certification pass.
+
+### Not covered / open
+
+- No decompiled-body fidelity to certify — the native behavior is an
+  intentional divergence.
+- A future pass that ports the actual `FINISHLINE`/race-timer logic could
+  open a real `linked` aspect here; until then this stays `linked-blocked`.
