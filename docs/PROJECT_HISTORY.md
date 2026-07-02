@@ -1683,3 +1683,24 @@ function-recovery on the five entry points, then a 1:1 port replacing the
 approved movement (native-port work + a product decision), then the
 input-trace oracle. No code changed; scoreboard stays 9 linked /
 9 linked-blocked.
+
+## linked branch: menus domain closed -- tenth certified row + two dispositions (2026-07-02)
+
+CMainMenu/level-routing-table is the tenth linked row: menu.c's g_items is
+certified against the executable's decoded routing table (.rdata:004ec71c --
+NewGame.tsk then VR01,VR03,VR02,VR08,VR06,VR07,VR05,VR04), driven through the
+real menu_open/menu_input/menu_take_confirm path with input stubbed
+(tools/linkage_oracles/CMainMenu.py + cmainmenu_dump.c); selection wrap pins
+the item count at 10. Mutation-tested: route retarget, dropped NewGame flag,
+and a deleted item all go red. Everything else about menus stays honestly
+uncertified: LoadMyMenu/displayMenu and the CMenuElement screen graph are not
+decompiled (only trace strings), and the native list UI is a deliberate
+stand-in -- recorded in CMainMenu.md.
+
+Two same-day dispositions close the domain sweep: CLoadLevel/activate-load
+(decoded ActivateLoad hide/request-block semantics are unported -- native
+load_on_trigger is a functional two-string bridge; the RequiredTask gate's
+original evaluation point is still unpinned) and C2DInGameMenu/hud-draw
+(DrawHud constants fully decoded but native hud.c is a deliberate original
+design; native death path does not load the unrecovered RestartLevel.tsk).
+Both linked-blocked with notes. Scoreboard: 10 linked / 11 linked-blocked.

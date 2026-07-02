@@ -180,3 +180,19 @@ The proximity/prerequisite gate (`Radius`, `RequiredTask`, `RequiredLevel`,
 outside deserialization scope — see the Open Questions above. This aspect certifies
 only that the 9 registered properties (and the generic record format they're an
 instance of) are read from disk identically to the reference parser.
+
+### Aspect: `activate-load` — status `linked-blocked` (investigated 2026-07-02)
+
+`ActivateLoad` (`00458370`) is decoded — hide the portal (slot `0xd8`), hand
+the `+0x17a` request block (`LevelName`/`StartPoint`/fade) to global
+game-object slot `0x100` — but the native path (`behavior_load.c`
+`load_on_trigger`) is a functional bridge, not a transcription: it forwards
+`LevelName`/`StartPoint` via `gamestate_request_level_swap`, does not hide
+the portal, adds a native fire-once latch, and drops the fade fields. The
+`RequiredTask`/`RequiredLevel`/`ExactLevel` gate it applies
+(`behavior_base.c` level-window semantics) has no decompiled counterpart —
+the Open Question above (where Neutron.exe evaluates the gate) is still
+unpinned. An oracle here could only certify the two-string forwarding, which
+adds nothing beyond the `gam-deserialization` aspect already linked. Returns
+to native-port: port the hide/fade/request-block semantics, and pin the gate
+caller in Ghidra.

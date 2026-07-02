@@ -101,3 +101,33 @@ Open questions:
   `.rdata:004ec71c`.
 - Sibling of the `CLevel*Game` controllers under `CJimmyGame`; front-end counterpart
   to the in-game `C2DInGameMenu` HUD.
+
+## Native Linkage (linked-parity branch)
+
+Aspect: **`level-routing-table`** — status `linked`.
+Certificate: `docs/linkage_certificates.csv`; oracle:
+`tools/linkage_oracles/CMainMenu.py`.
+
+This aspect certifies exactly the decoded Level Routing Table above
+(`.rdata:004ec71c`) against the native front-end (`src/game/menu.c`):
+
+| Decomp (Neutron.exe) | Native (`src/game/menu.c`) | Deviation |
+|---|---|---|
+| `NewGame.tsk` first route | `g_items[0]` = New Game -> `level1b` via the NewGame task (`is_newgame`) | the `NewGame->level1b.gam` binding is certified separately by `CTaskList`/tsk-deserialization |
+| `VR01..VR08.gam` in menu order `VR01, VR03, VR02, VR08, VR06, VR07, VR05, VR04` | `g_items[1..8]`, same order | `VRxx.gam` -> `vrxx` is the native loader's level-name normalization |
+| (menu-manager quit control) | trailing `Quit` row, no route | native UI convention; asserted only as the no-route terminator |
+
+Oracle: `cmainmenu_dump.c` compiles the real, unmodified `menu.c` (input
+stubbed to a scripted key queue, renderer overlay stubbed) and walks every
+index through the real `menu_open`/`menu_input`/`menu_take_confirm` path,
+diffing each routed `(level, is_newgame)` against the doc table; probing past
+the end must wrap to index 0, pinning the item count at 10.
+
+### Not covered / open
+
+- Everything else about the menu: the `CMenuElement` screen graph,
+  rollover/activation logic, drawing, audio cues, and input mapping.
+  `LoadMyMenu`/`displayMenu` and the menu-manager slots are **not
+  decompiled** (only their trace strings are known), and the native keyboard
+  list UI is a deliberate stand-in — that residue needs a Ghidra recovery
+  pass before any further menu aspect can be certified.

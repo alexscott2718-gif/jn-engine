@@ -104,3 +104,21 @@ Open questions:
 - Evidence: `DumpClass.java C2DInGameMenu /tmp/decomp_C2DInGameMenu.md`; HUD docs
   `docs/hud_chrome_digit_recapture.md`, `docs/decomp/hud.c`.
 - This is the gameplay HUD overlay; `CMainMenu` is the separate front-end menu mode.
+
+## Native Linkage (linked-parity branch)
+
+Aspect: **`hud-draw`** — status `linked-blocked` (investigated 2026-07-02).
+Certificate: `docs/linkage_certificates.csv`.
+
+`DrawHud` (`00406690`) is decoded to the constant level — counter positions
+(`0x7d/0x8c`, `400/0x8c`, `0x185/0x10e`, `0x1a9/0x1b3`), printf formats
+(`%3.0d`/`%5.0d`/`%6.0d`), and the death path (`RestartLevel.tsk` +
+`level1f.gam`) — so L1 is satisfied. But the L2 target is absent by design:
+the native HUD (`src/game/hud.c`) is a deliberate original design containing
+none of those constants, and the native death path (`game_flow`) is the
+already-excluded C2DInGameMenu bridge, which does not load
+`RestartLevel.tsk` (the file itself is unrecovered — see CTaskList's open
+questions). No fidelity claim exists to certify — the same disposition shape
+as `C3DCheckPoint`/progress. Returns to native-port: porting the DrawHud
+layout/death path is behavior work, and `RestartLevel.tsk` recovery belongs
+to the CTaskList open item.
