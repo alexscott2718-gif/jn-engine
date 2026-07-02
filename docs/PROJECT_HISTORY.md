@@ -1845,3 +1845,29 @@ no in-game menu gadget-controller protocol, Goddard/Jeep companion spawn, or
 oxygen/race countdown port. Added explicit `C3DJimmy`/
 `gadget-mode-dispatch` as `linked-blocked`; a faithful oracle requires porting
 that controller/timer/mode dispatch first.
+
+## linked branch: Ghidra target 7 recovered C3DAnimated event-to-animation L1, stays linked-blocked (2026-07-02)
+
+Executed target 7 from `docs/ghidra_recovery_plan.md`: function-defined and
+dumped the `C3DAnimated` animation dispatch cluster into
+`docs/decomp/evidence/c3danimated_target7.md`. The recovered set includes
+`UpdateAnimated` (`0040e050`), `SetAnim3DByName` (`0040dd90`),
+`CreateAnim3DRecord` (`0040d4a0`), `InitAnim3DDatabase` (`0040e270`),
+visibility/collision state helper `0040e1f0`, animation-record lookup/select
+helpers `0040d9e0`/`0040da30`/`0040dab0`/`0040db10`, name-buffer helper
+`0040df80`, enabled-state bridge `0040e3e0`, and pause helper `0040d350`.
+
+Key finding: `UpdateAnimated`'s last-frame path calls vtable-4 slot 65. Base
+`C3DAnimated` leaves that slot as shared no-op/thunk `00472970`; `C3DPlayer`
+is the concrete consumer found here, overriding the slot at `0043a900`
+(`OnPlayerAnimEnded`) for Jimmy's FENCE/LADDER and SPLAT/HIT completion
+cleanup. `SetAnim3DByName` is now body-backed as the OMedia animation-record
+dispatcher: it composes a shape/name lookup key, finds the record, selects the
+OMedia animation id, and applies the record's DB object pointer.
+
+Disposition: L1 is open, but no new `linked` row. Native
+`behavior_cutscene.c` uses a static actor-pose alias table (plus Jimmy's
+separate `player_anim.c` path), not the original `C3DAnimated` OMedia
+record-list/DB/virtual-completion mechanism. Added explicit
+`C3DAnimated`/`event-animation-dispatch` as `linked-blocked`; a faithful oracle
+requires porting that dispatch mechanism first.

@@ -27,6 +27,11 @@ Offsets below are byte offsets from the primary `C3DAnimated` pointer in the slo
 | `0x595` | char buffer | `PickupLink` | `.gam` registration at `0040d3c0`; `0040e050` | Object tag/string used for lazy runtime linkup unless equal to `"none"`. |
 | adjusted | pointer | `anim3d_database` | `0040e270`, `0040d4a0` | OMedia database used to load `Canv`, `3DSh`, `3DMa`, and `A3dm` objects. |
 | adjusted | list | `animation_records` | `0040d4a0`, `0040dd90` | Linked list of loaded animation records; each record stores name, id/index, DB object pointer, and next link. |
+| adjusted `+0x588` | int | `current_anim_index` | `0040da30`, `0040dab0` | Numeric OMedia animation index selected from the current animation record. |
+| adjusted `+0x58c` | pointer | `current_anim_db_object` | `0040db10`, `0040dd90` | DB object pointer applied from the selected animation record. |
+| adjusted `+0x62c` | pointer | `current_anim_record` | `0040dd90`, `0040da30` | Selected animation record; record `+0x48` caches the last-frame/frame-count value used by `UpdateAnimated`. |
+| adjusted `+0x634/+0x635` | bytes | `anim_loader_ready_flags` | `0040d9e0`, `0040da30`, `0040dab0`, `0040dd90` | Guard record lookup and animation selection. |
+| adjusted `+0x654` | byte | `anim_paused` | `0040d350`, `0040e050` | Mirrors `OMediaAnim::pause`; suppresses the last-frame hook while set. |
 | adjusted | pointer arrays | `canvas_slots[]`, `material_slots[]` | `0040db20`, `0040dd40`, `0040dd60` | Up to 10 loaded canvas/material pairs used by animation textures. |
 
 ## Vtable Methods
@@ -35,22 +40,31 @@ Offsets below are byte offsets from the primary `C3DAnimated` pointer in the slo
 |---:|---|---|---|---|
 | 7 | `0040d3c0` | `InitObjectAnimated` | Runs `C3DObject::InitObject`, then registers `RequiredLevel`, `ExactLevel`, `RemoveLevel`, `HasCollision`, `InitiallyVisible`, `CanMove`, `SecondPass`, and `PickupLink`. | non-trivial |
 | 8 | `0040e670` | `UnInitObjectAnimated` | Detaches current OMedia animation/shape state, runs `C3DObject::UnInitObject`, then frees loaded canvas/material arrays and animation-list records when the loader was initialized. | non-trivial |
-| 241 | `0040e050` | `UpdateAnimated` | Lazily resolves `PickupLink`, delegates to `C3DObject::Update3DObject`, enforces non-moving transform sync when `CanMove == 0`, and fires an inherited completion hook when the current animation reaches its last frame. | non-trivial |
+| 241 | `0040e050` | `UpdateAnimated` | Lazily resolves `PickupLink`, delegates to `C3DObject::Update3DObject`, enforces non-moving transform sync when `CanMove == 0`, and fires vtable-4 slot 65 when the current OMedia animation reaches its last frame. | non-trivial |
 | 242 | `0040d3a0` | `HideIfVisibleFlagSet` | If the adjusted visibility flag is non-zero, marks it as set and calls an inherited visibility setter with false. | TODO |
 | 259 | `0040e7b0` | `ApplyInitialAnimatedFlags` | Applies `InitiallyVisible`; if `SecondPass == 1`, calls inherited second-pass/material setup. | non-trivial |
 | 265 | `0040e340` | `ApplyLevelGate` | Uses `RequiredLevel`, `ExactLevel`, and `RemoveLevel` to enable or disable the object for the current level/state. | non-trivial |
+| 266 | `0040e1f0` | `ApplyAnimatedCollisionVisibleState` | Paired state helper used by the animated enable path; applies collision helpers when `HasCollision` is set and toggles inherited visible/enabled state through the adjusted base object. | non-trivial |
 | 272 | `0040e770` | `EnableAnimatedCollision` | Calls inherited collision/interaction setter with true. | trivial |
 | 273 | `0040e790` | `DisableAnimatedCollision` | Calls inherited collision/interaction setter with false. | trivial |
 | vtable 3 slot 2 | `0040d2d0` | scalar deleting destructor | Runs local cleanup helper, destroys the embedded `OMediaClassStreamer`, and frees the adjusted allocation when requested. | non-trivial |
 | vtable 4 slot 54 | `0040d4a0` | `CreateAnim3DRecord` | Appends an animation record, resolves a file path, opens the source stream, imports the OMedia animation/shape object into the local DB, stores the DB object pointer, and records the caller-supplied animation name. | non-trivial |
+| vtable 4 slot 55 | `0040d9e0` | `FindAnim3DRecordByName` | Walks the loaded animation-record list and returns the case-insensitive name match while loader-ready flags are set. | non-trivial |
 | vtable 4 slot 56 | `0040dd90` | `SetAnim3DByName` | Selects base/alternate shape, composes an animation lookup key, finds an animation record, stores it as current, sets the OMedia morph anim definition, and applies the DB object pointer. | non-trivial |
+| vtable 4 slot 57 | `0040da30` | `SelectAnim3DRecordIndex` | Writes the current animation id, updates the embedded `OMediaAnim`, starts playback, and refreshes the current record's last-frame/frame-count cache. | non-trivial |
+| vtable 4 slot 58 | `0040dab0` | `GetCurrentAnim3DRecord` | Returns the animation record whose id matches the current animation index; logs through the inherited trace path on miss. | non-trivial |
+| vtable 4 slot 59 | `0040db10` | `GetCurrentAnim3DObject` | Returns the current animation DB object pointer. | trivial |
 | vtable 4 slot 60 | `0040db20` | `CreateTextureSlot` | Loads an `OMediaCanvas` from a file path into `canvas_slots[index]`, then creates and initializes the paired `OMedia3DMaterial` in `material_slots[index]`. | non-trivial |
 | vtable 4 slot 61 | `0040dd60` | `AssignTextureSlotToMaterial` | If a material is supplied, calls its texture/canvas setter with `material_slots[index]`. | trivial |
 | vtable 4 slot 62 | `0040df90` | `EnsureAnim3DDatabase` | Lazily creates global/static `OMediaMemStream` and `OMediaDataBase` objects used by the animation loader. | non-trivial |
 | vtable 4 slot 63 | `0040dd40` | `SetTextureSlotModes` | Writes two mode fields at offsets `0x30` and `0x34` in `material_slots[index]`. | trivial |
+| vtable 4 slot 64 | `0040df80` | `GetAnim3DNameBuffer` | Returns the adjusted animation name buffer at `this+0x5e8`. | trivial |
+| vtable 4 slot 65 | `00472970` | `OnAnimEndedBaseNoop` | Default animation-ended hook invoked by `UpdateAnimated`; base `C3DAnimated` leaves it as the shared no-op/thunk, while `C3DPlayer` overrides this slot at `0043a900`. | trivial |
 | vtable 4 slot 66 | `0040e270` | `InitAnim3DDatabase` | Ensures the DB, registers OMedia object builders for `Canv`, `3DSh`, `3DMa`, and `A3dm`, loads default `3DSh`, seeds shape flags, then invokes the shape-selection helper. | non-trivial |
+| vtable 4 slot 68 | `0040e3e0` | `ApplyAnimatedEnabledState` | Bridges animated enabled/visible state into inherited visibility, collision, and material/selection hooks. | non-trivial |
 | vtable 4 slot 69 | `0040e4a0` | `SetShapeMaterialAlphaOrPass` | Iterates materials in the active shape and writes render/pass fields; non-positive input clears a flag, positive input sets pass and alpha-like value. | non-trivial |
 | vtable 4 slot 70 | `0040e5e0` | `ForceShapeMaterialPass` | Iterates current shape materials and marks them for render mode/pass `6/7`. | non-trivial |
+| vtable 4 slot 71 | `0040d350` | `SetAnim3DPaused` | Toggles `OMediaAnim::pause` and the local paused byte. | non-trivial |
 
 ## Per-Frame Behavior
 
@@ -74,11 +88,17 @@ C3DAnimated::UpdateAnimated(dt):
             xform = inherited_get_transform_vector()
             inherited_set_transform_vector(xform)
 
-        if animation_completion_flags_set and current_anim_def:
+        if animation_completion_flags_set and current_anim_def and !anim_paused:
+            local_anim_clock += dt
             anim_index = current_anim->get_frame_or_index()
             if current_anim_def->frame_count - 1 <= anim_index:
-                inherited_animation_finished_hook()
+                vtable4_slot65_OnAnimEnded()
 ```
+
+The default slot-65 implementation is the shared no-op/thunk at `00472970`;
+`C3DPlayer` overrides the same vtable-4 slot with `0043a900`
+(`OnPlayerAnimEnded`) and consumes the event for Jimmy's FENCE/LADDER and
+SPLAT/HIT return-to-STOP paths.
 
 Level gating:
 
@@ -128,11 +148,54 @@ No fixed asset filename is embedded in `C3DAnimated`; callers supply animation, 
 | animation record | caller supplied | `0040d4a0`, `0040dd90` | Linked records store name/id plus DB object pointer. |
 | canvas/material slot | caller supplied path + index | `0040db20`, `0040dd40`, `0040dd60` | `OMediaCanvas` is paired with a new `OMedia3DMaterial`. |
 
+## Target 7 Animation Dispatch
+
+Target 7 opened the L1 bodies around `UpdateAnimated` (`0040e050`) and
+`SetAnim3DByName` (`0040dd90`). The recovered mechanism is:
+
+1. Load/import animation records into an OMedia database (`CreateAnim3DRecord`,
+   `InitAnim3DDatabase`).
+2. Compose a shape-specific animation lookup key from the global prefix, base
+   or alternate shape suffix, and caller animation name (`SetAnim3DByName`).
+3. Find the record by case-insensitive name, select its OMedia animation id,
+   apply its DB object pointer, and cache the last-frame count.
+4. On each update, compare the current embedded OMedia animation frame against
+   the cached last-frame count and call vtable-4 slot 65 when the clip ends.
+
+Base `C3DAnimated` does not itself implement a behavior event at completion:
+slot 65 is `00472970`, the shared no-op/thunk. The concrete consumer found by
+this target is `C3DPlayer` vtable-4 slot 65 (`0043a900`,
+`OnPlayerAnimEnded`), already documented in `docs/decomp/C3DPlayer.md`.
+
+## Native Linkage
+
+`event-animation-dispatch`: `linked-blocked`.
+
+The original side is now L1-backed, but native has no 1:1 `C3DAnimated`
+animation-record subsystem. Current native `behavior_cutscene.c` dispatches
+cutscene actor poses through a static `ACTOR_ANIMS[]` alias table (85 rows in
+the current tree, not the old worklist's 53-row shape): non-player
+targets copy `cutscene_model`, optional texture, loop flag, and reset
+`anim_time`; Jimmy maps aliases to the separate `PlayerAnim` enum and calls
+`player_anim_advance`. Native `player_anim.c` then advances hardcoded Jimmy
+ASE clips with global `g_current_anim`/`g_clip_time`. Native
+`behavior_animsprite.c` is the separate `C3DAnimatedSprite`/`3ANI` billboard
+frame animator, not the OMedia morph-animation record path.
+
+There is therefore no native `SetAnim3DByName` record lookup, OMedia DB import,
+or vtable-4 slot-65 `AnimEnded` hook to certify. An oracle over the current
+native cutscene/player pose table would certify a different design, so the
+row returns to native-port until that mechanism is ported 1:1.
+
+The existing `C3DAnimated`/`ase-deserialization` certificate remains
+`linked-blocked` for the separate self-comparison reason documented in
+`docs/linkage_certificates.csv`; target 7 does not change that row.
+
 ## Confidence
 
-Confidence: Medium
+Confidence: Medium-high
 
-Validation: Static Ghidra-only base spec; not runtime-validated.
+Validation: Static Ghidra recovery plus PE vtable probe; not runtime-validated.
 
 Open questions:
 - Apply full `C3DAnimated`/OMedia morph structs so adjusted vtable-4 field indexes can be mapped to absolute offsets without colliding with primary property offsets.
@@ -144,5 +207,6 @@ Open questions:
 ## Notes
 
 - Evidence: `DumpClass.java C3DAnimated /tmp/decomp_C3DAnimated.md` (`slots=368`, `owned_methods=18`, `offsets=10`).
-- Extra raw vtable targets such as `0040e1f0`, `0040d9e0`, `0040da30`, `0040dab0`, `0040db10`, `0040df80`, `0040e3e0`, and `0040d350` are not function-defined in the current Ghidra project; this explains the ledger count mismatch (`19`) versus decompiled owned method count (`18`).
+- Target 7 evidence: `docs/decomp/evidence/c3danimated_target7.md`.
+- Extra raw vtable targets `0040e1f0`, `0040d9e0`, `0040da30`, `0040dab0`, `0040db10`, `0040df80`, `0040e3e0`, and `0040d350` are now function-defined in the Ghidra project and documented above.
 - String evidence from `/home/scotty/xp-jnbg-original/Neutron.exe`: `RequiredLevel`, `ExactLevel`, `RemoveLevel`, `HasCollision`, `InitiallyVisible`, `CanMove`, `SecondPass`, `PickupLink`, `MEMLOG Anim3D_CreateAnim`, `Anim3D_GetAnim`, and `MEMLOG 2 Anim3D_CreateTexture`.

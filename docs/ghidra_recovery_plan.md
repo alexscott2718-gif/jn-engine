@@ -79,6 +79,19 @@ bridge, and native has no `C2DInGameMenu` gadget-controller protocol,
 Goddard/Jeep companion spawn, or oxygen/race countdown port. The explicit
 `C3DJimmy`/`gadget-mode-dispatch` row is `linked-blocked`.
 
+Progress note (2026-07-02): target 7 is complete. The `C3DAnimated`
+event-to-animation cluster is now function-defined and dumped; see
+`docs/decomp/evidence/c3danimated_target7.md`. The pass pins
+`UpdateAnimated`'s last-frame path, `SetAnim3DByName`, animation-record
+creation/lookup/selection, OMedia DB initialization, pause, enabled-state, and
+the smaller vtable-4 helpers. The last-frame path calls vtable-4 slot 65:
+base `C3DAnimated` leaves it as shared no-op/thunk `00472970`, while
+`C3DPlayer` consumes it via `0043a900` (`OnPlayerAnimEnded`). No new
+`linked` row: native `behavior_cutscene.c` uses a static actor-pose alias
+table and Jimmy's separate `player_anim.c` path, with no `C3DAnimated`
+animation-record list, OMedia database, or virtual `AnimEnded` hook. The
+explicit `C3DAnimated`/`event-animation-dispatch` row is `linked-blocked`.
+
 | # | Entry points | Why / what it unblocks | Hardness |
 |---|---|---|---|
 | 1 | `transform_local` vtable `+0x384` slot (resolved addr `00472980`, tried 2026-07-02) | Blocks the exact orbit/dolly camera position for BOTH cutscene rows (`C3DCutSceneCamera`, `C3DMultiCutSceneCamera`) — highest-leverage single function; would also retire the native `entity_local_to_world` yaw-only approximation | Medium — one function, known address |

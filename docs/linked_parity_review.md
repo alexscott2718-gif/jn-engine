@@ -226,3 +226,26 @@ path, `game_flow.c` has only the simplified lives/restart bridge, and native
 has no `C2DInGameMenu` gadget controller, Goddard/Jeep companion spawn, or
 oxygen/race countdown port. An oracle over the current native inventory/tool
 path would certify a different design.
+
+## Addendum 9: Ghidra target 7 -- C3DAnimated event-to-animation L1 opened, native dispatch still different
+
+Target 7 function-defined and dumped the `C3DAnimated` animation loader and
+dispatch cluster into `docs/decomp/evidence/c3danimated_target7.md`:
+`UpdateAnimated` (`0040e050`), `SetAnim3DByName` (`0040dd90`),
+`CreateAnim3DRecord` (`0040d4a0`), `InitAnim3DDatabase` (`0040e270`), and the
+remaining raw vtable helpers (`0040e1f0`, `0040d9e0`, `0040da30`,
+`0040dab0`, `0040db10`, `0040df80`, `0040e3e0`, `0040d350`).
+
+The recovered L1 pins the original mechanism: OMedia animation records are
+loaded into a local DB, looked up by a composed shape/name key, selected into
+the embedded `OMediaAnim`, and monitored by `UpdateAnimated` until the last
+frame. The last-frame path calls vtable-4 slot 65. Base `C3DAnimated` supplies
+the shared no-op/thunk `00472970`; the concrete consumer found here is
+`C3DPlayer`'s override `0043a900` (`OnPlayerAnimEnded`).
+
+No `linked` row was added. The new explicit
+`C3DAnimated`/`event-animation-dispatch` certificate is `linked-blocked` on
+L2: native `behavior_cutscene.c` uses a static actor-pose alias table and
+Jimmy's separate `player_anim.c` path, with no `C3DAnimated` record list,
+OMedia DB import, or virtual `AnimEnded` hook. An oracle over the current
+native table would certify a different design.
