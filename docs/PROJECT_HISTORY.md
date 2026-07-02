@@ -1372,3 +1372,15 @@ truth is visual/aural are seeded as `linked-blocked` and return to `native-port`
 linkable via a headless input-trace oracle; only the *feel* is blocked. Full plan:
 `docs/linked_parity_plan.md`. On completion, merge `linked -> native-port` and close
 the `linked-blocked` residual with QA there.
+
+## linked branch: first two certified rows (2026-07-01)
+
+CTaskList/	sk-deserialization (5b7a14a) and CLoadLevel/gam-deserialization
+(this commit) are now linked — both byte-exact P1 oracles. CLoadLevel's aspect
+actually certifies the **shared .gam record parser** (gam_load, used by all 93
+placeable classes): the oracle runs the real, unmodified loader over all 35 shipped
+.gam files (3299 objects, tracked in git) via a headless dumper
+(	ools/linkage_oracles/gamload_dump.c) and diffs object framing plus LOAD's full
+9-property field map against 	ools/gam_parser.py, byte/bit-exact. Scoreboard: 2
+linked, 5 linked-blocked. Next worklist rows: C3DAnimated/ase-deserialization,
+CTaskList/set-task-state (docs/linked_parity_worklist.md).

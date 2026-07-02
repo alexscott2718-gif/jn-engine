@@ -5,3 +5,4 @@ C3DCindy,location-pathing,AI / pathing,linked-blocked,,docs/decomp/C3DCindy.md,"
 C3DSoundEffect,by-ear-mix,triggers / story sequencing,linked-blocked,,docs/decomp/C3DSoundEffect.md,"Audio timbre/mix/by-ear correctness needs desktop/noVNC listening; the dispatch/trigger LOGIC is separately linkable. Returns to native-port."
 C3DCarl,vehicle-rider-pose,vehicles / special movement,linked-blocked,,docs/decomp/C3DCarl.md,"Carl's vehicle insertion pose/offset needs decomp proof or capture evidence; the vehicle integrator MATH is separately linkable. Returns to native-port."
 CTaskList,tsk-deserialization,progression / objectives,linked,tools/linkage_oracles/CTaskList.py,docs/decomp/CTaskList.md,
+CLoadLevel,gam-deserialization,progression / objectives,linked,tools/linkage_oracles/CLoadLevel.py,docs/decomp/CLoadLevel.md,

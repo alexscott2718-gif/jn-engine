@@ -37,7 +37,7 @@ contract in `docs/linked_parity_plan.md` (Linkage Certificate L1-L5).
 ### Tier A — byte-exact format oracles (P1; strongest, fastest)
 - [x] **CTaskList / tsk-deserialization** — `task_loader.c` <-> `tsk_parser.py`. DONE
   (5b7a14a) — the worked example.
-- [ ] **CLoadLevel / gam-deserialization** — `src/engine/assets/gam_loader.c` <->
+- [x] **CLoadLevel / gam-deserialization** -- DONE (this commit). — `src/engine/assets/gam_loader.c` <->
   `tools/gam_parser.py` (`parse_gam`). Check if the record/pstring parse is libc-only
   compilable (P1); else transcribe (P2). `docs/decomp/CLoadLevel.md`, `gam_schema.py`.
 - [ ] **C3DAnimated / ase-deserialization** — `src/engine/assets/ase_loader.c` <->

@@ -102,3 +102,81 @@ Open questions:
 - Hand-written from the decompiled bodies (supersedes the generated skeleton). This is
   the in-world level-graph edge; the menu's `NewGame.tsk`/VR routes (see
   [`CMainMenu.md`](./CMainMenu.md)) are the front-end equivalent.
+
+## Native Linkage (linked-parity branch)
+
+Aspect: **`gam-deserialization`** — status `linked`.
+Certificate: `docs/linkage_certificates.csv`; oracle: `tools/linkage_oracles/CLoadLevel.py`.
+
+`InitObject`'s 9 registered properties (above) are read out of the shared `.gam`
+binary record format (magic + object-count header; per-object FourCC + prop-count;
+per-property `u8 name_len` pstring + `u32 BE type_id` + `u32 BE val_len` + typed
+value; per-object `u32` checksum). `CLoadLevel` doesn't implement that reader itself
+— it is the generic `.gam` deserializer (`gam_load`) shared by all 93 placeable
+classes — so this aspect proves the generic record parser using `LOAD`'s field set
+(all three `.gam` type ids: `1=string 3=float 6=int`) as the concrete exercise.
+
+### L2 — transcription map
+
+| Format element / reference (`tools/gam_parser.py`) | Native (`src/engine/assets/gam_loader.c`) |
+|---|---|
+| `parse_gam` header: 4-byte magic + BE u32 `object_count` | `gam_load` initial `fread`/`read_u32be` |
+| Per-object header: 4-byte FourCC + BE u32 `prop_count` | per-object `fread`/`read_u32be` in the `oi` loop |
+| `_read_prop`: `u8 name_len` + name bytes | `name_len` byte + `fread(prop_name,...)` (with the overlong-name guard skipping via `fseek`) |
+| type id 1 (string): 1-byte redundant length prefix + `val_len` bytes | `fseek(f,1,...)` then `fread(str_val,...)`, truncating into a 256-byte stack buffer with a compensating `fseek` for the remainder |
+| type id 3 (float32 BE) | `read_f32be` (reads BE u32 via `read_u32be`, `memcpy`s the bits into a `float` — a correct BE→native reinterpretation) |
+| type id 6 (int32 BE, `-1` = unset) | `read_u32be` cast to `(int32_t)` |
+| unknown/raw type ids (2/4/…) | `fseek(f,val_len,...)` — silently skipped (see deviation below) |
+| per-object trailing checksum (4 bytes, skipped) | `fseek(f,4,SEEK_CUR)` |
+| `LevelName`/`StartPoint` → `props['LevelName']`/`['StartPoint']` | copied unconditionally into `e->target_level`/`e->start_point` (named fields) |
+| `RequiredTask`/`RequiredLevel`/`ExactLevel`/`Radius`/`SoundIndex`/`FadeType`/`FadeTime` → `props[...]` | not individually named in `gam_loader.c` (`CLoadLevel` isn't special-cased); captured into the generic `GamProp`/`GamStr` bag (`prop_bag_add`/`str_prop_bag_add`) and read back by name via `gam_prop_f`/`gam_prop_i`/`gam_str` |
+
+### L3 — oracle
+
+`tools/linkage_oracles/CLoadLevel.py` compiles the real `gam_load()` (unmodified)
+into a headless dumper (`tools/linkage_oracles/gamload_dump.c`) and runs it over
+**all 35 shipped `.gam` files** (`assets/gam/*.gam`, tracked in git — no proprietary
+binary needed), diffing against `tools/gam_parser.py::parse_gam`:
+
+- **Object framing** — `(type, ObjectTag)` for every one of the corpus's 3299 object
+  instances, in on-disk order. Any record-length or checksum-skip bug anywhere
+  upstream of a `LOAD` row would desync this and mismatch immediately, so this
+  exercises the generic pstring/type-dispatch/checksum walk far beyond `LOAD` alone.
+- **`LOAD` property set** — all 97 real `LOAD` instances across the corpus, all 9
+  `docs/decomp/CLoadLevel.md` properties, compared byte-exact (strings, ints) or
+  bit-exact (floats — both sides decode the same 4 source bytes to an IEEE-754
+  pattern, compared as raw bits, not by lossy formatting).
+
+All values traced above come from real shipped level data or the format constants in
+this doc (L4) — the oracle synthesizes nothing.
+
+### Deliberate deviations (native-only; outside the linked aspect)
+
+- **Unknown/raw property types are dropped, not stored.** `gam_parser.py` records
+  type ids other than 1/3/6 (e.g. `RotateToDest`, a type-2/4 flag word seen on real
+  `LOAD` rows) as hex for inspection; `gam_load` has no consumer for them yet and
+  just `fseek`s past the bytes. This is an honest coverage gap (nothing currently
+  reads these), not a parse-format deviation — the byte-length skip is still exact,
+  which the object-framing check above confirms (a wrong skip length would desync
+  every later property/object).
+- **`"none"`/empty strings in the generic bag read back as absent, not literal.**
+  `str_prop_bag_add` filters authored `"none"`/`""` values out of the bag, so
+  `gam_str(e, "RequiredTask", "none")` can't distinguish "authored `none`" from
+  "not authored" — both return the harness default. The oracle picks the same
+  default on the reference side, so this doesn't affect the diff, but it is a real
+  native behavior difference from the raw parse worth flagging for any future
+  consumer of `RequiredTask`/similar bagged strings.
+- **Comparison-harness defaults for the 2/97 (`ExactLevel`) and 4/97
+  (`FadeType`/`FadeTime`) `LOAD` rows that omit a property.** `gam_prop_i`/
+  `gam_prop_f` return whatever default the caller passes when a property wasn't
+  authored; the oracle picks `-1` (ints) / `0.0` (floats) on both sides purely to
+  make the comparison well-defined — this is not a claim about the class's actual
+  runtime default for an unauthored `FadeType`/`ExactLevel`.
+
+### Not covered by this aspect (still open)
+
+The proximity/prerequisite gate (`Radius`, `RequiredTask`, `RequiredLevel`,
+`ExactLevel` evaluation) and the `ActivateLoad` handoff itself are runtime *behavior*
+outside deserialization scope — see the Open Questions above. This aspect certifies
+only that the 9 registered properties (and the generic record format they're an
+instance of) are read from disk identically to the reference parser.
