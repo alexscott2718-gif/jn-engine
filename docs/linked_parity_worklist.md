@@ -55,7 +55,7 @@ contract in `docs/linked_parity_plan.md` (Linkage Certificate L1-L5).
   `00415f90`. Reproduce static/orbit/dolly placement + `dist=clamp(InitialDist-
   ZoomSpeed*t,Min,Max)` for **all shipped 3CAM rows**; assert finite/sane + the known
   distribution (VFC {1:121,0:9,3:6}, CT {0:95,2:16,3:15,1:10}). `C3DCutSceneCamera.md`.
-- [ ] **C3DMultiCutSceneCamera / 3mca-offset-table** — reproduce the `CameraTypeN`
+- [x] **C3DMultiCutSceneCamera / 3mca-offset-table** -- DONE (this commit; local-offset table only, see doc). — reproduce the `CameraTypeN`
   target-local offset table over shipped 3MCA rows. `C3DMultiCutSceneCamera.md`.
 - [ ] **CJimmyGame / initgame-seed** — `game_flow.c` <-> `InitGame` (lives=5,
   mission_value=100, level-clear -> `level_objective_met`). Reproduce seed + win-bridge

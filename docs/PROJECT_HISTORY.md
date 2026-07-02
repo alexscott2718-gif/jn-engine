@@ -1448,3 +1448,23 @@ behavior_cutscene.c via #include so it can call its `static` functions directly,
 runs over all 136 real shipped 3CAM rows. Scoreboard: 4 linked, 6 linked-blocked.
 Next: C3DMultiCutSceneCamera/3mca-offset-table, or recover 00472980 first since it
 would also unblock 3MCA's own transform_local dependency.
+
+
+## linked branch: fifth certified row, C3DMultiCutSceneCamera/3mca-offset-table (2026-07-02)
+
+Same shape as the 3CAM row: certified exactly the fully-decompiled piece
+(CameraTypeN target-local offset table, Neutron.exe jump table 004311d0) over
+every real shipped CameraTypeN value -- 906 of 912 real (row,step) entries
+across all 114 3MCA rows fall in the documented 0..4 range (5436 byte-exact
+checks across 6 t samples each); the 6 out-of-range entries (5x -1, 1x 5) are
+explicitly excluded since the recovered jump table doesn't cover them and
+native's default-case fallback for them is an undecompiled guess. World-space
+camera position (same entity_local_to_world/transform_local gap as 3CAM) and
+the one-line look-point formula (target.y + LookatVOffsetN - 60, inline in
+cutscene_update, not its own testable function) stay outside the certified
+aspect -- flagged rather than silently claimed. Oracle
+(tools/linkage_oracles/C3DMultiCutSceneCamera.py) reuses the same #include-the-
+real-.c-file pattern as the 3CAM oracle to reach the static
+cutscene_mca_local_offset. Scoreboard: 5 linked, 6 linked-blocked. Next:
+CJimmyGame/initgame-seed, or recover transform_local (Neutron.exe target
+vtable +0x384) to unblock both camera rows' remaining world-position gap.
