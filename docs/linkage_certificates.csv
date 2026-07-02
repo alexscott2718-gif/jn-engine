@@ -4,3 +4,4 @@ C3DGoddard,texture-uv,animation / actor pose,linked-blocked,,docs/decomp/C3DGodd
 C3DCindy,location-pathing,AI / pathing,linked-blocked,,docs/decomp/C3DCindy.md,"Cindy's correct location/patrol state is unresolved and requires original-game or capture evidence; do not guess. Returns to native-port."
 C3DSoundEffect,by-ear-mix,triggers / story sequencing,linked-blocked,,docs/decomp/C3DSoundEffect.md,"Audio timbre/mix/by-ear correctness needs desktop/noVNC listening; the dispatch/trigger LOGIC is separately linkable. Returns to native-port."
 C3DCarl,vehicle-rider-pose,vehicles / special movement,linked-blocked,,docs/decomp/C3DCarl.md,"Carl's vehicle insertion pose/offset needs decomp proof or capture evidence; the vehicle integrator MATH is separately linkable. Returns to native-port."
+CTaskList,tsk-deserialization,progression / objectives,linked,tools/linkage_oracles/CTaskList.py,docs/decomp/CTaskList.md,

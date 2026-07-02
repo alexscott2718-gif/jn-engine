@@ -145,3 +145,53 @@ Open questions:
   `tools/build_level_entity_index.py` for the per-level cross-reference.
 - The `.tsk` is the `CTaskList` on-disk serialization; documenting the file format is
   equivalent to documenting the class's persistent state.
+
+## Native Linkage (linked-parity branch)
+
+Aspect: **`tsk-deserialization`** — status `linked`.
+Certificate: `docs/linkage_certificates.csv`; oracle: `tools/linkage_oracles/CTaskList.py`.
+
+`CTaskList`'s substance is the `.tsk` deserialization (the class itself is a thin
+`CLocalGameObject` streamer — only 2 owned vtable slots, both trivial). The measured
+LV1B format above **is** the class's persistent state, so a byte-exact reproduction
+of that format is the faithfulness proof for this aspect.
+
+### L2 — transcription map
+
+| Format element / reference (`tools/tsk_parser.py`) | Native (`src/game/task_loader.c`) |
+|---|---|
+| `parse_tsk` entry, `LV1B` magic guard | `task_parse_file` + `memcmp(data,"LV1B",4)` |
+| `_read_pstring` (u8 len + bytes) | `read_pstring` |
+| BE u32 / BE f32 field reads | `read_be_u32` / `read_be_f32` |
+| `_find_startexp` (`b"\x08STARTEXP"`) | `marker[9] = {0x08,'S'..'P'}` scan |
+| STARTEXP record: 4 pstrings + 3 BE floats | inline read in `task_parse_file` |
+| `_try_entity_list` (u8 count + count×(pstring,u32 BE), reject count 0/`>64`, tag len 0/`>32`, non-ASCII, must reach EOF bar a zero tail) | `try_entity_list` (identical guards + EOF anchor) |
+| `_scan_entity_list` (first non-zero byte past the spawn that parses to EOF) | scan loop over `[after_spawn, len)` |
+
+### L3 — oracle
+
+`tools/linkage_oracles/CTaskList.py` synthesizes LV1B streams from the format above
+(no proprietary `.tsk` needed), compiles `task_parse_file` into a headless dumper
+(`ctasklist_dump.c`), and asserts the C port and `parse_tsk` decode them
+**byte-identically** across: the documented NewGame table (12 entities, `SCENE=30`,
+the lone `0x01` gap byte), the stray-non-zero-in-gap disambiguation (the EOF anchor),
+a tolerated short zero tail, the minimum count, and a max-length tag. The NewGame
+case is additionally checked against the golden table transcribed from this doc.
+
+### Deliberate deviations (native-only; outside the linked aspect)
+
+- **Baked NewGame fallback.** `task_load` bakes the documented NewGame table when no
+  on-disk `.tsk` is present (the binaries are proprietary/uncommitted). This is a
+  native convenience, not decompiled behavior; the oracle certifies the *parser*
+  (`task_parse_file`) on real-format bytes, not the fallback.
+- **`RestartLevel.tsk`** is not yet recovered (open question below); only `NewGame`
+  is covered by the baked default. Parsing is format-general, so a recovered
+  `RestartLevel.tsk` would parse without code change.
+
+### Not covered by this aspect (still open)
+
+The streamer vtable slot that invokes the parse during `CLocalGameObject` load is not
+pinned (see Open questions) — that is *wiring*, not parse behavior, and does not
+affect deserialization faithfulness. `CJimmyGame::InitGame` consulting the table, and
+the `.gam` `TaskName`/`NewTaskState` write path (`set_task_state` / `FUN_0045f990`),
+are separate rows for the progression campaign.
