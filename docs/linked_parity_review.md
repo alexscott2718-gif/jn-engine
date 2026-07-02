@@ -167,3 +167,15 @@ set into `docs/decomp/evidence/c3dplayer_movement_target3.md`. The prior
 animation, load, and probe behavior. The certificate remains
 `linked-blocked`: native player movement is still the approved tank-turn
 design, so an oracle would require a deliberate 1:1 native port first.
+
+## Addendum 6: Menu target 4 opens canvas-menu L1, not native L2
+
+Target 4 recovered the shared menu-manager bodies behind
+`LoadMyMenu`/`displayMenu`/`Activating Item` plus
+`CMenuElement::UpdateItemLogic`; see
+`docs/decomp/evidence/menu_manager_target4.md`. The original uses
+`DAT_004f8164` menu tables, 29 active/rollover canvas item records, item-state
+writers, counter pulses, mouse/canvas dispatch, and save/task refresh. Native
+`src/game/menu.c` remains the deliberate keyboard-list stand-in, so only the
+existing routing-table row is linked; the canvas menu graph is now an explicit
+`linked-blocked` return to native-port.

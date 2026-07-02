@@ -38,6 +38,14 @@ animation transitions, and load/ray helpers. Per the plan, work stops here:
 certifying player movement still requires a product/native-port decision to
 replace the approved tank-turn movement with a 1:1 port.
 
+Progress note (2026-07-02): target 4 menu-manager slots are now
+function-defined and dumped; see
+`docs/decomp/evidence/menu_manager_target4.md`. It opens L1 for the
+`DAT_004f8164` canvas menu tables, 29 active/rollover item records,
+`LoadMyMenu`/`displayMenu`, item activation state, counters, save/task refresh,
+and `CMenuElement::UpdateItemLogic`. No new certification: native `menu.c`
+remains a keyboard-list stand-in scoped to the already-linked routing table.
+
 | # | Entry points | Why / what it unblocks | Hardness |
 |---|---|---|---|
 | 1 | `transform_local` vtable `+0x384` slot (resolved addr `00472980`, tried 2026-07-02) | Blocks the exact orbit/dolly camera position for BOTH cutscene rows (`C3DCutSceneCamera`, `C3DMultiCutSceneCamera`) — highest-leverage single function; would also retire the native `entity_local_to_world` yaw-only approximation | Medium — one function, known address |

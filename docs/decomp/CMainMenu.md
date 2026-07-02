@@ -19,9 +19,11 @@ are [`CMenuElement`](./CMenuElement.md) canvas objects; the gameplay HUD overlay
 the separate [`C2DInGameMenu`](./C2DInGameMenu.md).
 
 Because it inherits `CJimmyGame` (and thus `CGameType`), the menu gets the same
-init/uninit/update lifecycle; the menu-specific work is the inherited `CGameType`
-update plus the menu-manager slots (`LoadMyMenu` / `displayMenu` / `Activating Item`
-traces in `.rdata:004ec620`+).
+init/uninit/update lifecycle. Target 4 recovered the shared menu-manager slots
+behind the `LoadMyMenu` / `displayMenu` / `Activating Item` traces; Ghidra names
+some of these under `C2DInGameMenu` because the canvas-menu subsystem is shared,
+but the same `DAT_004f8164` menu tables and `CMenuElement` items are the missing
+front-end screen-graph layer beyond the routing table.
 
 ## Level Routing Table (executable)
 
@@ -66,7 +68,7 @@ The new-game / level-select routing targets are a string table in the executable
 |---|---|---|
 | `NewGame.tsk` | New-game route → Level 1 | `.rdata:004ec71c`; [`CTaskList.md`](./CTaskList.md) |
 | VR `.gam` list | 8 VR levels in menu order | `.rdata:004ec728`–`004ec77c` |
-| Menu-manager traces | `LoadMyMenu: CurrMenu = %d`, `displayMenu`, `Activating Item %d for %d IsActive:%d` | `.rdata:004ec620`+ |
+| Menu-manager traces | `LoadMyMenu: CurrMenu = %d`, `displayMenu`, `Activating Item %d for %d IsActive:%d` | `.rdata:004ec620`+; recovered in `docs/decomp/evidence/menu_manager_target4.md` |
 
 Not a level-placeable `.gam` object — instantiated as a game mode by the load path.
 
@@ -84,13 +86,13 @@ Confidence: Low-Medium
 
 Validation: Ghidra `DumpClass.java CMainMenu` (`slots=374`, `owned_methods=1`); base
 chain confirms the `CJimmyGame` lineage; routing table from executable string scan.
-The menu *flow* (screen graph, per-item activation) is inherited/menu-manager code
-not yet decompiled here. Not runtime-validated.
+Target 4 recovered the shared canvas menu-manager functions in
+`docs/decomp/evidence/menu_manager_target4.md`. Not runtime-validated.
 
 Open questions:
-- Decompile the menu-manager slots (`LoadMyMenu`/`displayMenu`/`Activating Item`) and
+- ~~Decompile the menu-manager slots (`LoadMyMenu`/`displayMenu`/`Activating Item`) and
   determine whether they are owned by `CMainMenu`, a shared manager, or
-  `CMenuElement`.
+  `CMenuElement`.~~ **DONE 2026-07-02**: target 4 pins them as a shared canvas-menu manager over `DAT_004f8164` tables, with Ghidra naming some slots under `C2DInGameMenu`; item-side dispatch remains `CMenuElement::UpdateItemLogic`.
 - Recover the screen graph and level-index → route mapping for the original game (the
   sequel's `menu.dat` is **not** authoritative for JNBG).
 - Confirm how `CMainMenu` hands off to the level `CLevel*Game` controller on select.
@@ -101,6 +103,54 @@ Open questions:
   `.rdata:004ec71c`.
 - Sibling of the `CLevel*Game` controllers under `CJimmyGame`; front-end counterpart
   to the in-game `C2DInGameMenu` HUD.
+
+## Target 4 Menu-Manager L1
+
+Target 4 recovered the menu-manager body cluster:
+
+```c
+LoadCurrentMenu(this):
+    table = DAT_004f8164[this->current_menu_index]
+    this->slot_0x4a0(table)          // LoadMyMenu
+    this->slot_0x4d8(current_menu_index)
+
+LoadMyMenu(this, menu_index):
+    table = DAT_004f8164[menu_index]
+    allocate root canvas if table[0] is null
+    attach root to DAT_00509a34
+    for item in 0..28:
+        if active_canvas missing and active sprite/index != -1:
+            allocate active OMediaCanvasElement
+            attach, position via slot 0x450, cache rounded x/y
+            state 0 or 4 -> show active; state 1 -> hide active
+        if rollover_canvas missing and rollover sprite/index != -1:
+            allocate rollover OMediaCanvasElement
+            attach, position via slot 0x450, cache rounded x/y
+            state 0 or 4 -> show rollover; state 1 -> hide rollover
+
+ActivateItem(menu, item, state):
+    if 0 <= item < 29:
+        *(DAT_004f8164[menu] + 0x24 + item*0x28) = state
+
+UnloadMyMenu(table):
+    hide root, active, and rollover canvases for all 29 records
+
+DisplayMenu(table):
+    show root canvas
+    for item in 0..28:
+        if item state is neither 0 nor 4:
+            hide active canvas
+            show rollover canvas
+        if table == DAT_004f816c and item counter is non-zero:
+            draw counter at active-item coordinates
+```
+
+`Menu_NewGameRoute_0040caa0` is a story/action dispatcher over strings at
+`this+0x468`; it updates task state, activates menu items, pulses counters, and
+routes `RESTARTGAME` to `NewGame.tsk`. `Menu_VRRouteTable_004603f0` loads a
+save/task stream, maps level FourCCs to `.gam` filenames including the
+`VR01..VR08` strings, writes the selected level to `DAT_00509980+0x74d`, and
+refreshes task/menu state.
 
 ## Native Linkage (linked-parity branch)
 
@@ -123,11 +173,24 @@ index through the real `menu_open`/`menu_input`/`menu_take_confirm` path,
 diffing each routed `(level, is_newgame)` against the doc table; probing past
 the end must wrap to index 0, pinning the item count at 10.
 
+### Aspect: `menu-manager-screen-graph` -- status `linked-blocked` (target 4, 2026-07-02)
+
+Target 4 opens the original L1 menu-manager graph: `LoadMyMenu`/`displayMenu`
+allocate and toggle 29 active/rollover `OMediaCanvasElement` item pairs from
+`DAT_004f8164`, `ActivateItem`/`DeactivateItem` write item state, and
+`CMenuElement::UpdateItemLogic` performs mouse/canvas target dispatch.
+
+This is not certifiable against the current native port. `src/game/menu.c` is
+the approved keyboard-list stand-in and only claims the executable routing
+table certified above. It has no `DAT_004f8164` canvas tables, active/rollover
+item pairs, item-state writer, counter pulse table, mouse cursor path, or
+save/task stream refresh. A green oracle would require porting the recovered
+canvas menu subsystem first; do not expand the existing `level-routing-table`
+certificate to cover this behavior.
+
 ### Not covered / open
 
-- Everything else about the menu: the `CMenuElement` screen graph,
-  rollover/activation logic, drawing, audio cues, and input mapping.
-  `LoadMyMenu`/`displayMenu` and the menu-manager slots are **not
-  decompiled** (only their trace strings are known), and the native keyboard
-  list UI is a deliberate stand-in — that residue needs a Ghidra recovery
-  pass before any further menu aspect can be certified.
+- The menu-manager screen graph is now decompiled, but it remains outside
+  the linked scope because native `menu.c` does not port the canvas subsystem.
+  Rollover/activation drawing, audio cues, mouse input, and save/task refresh
+  still require native-port work before another menu oracle is meaningful.

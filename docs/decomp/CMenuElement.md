@@ -66,9 +66,11 @@ CMenuElement::UpdateItemLogic(dt):      // vfunc_04_015 @ 0045e650
 Confidence: Low-Medium
 
 Validation: Ghidra `DumpClass.java CMenuElement` (`slots=321`, `owned_methods=2`);
-decompiled `UpdateItemLogic` and destructor; base chain confirms `OMediaCanvasElement`
-2D-canvas lineage. The boolean polarity of the active/hit query and the exact target
-slot semantics are named conservatively. Not runtime-validated.
+decompiled `UpdateItemLogic` and destructor; target 4 includes the raw body in
+`docs/decomp/evidence/menu_manager_target4.md`. Base chain confirms
+`OMediaCanvasElement` 2D-canvas lineage. The boolean polarity of the active/hit
+query and the exact target slot semantics are named conservatively. Not
+runtime-validated.
 
 Open questions:
 - Confirm the active/hit polarity (is state `0` "rollover" or "not hovered"?) and the
@@ -82,3 +84,17 @@ Open questions:
 - Evidence: `DumpClass.java CMenuElement /tmp/decomp_CMenuElement.md`.
 - Owned by `CMainMenu`; sibling concept to HUD elements in `C2DInGameMenu` but built
   on the generic `OMediaCanvasElement` rather than the HUD overlay class.
+
+## Native Linkage (linked-parity branch)
+
+Aspect: **`update-item-logic`** -- status `linked-blocked` (target 4, 2026-07-02).
+
+`UpdateItemLogic` is body-backed: it queries the parent/input object through
+slots `0x38` and `0x14`; when that query returns `0`, it dispatches the
+adjusted canvas subobject (`this+0xc`) through `parent_or_input[0x23]+0xc`,
+shows the mouse cursor, and then runs inherited canvas update logic.
+
+The native menu has no `CMenuElement` canvas object, mouse cursor path, or
+target-slot dispatch; `src/game/menu.c` is a keyboard-list stand-in scoped to
+the routing-table certificate. A green oracle would require porting this
+canvas item behavior first.

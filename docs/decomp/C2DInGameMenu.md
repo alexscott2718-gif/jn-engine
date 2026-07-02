@@ -95,8 +95,8 @@ Open questions:
 - Map each `this[0x13f..0x141]` + `DAT_004f83c0` counter to its gameplay meaning
   (score, fuel, gadget count, lives) — the capture shows positions; the source values
   need the producer functions.
-- Attribute the `LoadMyMenu`/`Activating Item` menu-manager strings precisely (this
-  class vs. a shared menu manager vs. `CMenuElement`).
+- ~~Attribute the `LoadMyMenu`/`Activating Item` menu-manager strings precisely (this
+  class vs. a shared menu manager vs. `CMenuElement`).~~ **DONE 2026-07-02**: target 4 recovered the shared canvas-menu manager around `00402f30`, `00402f60`, `004038c0`, `00403910`, `00406080`, and `004060d0`; Ghidra assigns several functions to this namespace, while item-side per-frame dispatch is `CMenuElement::UpdateItemLogic`.
 - Name the eight uncharacterized HUD-element helper slots.
 
 ## Notes

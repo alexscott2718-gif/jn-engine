@@ -132,8 +132,8 @@ OVERRIDES: dict[str, list[Override]] = {
         Override(
             "menus / UI flow",
             "must-link",
-            "Front-end routing table is known, but LoadMyMenu/displayMenu/activation screen graph and audio/input lock behavior are not decompiled.",
-            "Decode menu-manager slots and compare New Game, VR routing, Quit, rollover, and confirmation behavior.",
+            "Front-end routing table is linked; target 4 recovered LoadMyMenu/displayMenu/activation screen graph, but native menu.c does not port the canvas menu subsystem.",
+            "Port the recovered DAT_004f8164 canvas menu graph, active/rollover records, counter pulses, mouse dispatch, and save/task refresh before another oracle.",
             "src/game/menu.c",
         )
     ],
@@ -141,8 +141,8 @@ OVERRIDES: dict[str, list[Override]] = {
         Override(
             "menus / UI flow",
             "must-link",
-            "Clickable item update and target dispatch are partially named; active/hit polarity and activation target slot are unresolved.",
-            "Link UpdateItemLogic target dispatch, rollover state, cursor/show behavior, and menu audio cues.",
+            "UpdateItemLogic is recovered, but native menu.c has no CMenuElement canvas object, mouse cursor path, or target-slot dispatch.",
+            "Port CMenuElement canvas-item behavior and mouse/target dispatch before a linked oracle.",
             "src/game/menu.c",
         )
     ],
@@ -428,8 +428,8 @@ TOP25 = [
     ("8", "player movement", "C3DPlayer::UpdateSittingOrSmoothCamera", "0043a120", "Smooth/sitting camera path unlinked.", "Port smoothing offsets and turn-input camera behavior."),
     ("9", "player movement", "C3DPlayer motion/animation callbacks", "0043a420, 0043a5d0, 0043a750, 0043a900", "Rotate/project/stop/AnimEnded cluster is not linked.", "Port rotate-to-target, noisy camera target, stop, and fence/ladder completion."),
     ("10", "player movement", "C3DJimmy active controller", "00424600, 00425870, 00426030", "Raw Jimmy action/gadget/input/vehicle-mode cluster only partially understood.", "Repair function boundaries and link active-player/gadget locks plus vehicle insertion poses."),
-    ("11", "menus / UI flow", "CMainMenu menu manager", "LoadMyMenu/displayMenu/Activating Item traces", "Routing table known; screen graph and audio cues unlinked.", "Decode front-end screen graph, New Game, VR, Quit, and menu sounds."),
-    ("12", "menus / UI flow", "CMenuElement::UpdateItemLogic", "0045e650", "Rollover/dispatch polarity not validated.", "Link hit/active state, target dispatch, cursor, and activation sound."),
+    ("11", "menus / UI flow", "CMainMenu menu manager", "LoadMyMenu/displayMenu/Activating Item traces", "Target 4 recovered the canvas screen graph; native menu remains a keyboard-list stand-in.", "Port DAT_004f8164 canvas items, counters, mouse dispatch, save/task refresh, and sounds."),
+    ("12", "menus / UI flow", "CMenuElement::UpdateItemLogic", "0045e650", "Target 4 recovered item dispatch; native menu has no canvas item object.", "Port hit/active state, target dispatch, cursor, and activation sound before linking."),
     ("13", "menus / UI flow", "C2DInGameMenu HUD/death path", "00406690 plus 00402b40..00407490 helpers", "HUD draw constants known; flow helpers raw.", "Link counters, pause/death/restart/game-over producers."),
     ("14", "menus / UI flow", "CGameType pause/help/update gates", "00475a70, 00475ce0", "Native pause/menu flow approximates global gates.", "Link PauseGame, ToggleHelp, input locks, and global update block state."),
     ("15", "inventory / items / gadgets", "CPickupType state table", "0045f1f0", "PickupIndex visibility/state table identified.", "Name global pickup service and inherited state toggles."),

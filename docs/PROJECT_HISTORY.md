@@ -1763,3 +1763,21 @@ because native `behavior_player.c` is still the approved tank-turn movement,
 not a 1:1 port of the recovered state machine. Certifying this row requires a
 product/native-port decision to replace movement behavior, then an input-trace
 oracle plus mutation test. Scoreboard remains 10 linked / 13 linked-blocked.
+
+## linked branch: Ghidra target 4 recovered menu-manager L1, native menu stays scoped to routing (2026-07-02)
+
+Executed target 4 from `docs/ghidra_recovery_plan.md`: added the reusable
+`tools/ghidra/DumpRefs.java` xref helper, traced the menu-manager strings, and
+function-defined/dumped the menu cluster (`00402f30`, `00402f60`, `004038c0`,
+`00403910`, `00406080`, `004060d0`, `004061b0`, `004061c0`, `004061d0`,
+`0040caa0`, `004603f0`) plus `CMenuElement::UpdateItemLogic` (`0045e650`) into
+`docs/decomp/evidence/menu_manager_target4.md`.
+
+Disposition: L1 is open for the original canvas menu graph and item dispatch,
+but no new `linked` row was added. Native `src/game/menu.c` deliberately ports
+only the executable routing table as a keyboard list; it does not implement the
+`DAT_004f8164` canvas tables, 29 active/rollover item records, item-state
+writer, counter pulse table, mouse cursor dispatch, or save/task refresh. Added
+explicit `linked-blocked` rows for `CMainMenu/menu-manager-screen-graph` and
+`CMenuElement/update-item-logic`. Scoreboard becomes 10 linked /
+15 linked-blocked.
