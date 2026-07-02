@@ -433,8 +433,15 @@ Confidence: Medium
 Validation: Ghidra `DumpClass.java C3DMultiCutSceneCamera` (owned methods decompiled); `.gam` properties and assets resolved from the `InitObject` registrar calls with strings read directly from `Neutron.exe`. `.gam` value ranges cross-referenced via `docs/gam_schema.md`. Behavioral prose is derived from the decompiled bodies above; not runtime-validated.
 
 Open questions:
-- Decode the exact helper behind target vtable `+0x384` beyond the target-local
-  transform interpretation above.
+- ~~Decode the exact helper behind target vtable `+0x384` beyond the
+  target-local transform interpretation above.~~ **DONE 2026-07-02**:
+  `tools/ghidra/CreateFunctions.java` defined/dumped `00472980` as
+  `transform_local_00472980`; see
+  `docs/decomp/evidence/transform_local_00472980.md` and
+  `docs/decomp/C3DCutSceneCamera.md` for the interpreted signature/body.
+  This opens L1 for the full world-position math but does not certify the
+  native `3MCA` placement, because `behavior_cutscene.c` still transforms the
+  recovered local offset through a yaw-only `entity_local_to_world` helper.
 - Pin the constructor address and class-id immediate (FourCC).
 
 ## Notes
@@ -450,8 +457,8 @@ Certificate: `docs/linkage_certificates.csv`; oracle:
 This aspect certifies exactly the `CameraTypeN` target-local offset table
 recovered above from the `004311d0` jump table — the piece of the `3MCA`
 per-frame update that's fully decompiled and independently provable without
-touching the still-unrecovered `transform_local` (target vtable `+0x384`, the
-same open item as `C3DCutSceneCamera`'s per-frame update). The world-space
+relying on the still-unported `transform_local` (target vtable `+0x384`, now
+function-defined as `00472980`). The world-space
 camera position (this local offset transformed through the target's full
 world transform) and the look-point formula are explicitly **not** part of
 this certification — see "Not covered" below.
@@ -487,13 +494,15 @@ excluded (see "Not covered").
 - **`entity_local_to_world` is a yaw-only approximation of `transform_local`**
   — the same native-only helper `C3DCutSceneCamera`'s per-frame update uses
   (`docs/decomp/C3DCutSceneCamera.md`), applied here to transform this
-  aspect's local offset into world space. Acknowledged, not hidden.
+  aspect's local offset into world space. The recovered `00472980` body uses
+  all three `OMediaWorldAngle` components, so this remains an L2 gap for full
+  placement. Acknowledged, not hidden.
 
 ### Not covered by this aspect (still open)
 
 - **World-space camera position.** `cutscene_update` feeds this local offset
-  through `entity_local_to_world` — not certified, same `transform_local`
-  gap as `C3DCutSceneCamera`/`3cam-camera-math`.
+  through `entity_local_to_world` — not certified, same recovered-but-not-ported
+  `transform_local` gap as `C3DCutSceneCamera`/`3cam-camera-math`.
 - **Look-point formula** (`target.y + LookatVOffsetN - 60`, per the recovered
   body's "looks at the target position with `LookatVOffsetN - 60` applied to
   Y"). This is a single inline arithmetic line in `cutscene_update`

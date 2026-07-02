@@ -136,3 +136,16 @@ tuned "ice-skating" approximation the plan's L4 cites). The row stays
 `linked-blocked` with a corrected note; the real path (Ghidra recovery of
 five entry points -> 1:1 port replacing approved movement -> oracle) is
 recorded in docs/decomp/C3DPlayer.md's Native Linkage section.
+
+## Addendum 3 (2026-07-02, same day): `transform_local` L1 recovered, full placement blocked on L2
+
+The caveat above that called `transform_local` undecompiled is now superseded:
+`tools/ghidra/CreateFunctions.java` function-defined `00472980` in the Ghidra
+project and dumped the body to
+`docs/decomp/evidence/transform_local_00472980.md`. The recovered helper uses
+all three `OMediaWorldAngle` components through the engine's 14-bit trig table,
+then adds the target world position. This does **not** expand either existing
+camera row's linked scope, because native `behavior_cutscene.c` still uses the
+yaw-only `entity_local_to_world` helper. The full-placement pieces are now
+explicit `linked-blocked` rows in `docs/linkage_certificates.csv` rather than
+implicit "not covered" text.

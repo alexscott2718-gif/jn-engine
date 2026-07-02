@@ -1704,3 +1704,26 @@ original evaluation point is still unpinned) and C2DInGameMenu/hud-draw
 (DrawHud constants fully decoded but native hud.c is a deliberate original
 design; native death path does not load the unrecovered RestartLevel.tsk).
 Both linked-blocked with notes. Scoreboard: 10 linked / 11 linked-blocked.
+
+## linked branch: Ghidra target 1 recovered, full cutscene placement stays blocked (2026-07-02)
+
+Executed the first target from `docs/ghidra_recovery_plan.md`: added
+`tools/ghidra/CreateFunctions.java`, ran headless Ghidra against
+`~/ghidra-projects/JN_decomp`, and function-defined/dumped
+`transform_local_00472980` at `00472980`
+(`docs/decomp/evidence/transform_local_00472980.md`). The recovered signature
+is `thiscall(this, out4, local_x, local_y, local_z)` (`ret 0x10`), and the
+body calls target vtable slots `+0x328` (world angles) and `+0x310` (world
+position), converts degrees to the engine's 14-bit trig-table index with
+`45.511112f` (`8192/180`, `.rdata:0048e5e8`), applies all three angle
+components, then writes `out[0..2]` plus homogeneous `out[3]=1.0f`.
+
+Disposition: L1 is now open for both cutscene-camera rows, but full
+orbit/dolly placement is not certifiable yet. Native
+`src/game/behaviors/behavior_cutscene.c` still uses `entity_local_to_world`,
+a yaw-only `ry` helper, so L2 fails for the full placement aspects. Added
+explicit linked-blocked certificate rows for `C3DCutSceneCamera`/
+`3cam-full-placement` and `C3DMultiCutSceneCamera`/`3mca-full-placement`.
+The existing linked rows remain honestly scoped to the distance/static-branch
+and `CameraTypeN` offset-table pieces. Scoreboard: 10 linked /
+13 linked-blocked.
