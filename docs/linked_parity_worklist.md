@@ -62,7 +62,7 @@ contract in `docs/linked_parity_plan.md` (Linkage Certificate L1-L5).
   transitions. `docs/decomp/CJimmyGame.md`.
 - [~] **C3DStartPoint / spawn + C3DCheckPoint / progress** -- FLAGGED, both linked-blocked (2026-07-02; harness cost for spawn, deliberate divergence for progress -- see docs). — `00442740` / `00414410`
   <-> `behavior_checkpoint.c`. `docs/decomp/C3DStartPoint.md`, `C3DCheckPoint.md`.
-- [ ] **C3DPatrolPoint / on-arrive + AI patrol** — `00434ea0` <-> `behavior_ai.c`.
+- [x] **C3DPatrolPoint / on-arrive + AI patrol** -- DONE (this commit; NextPatrolPoint+WaitTime only, see doc). — `00434ea0` <-> `behavior_ai.c`.
   Patrol arrival/next-select/facing math over shipped PatrolPoint chains.
   `docs/decomp/C3DPatrolPoint.md`. (Defer Cindy — `linked-blocked`.)
 - [ ] **C3DAITrigger / dispatch-graph** — `behavior_ai_trigger.c`. Deterministic

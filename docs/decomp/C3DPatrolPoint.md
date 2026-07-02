@@ -68,3 +68,71 @@ Open questions:
 - Evidence: `DumpClass.java C3DPatrolPoint /tmp/dumps2/decomp_C3DPatrolPoint.md`.
   Hand-deepened (supersedes the generated skeleton). The AI nav-graph node; pairs with
   `C3DAI`, `CWayPoint`, and `C3DCutSceneCamera`.
+
+## Native Linkage (linked-parity branch)
+
+Aspect: **`on-arrive`** — status `linked`.
+Certificate: `docs/linkage_certificates.csv`; oracle:
+`tools/linkage_oracles/C3DPatrolPoint.py`.
+
+This aspect certifies exactly the "next-select" half of the decompiled
+`OnArrive` (`00434ea0`) — the `NextPatrolPoint` graph-edge resolution and
+`WaitTime` read-through — the piece that's a pure, deterministic, real-data
+lookup independent of *how* arrival is detected. Per the doc's own recovered
+behavior, `OnArrive`'s substance is: check the arriving object is a
+patrol-state `C3DAI`, run the wait/sound/call/anim side effects, then set
+`other.next_target = lookup(NextPatrolPoint)`. The native port (Cindy is
+excluded per `docs/linked_parity_worklist.md`'s "defer Cindy" note) implements
+the arrival *polling* differently from the decompiled collision-callback
+architecture (see "Not covered"), but the **graph edge itself** — which
+waypoint comes next, and how long to wait there — is directly, faithfully
+computed from the same authored `.gam` data the decompiled body reads.
+
+### L2 — transcription map
+
+| Decompiled (`OnArrive` @ `00434ea0`) | Native (`src/game/behaviors/behavior_ai.c`) |
+|---|---|
+| `other.next_target = lookup(NextPatrolPoint)` | `behavior_ai_find_patrol_point(w, tag)`: case-insensitive (`strcasecmp`) linear scan over placed `3PAT` entities in the same world/level |
+| (implicit: `WaitTime` read from the arrived-at point) | `gam_prop_f(wp, "WaitTime", 0.0f)` in `behavior_ai_update_patrol` |
+
+### L3 — oracle
+
+`tools/linkage_oracles/C3DPatrolPoint.py` compiles and runs the real,
+unmodified `gam_load()` + `behavior_ai_find_patrol_point()`/`gam_prop_f()`
+(`c3dpatrolpoint_dump.c`) over **all 35 shipped `.gam` files**
+(`assets/gam/*.gam`, tracked in git) and diffs the result — per real `3PAT`
+waypoint, the resolved `NextPatrolPoint` edge (or empty, for absent/dangling/
+`"none"` values) and `WaitTime` (IEEE-754 bit-exact) — against an
+independently-built Python graph from `tools/gam_parser.py`. Covers all 742
+real shipped `3PAT` instances; 581 of the 742 authored `NextPatrolPoint`
+edges resolve to a real same-level neighbor (the rest are terminal/absent/
+dangling, and the oracle proves the native code correctly reports those as
+unresolved too, not just the happy path).
+
+### Deliberate deviations (native-only; outside the linked aspect)
+
+- **Arrival is polled by distance, not a collision-volume callback.** The
+  decompiled `OnArrive` fires when a `C3DAI` (in the right patrol state)
+  enters the point's collision volume; native (`behavior_ai_update_patrol`)
+  instead has the AI seek toward the waypoint each frame and declares
+  arrival at `arrive_radius`. Different architecture, same intended
+  end-to-end graph traversal — not proven equivalent by this oracle (no
+  captured trace to compare "the exact frame/position arrival fires" against).
+- **`arrive_radius`/`speed` defaults (60.0/160.0) are native invented
+  constants**, not derived from a decompiled Neutron.exe value — this doc
+  doesn't cite one.
+- **The facing/heading formula** (`ry = atan2f(-dx, -dz)` in
+  `behavior_ai_seek_position`) isn't decompiled here either; it's the
+  engine's established forward-vector convention (consistent with the
+  camera-yaw formula in `behavior_cutscene.c`), not a Neutron.exe-measured
+  constant.
+
+### Not covered by this aspect (still open)
+
+- `SoundDatabase`/`SoundIndex` arrival sound, `CallObjectTag` activation,
+  and `ActivateAnim`/`WaitAnim` dispatch are **not ported** at all
+  (`behavior_walker.c`'s own comment: "WaitAnim/sound/CallObjectTag dispatch
+  are not yet [ported]").
+- `C3DCindy`'s patrol/location is explicitly `linked-blocked`
+  (`docs/linkage_certificates.csv`) and excluded from this aspect, per
+  `docs/linked_parity_worklist.md`'s "defer Cindy" note.

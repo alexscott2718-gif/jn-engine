@@ -6,7 +6,7 @@ Source of truth: `docs/linkage_certificates.csv`. A `linked` row is counted
 here only after its oracle ran green in this pass (see
 `docs/linked_parity_plan.md` for the Linkage Certificate L1-L5 contract).
 
-- **linked (oracle-verified):** 6
+- **linked (oracle-verified):** 7
 - **linked-blocked (returns to native-port):** 8
 
 ## linked
@@ -19,6 +19,7 @@ here only after its oracle ran green in this pass (see
 | `C3DCutSceneCamera` | 3cam-camera-math | camera / cutscene | `tools/linkage_oracles/C3DCutSceneCamera.py` | PASS C3DCutSceneCamera/3cam-camera-math: cutscene_3cam_dist byte-exact on 544 (row x t) samples across all 136 shipped 3CAM rows; cutscene_3cam_place's CameraType==2 static-branch precedence over ViewFromCamera byte-exact on all 16 real CT==2 rows; ViewFromCamera/CameraType distributions match docs/decomp/C3DCutSceneCamera.md |
 | `C3DMultiCutSceneCamera` | 3mca-offset-table | camera / cutscene | `tools/linkage_oracles/C3DMultiCutSceneCamera.py` | PASS C3DMultiCutSceneCamera/3mca-offset-table: cutscene_mca_local_offset byte-exact on 5436 (entry x t) samples across 906 real CameraTypeN entries in the documented 0..4 range (all 114 shipped 3MCA rows x up to 8 steps); 6 out-of-table entries excluded per the doc's scope note |
 | `CJimmyGame` | initgame-seed | progression / objectives | `tools/linkage_oracles/CJimmyGame.py` | PASS CJimmyGame/initgame-seed: game_flow_init_game reproduces the decompiled CJimmyGame::InitGame (0044d3d0) mission seed exactly (lives=5, mission_value=100), confirmed against a zero pre-seed baseline and idempotent re-seed |
+| `C3DPatrolPoint` | on-arrive | AI / pathing | `tools/linkage_oracles/C3DPatrolPoint.py` | PASS C3DPatrolPoint/on-arrive: behavior_ai_find_patrol_point + gam_prop_f reproduce NextPatrolPoint resolution and WaitTime byte-exact across all 742 shipped 3PAT waypoints in 35 levels (581 edges resolve to a real neighbor) |
 
 ## linked-blocked (needs gameplay / by-eye / by-ear evidence)
 

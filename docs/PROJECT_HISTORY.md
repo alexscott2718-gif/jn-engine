@@ -1521,3 +1521,23 @@ win-bridge exclusion: a working native behavior the project chose not to make
 Recorded both as linked-blocked in docs/linkage_certificates.csv with the
 distinct reasoning, and struck the worklist row. Scoreboard: 6 linked, 8
 linked-blocked. Next: C3DPatrolPoint/on-arrive + AI patrol.
+
+
+## linked branch: seventh certified row, C3DPatrolPoint/on-arrive (2026-07-02)
+
+Certified the "next-select" half of the decompiled OnArrive (00434ea0):
+NextPatrolPoint graph-edge resolution (case-insensitive same-level tag match)
+and WaitTime read-through, over all 742 real shipped 3PAT waypoints across 35
+levels (581 edges resolve to a real neighbor; the rest are terminal/absent/
+dangling and the oracle proves native reports those correctly too, not just
+the happy path). Scoped narrowly, consistent with this session's discipline:
+excluded the arrival TRIGGER mechanism itself (native polls toward the
+waypoint by distance each frame; the decompiled body is a collision-volume
+on-enter callback -- different architecture, not provably equivalent without
+a captured trace), the arrival-radius/speed constants and facing formula
+(native-invented, not decompiled), and SoundDatabase/CallObjectTag/ActivateAnim/
+WaitAnim dispatch (not ported at all per behavior_walker.c's own comment).
+Oracle (tools/linkage_oracles/C3DPatrolPoint.py) runs the real, unmodified
+gam_load() + behavior_ai_find_patrol_point()/gam_prop_f() over every shipped
+.gam file. Scoreboard: 7 linked, 8 linked-blocked. Next: C3DAITrigger/
+dispatch-graph.
