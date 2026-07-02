@@ -1781,3 +1781,39 @@ writer, counter pulse table, mouse cursor dispatch, or save/task refresh. Added
 explicit `linked-blocked` rows for `CMainMenu/menu-manager-screen-graph` and
 `CMenuElement/update-item-logic`. Scoreboard becomes 10 linked /
 15 linked-blocked.
+
+## linked branch: Ghidra target 5 -- TRIG RTTI resolved (TRIG = CTrigger), trigger-family L1 opened, still linked-blocked (2026-07-02)
+
+Executed target 5 from `docs/ghidra_recovery_plan.md`. Three results, all in
+`docs/decomp/evidence/triggertype_trigger_target5.md`:
+
+1. **TRIG RTTI resolved.** The `TRIG` factory `FUN_0047dcf0` is the `CTrigger`
+   constructor: it installs the four `CTrigger` vftables, sets default tag
+   `"CTRIGGER"` (the shipped row's ObjectTag is this default), registers class
+   id `'TRIG'` at `0047de03`, and defaults `trigger_radius` (base `+0x5e8`,
+   an unregistered field distinct from `LightRange` at `+0x4b4`) to `10.0f`.
+   `docs/gam_schema.md`'s "name pending Phase 0" row now reads `CTrigger`.
+2. **`C3DTriggerType::RunTriggerTypeNextTarget` (`00447a70`) recovered to full
+   L1** from raw disassembly -- the committed decompile was an x87-stack
+   artifact (one component added to all three stores). Real body: gated on
+   `DAT_0050985a` and the game object's active-trigger pointer
+   (`DAT_00509980+0xb4`), it resolves `NextTrigger` via
+   `FindObjectByTag_00474070` and repoints the global camera/player-target
+   record `DAT_00509a50` to target world position + the camera-local offset
+   `(20, -20, -100)` rotated through the record's three 14-bit angle shorts
+   (`+0x50/0x52/0x54`; 16384 == 360 deg).
+3. **`CTriggerTimer` boundaries repaired** (`TRIT`, zero shipped instances):
+   ctor `0047e0e0`, slot-241 dt-accumulator `0047e240`, slot-21 enter
+   arm/reset `0047e270` -- proving slot 21/`0x54` = enter and slot 22/`0x58`
+   = exit in `CTrigger::UpdateTrigger`'s latched dispatch.
+
+Disposition: no new `linked` row. Native `TRIG` (`behavior_trig.c`) is a
+deliberate one-shot log stub over the native engine's own AABB-overlap
+dispatch (`src/engine/physics.c`; re-fires every overlapping frame, no exit
+event, no watched list, no sphere radius), and `RegisterTarget` has no static
+caller, so no fidelity claim exists to certify. `CTrigger`/`enter-exit-latch`
+keeps `linked-blocked` with the note rewritten to the resolved facts, and the
+newly recovered camera-retarget aspect is recorded explicitly as
+`C3DTriggerType`/`nexttrigger-camera-retarget` (`linked-blocked`: native has
+no global camera/player-target record). Scoreboard becomes 10 linked /
+16 linked-blocked.

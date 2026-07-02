@@ -5,10 +5,10 @@
 | Item | Value |
 |---|---|
 | RTTI name | `CTriggerTimer` |
-| FourCC | (not resolved; not a `.gam`-placed object or id unmapped) |
+| FourCC | `TRIT` (registered by the ctor at `0047e17d`, `docs/_gam_classids.tsv` row `TIRT`; **zero shipped `.gam` instances**) |
 | Base chain | `CTrigger -> C3DLight -> OMediaLight -> OMediaElement -> OMediaWorldPosition -> OMediaWorldAngle -> OMediaElementContainer -> OMediaDBObject -> OMediaClassStreamer -> OMediaListener -> OMediaMessagePort -> CLocalGameObject -> CGameObject` |
 | Vftable(s) | `004d6f54, 004d6f64, 004d73b4, 004d73c8` |
-| Ctor(s) | factory/constructor installs the vftables and registers the class id (see `docs/_gam_classids.tsv`) |
+| Ctor(s) | `CTriggerTimer_ctor_0047e0e0` — calls the `CTrigger` ctor (`FUN_0047dcf0`), installs the four `CTriggerTimer` vftables, sets default tag `"CTRIGGERTIMER"` (`004f6c64`), zeroes the timer fields, seeds the `+0x602` word to `0x3c` (60), and registers class id `'TRIT'` via `C3DLight::vfunc_03_043` |
 | Dtor(s) | scalar deleting destructor `vfunc_02_002` at `0047e1c0` |
 | Ledger row | `docs/decomp_ledger.csv` |
 
@@ -16,13 +16,26 @@
 
 ## Field Map (registered `.gam` properties)
 
-No own `.gam` properties registered in `InitObject` (inherits its parent's property set, or is created at runtime rather than placed). See `docs/gam_schema.md` for any inherited properties.
+No own `.gam` properties registered in `InitObject` (inherits its parent's property set; `TRIT` is unplaced in the shipped corpus anyway).
+
+### Owned runtime fields (target 5 boundary repair)
+
+| Offset (base) | Type | Name | Source | Meaning |
+|---:|---|---|---|---|
+| `0x5f8` | byte | `timer_armed` | ctor; `0047e240`/`0047e270` (`+0x4f4` slot-1-relative) | Set by the first enter-edge; while set, the update accumulates `dt`. |
+| `0x5fc` | float | `timer_accum` | ctor; `0047e240`/`0047e270`/`0047e230` (`+0x4f8` slot-1-relative) | Accumulated seconds since arming; re-enter resets it to `0`. |
+| `0x600` | u16 | (unnamed) | ctor | Zeroed at construction; consumer not found statically. |
+| `0x602` | u16 | `timer_threshold_default_60` | ctor (`0x3c`) | Seeded to 60 at construction; the comparison against `timer_accum` was not found statically (open). |
 
 ## Vtable Methods (owned)
 
 | Slot | Address | Role | Behavior |
 |---|---|---|---|
-| `vfunc_02_002` | `0047e1c0` | scalar deleting destructor | destroys the `OMediaClassStreamer` subobject and frees the allocation |
+| ctor | `0047e0e0` | `CTriggerTimer_ctor_0047e0e0` | see Identity row above |
+| slot 241 | `0047e240` | `UpdateTriggerTimer_0047e240` | calls `CTrigger::UpdateTrigger(dt)` (the base watched-list proximity latch — the only static caller of `0047dfa0`), then `timer_accum += dt` while `timer_armed` |
+| slot 21 (`+0x54`, **enter action**) | `0047e270` | `TriggerTimerEnterArmOrReset_0047e270` | forwards to `CTrigger`'s slot-21 pass-through; first enter sets `timer_armed = 1`, re-enter resets `timer_accum = 0`. Proves slot 21/`0x54` = enter and slot 22/`0x58` = exit in the base latch. |
+| helper | `0047e230` | `TriggerTimerClear_0047e230` | clears `timer_armed` and `timer_accum` |
+| `vfunc_02_002` | `0047e1c0` | scalar deleting destructor | via `CTriggerTimer_dtor_helper_0047e1f0` re-installs the vftables and tail-calls the `CTrigger` destructor body (`0047de60`), then destroys the `OMediaClassStreamer` subobject and frees the allocation |
 
 ### Decompiled owned methods
 
@@ -53,13 +66,18 @@ No registered `.gam` properties to cross-check (inherited property set or runtim
 
 ## Confidence
 
-Confidence: Low-Medium
+Confidence: Medium
 
 Validation: Ghidra `DumpClass.java CTriggerTimer` (owned methods decompiled); `.gam` properties and assets resolved from the `InitObject` registrar calls with strings read directly from `Neutron.exe`. `.gam` value ranges cross-referenced via `docs/gam_schema.md`. Behavioral prose is derived from the decompiled bodies above; not runtime-validated.
 
 Open questions:
-- Confirm the gameplay semantics of the per-frame/owned override method(s) beyond the decompiled control flow.
-- Pin the constructor address and class-id immediate (FourCC).
+- Resolved (target 5): constructor `0047e0e0`, class id `'TRIT'` @ `0047e17d`,
+  and the per-frame semantics (enter-armed dt accumulator over the base
+  proximity latch). Evidence:
+  `docs/decomp/evidence/triggertype_trigger_target5.md`.
+- Find the consumer that compares `timer_accum` (`+0x5fc`) against the seeded
+  `0x3c` word (`+0x602`) — not found statically; likely reached via virtual
+  dispatch or never used (the class is unplaced in the shipped corpus).
 
 ## Notes
 

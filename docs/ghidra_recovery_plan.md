@@ -46,6 +46,21 @@ function-defined and dumped; see
 and `CMenuElement::UpdateItemLogic`. No new certification: native `menu.c`
 remains a keyboard-list stand-in scoped to the already-linked routing table.
 
+Progress note (2026-07-02): target 5 is complete. `TRIG`'s RTTI is resolved —
+the factory `FUN_0047dcf0` is the `CTrigger` constructor, so `TRIG` =
+`CTrigger` (`gam_schema.md` updated). `RunTriggerTypeNextTarget` (`00447a70`)
+is recovered to full L1 from raw disassembly (the committed decompile was an
+x87-stack artifact): it repoints the global camera/player-target record
+`DAT_00509a50` at the `NextTrigger` object plus the fixed offset
+`(20, -20, -100)` rotated through the record's three 14-bit angles; see
+`docs/decomp/evidence/triggertype_trigger_target5.md`. `CTriggerTimer`
+(`TRIT`, unplaced) boundaries were repaired as part of the pass, proving
+slot 21/`0x54` = enter and slot 22/`0x58` = exit. No new `linked` row: native
+`TRIG` is a deliberate one-shot stub over the engine's own AABB dispatch
+(no exit event / watched list), and native has no camera/player-target
+record, so both `CTrigger`/`enter-exit-latch` (note updated) and the new
+`C3DTriggerType`/`nexttrigger-camera-retarget` row are `linked-blocked`.
+
 | # | Entry points | Why / what it unblocks | Hardness |
 |---|---|---|---|
 | 1 | `transform_local` vtable `+0x384` slot (resolved addr `00472980`, tried 2026-07-02) | Blocks the exact orbit/dolly camera position for BOTH cutscene rows (`C3DCutSceneCamera`, `C3DMultiCutSceneCamera`) — highest-leverage single function; would also retire the native `entity_local_to_world` yaw-only approximation | Medium — one function, known address |

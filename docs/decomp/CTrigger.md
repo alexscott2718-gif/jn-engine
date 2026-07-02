@@ -5,9 +5,10 @@
 | Item | Value |
 |---|---|
 | RTTI name | `CTrigger` |
+| FourCC | `TRIG` (resolved target 5: factory `FUN_0047dcf0` installs the four `CTrigger` vftables and registers class id `'TRIG'` at `0047de03`; `docs/_gam_classids.tsv` row `GIRT`; 1 shipped instance whose `ObjectTag "CTRIGGER"` is the factory default tag @ `004f6c38`) |
 | Base chain | `C3DLight -> OMediaLight -> OMediaElement -> OMediaWorldPosition -> OMediaWorldAngle -> OMediaElementContainer -> OMediaDBObject -> OMediaClassStreamer -> OMediaListener -> OMediaMessagePort -> CLocalGameObject -> CGameObject` |
 | Vftable(s) | `004d6a1c`, `004d6a2c`, `004d6e7c`, `004d6e90` |
-| Ctor(s) | installs the four `CTrigger` vftables over the `C3DLight` construction path |
+| Ctor(s) | `FUN_0047dcf0` — installs the four `CTrigger` vftables over the `C3DLight` construction path, sets default tag `"CTRIGGER"` via `CGameObject::SetObjectTagLike`, allocates the watched-list sentinel, defaults `trigger_radius = 10.0f`, and registers class id `'TRIG'` via `C3DLight::vfunc_03_043` |
 | Dtor(s) | scalar deleting destructor `vfunc_02_002` at `0047de30` (destroys the `OMediaClassStreamer` at `this+0x173`) |
 | Ledger row | `docs/decomp_ledger.csv` |
 
@@ -25,13 +26,18 @@ data-driven activation graph (`ActivateObject*` / `NextTrigger` / `AITarget` in
 Offsets are from the primary `CTrigger` pointer (`this[N]` is slot arithmetic on the
 incomplete struct; the named byte offsets follow Ghidra's printout).
 
-| Offset | Type | Name | Source | Meaning |
+Byte offsets pinned by the constructor (target 5); the slot-arithmetic prints
+in the method bodies are the same fields viewed from different subobject
+pointers (`vfunc_01_*` methods take the vftable-1 pointer at base `+0x104`;
+`vfunc_03_045` and the ctor use the primary base).
+
+| Offset (base) | Type | Name | Source | Meaning |
 |---:|---|---|---|---|
-| `this[0x139]` | float | `trigger_radius` | `vfunc_01_241` | Distance threshold. A target is "inside" when `dist(target, trigger) < trigger_radius`. Compared with `<=` against the Euclidean distance. |
-| `this[0x13b]` | pointer | `watched_list_head` | `vfunc_01_241` | Head/sentinel of a circular linked list of watched-target nodes. Update walks `node = *node` until it returns to the head. |
-| `this[0x17c]` | pointer | `register_list` | `vfunc_03_045` | The list the registrar (slot 45) splices new watch nodes into (the same list `watched_list_head` iterates). |
-| `this[0x17d]` | int | `watched_count` | `vfunc_03_045` | Incremented each time a target is registered. |
-| `this+0x173` | subobject | `class_streamer` | `vfunc_02_002` | `OMediaClassStreamer` tail destroyed by the deleting destructor. |
+| `0x5e8` | float | `trigger_radius` | ctor `47ddb9`; `vfunc_01_241` (`this[0x139]` slot-1-relative) | Distance threshold; ctor default `10.0f`. A target is "inside" when `dist(target, trigger) < trigger_radius`. **Not** the registered `LightRange` property (slot-1 `+0x4b4`); no `.gam` property writes this field, so the shipped `TRIG` row's `LightRange 1e+04` never reaches it. |
+| `0x5ec` | byte | `heap_allocated_flag` | ctor `47dd52` | Ctor parameter; gates the deleting destructor's free. |
+| `0x5f0` | pointer | `watched_list_head` | ctor `47dd65`; `vfunc_01_241` (`this[0x13b]` slot-1-relative); `vfunc_03_045` (`this[0x17c]` base-relative) | Self-linked 12-byte sentinel of the circular watched-target list. The update's iteration list and the registrar's splice list are this same field. |
+| `0x5f4` | int | `watched_count` | ctor; `vfunc_03_045` (`this[0x17d]`) | Incremented per registered target. |
+| `0x5fc` | subobject | `class_streamer` | ctor (`in_ECX + 0x17f`); `vfunc_02_002` (`this+0x173` from the `+0x30` subobject) | `OMediaClassStreamer` tail destroyed by the deleting destructor. |
 
 ### Watch-node layout (from the update + registrar)
 
@@ -92,10 +98,10 @@ the level/activation graph, not stored on the trigger itself.
 
 | Item | Source | Notes |
 |---|---|---|
-| `trigger_radius` | inherited `C3DLight` radius | The proximity threshold. |
+| `trigger_radius` | owned float at base `+0x5e8`, ctor default `10.0f` | The proximity threshold. Distinct from the registered `LightRange` (`+0x4b4`); no property writes it. |
 | enter action | vtable slot `0x54` | Fired once when a target enters. |
 | exit action | vtable slot `0x58` | Fired once when a target leaves. |
-| `CTriggerTimer` | sibling spec | Timer-driven variant in the same family. |
+| `CTriggerTimer` | subclass (`TRIT`, unplaced) | Overrides slot 21 (enter) to arm/reset a dt-accumulating timer and slot 241 to accumulate; the only static caller of `UpdateTrigger` (`UpdateTriggerTimer_0047e240`). Confirms slot 21/`0x54` = enter and slot 22/`0x58` = exit. |
 
 ## Assets
 
@@ -111,12 +117,15 @@ proximity test, the latched enter/exit edges, and the linked-list registrar are 
 directly from the decompiled `UpdateTrigger`/`RegisterTarget`. Not runtime-validated.
 
 Open questions:
-- Resolve the concrete bindings of action slots `0x54` (enter) and `0x58` (exit) for
-  the shipped trigger subclasses / `.gam` activation rows.
-- Confirm `this[0x139]`/`this[0x13b]` against the inherited `C3DLight`/`OMediaLight`
-  field layout once those base structs are applied.
-- Map `RegisterTarget`'s caller — who populates the watched-target list (player? all
-  game objects? a specific `AITarget`?).
+- Resolved (target 5): slot 21/`0x54` is the enter action and slot 22/`0x58` the
+  exit action — proven by `CTriggerTimer`'s slot-21 arm/reset override
+  (`TriggerTimerEnterArmOrReset_0047e270`).
+- Resolved (target 5): `this[0x139]`/`this[0x13b]` are owned `CTrigger` fields at
+  base `+0x5e8`/`+0x5f0`, initialized by the ctor — not inherited light fields.
+- Map `RegisterTarget`'s caller — `0047df30` has **no static code callers**
+  (vtable DATA refs only), so watchers are registered purely through virtual
+  dispatch (slot 45 = vtable `+0xb4`), still unmapped. In particular nothing
+  statically registers a watcher for the single placed `TRIG`.
 
 ## Notes
 
@@ -131,52 +140,44 @@ Open questions:
 Aspect: **`enter-exit-latch`** — status `linked-blocked`.
 Certificate: `docs/linkage_certificates.csv`.
 
-Investigated 2026-07-02 (linked-parity pass). This worklist row's title
-conflates three distinct decompiled classes, and none of them has a faithful,
-testable native counterpart this pass:
+Re-dispositioned 2026-07-02 (Ghidra recovery plan target 5), superseding the
+earlier three-way-conflation note. The identity questions are now settled:
 
-- **`CTrigger` itself** (this doc) is the engine's proximity-volume primitive
-  (watched-target linked list, latched `inside_flag`, debounced enter/exit
-  dispatch to vtable slots `0x54`/`0x58`) — but it is **not a placeable
-  FourCC** (no `Identity` FourCC field in this doc, no `docs/gam_schema.md`
-  row). It's an internal mechanism other trigger-family classes build on, and
-  no native file implements *this* linked-list/latch structure directly —
-  `src/game/behaviors/behavior_trig.c` (below) is a different, simpler
-  mechanism for a different, concrete FourCC.
-- **`C3DTriggerType`** (`docs/decomp/C3DTriggerType.md`) is a shared base for
-  `C3DAITrigger`/`C3DCutSceneCamera`/`C3DMultiCutSceneCamera`/etc. — also not
-  itself placeable, and its one owned runtime method
-  (`RunTriggerTypeNextTarget`) is explicitly flagged in that doc as "still
-  raw decompiler output" (a global-record camera-targeting computation with
-  unresolved trig-table semantics) — too poor an L1 to certify against.
-- **`C3DTrigger`** (`3TRI`, `docs/decomp/C3DTrigger.md`) is the class with
-  the actual placeable FourCC and a fully decompiled `ActivateTrigger`
-  cascade (`ActivateBy` gate, `TimesToTrigger` limit, `NextTrigger`
-  resolution, `ActivateObject0..4` state-gated cascade, sound playback) — but
-  the native port (`src/game/behaviors/behavior_prop.c`, `vt_prop`) is
-  **explicitly and completely inert** for this FourCC: "its activate-object
-  cascade / NextTrigger dispatch is the project-wide deferred scripted-trigger
-  system... fully 'none' (inert)." Zero ported logic to diff against.
+- **`TRIG` = `CTrigger` itself.** The `TRIG` factory `FUN_0047dcf0` is the
+  `CTrigger` constructor (installs all four `CTrigger` vftables, default tag
+  `"CTRIGGER"`, class id `'TRIG'` @ `0047de03`); `docs/gam_schema.md` is
+  updated. The single shipped `TRIG` row's `ObjectTag "CTRIGGER"` is the
+  factory default tag, and its `LightRange 1e+04` lands in the registered
+  light field (`+0x4b4`), **not** in `trigger_radius` (`+0x5e8`, ctor default
+  `10.0f`, unregistered).
+- **L1 is complete** for the whole family: the proximity watched-list latch
+  (this doc), the constructor, and the `CTriggerTimer` subclass
+  (`TRIT`, zero shipped instances — ctor `0047e0e0`, slot-241 dt-accumulator
+  `0047e240`, slot-21 enter arm/reset `0047e270`). Evidence:
+  `docs/decomp/evidence/triggertype_trigger_target5.md`.
+- **No watcher wiring exists in the shipped data**: `RegisterTarget`
+  (`0047df30`) has no static code caller (virtual slot-45 dispatch only, still
+  unmapped), so the one placed `TRIG` has no statically-provable watched
+  targets.
 
-Separately, the `TRIG` FourCC (`src/game/behaviors/behavior_trig.c`,
-`vt_trig`) — the file the worklist row actually named — implements neither of
-the above: a one-shot latch (`user_flag`) with no enter/exit distinction, no
-`ActivateBy` gate, no `NextTrigger` cascade, and no sound. Its *own* RTTI
-class name is still unresolved in `docs/gam_schema.md` ("`TRIG` | — (name
-pending Phase 0)"), so there is no recovered decompiled body for `TRIG`
-itself to certify `behavior_trig.c` against either.
-
-Every reading of this row therefore lands on "no faithful native counterpart
-to certify this pass" — either no native implementation of the documented
-mechanism exists (`CTrigger`), the recovered body is too raw to trust
-(`C3DTriggerType`), the native port explicitly declines to implement the
-recovered body (`C3DTrigger`/`3TRI`), or the concrete class has no recovered
-body at all (`TRIG`). Recorded `linked-blocked` rather than force a fit.
+The row stays `linked-blocked` because **L2 fails by design**: native `TRIG`
+(`src/game/behaviors/behavior_trig.c`, `vt_trig`) is a deliberate one-shot log
+stub (a `user_flag` latch around a `printf`), fired by the native engine's own
+trigger dispatch (`src/engine/physics.c`: player-AABB overlap re-fires
+`on_trigger` every overlapping frame — no exit event, no per-target watched
+list, no sphere radius, no debounced enter/exit edges). There is no native
+implementation of the recovered watched-list/latched-edge mechanism, and no
+fidelity claim to certify. Porting it (sphere-radius volumes, per-watcher
+inside latches, exit dispatch) is engine behavior work for native-port, not
+certification. `C3DTrigger`/`3TRI`'s inert native cascade
+(`behavior_prop.c`, "fully none (inert)") is unchanged from the earlier note.
 
 ### Not covered / open
 
-- A future pass that (a) resolves `TRIG`'s RTTI class and recovers its body,
-  or (b) ports `C3DTrigger`/`3TRI`'s already-decompiled `ActivateTrigger`
-  cascade for real, could open a genuine `linked` aspect here.
-- `C3DTriggerType::RunTriggerTypeNextTarget` needs a cleaner Ghidra pass
-  before it's worth linkage work at all.
+- A future native-port pass that implements the watched-list sphere latch
+  1:1 (enter/exit edges included) would open a genuine `linked` aspect here;
+  the recovered body is now fully specified for that port.
+- `C3DTriggerType::RunTriggerTypeNextTarget` is now fully recovered (target 5)
+  and dispositioned separately as
+  `C3DTriggerType`/`nexttrigger-camera-retarget` (`linked-blocked`: native has
+  no global camera/player-target record).

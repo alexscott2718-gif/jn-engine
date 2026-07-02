@@ -179,3 +179,28 @@ writers, counter pulses, mouse/canvas dispatch, and save/task refresh. Native
 `src/game/menu.c` remains the deliberate keyboard-list stand-in, so only the
 existing routing-table row is linked; the canvas menu graph is now an explicit
 `linked-blocked` return to native-port.
+
+## Addendum 7: Ghidra target 5 -- TRIG identity resolved, trigger-family L1 opened, no new certification
+
+The `CTrigger`/`enter-exit-latch` blocked note above ("three-way conflation,
+TRIG RTTI unresolved, C3DTriggerType L1 too raw") is superseded on its
+factual claims, with the same disposition:
+
+- `TRIG` RTTI is resolved: the factory `FUN_0047dcf0` **is** the `CTrigger`
+  constructor (vftable installs + class-id push at `0047de03`), so the
+  worklist row's `behavior_trig.c` really does face `CTrigger`.
+- `C3DTriggerType::RunTriggerTypeNextTarget` is no longer "too raw an L1":
+  target 5 recovered the exact body from disassembly (the poor decompile was
+  an x87 artifact) -- a camera/player-target-record repoint to the
+  `NextTrigger` object with a fixed rotated offset `(20, -20, -100)`. It is
+  recorded as its own explicit blocked row
+  (`C3DTriggerType`/`nexttrigger-camera-retarget`) because native has no
+  global camera record to port it onto.
+- The remaining gap is now purely L2-by-design: native `TRIG` is a one-shot
+  log stub over the engine's own every-frame AABB dispatch (no exit event, no
+  watched list, no sphere radius), `RegisterTarget` has no static caller (so
+  the one placed TRIG has no statically-provable watchers), and
+  `C3DTrigger`/`3TRI`'s native cascade stays deliberately inert.
+
+Scoreboard after this pass: **10 linked / 16 linked-blocked** (the new row is
+an explicit accounting of already-blocked scope, not a regression).
