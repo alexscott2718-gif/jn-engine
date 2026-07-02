@@ -1897,3 +1897,20 @@ Mutation test: flipping `entity_transform_local`'s final z sign made both
 camera oracles fail; restoring it returned both to green. Certificate rows
 `C3DCutSceneCamera`/`3cam-full-placement` and
 `C3DMultiCutSceneCamera`/`3mca-full-placement` are now `linked`.
+
+## linked branch: cutscene placement local-Z mirror fix (2026-07-02)
+
+Post-link runtime testing exposed a visual regression in the full placement
+port: scripted cutscene cameras targeting Jimmy landed on the follow-cam/back
+side, so the shot saw Jimmy's back instead of his face. Root cause was the
+native `entity_transform_local` port converting the final world Z but not the
+authored local vector's Z before applying native rotations. The original local
+offsets are in original game space; native world space mirrors Z, so the local
+input must be mirrored too (`local_z -> -local_z`). With zero pitch/roll this
+preserves the previous yaw-only helper's front-side placement while still using
+the recovered three-axis 14-bit trig path.
+
+Fixed `src/game/behaviors/behavior_cutscene.c` and updated both camera linkage
+oracles so their native references mirror local Z before rotation. The
+`C3DCutSceneCamera`/`C3DMultiCutSceneCamera` docs now call out this native-space
+step explicitly instead of describing only a final-Z conversion.

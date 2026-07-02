@@ -171,9 +171,10 @@ Aspects: **`3cam-camera-math`** and **`3cam-full-placement`** ? status
 
 The native path now ports the full recovered placement surface. The old
 yaw-only `entity_local_to_world` helper was replaced with
-`entity_transform_local`, a direct native-coordinate port of `00472980`: it
-uses all three target rotations, the original 14-bit trig index scale, and the
-native loader's `PositionZ` handedness conversion.
+`entity_transform_local`, a native-coordinate port of `00472980`: it uses all
+three target rotations, the original 14-bit trig index scale, mirrors authored
+local Z into native space, and applies the native loader's `PositionZ`
+handedness conversion.
 
 ### L2 ? transcription map
 
@@ -181,8 +182,8 @@ native loader's `PositionZ` handedness conversion.
 |---|---|
 | `dist = InitialDist - ZoomSpeed*t; dist = max(dist,MinDist); dist = min(dist,MaxDist)` | `cutscene_3cam_dist`: identical accumulate + floor-then-ceiling clamp order |
 | `if CameraType==2: camera=self.world_position; look=target.world_position` (tested before `ViewFromCamera`) | `cutscene_3cam_place`: same precedence, same early return |
-| `ViewFromCamera==0`: `camera = target.transform_local(TargOffsetX,TargOffsetY,dist)`; `look = target + (0,LookVoffset,0)` | `cutscene_3cam_place`: calls `entity_transform_local` with `(offset.x, offset.y, dist)` and writes the same look point |
-| `ViewFromCamera!=0`: `framed = target.transform_local(TargOffsetX,TargOffsetY,TargOffsetZ)`; camera moves from `framed` toward the 3CAM placement by `dist`; `look=framed` | `cutscene_3cam_place`: calls `entity_transform_local`, normalizes the native placement ray, and writes camera/look from `framed` |
+| `ViewFromCamera==0`: `camera = target.transform_local(TargOffsetX,TargOffsetY,dist)`; `look = target + (0,LookVoffset,0)` | `cutscene_3cam_place`: calls `entity_transform_local` with `(offset.x, offset.y, dist)`, mirrors local Z for native space, and writes the same look point |
+| `ViewFromCamera!=0`: `framed = target.transform_local(TargOffsetX,TargOffsetY,TargOffsetZ)`; camera moves from `framed` toward the 3CAM placement by `dist`; `look=framed` | `cutscene_3cam_place`: calls `entity_transform_local`, mirrors local Z for native space, normalizes the native placement ray, and writes camera/look from `framed` |
 
 ### L3 ? oracle
 
@@ -198,8 +199,9 @@ native loader's `PositionZ` handedness conversion.
   all resolved real non-static `3CAM` rows plus synthetic non-zero rotation
   cases (351 checks). Float comparison uses a narrow epsilon for the trig path;
   distance/table pieces remain bit-exact.
-- Mutation test: flipping the native helper's final z sign makes the oracle go
-  red; restoring it returns green.
+- Regression coverage: the oracle's native reference mirrors authored local Z
+  before applying target rotations, so removing that mirror makes the
+  full-placement cases go red and catches the Jimmy-front/back inversion.
 
 ### Not covered by this aspect
 

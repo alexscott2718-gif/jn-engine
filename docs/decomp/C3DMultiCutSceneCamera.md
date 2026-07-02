@@ -440,7 +440,8 @@ Open questions:
   `docs/decomp/evidence/transform_local_00472980.md` and
   `docs/decomp/C3DCutSceneCamera.md` for the interpreted signature/body.
   This opened L1 for the full world-position math; the native linked branch now
-  ports that helper in `behavior_cutscene.c` as `entity_transform_local` and
+  ports that helper in `behavior_cutscene.c` as `entity_transform_local`,
+  including the authored-local-Z mirror required by native coordinates, and
   certifies the 3MCA world placement below.
 - Pin the constructor address and class-id immediate (FourCC).
 
@@ -467,7 +468,7 @@ ported `00472980` transform helper.
 | `CameraType 2 -> (0, 240, max(100, 500-35*t))` | `case 2: out = (0, 240, max(100, 500-35*t))` |
 | `CameraType 3 -> (200, 240, max(100, 700-55*t))` | `case 3: out = (200, 240, max(100, 700-55*t))` |
 | `CameraType 4 -> (-200, 190, max(100, 700-55*t))` | `case 4: out = (-200, 190, max(100, 700-55*t))` |
-| `world = target.transform_local(local_offset)` | `cutscene_update`: calls `entity_transform_local` with the recovered 14-bit three-axis transform |
+| `world = target.transform_local(local_offset)` | `cutscene_update`: calls `entity_transform_local` with the recovered 14-bit three-axis transform and native local-Z mirror |
 | `look = (target.x, target.y + LookatVOffsetN - 60, target.z)` | `cutscene_update`: same look point in native coordinates |
 
 ### L3 ? oracle
@@ -483,8 +484,9 @@ runs:
   math over resolved real in-range `3MCA` steps plus synthetic non-zero
   rotation cases (1,053 checks). Float comparison uses a narrow epsilon for the
   trig path; the local offset table remains bit-exact.
-- Mutation test: flipping the native helper's final z sign makes the oracle go
-  red; restoring it returns green.
+- Regression coverage: the oracle's native reference mirrors authored local Z
+  before applying target rotations, so removing that mirror makes the world
+  placement cases go red and catches the Jimmy-front/back inversion.
 
 ### Not covered by this aspect
 

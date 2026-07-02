@@ -96,7 +96,10 @@ def transform_local_native(pose: tuple[float, float, float, float, float, float]
     sx, cx = trig14(rx)
     sy, cy = trig14(ry)
     sz, cz = trig14(-rz)
-    lx, ly, lz = local
+    # Native world mirrors the original Z axis, so mirror the authored local
+    # offset too before applying native rotations. This keeps cutscene +Z
+    # camera offsets on Jimmy's front side under the native facing convention.
+    lx, ly, lz = local[0], local[1], -local[2]
 
     xz = cz * ly - sz * lx
     yz = cz * lx + sz * ly

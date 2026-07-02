@@ -419,11 +419,15 @@ static void entity_transform_local(const Entity *e, const float local[3], float 
     cutscene_trig14(e->ry, &sy, &cy);
     cutscene_trig14(-e->rz, &sz, &cz);
 
-    float xz = cz * local[1] - sz * local[0];
-    float yz = cz * local[0] + sz * local[1];
-    float t = cx * local[2] - xz * sx;
+    /* Cutscene local offsets are authored in the original coordinate space.
+       Mirror local Z before applying native rotations so +Z framing offsets
+       stay on the target's native front side instead of the follow-cam side. */
+    float lx = local[0], ly = local[1], lz = -local[2];
+    float xz = cz * ly - sz * lx;
+    float yz = cz * lx + sz * ly;
+    float t = cx * lz - xz * sx;
     float dx = yz * cy - t * sy;
-    float dy = xz * cx + sx * local[2];
+    float dy = xz * cx + sx * lz;
     float dz = t * cy + yz * sy;
 
     out[0] = e->x + dx;
