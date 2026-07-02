@@ -1964,3 +1964,9 @@ retarget (`00447a70`), wired into `behavior_ai_trigger.c`'s dispatch. FOLLOW
 mode is explicit scaffolding until `UpdateWalkingCameraA/B` are ported.
 Verified headless via xvfb screenshots: the record camera renders the level1
 spawn from behind the player, matching the native follow-cam's view direction.
+
+Certification follow-up (same day): tools/linkage_oracles/C3DTriggerType.py
+compiles the real camera_record.c and verifies the slot-242 retarget against
+the recovered math on 516 synthetic cases (mutation tested); the
+nexttrigger-camera-retarget row is flipped to linked -- gate now reads
+13 linked / 15 linked-blocked.

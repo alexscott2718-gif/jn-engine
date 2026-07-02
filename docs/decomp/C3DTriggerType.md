@@ -145,3 +145,7 @@ demo mode is on. Two original gates are *not* ported: the trigger-focus byte
 `DAT_0050985a` (no recovered writer) and the active-trigger pointer
 (`DAT_00509980+0xb4`); the demo gates on its mode instead, and the FOLLOW
 mode is explicit scaffolding pending an `UpdateWalkingCameraA/B` port.
+
+Certified 2026-07-02: the retarget aspect row is now **linked** in
+docs/linkage_certificates.csv (oracle tools/linkage_oracles/C3DTriggerType.py,
+516 synthetic cases, mutation tested via the native Z mirror).
