@@ -123,3 +123,16 @@ fallback `-1` -- stays green because no shipped STRT omits MusicIndex; that
 fallback is explicitly NOT certified and is documented in the doc's "Not
 covered" list, consistent with the corpus-scoped honesty the other rows use.
 Scoreboard is now **9 linked (oracle-verified) / 9 linked-blocked**.
+
+## Addendum 2 (2026-07-02, same day): C3DPlayer movement-logic investigated
+
+The blocked-table row above repeats the plan's claim that the player movement
+LOGIC "is linkable via an input-trace oracle... it's wave 8, not parked."
+Investigated same day: that claim is withdrawn. The movement bodies are not
+function-defined in Ghidra (L1: no recovered accumulate->clamp body exists),
+and the native player is the approved deliberate tank-turn simplification
+(L2: no fidelity claim to certify; the dormant movement_base.c ramp is the
+tuned "ice-skating" approximation the plan's L4 cites). The row stays
+`linked-blocked` with a corrected note; the real path (Ghidra recovery of
+five entry points -> 1:1 port replacing approved movement -> oracle) is
+recorded in docs/decomp/C3DPlayer.md's Native Linkage section.

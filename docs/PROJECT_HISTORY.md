@@ -1662,3 +1662,24 @@ recovered) and is documented as out of scope, as are ViewportP*/R* camera pose
 and StartTrigger (unported, unchanged). Scoreboard: **9 linked /
 9 linked-blocked**. Gates: make, audit_faithfulness (0/35), gate + selftest,
 build_vtable_parity_report all green.
+
+## linked branch: C3DPlayer movement-logic investigated, stays linked-blocked (2026-07-02)
+
+Attempted to repeat the C3DStartPoint/spawn extraction pattern on the player
+movement state machine (the blocked note's "separately linkable via a headless
+input-trace oracle" claim). Finding: not linkable this pass, and the note was
+corrected. L1 fails -- the five movement bodies (UpdateGroundMoveA 00437c40,
+UpdateJumpFallMove 00437f90, UpdateWalkingCameraA/B 00438bc0/00439900,
+SetPlayerAnimationState 0043aff0) are not function-defined in the committed
+Ghidra project ("function not found"); the class doc has prose from raw
+disassembly, not recovered bodies. L2 fails by design -- behavior_player.c is
+the approved deliberate tank-turn simplification (its comment records the
+data-driven physics as DEFERRED after the ice-skating failure), and the
+dormant movement_base.c ramp is that tuned approximation (untraceable 0.909f /
+decel*0.5f / dt*6.0f / +-45 constants -- the plan's own L4 example). An oracle
+around the tank-turn code would be self-certifying, exactly what the gate
+exists to prevent. Path recorded in docs/decomp/C3DPlayer.md: Ghidra
+function-recovery on the five entry points, then a 1:1 port replacing the
+approved movement (native-port work + a product decision), then the
+input-trace oracle. No code changed; scoreboard stays 9 linked /
+9 linked-blocked.

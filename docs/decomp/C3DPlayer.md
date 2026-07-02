@@ -301,3 +301,54 @@ Open questions:
 - Extra evidence: `objdump -D -Mintel` over `/home/scotty/xp-jnbg-original/Neutron.exe` for `00437c40..00438c00`, `00438bc0..0043a880`, and `0043a880..0043b980`.
 - `DumpFunctions.java /tmp/decomp_C3DPlayer_raw.md ...` reports the raw helper addresses as `(function not found)` because those entry points are not yet function-defined in Ghidra, even though the vtable and disassembly show normal code bodies.
 - The prior campaign invariant that `FUN_0041a140` is the flying/player-family integrator remains documented in `C3DFlyingObject`; `C3DPlayer` directly overrides the player update/camera/action controller and derives from `C3DAnimated`, not directly from `C3DFlyingObject`.
+
+## Native Linkage (linked-parity branch)
+
+Aspect: **`free-roam-feel`** — status `linked-blocked` (note corrected
+2026-07-02 after a movement-logic linkage investigation).
+
+The original blocked note claimed "the state-machine LOGIC is separately
+linkable via a headless input-trace oracle." Investigated 2026-07-02 with the
+intent of repeating the `C3DStartPoint`/spawn extraction pattern; the claim
+does not hold this pass, on two independent grounds:
+
+1. **L1 unsatisfied — the movement math is not decompiled.** The bodies that
+   hold the accumulate->clamp walk-speed machine and animation-state
+   transitions (`UpdateGroundMoveA` `00437c40`, `UpdateJumpFallMove`
+   `00437f90`, `UpdateWalkingCameraA` `00438bc0`, `UpdateWalkingCameraB`
+   `00439900`, `SetPlayerAnimationState` `0043aff0`) are not function-defined
+   in the committed Ghidra project — `DumpFunctions.java` reports
+   `(function not found)` for all five (see Notes above). This doc's
+   Per-Frame pseudocode covers `UpdatePlayerState`'s *dispatch*, and the
+   helper rows above are prose summaries from raw `objdump`, not recovered
+   bodies a 1:1 transcription could be certified against.
+
+2. **L2 impossible by design — the native player deliberately diverges.**
+   `src/game/behaviors/behavior_player.c` implements the approved simple
+   tank-turn movement (instant velocity; its own comment: the data-driven
+   accel/decel physics is DEFERRED after producing ice-skating / wrong
+   turn+speed). The dormant data-driven ramp (`src/engine/movement_base.c`,
+   `movement_base_flying_step`) is a tuned approximation with constants that
+   trace to no decomp address (`0.909f` decel window, `decel * 0.5f`,
+   `dt * 6.0f` lean smoothing, `±45` lean clamp) — it is the L4
+   "ice-skating" cautionary example, not a transcription. There is no
+   fidelity claim to certify: the same disposition shape as
+   `C3DCheckPoint`/progress and `C3DPickupItem`/collection.
+
+An input-trace oracle wrapped around the tank-turn code would compare the
+native design against itself — the circular-oracle failure the linkage gate
+exists to prevent. What linking player movement-logic actually requires:
+
+1. A Ghidra recovery pass that defines functions at the five entry points
+   above (plus resolving the inherited transform slots they call, e.g.
+   `0x2c4`/`0x334`) and deepens this doc from prose to bodies — the
+   "stronger model or human" recovery work the plan flags.
+2. A 1:1 native port of the recovered walk-speed machine — replacing the
+   approved tank-turn movement, i.e. native-port behavior work plus a
+   product decision (the approximation was already tried and rejected once).
+3. Only then the headless input-trace oracle.
+
+### Not covered / open
+
+- Free-roam FEEL confirmation (by-eye / capture-with-input) is untouched by
+  the above and remains native-port territory regardless.
