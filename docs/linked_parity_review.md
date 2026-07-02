@@ -204,3 +204,25 @@ factual claims, with the same disposition:
 
 Scoreboard after this pass: **10 linked / 16 linked-blocked** (the new row is
 an explicit accounting of already-blocked scope, not a regression).
+
+## Addendum 8: Ghidra target 6 -- C3DJimmy gadget/menu L1 opened, native L2 absent
+
+Target 6 function-defined and dumped the `C3DJimmy` raw frame/controller/setup
+cluster plus the remaining vtable-4 helpers into
+`docs/decomp/evidence/c3djimmy_target6.md`. The pass retires two factual
+blockers in `C3DJimmy.md`: `0xa18` is not an unknown inventory object but a
+code-created `C2DInGameMenu` controller (object size `0x51c`, ctor
+`00401430`, registration string `0x4ef05c = C2DInGameMenu`), and `0x95c` is a
+code-spawned `C3DGoddard` companion; `0x970` is a hidden code-spawned
+`C3DJeep`. The recovered bodies also pin the special-level oxygen/countdown
+`DAT_004f83d4`, race timer `DAT_004eefc8`, secondary countdown
+`_DAT_004eefd0`, action-menu lock/unlock, phone-booth/VR/gadget command
+dispatch, and the Jimmy-side `C2DInGameMenu` command protocol.
+
+No `linked` row was added. The new explicit
+`C3DJimmy`/`gadget-mode-dispatch` certificate is `linked-blocked` on L2:
+native `behavior_player.c` is the approved tank-turn/simple tool-use player
+path, `game_flow.c` has only the simplified lives/restart bridge, and native
+has no `C2DInGameMenu` gadget controller, Goddard/Jeep companion spawn, or
+oxygen/race countdown port. An oracle over the current native inventory/tool
+path would certify a different design.

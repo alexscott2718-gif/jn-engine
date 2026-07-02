@@ -61,6 +61,24 @@ slot 21/`0x54` = enter and slot 22/`0x58` = exit. No new `linked` row: native
 record, so both `CTrigger`/`enter-exit-latch` (note updated) and the new
 `C3DTriggerType`/`nexttrigger-camera-retarget` row are `linked-blocked`.
 
+Progress note (2026-07-02): target 6 is complete. `C3DJimmy`'s raw frame,
+active-controller, setup, runtime-init, menu-lock, snapshot, and helper
+boundaries are now function-defined and dumped; see
+`docs/decomp/evidence/c3djimmy_target6.md`. The pass resolves the previously
+open `0xa18` identity: the factory allocates `0x51c`, calls ctor `00401430`,
+and registers string `0x4ef05c = C2DInGameMenu`, so Jimmy's gadget controller
+is the in-game HUD/menu overlay object. It also corrects `0x95c` to a
+code-spawned `C3DGoddard` companion (`FUN_0041c810`, `3GOD`) and adds `0x970`
+as a hidden code-spawned `C3DJeep` (`FUN_004211a0`, `3JEE`). The recovered L1
+pins the `DAT_004f83d4` special-level oxygen/countdown, `DAT_004eefc8` race
+timer, `_DAT_004eefd0` secondary countdown, action-menu lock/unlock, and
+gadget/menu command queue through `C2DInGameMenu` slot `0x4b8`. No new
+`linked` row: native `behavior_player.c` is still the approved tank-turn/simple
+tool-use player path, `game_flow.c` only has the simplified lives/restart
+bridge, and native has no `C2DInGameMenu` gadget-controller protocol,
+Goddard/Jeep companion spawn, or oxygen/race countdown port. The explicit
+`C3DJimmy`/`gadget-mode-dispatch` row is `linked-blocked`.
+
 | # | Entry points | Why / what it unblocks | Hardness |
 |---|---|---|---|
 | 1 | `transform_local` vtable `+0x384` slot (resolved addr `00472980`, tried 2026-07-02) | Blocks the exact orbit/dolly camera position for BOTH cutscene rows (`C3DCutSceneCamera`, `C3DMultiCutSceneCamera`) — highest-leverage single function; would also retire the native `entity_local_to_world` yaw-only approximation | Medium — one function, known address |

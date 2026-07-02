@@ -1817,3 +1817,31 @@ newly recovered camera-retarget aspect is recorded explicitly as
 `C3DTriggerType`/`nexttrigger-camera-retarget` (`linked-blocked`: native has
 no global camera/player-target record). Scoreboard becomes 10 linked /
 16 linked-blocked.
+
+## linked branch: Ghidra target 6 recovered C3DJimmy gadget/menu L1, stays linked-blocked (2026-07-02)
+
+Executed target 6 from `docs/ghidra_recovery_plan.md`: function-defined and
+dumped the `C3DJimmy` raw frame/controller/setup/menu-lock/helper cluster into
+`docs/decomp/evidence/c3djimmy_target6.md`. The recovered set includes
+`UpdateJimmyFrame` (`00424600`), `UpdateJimmyActiveController` (`00426030`),
+`JimmySetupOrReset` (`00423610`), `InitJimmyRuntimeHandles` (`00425db0`),
+`JimmyEnterActionMenuLock` (`00425ef0`), snapshot helpers
+`0042af00`/`0042af50`, the remaining vtable-4 helper targets, and ctor
+`00401430`.
+
+Key findings: Jimmy's `0xa18` "gadget controller" is a code-created
+`C2DInGameMenu` object (size `0x51c`, registration string
+`0x4ef05c = C2DInGameMenu`); `0x95c` is a code-spawned `C3DGoddard`
+companion, not a level-timer toggle object; `0x970` is a hidden code-spawned
+`C3DJeep`. The bodies pin the special-level oxygen/countdown
+`DAT_004f83d4`, race timer `DAT_004eefc8`, secondary countdown
+`_DAT_004eefd0`, action-menu lock/unlock, phone-booth/VR/gadget command
+routes, and the `C2DInGameMenu` command queue through slot `0x4b8`.
+
+Disposition: L1 is open, but no new `linked` row. Native
+`behavior_player.c` remains the approved tank-turn/simple tool-use design,
+`game_flow.c` only carries the simplified restart/lives bridge, and native has
+no in-game menu gadget-controller protocol, Goddard/Jeep companion spawn, or
+oxygen/race countdown port. Added explicit `C3DJimmy`/
+`gadget-mode-dispatch` as `linked-blocked`; a faithful oracle requires porting
+that controller/timer/mode dispatch first.
