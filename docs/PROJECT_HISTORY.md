@@ -1564,3 +1564,26 @@ overlap, ActivateBy/IsA, TimesToTrigger) -- this aspect certifies the
 mutation-and-dispatch core itself, reached directly via the test hook.
 Scoreboard: 8 linked, 8 linked-blocked -- linked count now matches
 linked-blocked count. Next: C3DPickupItem/collection.
+
+
+## linked branch: C3DPickupItem/collection flagged, linked-blocked (2026-07-02)
+
+Investigated and flagged rather than force a certification. The worklist row
+named behavior_pickup.c as the native counterpart, but that file implements a
+different family entirely (C3DBaseballPickup/C3DBubblePickup/C3DHelmet/
+C3DMetalPickup -- 3BPU/3BUP/3HEL/3MEP, all code-spawned in the original, none
+placed in the shipped .gam corpus). The real 3PIC counterpart is
+behavior_item.c's vt_item (item_on_trigger), which turned out to be a
+deliberate simplification, not a port of the decompiled HandlePickupCollection
+(00435ce0): no RequiredPicNum/ReqPicNumAmount consume gate
+(CheckRequiredPicAndConsume), no PickupIndex global pickup-state table, no
+ActivateObject/ToggleObject/NextTrigger dispatch (none of the three fields
+are even read), no NeedMoreSound, no PickedUpIndex sprite swap. Native
+instead grants inventory "tools" by ObjectTag substring match against a
+hardcoded table -- a different design (tools + typed counters vs. the
+original's picture-flag/pickup-state-table model). Same shape as this
+session's other divergence flags (CJimmyGame's win-bridge, C3DCheckPoint's
+progress): a working native behavior with no fidelity claim to certify.
+Recorded linked-blocked with the full reasoning; struck the worklist row.
+Scoreboard: 8 linked, 9 linked-blocked. Next: CTrigger/C3DTriggerType
+enter-exit-latch -- the last Tier B row.

@@ -68,7 +68,7 @@ contract in `docs/linked_parity_plan.md` (Linkage Certificate L1-L5).
 - [x] **C3DAITrigger / dispatch-graph** -- DONE (this commit). — `behavior_ai_trigger.c`. Deterministic
   hide/show/AINewPos/AINewRotY/AIPatrol/ToggleObject/NextTrigger mutation of a
   synthetic target. `docs/decomp/C3DAITrigger.md`.
-- [ ] **C3DPickupItem / collection** — `00435ce0/00436200/00436830` <->
+- [~] **C3DPickupItem / collection** -- FLAGGED, linked-blocked (2026-07-02; wrong file in row, real 3PIC native is behavior_item.c, a deliberate simplification -- see doc). — `00435ce0/00436200/00436830` <->
   `behavior_pickup.c`. Consume required-picture, score, NextTrigger. `C3DPickupItem.md`.
 - [ ] **CTrigger / C3DTriggerType / enter-exit-latch** — `00447400..` <->
   `behavior_trig.c`. Enter/exit latch + NextTrigger cascade trace. `CTrigger.md`.

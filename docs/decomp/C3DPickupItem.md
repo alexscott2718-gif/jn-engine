@@ -152,3 +152,50 @@ Open questions:
 - Evidence: `DumpClass.java C3DPickupItem /tmp/decomp_C3DPickupItem.md` (`slots=337`, `owned_methods=5`, `offsets=17`), plus `objdump` over `/home/scotty/xp-jnbg-original/Neutron.exe` for raw slots `00436200`, `00436550`, and vtable 3 slot `00436830`.
 - String-table evidence around `0x4f034c..0x4f03c8` names `ShowArrow`, `PassThru`, `InitallyActive`, `ReqPicNumAmount`, `RequiredPicNum`, `PickedUpIndex`, `PointValue`, `IsAmbient`, and `NeedMoreSound`.
 - Preserve the misspelling `InitallyActive`; it appears in both the executable string and `.gam` schema.
+
+## Native Linkage (linked-parity branch)
+
+Aspect: **`collection`** — status `linked-blocked`.
+Certificate: `docs/linkage_certificates.csv`.
+
+Investigated 2026-07-02 (linked-parity pass). The worklist row named
+`behavior_pickup.c` as the native counterpart, but that file actually
+implements `C3DBaseballPickup`/`C3DBubblePickup`/`C3DHelmet`/`C3DMetalPickup`
+(`3BPU`/`3BUP`/`3HEL`/`3MEP`) — different classes entirely, none of them
+placed in the shipped `.gam` corpus (code-spawned in the original). The real
+native counterpart to the `3PIC` FourCC this class owns is
+`src/game/behaviors/behavior_item.c`'s `vt_item` (`item_on_trigger`).
+
+`item_on_trigger` is a **deliberate simplification**, not a port of the
+decompiled `HandlePickupCollection` (`00435ce0`): it grants a "tool" by
+case-insensitive substring match on `ObjectTag` against a hardcoded table
+(`TOOL_GRANTS`), a native inventory abstraction with no counterpart in the
+decompiled body. Specifically absent:
+
+- **No `RequiredPicNum`/`ReqPicNumAmount` consume-and-gate**
+  (`CheckRequiredPicAndConsume`, vtable 3 slot `00436830`) — the collection
+  in `item_on_trigger` is unconditional (bar the `user_flag` once-only guard).
+- **No `PickupIndex`-keyed global pickup-state table** (`DAT_004f8438`) —
+  native tracks collection per-entity (`user_flag`) only.
+- **No `ActivateObject`/`ToggleObject`/`NextTrigger` dispatch** — none of
+  these three fields are even read in `item_on_trigger`.
+- **No `NeedMoreSound`** (the "can't collect, missing required picture" sound).
+- **No `PickedUpIndex` replacement-sprite swap** — native just hides
+  (`alive = 0`) unconditionally.
+- **`PIC_NUMBER` is only special-cased for `==6`** (the baseball ability),
+  not generally awarded.
+
+Same shape as `CJimmyGame`'s win-bridge and `C3DCheckPoint`'s progress
+exclusions this session: a working native behavior the project built as its
+own simpler mechanism, not attempting 1:1 fidelity to the recovered body — no
+fidelity claim to certify. Porting the real `PickupIndex`/`RequiredPicNum`/
+`ActivateObject` machinery is real behavior-porting work, out of scope for a
+linkage-certification pass.
+
+### Not covered / open
+
+- No decompiled-body fidelity to certify — the native behavior is an
+  intentional divergence (a different inventory model: tools + typed
+  counters, vs. the original's picture-flag/pickup-state-table model).
+- A future pass that ports the actual `RequiredPicNum`/`PickupIndex`/
+  `ActivateObject` mechanism could open a real `linked` aspect here.
