@@ -98,41 +98,54 @@ Open questions:
 
 ## Native Linkage (linked-parity branch)
 
-Aspect: **`spawn`** — status `linked-blocked`.
-Certificate: `docs/linkage_certificates.csv`.
+Aspect: **`spawn`** — status `linked`.
+Certificate: `docs/linkage_certificates.csv`; oracle:
+`tools/linkage_oracles/C3DStartPoint.py`.
 
-Investigated 2026-07-02 (linked-parity pass). The native `place_player`
-(`src/game/main.c`) is a genuine, meaningful partial port of the decompiled
-`PlacePlayer` (`00442740`) — not inert, not a deliberate divergence:
+Investigated 2026-07-02 (linked-parity pass) as `linked-blocked`: the native
+`place_player` was already a faithful partial port of the decompiled
+`PlacePlayer` (`00442740`), but `static` inside the 2,480-line
+`src/game/main.c` — unreachable headless without stubbing the whole
+window/GL/audio init path. Converted the same day: `place_player` was
+extracted **verbatim** into `src/game/spawn.c` (+ `spawn.h`), unblocking the
+L3 oracle. Behavior unchanged; `main.c` now calls the extracted function.
 
-- Resolves the requested `StartPoint` tag against placed `STRT` entities via
-  a case-insensitive name match (`strcasecmp`), same as the decompiled
-  `IsA("C3DPLAYER")`-gated lookup by name.
-- Teleports the player to the matched start point's own world transform
-  (position **and** rotation), matching "place the player at this
-  transform."
-- Selects `MusicDatabase`/`MusicIndex` from the matched start point,
-  matching the decompiled music wiring.
+This aspect certifies exactly the deterministic, headless observables of the
+decompiled body:
 
-Not ported: the `ViewportPx/Py/Pz`/`ViewportRx/Ry/Rz` initial **camera** pose
-(a separate pose from the player's own transform — `place_player` never
-applies it to any camera) and `StartTrigger` (one-shot trigger on spawn).
+| Decomp (Neutron.exe) | Native (`src/game/spawn.c`) | Deviation |
+|---|---|---|
+| `PlacePlayer` @ `00442740`: named start resolved for the player (`DAT_005099e4` + `IsA("C3DPLAYER")` gate) | `place_player`: `world_find_type(world, "3JIM")` + case-insensitive `ObjectTag` match over placed `STRT` entities | native finds the player by walking the world list instead of a global pointer; same observable resolution |
+| "place the player at this transform" | `jim->{x,y,z,rx,ry,rz} = e->{...}` — copy of the matched start's stored world transform | none |
+| `MusicDatabase`/`MusicIndex` music selection | `audio_set_music_db(e->music_database, gam_prop_i(e, "MusicIndex", -1))` when `MusicDatabase` is authored | none |
+| no matching start point: player stays put | scan finds nothing; no teleport, no music call | none |
 
-**Blocked on harness cost, not on missing decompiled body or a deliberate
-divergence** (unlike `C3DAnimated`/`ase-deserialization` or
-`CJimmyGame`/the win-bridge exclusion). `place_player` is `static` inside
-`src/game/main.c` (2,480 lines — the full game loop: window/GL context init,
-audio init, physics stepping, the render loop). Reaching it for a headless L3
-oracle the way the cutscene-camera oracles reached `behavior_cutscene.c`'s
-statics (`#include`-ing the whole file into a driver TU) would require
-stubbing the entire windowing/GL/audio initialization path — impractical for
-one linkage row. The alternative, extracting the STRT-matching loop into its
-own small testable function, is a legitimate option for a **future** pass but
-is a production-code refactor with its own review/regression cost, out of
-scope for this one.
+Oracle: `tools/linkage_oracles/C3DStartPoint.py` + `c3dstartpoint_dump.c`
+compile the real, unmodified `spawn.c` + `gam_loader.c` and drive
+`place_player` over **every real shipped `STRT` row** (100 across the 35
+`assets/gam/*.gam` levels), each with its exact-case tag and a case-varied
+tag, plus per level one `@default` request (the player's own authored
+`StartPoint` — all 35 `3JIM` rows author one) and one guaranteed-miss tag.
+Byte-exact (IEEE-754 bit pattern) assertions against expectations computed
+independently from `tools/gam_parser.py`; the loader's import convention
+(`z = -PositionZ`, degrees→radians rotations) is recomputed from the raw
+parsed floats and cross-checked on the dumped STRT table, so a convention
+drift also goes red.
 
 ### Not covered / open
 
-- No L3 oracle this pass — see above.
-- `ViewportP*`/`ViewportR*` (camera pose) and `StartTrigger` are unported
-  gaps, independent of the linkage-certification question.
+- `ViewportP*`/`ViewportR*` (initial **camera** pose) and `StartTrigger`
+  (one-shot on spawn) remain unported gaps, unchanged from the
+  linked-blocked investigation.
+- The velocity-zero/airborne reset in the native tail is asserted by the
+  oracle as a regression guard only; the decompiled body shows
+  `C3DSprite::Reset()` there, not a recovered field-level equivalent, so it
+  is not a certified decomp equivalence.
+- A `STRT` with no authored `MusicIndex` (native would fall back to
+  `gam_prop_i`'s `-1` default): no shipped `STRT` omits `MusicIndex` and no
+  decompiled default was recovered, so that fallback constant is native
+  convenience, not a certified equivalence (a mutation of it stays green
+  by design -- the oracle covers only real, reachable data).
+- `JN_DEMO_SPAWN_XYZ` (preserve authored demo position) is a native-only
+  convenience branch; the oracle strips it from the environment, same spirit
+  as `task_load`'s baked-default fallback exclusion.

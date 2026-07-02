@@ -108,3 +108,18 @@ output" flag).
 Residual risks accepted: the CTaskList format-measurement caveat above, and the
 general limit that one mutation per row proves the oracle is not inert, not
 that it kills *every* possible deviation.
+
+## Addendum (2026-07-02, same day): C3DStartPoint/spawn converted to `linked`
+
+The audit's one borderline blocked row was closed by doing the extraction its
+note proposed: `place_player` moved verbatim to `src/game/spawn.c` (+
+`spawn.h`), unblocking a real L3 oracle
+(`tools/linkage_oracles/C3DStartPoint.py`: all 100 shipped STRT rows across
+the 35 levels, 270 requests incl. case-varied, `@default` and miss cases).
+Audited to the same standard as the table above: four native-side mutations
+(case-sensitivity, wrong teleport axis, dropped match guard, hardcoded
+MusicIndex) all go RED. One probe mutation -- the `gam_prop_i` MusicIndex
+fallback `-1` -- stays green because no shipped STRT omits MusicIndex; that
+fallback is explicitly NOT certified and is documented in the doc's "Not
+covered" list, consistent with the corpus-scoped honesty the other rows use.
+Scoreboard is now **9 linked (oracle-verified) / 9 linked-blocked**.

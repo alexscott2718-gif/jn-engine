@@ -1640,3 +1640,25 @@ deliberate native divergences/simplifications from the recovered body).
 decompiled counterpart). No gameplay/QA was run at any point; every check in
 this session was headless (`tools/build_vtable_parity_report.py`,
 `make`, `tools/audit_faithfulness.py`).
+
+## linked branch: ninth certified row, C3DStartPoint/spawn (2026-07-02)
+
+Converted the linked-blocked C3DStartPoint/spawn row by doing the extraction
+its note called out: `place_player` moved **verbatim** from `src/game/main.c`
+into `src/game/spawn.c` (+ `spawn.h`; main.c includes and calls it unchanged),
+making the STRT-resolution logic reachable headless. New oracle
+`tools/linkage_oracles/C3DStartPoint.py` + `c3dstartpoint_dump.c` compile the
+real, unmodified `spawn.c` + `gam_loader.c` and drive `place_player` over all
+100 shipped STRT rows in the 35 levels (270 requests: exact-case, case-varied,
+`@default` = the player's authored StartPoint, and a guaranteed miss per
+level), asserting byte-exact teleport-to-transform, case-insensitive
+resolution, and MusicDatabase/MusicIndex selection against
+`gam_parser.py`-derived expectations (with gam_parser's `round(..., 6)`
+neutralized module-locally for exact IEEE-754 bits). Mutation-tested:
+strcasecmp->strcmp, wrong teleport axis, dropped match guard, and a hardcoded
+MusicIndex all go red. The `gam_prop_i` MusicIndex fallback default (`-1`) is
+NOT certified (no shipped STRT omits MusicIndex; no decompiled default
+recovered) and is documented as out of scope, as are ViewportP*/R* camera pose
+and StartTrigger (unported, unchanged). Scoreboard: **9 linked /
+9 linked-blocked**. Gates: make, audit_faithfulness (0/35), gate + selftest,
+build_vtable_parity_report all green.
