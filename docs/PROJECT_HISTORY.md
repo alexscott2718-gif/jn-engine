@@ -1914,3 +1914,27 @@ Fixed `src/game/behaviors/behavior_cutscene.c` and updated both camera linkage
 oracles so their native references mirror local Z before rotation. The
 `C3DCutSceneCamera`/`C3DMultiCutSceneCamera` docs now call out this native-space
 step explicitly instead of describing only a final-Z conversion.
+
+## linked branch: Campaign actor catalog readiness pass (2026-07-02)
+
+Expanded `tools/build_campaign_actor_catalog.py` from a placement/animation list
+into a readiness surface for campaign actor review. The generated catalog now
+records per-animation ASE/OMT readiness, ASE frame/mesh/material/key counts,
+same-stem static GLB coverage, texture thumbnail coverage through the live asset
+manifest, and explicit missing active actor-loop preview artifacts. Current
+totals: 123 non-player campaign placements, 115 animation aliases, 113/113 ASE
+aliases found and parseable, 9 static GLB snapshots, and 0 committed actor-loop
+previews.
+
+The same pass added sprite/item preview readiness by joining
+`src/game/sprite_chunk_map_generated.h` to `docs/asset_catalog/catalog.json`:
+200 sprite canvases, 200 still thumbnails, 82 animated WebP previews, and 104
+item/sprite candidates are now reported in the JSON, markdown, and generated
+HTML catalog. The primary human page is generated outside the QA path at
+`docs/campaign-actor-catalog-plan-2026-06-26/index.html`, while the original QA
+path remains a compatibility copy.
+
+Preview pipeline decision: use engine-driven actor clip capture for future
+active loop previews. Extending ASE-to-GLB timelines or building a second browser
+ASE renderer would duplicate runtime animation/timing/orientation logic; the
+runtime already has the authoritative path.
