@@ -1,13 +1,13 @@
 # Linked-Parity Scoreboard
 
-Generated 2026-07-01 by `tools/check_linkage_certificates.py`.
+Generated 2026-07-02 by `tools/check_linkage_certificates.py`.
 
 Source of truth: `docs/linkage_certificates.csv`. A `linked` row is counted
 here only after its oracle ran green in this pass (see
 `docs/linked_parity_plan.md` for the Linkage Certificate L1-L5 contract).
 
 - **linked (oracle-verified):** 3
-- **linked-blocked (returns to native-port):** 5
+- **linked-blocked (returns to native-port):** 6
 
 ## linked
 
@@ -26,3 +26,4 @@ here only after its oracle ran green in this pass (see
 | `C3DCindy` | location-pathing | AI / pathing | Cindy's correct location/patrol state is unresolved and requires original-game or capture evidence; do not guess. Returns to native-port. |
 | `C3DSoundEffect` | by-ear-mix | triggers / story sequencing | Audio timbre/mix/by-ear correctness needs desktop/noVNC listening; the dispatch/trigger LOGIC is separately linkable. Returns to native-port. |
 | `C3DCarl` | vehicle-rider-pose | vehicles / special movement | Carl's vehicle insertion pose/offset needs decomp proof or capture evidence; the vehicle integrator MATH is separately linkable. Returns to native-port. |
+| `C3DAnimated` | ase-deserialization | animation / actor pose | ase_loader.c parses this project's own OMT->ASE exporter output (PROJECT_HISTORY.md Era 2 -- OMT->ASE exporter), not a Neutron.exe binary format -- no decompiled body exists to certify against (L1 unsatisfiable). The original binary mesh format is OMT/3DSP, already decoded and settled (docs/omt_3dsp_format.md); diffing ase_loader.c against tools/ase_parser.py would only prove two readers of this project's own re-export format agree with each other, which the plan excludes as self-comparing. Mesh/pose/texture visual correctness is the real faithfulness question and needs by-eye comparison. Returns to native-port. |

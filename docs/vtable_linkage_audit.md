@@ -1,6 +1,6 @@
 # Vtable Linkage Audit
 
-Generated 2026-07-01 by `tools/build_vtable_parity_report.py`.
+Generated 2026-07-02 by `tools/build_vtable_parity_report.py`.
 
 Inputs:
 

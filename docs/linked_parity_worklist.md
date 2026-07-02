@@ -40,8 +40,12 @@ contract in `docs/linked_parity_plan.md` (Linkage Certificate L1-L5).
 - [x] **CLoadLevel / gam-deserialization** -- DONE (this commit). — `src/engine/assets/gam_loader.c` <->
   `tools/gam_parser.py` (`parse_gam`). Check if the record/pstring parse is libc-only
   compilable (P1); else transcribe (P2). `docs/decomp/CLoadLevel.md`, `gam_schema.py`.
-- [ ] **C3DAnimated / ase-deserialization** — `src/engine/assets/ase_loader.c` <->
-  `tools/ase_parser.py`. `docs/decomp/C3DAnimated.md`.
+- [~] **C3DAnimated / ase-deserialization** -- FLAGGED, not linkable here (2026-07-02).
+  `.ase` is this project's own OMT->ASE exporter output (PROJECT_HISTORY.md Era 2), not
+  a Neutron.exe format -- no decompiled body exists to certify `ase_loader.c` against
+  (L1 unsatisfiable); the real original mesh format is OMT/3DSP (already decoded,
+  `docs/omt_3dsp_format.md`). Recorded `linked-blocked` in `docs/linkage_certificates.csv`
+  with the full reasoning; do not retry as a byte-exact row.
 - [x] **CTaskList / set-task-state** -- DONE (this commit). — `task_set_entity_state` <-> `FUN_0045f990`
   (write EXISTING entries only, never append). Small P1 (task_loader.c is libc-only).
   `docs/decomp/CTaskList.md`.

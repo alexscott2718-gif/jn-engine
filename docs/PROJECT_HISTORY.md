@@ -1402,3 +1402,24 @@ already tracked in docs/decomp/_scene_sequencer.md); and task_entity_state (gett
 returns -1 on no-match where the decompiled FUN_0045fea0 returns 0 -- out of this
 row's scope (setter only) but worth resolving before a future get-task-state row.
 Scoreboard: 3 linked, 5 linked-blocked. Next: C3DAnimated/ase-deserialization.
+
+## linked branch: C3DAnimated/ase-deserialization flagged, not linkable (2026-07-02)
+
+Investigated the next worklist row and stopped rather than force a certification.
+.ase is **this project's own OMT->ASE exporter output** (Era 2 above), not a
+Neutron.exe format: the committed \ssets/ase/*.ASE\ files are 3ds Max ASCII
+Scene Export text (confirmed by their \*3DSMAX_ASCIIEXPORT\ header and 2001
+export-tool comment), produced by this repo's OMT->ASE exporter from the real
+original binary format (OMT/3DSP, already decoded in
+\docs/omt_3dsp_format.md\). \src/engine/assets/ase_loader.c\ therefore has no
+decompiled Neutron.exe body to be faithful to -- L1 (body recovered) is
+unsatisfiable by construction, and diffing it against \	ools/ase_parser.py\ would
+only prove two independently-written readers of this project's own intermediate
+format agree with each other, which \docs/linked_parity_plan.md\ explicitly
+excludes as self-comparing. Recorded \C3DAnimated/ase-deserialization\ as
+\linked-blocked\ in \docs/linkage_certificates.csv\ with the full reasoning
+(domain: animation / actor pose -- mesh/pose/texture visual correctness is the
+real faithfulness question, needs by-eye comparison, returns to native-port) and
+struck the worklist row so a future pass doesn't retry it as a byte-exact row.
+Scoreboard: 3 linked, 6 linked-blocked. Next: Tier B, starting with
+C3DCutSceneCamera/3cam-camera-math.
