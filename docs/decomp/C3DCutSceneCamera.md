@@ -144,6 +144,16 @@ Open questions:
   the activation message source is still to be pinned.
 - Decode the exact `transform_local` helper (`target` vtable `+0x384`) — the native
   port approximates it with a yaw-only transform (shared with the `3MCA` path).
+  **Attempted 2026-07-02** (linked-parity pass): for a representative
+  `CameraTarget` class (`C3DGoddard`), `tools/ghidra/DumpClass.java` resolves
+  vtable 1 slot 225 (byte offset `0x384`) to `00472980`, but
+  `tools/ghidra/DumpFunctions.java` reports no `Function` defined there in the
+  committed Ghidra project (`getFunctionAt`/`getFunctionContaining` both fail) —
+  this address was never walked by a prior analysis pass. Recovering it needs a
+  fresh disassembly/function-creation pass at that address, which is out of
+  scope for a single linked-parity row; flagged rather than guessed. See the
+  Native Linkage section below for how this bounds the `3cam-camera-math`
+  linked aspect.
 
 ## Notes
 
@@ -151,3 +161,72 @@ Open questions:
   all property strings + `.gam` ranges validated. Hand-deepened (supersedes the
   generated skeleton). Pairs with `C3DMultiCutSceneCamera` (sequencer), `C3DPatrolPoint`
   (AI routing), and the `CTrigger` graph.
+
+## Native Linkage (linked-parity branch)
+
+Aspect: **`3cam-camera-math`** — status `linked`.
+Certificate: `docs/linkage_certificates.csv`; oracle:
+`tools/linkage_oracles/C3DCutSceneCamera.py`.
+
+This aspect certifies exactly the two pieces of the per-frame update above that
+are **fully decompiled** and independently provable without touching the
+still-unrecovered `transform_local`: the distance/zoom formula, and the
+`CameraType==2` branch's precedence over `ViewFromCamera`. The orbit/dolly
+branches' exact 3D camera position is explicitly **not** part of this
+certification (see "Not covered" below) — certifying it would mean baking the
+native port's unverified yaw-only `transform_local` approximation into the
+oracle as if it were ground truth, which is exactly the "hand-tuned magic" L4
+guards against.
+
+### L2 — transcription map
+
+| Decompiled (`00415f90`, per-frame update) | Native (`src/game/behaviors/behavior_cutscene.c`) |
+|---|---|
+| `dist = InitialDist - ZoomSpeed*t; dist = max(dist,MinDist); dist = min(dist,MaxDist)` | `cutscene_3cam_dist`: identical accumulate + floor-then-ceiling clamp order |
+| `if CameraType==2: camera=self.world_position; look=target.world_position` (tested **before** `ViewFromCamera`) | `cutscene_3cam_place`: `if (s->camera_type==2) { cam=s->cam_pos; look=target raw x/y/z; return; }` — same precedence, same early return |
+
+### L3 — oracle
+
+`tools/linkage_oracles/C3DCutSceneCamera.py` pulls in the real, unmodified
+`behavior_cutscene.c` (via `#include` into a headless driver,
+`c3dcutscenecamera_dump.c`, so the driver's `main()` shares its translation
+unit and can call the file's `static` `cutscene_3cam_dist`/`cutscene_3cam_place`
+directly — the only way to reach them without changing their linkage) and runs
+it over **all 136 shipped `3CAM` rows** (`assets/gam/*.gam`, tracked in git):
+
+- **Distance formula**: byte-exact (IEEE-754 bit pattern, not epsilon) against
+  an independently-transcribed Python reference, at 4 `t` samples per row (544
+  total). Two real rows (`Level7.gam` `podcam`, `level4c.gam` `rescue`) author
+  `MinDist > MaxDist`, which distinguishes floor-then-ceiling from
+  ceiling-then-floor clamping — the clamp *order* is genuinely tested by real
+  data, not assumed.
+- **`CameraType==2` precedence**: byte-exact `cam`/`look` output against all 16
+  real `CameraType==2` rows, using each row's own authored `ViewFromCamera`
+  (14 of the 16 author `1`, 2 author `0` — both non-static-implying values are
+  present, so the test is non-vacuous: if `ViewFromCamera` were checked before
+  `CameraType`, these rows would take the dolly/orbit branch instead and the
+  byte-exact assertion would fail).
+- A regression check that the corpus still matches the doc's cited
+  `ViewFromCamera`/`CameraType` distributions (fails loudly if the corpus or
+  the doc's numbers ever drift apart).
+
+### Deliberate deviations (native-only; outside the linked aspect)
+
+- **`entity_local_to_world` is a yaw-only approximation of `transform_local`.**
+  `behavior_cutscene.c`'s local helper rotates only around Y (using the
+  target's `ry`) and translates — it stands in for the undecompiled
+  `transform_local` (target vtable `+0x384`). This is a real, acknowledged gap
+  (see Open Questions above), not a hidden one.
+
+### Not covered by this aspect (still open)
+
+The exact 3D camera position for the **orbit** (`ViewFromCamera==0`) and
+**dolly** (`ViewFromCamera!=0`, not static) branches depends on
+`entity_local_to_world`/`transform_local` and is **not** certified here — there
+is no recovered ground truth to certify it against (L1 unsatisfiable for that
+sub-piece). A future pass that recovers `00472980` (or whichever function the
+real `CameraTarget` classes resolve at vtable `+0x384`) could extend this
+aspect to the full placement; until then this row's `linked` claim is scoped to
+the distance formula and the `CameraType` precedence only, matching the
+worklist's own framing ("assert finite/sane + the known distribution" for
+placement, byte-exact only for the dist formula).

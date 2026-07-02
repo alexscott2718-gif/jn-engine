@@ -51,7 +51,7 @@ contract in `docs/linked_parity_plan.md` (Linkage Certificate L1-L5).
   `docs/decomp/CTaskList.md`.
 
 ### Tier B — deterministic math / dispatch (P2; reproduce over shipped data)
-- [ ] **C3DCutSceneCamera / 3cam-camera-math** — `behavior_cutscene.c` <-> Neutron.exe
+- [x] **C3DCutSceneCamera / 3cam-camera-math** -- DONE (this commit; scoped to dist formula + CameraType precedence, see doc). — `behavior_cutscene.c` <-> Neutron.exe
   `00415f90`. Reproduce static/orbit/dolly placement + `dist=clamp(InitialDist-
   ZoomSpeed*t,Min,Max)` for **all shipped 3CAM rows**; assert finite/sane + the known
   distribution (VFC {1:121,0:9,3:6}, CT {0:95,2:16,3:15,1:10}). `C3DCutSceneCamera.md`.

@@ -1423,3 +1423,28 @@ real faithfulness question, needs by-eye comparison, returns to native-port) and
 struck the worklist row so a future pass doesn't retry it as a byte-exact row.
 Scoreboard: 3 linked, 6 linked-blocked. Next: Tier B, starting with
 C3DCutSceneCamera/3cam-camera-math.
+
+
+## linked branch: fourth certified row, C3DCutSceneCamera/3cam-camera-math (2026-07-02)
+
+Certified the two fully-decompiled pieces of the 3CAM per-frame update
+(Neutron.exe 00415f90): the InitialDist-ZoomSpeed*t distance formula (floor-then-
+ceiling clamp order -- proven against two real rows that author MinDist > MaxDist,
+where clamp order actually matters) and CameraType==2's precedence over
+ViewFromCamera (proven non-vacuous: 14 of the 16 real CT==2 rows author VFC==1,
+2 author VFC==0 -- both would take the wrong branch if precedence were reversed).
+Attempted to also recover transform_local (target vtable +0x384, the last piece
+needed for exact orbit/dolly camera position) via a fresh Ghidra pass on a
+representative CameraTarget class (C3DGoddard): DumpClass resolves the slot to
+00472980, but DumpFunctions reports no Function defined there in the committed
+project -- never walked by a prior analysis pass, and creating it fresh is out of
+scope for one row. Rather than bake the native port's existing yaw-only
+transform_local approximation (entity_local_to_world) into the oracle as ground
+truth, scoped the linked aspect to exactly what's provably faithful (dist formula
++ CameraType precedence) and documented the orbit/dolly exact-position gap
+explicitly as "not covered" -- consistent with L1/L4 discipline. Oracle
+(tools/linkage_oracles/C3DCutSceneCamera.py) pulls in the real, unmodified
+behavior_cutscene.c via #include so it can call its `static` functions directly,
+runs over all 136 real shipped 3CAM rows. Scoreboard: 4 linked, 6 linked-blocked.
+Next: C3DMultiCutSceneCamera/3mca-offset-table, or recover 00472980 first since it
+would also unblock 3MCA's own transform_local dependency.
