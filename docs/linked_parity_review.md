@@ -157,3 +157,13 @@ Ghidra target 2 recovered the contact/gate body at `00457ec0`. The row remains
 `linked-blocked`, but now on L2 grounds rather than L1: native load behavior is
 a simplified bridge and does not port the recovered Jimmy-only contact,
 `RETURN` branch, original handoff slots, sound, or fade semantics.
+
+## Addendum 5: C3DPlayer target 3 recovery opens L1, not L2
+
+Target 3 function-defined and dumped the C3DPlayer movement/animation helper
+set into `docs/decomp/evidence/c3dplayer_movement_target3.md`. The prior
+`function not found` blocker is retired for those entry points, and
+`C3DPlayer.md` now records body-backed walk-speed, turn, jump/fall, camera,
+animation, load, and probe behavior. The certificate remains
+`linked-blocked`: native player movement is still the approved tank-turn
+design, so an oracle would require a deliberate 1:1 native port first.

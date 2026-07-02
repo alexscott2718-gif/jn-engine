@@ -94,11 +94,11 @@ Offsets below are byte offsets from the primary `C3DPlayer` pointer unless noted
 | 221 | `0043aa40` | `HandlePlayerCollisionSurface` | After the elapsed timer exceeds `3.0`, reads material/collision ids, dispatches id ranges `0x78..0x81` and `0x6e..0x77` to inherited handlers, and uses ray tests to enter `LADDER` (`0xb4`) or `FENCE` (`0x3c..0x45`) special states. | non-trivial |
 | 241 | `00437940` | `UpdatePlayerState` | Main update gate. Calls `C3DAnimated::UpdateAnimated`, handles timed special-state expiry, checks the global active-player pointer, selects idle/left/right/shoot/walk animations, dispatches walking/flying submodes, and forwards `current_speed` to slot `0x26c`. | non-trivial |
 | 243 | `00438a60` | `DispatchPlayerModeCamera` | Clears action-animation latch, processes `camera_bump_timer`, and dispatches `player_mode` to slots `0x124`, `0x128`, or `0x12c` with trace strings `Walking A`, `Flying`, `Walking B`, and `Sitting`. | non-trivial |
-| 246 | `0043a420` | `UpdateRotateToTargetDelta` | Raw vtable target. If update/input gates are true, compares current and target transform fields at `0x224..0x27c`, wraps angular deltas, scales them by `dt`, and calls inherited slot `0x334`. | non-trivial |
+| 246 | `0043a420` | `UpdateRotateToTargetDelta` | If update/input gates are true, compares current and target transform fields at `0x224..0x27c`, wraps angular deltas, scales them by `dt`, and calls inherited slot `0x334`. | non-trivial |
 | 260 | `0043a750` | `StopPlayerMotion` | Runs a no-op/base hook, zeros `current_speed`, zeroes inherited velocity with slot `0x2c4`, and calls primary slot `0x148` to stop/reset current animation. | non-trivial |
 | 261 | `0043a790` | `TouchOrCollisionFallback` | If the touched object is not class/tag `4ecc44`, delegates to inherited touch handler; otherwise clears velocity for non-active-player instances. | non-trivial |
 | vtable 4 slot 65 | `0043a900` | `OnPlayerAnimEnded` | Handles `AnimEnded`. For `FENCE`/`LADDER`, returns to `STOP`, clears `DAT_004f83e0`, restores saved transform, clears movement flags, and re-enables inherited state. For `SPLAT`/`HIT`, returns to `STOP`. | non-trivial |
-| vtable 4 slot 72 | `0043a5d0` | `ProjectNoisyCameraTarget` | Raw helper. Builds a transform/position from current orientation plus randomized trig offsets and writes a projected vec4 result to the caller. | non-trivial |
+| vtable 4 slot 72 | `0043a5d0` | `ProjectNoisyCameraTarget` | Builds a transform/position from current orientation plus trig offsets and writes a projected vec4 result to the caller. | non-trivial |
 | vtable 4 slot 73 | `00438bc0` | `UpdateWalkingCameraA` | Large camera/movement helper. Samples input, manages scratch/buttons/play animation timers, updates `walk_speed`, vertical/edge state, probe transforms, and `DAT_00509a50` position/angles. | non-trivial |
 | vtable 4 slot 74 | `00439900` | `UpdateWalkingCameraB` | Companion movement/camera helper with turn input latching, acceleration/deceleration of `walk_speed`, turn clamps, and camera target/probe updates. | non-trivial |
 | vtable 4 slot 75 | `0043a120` | `UpdateSittingOrSmoothCamera` | Companion camera helper that applies turn input, uses configured camera offsets, probes target transforms, and smooths `DAT_00509a50+0x44..0x4c`/angles toward the result. | non-trivial |
@@ -286,10 +286,10 @@ Notable globals:
 
 Confidence: Medium
 
-Validation: Static Ghidra + local disassembly only; not runtime-validated.
+Validation: Static Ghidra function recovery + local disassembly only; not runtime-validated.
 
 Open questions:
-- Create Ghidra functions for raw helper entry points `00437890`, `00437c40`, `00437f90`, `00438bc0`, `00439900`, `0043a120`, `0043a420`, `0043a5d0`, `0043a790`, `0043a7f0`, `0043aff0`, `0043b5a0`, and `0043b820` so the next dump can produce decompiler bodies instead of `(function not found)`.
+- ~~Create Ghidra functions for raw helper entry points `00437890`, `00437c40`, `00437f90`, `00438bc0`, `00439900`, `0043a120`, `0043a420`, `0043a5d0`, `0043a790`, `0043a7f0`, `0043aff0`, `0043b5a0`, and `0043b820` so the next dump can produce decompiler bodies instead of `(function not found)`.~~ **DONE 2026-07-02**: see `docs/decomp/evidence/c3dplayer_movement_target3.md`; remaining work is signature/slot naming, not function-boundary creation.
 - Resolve inherited transform slots (`0x120`, `0x124`, `0x128`, `0x12c`, `0x130`, `0x134`, `0x138`, `0x13c`, `0x140`, `0x144`, `0x148`, `0x150`, `0x154`, `0x158`, `0x15c`, `0x16c`, `0x218`, `0x248`, `0x264`, `0x270`, `0x278`, `0x2bc`, `0x2c4`, `0x310`, `0x314`, `0x328`, `0x330`, `0x334`, `0x338`, `0x384`, `0x38c`, `0x410`) against named OMedia/CGameObject methods.
 - Name the input globals and map them to keyboard/controller actions.
 - Confirm whether `StartPoint` is consumed in `C3DJimmy`/level-load code rather than in `C3DPlayer` itself.
@@ -302,51 +302,136 @@ Open questions:
 - `DumpFunctions.java /tmp/decomp_C3DPlayer_raw.md ...` reports the raw helper addresses as `(function not found)` because those entry points are not yet function-defined in Ghidra, even though the vtable and disassembly show normal code bodies.
 - The prior campaign invariant that `FUN_0041a140` is the flying/player-family integrator remains documented in `C3DFlyingObject`; `C3DPlayer` directly overrides the player update/camera/action controller and derives from `C3DAnimated`, not directly from `C3DFlyingObject`.
 
+## Target 3 Recovered Movement L1
+
+Target 3 from `docs/ghidra_recovery_plan.md` is now complete at L1. The
+function boundaries were created in `~/ghidra-projects/JN_decomp` and dumped
+to `docs/decomp/evidence/c3dplayer_movement_target3.md`.
+
+Signature caveat: the helper pass created function bodies but did not finish
+all stack-argument prototypes. In particular, `UpdateGroundMoveA_00437c40` and
+`UpdateJumpFallMove_00437f90` still show the per-frame `dt` as
+`unaff_retaddr`/temporary values in raw Ghidra output. Treat this as recovered
+control-flow and offset evidence, not final C signatures.
+
+Recovered body map:
+
+```c
+ResetPlayerRuntime:
+    inherited_reset()
+    current_speed = 0
+    lean_angle = previous_lean_angle = 0
+    initial_or_ground_y = transform_slot_0x328().y
+
+UpdateGroundMoveA(dt):
+    if !global_special_lock:
+        if current_motion_vector_nonzero() or turn_speed_bias != 0:
+            scaled_yaw_delta = turn_or_yaw_rate
+            rotate_self(turn_or_yaw_rate * dt)        // slot 0x334
+            project walk_speed/turn_speed_bias through engine trig table
+    write inherited velocity through slot 0x2c4
+    if no active-player pointer:
+        clear scratch_anim_name and scratch_anim_timer
+    if grounded/probe slots succeed:
+        normalize probe vector, compute angles, write adjusted velocity
+
+UpdateJumpFallMove(dt):
+    turn_probe_offset_a = -40.0
+    turn_probe_offset_b = 10.0
+    project turn/walk velocity as in ground move
+    branch on jump_or_motion_phase
+    if linked_motion_object burn time expires in phase 3/4:
+        jump_or_motion_phase = 0
+        motion_submode = 1
+        set FALL
+        zero linked burn
+    otherwise transition among phases 0..5, JUMP/FALL, linked-object scale,
+    and ground/contact tests
+
+UpdateWalkingCameraA(dt):
+    process side/input globals and special lock state
+    randomize idle action animation among SCRATCH/BUTTONS/PLAY
+    accelerate/decelerate walk_speed with walk_accel_step/walk_decel_step
+    snapshot camera_origin_before_update
+    update camera probe fields and DAT_00509a50 position/angles
+
+UpdateWalkingCameraB(dt):
+    turn_or_yaw_rate += input_turn * dt or keyboard_turn * dt * 100
+    forward input accelerates walk_speed toward walk_speed_cap
+    no-input high-speed tail subtracts walk_decel_step * 0.5 above cap * 0.90909094
+    reverse/brake subtracts walk_decel_step or walk_decel_step * 0.5
+    clamp turn_or_yaw_rate to +/-50 in motion_submode 2, otherwise +/-30
+    update camera target and DAT_00509a50 position/angles
+
+UpdateSittingOrSmoothCamera(dt):
+    use the same turn-input ramp
+    smooth DAT_00509a50 toward an offset target with 1.2 position scaling
+
+UpdateRotateToTargetDelta(dt):
+    compare current/target transform fields at 0x224..0x27c
+    wrap angular deltas to [-180,180]
+    call rotation slot 0x334 with multipliers 4.5, 3.7, 4.5
+```
+
+Additional recovered helpers:
+
+- `ProjectNoisyCameraTarget_0043a5d0` projects a local offset through current
+  transform/trig-table state and writes a vec4 result with `w=1.0`.
+- `TouchOrCollisionFallback_0043a790` delegates non-`C3DGODDARD` touches to
+  inherited touch handling; Goddard contact zeros velocity for non-active
+  players.
+- `GroundAheadPredicate_0043a7f0` runs only when `motion_submode == 0`, probes
+  from a transformed point down by `2000.0`, and requires the hit/random
+  threshold to exceed `0x46`.
+- `SetPlayerAnimationState_0043aff0` now has a recovered transition body for
+  `STOP`, `WALK`, `EDGE`, `JUMP`, `SWING`, `BACK`, `FALL`, `LEFT`, `RIGHT`,
+  `HIT`, `FENCE`, and `LADDER`. Fence/ladder store restore transforms at
+  `0x838..0x844`, zero velocity, set `DAT_004f83e0`, set durations `4.0` and
+  `6.0`, set grace `5.0`, and play sound ids `0x92`/`0x8f`.
+- `PlayerLoadLevel_0043b5a0` copies transition strings into the player buffers,
+  sets `DAT_00509980+0x1fe`, snapshots current position to `0x9a8..0x9b4` when
+  needed, calls global game slot `0x100`, and stops the current animation.
+- `ProbePlayerRayBlend_0043b820` raycasts between the caller vector and player
+  position, writes a 75-percent blended hit point on success, and returns
+  `1.5`.
+
 ## Native Linkage (linked-parity branch)
 
-Aspect: **`free-roam-feel`** — status `linked-blocked` (note corrected
-2026-07-02 after a movement-logic linkage investigation).
+Aspect: **`free-roam-feel`** — status `linked-blocked` (note updated
+2026-07-02 after target 3 Ghidra recovery).
 
-The original blocked note claimed "the state-machine LOGIC is separately
-linkable via a headless input-trace oracle." Investigated 2026-07-02 with the
-intent of repeating the `C3DStartPoint`/spawn extraction pattern; the claim
-does not hold this pass, on two independent grounds:
+The earlier L1 blocker is retired for the target 3 helper set: Ghidra now has
+function-defined bodies for `UpdateGroundMoveA` `00437c40`,
+`UpdateJumpFallMove` `00437f90`, `UpdateWalkingCameraA` `00438bc0`,
+`UpdateWalkingCameraB` `00439900`, `SetPlayerAnimationState` `0043aff0`, and
+the doc's remaining raw helper list. The recovered bodies pin the real
+accumulate/clamp walk-speed machine, turn-rate clamps, jump/fall phase state,
+camera smoothing, scratch/action animation randomization, fence/ladder
+special-state setup, load-level handoff, and ray/probe helpers. Remaining L1
+cleanup is naming/signature polish for inherited slots and input globals, not
+missing function boundaries.
 
-1. **L1 unsatisfied — the movement math is not decompiled.** The bodies that
-   hold the accumulate->clamp walk-speed machine and animation-state
-   transitions (`UpdateGroundMoveA` `00437c40`, `UpdateJumpFallMove`
-   `00437f90`, `UpdateWalkingCameraA` `00438bc0`, `UpdateWalkingCameraB`
-   `00439900`, `SetPlayerAnimationState` `0043aff0`) are not function-defined
-   in the committed Ghidra project — `DumpFunctions.java` reports
-   `(function not found)` for all five (see Notes above). This doc's
-   Per-Frame pseudocode covers `UpdatePlayerState`'s *dispatch*, and the
-   helper rows above are prose summaries from raw `objdump`, not recovered
-   bodies a 1:1 transcription could be certified against.
-
-2. **L2 impossible by design — the native player deliberately diverges.**
-   `src/game/behaviors/behavior_player.c` implements the approved simple
-   tank-turn movement (instant velocity; its own comment: the data-driven
-   accel/decel physics is DEFERRED after producing ice-skating / wrong
-   turn+speed). The dormant data-driven ramp (`src/engine/movement_base.c`,
-   `movement_base_flying_step`) is a tuned approximation with constants that
-   trace to no decomp address (`0.909f` decel window, `decel * 0.5f`,
-   `dt * 6.0f` lean smoothing, `±45` lean clamp) — it is the L4
-   "ice-skating" cautionary example, not a transcription. There is no
-   fidelity claim to certify: the same disposition shape as
-   `C3DCheckPoint`/progress and `C3DPickupItem`/collection.
+The aspect is still not certifiable because **L2 fails by design**.
+`src/game/behaviors/behavior_player.c` implements the approved simple
+tank-turn movement (instant velocity; its own comment: the data-driven
+accel/decel physics is DEFERRED after producing ice-skating / wrong
+turn+speed). The dormant data-driven ramp (`src/engine/movement_base.c`,
+`movement_base_flying_step`) is a tuned approximation with constants that
+trace to no decomp address (`0.909f` decel window, `decel * 0.5f`,
+`dt * 6.0f` lean smoothing, `+/-45` lean clamp) — it is the L4
+"ice-skating" cautionary example, not a transcription. There is no fidelity
+claim to certify: the same disposition shape as `C3DCheckPoint`/progress and
+`C3DPickupItem`/collection.
 
 An input-trace oracle wrapped around the tank-turn code would compare the
 native design against itself — the circular-oracle failure the linkage gate
-exists to prevent. What linking player movement-logic actually requires:
+exists to prevent. What linking player movement-logic actually requires now:
 
-1. A Ghidra recovery pass that defines functions at the five entry points
-   above (plus resolving the inherited transform slots they call, e.g.
-   `0x2c4`/`0x334`) and deepens this doc from prose to bodies — the
-   "stronger model or human" recovery work the plan flags.
-2. A 1:1 native port of the recovered walk-speed machine — replacing the
-   approved tank-turn movement, i.e. native-port behavior work plus a
-   product decision (the approximation was already tried and rejected once).
-3. Only then the headless input-trace oracle.
+1. A product/native-port decision to replace the approved tank-turn movement
+   with a 1:1 port of the recovered walk-speed/jump/camera state machine.
+2. Signature and inherited-slot naming cleanup as needed to make that port
+   maintainable.
+3. Only then a headless input-trace oracle plus mutation test.
 
 ### Not covered / open
 

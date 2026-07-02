@@ -1746,3 +1746,20 @@ Disposition: L1 is now open, but `CLoadLevel`/`activate-load` remains
 no `RETURN` path, no Jimmy handoff slot port, and no original sound/fade
 semantics. A green oracle would require porting `00457ec0`/`00458370` 1:1
 first. Scoreboard remains 10 linked / 13 linked-blocked.
+
+## linked branch: Ghidra target 3 recovered C3DPlayer movement L1, stopped before porting (2026-07-02)
+
+Executed target 3 from `docs/ghidra_recovery_plan.md`: function-defined and
+dumped the C3DPlayer movement/action helper set (`00437890`, `00437c40`,
+`00437f90`, `00438bc0`, `00439900`, `0043a120`, `0043a420`, `0043a5d0`,
+`0043a790`, `0043a7f0`, `0043aff0`, `0043b5a0`, `0043b820`) into
+`docs/decomp/evidence/c3dplayer_movement_target3.md`. This opens the L1 bodies
+behind walk-speed accumulation/clamping, turn-rate clamps, jump/fall phases,
+camera smoothing, scratch/action animations, fence/ladder setup, load-level
+handoff, and ray/probe helpers.
+
+Disposition: stopped at L1 as required. `C3DPlayer` remains `linked-blocked`
+because native `behavior_player.c` is still the approved tank-turn movement,
+not a 1:1 port of the recovered state machine. Certifying this row requires a
+product/native-port decision to replace movement behavior, then an input-trace
+oracle plus mutation test. Scoreboard remains 10 linked / 13 linked-blocked.

@@ -30,6 +30,14 @@ a functional bridge rather than a 1:1 port, so `CLoadLevel`/`activate-load`
 stays `linked-blocked`.
 
 
+Progress note (2026-07-02): target 3 (`C3DPlayer` movement/anim helpers)
+is now function-defined and dumped; see
+`docs/decomp/evidence/c3dplayer_movement_target3.md`. It opens the L1 bodies
+for the walk-speed accumulator, turn clamps, jump/fall phases, camera helpers,
+animation transitions, and load/ray helpers. Per the plan, work stops here:
+certifying player movement still requires a product/native-port decision to
+replace the approved tank-turn movement with a 1:1 port.
+
 | # | Entry points | Why / what it unblocks | Hardness |
 |---|---|---|---|
 | 1 | `transform_local` vtable `+0x384` slot (resolved addr `00472980`, tried 2026-07-02) | Blocks the exact orbit/dolly camera position for BOTH cutscene rows (`C3DCutSceneCamera`, `C3DMultiCutSceneCamera`) — highest-leverage single function; would also retire the native `entity_local_to_world` yaw-only approximation | Medium — one function, known address |
