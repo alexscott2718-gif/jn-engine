@@ -2,8 +2,8 @@
    (docs/linked_parity_plan.md L3). Pulls in the REAL, unmodified
    src/game/behaviors/behavior_cutscene.c via #include so this driver's main()
    shares its translation unit and can call its `static` functions
-   (cutscene_3cam_dist, cutscene_3cam_place) directly -- the only way to reach
-   them without changing their linkage.
+   (cutscene_3cam_dist, cutscene_3cam_place, entity_transform_local) directly
+   -- the only way to reach them without changing their linkage.
 
    behavior_cutscene.c also defines other cutscene machinery (audio dispatch,
    sequencing, player-anim overrides) this oracle doesn't exercise; those
@@ -80,7 +80,7 @@ int main(void) {
             float t        = bits_f32(strtok_r(NULL, "|\n", &save));
             float dist = cutscene_3cam_dist(&s, t);
             printf("D|%s|%08x\n", idx, f32_bits(dist));
-        } else if (tok[0] == 'S') {
+        } else if (tok[0] == 'S' || tok[0] == 'P') {
             char *idx = strtok_r(NULL, "|\n", &save);
             CutSceneShot s;
             memset(&s, 0, sizeof s);
@@ -93,19 +93,31 @@ int main(void) {
             s.offset[1]  = bits_f32(strtok_r(NULL, "|\n", &save));
             s.offset[2]  = bits_f32(strtok_r(NULL, "|\n", &save));
             s.look_voffset = bits_f32(strtok_r(NULL, "|\n", &save));
+            if (tok[0] == 'P') {
+                s.initial_dist = bits_f32(strtok_r(NULL, "|\n", &save));
+                s.zoom_speed   = bits_f32(strtok_r(NULL, "|\n", &save));
+                s.min_dist     = bits_f32(strtok_r(NULL, "|\n", &save));
+                s.max_dist     = bits_f32(strtok_r(NULL, "|\n", &save));
+            }
 
             Entity target;
             memset(&target, 0, sizeof target);
             target.x  = bits_f32(strtok_r(NULL, "|\n", &save));
             target.y  = bits_f32(strtok_r(NULL, "|\n", &save));
             target.z  = bits_f32(strtok_r(NULL, "|\n", &save));
+            if (tok[0] == 'P') {
+                target.rx = bits_f32(strtok_r(NULL, "|\n", &save));
+            }
             target.ry = bits_f32(strtok_r(NULL, "|\n", &save));
+            if (tok[0] == 'P') {
+                target.rz = bits_f32(strtok_r(NULL, "|\n", &save));
+            }
 
             float t = bits_f32(strtok_r(NULL, "|\n", &save));
 
             float cam[3], look[3];
             cutscene_3cam_place(&s, &target, t, cam, look);
-            printf("S|%s|%08x|%08x|%08x|%08x|%08x|%08x\n", idx,
+            printf("%c|%s|%08x|%08x|%08x|%08x|%08x|%08x\n", tok[0], idx,
                    f32_bits(cam[0]), f32_bits(cam[1]), f32_bits(cam[2]),
                    f32_bits(look[0]), f32_bits(look[1]), f32_bits(look[2]));
         }

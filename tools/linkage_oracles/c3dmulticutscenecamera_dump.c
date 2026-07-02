@@ -2,9 +2,10 @@
    (docs/linked_parity_plan.md L3). Pulls in the REAL, unmodified
    src/game/behaviors/behavior_cutscene.c via #include so this driver's main()
    shares its translation unit and can call the file's `static`
-   cutscene_mca_local_offset directly -- the only way to reach it without
-   changing its linkage. Same stub set as the CLoadLevel/C3DCutSceneCamera
-   oracles' dumpers (audio/anim/spawn externs unrelated to this function). */
+   cutscene_mca_local_offset and entity_transform_local directly -- the only
+   way to reach them without changing their linkage. Same stub set as the
+   CLoadLevel/C3DCutSceneCamera oracles' dumpers (audio/anim/spawn externs
+   unrelated to these functions). */
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -58,7 +59,7 @@ int main(void) {
     while (fgets(line, sizeof line, stdin)) {
         char *save = NULL;
         char *tok = strtok_r(line, "|\n", &save);
-        if (!tok || tok[0] != 'M') continue;
+        if (!tok || (tok[0] != 'M' && tok[0] != 'W')) continue;
 
         char *idx = strtok_r(NULL, "|\n", &save);
         int camera_type = atoi(strtok_r(NULL, "|\n", &save));
@@ -66,8 +67,27 @@ int main(void) {
 
         float out[3];
         cutscene_mca_local_offset(camera_type, t, out);
-        printf("M|%s|%08x|%08x|%08x\n", idx,
-               f32_bits(out[0]), f32_bits(out[1]), f32_bits(out[2]));
+        if (tok[0] == 'M') {
+            printf("M|%s|%08x|%08x|%08x\n", idx,
+                   f32_bits(out[0]), f32_bits(out[1]), f32_bits(out[2]));
+        } else {
+            Entity target;
+            memset(&target, 0, sizeof target);
+            target.x  = bits_f32(strtok_r(NULL, "|\n", &save));
+            target.y  = bits_f32(strtok_r(NULL, "|\n", &save));
+            target.z  = bits_f32(strtok_r(NULL, "|\n", &save));
+            target.rx = bits_f32(strtok_r(NULL, "|\n", &save));
+            target.ry = bits_f32(strtok_r(NULL, "|\n", &save));
+            target.rz = bits_f32(strtok_r(NULL, "|\n", &save));
+            float look_voffset = bits_f32(strtok_r(NULL, "|\n", &save));
+
+            float world[3];
+            entity_transform_local(&target, out, world);
+            printf("W|%s|%08x|%08x|%08x|%08x|%08x|%08x\n", idx,
+                   f32_bits(world[0]), f32_bits(world[1]), f32_bits(world[2]),
+                   f32_bits(target.x), f32_bits(target.y + look_voffset - 60.0f),
+                   f32_bits(target.z));
+        }
     }
     return 0;
 }

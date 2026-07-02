@@ -25,20 +25,19 @@ excludes the 6 out-of-range entries (native falls to the `default:` case for
 them, which is a plausible but *undecompiled* jump-table-bounds guess -- not
 certified here; see "Not covered" in the doc's Native Linkage section).
 
-Also deliberately out of scope, same as `C3DCutSceneCamera`/`3cam-camera-math`:
-the world-space camera position (this local offset transformed through
-`entity_local_to_world`, the native-only yaw-only approximation of the
-still-undecompiled `transform_local`) and the look-point formula
-(`target.y + LookatVOffsetN - 60`, a single inline arithmetic line in
-`cutscene_update`, not its own testable function -- verified by direct
-inspection, not by this oracle).
+The oracle also proves the full world-space camera placement for in-range
+CameraTypeN entries after the recovered `transform_local_00472980` port: the
+local offset table is transformed through the resolved target object's three
+authored rotations, then the native look point is checked as
+`target.y + LookatVOffsetN - 60`. Synthetic non-zero rotation cases keep the
+three-axis transform non-vacuous.
 
 See docs/linked_parity_plan.md for the Linkage Certificate. Exit 0 + PASS on
 faithful reproduction; non-zero + a diff on any mismatch.
 """
 from __future__ import annotations
 
-import glob
+import math
 import struct
 import subprocess
 import sys
@@ -53,10 +52,50 @@ import gam_parser  # noqa: E402  (reference parser, reused for real 3MCA data)
 
 GAM_DIR = REPO / "assets" / "gam"
 T_SAMPLES = (0.0, 1.0, 5.0, 10.0, 20.0, 60.0)  # sweeps at/above the 100-unit floor
+WORLD_T_SAMPLES = (0.0, 5.0, 20.0)
+FULL_EPS = 0.10
 
 
 def f32_bits(x: float) -> int:
     return struct.unpack("<I", struct.pack("<f", float(x)))[0]
+
+
+def bits_f32(bits: int) -> float:
+    return struct.unpack("<f", struct.pack("<I", bits))[0]
+
+
+def native_pose(props: dict) -> tuple[float, float, float, float, float, float]:
+    return (
+        float(props.get("PositionX", 0.0)),
+        float(props.get("PositionY", 0.0)),
+        -float(props.get("PositionZ", 0.0)),
+        math.radians(float(props.get("RotationX", 0.0))),
+        math.radians(float(props.get("RotationY", 0.0))),
+        -math.radians(float(props.get("RotationZ", 0.0))),
+    )
+
+
+def trig14(original_rad: float) -> tuple[float, float]:
+    idx = int(original_rad * (8192.0 / math.pi)) & 0x3fff
+    theta = idx * (2.0 * math.pi / 16384.0)
+    return math.sin(theta), math.cos(theta)
+
+
+def transform_local_native(pose: tuple[float, float, float, float, float, float],
+                           local: tuple[float, float, float]) -> tuple[float, float, float]:
+    x, y, z, rx, ry, rz = pose
+    sx, cx = trig14(rx)
+    sy, cy = trig14(ry)
+    sz, cz = trig14(-rz)
+    lx, ly, lz = local
+
+    xz = cz * ly - sz * lx
+    yz = cz * lx + sz * ly
+    t = cx * lz - xz * sx
+    dx = yz * cy - t * sy
+    dy = xz * cx + sx * lz
+    dz = t * cy + yz * sy
+    return (x + dx, y + dy, z - dz)
 
 
 def py_mca_offset(camera_type: int, t: float) -> tuple[float, float, float]:
@@ -75,11 +114,16 @@ def py_mca_offset(camera_type: int, t: float) -> tuple[float, float, float]:
     return (0.0, 40.0, 200.0)  # 0 / default
 
 
-def load_camera_types() -> list[tuple[str, str, int]]:
+def load_camera_types() -> list[dict]:
     """Every real (file, tag, CameraTypeN) entry across all 3MCA rows/steps."""
     entries = []
     for f in sorted(GAM_DIR.glob("*.gam")):
         d = gam_parser.parse_gam(str(f))
+        targets = {}
+        for obj in d["objects"]:
+            tag = obj["properties"].get("ObjectTag", "")
+            if tag:
+                targets[tag.lower()] = native_pose(obj["properties"])
         for obj in d["objects"]:
             if obj["type"] != "3MCA":
                 continue
@@ -88,7 +132,15 @@ def load_camera_types() -> list[tuple[str, str, int]]:
             for i in range(8):
                 key = f"CameraType{i}"
                 if key in p:
-                    entries.append((f.name, f"{tag}#{i}", int(p[key])))
+                    target = p.get(f"CameraTarget{i}", "")
+                    entries.append({
+                        "file": f.name,
+                        "tag": f"{tag}#{i}",
+                        "camera_type": int(p[key]),
+                        "target": target,
+                        "target_pose": targets.get(target.lower()),
+                        "look_voffset": float(p.get(f"LookatVOffset{i}", 100.0)),
+                    })
     return entries
 
 
@@ -115,9 +167,9 @@ def main() -> int:
               f"-- corpus changed, re-derive the in/out-of-range split before trusting this oracle")
         return 1
 
-    dist = Counter(ct for _, _, ct in entries)
-    in_range = [(f, tag, ct) for f, tag, ct in entries if 0 <= ct <= 4]
-    out_of_range = [(f, tag, ct) for f, tag, ct in entries if not (0 <= ct <= 4)]
+    dist = Counter(e["camera_type"] for e in entries)
+    in_range = [e for e in entries if 0 <= e["camera_type"] <= 4]
+    out_of_range = [e for e in entries if not (0 <= e["camera_type"] <= 4)]
     if len(out_of_range) != 6:
         print(f"MISMATCH: expected 6 out-of-table CameraTypeN entries, found {len(out_of_range)} "
               f"({dict(dist)}) -- update the doc's scope note before trusting this oracle")
@@ -129,44 +181,103 @@ def main() -> int:
         lines = []
         expected = {}
         idx = 0
-        for f, tag, ct in in_range:
+        for e in in_range:
+            ct = e["camera_type"]
             for t in T_SAMPLES:
-                key = f"{f}:{tag}:CameraType={ct}:t={t}"
+                key = f"{e['file']}:{e['tag']}:CameraType={ct}:t={t}"
                 lines.append(f"M|{idx}|{ct}|{f32_bits(t):08x}")
                 expected[idx] = (key, tuple(f32_bits(v) for v in py_mca_offset(ct, t)))
                 idx += 1
 
-        proc = subprocess.run([str(dumper)], input="\n".join(lines) + "\n",
+        world_entries = [e for e in in_range if e["target_pose"] is not None]
+        if len(world_entries) == 0:
+            print("MISMATCH: no in-range 3MCA CameraTargetN entries resolved for full placement")
+            return 1
+
+        world_lines = []
+        world_expected = {}
+        world_idx = 0
+        for e in world_entries:
+            ct = e["camera_type"]
+            pose = e["target_pose"]
+            for t in WORLD_T_SAMPLES:
+                local = py_mca_offset(ct, t)
+                world = transform_local_native(pose, local)
+                look = (pose[0], pose[1] + e["look_voffset"] - 60.0, pose[2])
+                world_lines.append(
+                    f"W|{world_idx}|{ct}|{f32_bits(t):08x}|"
+                    f"{f32_bits(pose[0]):08x}|{f32_bits(pose[1]):08x}|{f32_bits(pose[2]):08x}|"
+                    f"{f32_bits(pose[3]):08x}|{f32_bits(pose[4]):08x}|{f32_bits(pose[5]):08x}|"
+                    f"{f32_bits(e['look_voffset']):08x}"
+                )
+                world_expected[world_idx] = (
+                    f"{e['file']}:{e['tag']}->{e['target']}:CameraType={ct}:t={t}",
+                    (*world, *look),
+                )
+                world_idx += 1
+
+        synthetic_pose = (100.0, 25.0, -650.0, math.radians(17.0), math.radians(43.0), -math.radians(29.0))
+        for ct in range(5):
+            for t in WORLD_T_SAMPLES:
+                local = py_mca_offset(ct, t)
+                world = transform_local_native(synthetic_pose, local)
+                look = (synthetic_pose[0], synthetic_pose[1] + 125.0 - 60.0, synthetic_pose[2])
+                world_lines.append(
+                    f"W|{world_idx}|{ct}|{f32_bits(t):08x}|"
+                    f"{f32_bits(synthetic_pose[0]):08x}|{f32_bits(synthetic_pose[1]):08x}|{f32_bits(synthetic_pose[2]):08x}|"
+                    f"{f32_bits(synthetic_pose[3]):08x}|{f32_bits(synthetic_pose[4]):08x}|{f32_bits(synthetic_pose[5]):08x}|"
+                    f"{f32_bits(125.0):08x}"
+                )
+                world_expected[world_idx] = (
+                    f"@synthetic:CameraType={ct}:t={t}",
+                    (*world, *look),
+                )
+                world_idx += 1
+
+        proc = subprocess.run([str(dumper)], input="\n".join(lines + world_lines) + "\n",
                                capture_output=True, text=True)
         if proc.returncode != 0:
             print(f"MISMATCH: dumper exited {proc.returncode}\n{proc.stderr}")
             return 1
 
-        checked = 0
+        checked = world_checked = 0
         for line in proc.stdout.splitlines():
             parts = line.split("|")
-            if parts[0] != "M":
-                continue
-            i = int(parts[1])
-            key, expected_bits = expected[i]
-            got_bits = tuple(int(x, 16) for x in parts[2:5])
-            if got_bits != expected_bits:
-                print(f"MISMATCH in case {key!r}:")
-                print(f"  native   ={tuple(f'{x:08x}' for x in got_bits)}")
-                print(f"  reference={tuple(f'{x:08x}' for x in expected_bits)}")
-                return 1
-            checked += 1
+            if parts[0] == "M":
+                i = int(parts[1])
+                key, expected_bits = expected[i]
+                got_bits = tuple(int(x, 16) for x in parts[2:5])
+                if got_bits != expected_bits:
+                    print(f"MISMATCH in case {key!r}:")
+                    print(f"  native   ={tuple(f'{x:08x}' for x in got_bits)}")
+                    print(f"  reference={tuple(f'{x:08x}' for x in expected_bits)}")
+                    return 1
+                checked += 1
+            elif parts[0] == "W":
+                i = int(parts[1])
+                key, expected_vals = world_expected[i]
+                got_vals = tuple(bits_f32(int(x, 16)) for x in parts[2:8])
+                diffs = [abs(a - b) for a, b in zip(got_vals, expected_vals)]
+                if any(d > FULL_EPS for d in diffs):
+                    print(f"MISMATCH in world-placement case {key!r}:")
+                    print(f"  native   ={tuple(f'{x:.6f}' for x in got_vals)}")
+                    print(f"  reference={tuple(f'{x:.6f}' for x in expected_vals)}")
+                    print(f"  absdiff  ={tuple(f'{x:.6f}' for x in diffs)}")
+                    return 1
+                world_checked += 1
 
-        if checked != len(lines):
-            print(f"MISMATCH: expected {len(lines)} results, got {checked}")
+        if checked != len(lines) or world_checked != len(world_lines):
+            print(f"MISMATCH: expected {len(lines)} local + {len(world_lines)} world "
+                  f"results, got {checked} + {world_checked}")
             return 1
 
     print(
         f"PASS C3DMultiCutSceneCamera/3mca-offset-table: cutscene_mca_local_offset "
         f"byte-exact on {checked} (entry x t) samples across {len(in_range)} real "
         f"CameraTypeN entries in the documented 0..4 range (all 114 shipped 3MCA "
-        f"rows x up to 8 steps); {len(out_of_range)} out-of-table entries excluded "
-        f"per the doc's scope note"
+        f"rows x up to 8 steps); full world placement and look point match "
+        f"recovered transform_local on {world_checked} real/synthetic cases; "
+        f"{len(out_of_range)} out-of-table entries excluded per the doc's scope note"
     )
     return 0
 

@@ -249,3 +249,25 @@ L2: native `behavior_cutscene.c` uses a static actor-pose alias table and
 Jimmy's separate `player_anim.c` path, with no `C3DAnimated` record list,
 OMedia DB import, or virtual `AnimEnded` hook. An oracle over the current
 native table would certify a different design.
+
+## Addendum 10: Camera full-placement blockers converted to `linked`
+
+The recovered `transform_local_00472980` helper is now ported into
+`src/game/behaviors/behavior_cutscene.c` as `entity_transform_local`. It uses
+all three target rotations, the original 14-bit trig index path, and the
+native `PositionZ` handedness conversion. Both camera full-placement blockers
+therefore move from L2-blocked to linked:
+
+- `C3DCutSceneCamera`/`3cam-full-placement`: the expanded
+  `C3DCutSceneCamera.py` oracle still proves the existing distance/static
+  precedence checks, and now verifies orbit/dolly placement over resolved real
+  non-static 3CAM rows plus synthetic non-zero rotation cases. Mutation:
+  flipping the helper's final z sign goes RED, restore goes green.
+- `C3DMultiCutSceneCamera`/`3mca-full-placement`: the expanded
+  `C3DMultiCutSceneCamera.py` oracle keeps the byte-exact in-range
+  `CameraTypeN` table check and now verifies world placement plus look point
+  over resolved real in-range 3MCA steps plus synthetic non-zero rotation
+  cases. The 6 out-of-table CameraTypeN values remain excluded. The same z-sign
+  mutation goes RED and restore goes green.
+
+Scoreboard after this pass: **12 linked / 16 linked-blocked**.

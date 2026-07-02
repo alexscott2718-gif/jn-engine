@@ -439,9 +439,9 @@ Open questions:
   `transform_local_00472980`; see
   `docs/decomp/evidence/transform_local_00472980.md` and
   `docs/decomp/C3DCutSceneCamera.md` for the interpreted signature/body.
-  This opens L1 for the full world-position math but does not certify the
-  native `3MCA` placement, because `behavior_cutscene.c` still transforms the
-  recovered local offset through a yaw-only `entity_local_to_world` helper.
+  This opened L1 for the full world-position math; the native linked branch now
+  ports that helper in `behavior_cutscene.c` as `entity_transform_local` and
+  certifies the 3MCA world placement below.
 - Pin the constructor address and class-id immediate (FourCC).
 
 ## Notes
@@ -450,69 +450,44 @@ Open questions:
 
 ## Native Linkage (linked-parity branch)
 
-Aspect: **`3mca-offset-table`** — status `linked`.
-Certificate: `docs/linkage_certificates.csv`; oracle:
+Aspects: **`3mca-offset-table`** and **`3mca-full-placement`** ? status
+`linked`. Certificate: `docs/linkage_certificates.csv`; oracle:
 `tools/linkage_oracles/C3DMultiCutSceneCamera.py`.
 
-This aspect certifies exactly the `CameraTypeN` target-local offset table
-recovered above from the `004311d0` jump table — the piece of the `3MCA`
-per-frame update that's fully decompiled and independently provable without
-relying on the still-unported `transform_local` (target vtable `+0x384`, now
-function-defined as `00472980`). The world-space
-camera position (this local offset transformed through the target's full
-world transform) and the look-point formula are explicitly **not** part of
-this certification — see "Not covered" below.
+The native path now certifies both stages of the recovered 3MCA camera update:
+the `CameraTypeN` local offset table and the world-space placement through the
+ported `00472980` transform helper.
 
-### L2 — transcription map
+### L2 ? transcription map
 
-| Decompiled (`004311d0` jump table) | Native (`cutscene_mca_local_offset`, `behavior_cutscene.c`) |
+| Decompiled (`004311d0` jump table / `00472980`) | Native (`behavior_cutscene.c`) |
 |---|---|
 | `CameraType 0 / default -> (0, 40, 200)` | `case 0: default: out = (0, 40, 200)` |
 | `CameraType 1 -> (0, 140, max(100, 300-15*t))` | `case 1: out = (0, 140, max(100, 300-15*t))` |
 | `CameraType 2 -> (0, 240, max(100, 500-35*t))` | `case 2: out = (0, 240, max(100, 500-35*t))` |
 | `CameraType 3 -> (200, 240, max(100, 700-55*t))` | `case 3: out = (200, 240, max(100, 700-55*t))` |
 | `CameraType 4 -> (-200, 190, max(100, 700-55*t))` | `case 4: out = (-200, 190, max(100, 700-55*t))` |
-| `t` = current step timer, seconds | `g_cut.shot_t`, passed in |
+| `world = target.transform_local(local_offset)` | `cutscene_update`: calls `entity_transform_local` with the recovered 14-bit three-axis transform |
+| `look = (target.x, target.y + LookatVOffsetN - 60, target.z)` | `cutscene_update`: same look point in native coordinates |
 
-### L3 — oracle
+### L3 ? oracle
 
-`tools/linkage_oracles/C3DMultiCutSceneCamera.py` pulls in the real, unmodified
-`behavior_cutscene.c` (via `#include` into a headless driver,
-`c3dmulticutscenecamera_dump.c`, so the driver's `main()` shares its
-translation unit and can call the file's `static` `cutscene_mca_local_offset`
-directly) and runs it over **every real shipped `CameraTypeN` value** across
-all 114 `3MCA` rows × up to 8 steps (912 total entries, `assets/gam/*.gam`,
-tracked in git), at 6 `t` samples each (5,436 checks) — byte-exact (IEEE-754
-bit pattern) against an independently-transcribed Python reference.
+`tools/linkage_oracles/C3DMultiCutSceneCamera.py` pulls in the real,
+unmodified `behavior_cutscene.c` through `c3dmulticutscenecamera_dump.c` and
+runs:
 
-906 of the 912 real entries fall inside the documented `0..4` range and are
-certified; 6 author out-of-table values (5× `-1`, 1× `5`) and are explicitly
-excluded (see "Not covered").
+- Local offset table: byte-exact at 6 `t` samples over 906 real in-range
+  `CameraTypeN` entries (5,436 checks). The 6 out-of-table entries remain
+  explicitly excluded because the recovered jump table only documents `0..4`.
+- Full world placement and look point: recovered `transform_local` reference
+  math over resolved real in-range `3MCA` steps plus synthetic non-zero
+  rotation cases (1,053 checks). Float comparison uses a narrow epsilon for the
+  trig path; the local offset table remains bit-exact.
+- Mutation test: flipping the native helper's final z sign makes the oracle go
+  red; restoring it returns green.
 
-### Deliberate deviations (native-only; outside the linked aspect)
+### Not covered by this aspect
 
-- **`entity_local_to_world` is a yaw-only approximation of `transform_local`**
-  — the same native-only helper `C3DCutSceneCamera`'s per-frame update uses
-  (`docs/decomp/C3DCutSceneCamera.md`), applied here to transform this
-  aspect's local offset into world space. The recovered `00472980` body uses
-  all three `OMediaWorldAngle` components, so this remains an L2 gap for full
-  placement. Acknowledged, not hidden.
-
-### Not covered by this aspect (still open)
-
-- **World-space camera position.** `cutscene_update` feeds this local offset
-  through `entity_local_to_world` — not certified, same recovered-but-not-ported
-  `transform_local` gap as `C3DCutSceneCamera`/`3cam-camera-math`.
-- **Look-point formula** (`target.y + LookatVOffsetN - 60`, per the recovered
-  body's "looks at the target position with `LookatVOffsetN - 60` applied to
-  Y"). This is a single inline arithmetic line in `cutscene_update`
-  (`src/game/behaviors/behavior_cutscene.c`), not its own testable function;
-  verified by direct code inspection against the recovered body, not by a
-  runtime oracle. Extracting it into a standalone function purely to make it
-  oracle-testable was judged not worth the churn for one arithmetic line —
-  flagged here rather than silently claimed as oracle-verified.
-- **6 out-of-table `CameraTypeN` entries** (5× `-1`, 1× `5` across the real
-  corpus). The recovered jump table only documents cases `0..4`; native falls
-  to the `default:` case (the `CameraType0` formula) for anything else, which
-  is a plausible but *undecompiled* guess at the original's jump-table-bounds
-  behavior — not certified.
+The 6 out-of-table `CameraTypeN` entries (5 x `-1`, 1 x `5`) remain outside the
+linked claim. Native falls to `default:` for those values, which is plausible,
+but the recovered jump table only proves cases `0..4`.

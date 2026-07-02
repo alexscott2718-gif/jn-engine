@@ -153,8 +153,8 @@ Open questions:
   `45.511112f` (`8192/180`, constant at `.rdata:0048e5e8`), calls
   `this->vtable[+0x310]` for world position, writes `out[3]=1.0f`, and writes
   a three-axis transformed point into `out[0..2]`. This proves L1 for the
-  helper and also proves the native helper in `behavior_cutscene.c` is still
-  only a yaw/`ry` approximation, not a 1:1 transcription.
+  helper; the linked branch now ports this path in `behavior_cutscene.c` as
+  `entity_transform_local` and certifies the orbit/dolly placement below.
 
 ## Notes
 
@@ -165,70 +165,45 @@ Open questions:
 
 ## Native Linkage (linked-parity branch)
 
-Aspect: **`3cam-camera-math`** — status `linked`.
-Certificate: `docs/linkage_certificates.csv`; oracle:
+Aspects: **`3cam-camera-math`** and **`3cam-full-placement`** ? status
+`linked`. Certificate: `docs/linkage_certificates.csv`; oracle:
 `tools/linkage_oracles/C3DCutSceneCamera.py`.
 
-This aspect certifies exactly the two pieces of the per-frame update above that
-are independently provable without relying on the still-unported
-`transform_local`: the distance/zoom formula, and the `CameraType==2`
-branch's precedence over `ViewFromCamera`. The orbit/dolly
-branches' exact 3D camera position is explicitly **not** part of this
-certification (see "Not covered" below) — certifying it would mean baking the
-native port's unverified yaw-only `transform_local` approximation into the
-oracle as if it were ground truth, which is exactly the "hand-tuned magic" L4
-guards against.
+The native path now ports the full recovered placement surface. The old
+yaw-only `entity_local_to_world` helper was replaced with
+`entity_transform_local`, a direct native-coordinate port of `00472980`: it
+uses all three target rotations, the original 14-bit trig index scale, and the
+native loader's `PositionZ` handedness conversion.
 
-### L2 — transcription map
+### L2 ? transcription map
 
-| Decompiled (`00415f90`, per-frame update) | Native (`src/game/behaviors/behavior_cutscene.c`) |
+| Decompiled (`00415f90` / `00472980`) | Native (`src/game/behaviors/behavior_cutscene.c`) |
 |---|---|
 | `dist = InitialDist - ZoomSpeed*t; dist = max(dist,MinDist); dist = min(dist,MaxDist)` | `cutscene_3cam_dist`: identical accumulate + floor-then-ceiling clamp order |
-| `if CameraType==2: camera=self.world_position; look=target.world_position` (tested **before** `ViewFromCamera`) | `cutscene_3cam_place`: `if (s->camera_type==2) { cam=s->cam_pos; look=target raw x/y/z; return; }` — same precedence, same early return |
+| `if CameraType==2: camera=self.world_position; look=target.world_position` (tested before `ViewFromCamera`) | `cutscene_3cam_place`: same precedence, same early return |
+| `ViewFromCamera==0`: `camera = target.transform_local(TargOffsetX,TargOffsetY,dist)`; `look = target + (0,LookVoffset,0)` | `cutscene_3cam_place`: calls `entity_transform_local` with `(offset.x, offset.y, dist)` and writes the same look point |
+| `ViewFromCamera!=0`: `framed = target.transform_local(TargOffsetX,TargOffsetY,TargOffsetZ)`; camera moves from `framed` toward the 3CAM placement by `dist`; `look=framed` | `cutscene_3cam_place`: calls `entity_transform_local`, normalizes the native placement ray, and writes camera/look from `framed` |
 
-### L3 — oracle
+### L3 ? oracle
 
 `tools/linkage_oracles/C3DCutSceneCamera.py` pulls in the real, unmodified
-`behavior_cutscene.c` (via `#include` into a headless driver,
-`c3dcutscenecamera_dump.c`, so the driver's `main()` shares its translation
-unit and can call the file's `static` `cutscene_3cam_dist`/`cutscene_3cam_place`
-directly — the only way to reach them without changing their linkage) and runs
-it over **all 136 shipped `3CAM` rows** (`assets/gam/*.gam`, tracked in git):
+`behavior_cutscene.c` through `c3dcutscenecamera_dump.c` and runs:
 
-- **Distance formula**: byte-exact (IEEE-754 bit pattern, not epsilon) against
-  an independently-transcribed Python reference, at 4 `t` samples per row (544
-  total). Two real rows (`Level7.gam` `podcam`, `level4c.gam` `rescue`) author
-  `MinDist > MaxDist`, which distinguishes floor-then-ceiling from
-  ceiling-then-floor clamping — the clamp *order* is genuinely tested by real
-  data, not assumed.
-- **`CameraType==2` precedence**: byte-exact `cam`/`look` output against all 16
-  real `CameraType==2` rows, using each row's own authored `ViewFromCamera`
-  (14 of the 16 author `1`, 2 author `0` — both non-static-implying values are
-  present, so the test is non-vacuous: if `ViewFromCamera` were checked before
-  `CameraType`, these rows would take the dolly/orbit branch instead and the
-  byte-exact assertion would fail).
-- A regression check that the corpus still matches the doc's cited
-  `ViewFromCamera`/`CameraType` distributions (fails loudly if the corpus or
-  the doc's numbers ever drift apart).
+- Distance formula: byte-exact at 4 `t` samples over all 136 shipped `3CAM`
+  rows (544 checks), including real `MinDist > MaxDist` rows that pin the
+  clamp order.
+- `CameraType==2` precedence: byte-exact `cam`/`look` output over all 16 real
+  static rows, with both `ViewFromCamera==0` and nonzero values present.
+- Full orbit/dolly placement: recovered `transform_local` reference math over
+  all resolved real non-static `3CAM` rows plus synthetic non-zero rotation
+  cases (351 checks). Float comparison uses a narrow epsilon for the trig path;
+  distance/table pieces remain bit-exact.
+- Mutation test: flipping the native helper's final z sign makes the oracle go
+  red; restoring it returns green.
 
-### Deliberate deviations (native-only; outside the linked aspect)
+### Not covered by this aspect
 
-- **`entity_local_to_world` is a yaw-only approximation of `transform_local`.**
-  `behavior_cutscene.c`'s local helper rotates only around Y (using the
-  target's `ry`) and translates. The recovered `00472980` body instead uses
-  all three `OMediaWorldAngle` components through the engine trig table and
-  writes a homogeneous four-float point. This is a real, acknowledged L2 gap,
-  not a hidden one.
-
-### Not covered by this aspect (still open)
-
-The exact 3D camera position for the **orbit** (`ViewFromCamera==0`) and
-**dolly** (`ViewFromCamera!=0`, not static) branches depends on
-`entity_local_to_world`/`transform_local` and is **not** certified here — there
-is recovered ground truth now, but the native side is not a 1:1 transcription
-(L2 fails for full placement). A future native pass can replace
-`entity_local_to_world` with a direct port of `00472980` and add an oracle for
-the orbit/dolly world positions; until then this row's `linked` claim is scoped
-to the distance formula and the `CameraType` precedence only, matching the
-worklist's own framing ("assert finite/sane + the known distribution" for
-placement, byte-exact only for the dist formula).
+Activation/deactivation source wiring remains outside this camera-placement
+aspect: the update self-deactivates when shot audio completes, but the exact
+message source from `C3DMultiCutSceneCamera` versus `CTrigger` is still an open
+L1 question above. The placement math itself is now certified.

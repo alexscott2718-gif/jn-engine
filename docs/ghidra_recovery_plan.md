@@ -92,6 +92,15 @@ table and Jimmy's separate `player_anim.c` path, with no `C3DAnimated`
 animation-record list, OMedia database, or virtual `AnimEnded` hook. The
 explicit `C3DAnimated`/`event-animation-dispatch` row is `linked-blocked`.
 
+Follow-up progress note (2026-07-02): target 1's L2 blocker is now closed for
+cutscene cameras. `behavior_cutscene.c` ports `transform_local_00472980` as
+`entity_transform_local`, using all three target rotations, the original
+14-bit trig index scale, and the native `PositionZ` handedness conversion.
+The expanded `C3DCutSceneCamera.py` and `C3DMultiCutSceneCamera.py` oracles
+now certify both full-placement rows with mutation tests, converting
+`3cam-full-placement` and `3mca-full-placement` from `linked-blocked` to
+`linked`.
+
 | # | Entry points | Why / what it unblocks | Hardness |
 |---|---|---|---|
 | 1 | `transform_local` vtable `+0x384` slot (resolved addr `00472980`, tried 2026-07-02) | Blocks the exact orbit/dolly camera position for BOTH cutscene rows (`C3DCutSceneCamera`, `C3DMultiCutSceneCamera`) — highest-leverage single function; would also retire the native `entity_local_to_world` yaw-only approximation | Medium — one function, known address |

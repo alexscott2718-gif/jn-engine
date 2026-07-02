@@ -1871,3 +1871,29 @@ separate `player_anim.c` path), not the original `C3DAnimated` OMedia
 record-list/DB/virtual-completion mechanism. Added explicit
 `C3DAnimated`/`event-animation-dispatch` as `linked-blocked`; a faithful oracle
 requires porting that dispatch mechanism first.
+
+## linked branch: Camera full-placement rows converted to linked (2026-07-02)
+
+Ported the recovered `transform_local_00472980` helper into
+`src/game/behaviors/behavior_cutscene.c` as `entity_transform_local`. The
+native helper now applies all three target rotations through the original
+14-bit trig index scale and converts the final z delta through the native
+loader's `PositionZ` handedness convention. `cutscene_3cam_place` and the
+3MCA runtime path now use this helper instead of the old yaw-only
+`entity_local_to_world` approximation.
+
+Expanded both camera oracles rather than adding self-comparing tests:
+
+- `tools/linkage_oracles/C3DCutSceneCamera.py` still proves the 3CAM
+  distance/static-precedence surface, and now verifies full orbit/dolly
+  placement over resolved real non-static 3CAM target rows plus synthetic
+  non-zero rotation cases.
+- `tools/linkage_oracles/C3DMultiCutSceneCamera.py` still proves the in-range
+  3MCA `CameraTypeN` table byte-exactly, and now verifies world placement plus
+  look point over resolved real in-range 3MCA steps plus synthetic non-zero
+  rotation cases. The 6 out-of-table `CameraTypeN` values remain excluded.
+
+Mutation test: flipping `entity_transform_local`'s final z sign made both
+camera oracles fail; restoring it returned both to green. Certificate rows
+`C3DCutSceneCamera`/`3cam-full-placement` and
+`C3DMultiCutSceneCamera`/`3mca-full-placement` are now `linked`.

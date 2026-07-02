@@ -16,8 +16,9 @@
  * matched-camera validators — which drive this same render loop — are
  * unaffected. 3MCA's CameraType table is recovered from Neutron.exe 00430da0:
  * each step chooses a target-local camera offset, transforms it through the
- * current target, then looks at target.y + LookatVOffset - 60. Standalone
- * 3CAM now carries the authored ViewFromCamera, FaceObject, TargetActAnim,
+ * current target with the recovered 00472980 transform_local helper, then looks
+ * at target.y + LookatVOffset - 60. Standalone 3CAM now carries the authored
+ * ViewFromCamera, FaceObject, TargetActAnim,
  * TargetDeactAnim, LoopActAnim, PlayerControlled, and DeactivateInv fields.
  * 3CAM's CameraType/ViewFromCamera enum is recovered from Neutron.exe 00415f90.
  * Target animation dispatch follows the original C3DANIMATED path at the
@@ -39,6 +40,8 @@
 #define CUTSCENE_DEFAULT_SHOT_SECONDS 3.0f
 #define CUTSCENE_AUDIO_PAD_SECONDS 0.35f
 #define CUTSCENE_PI 3.14159265358979323846f
+#define CUTSCENE_TRIG14_SCALE (8192.0f / CUTSCENE_PI)
+#define CUTSCENE_TRIG14_STEP  (2.0f * CUTSCENE_PI / 16384.0f)
 
 #ifdef __EMSCRIPTEN__
 #include <emscripten.h>
@@ -403,11 +406,29 @@ static void cutscene_mca_local_offset(int camera_type, float t, float out[3]) {
     }
 }
 
-static void entity_local_to_world(const Entity *e, const float local[3], float out[3]) {
-    float c = cosf(e->ry), s = sinf(e->ry);
-    out[0] = e->x + local[0] * c + local[2] * s;
-    out[1] = e->y + local[1];
-    out[2] = e->z - local[0] * s + local[2] * c;
+static void cutscene_trig14(float original_rad, float *s, float *c) {
+    int idx = (int)(original_rad * CUTSCENE_TRIG14_SCALE);
+    float theta = (float)(idx & 0x3fff) * CUTSCENE_TRIG14_STEP;
+    *s = sinf(theta);
+    *c = cosf(theta);
+}
+
+static void entity_transform_local(const Entity *e, const float local[3], float out[3]) {
+    float sx, cx, sy, cy, sz, cz;
+    cutscene_trig14(e->rx, &sx, &cx);
+    cutscene_trig14(e->ry, &sy, &cy);
+    cutscene_trig14(-e->rz, &sz, &cz);
+
+    float xz = cz * local[1] - sz * local[0];
+    float yz = cz * local[0] + sz * local[1];
+    float t = cx * local[2] - xz * sx;
+    float dx = yz * cy - t * sy;
+    float dy = xz * cx + sx * local[2];
+    float dz = t * cy + yz * sy;
+
+    out[0] = e->x + dx;
+    out[1] = e->y + dy;
+    out[2] = e->z - dz;
 }
 
 static void cutscene_halt_audio(void) {
@@ -620,7 +641,7 @@ static void cutscene_3cam_place(const CutSceneShot *s, const Entity *target,
 
     if (s->view_from_camera == 0) {
         float local[3] = { s->offset[0], s->offset[1], dist };
-        entity_local_to_world(target, local, cam);
+        entity_transform_local(target, local, cam);
         look[0] = target->x;
         look[1] = target->y + s->look_voffset;
         look[2] = target->z;
@@ -629,7 +650,7 @@ static void cutscene_3cam_place(const CutSceneShot *s, const Entity *target,
 
     /* dolly: hold the camera along the authored placement->framed-point ray. */
     float framed[3];
-    entity_local_to_world(target, s->offset, framed);
+    entity_transform_local(target, s->offset, framed);
     float dx = s->cam_pos[0] - framed[0];
     float dy = s->cam_pos[1] - framed[1];
     float dz = s->cam_pos[2] - framed[2];
@@ -672,7 +693,7 @@ void cutscene_update(Camera *cam, World *w, float dt) {
         if (g_cut.playing_sequence_index >= 0) {
             float local[3], world[3];
             cutscene_mca_local_offset(s->camera_type, g_cut.shot_t, local);
-            entity_local_to_world(target, local, world);
+            entity_transform_local(target, local, world);
             cx = world[0]; cy = world[1]; cz = world[2];
             lx = target->x;
             ly = target->y + s->look_voffset - 60.0f;
