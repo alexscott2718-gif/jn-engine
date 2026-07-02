@@ -1384,3 +1384,21 @@ placeable classes): the oracle runs the real, unmodified loader over all 35 ship
 9-property field map against 	ools/gam_parser.py, byte/bit-exact. Scoreboard: 2
 linked, 5 linked-blocked. Next worklist rows: C3DAnimated/ase-deserialization,
 CTaskList/set-task-state (docs/linked_parity_worklist.md).
+
+## linked branch: third certified row, CTaskList/set-task-state (2026-07-01)
+
+Recovered FUN_0045f990 body via a fresh Ghidra headless pass (JAVA_HOME was unset
+on the gateway -- resolved via the existing /home/scotty/jdk21 install; the target
+program must be pinned explicitly with '-process Neutron.exe', since the same
+address also resolves as an unrelated symbol in the OMT2.dll project file). The
+table-write half (case-insensitive scan, write-existing-only, never append) is
+exactly what task_set_entity_state already implemented; certified it with an
+independently-transcribed Python reference of the recovered loop, diffed over the
+baked NewGame table via a headless dumper (tools/linkage_oracles/CTaskList_set_task_state.py
++ tasklist_setstate_dump.c). Flagged two known gaps as deliberate deviations, not
+silently absorbed: the SCENE objective-ordinal flag (FUN_00406f50) and the
+live-object TaskName broadcast (vtable +0x424) stay unported (HUD/menu subsystem,
+already tracked in docs/decomp/_scene_sequencer.md); and task_entity_state (getter)
+returns -1 on no-match where the decompiled FUN_0045fea0 returns 0 -- out of this
+row's scope (setter only) but worth resolving before a future get-task-state row.
+Scoreboard: 3 linked, 5 linked-blocked. Next: C3DAnimated/ase-deserialization.

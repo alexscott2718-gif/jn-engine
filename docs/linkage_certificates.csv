@@ -6,3 +6,4 @@ C3DSoundEffect,by-ear-mix,triggers / story sequencing,linked-blocked,,docs/decom
 C3DCarl,vehicle-rider-pose,vehicles / special movement,linked-blocked,,docs/decomp/C3DCarl.md,"Carl's vehicle insertion pose/offset needs decomp proof or capture evidence; the vehicle integrator MATH is separately linkable. Returns to native-port."
 CTaskList,tsk-deserialization,progression / objectives,linked,tools/linkage_oracles/CTaskList.py,docs/decomp/CTaskList.md,
 CLoadLevel,gam-deserialization,progression / objectives,linked,tools/linkage_oracles/CLoadLevel.py,docs/decomp/CLoadLevel.md,
+CTaskList,set-task-state,progression / objectives,linked,tools/linkage_oracles/CTaskList_set_task_state.py,docs/decomp/CTaskList.md,

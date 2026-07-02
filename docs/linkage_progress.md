@@ -6,7 +6,7 @@ Source of truth: `docs/linkage_certificates.csv`. A `linked` row is counted
 here only after its oracle ran green in this pass (see
 `docs/linked_parity_plan.md` for the Linkage Certificate L1-L5 contract).
 
-- **linked (oracle-verified):** 2
+- **linked (oracle-verified):** 3
 - **linked-blocked (returns to native-port):** 5
 
 ## linked
@@ -15,6 +15,7 @@ here only after its oracle ran green in this pass (see
 |---|---|---|---|---|
 | `CTaskList` | tsk-deserialization | progression / objectives | `tools/linkage_oracles/CTaskList.py` | PASS CTaskList: task_parse_file == tsk_parser.py byte-exact on 5 synthesized .tsk streams; NewGame table matches CTaskList.md (SCENE=30) |
 | `CLoadLevel` | gam-deserialization | progression / objectives | `tools/linkage_oracles/CLoadLevel.py` | PASS CLoadLevel: gam_load == gam_parser.parse_gam byte-exact on 35 shipped .gam files (3299 objects, 97 LOAD rows -- all 9 docs/decomp/CLoadLevel.md properties) |
+| `CTaskList` | set-task-state | progression / objectives | `tools/linkage_oracles/CTaskList_set_task_state.py` | PASS CTaskList/set-task-state: task_set_entity_state == FUN_0045f990's table-write loop (case-insensitive match, write-existing-only, never append) across 4 write sequences over the documented NewGame table |
 
 ## linked-blocked (needs gameplay / by-eye / by-ear evidence)
 

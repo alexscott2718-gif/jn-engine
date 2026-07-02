@@ -148,7 +148,8 @@ Open questions:
 
 ## Native Linkage (linked-parity branch)
 
-Aspect: **`tsk-deserialization`** — status `linked`.
+### Aspect: `tsk-deserialization` — status `linked`
+
 Certificate: `docs/linkage_certificates.csv`; oracle: `tools/linkage_oracles/CTaskList.py`.
 
 `CTaskList`'s substance is the `.tsk` deserialization (the class itself is a thin
@@ -156,7 +157,7 @@ Certificate: `docs/linkage_certificates.csv`; oracle: `tools/linkage_oracles/CTa
 LV1B format above **is** the class's persistent state, so a byte-exact reproduction
 of that format is the faithfulness proof for this aspect.
 
-### L2 — transcription map
+#### L2 — transcription map
 
 | Format element / reference (`tools/tsk_parser.py`) | Native (`src/game/task_loader.c`) |
 |---|---|
@@ -168,7 +169,7 @@ of that format is the faithfulness proof for this aspect.
 | `_try_entity_list` (u8 count + count×(pstring,u32 BE), reject count 0/`>64`, tag len 0/`>32`, non-ASCII, must reach EOF bar a zero tail) | `try_entity_list` (identical guards + EOF anchor) |
 | `_scan_entity_list` (first non-zero byte past the spawn that parses to EOF) | scan loop over `[after_spawn, len)` |
 
-### L3 — oracle
+#### L3 — oracle
 
 `tools/linkage_oracles/CTaskList.py` synthesizes LV1B streams from the format above
 (no proprietary `.tsk` needed), compiles `task_parse_file` into a headless dumper
@@ -178,7 +179,7 @@ the lone `0x01` gap byte), the stray-non-zero-in-gap disambiguation (the EOF anc
 a tolerated short zero tail, the minimum count, and a max-length tag. The NewGame
 case is additionally checked against the golden table transcribed from this doc.
 
-### Deliberate deviations (native-only; outside the linked aspect)
+#### Deliberate deviations (native-only; outside the linked aspect)
 
 - **Baked NewGame fallback.** `task_load` bakes the documented NewGame table when no
   on-disk `.tsk` is present (the binaries are proprietary/uncommitted). This is a
@@ -188,10 +189,117 @@ case is additionally checked against the golden table transcribed from this doc.
   is covered by the baked default. Parsing is format-general, so a recovered
   `RestartLevel.tsk` would parse without code change.
 
-### Not covered by this aspect (still open)
+#### Not covered by this aspect (still open)
 
 The streamer vtable slot that invokes the parse during `CLocalGameObject` load is not
 pinned (see Open questions) — that is *wiring*, not parse behavior, and does not
-affect deserialization faithfulness. `CJimmyGame::InitGame` consulting the table, and
-the `.gam` `TaskName`/`NewTaskState` write path (`set_task_state` / `FUN_0045f990`),
-are separate rows for the progression campaign.
+affect deserialization faithfulness. `CJimmyGame::InitGame` consulting the table is a
+separate row for the progression campaign.
+
+### Aspect: `set-task-state` — status `linked`
+
+Certificate: `docs/linkage_certificates.csv`; oracle:
+`tools/linkage_oracles/CTaskList_set_task_state.py`.
+
+This aspect certifies `task_set_entity_state` (`src/game/task_loader.c`) — the write
+side of the `.gam` `TaskName`/`NewTaskState` path flagged open above, and the write
+half of the SCENE sequencer (`docs/decomp/_scene_sequencer.md`).
+
+#### L1 — recovered body
+
+`FUN_0045f990` (Neutron.exe @ `0045f990`) was decompiled 2026-07-01 via
+`tools/ghidra/DumpFunctions.java` against the committed `JN_decomp` Ghidra project
+(`/home/scotty/ghidra-projects/JN_decomp.{gpr,rep}`, `-process Neutron.exe` — the
+same address also exists as an unrelated/unresolved symbol in `OMT2.dll`'s project
+file, so the target program must be pinned explicitly). Full recovered body (locals
+renamed for clarity, decompiler-only artifacts noted):
+
+```c
+void FUN_0045f990(char *param_1 /* tag */, int param_2 /* value */)
+{
+    // ... decompiler-noise CGameObject::vfunc_00_013 calls on aliased/uninitialized
+    // ECX locals (x86 thiscall register-aliasing artifact; no modeled effect) ...
+
+    if (__strcmpi(s_SCENE_004ed220, param_1) == 0) {
+        // SCENE-only: map param_2 (an exact matched value, e.g. 0x23, 0x32, 0x3c, ...)
+        // to an objective ordinal via a ~40-entry switch, then FUN_00406f50(ordinal, 1).
+        // See "Deliberate deviations" -- deferred, HUD/menu subsystem.
+    }
+    // Falls through here even when the SCENE branch is skipped (goto lands here) --
+    // this loop runs for EVERY call, including SCENE:
+    piVar3 = *DAT_004fc5fc;                        // task-state list head/sentinel
+    if (piVar3 != DAT_004fc5fc) {
+        do {
+            _Str1 = (char *)piVar3[2];              // entry's name pointer
+            if (__strcmpi(_Str1, param_1) == 0)
+                *(int *)(_Str1 + 100) = param_2;    // write EXISTING entry only
+            piVar3 = (int *)*piVar3;                // next (singly-linked, circular)
+        } while (piVar3 != DAT_004fc5fc);
+    }
+    // no append if the scan above never matched
+
+    // Second, unrelated list: broadcast to every live CGameObject whose
+    // this[0x10c] TaskName (case-insensitive) == param_1, via that object's
+    // vtable+0x424. See "Deliberate deviations" -- deferred (no consumer ported).
+    piVar3 = *DAT_0050999c;
+    if (piVar3 != DAT_0050999c) {
+        do {
+            piVar1 = (int *)piVar3[2];
+            _Str2 = piVar1 + 0x10c;
+            if (_Str2 != NULL && __strcmpi(param_1, (char *)_Str2) == 0)
+                (**(code **)(*piVar1 + 0x424))(param_2);
+            piVar3 = (int *)*piVar3;
+        } while (piVar3 != DAT_0050999c);
+    }
+}
+```
+
+`FUN_0045fea0` (the getter, `get_task_state`) was decompiled alongside it for
+context: the same `__strcmpi` linear scan over the `DAT_004fc5fc` list, returning
+`*(entry+100)` on match, **`0`** (not `-1`) if no entry matches. `task_entity_state`
+in `task_loader.c` returns `-1` on no-match instead — noted below; it's outside this
+aspect's certified scope (the row is `set-task-state`, the write path), but is a real,
+observable divergence for any future `get_task_state` linkage row.
+
+#### L2 — transcription map
+
+| Decompiled (`FUN_0045f990`) | Native (`src/game/task_loader.c`) |
+|---|---|
+| `__strcmpi(_Str1, param_1)` linear scan over the task-state list, existing entries only | `task_set_entity_state`'s `for` loop, `strcasecmp(t->entities[i].tag, tag)` |
+| `*(int *)(_Str1 + 100) = param_2` on match | `t->entities[i].state = (unsigned int)value;` |
+| falls off the end / no match found → **no append**, silent | loop exhausts → `return 0;` (entity_count unchanged) |
+| SCENE branch: map `param_2` to an objective ordinal, `FUN_00406f50(ordinal,1)` | **not implemented** — see deviations |
+| live-object `TaskName`-match broadcast via vtable `+0x424` | **not implemented** — see deviations |
+
+#### L3 — oracle
+
+`tools/linkage_oracles/CTaskList_set_task_state.py` compiles the real
+`task_set_entity_state` (unmodified) into a headless dumper
+(`tasklist_setstate_dump.c`) seeded with the baked NewGame table (`task_load`, no
+proprietary `.tsk` needed) and diffs it against an independently-transcribed Python
+mirror of the recovered write loop, over four write sequences: every documented tag
+case-varied (proves `__strcmpi`/`strcasecmp` case-insensitivity), unknown tags
+including an empty string (proves no-append), same-tag overwritten twice
+(last-write-wins), and a mixed known/unknown/empty sequence — comparing both each
+write's return code and the final table.
+
+#### Deliberate deviations (native-only; outside the linked aspect)
+
+- **SCENE objective-ordinal flag (`FUN_00406f50`) is not ported.** The native
+  `task_set_entity_state` performs the table write for `SCENE` exactly like any
+  other tag (the write loop is unconditional), but never computes the ordinal or
+  raises the HUD objective flag — that requires the unported menu/HUD subsystem.
+  This is a known, already-documented gap (`docs/decomp/_scene_sequencer.md`), not a
+  write-path deviation.
+- **Live-object `TaskName`-match broadcast (vtable `+0x424`) is not ported.** No
+  native consumer currently listens for task-state pushes; `task_set_entity_state`
+  only mutates the store. Consumers poll `task_entity_state`/`get_task_state`
+  instead (see `docs/decomp/_scene_sequencer.md`).
+- **`task_entity_state` (getter) returns `-1` on no-match; `FUN_0045fea0` returns
+  `0`.** A real behavioral difference in the *getter*, outside this row's scope
+  (the setter). Flagged here since both live in the same file and share a doc
+  section — worth resolving before any future `get-task-state` linkage row.
+- **Empty-tag guard.** `task_set_entity_state` explicitly returns 0 for `tag==""`;
+  the decompiled loop has no such guard but would no-op on an empty string anyway
+  (no task-state entry is ever named `""`), so this is a defensive no-op, not an
+  observable divergence.
