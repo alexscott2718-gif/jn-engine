@@ -25,6 +25,7 @@
 #include "behaviors/behavior_enemy.h"
 #include "behaviors/behavior_vehicle.h"
 #include "camera.h"
+#include "camera_record.h"
 #include "gamestate.h"
 #include "game_flow.h"
 #include "spawn.h"
@@ -1810,6 +1811,17 @@ int main(int argc, char **argv) {
 
     FollowCam fcam;
     follow_cam_init(&fcam);
+    camera_record_init_game();
+    {
+        /* Headless/QA hook: start the record-camera demo in a mode. */
+        const char *cr = getenv("JN_CAMREC");
+        if (cr && cr[0]) {
+            if (!strcmp(cr, "follow") || !strcmp(cr, "1"))
+                camera_record_set_mode(CAMREC_FOLLOW);
+            else if (!strcmp(cr, "hold") || !strcmp(cr, "2"))
+                camera_record_set_mode(CAMREC_HOLD);
+        }
+    }
     follow_cam_snap(&fcam, cam, jim);
 
     int mouse_down = 0, last_mx = 0, last_my = 0;
@@ -2291,8 +2303,17 @@ int main(int argc, char **argv) {
                fixed by the descriptor and begin_frame ignores the follow cam. */
             if (cutscene_active())
                 cutscene_update(cam, &world, DT);
-            else if (!renderer_camera_override_active())
-                follow_cam_update(&fcam, cam, jim, &world, DT);
+            else if (!renderer_camera_override_active()) {
+                if (camera_record_mode() != CAMREC_OFF) {
+                    /* Record-camera demo: the original DAT_00509a50
+                       mechanism drives the pose (see camera_record.h). */
+                    if (camera_record_mode() == CAMREC_FOLLOW)
+                        camera_record_follow_update(jim, DT);
+                    camera_record_apply(cam);
+                } else {
+                    follow_cam_update(&fcam, cam, jim, &world, DT);
+                }
+            }
         }
 
         /* Event handling */
@@ -2307,6 +2328,9 @@ int main(int argc, char **argv) {
                build in Firefox, while letter keys are proven to arrive. */
             if (ev.type == SDL_KEYDOWN && ev.key.keysym.sym == SDLK_b && !ev.key.repeat)
                 qa_toggle();
+            /* V cycles the record-camera demo: OFF -> FOLLOW -> HOLD. */
+            if (ev.type == SDL_KEYDOWN && ev.key.keysym.sym == SDLK_v && !ev.key.repeat)
+                camera_record_cycle_mode();
             if (ev.type == SDL_KEYDOWN && ev.key.keysym.sym == SDLK_1) audio_play(0);
             if (ev.type == SDL_KEYDOWN && ev.key.keysym.sym == SDLK_2) audio_play(1);
             if (ev.type == SDL_KEYDOWN && ev.key.keysym.sym == SDLK_3) audio_play(2);

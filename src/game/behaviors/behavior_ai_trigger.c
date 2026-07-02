@@ -46,6 +46,7 @@
 #include "behaviors.h"
 #include "behavior_base.h"
 #include "../game_flow.h"
+#include "../camera_record.h"
 #include "../../engine/physics.h"
 #include <math.h>
 #include <stddef.h>
@@ -189,6 +190,16 @@ static void aitrig_activate(Entity *e, World *w) {
     Entity *next = aitrig_find_by_tag(w, gam_str(e, "NextTrigger", "none"));
     if (next && next->vt && next->vt->on_trigger)
         next->vt->on_trigger(next, g_player);
+
+    /* C3DTriggerType slot-242 record retarget (00447a70): with the record
+       camera demo enabled, swing the global camera record to the fixed
+       offset from the resolved NextTrigger object. The original gates on
+       the trigger-focus byte DAT_0050985a (writer unrecovered) and the
+       current active-trigger pointer; the demo gates on record mode. */
+    if (next && camera_record_mode() != CAMREC_OFF) {
+        camera_record_retarget(next);
+        camera_record_set_mode(CAMREC_HOLD);
+    }
 
     e->user_flag++;  /* trigger_count */
     printf("[AITRIG] '%s' fired (#%d) target='%s' next='%s'\n", e->tag,

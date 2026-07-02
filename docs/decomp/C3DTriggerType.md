@@ -122,3 +122,26 @@ Open questions:
 - `.gam` evidence: `docs/gam_schema.md` rows for `3AIT`, `3CAM`, `3MCA`, `3MUS`, `3ANI`, `3RED`, and `3PIC` show the shared trigger property group populated by descendants.
 - Slot 242 compares `NextTrigger` against `DAT_004eca6c`, confirmed as the literal string `"none"` (`.data` at `4eca6c`).
 - Target 5 evidence (full disassembly, constants, globals): `docs/decomp/evidence/triggertype_trigger_target5.md`.
+
+## Record-camera demo port (2026-07-02)
+
+The global camera/player-target record mechanism this class writes into is now
+ported natively as a gated demo module: `src/game/camera_record.c/h`. The
+module keeps the original representation (native-space position + the three
+14-bit angle shorts) and ports, from the recovered L1s:
+
+- the slot-242 retarget write (`camera_record_retarget`): fixed camera-local
+  offset `(20,-20,-100)` rotated through the record's current angles, added to
+  the target world position (native Z mirror on output);
+- the generic record transforms `CameraRecordLocalToWorld_00476e10` /
+  `..Dir_00476f10`;
+- the `CGameType::InitGame` seed and the record → view bridge derived from the
+  recovered `FrameStepAndRender` view build (`yaw = -angle_y`,
+  `pitch = angle_x`); see `docs/decomp/evidence/camera_record_layout.md`.
+
+Wiring: the V key (or `JN_CAMREC=follow|hold`) cycles OFF → FOLLOW → HOLD;
+`behavior_ai_trigger.c` invokes the retarget on NextTrigger dispatch while the
+demo mode is on. Two original gates are *not* ported: the trigger-focus byte
+`DAT_0050985a` (no recovered writer) and the active-trigger pointer
+(`DAT_00509980+0xb4`); the demo gates on its mode instead, and the FOLLOW
+mode is explicit scaffolding pending an `UpdateWalkingCameraA/B` port.

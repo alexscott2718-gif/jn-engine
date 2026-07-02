@@ -1938,3 +1938,29 @@ Preview pipeline decision: use engine-driven actor clip capture for future
 active loop previews. Extending ASE-to-GLB timelines or building a second browser
 ASE renderer would duplicate runtime animation/timing/orientation logic; the
 runtime already has the authoritative path.
+
+## linked branch: camera-record recovery + native demo port (2026-07-02)
+
+Recovery pass (autonomous, nap-window): consolidated the global
+camera/player-target record `DAT_00509a50` — previously 88 scattered
+references across 13 class docs — into a single layout note with new L1:
+`docs/decomp/evidence/camera_record_layout.md`. `CViewPort::FrameStepAndRender`
+(`0047e4f0`) is now function-defined and its view build fully recovered
+(decompile + raw objdump cross-check): the view matrix is
+`RotY(-angle_y)·RotX(-angle_x)·RotZ(-angle_z)` with **zero translation** in a
+68-byte `{m[16], tag}` matrix object — camera position reaches the renderer
+through the view element, not the matrix. The record itself is a 0x120-byte
+OMedia element built by `InitViewPort` (`00476490`); the generic record
+transform pair (`00476e10`/`00476f10`) and the rotation-matrix builders
+(`0047e700..0047e8b0`) are recovered, and the record field map now covers
+position, angles, viewport rect, and the `+0x114` mode flags.
+
+Port: new `src/game/camera_record.c/h` implements the record natively for
+demo/RE purposes behind the V-key toggle (`JN_CAMREC` env for headless): the
+`CGameType::InitGame` seed, both record transforms, the record → native-Camera
+bridge (`yaw = -angle_y`, `pitch = angle_x`, derived from the recovered view
+build plus the native Z mirror), and C3DTriggerType's slot-242 NextTrigger
+retarget (`00447a70`), wired into `behavior_ai_trigger.c`'s dispatch. FOLLOW
+mode is explicit scaffolding until `UpdateWalkingCameraA/B` are ported.
+Verified headless via xvfb screenshots: the record camera renders the level1
+spawn from behind the player, matching the native follow-cam's view direction.
