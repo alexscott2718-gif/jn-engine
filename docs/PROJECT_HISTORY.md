@@ -1468,3 +1468,25 @@ real-.c-file pattern as the 3CAM oracle to reach the static
 cutscene_mca_local_offset. Scoreboard: 5 linked, 6 linked-blocked. Next:
 CJimmyGame/initgame-seed, or recover transform_local (Neutron.exe target
 vtable +0x384) to unblock both camera rows' remaining world-position gap.
+
+
+## linked branch: sixth certified row, CJimmyGame/initgame-seed (2026-07-02)
+
+Certified the fully-decompiled mission-seed constants CJimmyGame::InitGame
+(0044d3d0) writes: lives=5 (mission_counter_a/b), mission_value=100,
+mission_active=1. Investigated the worklist's other half -- "win-bridge
+transitions" (level-clear -> game_flow_level_objective_met()) -- and found no
+decompiled CJimmyGame method backing it: docs/decomp/_next_session.md
+describes it as a native-port design choice bridging gamestate's level-clear
+signal (e.g. the VR trophy pickup) into the mission layer, not a recovered
+Neutron.exe body. Same discipline as the ase-deserialization and camera rows:
+certified only what's actually decompiled (the seed), excluded the rest with
+a clear note rather than silently claiming a native invention as
+faithfulness-proven. Also excluded the death/restart lives-decrement flow
+(game_flow_player_died) for the same reason -- C2DInGameMenu.md has no
+recovered body for it either. Oracle (tools/linkage_oracles/CJimmyGame.py)
+links the real, unmodified game_flow.c + task_loader.c directly (both are
+libc-only + task_loader.c, no stubs needed) and asserts a zero pre-seed
+baseline, the exact post-seed constants, and idempotent re-seeding.
+Scoreboard: 6 linked, 6 linked-blocked. Next: C3DStartPoint/spawn +
+C3DCheckPoint/progress.

@@ -130,3 +130,63 @@ Open questions:
   `level1f.gam`, `RestartLevel.tsk`).
 - Parent of the `CLevel*Game` / `CLevelVR0N` batch (see those specs — all are
   0-owned-method leaves that inherit this controller).
+
+## Native Linkage (linked-parity branch)
+
+Aspect: **`initgame-seed`** — status `linked`.
+Certificate: `docs/linkage_certificates.csv`; oracle:
+`tools/linkage_oracles/CJimmyGame.py`.
+
+This aspect certifies exactly the mission-seed constants `InitGame`
+(`0044d3d0`) writes — the fully decompiled part of `CJimmyGame`'s per-frame/
+lifecycle behavior. It does **not** cover the death/restart lives-decrement
+flow or the win-condition bridge described in `docs/PROJECT_HISTORY.md` —
+neither corresponds to a decompiled `CJimmyGame` method in the Vtable Methods
+table above (see "Not covered" below).
+
+### L2 — transcription map
+
+| Decompiled (`CJimmyGame::InitGame` @ `0044d3d0`) | Native (`game_flow_init_game`, `src/game/game_flow.c`) |
+|---|---|
+| `mission_counter_a = mission_counter_b = 5` | `g_flow.lives = JIMMYGAME_DEFAULT_LIVES` (`#define ... 5`) |
+| `mission_value = 0x64` (100) | `g_flow.mission_value = JIMMYGAME_DEFAULT_MISSION_VAL` (`#define ... 100`) |
+| `mission_active = 1` | `g_flow.mission_active = 1` |
+| `mission_scale_a = mission_scale_b = 1.0` | not ported (no native consumer of a mission "scale" yet) |
+| `mission_flag = 0` | not individually ported; `level_won = 0` is the nearest native field but is not a 1:1 map (see deviations) |
+
+### L3 — oracle
+
+`tools/linkage_oracles/CJimmyGame.py` compiles and runs the real, unmodified
+`game_flow_init_game`/`game_flow_lives`/`game_flow_mission_value`
+(`cjimmygame_dump.c` links `game_flow.c` + its only non-libc dependency,
+`task_loader.c`) and asserts: the pre-seed globals read `0` (BSS zero-init,
+proving the post-seed values genuinely come from calling `InitGame`, not a
+coincidental default); post-seed `lives==5, mission_value==100` (the
+decompiled constants); and that re-seeding is idempotent (a second call still
+yields `5, 100`, matching the decompiled body's unconditional overwrite, not
+an accumulate).
+
+### Deliberate deviations (native-only; outside the linked aspect)
+
+- **`mission_scale_a/b` (seeded to `1.0`) is not ported.** No native consumer
+  reads a mission "scale" value yet; nothing to certify against.
+- **`mission_flag` (cleared to `0`) has no direct native field.** `level_won`
+  is the closest native analogue but serves a different purpose (the win
+  latch, a native-port invention — see "Not covered") and is not claimed as
+  a 1:1 map to `mission_flag`.
+
+### Not covered by this aspect (still open)
+
+- **Death/restart lives-decrement** (`game_flow_player_died`). Routed through
+  "`C2DInGameMenu` semantics" per `docs/PROJECT_HISTORY.md`, but
+  `docs/decomp/C2DInGameMenu.md` does not carry a recovered body for this
+  specific decrement-and-respawn-or-game-over flow; no decompiled ground
+  truth to certify against this pass.
+- **Win-condition bridge** (`game_flow_level_objective_met`). Per
+  `docs/decomp/_next_session.md`, this "bridges `gamestate`'s level-clear to
+  `game_flow_level_objective_met()`" — a native-port design choice for
+  wiring level-completion signals (e.g. the VR trophy pickup) into the
+  mission layer, not a decompiled `CJimmyGame` method. `CJimmyGame.md`'s
+  Vtable Methods table has no owned method matching this behavior. Certifying
+  it here would mean treating a native invention as if it were proven
+  faithful to Neutron.exe — flagged rather than claimed.

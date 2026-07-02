@@ -57,7 +57,7 @@ contract in `docs/linked_parity_plan.md` (Linkage Certificate L1-L5).
   distribution (VFC {1:121,0:9,3:6}, CT {0:95,2:16,3:15,1:10}). `C3DCutSceneCamera.md`.
 - [x] **C3DMultiCutSceneCamera / 3mca-offset-table** -- DONE (this commit; local-offset table only, see doc). — reproduce the `CameraTypeN`
   target-local offset table over shipped 3MCA rows. `C3DMultiCutSceneCamera.md`.
-- [ ] **CJimmyGame / initgame-seed** — `game_flow.c` <-> `InitGame` (lives=5,
+- [x] **CJimmyGame / initgame-seed** -- DONE (this commit; seed only, win-bridge + death flow not decompiled, see doc). — `game_flow.c` <-> `InitGame` (lives=5,
   mission_value=100, level-clear -> `level_objective_met`). Reproduce seed + win-bridge
   transitions. `docs/decomp/CJimmyGame.md`.
 - [ ] **C3DStartPoint / spawn + C3DCheckPoint / progress** — `00442740` / `00414410`
