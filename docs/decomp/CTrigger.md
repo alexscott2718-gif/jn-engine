@@ -125,3 +125,58 @@ Open questions:
   proximity-volume + latched-edge pattern is the primitive under the wider
   trigger/activation graph; see `CTriggerTimer`, `C3DAITrigger`, and the
   `ActivateObject*`/`NextTrigger` `.gam` wiring documented in `docs/gam_schema.md`.
+
+## Native Linkage (linked-parity branch)
+
+Aspect: **`enter-exit-latch`** — status `linked-blocked`.
+Certificate: `docs/linkage_certificates.csv`.
+
+Investigated 2026-07-02 (linked-parity pass). This worklist row's title
+conflates three distinct decompiled classes, and none of them has a faithful,
+testable native counterpart this pass:
+
+- **`CTrigger` itself** (this doc) is the engine's proximity-volume primitive
+  (watched-target linked list, latched `inside_flag`, debounced enter/exit
+  dispatch to vtable slots `0x54`/`0x58`) — but it is **not a placeable
+  FourCC** (no `Identity` FourCC field in this doc, no `docs/gam_schema.md`
+  row). It's an internal mechanism other trigger-family classes build on, and
+  no native file implements *this* linked-list/latch structure directly —
+  `src/game/behaviors/behavior_trig.c` (below) is a different, simpler
+  mechanism for a different, concrete FourCC.
+- **`C3DTriggerType`** (`docs/decomp/C3DTriggerType.md`) is a shared base for
+  `C3DAITrigger`/`C3DCutSceneCamera`/`C3DMultiCutSceneCamera`/etc. — also not
+  itself placeable, and its one owned runtime method
+  (`RunTriggerTypeNextTarget`) is explicitly flagged in that doc as "still
+  raw decompiler output" (a global-record camera-targeting computation with
+  unresolved trig-table semantics) — too poor an L1 to certify against.
+- **`C3DTrigger`** (`3TRI`, `docs/decomp/C3DTrigger.md`) is the class with
+  the actual placeable FourCC and a fully decompiled `ActivateTrigger`
+  cascade (`ActivateBy` gate, `TimesToTrigger` limit, `NextTrigger`
+  resolution, `ActivateObject0..4` state-gated cascade, sound playback) — but
+  the native port (`src/game/behaviors/behavior_prop.c`, `vt_prop`) is
+  **explicitly and completely inert** for this FourCC: "its activate-object
+  cascade / NextTrigger dispatch is the project-wide deferred scripted-trigger
+  system... fully 'none' (inert)." Zero ported logic to diff against.
+
+Separately, the `TRIG` FourCC (`src/game/behaviors/behavior_trig.c`,
+`vt_trig`) — the file the worklist row actually named — implements neither of
+the above: a one-shot latch (`user_flag`) with no enter/exit distinction, no
+`ActivateBy` gate, no `NextTrigger` cascade, and no sound. Its *own* RTTI
+class name is still unresolved in `docs/gam_schema.md` ("`TRIG` | — (name
+pending Phase 0)"), so there is no recovered decompiled body for `TRIG`
+itself to certify `behavior_trig.c` against either.
+
+Every reading of this row therefore lands on "no faithful native counterpart
+to certify this pass" — either no native implementation of the documented
+mechanism exists (`CTrigger`), the recovered body is too raw to trust
+(`C3DTriggerType`), the native port explicitly declines to implement the
+recovered body (`C3DTrigger`/`3TRI`), or the concrete class has no recovered
+body at all (`TRIG`). Recorded `linked-blocked` rather than force a fit.
+
+### Not covered / open
+
+- A future pass that (a) resolves `TRIG`'s RTTI class and recovers its body,
+  or (b) ports `C3DTrigger`/`3TRI`'s already-decompiled `ActivateTrigger`
+  cascade for real, could open a genuine `linked` aspect here.
+- `C3DTriggerType::RunTriggerTypeNextTarget` needs a cleaner Ghidra pass
+  before it's worth linkage work at all.

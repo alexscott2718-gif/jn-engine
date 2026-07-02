@@ -1587,3 +1587,56 @@ progress): a working native behavior with no fidelity claim to certify.
 Recorded linked-blocked with the full reasoning; struck the worklist row.
 Scoreboard: 8 linked, 9 linked-blocked. Next: CTrigger/C3DTriggerType
 enter-exit-latch -- the last Tier B row.
+
+
+## linked branch: CTrigger/C3DTriggerType/enter-exit-latch flagged, linked-blocked (2026-07-02)
+
+Investigated the last Tier B row and found it conflates three distinct
+classes, none linkable this pass. CTrigger (the engine's proximity-volume
+primitive: watched-list + latched enter/exit dispatch) has no placeable
+FourCC and no native file implementing that exact mechanism. C3DTriggerType's
+one owned runtime method (RunTriggerTypeNextTarget) is flagged in its own doc
+as "still raw decompiler output" -- too poor an L1 to certify against.
+C3DTrigger (3TRI) has a genuinely well-decompiled ActivateTrigger cascade
+(ActivateBy gate, TimesToTrigger, NextTrigger, ActivateObject0..4 state
+cascade, sound) but the native port (behavior_prop.c/vt_prop) is explicitly
+and completely inert for it -- the project's own comment: "fully 'none'
+(inert)". Separately, the TRIG FourCC (behavior_trig.c, what the worklist row
+actually named) implements neither mechanism (a bare one-shot latch, no
+enter/exit distinction, no NextTrigger cascade) and its own RTTI class is
+still unresolved in gam_schema.md ("name pending Phase 0"), so there's no
+recovered body for TRIG to certify behavior_trig.c against either. Recorded
+linked-blocked with the three-way breakdown rather than force a fit.
+
+Scoreboard: 8 linked, 10 linked-blocked. **Tier A and Tier B are now fully
+dispositioned** -- every row is either linked (with a green, independently-
+verified oracle) or linked-blocked (with a specific, checked reason: no
+decompiled body, a deliberate native divergence, a harness-cost blocker, or a
+class-identity conflation). Handing off to the Fable-5 review pass
+(docs/linked_parity_review_prompt.md) per docs/linked_parity_worklist.md's
+stop condition.
+
+**Handoff summary for the reviewer:** eight `linked` rows landed this session,
+each with a real headless oracle over shipped `.gam` data or a synthetic
+harness reaching the actual production code (via #include-the-.c-file for
+`static` functions, or a purpose-built test hook where one already existed):
+`CTaskList` (tsk-deserialization, set-task-state), `CLoadLevel`
+(gam-deserialization), `C3DCutSceneCamera` (3cam-camera-math, scoped to the
+dist formula + CameraType precedence), `C3DMultiCutSceneCamera`
+(3mca-offset-table), `CJimmyGame` (initgame-seed), `C3DPatrolPoint`
+(on-arrive, NextPatrolPoint+WaitTime), and `C3DAITrigger` (dispatch-graph).
+Every certified row deliberately narrowed its scope to what's *actually*
+decompiled and provable, leaving open gaps documented rather than absorbed
+(most recurring: `transform_local`, target vtable `+0x384`, still unrecovered
+-- blocks the exact 3D camera position for both cutscene-camera rows).
+Four rows were investigated and found NOT linkable this pass for reasons
+worth the reviewer's attention: `C3DAnimated`/ase-deserialization (native
+parses this project's own export format, not a Neutron.exe one),
+`C3DStartPoint`/spawn (a real, faithful port -- blocked purely on
+extracting it from the 2,480-line main.c), `C3DCheckPoint`/progress,
+`C3DPickupItem`/collection, and `CTrigger`/enter-exit-latch (all three
+deliberate native divergences/simplifications from the recovered body).
+`CJimmyGame`'s win-bridge half was similarly excluded (native invention, no
+decompiled counterpart). No gameplay/QA was run at any point; every check in
+this session was headless (`tools/build_vtable_parity_report.py`,
+`make`, `tools/audit_faithfulness.py`).

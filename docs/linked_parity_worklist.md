@@ -70,7 +70,7 @@ contract in `docs/linked_parity_plan.md` (Linkage Certificate L1-L5).
   synthetic target. `docs/decomp/C3DAITrigger.md`.
 - [~] **C3DPickupItem / collection** -- FLAGGED, linked-blocked (2026-07-02; wrong file in row, real 3PIC native is behavior_item.c, a deliberate simplification -- see doc). — `00435ce0/00436200/00436830` <->
   `behavior_pickup.c`. Consume required-picture, score, NextTrigger. `C3DPickupItem.md`.
-- [ ] **CTrigger / C3DTriggerType / enter-exit-latch** — `00447400..` <->
+- [~] **CTrigger / C3DTriggerType / enter-exit-latch** -- FLAGGED, linked-blocked (2026-07-02; three-way class conflation, none linkable -- see CTrigger.md). — `00447400..` <->
   `behavior_trig.c`. Enter/exit latch + NextTrigger cascade trace. `CTrigger.md`.
 
 ### Tier C — logic-only (feel/visual stays linked-blocked)
@@ -87,6 +87,14 @@ contract in `docs/linked_parity_plan.md` (Linkage Certificate L1-L5).
 `C3DSoundEffect` by-ear mix, `C3DCarl` rider pose. See `docs/linkage_certificates.csv`.
 
 ## Stop / handoff
+
+**2026-07-02: Tier A + Tier B are fully dispositioned.** Every row above is
+either `[x]` DONE (a real `linked` certificate with a green, independently-
+verified oracle) or `[~]` FLAGGED (`linked-blocked`, with a specific,
+investigated reason recorded in the class doc and `docs/linkage_certificates.csv`
+-- not a placeholder). Scoreboard: 8 `linked`, 10 `linked-blocked`
+(`docs/linkage_progress.md`). Handing off to the Fable-5 review pass now.
+
 When Tier A+B are certified (or a row needs decomp evidence you can't recover
 statically), stop and hand to the Fable-5 review pass
 (`docs/linked_parity_review_prompt.md`).
