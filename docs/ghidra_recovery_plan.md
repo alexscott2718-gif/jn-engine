@@ -145,3 +145,14 @@ gate + `make` + `audit_faithfulness` green per commit; no gameplay/QA.
   body resists interpretation, not preemptively.
 - **User decides:** whether a recovered player movement body ever replaces
   the approved tank-turn movement (step 3 for target 3).
+
+## Progress note (2026-07-02): camera record + view build recovered
+
+The global camera/player-target record (DAT_00509a50) is now consolidated to a
+single layout note with the per-frame view build at full L1:
+docs/decomp/evidence/camera_record_layout.md. FrameStepAndRender (0047e4f0)
+is function-defined; the record is a 0x120-byte OMedia element created by
+InitViewPort (00476490); the generic record local-to-world helper (00476e10)
+and the rotation-matrix builders (0047e700..0047e8b0) are recovered. This is
+the L1 prerequisite for porting the record mechanism natively (item 6
+nexttrigger-camera-retarget and the original walking camera).

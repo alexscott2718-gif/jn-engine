@@ -50,7 +50,7 @@ CViewPort::FrameStepAndRender(arg):
         update_timers(dt)
         update_input_or_world_lists()
         if DAT_00509a38 != null:
-            rebuild_view_matrix_from_camera_globals()
+            rebuild_view_matrix_from_camera_globals()  // L1 recovered: see evidence/camera_record_layout.md
         update_render_or_scene(dt)
     OMediaViewPort::render_or_step(arg)
     post_frame_cleanup()
@@ -83,7 +83,7 @@ Open questions:
 - Name the imported OMedia calls behind IAT entries `0x48d0b8`, `0x48d0bc`, `0x48d24c`, `0x48d300`, and `0x48d304`.
 - Confirm whether `render_port_counter` at `0x696034` is diagnostics-only or feeds later timing logic.
 - Resolve the exact owners of the gameplay update hooks called from `FrameStepAndRender` (`00479bc0`, `00462a20`, `004693a0`, `0047d8f0`, `00477db0`, and `00468600`).
-- Name the camera matrix structure copied into `DAT_00509a38 + 0x7c`.
+- ~~Name the camera matrix structure copied into DAT_00509a38 + 0x7c.~~ **DONE 2026-07-02**: 68-byte {float m[16]; u32 tag} (tags: 1 identity, 4 translation, 5 rotation, 6 composed); the full view build is L1 in docs/decomp/evidence/camera_record_layout.md — RotY(-angle_y)·RotX(-angle_x)·RotZ(-angle_z), zero translation, copied as 17 dwords.
 
 ## Notes
 
