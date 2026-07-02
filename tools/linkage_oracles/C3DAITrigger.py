@@ -55,6 +55,7 @@ def build_dumper(tmp: Path) -> Path:
         "cc", "-O0",
         str(HERE / "c3daitrigger_dump.c"),
         str(src_game / "behaviors" / "behavior_ai_trigger.c"),
+        str(src_game / "camera_record.c"),
         str(src_game / "game_flow.c"),
         str(src_game / "task_loader.c"),
         str(src_engine / "assets" / "gam_loader.c"),
