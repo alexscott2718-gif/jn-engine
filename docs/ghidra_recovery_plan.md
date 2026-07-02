@@ -22,6 +22,14 @@ uses a yaw-only `entity_local_to_world` helper instead of the recovered
 three-axis transform. The full-placement aspects are recorded as
 `linked-blocked` in `docs/linkage_certificates.csv`.
 
+Progress note (2026-07-02): target 2 (`CLoadLevel` gate caller) is now
+function-defined and dumped at `00457ec0`; see
+`docs/decomp/evidence/cloadlevel_gate_00457ec0.md`. It opened L1 and pins the
+`RequiredTask`/`RequiredLevel`/`ExactLevel` gate, but the native load path remains
+a functional bridge rather than a 1:1 port, so `CLoadLevel`/`activate-load`
+stays `linked-blocked`.
+
+
 | # | Entry points | Why / what it unblocks | Hardness |
 |---|---|---|---|
 | 1 | `transform_local` vtable `+0x384` slot (resolved addr `00472980`, tried 2026-07-02) | Blocks the exact orbit/dolly camera position for BOTH cutscene rows (`C3DCutSceneCamera`, `C3DMultiCutSceneCamera`) — highest-leverage single function; would also retire the native `entity_local_to_world` yaw-only approximation | Medium — one function, known address |

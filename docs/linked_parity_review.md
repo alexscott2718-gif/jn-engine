@@ -149,3 +149,11 @@ camera row's linked scope, because native `behavior_cutscene.c` still uses the
 yaw-only `entity_local_to_world` helper. The full-placement pieces are now
 explicit `linked-blocked` rows in `docs/linkage_certificates.csv` rather than
 implicit "not covered" text.
+
+## Addendum 4 (2026-07-02, same day): `CLoadLevel` gate caller pinned
+
+The earlier `CLoadLevel` blocked note's unpinned-gate caveat is superseded:
+Ghidra target 2 recovered the contact/gate body at `00457ec0`. The row remains
+`linked-blocked`, but now on L2 grounds rather than L1: native load behavior is
+a simplified bridge and does not port the recovered Jimmy-only contact,
+`RETURN` branch, original handoff slots, sound, or fade semantics.

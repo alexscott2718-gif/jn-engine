@@ -1727,3 +1727,22 @@ explicit linked-blocked certificate rows for `C3DCutSceneCamera`/
 The existing linked rows remain honestly scoped to the distance/static-branch
 and `CameraTypeN` offset-table pieces. Scoreboard: 10 linked /
 13 linked-blocked.
+
+## linked branch: Ghidra target 2 recovered, CLoadLevel activate-load still blocked (2026-07-02)
+
+Executed target 2 from `docs/ghidra_recovery_plan.md`: function-defined and
+dumped the missing `CLoadLevel` contact/gate body at `00457ec0`
+(`docs/decomp/evidence/cloadlevel_gate_00457ec0.md`). This pins the previously
+open `RequiredTask`/`RequiredLevel`/`ExactLevel` gate: only `C3DJIMMY` contact
+enters the body; `RequiredTask != "none"` calls `FUN_0045fea0`; found task
+states must satisfy `state >= RequiredLevel` and, when authored,
+`state == ExactLevel`; missing task names log and continue. The normal
+non-`RETURN` path hides the load portal, dispatches `LevelName`/`StartPoint`,
+plays optional `SoundIndex`, and applies optional `FadeType`/`FadeTime`.
+
+Disposition: L1 is now open, but `CLoadLevel`/`activate-load` remains
+`linked-blocked`. Native `behavior_load.c` is still a functional bridge with
+`gamestate_request_level_swap`, a fire-once latch, spawn/update gate refresh,
+no `RETURN` path, no Jimmy handoff slot port, and no original sound/fade
+semantics. A green oracle would require porting `00457ec0`/`00458370` 1:1
+first. Scoreboard remains 10 linked / 13 linked-blocked.

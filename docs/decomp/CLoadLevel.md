@@ -47,6 +47,7 @@ See `docs/gam_schema.md` for the per-level `LOAD` rows and the actual
 | Slot | Address | Name | Behavior | Status |
 |---:|---|---|---|---|
 | vtable 1 slot 7 | `00457da0` | `InitObject` | Registers the 9 `.gam` properties above + FourCC `LOAD`. | non-trivial |
+| recovered contact/gate body | `00457ec0` | `TouchLoad` / gate caller | Handles Jimmy contact, evaluates `RequiredTask`/`RequiredLevel`/`ExactLevel`, handles `RETURN`, hides the portal on the normal path, plays optional `SoundIndex`, applies optional fade, and dispatches `LevelName`/`StartPoint`. | non-trivial |
 | vtable 3 slot 53 | `00458370` | `ActivateLoad` | Fires the transition: hides the portal (slot `0xd8`) and calls the global game object (`*DAT_00509980`) slot `0x100` with the request block at `this+0x17a`, handing off the `LevelName`/`StartPoint`/fade request to the level loader. | non-trivial |
 
 ### Activation behavior
@@ -59,11 +60,44 @@ CLoadLevel::ActivateLoad():                  // vfunc_03_053 @ 00458370
     global_game->slot_0x100(&this->load_request)   // this+0x17a -> begin level load
 ```
 
-The proximity/prerequisite test (player within `Radius`, `RequiredTask`/`RequiredLevel`
-satisfied) is performed by the inherited update / collision path; `ActivateLoad` is the
-commit step that hands the `{LevelName, StartPoint, FadeType, FadeTime}` request to the
-global game controller (`CGameType`/`CJimmyGame` at `DAT_00509980`) which performs the
-actual `.gam`/`.tsk` swap.
+The proximity/contact test starts in the inherited trigger/collision path; `Radius`
+sizes that contact volume. The recovered contact body at `00457ec0` is the missing
+gate caller:
+
+```c
+TouchLoad(toucher):
+    if !toucher.IsA("C3DJIMMY"):
+        return
+
+    if RequiredTask != "none":
+        state = task_state(RequiredTask)          // FUN_0045fea0
+        if state != -1:
+            if state < RequiredLevel:
+                return
+            if ExactLevel != -1 && state != ExactLevel:
+                return
+        else:
+            log_missing_task_and_continue()
+
+    if LevelName == "RETURN":
+        run_return_loadpoint_path()
+        return
+
+    if LevelName != "none":
+        maybe_prepare_jimmy_for_current_level()
+        hide_this_load_portal()                  // slot 0xd8
+        jimmy_load_handoff(LevelName, StartPoint)
+        if SoundIndex != -1:
+            play_sound(SoundIndex)
+        if FadeType != -1:
+            apply_fade(FadeType, FadeTime)
+            lock_or_transition_jimmy()
+```
+
+`ActivateLoad` (`00458370`) is a smaller direct commit helper: it hides the portal
+and hands the request block to the global game controller (`CGameType`/`CJimmyGame`
+at `DAT_00509980`). The normal Jimmy contact path above performs more of the
+player/fade/sound handoff inline before transition.
 
 ## Constants And Wiring
 
@@ -91,8 +125,11 @@ directly from the decompiled `InitObject`/`ActivateLoad`. Not runtime-validated.
 Open questions:
 - Decode the exact request-block layout at `this+0x17a` / `this+0x18e` passed to the
   loader slot `0x100`.
-- Confirm where the `Radius` proximity + `RequiredTask`/`RequiredLevel` gate is
-  evaluated (inherited collision/update slot) and how it calls `ActivateLoad`.
+- ~~Confirm where the `Radius` proximity + `RequiredTask`/`RequiredLevel` gate is
+  evaluated (inherited collision/update slot) and how it calls `ActivateLoad`.~~
+  **DONE 2026-07-02**: contact is inherited, and the recovered `00457ec0` body is
+  the gate/Jimmy handoff path. It does not literally call `00458370`; it performs
+  hide/player/sound/fade dispatch inline for the normal path.
 - Tie `FadeType` values to the fade implementation.
 
 ## Notes
@@ -181,18 +218,22 @@ outside deserialization scope — see the Open Questions above. This aspect cert
 only that the 9 registered properties (and the generic record format they're an
 instance of) are read from disk identically to the reference parser.
 
-### Aspect: `activate-load` — status `linked-blocked` (investigated 2026-07-02)
+### Aspect: `activate-load` — status `linked-blocked` (investigated 2026-07-02, updated after Ghidra target 2)
 
 `ActivateLoad` (`00458370`) is decoded — hide the portal (slot `0xd8`), hand
 the `+0x17a` request block (`LevelName`/`StartPoint`/fade) to global
-game-object slot `0x100` — but the native path (`behavior_load.c`
-`load_on_trigger`) is a functional bridge, not a transcription: it forwards
-`LevelName`/`StartPoint` via `gamestate_request_level_swap`, does not hide
-the portal, adds a native fire-once latch, and drops the fade fields. The
-`RequiredTask`/`RequiredLevel`/`ExactLevel` gate it applies
-(`behavior_base.c` level-window semantics) has no decompiled counterpart —
-the Open Question above (where Neutron.exe evaluates the gate) is still
-unpinned. An oracle here could only certify the two-string forwarding, which
-adds nothing beyond the `gam-deserialization` aspect already linked. Returns
-to native-port: port the hide/fade/request-block semantics, and pin the gate
-caller in Ghidra.
+game-object slot `0x100`. Target 2 also recovered the missing contact/gate body
+at `00457ec0`: Jimmy-only contact, `RequiredTask` lookup via `FUN_0045fea0`,
+`RequiredLevel` minimum, optional `ExactLevel`, special `RETURN` path, normal
+`LevelName`/`StartPoint` handoff, optional `SoundIndex`, and optional
+`FadeType`/`FadeTime`.
+
+The native path (`behavior_load.c` `load_on_trigger` +
+`behavior_base.c` gate helpers) is still a functional bridge, not a
+transcription: it forwards `LevelName`/`StartPoint` via
+`gamestate_request_level_swap`, adds a native fire-once latch, applies its gate
+at spawn/update as well as trigger time, has no `RETURN` branch, does not port
+the Jimmy handoff slots, and drops the original sound/fade request semantics.
+An oracle around the current native path would certify a different design, not
+the recovered body. Returns to native-port: port the recovered `00457ec0`/`00458370`
+semantics 1:1, then write the oracle.
