@@ -218,3 +218,81 @@ Open questions:
 
 - Evidence: `DumpClass.java C3DAITrigger /tmp/decomp_C3DAITrigger.md` (`slots=336`, `owned_methods=2`, `offsets=25`), `DumpClass.java C3DTriggerType /tmp/decomp_C3DTriggerType.md`, local objdump over `/home/scotty/xp-jnbg-original/Neutron.exe` at `0040ba70..0040d120`, and string scans around `0x4ecd44..0x4ed260`.
 - Offset conversion: constructor/register methods use active pointer `outer + 0xc8`; fields listed as `this + 0x17d` in decompiler output are byte offset `0x5f4` in disassembly.
+
+## Native Linkage (linked-parity branch)
+
+Aspect: **`dispatch-graph`** — status `linked`.
+Certificate: `docs/linkage_certificates.csv`; oracle:
+`tools/linkage_oracles/C3DAITrigger.py`.
+
+This aspect certifies the two fully-decompiled, deterministic pieces of
+`ActivateAITrigger` (`0040c300`) that don't depend on the subsystems
+`behavior_ai_trigger.c`'s own header comment already documents as deferred
+(the general `C3DAI` `AIState`/`AISpeed` combat state machine beyond the
+Goddard companion, `AIAnim`/`ActivateByAnim` animation selection, the
+`ActivateObject0..4` state-gated next-object machine, and the reward-flag/
+counter-popup/story-screen side effects): the **target mutation + dispatch**
+core, and `ApplyAITriggerStoryProgress`'s SCENE patch table.
+
+### L2 — transcription map
+
+| Decompiled (`ActivateAITrigger` @ `0040c300`) | Native (`aitrig_activate`, `src/game/behaviors/behavior_ai_trigger.c`) |
+|---|---|
+| `apply_hide_or_show(target, AIHideObj)` | `AIHideObj==0` clears `visible`+`SOLID`/`TRIGGER` flags; `==1` sets `visible`; else no-op |
+| `if AINewPos != "none": target->set_position(lookup(AINewPos)->position)` | resolves `AINewPos` by tag, copies `x/y/z` |
+| `if AINewRotY != -1.0: target->set_y_rotation(AINewRotY)` | `gam_prop_f(e,"AINewRotY",-1.0f)`, applied in degrees→radians unless `==-1.0f` |
+| `if AIPatrol != "none": target->PatrolPoint = AIPatrol; target->clear_patrol_cache()` | copies the tag into `target->patrol_point` **and** `target->start_point` |
+| `if ToggleObject != "none": lookup(ToggleObject)->apply_toggle(Toggle)` | resolves `ToggleObject`, calls its `vt->on_trigger` |
+| `... dispatch_trigger(next.ObjectTag) / dispatch_trigger(NextTrigger)` | resolves `NextTrigger`, calls its `vt->on_trigger` (the `ActivateObject0..4` state-machine half of this dispatch is deferred, so native always falls through to `NextTrigger`) |
+| (implicit `trigger_count` bookkeeping) | `e->user_flag++` |
+| `ApplyAITriggerStoryProgress` (`0040caa0`) | `aitrig_apply_story_progress`: the same `ObjectTag` × current-`SCENE` → new-`SCENE` table, transcribed in `docs/decomp/_scene_sequencer.md` |
+
+### L3 — oracle
+
+`tools/linkage_oracles/C3DAITrigger.py` compiles and runs the real,
+unmodified `behavior_ai_trigger_fire_tag` — a test hook already present in
+the source specifically for headless exercise of the activate-and-mutate
+core, bypassing the touch/arm/activator gates — via `c3daitrigger_dump.c`,
+over:
+
+- **9 synthetic target-mutation scenarios**: hide (`AIHideObj==0`), show
+  (`==1`), no-op (`==-1`), `AINewPos` teleport (byte-exact against a distinct
+  marker position), `AINewRotY` (byte-exact `90°→π/2`), `AINewRotY` no-op
+  (unauthored → default `-1.0f`, target rotation unchanged), `AIPatrol`
+  repoint (both `patrol_point` and `start_point`), `ToggleObject`+
+  `NextTrigger` forwarding (observed via probe `on_trigger` callbacks that
+  count invocations), and `trigger_count` incrementing across 3 repeated
+  fires.
+- **7 story-progress scenarios**, using the real documented `ObjectTag`s
+  (`teleportexplanation`, `CARLOUT`, `GIVEKEY`, `KITEND1`): a gate **hit**
+  and a gate **miss** for `teleportexplanation`/`CARLOUT` (proving the gate
+  condition itself, not just the write), `teleportexplanation`'s alternate
+  gate value (`0x1e` and `0x1f` both hit), `GIVEKEY`'s hit, and the
+  `KITTY`-family special case (`KITEND1` writes `KITTY1=10` only when
+  `KITTY1==0`).
+
+Every result is diffed byte/value-exact against expectations independently
+computed from the recovered bodies above.
+
+### Deliberate deviations (native-only; outside the linked aspect)
+
+- **`ActivateObject0..4` state machine is not modeled.** `FindActivateObjectForState`
+  (`0040c230`) is entirely deferred; native's dispatch always falls through
+  to `NextTrigger`, per `behavior_ai_trigger.c`'s own comment.
+- **`AIState`/`AISpeed` route only to the Goddard companion**
+  (`behavior_goddard_apply_ai_state`), a no-op for any other target — the
+  general `C3DAI` combat state machine isn't ported. Stubbed to a no-op in
+  this oracle's dumper since it's outside the certified scope.
+- **`AIAnim`/`ActivateByAnim` animation dispatch is not ported.**
+- **Reward-flag/counter-popup/story-screen side effects** of the story-progress
+  table (the same HUD/menu helpers `docs/decomp/_scene_sequencer.md` and the
+  `CTaskList`/`set-task-state` aspect both defer) are not ported — only the
+  SCENE/KITTY task-state writes are.
+
+### Not covered by this aspect (still open)
+
+- The **arm/gate layer** above `aitrig_activate` (touch-volume overlap,
+  `ActivateBy`/`IsA` activator gating, `TimesToTrigger` limit) is separate
+  runtime-dispatch logic, not part of this aspect's certified scope (which is
+  the mutation-and-dispatch core itself, reached directly via the
+  `behavior_ai_trigger_fire_tag` test hook).

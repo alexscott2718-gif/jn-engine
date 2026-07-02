@@ -65,7 +65,7 @@ contract in `docs/linked_parity_plan.md` (Linkage Certificate L1-L5).
 - [x] **C3DPatrolPoint / on-arrive + AI patrol** -- DONE (this commit; NextPatrolPoint+WaitTime only, see doc). — `00434ea0` <-> `behavior_ai.c`.
   Patrol arrival/next-select/facing math over shipped PatrolPoint chains.
   `docs/decomp/C3DPatrolPoint.md`. (Defer Cindy — `linked-blocked`.)
-- [ ] **C3DAITrigger / dispatch-graph** — `behavior_ai_trigger.c`. Deterministic
+- [x] **C3DAITrigger / dispatch-graph** -- DONE (this commit). — `behavior_ai_trigger.c`. Deterministic
   hide/show/AINewPos/AINewRotY/AIPatrol/ToggleObject/NextTrigger mutation of a
   synthetic target. `docs/decomp/C3DAITrigger.md`.
 - [ ] **C3DPickupItem / collection** — `00435ce0/00436200/00436830` <->

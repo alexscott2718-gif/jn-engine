@@ -1541,3 +1541,26 @@ Oracle (tools/linkage_oracles/C3DPatrolPoint.py) runs the real, unmodified
 gam_load() + behavior_ai_find_patrol_point()/gam_prop_f() over every shipped
 .gam file. Scoreboard: 7 linked, 8 linked-blocked. Next: C3DAITrigger/
 dispatch-graph.
+
+
+## linked branch: eighth certified row, C3DAITrigger/dispatch-graph (2026-07-02)
+
+Certified the two fully-decompiled, deterministic pieces of ActivateAITrigger
+(0040c300): the target mutation+dispatch core (AIHideObj/AINewPos/AINewRotY/
+AIPatrol, ToggleObject+NextTrigger forwarding, trigger_count) and
+ApplyAITriggerStoryProgress's SCENE patch table (0040caa0,
+docs/decomp/_scene_sequencer.md). Drove the real, unmodified
+behavior_ai_trigger_fire_tag -- a test hook already in the source for exactly
+this kind of headless exercise -- through 9 synthetic mutation scenarios and 7
+story-progress scenarios using the real documented ObjectTags
+(teleportexplanation, CARLOUT, GIVEKEY, KITEND1), each with both a gate HIT
+and a gate MISS so the gate condition itself is proven, not just the write.
+Excluded (matching the file's own header comment on what's deferred): the
+ActivateObject0..4 state machine, the general C3DAI AIState/AISpeed combat
+state machine beyond the Goddard companion, AIAnim/ActivateByAnim animation
+dispatch, and the reward/counter/menu side effects of the story-progress
+table. Also outside scope: the arm/gate layer above aitrig_activate (touch
+overlap, ActivateBy/IsA, TimesToTrigger) -- this aspect certifies the
+mutation-and-dispatch core itself, reached directly via the test hook.
+Scoreboard: 8 linked, 8 linked-blocked -- linked count now matches
+linked-blocked count. Next: C3DPickupItem/collection.
