@@ -1,6 +1,7 @@
 #include "world.h"
 #include "collision.h"
 #include "glad.h"
+#include "../game/animated_dispatch.h"
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
@@ -38,7 +39,12 @@ Entity *world_find_type(const World *w, const char *type) {
 
 void world_destroy(World *w) {
     Entity *e = w->head;
-    while (e) { Entity *n = e->next; free(e); e = n; }
+    while (e) {
+        Entity *n = e->next;
+        animated_dispatch_free_entity(e);
+        free(e);
+        e = n;
+    }
     w->head = NULL; w->count = 0;
     collision_free(w->collision);
     w->collision = NULL;

@@ -4,6 +4,7 @@
 #include "assets/ase_loader.h"
 
 struct Entity;
+struct AnimatedDispatch;
 struct World;
 
 typedef struct EntityVTable {
@@ -92,6 +93,7 @@ typedef struct Entity {
     char  cutscene_model[160];    /* current cutscene-selected actor ASE, if any */
     char  cutscene_texture[160];  /* texture paired with cutscene_model, if any */
     int   cutscene_anim_loop;     /* authored LoopActAnim / sequence loop flag */
+    struct AnimatedDispatch *anim_dispatch; /* lazy C3DAnimated record dispatcher */
     float move_speed;             /* shared movement-base horizontal speed */
     float move_vert;              /* shared movement-base vertical velocity */
     float move_lean;              /* shared movement-base lean angle */
