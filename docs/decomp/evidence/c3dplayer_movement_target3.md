@@ -82,14 +82,6 @@ record write is ported and certified (`C3DPlayer`/`walking-camera-record`).
 The A/B summaries above keep the movement-half reading; the camera-write
 details there are superseded.
 
-2026-07-02 follow-up: the walking-camera halves are now fully interpreted
-— prototype-repaired re-dump, record-write x87 trace,
-ProjectNoisyCameraTarget / ProbePlayerRayBlend decode, and the OMedia
-angles() import — in `walking_camera_record_write.md`; the B-variant
-record write is ported and certified (`C3DPlayer`/`walking-camera-record`).
-The A/B summaries above keep the movement-half reading; the camera-write
-details there are superseded.
-
 ## Raw Ghidra Dump
 
 ## ResetPlayerRuntime_00437890 @ 00437890
