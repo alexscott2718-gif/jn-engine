@@ -2018,3 +2018,33 @@ against real geometry; pointers are re-bound every FOLLOW frame so
 level swaps/respawns cannot dangle them. Verified headless: a synthetic
 through-the-ground segment at the level1 spawn hits at ground height,
 and FOLLOW frames the spawn identically in the open (no false hits).
+
+## linked branch: C3DAnimated dispatch port staged, certificate still blocked (2026-07-03)
+
+Resolved the remaining `C3DAnimated` dispatch ambiguity against the OMT 2.5
+source: the embedded `OMediaAnim` layout identifies the completion gate as
+`play_loop` (`+0xad`), not pause, pins `setcurrentsequence` /
+`setplay_timebased` / `getcurrentframe_pos`, confirms float millisecond timing,
+and explains why non-loop completion re-fires every update until the slot-65
+consumer switches animation state. `docs/decomp/C3DAnimated.md` now carries the
+native linkage map, key-composition correction, state-carrier offsets, deliberate
+deviations, and open questions.
+
+Port staging: added `src/game/animated_dispatch.c/h` as a standalone, unwired
+native module for the recovered record dispatcher. `Entity` now has one lazy
+`AnimatedDispatch *` pointer and `world_destroy` frees it if a future runtime path
+allocates it; no behavior calls the module yet. The module implements record
+creation including failed-import id reuse, shape-mode key leads, case-insensitive
+lookup, same/different record selection semantics, float-ms timebase walking,
+pause/unpause, non-loop completion, and a nullable AnimEnded hook.
+
+Oracle: `tools/linkage_oracles/C3DAnimated_dispatch.py` compiles the real module
+with `c3danimated_dispatch_dump.c` and compares it to an independent reference
+model across lookup, guard, frame-walk, pause, key-mode, truncation, id-reuse, and
+consuming-hook cases. Its `--selftest` rejects mutants for case-sensitive lookup,
+missing def-change frame reset, removed hook fires, and inverted loop completion.
+
+Disposition: `C3DAnimated`/`event-animation-dispatch` remains `linked-blocked`.
+The recovered dispatcher exists and is oracle-covered, but the certificate flip
+waits for the later runtime wiring slice that connects actual `C3DAnimated` /
+`C3DPlayer` behavior to the module.
