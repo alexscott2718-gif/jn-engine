@@ -11,6 +11,8 @@
 #include <strings.h>
 
 #include "../../src/game/behaviors/behaviors.h"
+#include "../../src/game/behaviors/behavior_ai.h"
+#include "../../src/game/behaviors/behavior_projectile.h"
 #include "../../src/game/animated_dispatch.h"
 #include "../../src/game/player_anim.h"
 #include "../../src/engine/assets/asset_cache.h"
@@ -25,6 +27,9 @@ static AseModel g_model_carl_stop;
 static AseModel g_model_carl_walk;
 static AseModel g_model_jim_stop;
 static AseModel g_model_jim_ladder;
+static AseModel g_model_jim_fence;
+static AseModel g_model_jim_splat;
+static AseModel g_model_jim_hit;
 static AseModel g_model_default;
 
 static void init_model(AseModel *m, int frames, float fps) {
@@ -38,6 +43,9 @@ static void init_models(void) {
     init_model(&g_model_carl_walk, 5, 5.0f);
     init_model(&g_model_jim_stop, 2, 10.0f);
     init_model(&g_model_jim_ladder, 2, 10.0f);
+    init_model(&g_model_jim_fence, 3, 10.0f);
+    init_model(&g_model_jim_splat, 5, 10.0f);
+    init_model(&g_model_jim_hit, 4, 10.0f);
     init_model(&g_model_default, 3, 5.0f);
 }
 
@@ -53,6 +61,9 @@ AseModel *model_cache_get(const char *path) {
     if (ends_ci(path, "carlwalk.ASE")) return &g_model_carl_walk;
     if (ends_ci(path, "jimstop.ase")) return &g_model_jim_stop;
     if (ends_ci(path, "jimladder.ASE")) return &g_model_jim_ladder;
+    if (ends_ci(path, "jimfence.ASE")) return &g_model_jim_fence;
+    if (ends_ci(path, "jimsplat.ASE")) return &g_model_jim_splat;
+    if (ends_ci(path, "jimhit.ASE")) return &g_model_jim_hit;
     if (strstr(path, "assets/ase/jim") || strstr(path, "assets/ase/Jim"))
         return &g_model_default;
     return &g_model_default;
@@ -69,6 +80,44 @@ float audio_duration_db(const char *db, int handle) {
 }
 
 void audio_channel_halt(int channel) { (void)channel; }
+
+static int g_damage_down;
+static int g_damage_calls;
+
+void gamestate_damage_player(int amount) {
+    if (amount > 0) g_damage_calls++;
+}
+
+int gamestate_player_is_down(void) {
+    return g_damage_down;
+}
+
+int physics_aabb_overlap(const Entity *a, const Entity *b) {
+    (void)a; (void)b;
+    return 1;
+}
+
+float world_query_segment(const World *w, const Entity *ignore,
+                          float px, float py, float pz,
+                          float qx, float qy, float qz) {
+    (void)w; (void)ignore; (void)px; (void)py; (void)pz;
+    (void)qx; (void)qy; (void)qz;
+    return 1.0f;
+}
+
+Entity *world_add(World *w) {
+    (void)w;
+    return calloc(1, sizeof(Entity));
+}
+
+void behavior_ai_idle(Entity *e) { (void)e; }
+
+BehaviorAIResult behavior_ai_seek_position(Entity *e, float x, float y, float z,
+                                           float speed, float arrive_radius,
+                                           float dt) {
+    (void)e; (void)x; (void)y; (void)z; (void)speed; (void)arrive_radius; (void)dt;
+    return BEHAVIOR_AI_SEEKING;
+}
 
 long game_flow_entity_state(const char *name) {
     (void)name;
@@ -91,6 +140,70 @@ const char *gam_str(const Entity *e, const char *name, const char *def) {
 }
 
 #include BEHAVIOR_CUTSCENE_SOURCE
+
+static void init_player_entity(Entity *e) {
+    memset(e, 0, sizeof(*e));
+    memcpy(e->type, "3JIM", 4);
+    e->alive = 1;
+    e->visible = 1;
+    g_player = e;
+    player_anim_bind_entity(e);
+}
+
+static void run_until_idle(Entity *e, PlayerAnim a) {
+    for (int i = 0; i < 16; i++) {
+        player_anim_advance_entity(e, a, 0.1f);
+        if (e->user_flag == (int)PA_IDLE) {
+            const char *alias = animated_dispatch_active_alias(e);
+            if (alias && strcasecmp(alias, "STOP") == 0) break;
+        }
+    }
+}
+
+static void trigger_enemy_projectile(Entity *jim, int down) {
+    World w;
+    memset(&w, 0, sizeof(w));
+    Entity bolt;
+    memset(&bolt, 0, sizeof(bolt));
+    memcpy(bolt.type, "PROJ", 4);
+    bolt.alive = 1;
+    bolt.visible = 1;
+    bolt.user_flag = PROJ_TEAM_ENEMY;
+    bolt.user_float = 1.0f;
+    bolt.points = down ? 100 : 10;
+    g_player = jim;
+    g_damage_down = down;
+    vt_projectile.on_update(&bolt, &w, 0.016f);
+}
+
+static void trigger_yokian_melee(Entity *jim) {
+    World w;
+    memset(&w, 0, sizeof(w));
+    Entity y;
+    memset(&y, 0, sizeof(y));
+    memcpy(y.type, "3SOL", 4);
+    y.alive = 1;
+    y.visible = 1;
+    y.x = jim->x;
+    y.z = jim->z;
+    g_player = jim;
+    g_damage_down = 0;
+    vt_yokian.on_update(&y, &w, 0.016f);
+}
+
+static void trigger_tesla_contact(Entity *jim) {
+    Entity tesla;
+    memset(&tesla, 0, sizeof(tesla));
+    memcpy(tesla.type, "3TES", 4);
+    tesla.alive = 1;
+    tesla.visible = 1;
+    tesla.user_flag = 1;
+    tesla.x = jim->x + 100.0f;
+    tesla.z = jim->z;
+    g_player = jim;
+    g_damage_down = 0;
+    vt_tesla.on_trigger(&tesla, jim);
+}
 
 static void print_dispatch(const char *tag, Entity *e) {
     AnimatedDispatch *d = e->anim_dispatch;
@@ -140,21 +253,51 @@ int main(void) {
     print_dispatch("CUT", &car);
 
     Entity jim;
-    memset(&jim, 0, sizeof(jim));
-    memcpy(jim.type, "3JIM", 4);
-    jim.alive = 1;
-    jim.visible = 1;
-    g_player = &jim;
     (void)player_anim_init(0);
-    player_anim_bind_entity(&jim);
+    init_player_entity(&jim);
     player_anim_advance_entity(&jim, PA_LADDER, 0.0f);
     player_anim_advance_entity(&jim, PA_LADDER, 0.1f);
     player_anim_advance_entity(&jim, PA_LADDER, 0.1f);
     print_dispatch("PLAYER", &jim);
 
+    Entity fence;
+    init_player_entity(&fence);
+    (void)player_anim_start_entity_state(&fence, PA_FENCE);
+    run_until_idle(&fence, PA_FENCE);
+    print_dispatch("FENCE", &fence);
+
+    Entity hit;
+    init_player_entity(&hit);
+    trigger_enemy_projectile(&hit, 0);
+    print_dispatch("PROJECTILE_HIT", &hit);
+    run_until_idle(&hit, PA_HIT);
+    print_dispatch("PROJECTILE_HIT_END", &hit);
+
+    Entity splat;
+    init_player_entity(&splat);
+    trigger_enemy_projectile(&splat, 1);
+    print_dispatch("PROJECTILE_SPLAT", &splat);
+    run_until_idle(&splat, PA_SPLAT);
+    print_dispatch("PROJECTILE_SPLAT_END", &splat);
+
+    Entity enemy_hit;
+    init_player_entity(&enemy_hit);
+    trigger_yokian_melee(&enemy_hit);
+    print_dispatch("ENEMY_HIT", &enemy_hit);
+
+    Entity tesla_hit;
+    init_player_entity(&tesla_hit);
+    trigger_tesla_contact(&tesla_hit);
+    print_dispatch("TESLA_HIT", &tesla_hit);
+
     animated_dispatch_free_entity(&base);
     animated_dispatch_free_entity(&car);
     animated_dispatch_free_entity(&jim);
+    animated_dispatch_free_entity(&fence);
+    animated_dispatch_free_entity(&hit);
+    animated_dispatch_free_entity(&splat);
+    animated_dispatch_free_entity(&enemy_hit);
+    animated_dispatch_free_entity(&tesla_hit);
     player_anim_destroy();
     return 0;
 }

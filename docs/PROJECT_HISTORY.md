@@ -2077,3 +2077,29 @@ Disposition: `C3DAnimated`/`event-animation-dispatch` stays
 frame-count/timing data still comes from native/exported ASE `AseModel` metadata
 rather than recovered original `A3dm` sequence/import data, and the player
 completion surface is only partially represented.
+
+
+## linked branch: Jimmy special animation states wired, certificate still blocked (2026-07-03)
+
+Follow-up runtime slice for `C3DAnimated`/`event-animation-dispatch`: the Jimmy
+player animation table now includes `FENCE`, `SPLAT`, and `HIT`, with dispatch
+records sourced from the loaded ASE metadata through `animated_dispatch_clip_from_ase`
+(single sequence, `frame_count`, and `framespeed`). `behavior_player.c` preserves
+active special states instead of overwriting them with locomotion. The slot-65
+consumer now returns `FENCE`/`LADDER`/`SPLAT`/`HIT` to `STOP`.
+
+Existing runtime damage paths now enter the recovered special states: enemy
+projectiles and Yokian/Tesla contact call `player_anim_react_to_damage`, selecting
+`HIT` for normal damage and `SPLAT` when the health model reports down. This does
+not port the full C3DPlayer movement state machine or gadget/menu action system.
+
+Oracle follow-up: `tools/linkage_oracles/C3DAnimated_runtime.py` now links the real
+projectile, Yokian, and Tesla behavior files in addition to base/cutscene/player
+animation code. Its selftest rejects four mutants: base dispatch update removed,
+cutscene `SetAnim3DByName` removed, the player special completion hook disabled,
+and projectile player reaction removed.
+
+Disposition: the certificate remains `linked-blocked`. The runtime path is more
+complete, but clip timing still comes from native/exported ASE metadata rather than
+recovered original `A3dm` sequence/import data, and faithful FENCE entry still needs
+collision material/ray-probe data plus restore-transform behavior.

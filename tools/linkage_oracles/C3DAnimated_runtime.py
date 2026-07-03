@@ -9,8 +9,10 @@ runtime paths:
   C3DAnimated entities.
 * behavior_cutscene.c routes target actor animation selection through
   animated_dispatch_set_by_name while preserving the resolved ASE path.
-* player_anim.c binds entity-owned records and consumes the represented ladder
-  AnimEnded case by returning to STOP.
+* player_anim.c binds entity-owned records and consumes the represented
+  FENCE/LADDER/SPLAT/HIT AnimEnded family by returning to STOP.
+* real projectile, Yokian melee, and Tesla contact behavior paths call the
+  player HIT/SPLAT reaction bridge.
 
 The harness uses deterministic fake AseModel instances so the test is not a
 filesystem asset check.
@@ -30,6 +32,13 @@ EXPECTED = [
     "BASE alias=END idx=0 rec_fc=2 frame=1 sample=1:1:0.000 fires=1 loop=0 model=- user=0",
     "CUT alias=WALK idx=2 rec_fc=5 frame=1 sample=1:2:0.000 fires=0 loop=0 model=assets/ase/carlwalk.ASE user=0",
     "PLAYER alias=STOP idx=0 rec_fc=2 frame=-1 sample=0:1:0.000 fires=1 loop=1 model=- user=0",
+    "FENCE alias=STOP idx=0 rec_fc=2 frame=-1 sample=0:1:0.000 fires=1 loop=1 model=- user=0",
+    "PROJECTILE_HIT alias=HIT idx=16 rec_fc=4 frame=-1 sample=0:1:0.000 fires=0 loop=0 model=- user=16",
+    "PROJECTILE_HIT_END alias=STOP idx=0 rec_fc=2 frame=-1 sample=0:1:0.000 fires=1 loop=1 model=- user=0",
+    "PROJECTILE_SPLAT alias=SPLAT idx=15 rec_fc=5 frame=-1 sample=0:1:0.000 fires=0 loop=0 model=- user=15",
+    "PROJECTILE_SPLAT_END alias=STOP idx=0 rec_fc=2 frame=-1 sample=0:1:0.000 fires=1 loop=1 model=- user=0",
+    "ENEMY_HIT alias=HIT idx=16 rec_fc=4 frame=-1 sample=0:1:0.000 fires=0 loop=0 model=- user=16",
+    "TESLA_HIT alias=HIT idx=16 rec_fc=4 frame=-1 sample=0:1:0.000 fires=0 loop=0 model=- user=16",
 ]
 
 
@@ -39,11 +48,17 @@ def build_dumper(
     behavior_cutscene: Path | None = None,
     behavior_base: Path | None = None,
     player_anim: Path | None = None,
+    behavior_projectile: Path | None = None,
+    behavior_enemy: Path | None = None,
+    behavior_tesla: Path | None = None,
 ) -> Path:
     binp = tmp / "c3danimated_runtime_dump"
     behavior_cutscene = behavior_cutscene or REPO / "src/game/behaviors/behavior_cutscene.c"
     behavior_base = behavior_base or REPO / "src/game/behaviors/behavior_base.c"
     player_anim = player_anim or REPO / "src/game/player_anim.c"
+    behavior_projectile = behavior_projectile or REPO / "src/game/behaviors/behavior_projectile.c"
+    behavior_enemy = behavior_enemy or REPO / "src/game/behaviors/behavior_enemy.c"
+    behavior_tesla = behavior_tesla or REPO / "src/game/behaviors/behavior_tesla.c"
     cmd = [
         "cc", "-O0",
         f"-DBEHAVIOR_CUTSCENE_SOURCE=\"{behavior_cutscene}\"",
@@ -51,6 +66,9 @@ def build_dumper(
         str(REPO / "src/game/animated_dispatch.c"),
         str(player_anim),
         str(behavior_base),
+        str(behavior_projectile),
+        str(behavior_enemy),
+        str(behavior_tesla),
         "-I", str(REPO / "src/game/behaviors"),
         "-I", str(REPO / "src/game"),
         "-I", str(REPO / "src/engine"),
@@ -73,8 +91,14 @@ def run_oracle(**sources: Path | None) -> tuple[bool, str]:
         if r.returncode != 0:
             return False, "dumper run failed\n" + r.stderr
 
+    prefixes = (
+        "BASE ", "CUT ", "PLAYER ", "FENCE ",
+        "PROJECTILE_HIT ", "PROJECTILE_HIT_END ",
+        "PROJECTILE_SPLAT ", "PROJECTILE_SPLAT_END ",
+        "ENEMY_HIT ", "TESLA_HIT ",
+    )
     got = [ln.rstrip() for ln in r.stdout.splitlines()
-           if ln.startswith(("BASE ", "CUT ", "PLAYER "))]
+           if ln.startswith(prefixes)]
     if got != EXPECTED:
         for i, (g, e) in enumerate(zip(got, EXPECTED), 1):
             if g != e:
@@ -87,8 +111,9 @@ def run_oracle(**sources: Path | None) -> tuple[bool, str]:
 
     msg = (
         "PASS C3DAnimated/runtime-wiring: behavior_base advances dispatch, "
-        "cutscene actor selection routes through SetAnim3DByName, and the "
-        "entity-owned player ladder AnimEnded hook consumes completion to STOP"
+        "cutscene actor selection routes through SetAnim3DByName, player "
+        "special AnimEnded consumes completion to STOP, and real damage paths "
+        "enter HIT/SPLAT dispatch states"
     )
     print(msg)
     return True, msg
@@ -104,6 +129,7 @@ def selftest() -> int:
     base_src = REPO / "src/game/behaviors/behavior_base.c"
     cut_src = REPO / "src/game/behaviors/behavior_cutscene.c"
     player_src = REPO / "src/game/player_anim.c"
+    projectile_src = REPO / "src/game/behaviors/behavior_projectile.c"
     with tempfile.TemporaryDirectory() as td:
         tmp = Path(td)
         mutants: list[tuple[str, dict[str, Path]]] = []
@@ -123,11 +149,18 @@ def selftest() -> int:
         mutants.append(("cutscene selection dispatch removed", {"behavior_cutscene": p}))
 
         body = replace_once(player_src.read_text(),
-                            '    if (strcasecmp(alias, "LADDER") == 0) {\n',
-                            '    if (0 && strcasecmp(alias, "LADDER") == 0) {\n')
-        p = tmp / "player_anim_no_ladder_hook.c"
+                            '    return alias &&\n           (strcasecmp(alias, "FENCE") == 0 ||\n',
+                            '    return 0 && alias &&\n           (strcasecmp(alias, "FENCE") == 0 ||\n')
+        p = tmp / "player_anim_no_special_hook.c"
         p.write_text(body)
-        mutants.append(("player ladder hook disabled", {"player_anim": p}))
+        mutants.append(("player special hook disabled", {"player_anim": p}))
+
+        body = replace_once(projectile_src.read_text(),
+                            '            player_anim_react_to_damage(g_player, gamestate_player_is_down());\n',
+                            '')
+        p = tmp / "behavior_projectile_no_player_reaction.c"
+        p.write_text(body)
+        mutants.append(("projectile player reaction removed", {"behavior_projectile": p}))
 
         rejected = 0
         for name, sources in mutants:

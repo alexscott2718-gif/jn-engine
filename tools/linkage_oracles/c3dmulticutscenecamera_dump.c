@@ -30,8 +30,16 @@ void player_anim_advance(PlayerAnim a, float dt) { (void)a; (void)dt; }
 void player_anim_advance_entity(Entity *e, PlayerAnim a, float dt) {
     (void)e; (void)a; (void)dt;
 }
+int player_anim_start_entity_state(Entity *e, PlayerAnim a) {
+    (void)e; (void)a;
+    return 0;
+}
 void behavior_animated_spawn_base(Entity *e) { (void)e; }
 AseModel *model_cache_get(const char *path) { (void)path; return NULL; }
+void animated_dispatch_clip_from_ase(AnimatedClip *out, const AseModel *model) {
+    (void)model;
+    if (out) memset(out, 0, sizeof(*out));
+}
 void animated_dispatch_set_key_strings(const char *suffix_base,
                                        const char *suffix_alt,
                                        const char *prefix) {

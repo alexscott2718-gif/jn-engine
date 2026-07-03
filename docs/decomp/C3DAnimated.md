@@ -185,10 +185,12 @@ this target is `C3DPlayer` vtable-4 slot 65 (`0043a900`,
 The original side is now L1-backed, and the native port target is the recovered
 OMedia animation-record dispatcher, not the old cutscene pose table. Runtime
 wiring now reaches the staged dispatcher from `behavior_base.c`, cutscene actor
-selection, and entity-owned player animation state, but the certificate stays
-`linked-blocked`: the live clip frame counts/timing still come from native
-exported ASE `AseModel` data rather than a proven original `A3dm` import path,
-and native `C3DPlayer` still lacks FENCE/SPLAT/HIT runtime states.
+selection, entity-owned player animation state, the FENCE/LADDER/SPLAT/HIT
+completion consumer, and existing damage paths that enter HIT/SPLAT. The
+certificate still stays `linked-blocked`: live clip frame counts/timing come
+from native/exported ASE `AseModel` metadata rather than a proven original
+`A3dm` import path, and faithful FENCE entry still needs the original
+collision-material/probe data and restore-transform behavior.
 
 ### OMedia runtime resolution
 
@@ -253,7 +255,7 @@ updated only after a successful record lookup.
 | `GetCurrentAnim3DRecord` / `GetCurrentAnim3DObject` | `animated_dispatch_current_record` / `animated_dispatch_current_clip` | Read-only accessors for the current record and clip. |
 | `UpdateAnimated` dispatch slice | `animated_dispatch_update`; called by `behavior_animated_update_base` | Only the animation-time walk and completion hook; `PickupLink`, `Update3DObject`, and `CanMove` stay with existing native behavior paths. |
 | vtable-4 slot 65 base | `NULL` hook | Base no-op at `00472970` becomes a null callback. |
-| `C3DPlayer` slot 65 | `animated_dispatch_set_anim_ended_hook` via `player_anim.c` | Native consumes the represented dormant `LADDER` case by returning to `STOP`; `FENCE`, `SPLAT`, and `HIT` remain blocked because native has no matching runtime player states yet. |
+| `C3DPlayer` slot 65 | `animated_dispatch_set_anim_ended_hook` via `player_anim.c` | Native consumes the represented `FENCE`/`LADDER`/`SPLAT`/`HIT` completion family by returning to `STOP`. HIT/SPLAT entry is wired through existing native damage paths; faithful FENCE entry remains blocked on collision material/probe data. |
 | `SetAnim3DPaused` | `animated_dispatch_set_paused` | Edge-guarded pause count mirror; unpause resets `play_started`. |
 | `ApplyAnimatedEnabledState` / `ApplyAnimatedCollisionVisibleState` | existing `behavior_base.c` gates | Not part of the dispatch module scope. |
 | render frame read | `animated_dispatch_sample` | Native renderer consumes dispatcher frame/lerp state for wired cutscene/player clips, falling back to legacy `anim_time` only when no dispatch sample exists. |
@@ -286,12 +288,15 @@ original offsets needed by the recovered dispatch path:
 
 ### Deliberate deviations
 
-1. Native clips are treated as single-sequence defs. This collapses OMedia's
-   sequence-vector indirection, positional mapping, and refresh-vs-clamp
-   interplay. The shipped-data pass still needs to validate that exported
-   `A3dm` defs are single-sequence for this dispatch surface.
+1. Native clips are treated as single-sequence defs. `AnimatedClip` records
+   `sequence_count == 1` and the sequence-0 frame count from the loaded ASE
+   metadata, which matches the current original asset stream but still collapses
+   OMedia's sequence-vector indirection, positional mapping, and
+   refresh-vs-clamp interplay. The shipped-data pass still needs recovered
+   `A3dm` definitions before this can be certified as original import data.
 2. No OMedia database is ported. The native record stores an `AnimatedClip`
-   pointer that represents the imported `A3dm` timing/frame-count data.
+   pointer that represents imported timing/frame-count metadata; this is fed by
+   `AseModel::frame_count` and `framespeed`, not by a binary `A3dm` reader.
 3. Frame advance is merged into the dispatch update. The original timebase uses
    float milliseconds (`omt_WMilliSec`), so there is no integer-truncation gap.
    `play_reverse` and `play_pingpong` are not set by recovered paths.
@@ -312,15 +317,19 @@ original offsets needed by the recovered dispatch path:
   for target actor aliases. Rendering reads `animated_dispatch_sample` when a
   selected dispatch clip exists.
 - `player_anim.c` now binds per-player dispatch records from the loaded Jimmy
-  `AseModel` clips, uses `player_anim_advance_entity` from
-  `behavior_player.c`, and exposes `player_anim_sample_entity` for rendering.
-  The bound completion hook consumes only the represented dormant `LADDER`
-  state by selecting `STOP`; it intentionally does not invent native
-  FENCE/SPLAT/HIT state.
+  `AseModel` clips, including `jimfence.ASE`, `jimsplat.ASE`, and
+  `jimhit.ASE`. `behavior_player.c` preserves active special states instead of
+  overwriting them with locomotion, and rendering reads
+  `player_anim_sample_entity`.
+- The player completion hook consumes the represented
+  `FENCE`/`LADDER`/`SPLAT`/`HIT` family by selecting `STOP`. Existing native
+  damage paths (`PROJ` enemy bolts, Yokian melee, and Tesla contact) enter
+  HIT/SPLAT through `player_anim_react_to_damage`; real FENCE entry is still
+  blocked on the recovered collision material/probe path.
 - `tools/linkage_oracles/C3DAnimated_runtime.py` compiles the real runtime
   modules and mutation-tests these wiring points: removing the base update call,
-  the cutscene `SetAnim3DByName` call, or the player ladder hook turns the
-  oracle red.
+  the cutscene `SetAnim3DByName` call, the player special completion hook, or
+  the projectile damage reaction turns the oracle red.
 
 ### Scope and certificate status
 
@@ -330,11 +339,14 @@ native-by-eye tracks, and the separate `C3DAnimated`/`ase-deserialization`
 certificate remains `linked-blocked` for the self-comparison reason documented
 in `docs/linkage_certificates.csv`.
 
-Remaining blocker: the live records are still backed by exported/native ASE
+Remaining blockers: the live records are still backed by exported/native ASE
 clip metadata (`AseModel::frame_count` and `framespeed`) rather than recovered
-OMedia `A3dm` sequence definitions. That is good enough to wire the recovered
-runtime control flow without changing playable behavior, but not enough to
-claim the original clip timing/import data is faithfully linked. Native
+OMedia `A3dm` sequence definitions, and FENCE has no faithful runtime entry
+until collision material ids/ray probes and restore transforms are ported. The
+current HIT/SPLAT entry is deliberately limited to native damage paths already
+present in gameplay. This is enough to wire the recovered runtime control flow
+without changing movement design, but not enough to claim the original clip
+import/timing and special-state entry surface is fully linked. Native
 `behavior_animsprite.c` remains the separate `C3DAnimatedSprite` / `3ANI`
 billboard frame animator, not this OMedia morph-animation record path.
 
@@ -342,7 +354,8 @@ billboard frame animator, not this OMedia morph-animation record path.
 
 Confidence: Medium-high
 
-Validation: Static Ghidra recovery plus PE vtable probe; not runtime-validated.
+Validation: Static Ghidra recovery plus PE vtable probe; runtime wiring oracle
+`tools/linkage_oracles/C3DAnimated_runtime.py` with mutation selftest.
 
 Open questions:
 - Apply full `C3DAnimated`/OMedia morph structs so adjusted vtable-4 field indexes can be mapped to absolute offsets without colliding with primary property offsets.
