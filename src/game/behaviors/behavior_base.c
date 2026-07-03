@@ -1,4 +1,5 @@
 #include "behavior_base.h"
+#include "../animated_dispatch.h"
 #include "../game_flow.h"
 #include <stdlib.h>
 #include <string.h>
@@ -80,6 +81,7 @@ int behavior_animated_update_base(Entity *e, World *w, float dt) {
     e->visible = 1;
     animated_apply_collision_flag(e);
     e->anim_time += dt;
+    animated_dispatch_update(e, dt);
     return 1;
 }
 

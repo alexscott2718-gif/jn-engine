@@ -268,3 +268,41 @@ const char *animated_dispatch_active_alias(const Entity *e) {
     if (!d || !d->current_name[0]) return NULL;
     return d->current_name;
 }
+
+int animated_dispatch_sample(const Entity *e, AnimatedDispatchSample *out) {
+    if (!out) return 0;
+    out->frame_a = 0;
+    out->frame_b = 0;
+    out->lerp = 0.0f;
+
+    const AnimatedDispatch *d = e ? e->anim_dispatch : NULL;
+    const AnimatedClip *clip = d ? d->current_clip : NULL;
+    int frames = clip ? clip->frame_count : 0;
+    if (!d || !clip || frames <= 0)
+        return 0;
+
+    int frame = d->cur_frame < 0 ? 0 : d->cur_frame;
+    if (frame < 0) frame = 0;
+    if (frame >= frames) frame = frames - 1;
+
+    int next = frame;
+    if (frames > 1) {
+        if (d->play_loop) {
+            next = (frame + 1) % frames;
+        } else if (frame < frames - 1) {
+            next = frame + 1;
+        }
+    }
+
+    float lerp = 0.0f;
+    if (next != frame && d->play_started && clip->ms_per_frame > 0.0f) {
+        lerp = 1.0f - (d->tb_count_ms / clip->ms_per_frame);
+        if (lerp < 0.0f) lerp = 0.0f;
+        if (lerp > 1.0f) lerp = 1.0f;
+    }
+
+    out->frame_a = frame;
+    out->frame_b = next;
+    out->lerp = lerp;
+    return 1;
+}

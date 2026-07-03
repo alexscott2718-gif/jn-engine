@@ -31,6 +31,7 @@
 #include "spawn.h"
 #include "menu.h"
 #include "hud.h"
+#include "animated_dispatch.h"
 #include "player_anim.h"
 #include "qa.h"
 #include <stdio.h>
@@ -833,7 +834,8 @@ static void draw_scene(World *world, int jim_model_ok)
 
         /* Player: dedicated anim path. */
         if (jim_model_ok && strcmp(e->type, "3JIM") == 0) {
-            PlayerAnimSample sample = player_anim_sample((PlayerAnim)e->user_flag);
+            PlayerAnimSample sample =
+                player_anim_sample_entity(e, (PlayerAnim)e->user_flag);
             if (sample.model) {
                 renderer_draw_model_anim(sample.model, 0, e->x, e->y, e->z,
                                          e->ry + 3.14159265f, 1.0f,
@@ -854,22 +856,30 @@ static void draw_scene(World *world, int jim_model_ok)
             if (m) {
                 renderer_set_hide_untextured_groups(0);
                 if (m->frame_count > 1) {
-                    float fps = m->framespeed > 0.0f ? m->framespeed : 10.0f;
-                    float frame_pos = e->anim_time * fps;
-                    int last = m->frame_count - 1;
-                    int base = (int)floorf(frame_pos);
+                    AnimatedDispatchSample ds;
                     int a, b;
-                    float lerp = frame_pos - floorf(frame_pos);
-                    if (e->cutscene_anim_loop) {
-                        a = base % m->frame_count;
-                        b = (a + 1) % m->frame_count;
-                    } else if (base >= last) {
-                        a = last;
-                        b = last;
-                        lerp = 0.0f;
+                    float lerp;
+                    if (animated_dispatch_sample(e, &ds)) {
+                        a = ds.frame_a;
+                        b = ds.frame_b;
+                        lerp = ds.lerp;
                     } else {
-                        a = base;
-                        b = base + 1;
+                        float fps = m->framespeed > 0.0f ? m->framespeed : 10.0f;
+                        float frame_pos = e->anim_time * fps;
+                        int last = m->frame_count - 1;
+                        int base = (int)floorf(frame_pos);
+                        lerp = frame_pos - floorf(frame_pos);
+                        if (e->cutscene_anim_loop) {
+                            a = base % m->frame_count;
+                            b = (a + 1) % m->frame_count;
+                        } else if (base >= last) {
+                            a = last;
+                            b = last;
+                            lerp = 0.0f;
+                        } else {
+                            a = base;
+                            b = base + 1;
+                        }
                     }
                     renderer_draw_model_anim(m, tex, e->x, e->y, e->z,
                                              e->ry, 1.0f, a, b, lerp);

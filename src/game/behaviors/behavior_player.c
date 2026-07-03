@@ -41,6 +41,7 @@ static void player_on_spawn(Entity *e, World *w) {
     e->user_flag = PA_IDLE;
     e->user_float = 0.0f;       /* pickup-animation countdown (sec) */
     s_last_items_collected = 0;
+    player_anim_bind_entity(e);
     if (!g_player) g_player = e;
 }
 
@@ -65,7 +66,7 @@ static void player_on_update(Entity *e, World *w, float dt) {
        driving pose so the visible, seated Jimmy reads as riding. */
     if (behavior_vehicle_riding()) {
         e->user_flag = (int)PA_DRIVE;
-        player_anim_advance(PA_DRIVE, dt);
+        player_anim_advance_entity(e, PA_DRIVE, dt);
         return;
     }
 
@@ -74,7 +75,7 @@ static void player_on_update(Entity *e, World *w, float dt) {
         PlayerAnim anim = (cut_pose >= 0) ? (PlayerAnim)cut_pose : PA_IDLE;
         e->vx = e->vz = 0.0f;
         e->user_flag = (int)anim;
-        player_anim_advance(anim, dt);
+        player_anim_advance_entity(e, anim, dt);
         return;
     }
     if (input_just_pressed(SDL_SCANCODE_N))
@@ -173,7 +174,7 @@ static void player_on_update(Entity *e, World *w, float dt) {
         anim = PA_IDLE;
     }
     e->user_flag = (int)anim;
-    player_anim_advance(anim, dt);
+    player_anim_advance_entity(e, anim, dt);
 }
 
 const EntityVTable vt_player = {

@@ -3,6 +3,8 @@
 
 #include "../engine/assets/ase_loader.h"
 
+struct Entity;
+
 typedef enum {
     PA_IDLE      = 0,
     PA_RUN       = 1,
@@ -33,10 +35,14 @@ typedef struct {
 int player_anim_init(unsigned int shared_texture_id);
 void player_anim_destroy(void);
 void player_anim_advance(PlayerAnim a, float dt);
+void player_anim_bind_entity(struct Entity *e);
+void player_anim_advance_entity(struct Entity *e, PlayerAnim a, float dt);
 
 /* Returns the loaded model for the given anim, or the IDLE model if the
    requested one didn't load. NULL if nothing loaded. */
 const AseModel *player_anim_model(PlayerAnim a);
 PlayerAnimSample player_anim_sample(PlayerAnim a);
+PlayerAnimSample player_anim_sample_entity(const struct Entity *e,
+                                           PlayerAnim a);
 
 #endif

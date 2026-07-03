@@ -47,6 +47,12 @@ typedef struct AnimatedDispatch {
     int anim_ended_fires;          /* oracle-visible hook fire count */
 } AnimatedDispatch;
 
+typedef struct AnimatedDispatchSample {
+    int frame_a;
+    int frame_b;
+    float lerp;
+} AnimatedDispatchSample;
+
 void animated_dispatch_set_key_strings(const char *suffix_base,
                                        const char *suffix_alt,
                                        const char *prefix);
@@ -76,5 +82,6 @@ void animated_dispatch_set_anim_ended_hook(Entity *e,
 
 const char *animated_dispatch_active_alias(const Entity *e);
 int animated_dispatch_completed(const Entity *e);
+int animated_dispatch_sample(const Entity *e, AnimatedDispatchSample *out);
 
 #endif

@@ -1,7 +1,9 @@
 #include "player_anim.h"
+#include "animated_dispatch.h"
 #include "../engine/assets/asset_cache.h"
 #include <stdio.h>
 #include <string.h>
+#include <strings.h>
 #include <math.h>
 
 static const char *POSE_PATHS[PA_COUNT] = {
@@ -21,10 +23,29 @@ static const char *POSE_PATHS[PA_COUNT] = {
     "assets/ase/jimdrive.ASE",
 };
 
+static const char *POSE_DISPATCH_NAMES[PA_COUNT] = {
+    "STOP",
+    "RUN",
+    "LEFT",
+    "RIGHT",
+    "BACK",
+    "JUMP",
+    "FALL",
+    "PICKUP",
+    "SWING",
+    "LADDER",
+    "TALK",
+    "BUTTONS",
+    "PLAY",
+    "DRIVE",
+};
+
 static unsigned int g_shared_tex = 0;
 static int          g_loaded[PA_COUNT];
 static PlayerAnim   g_current_anim = PA_IDLE;
 static float        g_clip_time = 0.0f;
+static AnimatedClip g_dispatch_clips[PA_COUNT];
+static int          g_dispatch_clip_ready[PA_COUNT];
 
 static void copy_shared_jimmy_uvs(AseModel *dst, const AseModel *src) {
     if (!dst || !src || !dst->frames || !src->frames) return;
@@ -64,8 +85,41 @@ static void ensure_shared_jimmy_clip_data(PlayerAnim a, AseModel *m) {
 static int anim_loops(PlayerAnim a) {
     return a == PA_IDLE || a == PA_RUN || a == PA_LEFT ||
            a == PA_RIGHT || a == PA_BACKPEDAL || a == PA_FALL ||
-           a == PA_SWING || a == PA_LADDER || a == PA_TALK ||
+           a == PA_SWING || a == PA_TALK ||
            a == PA_DRIVE;
+}
+
+static const char *dispatch_name(PlayerAnim a) {
+    if (a < 0 || a >= PA_COUNT) a = PA_IDLE;
+    return POSE_DISPATCH_NAMES[a];
+}
+
+static void dispatch_record_name(PlayerAnim a, char *dst, size_t dst_size) {
+    snprintf(dst, dst_size, "HI%s", dispatch_name(a));
+}
+
+static int refresh_dispatch_clip(PlayerAnim a) {
+    if (a < 0 || a >= PA_COUNT) return 0;
+    const AseModel *m = player_anim_model(a);
+    if (!m) return 0;
+    float fps = m->framespeed > 0.0f ? m->framespeed : 10.0f;
+    g_dispatch_clips[a].frame_count = m->frame_count > 0 ? m->frame_count : 1;
+    g_dispatch_clips[a].ms_per_frame = fps > 0.0f ? 1000.0f / fps : 0.0f;
+    g_dispatch_clip_ready[a] = 1;
+    return 1;
+}
+
+static void player_anim_dispatch_ended(Entity *e) {
+    const char *alias = animated_dispatch_active_alias(e);
+    if (!alias) return;
+
+    /* Native gameplay currently represents the original completion consumer
+       only for the dormant ladder state. FENCE/SPLAT/HIT do not have native
+       player states yet, so they stay documented as blocked. */
+    if (strcasecmp(alias, "LADDER") == 0) {
+        e->user_flag = (int)PA_IDLE;
+        (void)animated_dispatch_set_by_name(e, "STOP", 1);
+    }
 }
 
 int player_anim_init(unsigned int shared_texture_id) {
@@ -96,6 +150,7 @@ int player_anim_init(unsigned int shared_texture_id) {
 void player_anim_destroy(void) {
     /* Models are owned by asset_cache now — asset_cache_destroy_all handles them. */
     for (int i = 0; i < PA_COUNT; i++) g_loaded[i] = 0;
+    for (int i = 0; i < PA_COUNT; i++) g_dispatch_clip_ready[i] = 0;
     g_shared_tex = 0;
     g_current_anim = PA_IDLE;
     g_clip_time = 0.0f;
@@ -130,6 +185,50 @@ void player_anim_advance(PlayerAnim a, float dt) {
     }
 }
 
+void player_anim_bind_entity(Entity *e) {
+    if (!e) return;
+
+    animated_dispatch_set_key_strings("HI", "HI", "");
+    (void)animated_dispatch_init_entity(e);
+    animated_dispatch_set_anim_ended_hook(e, player_anim_dispatch_ended);
+
+    for (int i = 0; i < PA_COUNT; i++) {
+        char rec_name[64];
+        dispatch_record_name((PlayerAnim)i, rec_name, sizeof rec_name);
+        if (animated_dispatch_find_record(e, rec_name))
+            continue;
+        if (!g_dispatch_clip_ready[i] && !refresh_dispatch_clip((PlayerAnim)i))
+            continue;
+        (void)animated_dispatch_create_record(e, rec_name, &g_dispatch_clips[i]);
+    }
+}
+
+void player_anim_advance_entity(Entity *e, PlayerAnim a, float dt) {
+    if (!e) {
+        player_anim_advance(a, dt);
+        return;
+    }
+    if (a < 0 || a >= PA_COUNT) a = PA_IDLE;
+
+    player_anim_bind_entity(e);
+    const char *name = dispatch_name(a);
+    const char *active = animated_dispatch_active_alias(e);
+    int changed = !active || strcasecmp(active, name) != 0;
+
+    if (changed) {
+        AnimatedDispatchResult r =
+            animated_dispatch_set_by_name(e, name, anim_loops(a));
+        if (r == ANIMATED_DISPATCH_NOT_FOUND) {
+            player_anim_advance(a, dt);
+        }
+        return;
+    }
+
+    if (dt > 0.0f) {
+        animated_dispatch_update(e, dt);
+    }
+}
+
 PlayerAnimSample player_anim_sample(PlayerAnim a) {
     PlayerAnimSample s;
     s.model = player_anim_model(a);
@@ -158,4 +257,27 @@ PlayerAnimSample player_anim_sample(PlayerAnim a) {
         }
     }
     return s;
+}
+
+PlayerAnimSample player_anim_sample_entity(const Entity *e, PlayerAnim a) {
+    PlayerAnimSample s;
+    s.model = player_anim_model(a);
+    s.frame_a = 0;
+    s.frame_b = 0;
+    s.lerp = 0.0f;
+    if (!s.model || s.model->frame_count <= 1)
+        return s;
+
+    const char *active = animated_dispatch_active_alias(e);
+    if (active && strcasecmp(active, dispatch_name(a)) == 0) {
+        AnimatedDispatchSample ds;
+        if (animated_dispatch_sample(e, &ds)) {
+            s.frame_a = ds.frame_a;
+            s.frame_b = ds.frame_b;
+            s.lerp = ds.lerp;
+            return s;
+        }
+    }
+
+    return player_anim_sample(a);
 }

@@ -27,9 +27,12 @@
 
 #include "behaviors.h"
 #include "behavior_base.h"
+#include "../animated_dispatch.h"
+#include "../../engine/assets/asset_cache.h"
 #include "../../engine/audio.h"
 #include "../player_anim.h"
 #include <math.h>
+#include <stddef.h>
 #include <string.h>
 #include <strings.h>
 #include <stdio.h>
@@ -254,6 +257,57 @@ static const CutSceneActorAnim ACTOR_ANIMS[] = {
     { "3ULT", "FLEX",   "assets/ase/ultraflex.ASE",     NULL },
     { "3ULT", "WHISPER","assets/ase/ultrawhisper.ASE",  NULL },
 };
+
+static AnimatedClip g_actor_anim_clips[sizeof(ACTOR_ANIMS) / sizeof(ACTOR_ANIMS[0])];
+static int g_actor_anim_clip_ready[sizeof(ACTOR_ANIMS) / sizeof(ACTOR_ANIMS[0])];
+
+static void cutscene_dispatch_record_name(const char *anim,
+                                          char *dst, size_t dst_size) {
+    snprintf(dst, dst_size, "HI%s", anim ? anim : "");
+}
+
+static int cutscene_prepare_actor_record(Entity *target, int idx) {
+    if (!target || idx < 0 ||
+        idx >= (int)(sizeof(ACTOR_ANIMS) / sizeof(ACTOR_ANIMS[0])))
+        return 0;
+
+    char rec_name[64];
+    cutscene_dispatch_record_name(ACTOR_ANIMS[idx].anim,
+                                  rec_name, sizeof rec_name);
+    if (animated_dispatch_find_record(target, rec_name))
+        return 1;
+
+    AseModel *m = model_cache_get(ACTOR_ANIMS[idx].model_path);
+    if (!m) return 0;
+
+    float fps = m->framespeed > 0.0f ? m->framespeed : 10.0f;
+    g_actor_anim_clips[idx].frame_count = m->frame_count > 0 ? m->frame_count : 1;
+    g_actor_anim_clips[idx].ms_per_frame = fps > 0.0f ? 1000.0f / fps : 0.0f;
+    g_actor_anim_clip_ready[idx] = 1;
+    return animated_dispatch_create_record(target, rec_name,
+                                           &g_actor_anim_clips[idx]) != NULL;
+}
+
+static void cutscene_bind_actor_dispatch(Entity *target) {
+    if (!target) return;
+
+    animated_dispatch_set_key_strings("HI", "HI", "");
+    (void)animated_dispatch_init_entity(target);
+    for (int i = 0; i < (int)(sizeof(ACTOR_ANIMS) / sizeof(ACTOR_ANIMS[0])); i++) {
+        if (strncmp(target->type, ACTOR_ANIMS[i].fourcc, 4) != 0)
+            continue;
+        if (!g_actor_anim_clip_ready[i])
+            (void)cutscene_prepare_actor_record(target, i);
+        else {
+            char rec_name[64];
+            cutscene_dispatch_record_name(ACTOR_ANIMS[i].anim,
+                                          rec_name, sizeof rec_name);
+            if (!animated_dispatch_find_record(target, rec_name))
+                (void)animated_dispatch_create_record(target, rec_name,
+                                                      &g_actor_anim_clips[i]);
+        }
+    }
+}
 
 static const CutSceneActorAnim *cutscene_actor_anim(const Entity *target,
                                                     const char *anim) {
@@ -584,6 +638,8 @@ static void cutscene_apply_target_anim(Entity *target, const char *anim, int loo
     if (target != g_player) {
         const CutSceneActorAnim *a = cutscene_actor_anim(target, anim);
         if (!a) return;
+        cutscene_bind_actor_dispatch(target);
+        (void)animated_dispatch_set_by_name(target, anim, loop);
         cutscene_copy(target->cutscene_model, sizeof(target->cutscene_model),
                       a->model_path);
         cutscene_copy(target->cutscene_texture, sizeof(target->cutscene_texture),
@@ -595,7 +651,7 @@ static void cutscene_apply_target_anim(Entity *target, const char *anim, int loo
     int pose = cutscene_anim_to_player_pose(anim);
     if (pose < 0) return;
     target->user_flag = pose;
-    player_anim_advance((PlayerAnim)pose, 0.0f);
+    player_anim_advance_entity(target, (PlayerAnim)pose, 0.0f);
 }
 
 static void cutscene_activate_current(World *w, Entity *target) {
