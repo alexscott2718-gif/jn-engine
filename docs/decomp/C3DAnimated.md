@@ -182,25 +182,136 @@ this target is `C3DPlayer` vtable-4 slot 65 (`0043a900`,
 
 `event-animation-dispatch`: `linked-blocked`.
 
-The original side is now L1-backed, but native has no 1:1 `C3DAnimated`
-animation-record subsystem. Current native `behavior_cutscene.c` dispatches
-cutscene actor poses through a static `ACTOR_ANIMS[]` alias table (85 rows in
-the current tree, not the old worklist's 53-row shape): non-player
-targets copy `cutscene_model`, optional texture, loop flag, and reset
-`anim_time`; Jimmy maps aliases to the separate `PlayerAnim` enum and calls
-`player_anim_advance`. Native `player_anim.c` then advances hardcoded Jimmy
-ASE clips with global `g_current_anim`/`g_clip_time`. Native
-`behavior_animsprite.c` is the separate `C3DAnimatedSprite`/`3ANI` billboard
-frame animator, not the OMedia morph-animation record path.
+The original side is now L1-backed, and the native port target is the recovered
+OMedia animation-record dispatcher, not the existing cutscene pose table. The
+port-in-progress is tracked in `docs/c3danimated_dispatch_port_plan.md`; until
+runtime wiring lands, the certificate stays `linked-blocked`.
 
-There is therefore no native `SetAnim3DByName` record lookup, OMedia DB import,
-or vtable-4 slot-65 `AnimEnded` hook to certify. An oracle over the current
-native cutscene/player pose table would certify a different design, so the
-row returns to native-port until that mechanism is ported 1:1.
+### OMedia runtime resolution
 
-The existing `C3DAnimated`/`ase-deserialization` certificate remains
-`linked-blocked` for the separate self-comparison reason documented in
-`docs/linkage_certificates.csv`; target 7 does not change that row.
+The embedded `OMediaAnim` begins at adjusted `+0x90`. The decisive source is the
+OMT 2.5 tree at
+`~/omt-src/open-media-toolkit-master/sources/OMTClasses/World/Anim/OMediaAnim.{h,cpp}`,
+with `omt_WMilliSec` confirmed as `float` in `OMediaWorldUnits.h:40-41`.
+
+| Adjusted offset / slot | OMT name | Native port meaning |
+|---:|---|---|
+| `+0x94` | `anim_def` | Applied animation definition / clip pointer. |
+| `+0x98` | `current_frame` | Current frame cursor; native uses `cur_frame`, with `-1` for no frame. |
+| `+0x9c` | `next_frame` | OMedia interpolation state; out of scope for dispatch certification. |
+| `+0xa0` | `current_sequence` | Sequence index; collapsed to one native clip sequence. |
+| `+0xa4` | `updatecount` | OMedia internal update counter; not needed by the event dispatch. |
+| `+0xa8` | `pause_count` | Pause gate for frame advance. |
+| `+0xac` | `play_timebased` | Always forced true by `SetAnim3DByName` / slot 57. |
+| `+0xad` | `play_loop` | Completion gate: loops never fire slot 65. |
+| `+0xae` | `play_reverse` | Not set by recovered paths; intentionally not ported. |
+| `+0xaf` | `play_started` | Timebase priming flag. |
+| `+0xb0` | `play_pingpong` | Not set by recovered paths; intentionally not ported. |
+| `+0xb4` | `current_frame_tbcount` | Remaining ms for the current frame. |
+| vtable `+0xc` | `set_anim_def` | Clip application; resets frame/sequence only when the def changes. |
+| vtable `+0x10` | `setcurrentsequence(long, bool restart)` | Sequence select; second arg is the recovered loop/restart flag. |
+| vtable `+0x1c` | `getcurrentframe_pos()` | Returns `0` when there is no def/current frame. |
+| vtable `+0x24` | `setplay_timebased(bool)` | Forces time-based playback and resets timer phase. |
+
+Consequences for the native port:
+
+1. The last-frame hook is gated by `play_loop`, not by pause. Pause stops
+   `OMediaAnim::update_logic` frame advance, but a paused one-shot already at
+   its last frame still re-fires slot 65 every update.
+2. There is no completion latch. Non-looping clips hold at the last frame;
+   `C3DPlayer::OnPlayerAnimEnded` consumes the repeated event by switching
+   animation state.
+3. `SetAnim3DByName(name, loop_flag)` zeroes `anim_clock` after the ready flags
+   pass, even on a lookup miss. Re-selecting the same record preserves the
+   frame cursor but resets timer phase; selecting a different record resets the
+   frame cursor through the def-change path.
+
+### Lookup-key composition
+
+Earlier prose implied appending a shape suffix. The L1 copy idioms correct that:
+the mode-selected global is copied first, then the caller name is appended into
+an 80-byte stack key. Mode `0` uses `DAT_004ed3dc`, mode `1` uses
+`DAT_004ed3e0`, and all other mode words use `DAT_004f81a8`. The global data
+contents are unrecovered, so native exposes them as settable key strings.
+
+For modes `0` and `1`, the visible/current name buffer is pre-copied from the
+caller name before lookup, even on a miss. For other modes, the name buffer is
+updated only after a successful record lookup.
+
+### Method map
+
+| Original method | Native target | Notes |
+|---|---|---|
+| `InitAnim3DDatabase` | `animated_dispatch_init_entity` | Collapses OMedia DB creation, builder registration, and default-shape seeding to a lazy per-entity dispatch state with ready flags set. |
+| `CreateAnim3DRecord` | `animated_dispatch_create_record` | Stores a native clip pointer instead of importing an `A3dm`; `clip == NULL` preserves the failed-import record shape. |
+| `FindAnim3DRecordByName` | `animated_dispatch_find_record` | Case-insensitive linked-list lookup under the two ready flags. |
+| `SetAnim3DByName` | `animated_dispatch_set_by_name` | Ready guards, clock reset, key composition, record lookup, sequence select, and clip application. |
+| `SelectAnim3DRecordIndex` | `animated_dispatch_select_index` | Writes current index, loop flag, timebase phase reset, and frame-count refresh. |
+| `GetCurrentAnim3DRecord` / `GetCurrentAnim3DObject` | `animated_dispatch_current_record` / `animated_dispatch_current_clip` | Read-only accessors for the current record and clip. |
+| `UpdateAnimated` dispatch slice | `animated_dispatch_update` | Only the animation-time walk and completion hook; `PickupLink`, `Update3DObject`, and `CanMove` stay with existing native behavior paths. |
+| vtable-4 slot 65 base | `NULL` hook | Base no-op at `00472970` becomes a null callback. |
+| `C3DPlayer` slot 65 | `animated_dispatch_set_anim_ended_hook` | Future wiring target for the player return-to-STOP/FENCE/LADDER/SPLAT/HIT behavior. |
+| `SetAnim3DPaused` | `animated_dispatch_set_paused` | Edge-guarded pause count mirror; unpause resets `play_started`. |
+| `ApplyAnimatedEnabledState` / `ApplyAnimatedCollisionVisibleState` | existing `behavior_base.c` gates | Not part of the dispatch module scope. |
+
+### Native state carrier
+
+`Entity` gets one lazily allocated pointer, `struct AnimatedDispatch
+*anim_dispatch`; the module owns allocation/freeing. The state mirrors the
+original offsets needed by the recovered dispatch path:
+
+| Native field | Original evidence | Purpose |
+|---|---:|---|
+| `records`, `record_count` | record list / creation count | Linked animation records and id assignment. |
+| `AnimatedRecord::name[64]` | record name buffer | Case-insensitive lookup key target. |
+| `AnimatedRecord::next` | `+0x40` | Tail-appended linked list. |
+| `AnimatedRecord::seq_id` | `+0x44` | Creation id / sequence id. |
+| `AnimatedRecord::frame_count` | `+0x48` | Cached completion threshold. |
+| `AnimatedRecord::clip` | `+0x4c` | Native stand-in for the imported DB object/def. |
+| `ready_a`, `ready_b` | `+0x634/+0x635` | Lookup/select/update guard bytes. |
+| `shape_mode` | adjusted `+0x580` | Selects the key lead string and name-buffer side effect. |
+| `clock` | adjusted `+0x584` | Per-dispatch animation clock. |
+| `current_index` | adjusted `+0x588` | Current record/sequence id. |
+| `current_clip` | adjusted `+0x58c` | Applied native clip pointer. |
+| `current` | adjusted `+0x62c` | Current animation record. |
+| `current_name[64]` | `+0x17a` region | Visible/current name buffer. |
+| `play_loop` | adjusted `+0xad` | Last-frame hook gate. |
+| `paused` | adjusted `+0x654` mirror / `pause_count` | Stops frame advance only. |
+| `play_started`, `tb_count_ms`, `cur_frame` | OMedia timebase fields | Time-based frame walk and phase reset. |
+| `on_anim_ended`, `anim_ended_fires` | vtable-4 slot 65 | Hook callback and oracle-visible fire count. |
+
+### Deliberate deviations
+
+1. Native clips are treated as single-sequence defs. This collapses OMedia's
+   sequence-vector indirection, positional mapping, and refresh-vs-clamp
+   interplay. The shipped-data pass still needs to validate that exported
+   `A3dm` defs are single-sequence for this dispatch surface.
+2. No OMedia database is ported. The native record stores an `AnimatedClip`
+   pointer that represents the imported `A3dm` timing/frame-count data.
+3. Frame advance is merged into the dispatch update. The original timebase uses
+   float milliseconds (`omt_WMilliSec`), so there is no integer-truncation gap.
+   `play_reverse` and `play_pingpong` are not set by recovered paths.
+4. Caller buffers are not mutated. The original truncates the caller's record
+   name buffer in place on success; native keeps truncation copy-side only.
+5. The 80-byte lookup key is bounded with `snprintf`/explicit copies instead of
+   preserving a possible original stack overrun.
+6. MEMLOG and inherited trace calls are intentionally dropped.
+
+### Scope and certificate status
+
+This port covers dispatch, update, and completion-event logic only. Visual
+fidelity, actor mesh selection, and player movement remain on their existing
+native-by-eye tracks, and the separate `C3DAnimated`/`ase-deserialization`
+certificate remains `linked-blocked` for the self-comparison reason documented
+in `docs/linkage_certificates.csv`.
+
+Historical native gap note: current native `behavior_cutscene.c` dispatches
+cutscene actor poses through a static `ACTOR_ANIMS[]` alias table; Jimmy maps
+aliases to the separate `PlayerAnim` enum and `player_anim.c` advances hardcoded
+ASE clips. Native `behavior_animsprite.c` is the separate `C3DAnimatedSprite` /
+`3ANI` billboard frame animator, not this OMedia morph-animation record path.
+An oracle over those existing native systems would certify a different design,
+so the row stays blocked until the recovered dispatcher is wired and certified.
 
 ## Confidence
 
@@ -211,13 +322,17 @@ Validation: Static Ghidra recovery plus PE vtable probe; not runtime-validated.
 Open questions:
 - Apply full `C3DAnimated`/OMedia morph structs so adjusted vtable-4 field indexes can be mapped to absolute offsets without colliding with primary property offsets.
 - Identify constructor(s) and the helper at `FUN_0040d300` used by the deleting destructor.
-- Name the inherited setters called by slots `0x58`, `0x110`, `0x118`, and `0x11c`.
+- Name the inherited setters called by slots `0x58` and `0x118`; slots `0x110`/`0x11c` are partially resolved through the shape-selection path, but slot `+0x10c` remains unnamed.
 - Confirm the target lookup semantics behind `PickupLink` and `FUN_00474070`.
 - Define the material fields at offsets `0x30`, `0x34`, `0x38`, and `0x4c..0x58`.
+- Validate the single-sequence-per-`A3dm` assumption against shipped exported animation defs.
+- Locate the writer for the loader-ready bytes at adjusted `+0x634/+0x635` (`InitAnim3DDatabase` writes a nearby byte at adjusted `+0x570`).
+- Recover the slot-48 (`+0xc0`) setter body; current evidence assumes it is the `set_anim_def` application path.
 
 ## Notes
 
 - Evidence: `DumpClass.java C3DAnimated /tmp/decomp_C3DAnimated.md` (`slots=368`, `owned_methods=18`, `offsets=10`).
 - Target 7 evidence: `docs/decomp/evidence/c3danimated_target7.md`.
+- OMT source evidence: `~/omt-src/open-media-toolkit-master/sources/OMTClasses/World/Anim/OMediaAnim.h`, `OMediaAnim.cpp`, `OMediaWorldUnits.h:40-41`, and `OMediaClassStreamer.h:49-55`.
 - Extra raw vtable targets `0040e1f0`, `0040d9e0`, `0040da30`, `0040dab0`, `0040db10`, `0040df80`, `0040e3e0`, and `0040d350` are now function-defined in the Ghidra project and documented above.
 - String evidence from `/home/scotty/xp-jnbg-original/Neutron.exe`: `RequiredLevel`, `ExactLevel`, `RemoveLevel`, `HasCollision`, `InitiallyVisible`, `CanMove`, `SecondPass`, `PickupLink`, `MEMLOG Anim3D_CreateAnim`, `Anim3D_GetAnim`, and `MEMLOG 2 Anim3D_CreateTexture`.
