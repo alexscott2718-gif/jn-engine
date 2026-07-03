@@ -78,6 +78,12 @@ static void player_on_update(Entity *e, World *w, float dt) {
         player_anim_advance_entity(e, anim, dt);
         return;
     }
+
+    if (player_anim_entity_special_active(e)) {
+        player_anim_advance_entity(e, (PlayerAnim)e->user_flag, dt);
+        return;
+    }
+
     if (input_just_pressed(SDL_SCANCODE_N))
         input_toggle_noclip();
     /* Turbo (sticky speed boost) is toggled via the "Speed" UI button

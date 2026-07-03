@@ -9,6 +9,7 @@
 #include "behavior_tesla.h"
 #include "behavior_base.h"
 #include "../gamestate.h"
+#include "../player_anim.h"
 #include "../../engine/physics.h"
 #include <math.h>
 #include <stdio.h>
@@ -69,6 +70,7 @@ static void tesla_contact_player(Entity *e, Entity *by) {
 
     e->user_float = TESLA_HIT_COOLDOWN;
     gamestate_damage_player(TESLA_DAMAGE);
+    player_anim_react_to_damage(by, gamestate_player_is_down());
     printf("[TESLA] '%s' shocked player\n", e->tag);
 }
 

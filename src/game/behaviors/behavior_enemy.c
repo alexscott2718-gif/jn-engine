@@ -32,6 +32,7 @@
 #include "behavior_ai.h"
 #include "behavior_base.h"
 #include "../gamestate.h"
+#include "../player_anim.h"
 #include <math.h>
 #include <stddef.h>
 #include <stdio.h>
@@ -165,6 +166,7 @@ static void enemy_on_update(Entity *e, World *w, float dt) {
         e->ry = atan2f(-dx, -dz);  /* face the player */
         if (e->user_float <= 0.0f) {
             gamestate_damage_player(ENEMY_ATTACK_DAMAGE);
+            player_anim_react_to_damage(p, gamestate_player_is_down());
             e->user_float = ENEMY_ATTACK_COOLDN;
         }
     } else {

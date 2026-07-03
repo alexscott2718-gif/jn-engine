@@ -22,6 +22,18 @@ static const char *mode_lead(const AnimatedDispatch *d) {
     return g_key_prefix;
 }
 
+void animated_dispatch_clip_from_ase(AnimatedClip *out, const AseModel *model) {
+    if (!out) return;
+    memset(out, 0, sizeof(*out));
+
+    float fps = (model && model->framespeed > 0.0f) ? model->framespeed : 10.0f;
+    out->frame_count = (model && model->frame_count > 0) ? model->frame_count : 1;
+    out->ms_per_frame = fps > 0.0f ? 1000.0f / fps : 0.0f;
+    out->sequence_count = model ? 1 : 0;
+    out->sequence_index = 0;
+    out->source_framespeed = fps;
+}
+
 void animated_dispatch_set_key_strings(const char *suffix_base,
                                        const char *suffix_alt,
                                        const char *prefix) {

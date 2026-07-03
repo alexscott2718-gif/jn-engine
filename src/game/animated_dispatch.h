@@ -4,11 +4,18 @@
 #include "../engine/world.h"
 
 /* Native stand-in for one imported OMedia A3dm definition. `ms_per_frame`
-   mirrors OMediaAnimFrame::getmillisecperframe() and stays float. */
+   mirrors OMediaAnimFrame::getmillisecperframe() and stays float. The current
+   runtime imports Jimmy/cutscene animation metadata from the original ASE
+   streams, which become one OMedia sequence after import. */
 typedef struct AnimatedClip {
     int frame_count;
     float ms_per_frame;
+    int sequence_count;
+    int sequence_index;
+    float source_framespeed;
 } AnimatedClip;
+
+void animated_dispatch_clip_from_ase(AnimatedClip *out, const AseModel *model);
 
 typedef struct AnimatedRecord {
     char name[64];

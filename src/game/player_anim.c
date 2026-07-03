@@ -21,6 +21,9 @@ static const char *POSE_PATHS[PA_COUNT] = {
     "assets/ase/jimbuttons.ASE",
     "assets/ase/jimheadshrink.ASE",
     "assets/ase/jimdrive.ASE",
+    "assets/ase/jimfence.ASE",
+    "assets/ase/jimsplat.ASE",
+    "assets/ase/jimhit.ASE",
 };
 
 static const char *POSE_DISPATCH_NAMES[PA_COUNT] = {
@@ -38,6 +41,9 @@ static const char *POSE_DISPATCH_NAMES[PA_COUNT] = {
     "BUTTONS",
     "PLAY",
     "DRIVE",
+    "FENCE",
+    "SPLAT",
+    "HIT",
 };
 
 static unsigned int g_shared_tex = 0;
@@ -89,6 +95,10 @@ static int anim_loops(PlayerAnim a) {
            a == PA_DRIVE;
 }
 
+int player_anim_is_special(PlayerAnim a) {
+    return a == PA_FENCE || a == PA_LADDER || a == PA_SPLAT || a == PA_HIT;
+}
+
 static const char *dispatch_name(PlayerAnim a) {
     if (a < 0 || a >= PA_COUNT) a = PA_IDLE;
     return POSE_DISPATCH_NAMES[a];
@@ -102,21 +112,22 @@ static int refresh_dispatch_clip(PlayerAnim a) {
     if (a < 0 || a >= PA_COUNT) return 0;
     const AseModel *m = player_anim_model(a);
     if (!m) return 0;
-    float fps = m->framespeed > 0.0f ? m->framespeed : 10.0f;
-    g_dispatch_clips[a].frame_count = m->frame_count > 0 ? m->frame_count : 1;
-    g_dispatch_clips[a].ms_per_frame = fps > 0.0f ? 1000.0f / fps : 0.0f;
+    animated_dispatch_clip_from_ase(&g_dispatch_clips[a], m);
     g_dispatch_clip_ready[a] = 1;
     return 1;
 }
 
+static int completion_alias(const char *alias) {
+    return alias &&
+           (strcasecmp(alias, "FENCE") == 0 ||
+            strcasecmp(alias, "LADDER") == 0 ||
+            strcasecmp(alias, "SPLAT") == 0 ||
+            strcasecmp(alias, "HIT") == 0);
+}
+
 static void player_anim_dispatch_ended(Entity *e) {
     const char *alias = animated_dispatch_active_alias(e);
-    if (!alias) return;
-
-    /* Native gameplay currently represents the original completion consumer
-       only for the dormant ladder state. FENCE/SPLAT/HIT do not have native
-       player states yet, so they stay documented as blocked. */
-    if (strcasecmp(alias, "LADDER") == 0) {
+    if (completion_alias(alias)) {
         e->user_flag = (int)PA_IDLE;
         (void)animated_dispatch_set_by_name(e, "STOP", 1);
     }
@@ -203,12 +214,30 @@ void player_anim_bind_entity(Entity *e) {
     }
 }
 
+int player_anim_entity_special_active(const Entity *e) {
+    return e && player_anim_is_special((PlayerAnim)e->user_flag);
+}
+
+int player_anim_start_entity_state(Entity *e, PlayerAnim a) {
+    if (!e || a < 0 || a >= PA_COUNT) return 0;
+    PlayerAnim cur = (PlayerAnim)e->user_flag;
+    if (player_anim_is_special(cur) && cur != a)
+        return 0;
+    e->user_flag = (int)a;
+    player_anim_bind_entity(e);
+    AnimatedDispatchResult r =
+        animated_dispatch_set_by_name(e, dispatch_name(a), anim_loops(a));
+    return r != ANIMATED_DISPATCH_NOT_FOUND;
+}
+
 void player_anim_advance_entity(Entity *e, PlayerAnim a, float dt) {
     if (!e) {
         player_anim_advance(a, dt);
         return;
     }
     if (a < 0 || a >= PA_COUNT) a = PA_IDLE;
+    if (player_anim_entity_special_active(e) && !player_anim_is_special(a))
+        a = (PlayerAnim)e->user_flag;
 
     player_anim_bind_entity(e);
     const char *name = dispatch_name(a);
@@ -227,6 +256,10 @@ void player_anim_advance_entity(Entity *e, PlayerAnim a, float dt) {
     if (dt > 0.0f) {
         animated_dispatch_update(e, dt);
     }
+}
+
+void player_anim_react_to_damage(Entity *e, int is_down) {
+    (void)player_anim_start_entity_state(e, is_down ? PA_SPLAT : PA_HIT);
 }
 
 PlayerAnimSample player_anim_sample(PlayerAnim a) {

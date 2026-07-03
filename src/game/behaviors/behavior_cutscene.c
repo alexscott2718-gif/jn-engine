@@ -147,6 +147,14 @@ static int cutscene_anim_to_player_pose(const char *anim) {
         return PA_JUMP;
     if (strcasecmp(anim, "FALL") == 0)
         return PA_FALL;
+    if (strcasecmp(anim, "LADDER") == 0)
+        return PA_LADDER;
+    if (strcasecmp(anim, "FENCE") == 0)
+        return PA_FENCE;
+    if (strcasecmp(anim, "SPLAT") == 0)
+        return PA_SPLAT;
+    if (strcasecmp(anim, "HIT") == 0)
+        return PA_HIT;
     return -1;
 }
 
@@ -280,9 +288,7 @@ static int cutscene_prepare_actor_record(Entity *target, int idx) {
     AseModel *m = model_cache_get(ACTOR_ANIMS[idx].model_path);
     if (!m) return 0;
 
-    float fps = m->framespeed > 0.0f ? m->framespeed : 10.0f;
-    g_actor_anim_clips[idx].frame_count = m->frame_count > 0 ? m->frame_count : 1;
-    g_actor_anim_clips[idx].ms_per_frame = fps > 0.0f ? 1000.0f / fps : 0.0f;
+    animated_dispatch_clip_from_ase(&g_actor_anim_clips[idx], m);
     g_actor_anim_clip_ready[idx] = 1;
     return animated_dispatch_create_record(target, rec_name,
                                            &g_actor_anim_clips[idx]) != NULL;
@@ -650,8 +656,7 @@ static void cutscene_apply_target_anim(Entity *target, const char *anim, int loo
     }
     int pose = cutscene_anim_to_player_pose(anim);
     if (pose < 0) return;
-    target->user_flag = pose;
-    player_anim_advance_entity(target, (PlayerAnim)pose, 0.0f);
+    (void)player_anim_start_entity_state(target, (PlayerAnim)pose);
 }
 
 static void cutscene_activate_current(World *w, Entity *target) {

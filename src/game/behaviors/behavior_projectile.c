@@ -14,6 +14,7 @@
 #include "behavior_projectile.h"
 #include "behavior_enemy.h"
 #include "../gamestate.h"
+#include "../player_anim.h"
 #include "../../engine/physics.h"
 #include <math.h>
 #include <stddef.h>
@@ -80,6 +81,7 @@ static void projectile_on_update(Entity *e, World *w, float dt) {
     if (e->user_flag == PROJ_TEAM_ENEMY) {
         if (g_player && g_player->alive && physics_aabb_overlap(e, g_player)) {
             gamestate_damage_player(e->points);
+            player_anim_react_to_damage(g_player, gamestate_player_is_down());
             projectile_despawn(e);
         }
         return;

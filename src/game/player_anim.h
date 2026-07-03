@@ -20,7 +20,10 @@ typedef enum {
     PA_BUTTONS   = 11,  /* cutscene control-panel pose */
     PA_SHRINK    = 12,  /* shrink-ray target pose */
     PA_DRIVE     = 13,  /* seated/riding pose for vehicles */
-    PA_COUNT     = 14
+    PA_FENCE     = 14,  /* recovered player special-state animation */
+    PA_SPLAT     = 15,  /* recovered Jimmy impact/splat reaction */
+    PA_HIT       = 16,  /* recovered Jimmy hit reaction */
+    PA_COUNT     = 17
 } PlayerAnim;
 
 typedef struct {
@@ -37,6 +40,10 @@ void player_anim_destroy(void);
 void player_anim_advance(PlayerAnim a, float dt);
 void player_anim_bind_entity(struct Entity *e);
 void player_anim_advance_entity(struct Entity *e, PlayerAnim a, float dt);
+int  player_anim_start_entity_state(struct Entity *e, PlayerAnim a);
+int  player_anim_is_special(PlayerAnim a);
+int  player_anim_entity_special_active(const struct Entity *e);
+void player_anim_react_to_damage(struct Entity *e, int is_down);
 
 /* Returns the loaded model for the given anim, or the IDLE model if the
    requested one didn't load. NULL if nothing loaded. */
