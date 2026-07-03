@@ -198,8 +198,11 @@ original yaw_deg = degrees(native ry) − 180 (from the native player forward
 `(sin ry, 0, cos ry)` vs the original transform forward `(−sin B, 0, cos B)`).
 Documented deviations, mirroring the retarget row's style:
 
-- the native world-ray query is not wired into the demo (probe hook defaults
-  to NULL → k = 1.0); the blend/k mechanism itself IS ported and certified;
+- the original world-ray internals (`FUN_0047c210` / `0047c280` /
+  `0047c4b0`) stay untraced; since 2026-07-03 the demo probe is the native
+  world query (solid-entity AABBs + the baked collider soup), mirroring the
+  original's two-stage shape — the blend/k mechanism itself is ported and
+  oracle-certified via a synthetic probe;
 - A's variant (pan offsets, 0x854..0x85c scales, turn-around eye freeze),
   B's submode-2 scales, and the `0x851` modes are recovered above but not
   ported — they hang off player-movement state that native does not carry

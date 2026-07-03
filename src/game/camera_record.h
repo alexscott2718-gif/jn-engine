@@ -53,8 +53,9 @@ void camera_record_retarget(const Entity *target);
    original's world ray (ProbePlayerRayBlend 0043b820 -> FUN_0047c210).
    Given the ray source (the look point) and the eye target (native space),
    return nonzero and fill `hit` when world geometry blocks the ray. NULL
-   (the default) means never blocked — the native world query is not wired
-   into the demo yet; the blend/k mechanism itself is ported and certified. */
+   means never blocked. main.c wires the native world query (solid-entity
+   AABBs + the baked collider soup, mirroring the original's two-stage
+   test); the blend/k mechanism is oracle-certified via a synthetic probe. */
 typedef int (*CameraRecordRayProbe)(const float src[3], const float eye[3],
                                     float hit[3]);
 void camera_record_set_ray_probe(CameraRecordRayProbe probe);

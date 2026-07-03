@@ -115,6 +115,29 @@ static void dbg_text(int vw, int vh, float x, float y, float px,
     }
 }
 
+/* Walking-camera world ray (camera_record_set_ray_probe): the native
+   stand-in for the original's FUN_0047c210 -- smallest hit across the
+   solid-entity AABBs and the baked collider soup. The world/player
+   pointers are re-bound every FOLLOW frame so level swaps and respawns
+   (which reallocate jim) can never dangle them. */
+static const World  *g_camrec_world  = NULL;
+static const Entity *g_camrec_player = NULL;
+
+static int camrec_world_probe(const float src[3], const float eye[3],
+                              float hit[3]) {
+    if (!g_camrec_world) return 0;
+    float t = world_query_segment(g_camrec_world, g_camrec_player,
+                                  src[0], src[1], src[2],
+                                  eye[0], eye[1], eye[2]);
+    float tm = collision_segment(g_camrec_world->collision, src, eye, NULL);
+    if (tm < t) t = tm;
+    if (t >= 1.0f) return 0;
+    hit[0] = src[0] + (eye[0] - src[0]) * t;
+    hit[1] = src[1] + (eye[1] - src[1]) * t;
+    hit[2] = src[2] + (eye[2] - src[2]) * t;
+    return 1;
+}
+
 static void dbg_coords_overlay(int vw, int vh, const Entity *jim) {
     if (!g_show_coords || !jim) return;
     float deg = fmodf(jim->ry * 57.29578f, 360.0f);
@@ -1812,6 +1835,7 @@ int main(int argc, char **argv) {
     FollowCam fcam;
     follow_cam_init(&fcam);
     camera_record_init_game();
+    camera_record_set_ray_probe(camrec_world_probe);
     {
         /* Headless/QA hook: start the record-camera demo in a mode. */
         const char *cr = getenv("JN_CAMREC");
@@ -2307,8 +2331,11 @@ int main(int argc, char **argv) {
                 if (camera_record_mode() != CAMREC_OFF) {
                     /* Record-camera demo: the original DAT_00509a50
                        mechanism drives the pose (see camera_record.h). */
-                    if (camera_record_mode() == CAMREC_FOLLOW)
+                    if (camera_record_mode() == CAMREC_FOLLOW) {
+                        g_camrec_world = &world;
+                        g_camrec_player = jim;
                         camera_record_follow_update(jim, DT);
+                    }
                     camera_record_apply(cam);
                 } else {
                     follow_cam_update(&fcam, cam, jim, &world, DT);

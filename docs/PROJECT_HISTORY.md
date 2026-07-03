@@ -2008,3 +2008,13 @@ bit-exact angles (max deviation 0 table units). Mutation tested:
 flipping the native Z mirror or the y-doubling turns the oracle red.
 New linked row C3DPlayer/walking-camera-record; gate now reads
 14 linked / 15 linked-blocked.
+
+Follow-up (2026-07-03): the walking-camera collision is live -- main.c
+wires camera_record_set_ray_probe to the native world query (smallest
+hit across world_query_segment's solid-entity AABBs and the collider
+soup's collision_segment, mirroring FUN_0047c210's two-stage shape).
+On a blocked look->eye ray the certified 75%-blend/1.5x path now runs
+against real geometry; pointers are re-bound every FOLLOW frame so
+level swaps/respawns cannot dangle them. Verified headless: a synthetic
+through-the-ground segment at the level1 spawn hits at ground height,
+and FOLLOW frames the spawn identically in the open (no false hits).
