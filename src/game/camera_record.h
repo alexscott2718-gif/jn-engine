@@ -22,8 +22,8 @@ typedef struct CameraRecord {
 } CameraRecord;
 
 /* Demo modes: OFF = native follow cam; FOLLOW = record tracks the player
-   (provisional scaffolding, see camera_record_follow_update); HOLD = record
-   keeps its pose (what a NextTrigger retarget swings). */
+   through the ported UpdateWalkingCameraB record write; HOLD = record keeps
+   its pose (what a NextTrigger retarget swings). */
 enum { CAMREC_OFF = 0, CAMREC_FOLLOW = 1, CAMREC_HOLD = 2 };
 
 CameraRecord *camera_record(void);
@@ -49,8 +49,42 @@ void camera_record_local_to_world_dir(const float local[3], float out[3]);
    is unrecovered — so callers gate on the demo mode instead. */
 void camera_record_retarget(const Entity *target);
 
-/* PROVISIONAL follow scaffolding — NOT an L1 port. Placeholder until
-   UpdateWalkingCameraA/B (00438bc0/00439900) are ported 1:1. */
+/* Camera-collision hook for the walking-camera write, standing in for the
+   original's world ray (ProbePlayerRayBlend 0043b820 -> FUN_0047c210).
+   Given the ray source (the look point) and the eye target (native space),
+   return nonzero and fill `hit` when world geometry blocks the ray. NULL
+   (the default) means never blocked — the native world query is not wired
+   into the demo yet; the blend/k mechanism itself is ported and certified. */
+typedef int (*CameraRecordRayProbe)(const float src[3], const float eye[3],
+                                    float hit[3]);
+void camera_record_set_ray_probe(CameraRecordRayProbe probe);
+
+/* Port of the UpdateWalkingCameraB (00439900) record write, normal path
+   (motion_submode != 2) — the plain walking camera. L1 in
+   docs/decomp/evidence/walking_camera_record_write.md:
+
+     snap = rec.pos
+     eye  = ProjectNoisyCameraTarget(0, 200, -350)   (yaw + turn lead, 0043a5d0)
+     look = transform_local(0, 80, 0)                (00472980 via slot +0x384)
+     k    = ProbePlayerRayBlend(look, &eye)          (1.0 free / 1.5 blocked,
+                                                      eye pulled 75% to the hit)
+     rec.pos += (eye - snap) * (1.2, 2.0, 1.2) * k * dt
+     rec.angle_x/y snap to OMedia3DVector::angles(look - snap)
+
+   `pos_native` is the player position in native space; `yaw_deg`/`roll_deg`
+   are the player transform angles in original-space degrees (native bridge:
+   yaw_deg = degrees(ry) - 180, roll 0); `turn_lead_deg` is the original's
+   turn-rate lead (0x6d4). Angle-write shape: pitch += (target - pitch),
+   yaw += 14-bit-wrapped delta — both full snaps from the pre-update
+   snapshot toward the look point. */
+void camera_record_walkcam_write(const float pos_native[3], float yaw_deg,
+                                 float roll_deg, float turn_lead_deg,
+                                 float dt);
+
+/* FOLLOW-mode demo wrapper: drives camera_record_walkcam_write from the
+   native player entity. The original's turn lead (0x6d4) is player-input
+   state native does not carry; the wrapper eases a lead angle toward
+   +/-30 deg at the recovered 100 deg/s ramp from the observed yaw rate. */
 void camera_record_follow_update(const Entity *player, float dt);
 
 /* Record -> native Camera bridge, from the recovered per-frame view build

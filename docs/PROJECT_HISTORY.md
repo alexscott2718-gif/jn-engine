@@ -1987,3 +1987,14 @@ the ray hit, 1.5x catch-up). The angle extraction is the OMT2.dll import
 OMedia3DVector::angles — recovered verbatim from the LGPL Open Media
 Toolkit source (~/omt-src), table-based atan2 included. L1:
 docs/decomp/evidence/walking_camera_record_write.md.
+
+Port: camera_record_follow_update is no longer scaffolding —
+camera_record_walkcam_write implements the UpdateWalkingCameraB record
+write (normal path) 1:1: ProjectNoisy eye (0,200,-350) with turn lead,
+plain transform_local look (0,80,0), the ProbePlayerRayBlend
+75%-blend/1.5x hook (camera_record_set_ray_probe; NULL in the demo),
+scales (1.2, 2.0, 1.2), and the snapshot-anchored OMedia angles() snap.
+The FOLLOW wrapper bridges the native player (yaw_deg = degrees(ry) -
+180) and eases a +/-30 deg lead at the recovered 100 deg/s ramp from the
+observed yaw rate. Verified headless via xvfb: FOLLOW frames the level1
+spawn from behind/above at the original offsets.
