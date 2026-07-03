@@ -183,9 +183,12 @@ this target is `C3DPlayer` vtable-4 slot 65 (`0043a900`,
 `event-animation-dispatch`: `linked-blocked`.
 
 The original side is now L1-backed, and the native port target is the recovered
-OMedia animation-record dispatcher, not the existing cutscene pose table. The
-port-in-progress is tracked in `docs/c3danimated_dispatch_port_plan.md`; until
-runtime wiring lands, the certificate stays `linked-blocked`.
+OMedia animation-record dispatcher, not the old cutscene pose table. Runtime
+wiring now reaches the staged dispatcher from `behavior_base.c`, cutscene actor
+selection, and entity-owned player animation state, but the certificate stays
+`linked-blocked`: the live clip frame counts/timing still come from native
+exported ASE `AseModel` data rather than a proven original `A3dm` import path,
+and native `C3DPlayer` still lacks FENCE/SPLAT/HIT runtime states.
 
 ### OMedia runtime resolution
 
@@ -248,11 +251,12 @@ updated only after a successful record lookup.
 | `SetAnim3DByName` | `animated_dispatch_set_by_name` | Ready guards, clock reset, key composition, record lookup, sequence select, and clip application. |
 | `SelectAnim3DRecordIndex` | `animated_dispatch_select_index` | Writes current index, loop flag, timebase phase reset, and frame-count refresh. |
 | `GetCurrentAnim3DRecord` / `GetCurrentAnim3DObject` | `animated_dispatch_current_record` / `animated_dispatch_current_clip` | Read-only accessors for the current record and clip. |
-| `UpdateAnimated` dispatch slice | `animated_dispatch_update` | Only the animation-time walk and completion hook; `PickupLink`, `Update3DObject`, and `CanMove` stay with existing native behavior paths. |
+| `UpdateAnimated` dispatch slice | `animated_dispatch_update`; called by `behavior_animated_update_base` | Only the animation-time walk and completion hook; `PickupLink`, `Update3DObject`, and `CanMove` stay with existing native behavior paths. |
 | vtable-4 slot 65 base | `NULL` hook | Base no-op at `00472970` becomes a null callback. |
-| `C3DPlayer` slot 65 | `animated_dispatch_set_anim_ended_hook` | Future wiring target for the player return-to-STOP/FENCE/LADDER/SPLAT/HIT behavior. |
+| `C3DPlayer` slot 65 | `animated_dispatch_set_anim_ended_hook` via `player_anim.c` | Native consumes the represented dormant `LADDER` case by returning to `STOP`; `FENCE`, `SPLAT`, and `HIT` remain blocked because native has no matching runtime player states yet. |
 | `SetAnim3DPaused` | `animated_dispatch_set_paused` | Edge-guarded pause count mirror; unpause resets `play_started`. |
 | `ApplyAnimatedEnabledState` / `ApplyAnimatedCollisionVisibleState` | existing `behavior_base.c` gates | Not part of the dispatch module scope. |
+| render frame read | `animated_dispatch_sample` | Native renderer consumes dispatcher frame/lerp state for wired cutscene/player clips, falling back to legacy `anim_time` only when no dispatch sample exists. |
 
 ### Native state carrier
 
@@ -297,6 +301,27 @@ original offsets needed by the recovered dispatch path:
    preserving a possible original stack overrun.
 6. MEMLOG and inherited trace calls are intentionally dropped.
 
+### Runtime wiring landed 2026-07-03
+
+- `behavior_animated_update_base` now calls `animated_dispatch_update` after the
+  existing level/visibility/collision gates and `anim_time` accumulation. This
+  is inert for entities without `anim_dispatch`.
+- `behavior_cutscene.c` keeps the docs-backed `ACTOR_ANIMS[]` asset map as the
+  native source of model/texture paths, but lazily creates `HI`-prefixed
+  dispatch records from that table and calls `animated_dispatch_set_by_name`
+  for target actor aliases. Rendering reads `animated_dispatch_sample` when a
+  selected dispatch clip exists.
+- `player_anim.c` now binds per-player dispatch records from the loaded Jimmy
+  `AseModel` clips, uses `player_anim_advance_entity` from
+  `behavior_player.c`, and exposes `player_anim_sample_entity` for rendering.
+  The bound completion hook consumes only the represented dormant `LADDER`
+  state by selecting `STOP`; it intentionally does not invent native
+  FENCE/SPLAT/HIT state.
+- `tools/linkage_oracles/C3DAnimated_runtime.py` compiles the real runtime
+  modules and mutation-tests these wiring points: removing the base update call,
+  the cutscene `SetAnim3DByName` call, or the player ladder hook turns the
+  oracle red.
+
 ### Scope and certificate status
 
 This port covers dispatch, update, and completion-event logic only. Visual
@@ -305,13 +330,13 @@ native-by-eye tracks, and the separate `C3DAnimated`/`ase-deserialization`
 certificate remains `linked-blocked` for the self-comparison reason documented
 in `docs/linkage_certificates.csv`.
 
-Historical native gap note: current native `behavior_cutscene.c` dispatches
-cutscene actor poses through a static `ACTOR_ANIMS[]` alias table; Jimmy maps
-aliases to the separate `PlayerAnim` enum and `player_anim.c` advances hardcoded
-ASE clips. Native `behavior_animsprite.c` is the separate `C3DAnimatedSprite` /
-`3ANI` billboard frame animator, not this OMedia morph-animation record path.
-An oracle over those existing native systems would certify a different design,
-so the row stays blocked until the recovered dispatcher is wired and certified.
+Remaining blocker: the live records are still backed by exported/native ASE
+clip metadata (`AseModel::frame_count` and `framespeed`) rather than recovered
+OMedia `A3dm` sequence definitions. That is good enough to wire the recovered
+runtime control flow without changing playable behavior, but not enough to
+claim the original clip timing/import data is faithfully linked. Native
+`behavior_animsprite.c` remains the separate `C3DAnimatedSprite` / `3ANI`
+billboard frame animator, not this OMedia morph-animation record path.
 
 ## Confidence
 

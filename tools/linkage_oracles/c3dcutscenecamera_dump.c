@@ -16,6 +16,8 @@
 #include <string.h>
 
 #include "../../src/game/behaviors/behaviors.h"
+#include "../../src/game/animated_dispatch.h"
+#include "../../src/engine/assets/asset_cache.h"
 #include "../../src/game/player_anim.h"
 
 Entity *g_player = NULL;
@@ -45,7 +47,36 @@ float audio_duration_db(const char *db, int handle) {
 }
 void audio_channel_halt(int channel) { (void)channel; }
 void player_anim_advance(PlayerAnim a, float dt) { (void)a; (void)dt; }
+void player_anim_advance_entity(Entity *e, PlayerAnim a, float dt) {
+    (void)e; (void)a; (void)dt;
+}
 void behavior_animated_spawn_base(Entity *e) { (void)e; }
+AseModel *model_cache_get(const char *path) { (void)path; return NULL; }
+void animated_dispatch_set_key_strings(const char *suffix_base,
+                                       const char *suffix_alt,
+                                       const char *prefix) {
+    (void)suffix_base; (void)suffix_alt; (void)prefix;
+}
+AnimatedDispatch *animated_dispatch_init_entity(Entity *e) {
+    (void)e;
+    return NULL;
+}
+AnimatedRecord *animated_dispatch_create_record(Entity *e, const char *name,
+                                                const AnimatedClip *clip) {
+    (void)e; (void)name; (void)clip;
+    return NULL;
+}
+const AnimatedRecord *animated_dispatch_find_record(const Entity *e,
+                                                    const char *name) {
+    (void)e; (void)name;
+    return NULL;
+}
+AnimatedDispatchResult animated_dispatch_set_by_name(Entity *e,
+                                                     const char *name,
+                                                     int loop) {
+    (void)e; (void)name; (void)loop;
+    return ANIMATED_DISPATCH_NOT_FOUND;
+}
 
 #include "../../src/game/behaviors/behavior_cutscene.c"
 

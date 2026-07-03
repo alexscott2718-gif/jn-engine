@@ -2048,3 +2048,32 @@ Disposition: `C3DAnimated`/`event-animation-dispatch` remains `linked-blocked`.
 The recovered dispatcher exists and is oracle-covered, but the certificate flip
 waits for the later runtime wiring slice that connects actual `C3DAnimated` /
 `C3DPlayer` behavior to the module.
+
+## linked branch: C3DAnimated dispatch runtime wiring, certificate still blocked (2026-07-03)
+
+Runtime wiring slice: `behavior_animated_update_base` now advances
+`AnimatedDispatch` state for entities that have records; cutscene target actor
+selection lazily creates `HI*` dispatch records from the existing docs-backed
+`ACTOR_ANIMS[]` table and calls `animated_dispatch_set_by_name`; rendering reads
+`animated_dispatch_sample` for wired cutscene/player clips. `player_anim.c` now
+binds entity-owned Jimmy dispatch records from the loaded ASE clips, and
+`behavior_player.c` uses the entity path without changing the tank-turn movement
+state machine.
+
+Completion hook scope: native player dispatch consumes the represented dormant
+`LADDER` case by returning to `STOP`. The original `FENCE`, `SPLAT`, and `HIT`
+completion consumers remain blocked because those faithful runtime player states
+are not present in the approved native player path.
+
+Oracle follow-up: `tools/linkage_oracles/C3DAnimated_runtime.py` compiles the
+real runtime modules and proves the new wiring points. Its `--selftest` rejects
+mutants that remove the base dispatch update, remove the cutscene
+`SetAnim3DByName` call, or disable the player ladder completion hook. The older
+cutscene camera oracles were kept scoped to camera math with stubs for the new
+animation-dispatch symbols.
+
+Disposition: `C3DAnimated`/`event-animation-dispatch` stays
+`linked-blocked`. The runtime control flow is now wired, but live clip
+frame-count/timing data still comes from native/exported ASE `AseModel` metadata
+rather than recovered original `A3dm` sequence/import data, and the player
+completion surface is only partially represented.
