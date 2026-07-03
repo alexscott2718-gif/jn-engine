@@ -30,8 +30,11 @@ Offsets below are byte offsets from the primary `C3DAnimated` pointer in the slo
 | adjusted `+0x588` | int | `current_anim_index` | `0040da30`, `0040dab0` | Numeric OMedia animation index selected from the current animation record. |
 | adjusted `+0x58c` | pointer | `current_anim_db_object` | `0040db10`, `0040dd90` | DB object pointer applied from the selected animation record. |
 | adjusted `+0x62c` | pointer | `current_anim_record` | `0040dd90`, `0040da30` | Selected animation record; record `+0x48` caches the last-frame/frame-count value used by `UpdateAnimated`. |
-| adjusted `+0x634/+0x635` | bytes | `anim_loader_ready_flags` | `0040d9e0`, `0040da30`, `0040dab0`, `0040dd90` | Guard record lookup and animation selection. |
-| adjusted `+0x654` | byte | `anim_paused` | `0040d350`, `0040e050` | Mirrors `OMediaAnim::pause`; suppresses the last-frame hook while set. |
+| adjusted `+0x634/+0x635` | bytes | `anim_loader_ready_flags` | `0040d9e0`, `0040da30`, `0040dab0`, `0040dd90`, `0040e050` | Guard record lookup, animation selection, and the whole `UpdateAnimated` completion path (`this1[0x15d]` bytes 0/1 with `this1 = adjusted + 0xc0`). |
+| adjusted `+0x654` | byte | `anim_paused_mirror` | `0040d350` | `SetAnim3DPaused`'s edge-guard mirror keeping `OMediaAnim::pause`'s count binary. Pause gates frame *advance* (`OMediaAnim::update_logic` returns while `pause_count != 0`); it is **not** the last-frame hook gate — that gate is `play_loop` at adjusted `+0xad` (see below). |
+| adjusted `+0x90` | embedded object | `omedia_anim` | `0040da30`, `0040e050`, `0040d350` | Embedded `OMediaAnim` instance (OMT 2.5 source layout): `+0x94` `anim_def`, `+0xa0` `current_sequence` (the frame-count refresh index), `+0xa8` `pause_count`, `+0xad` `play_loop`. Vtable calls: `+0x10` `setcurrentsequence(long, bool restart)`, `+0x1c` `getcurrentframe_pos()`, `+0x24` `setplay_timebased(bool)`. |
+| adjusted `+0x580` | short | `shape_mode` | `0040dd90`, `0040e270` | Selects base (`0`) / alternate (`1`) shape and the lookup-key lead string in `SetAnim3DByName`; seeded `0` by `InitAnim3DDatabase`. |
+| adjusted `+0x584` | float | `anim_clock` | `0040dd90`, `0040e050` | Per-frame animation clock (`this1[0x131] += dt` in `UpdateAnimated`); zeroed unconditionally by every `SetAnim3DByName` call that passes the ready-flag guard, found or not. |
 | adjusted | pointer arrays | `canvas_slots[]`, `material_slots[]` | `0040db20`, `0040dd40`, `0040dd60` | Up to 10 loaded canvas/material pairs used by animation textures. |
 
 ## Vtable Methods
@@ -40,7 +43,7 @@ Offsets below are byte offsets from the primary `C3DAnimated` pointer in the slo
 |---:|---|---|---|---|
 | 7 | `0040d3c0` | `InitObjectAnimated` | Runs `C3DObject::InitObject`, then registers `RequiredLevel`, `ExactLevel`, `RemoveLevel`, `HasCollision`, `InitiallyVisible`, `CanMove`, `SecondPass`, and `PickupLink`. | non-trivial |
 | 8 | `0040e670` | `UnInitObjectAnimated` | Detaches current OMedia animation/shape state, runs `C3DObject::UnInitObject`, then frees loaded canvas/material arrays and animation-list records when the loader was initialized. | non-trivial |
-| 241 | `0040e050` | `UpdateAnimated` | Lazily resolves `PickupLink`, delegates to `C3DObject::Update3DObject`, enforces non-moving transform sync when `CanMove == 0`, and fires vtable-4 slot 65 when the current OMedia animation reaches its last frame. | non-trivial |
+| 241 | `0040e050` | `UpdateAnimated` | Lazily resolves `PickupLink`, delegates to `C3DObject::Update3DObject`, enforces non-moving transform sync when `CanMove == 0`, and fires vtable-4 slot 65 when a **non-looping** current OMedia animation reaches its last frame (gate = `OMediaAnim::play_loop` at adjusted `+0xad`; no completion latch — the hook re-fires every update while the clip sits at its last frame). | non-trivial |
 | 242 | `0040d3a0` | `HideIfVisibleFlagSet` | If the adjusted visibility flag is non-zero, marks it as set and calls an inherited visibility setter with false. | TODO |
 | 259 | `0040e7b0` | `ApplyInitialAnimatedFlags` | Applies `InitiallyVisible`; if `SecondPass == 1`, calls inherited second-pass/material setup. | non-trivial |
 | 265 | `0040e340` | `ApplyLevelGate` | Uses `RequiredLevel`, `ExactLevel`, and `RemoveLevel` to enable or disable the object for the current level/state. | non-trivial |
@@ -50,8 +53,8 @@ Offsets below are byte offsets from the primary `C3DAnimated` pointer in the slo
 | vtable 3 slot 2 | `0040d2d0` | scalar deleting destructor | Runs local cleanup helper, destroys the embedded `OMediaClassStreamer`, and frees the adjusted allocation when requested. | non-trivial |
 | vtable 4 slot 54 | `0040d4a0` | `CreateAnim3DRecord` | Appends an animation record, resolves a file path, opens the source stream, imports the OMedia animation/shape object into the local DB, stores the DB object pointer, and records the caller-supplied animation name. | non-trivial |
 | vtable 4 slot 55 | `0040d9e0` | `FindAnim3DRecordByName` | Walks the loaded animation-record list and returns the case-insensitive name match while loader-ready flags are set. | non-trivial |
-| vtable 4 slot 56 | `0040dd90` | `SetAnim3DByName` | Selects base/alternate shape, composes an animation lookup key, finds an animation record, stores it as current, sets the OMedia morph anim definition, and applies the DB object pointer. | non-trivial |
-| vtable 4 slot 57 | `0040da30` | `SelectAnim3DRecordIndex` | Writes the current animation id, updates the embedded `OMediaAnim`, starts playback, and refreshes the current record's last-frame/frame-count cache. | non-trivial |
+| vtable 4 slot 56 | `0040dd90` | `SetAnim3DByName` | Takes `(name, loop_flag)`. Zeroes the anim clock, selects base/alternate shape, composes an animation lookup key, finds an animation record, stores it as current, forwards the loop flag to slot 57, and applies the DB object pointer. | non-trivial |
+| vtable 4 slot 57 | `0040da30` | `SelectAnim3DRecordIndex` | Takes `(seq_id, loop_flag)`. Writes the current animation id, calls `OMediaAnim::setcurrentsequence(seq_id, loop_flag)`, stores the flag as `play_loop` (`+0xad`), forces `setplay_timebased(true)` (resets the time-base phase), and refreshes the current record's frame-count cache from the imported def's `sequences[current_sequence].size()`. | non-trivial |
 | vtable 4 slot 58 | `0040dab0` | `GetCurrentAnim3DRecord` | Returns the animation record whose id matches the current animation index; logs through the inherited trace path on miss. | non-trivial |
 | vtable 4 slot 59 | `0040db10` | `GetCurrentAnim3DObject` | Returns the current animation DB object pointer. | trivial |
 | vtable 4 slot 60 | `0040db20` | `CreateTextureSlot` | Loads an `OMediaCanvas` from a file path into `canvas_slots[index]`, then creates and initializes the paired `OMedia3DMaterial` in `material_slots[index]`. | non-trivial |
@@ -88,12 +91,19 @@ C3DAnimated::UpdateAnimated(dt):
             xform = inherited_get_transform_vector()
             inherited_set_transform_vector(xform)
 
-        if animation_completion_flags_set and current_anim_def and !anim_paused:
-            local_anim_clock += dt
-            anim_index = current_anim->get_frame_or_index()
-            if current_anim_def->frame_count - 1 <= anim_index:
-                vtable4_slot65_OnAnimEnded()
+        if anim_loader_ready_flags_set:            # +0x634 and +0x635
+            local_anim_clock += dt                  # +0x584, always
+            if !omedia_anim.play_loop:              # +0xad — loops never complete
+                if current_anim_record:             # +0x62c
+                    frame_pos = omedia_anim.getcurrentframe_pos()
+                    if current_anim_record->frame_count - 1 <= frame_pos:
+                        vtable4_slot65_OnAnimEnded()   # every update; no latch
 ```
+
+Frame advance itself happens inside the `Update3DObject` element update
+(`OMediaAnim::update_logic`, time-based walk), before the completion check
+above. Pause (`pause_count != 0`) stops that advance but not the check, so a
+paused one-shot already at its last frame keeps firing the hook.
 
 The default slot-65 implementation is the shared no-op/thunk at `00472970`;
 `C3DPlayer` overrides the same vtable-4 slot with `0043a900`
@@ -155,8 +165,9 @@ Target 7 opened the L1 bodies around `UpdateAnimated` (`0040e050`) and
 
 1. Load/import animation records into an OMedia database (`CreateAnim3DRecord`,
    `InitAnim3DDatabase`).
-2. Compose a shape-specific animation lookup key from the global prefix, base
-   or alternate shape suffix, and caller animation name (`SetAnim3DByName`).
+2. Compose a shape-specific animation lookup key from a shape-mode-selected
+   lead string plus the caller animation name (`SetAnim3DByName`; see the
+   Native Linkage key-composition note for the exact copy semantics).
 3. Find the record by case-insensitive name, select its OMedia animation id,
    apply its DB object pointer, and cache the last-frame count.
 4. On each update, compare the current embedded OMedia animation frame against
