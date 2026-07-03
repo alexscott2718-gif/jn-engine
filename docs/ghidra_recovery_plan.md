@@ -79,6 +79,18 @@ bridge, and native has no `C2DInGameMenu` gadget-controller protocol,
 Goddard/Jeep companion spawn, or oxygen/race countdown port. The explicit
 `C3DJimmy`/`gadget-mode-dispatch` row is `linked-blocked`.
 
+Progress note (2026-07-02): the target-3 walking-camera follow-up is
+complete. `UpdateWalkingCameraA/B` (`00438bc0`/`00439900`) re-dumped with
+repaired prototypes (`tools/ghidra/WalkCamPass.java`/`WalkCamPass2.java`),
+record writes x87-traced, `ProjectNoisyCameraTarget` (`0043a5d0`) and
+`ProbePlayerRayBlend` (`0043b820`) repaired and decoded, and the
+`OMedia3DVector::angles` import (IAT `0048d108`, `OMT2.dll`) recovered
+from the LGPL OMT source (`~/omt-src`). See
+`docs/decomp/evidence/walking_camera_record_write.md`. The B-variant
+record write is ported (`camera_record_walkcam_write`) and certified as
+`C3DPlayer`/`walking-camera-record`; the movement halves stay under the
+`free-roam-feel` linked-blocked row.
+
 Progress note (2026-07-02): target 7 is complete. The `C3DAnimated`
 event-to-animation cluster is now function-defined and dumped; see
 `docs/decomp/evidence/c3danimated_target7.md`. The pass pins

@@ -107,12 +107,16 @@ editor and distance/audio helpers `FUN_0047d640`/`FUN_0047d9d0` read
 ~150 code references to `DAT_00509a50`. Functional groups:
 
 - **Writers of `pos`:** `CGameType::InitGame` seed; `UpdateWalkingCameraA/B`
-  (`00438bc0`/`00439900`) per-frame follow; `UpdateSittingOrSmoothCamera`
+  (`00438bc0`/`00439900`) per-frame follow (L1:
+  `walking_camera_record_write.md`); `UpdateSittingOrSmoothCamera`
   (`0043a120`); `RunTriggerTypeNextTarget` (`00447a70`) retarget; `CEditor`
   save/restore pair.
-- **Writers of `angles`:** `UpdateWalkingCameraA` (`+0x50` smoothing at
-  `00438f0c..`, `+0x52` wrap-relative turn at `004397f8..`), walking camera B
-  variants, editor free-fly.
+- **Writers of `angles`:** the walking cameras (`00438bc0`/`00439900`) — both
+  full per-frame snaps from the pre-update position snapshot toward the look
+  point (`+0x50` raw-add pitch, `+0x52` 14-bit wrap-delta yaw; the earlier
+  "smoothing" reading is superseded by the x87 trace in
+  `walking_camera_record_write.md`), `UpdateSittingOrSmoothCamera`
+  (`0043a120`), editor free-fly.
 - **Render consumer:** `FrameStepAndRender` (angles → view matrix, above).
 - **Transform helpers:** `CameraRecordLocalToWorld_00476e10`,
   `CameraRecordLocalToWorldDir_00476f10`, half-extent getters

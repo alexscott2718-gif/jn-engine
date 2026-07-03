@@ -1970,3 +1970,20 @@ compiles the real camera_record.c and verifies the slot-242 retarget against
 the recovered math on 516 synthetic cases (mutation tested); the
 nexttrigger-camera-retarget row is flipped to linked -- gate now reads
 13 linked / 15 linked-blocked.
+
+Walking-camera interpretation pass (autonomous): the FOLLOW-mode
+scaffolding's real target is recovered. UpdateWalkingCameraA/B
+(00438bc0/00439900) were re-dumped with repaired prototypes
+(tools/ghidra/WalkCamPass*.java) and their record writes x87-traced: both
+end in the same DAT_00509a50 pipeline — eye target and look point
+projected through the player element, position eased per-axis (A:
+1.6/1.2/1.6 from 0x854..0x85c; B: 1.2/2.0/1.2) with dt and a
+camera-collision factor, then pitch/yaw snapped from the pre-update
+snapshot toward the look point (full snaps — all smoothing is
+positional). ProjectNoisyCameraTarget (0043a5d0) is transform_local with
+pitch forced to index 0 and yaw led by the 0x6d4 turn rate;
+ProbePlayerRayBlend (0043b820) is the camera collision (eye pulled 75% to
+the ray hit, 1.5x catch-up). The angle extraction is the OMT2.dll import
+OMedia3DVector::angles — recovered verbatim from the LGPL Open Media
+Toolkit source (~/omt-src), table-based atan2 included. L1:
+docs/decomp/evidence/walking_camera_record_write.md.
