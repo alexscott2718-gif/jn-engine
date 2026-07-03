@@ -1998,3 +1998,13 @@ The FOLLOW wrapper bridges the native player (yaw_deg = degrees(ry) -
 180) and eases a +/-30 deg lead at the recovered 100 deg/s ramp from the
 observed yaw rate. Verified headless via xvfb: FOLLOW frames the level1
 spawn from behind/above at the original offsets.
+
+Certification follow-up (same day):
+tools/linkage_oracles/C3DPlayer_walkcam.py compiles the real
+camera_record.c and verifies the walking-camera record write against the
+recovered math on 294 synthetic cases — both yaw-quantization paths,
+nonzero roll, angle octants, position sweeps, the probe path — with
+bit-exact angles (max deviation 0 table units). Mutation tested:
+flipping the native Z mirror or the y-doubling turns the oracle red.
+New linked row C3DPlayer/walking-camera-record; gate now reads
+14 linked / 15 linked-blocked.
