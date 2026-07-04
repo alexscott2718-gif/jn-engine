@@ -2103,3 +2103,37 @@ Disposition: the certificate remains `linked-blocked`. The runtime path is more
 complete, but clip timing still comes from native/exported ASE metadata rather than
 recovered original `A3dm` sequence/import data, and faithful FENCE entry still needs
 collision material/ray-probe data plus restore-transform behavior.
+
+
+## Windows 64-bit port: first working build (2026-07-04)
+
+Community ask (Discord): a standalone offline Windows build instead of the
+browser demo re-downloading the bundle every session. Result: the engine
+cross-compiles to a native Win64 exe **with zero source changes**.
+
+- `make win` / `tools/build_win.sh`: cross-compiles with the repo's own zig
+  (`zig cc -target x86_64-windows-gnu`), fetches the official SDL2 2.32.10 +
+  SDL2_mixer 2.8.2 mingw dev packages and zlib 1.3.1 source into
+  `build/win/deps/` (cached), compiles zlib into the exe, links the SDL2
+  import libs, and emits `build/win/dist/` plus the shippable
+  `build/win/jn-engine-win64.zip` (exe + DLLs + README + PLAY.bat + assets/).
+- Why it was nearly free: the platform layer is pure SDL2, GL loads via
+  `SDL_GL_GetProcAddress` (WGL-safe), and the only POSIX calls (`access`,
+  `getpid`) exist in mingw-w64's `unistd.h`. `-DSDL_MAIN_HANDLED` keeps the
+  plain `int main` (console subsystem on purpose: QA builds show the log).
+- Verified on real Windows 11 (i5-8400T / UHD 630, GL 3.3 core context):
+  level1 loads all ~10.2k assets, renders faithfully (`JN_SCREENSHOT=1`
+  harness), clean exit. First QA zip SHA-1
+  `36a28caf83339c9c56aee09955fe41c2adc739e3` (273 MB).
+- The native renderer needs GL **3.3 core**, not GL 2 -- the old
+  "OpenGL 2 on Win11" worry does not apply to this codebase.
+- CRT: zig's mingw links UCRT (`api-ms-win-crt-*`). Preinstalled on Win10/11;
+  **Windows 7 needs KB2999226 / the VC++ 2015+ x64 redist** (noted in the
+  bundle's README_WINDOWS.txt -- relevant: the first QA tester is on Win7).
+- Pre-existing, not port bugs: `assets/hud/capture/font/big_{3,4,6}.png` are
+  absent from the repo (same warning on Linux). NTFS case-insensitivity also
+  happens to absorb the `Level1.gam`/`level1.gam` casing probes.
+- Untested so far: audio output verification, gamepads, long sessions, real
+  Win7 hardware, FPS on low-end GPUs (the QA README asks testers for specs +
+  console text to scotty@exentt.com). Publishing the zip (GitHub release /
+  exentt.com) is deliberately left to the maintainer.

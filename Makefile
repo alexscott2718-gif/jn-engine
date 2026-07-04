@@ -156,3 +156,12 @@ web-jnvsjn:
 .PHONY: all clean web web-jnvsjn capture replay-hudfix capture-static capture-live-jimmy capture-live-hud capture-multiframe hybrid-level1 hybrid-level1-manifest native-level1-map native-level1 native-level1-keyframes diff-native-capture native-vs-capture-8881-review phase1-sky-tint phase4-capture-state capture-fixture capture-world-fixture solve-keyframe-views
 
 -include $(DEP)
+
+# --- Windows cross-build (zig cc -target x86_64-windows-gnu) ----------------
+# Fetches mingw SDL2/SDL2_mixer + zlib into build/win/deps (one-time), then
+# emits build/win/dist/jnengine.exe and the standalone offline bundle
+# build/win/jn-engine-win64.zip. Details in tools/build_win.sh.
+win:
+	./tools/build_win.sh
+
+.PHONY: win

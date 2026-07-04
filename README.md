@@ -40,6 +40,16 @@ source ~/emsdk/emsdk_env.sh
 make web          # -> web/jnengine.{html,js,wasm,data}
 ```
 
+Windows 64-bit (cross-compiled from Linux with the same zig toolchain):
+
+```bash
+make win          # -> build/win/dist/jnengine.exe + build/win/jn-engine-win64.zip
+```
+
+The zip is the standalone offline bundle (engine + SDL2 DLLs + assets) -- no
+network use at runtime. GL 3.3 core required; on Windows 7 install the UCRT
+update first (details in the bundle's `README_WINDOWS.txt`).
+
 Other targets: `make capture` (D3D7-comparable capture build), `make web-jnvsjn`
 (sequel browser bundle), plus a suite of native-vs-capture validators. See the
 `Makefile` and [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) §9.

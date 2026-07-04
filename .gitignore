@@ -82,3 +82,6 @@ build/portal_jnvsjn/
 # One-off scratch (HUD digit harvest, ad-hoc experiments)
 build/hud_digit_harvest/
 build/oneoff/
+
+# Windows cross-build workspace (deps + dist + zip)
+build/win/
