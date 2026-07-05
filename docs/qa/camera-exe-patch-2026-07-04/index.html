@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Camera Exe Patch (M1) - jn-engine</title>
+<style>
+* { box-sizing:border-box; margin:0; padding:0; }
+body { font-family:Monaco,Menlo,"Ubuntu Mono",monospace; background:#0d0d0d; color:#dedede; line-height:1.52; padding:24px 16px; }
+.wrap { max-width:1160px; margin:0 auto; }
+h1 { font-size:1.5rem; color:#fff; margin-bottom:4px; }
+h2 { font-size:1.05rem; color:#7ec8ff; border-bottom:1px solid #2a2a2a; padding-bottom:6px; margin:30px 0 12px; }
+h3 { font-size:0.94rem; color:#f1f1f1; margin:18px 0 6px; }
+p { margin:10px 0; color:#c8c8c8; }
+a { color:#7ec8ff; text-decoration:none; }
+a:hover { text-decoration:underline; }
+code { color:#d9c08a; }
+.sub,.muted { color:#888; font-size:0.84rem; }
+.grid { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:12px; margin:18px 0; }
+.stat { background:#141414; border:1px solid #262626; border-radius:8px; padding:15px; }
+.stat strong { display:block; color:#fff; font-size:1.26rem; line-height:1.1; margin-bottom:4px; }
+.stat span { color:#999; font-size:0.8rem; }
+.note { border-left:3px solid #6c5720; background:#181409; border-radius:0 6px 6px 0; color:#d8c184; padding:9px 12px; margin:14px 0; font-size:0.88rem; }
+.warn { border-left:3px solid #7a2020; background:#1e0f0f; border-radius:0 6px 6px 0; color:#f0a3a3; padding:9px 12px; margin:14px 0; font-size:0.88rem; }
+.badge { display:inline-block; border-radius:4px; padding:1px 7px; font-size:0.72rem; vertical-align:middle; }
+.blue { background:#102536; color:#9fd8ff; border:1px solid #244861; }
+.amber { background:#33280e; color:#e6c66f; border:1px solid #6c5720; }
+.green { background:#102e1c; color:#8ee6a2; border:1px solid #285e36; }
+.red { background:#361010; color:#f0a3a3; border:1px solid #612424; }
+table { width:100%; border-collapse:collapse; margin:14px 0; font-size:0.8rem; }
+th,td { text-align:left; padding:8px 8px; border-bottom:1px solid #242424; vertical-align:top; }
+th { color:#9a9a9a; font-weight:normal; background:#0d0d0d; }
+ol,ul { margin:10px 0 10px 22px; color:#c8c8c8; }
+li { margin:6px 0; }
+.cards { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:12px; margin:14px 0; }
+.card { background:#141414; border:1px solid #262626; border-radius:8px; padding:13px; }
+.card p { font-size:0.82rem; margin:6px 0 0; color:#aaa; }
+.footer { color:#777; border-top:1px solid #2a2a2a; margin-top:34px; padding-top:12px; font-size:0.8rem; }
+@media (max-width:860px) { .grid,.cards { grid-template-columns:1fr 1fr; } table { font-size:0.72rem; } }
+@media (max-width:620px) { .grid,.cards { grid-template-columns:1fr; } body { padding:18px 10px; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>Camera Exe Patch <span class="badge red">untested</span> <span class="badge blue">branch: modify-source</span></h1>
+<p class="sub">Published 2026-07-04 &middot; source: <code>instrument/patch/</code> on <a href="https://github.com/alexscott2718-gif/jn-engine/tree/modify-source/instrument/patch">modify-source</a> (not merged to <code>master</code>)</p>
+
+<div class="warn"><strong>Untested against the real game.</strong> Everything on this page compiles
+and passes static export/ABI verification. None of it has been run against the actual
+<code>Neutron.exe</code> process yet &mdash; the machine that hosts the original game was unreachable
+while this was built (see Blockers below). Treat this as a design + scaffold writeup, not a
+confirmed working patch.</p></div>
+
+<p>Someone asked whether jn-engine's recent camera-movement fixes (walking-camera follow,
+camera-record write) could be applied to the <strong>original retail game</strong>, not just
+jn-engine's own reimplementation. Short answer: not directly &mdash; jn-engine is a separate,
+from-scratch executable that reads the original's asset files, it doesn't share code with
+<code>Neutron.exe</code>. This page documents the follow-up: an actual runtime patch mechanism
+for the original binary, reusing this project's existing capture-proxy infrastructure.</p>
+
+<div class="grid">
+  <div class="stat"><strong>M1</strong><span>milestone: hook mechanism only</span></div>
+  <div class="stat"><strong>22 / 22</strong><span>ddraw exports verified, XP-safe</span></div>
+  <div class="stat"><strong>5 bytes</strong><span>hook footprint (E9 rel32 jmp)</span></div>
+  <div class="stat"><strong>2</strong><span>open blockers before the real fix can run</span></div>
+</div>
+
+<div class="note"><strong>Off by default.</strong> The hook only installs if <code>C:\camerapatch_enable</code>
+exists on the target machine. Without it, the shim loads and does nothing &mdash; the game runs
+bit-identical. This was a deliberate safety choice: two inputs the real fix needs aren't
+recovered yet (see Blockers), so the hook can't safely replace the camera-follow logic today.</div>
+
+<h2>Why the exe and jn-engine are different problems</h2>
+<table>
+<tr><th></th><th>jn-engine</th><th>This patch</th></tr>
+<tr><td>What it is</td><td>Clean-room reimplementation, own executable</td><td>Runtime hook into the original binary's own code</td></tr>
+<tr><td>Where the camera fix lives</td><td><code>src/game/camera.c</code>, <code>camera_record.c</code></td><td>A <code>ddraw.dll</code> shim loaded by <code>Neutron.exe</code> itself</td></tr>
+<tr><td>How it reaches the game</td><td>Reads the original's <code>.omt</code>/<code>.gam</code> assets</td><td>Overwrites a live function's first 5 bytes with a jmp</td></tr>
+<tr><td>Status</td><td>Shipped, oracle-certified</td><td>Scaffolded, unarmed by default, unverified live</td></tr>
+</table>
+
+<h2>Mechanism</h2>
+<div class="cards">
+  <div class="card"><h3>Load order</h3><p>Reuses the same trick as the existing capture proxy
+  (<code>instrument/proxy</code>): a <code>ddraw.dll</code> placed next to the game's exe loads
+  ahead of the system one. All 22 exports are plain forwarders to the renamed real ddraw &mdash;
+  this shim never touches a DirectDraw call, it just needs to be loaded early.</p></div>
+  <div class="card"><h3>Hook</h3><p><code>hook_install.c</code>: a generic x86 primitive that
+  overwrites a live function's first 5 bytes with a near jmp (<code>E9 rel32</code>) to a
+  replacement of matching signature/ABI. Full replacement, no call-through &mdash; consistent
+  with how jn-engine already reimplements logic rather than wrapping the original.</p></div>
+  <div class="card"><h3>Target</h3><p>Hooks <code>UpdateWalkingCameraB</code> (<code>00439900</code>),
+  the walking-camera record write jn-engine already ported and oracle-certified as
+  <code>camera_record_walkcam_write</code>.</p></div>
+</div>
+
+<h2>What M1 actually does when armed</h2>
+<p>With <code>C:\camerapatch_enable</code> present, the hook installs and logs the live camera
+record (<code>DAT_00509a50</code>) and the player's turn-rate input (<code>this+0x6d4</code>)
+every frame, throttled &mdash; then <strong>returns without doing the original work.</strong>
+This validates that the hook fires and that reading live game memory is safe. It also means
+<strong>arming it freezes walking-camera follow</strong> &mdash; it is a mechanism smoke test,
+not the fix. Don't enable it during normal play.</p>
+
+<h2>Blockers before the real fix can be wired</h2>
+<table>
+<tr><th>Blocker</th><th>Status</th><th>Needed</th></tr>
+<tr><td>Image base / ASLR</td><td><span class="badge amber">unverified</span></td>
+<td>Hook math assumes the typical unrelocated <code>0x00400000</code> base for a 2003-era PE32
+exe. Not checked against the real PE header &mdash; the XP box hosting the game
+(<code>192.168.1.1</code>) was unreachable (ARP <code>FAILED</code>, likely powered off) while
+this was built.</td></tr>
+<tr><td>Player world position / yaw offset</td><td><span class="badge amber">not recovered</span></td>
+<td><code>C3DPlayer</code>'s own movement accumulators are mapped (from <code>0x608</code>), but
+the base position/rotation inherited further up the class chain
+(<code>OMediaWorldPosition</code>/<code>OMediaWorldAngle</code>) isn't a named, confirmed offset
+anywhere in the repo yet. Needed to feed real inputs to
+<code>camera_record_walkcam_write</code>.</td></tr>
+</table>
+
+<h2>Next steps (M2, not started)</h2>
+<ol>
+  <li>Get the XP box back online, pull <code>Neutron.exe</code>, confirm image base +
+  <code>DllCharacteristics</code> against the hook's assumption.</li>
+  <li>Recover the player object's world position/yaw offset via Ghidra.</li>
+  <li>Replace the M1 no-op with a bridge: copy the live record into
+  <code>camera_record()</code>'s struct, pull real player inputs, call
+  <code>camera_record_walkcam_write</code>, write the result back to
+  <code>DAT_00509a50</code>.</li>
+  <li>Verify live against the real game before considering this done.</li>
+</ol>
+
+<div class="footer">
+Patch source: <a href="https://github.com/alexscott2718-gif/jn-engine/tree/modify-source/instrument/patch">instrument/patch/</a> (branch <code>modify-source</code>) &middot;
+Camera fixes (jn-engine): <a href="https://github.com/alexscott2718-gif/jn-engine/blob/master/src/game/camera_record.c">camera_record.c</a> &middot;
+Demo: <a href="/jn-engine/">/jn-engine/</a>
+</div>
+</div>
+</body>
+</html>
