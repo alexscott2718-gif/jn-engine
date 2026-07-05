@@ -1,0 +1,39 @@
+; Export list for the camera-patch ddraw.dll shim.
+;
+; Unlike instrument/proxy/ddraw_proxy.c (which implements 2 exports to wrap
+; the DirectDraw/D3D COM chain for capture), this shim does not care about
+; any DirectDraw call -- it only needs to *be loaded* into Neutron.exe early
+; (via the same "ddraw.dll next to the exe wins DLL search order" trick), so
+; every one of the 22 exports is a plain forwarder to ddraw_orig.dll (the
+; renamed real ddraw shipped alongside it). See ddraw_proxy.def for the
+; ordinal provenance notes; the table is identical, just with 11/12 also
+; forwarded instead of implemented.
+;
+; NOTE: zig/lld prepends a stray "_" to forwarder targets on i386; build.sh
+; runs the same fix_forwarders.py step as the capture proxy afterwards.
+
+LIBRARY ddraw.dll
+
+EXPORTS
+    AcquireDDThreadLock         = ddraw_orig.AcquireDDThreadLock         @1
+    CheckFullscreen             = ddraw_orig.CheckFullscreen             @2
+    CompleteCreateSysmemSurface = ddraw_orig.CompleteCreateSysmemSurface @3
+    D3DParseUnknownCommand      = ddraw_orig.D3DParseUnknownCommand      @4
+    DDGetAttachedSurfaceLcl     = ddraw_orig.DDGetAttachedSurfaceLcl     @5
+    DDInternalLock              = ddraw_orig.DDInternalLock              @6
+    DDInternalUnlock            = ddraw_orig.DDInternalUnlock            @7
+    DSoundHelp                  = ddraw_orig.DSoundHelp                  @8
+    DirectDrawCreate            = ddraw_orig.DirectDrawCreate            @9
+    DirectDrawCreateClipper     = ddraw_orig.DirectDrawCreateClipper     @10
+    DirectDrawCreateEx          = ddraw_orig.DirectDrawCreateEx          @11
+    DirectDrawEnumerateA        = ddraw_orig.DirectDrawEnumerateA        @12
+    DirectDrawEnumerateExA      = ddraw_orig.DirectDrawEnumerateExA      @13
+    DirectDrawEnumerateExW      = ddraw_orig.DirectDrawEnumerateExW      @14
+    DirectDrawEnumerateW        = ddraw_orig.DirectDrawEnumerateW        @15
+    DllCanUnloadNow             = ddraw_orig.DllCanUnloadNow             @16
+    DllGetClassObject           = ddraw_orig.DllGetClassObject           @17
+    GetDDSurfaceLocal           = ddraw_orig.GetDDSurfaceLocal           @18
+    GetOLEThunkData             = ddraw_orig.GetOLEThunkData             @19
+    GetSurfaceFromDC            = ddraw_orig.GetSurfaceFromDC            @20
+    RegisterSpecialCase         = ddraw_orig.RegisterSpecialCase         @21
+    ReleaseDDThreadLock         = ddraw_orig.ReleaseDDThreadLock         @22
