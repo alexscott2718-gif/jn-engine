@@ -9,12 +9,16 @@ is *not required* to work on the engine. **Never copy its secrets into this repo
 references hosts/tokens/passwords only as env vars (see `docs/local_env.md`). Keep cross-tool
 engineering conventions in these tracked files, never in an agent's private memory.
 
-## Mission (as of 2026-06-22)
+## Mission (as of 2026-06-22, branch note updated 2026-07-04)
 **Native Linux port.** The decomp **spec** campaign is finished (208/208 classes) and the
 C engine in `src/` is **the product** — not a foundry for something else. **Godot was retired**
-(`docs/godot_bridge_plan.md` is superseded; do not start work against it). Branch: `native-port`.
-Waves N1–N5 have landed; the current frontier is **behavior coverage** (enemies/NPCs/vehicles
-still largely inert — visual coverage is effectively complete).
+(`docs/godot_bridge_plan.md` is superseded; do not start work against it). **Branch: `master`**
+(the former working branches `native-port` and `linked` are both ancestors of `master` as of
+2026-07-04 — fast-forward merged, nothing diverged; work directly on `master` going forward).
+Waves N1–N5 landed, followed by a large batch of additional behavior/animation/camera work
+(most recently the walking-camera record port and `C3DAnimated` dispatch wiring) — treat the
+specific "current frontier" framing below as directional, not exact; `docs/decomp/_next_session.md`
+is the authoritative up-to-the-session state.
 
 ## Read before touching code
 1. `docs/decomp/_next_session.md` — the **live per-session handoff** (current state + your task).
