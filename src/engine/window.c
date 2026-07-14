@@ -1,6 +1,8 @@
 #include "window.h"
 #include "glad.h"
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #ifdef __EMSCRIPTEN__
 #include <emscripten.h>
 #include <emscripten/html5.h>
@@ -25,6 +27,9 @@ int window_init(Window *w, const char *title, int width, int height) {
     Uint32 win_flags = SDL_WINDOW_OPENGL;
 #ifndef __EMSCRIPTEN__
     win_flags |= SDL_WINDOW_RESIZABLE;
+    const char *headless = getenv("JN_HEADLESS");
+    if (headless && headless[0] && strcmp(headless, "0") != 0)
+        win_flags |= SDL_WINDOW_HIDDEN;
 #endif
     w->sdl_win = SDL_CreateWindow(
         title,
@@ -56,7 +61,9 @@ int window_init(Window *w, const char *title, int width, int height) {
         return 0;
     }
 
-    SDL_GL_SetSwapInterval(1);
+    const char *headless_swap = getenv("JN_HEADLESS");
+    SDL_GL_SetSwapInterval(headless_swap && headless_swap[0] && strcmp(headless_swap, "0") != 0
+                           ? 0 : 1);
 
     if (!glad_load_gl()) {
         fprintf(stderr, "Failed to load GL functions\n");

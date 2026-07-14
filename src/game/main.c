@@ -40,6 +40,9 @@
 #include <string.h>
 #include <strings.h>
 #include <ctype.h>
+#include <errno.h>
+#include <limits.h>
+#include <sys/stat.h>
 #include <zlib.h>
 #include <SDL.h>
 
@@ -304,6 +307,44 @@ static void save_screenshot(const char *path, int w, int h) {
     fclose(f);
     free(comp);
     printf("Screenshot saved: %s (%dx%d)\n", path, w, h);
+}
+
+static int make_directory_tree(const char *path) {
+    char buf[PATH_MAX];
+    size_t len;
+    if (!path || !path[0] || snprintf(buf, sizeof(buf), "%s", path) >= (int)sizeof(buf))
+        return 0;
+    len = strlen(buf);
+    while (len > 1 && buf[len - 1] == '/') buf[--len] = '\0';
+    for (char *p = buf + 1; *p; p++) {
+        if (*p != '/') continue;
+        *p = '\0';
+        if (mkdir(buf, 0777) != 0 && errno != EEXIST) return 0;
+        *p = '/';
+    }
+    return mkdir(buf, 0777) == 0 || errno == EEXIST;
+}
+
+static void dump_deterministic_state(FILE *f, unsigned int frame,
+                                     const World *world) {
+    const GameState *gs = gamestate_get();
+    fprintf(f, "frame=%u game items=%d collected=%d gems=%d points=%d "
+               "health=%d/%d done=%d inventory=%d active_tool=%d\n",
+            frame, gs->items_total, gs->items_collected, gs->gems_collected,
+            gs->points, gs->health, gs->health_max, gs->level_done,
+            gs->inventory_count, gs->active_tool);
+    unsigned int index = 0;
+    for (const Entity *e = world->head; e; e = e->next, index++) {
+        fprintf(f, "entity=%u type=%.4s tag=%s alive=%d visible=%d flags=%u "
+                   "pos=%a,%a,%a rot=%a,%a,%a vel=%a,%a,%a "
+                   "ground=%d state=%d timer=%a hp=%a anim=%a\n",
+                index, e->type, e->tag[0] ? e->tag : "-", e->alive,
+                e->visible, e->runtime_flags, (double)e->x, (double)e->y,
+                (double)e->z, (double)e->rx, (double)e->ry, (double)e->rz,
+                (double)e->vx, (double)e->vy, (double)e->vz, e->on_ground,
+                e->user_flag, (double)e->user_float, (double)e->hp,
+                (double)e->anim_time);
+    }
 }
 
 static const char *env_root_default(const char *env_name, const char *fallback) {
@@ -1365,6 +1406,12 @@ int main(int argc, char **argv) {
     int want_newgame = 0;
     int want_menu = 0;
     int want_sandbox = 0;
+    int headless = 0;
+    long frame_limit = -1;
+    unsigned long seed = 0;
+    int seed_set = 0;
+    const char *dump_png_dir = NULL;
+    const char *dump_state_path = NULL;
     for (int i = 1; i < argc; i++) {
         if (i < argc - 1 && strcmp(argv[i], "--level") == 0) {
             start_level = argv[i + 1];
@@ -1375,7 +1422,45 @@ int main(int argc, char **argv) {
             want_menu = 1;
         } else if (strcmp(argv[i], "--sandbox") == 0) {
             want_sandbox = 1;
+        } else if (strcmp(argv[i], "--headless") == 0) {
+            headless = 1;
+        } else if (i < argc - 1 && strcmp(argv[i], "--frames") == 0) {
+            char *end = NULL;
+            errno = 0;
+            frame_limit = strtol(argv[++i], &end, 10);
+            if (errno || !end || *end || frame_limit < 0) {
+                fprintf(stderr, "Invalid --frames value '%s'\n", argv[i]);
+                return 2;
+            }
+        } else if (i < argc - 1 && strcmp(argv[i], "--seed") == 0) {
+            char *end = NULL;
+            errno = 0;
+            seed = strtoul(argv[++i], &end, 0);
+            if (errno || !end || *end || seed > UINT_MAX) {
+                fprintf(stderr, "Invalid --seed value '%s'\n", argv[i]);
+                return 2;
+            }
+            seed_set = 1;
+        } else if (i < argc - 1 && strcmp(argv[i], "--dump-png") == 0) {
+            dump_png_dir = argv[++i];
+        } else if (i < argc - 1 && strcmp(argv[i], "--dump-state") == 0) {
+            dump_state_path = argv[++i];
+        } else {
+            fprintf(stderr, "Unknown or incomplete option '%s'\n", argv[i]);
+            return 2;
         }
+    }
+
+    if (headless) {
+        SDL_setenv("SDL_VIDEODRIVER", "offscreen", 1);
+        SDL_setenv("SDL_AUDIODRIVER", "dummy", 1);
+        SDL_setenv("JN_HEADLESS", "1", 1);
+    }
+    if (seed_set) srand((unsigned int)seed);
+    if (dump_png_dir && !make_directory_tree(dump_png_dir)) {
+        fprintf(stderr, "Cannot create --dump-png directory '%s': %s\n",
+                dump_png_dir, strerror(errno));
+        return 2;
     }
 
     /* --newgame: enter through the CTaskList task system (CJimmyGame /
@@ -2006,16 +2091,35 @@ int main(int argc, char **argv) {
     int frame_count = 0;
     unsigned int cap_seq = 0;
     Uint32 fps_time = last_time;
+    unsigned long fixed_steps = 0;
+    int run_failed = 0;
+    FILE *state_dump = NULL;
+    if (dump_state_path) {
+        state_dump = fopen(dump_state_path, "wb");
+        if (!state_dump) {
+            fprintf(stderr, "Cannot open --dump-state file '%s': %s\n",
+                    dump_state_path, strerror(errno));
+            run_failed = 1;
+        }
+    }
 
-    while (!w.should_quit) {
-        Uint32 now = SDL_GetTicks();
-        float frame_time = (now - last_time) / 1000.0f;
+    while (!run_failed) {
+        if (frame_limit >= 0) {
+            if (fixed_steps >= (unsigned long)frame_limit) break;
+        } else if (w.should_quit) {
+            break;
+        }
+        Uint32 now = frame_limit >= 0
+            ? (Uint32)((fixed_steps * 1000UL) / 60UL)
+            : SDL_GetTicks();
+        float frame_time = frame_limit >= 0 ? DT : (now - last_time) / 1000.0f;
         last_time = now;
 
         /* Cap frame time to prevent spiral of death (lag spike) */
         if (frame_time > 0.1f) frame_time = 0.1f;
 
-        accumulator += frame_time;
+        if (frame_limit >= 0) accumulator = DT;
+        else accumulator += frame_time;
         if (screenshot_mode && screenshot_warmup_ticks < screenshot_warmup_goal) {
             accumulator = DT;   /* force one tick per render frame during warmup */
         }
@@ -2023,6 +2127,7 @@ int main(int argc, char **argv) {
         /* Update phase: fixed timestep */
         while (accumulator >= DT) {
             accumulator -= DT;
+            fixed_steps++;
 
             input_update();
             if (demo_jump_enabled && !demo_jump_sent &&
@@ -2405,7 +2510,10 @@ int main(int argc, char **argv) {
         }
 
         /* Render phase: uncapped */
-        capture_begin_frame(cap_seq, SDL_GetTicks());
+        Uint32 deterministic_now = frame_limit >= 0
+            ? (Uint32)((fixed_steps * 1000UL) / 60UL)
+            : SDL_GetTicks();
+        capture_begin_frame(cap_seq, deterministic_now);
         renderer_begin_frame(w.width, w.height);
 
         /* Sky behind everything: full rotating cloud hemisphere first, then the
@@ -2430,7 +2538,7 @@ int main(int argc, char **argv) {
         /* QA pick pass: re-enumerate the same scene into the offscreen ID
            buffer and resolve the object under the cursor. Throttled inside
            qa_want_pick; immediate when a click is pending. */
-        if (qa_want_pick(SDL_GetTicks()) &&
+        if (qa_want_pick(deterministic_now) &&
             renderer_pick_begin(w.width, w.height)) {
             qa_begin_scene(1);
             draw_scene(&world, jim_model_ok);
@@ -2454,6 +2562,21 @@ int main(int argc, char **argv) {
         capture_end_frame();
         cap_seq++;
 
+        if (state_dump)
+            dump_deterministic_state(state_dump, (unsigned int)(fixed_steps - 1), &world);
+
+        if (dump_png_dir) {
+            char png_path[PATH_MAX];
+            if (snprintf(png_path, sizeof(png_path), "%s/frame_%06lu.png",
+                         dump_png_dir, fixed_steps - 1) >= (int)sizeof(png_path)) {
+                fprintf(stderr, "--dump-png path is too long\n");
+                run_failed = 1;
+            } else {
+                glFinish();
+                save_screenshot(png_path, w.width, w.height);
+            }
+        }
+
         /* Capture frame budget exhausted: break so the normal shutdown path
            (input/SDL teardown) runs. No-op in non-capture builds. */
         if (capture_should_exit()) break;
@@ -2472,8 +2595,8 @@ int main(int argc, char **argv) {
 
         /* HUD: update window title with FPS, items, and player state. */
         frame_count++;
-        Uint32 now_fps = SDL_GetTicks();
-        if (now_fps - fps_time >= 500) {
+        Uint32 now_fps = frame_limit >= 0 ? deterministic_now : SDL_GetTicks();
+        if (frame_limit < 0 && now_fps - fps_time >= 500) {
             int fps = frame_count * 1000 / (now_fps - fps_time);
             const GameState *gs = gamestate_get();
             char title[256];
@@ -2494,6 +2617,8 @@ int main(int argc, char **argv) {
         window_swap(&w);
     }
 
+    if (state_dump) fclose(state_dump);
+
     capture_shutdown();
     player_anim_destroy();
     world_box_destroy();
@@ -2504,5 +2629,5 @@ int main(int argc, char **argv) {
     audio_destroy();
     renderer_destroy();
     window_destroy(&w);
-    return 0;
+    return run_failed ? 1 : 0;
 }
