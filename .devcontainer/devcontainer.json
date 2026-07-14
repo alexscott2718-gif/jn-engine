@@ -1,0 +1,8 @@
+{
+  "name": "jn-engine",
+  "build": {
+    "dockerfile": "../Dockerfile",
+    "context": ".."
+  },
+  "workspaceFolder": "/workspace/jn-engine"
+}
