@@ -124,7 +124,10 @@ static int cutscene_tags_match(const char *a, const char *b) {
 
 static void cutscene_copy(char *dst, size_t dst_size, const char *src) {
     if (!dst || dst_size == 0) return;
-    snprintf(dst, dst_size, "%s", src ? src : "");
+    if (!src) src = "";
+    size_t n = strnlen(src, dst_size - 1);
+    memmove(dst, src, n);
+    dst[n] = '\0';
 }
 
 static int cutscene_anim_to_player_pose(const char *anim) {

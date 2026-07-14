@@ -12,7 +12,9 @@ static char g_key_prefix[80] = "";
 static void copy_bounded(char *dst, size_t dst_size, const char *src) {
     if (!dst || dst_size == 0) return;
     if (!src) src = "";
-    snprintf(dst, dst_size, "%s", src);
+    size_t n = strnlen(src, dst_size - 1);
+    memmove(dst, src, n);
+    dst[n] = '\0';
 }
 
 static const char *mode_lead(const AnimatedDispatch *d) {
