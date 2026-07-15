@@ -38,6 +38,7 @@ faithful reproduction; non-zero + a diff on any mismatch.
 from __future__ import annotations
 
 import subprocess
+import shlex
 import sys
 import tempfile
 from pathlib import Path
@@ -67,11 +68,17 @@ COUNT = len(EXPECTED)  # 10
 def build_dumper(tmp: Path) -> Path:
     binp = tmp / "cmainmenu_dump"
     home = Path.home()
+    pkg = subprocess.run(
+        ["pkg-config", "--cflags", "sdl2"], capture_output=True, text=True
+    )
+    sdl_cflags = shlex.split(pkg.stdout) if pkg.returncode == 0 else [
+        "-I", str(home / "sdl2" / "include"),
+        "-I", str(home / "sdl2" / "include" / "SDL2"),
+    ]
     cmd = [
         "cc", "-O0",
         "-I", str(REPO / "src" / "engine"),
-        "-I", str(home / "sdl2" / "include"),
-        "-I", str(home / "sdl2" / "include" / "SDL2"),
+        *sdl_cflags,
         str(HERE / "cmainmenu_dump.c"),
         str(REPO / "src" / "game" / "menu.c"),
         "-o", str(binp),

@@ -31,9 +31,12 @@
 
 /* Sprite1..Sprite9 (1-based in the .gam); returns -1 for the end sentinel. */
 static int anim_frame_at(const Entity *e, int slot) {
-    char name[12];
-    snprintf(name, sizeof(name), "Sprite%d", slot + 1);
-    return gam_prop_i(e, name, -1);
+    static const char *names[9] = {
+        "Sprite1", "Sprite2", "Sprite3", "Sprite4", "Sprite5",
+        "Sprite6", "Sprite7", "Sprite8", "Sprite9",
+    };
+    if (slot < 0 || slot >= 9) return -1;
+    return gam_prop_i(e, names[slot], -1);
 }
 
 /* frame_count = index of the first Sprite==-1, else the full 9. */

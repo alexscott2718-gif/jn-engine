@@ -32,6 +32,8 @@ CFLAGS  = -Wall -O2 -MMD -MP $(NATIVE_CFLAGS) -Isrc/engine
 LIBS    = $(filter-out -lz,$(NATIVE_LIBS)) -lz -lm -ldl -lpthread
 endif
 
+GAME_CFLAGS ?=
+
 SRC     = $(wildcard src/engine/*.c src/engine/assets/*.c src/game/*.c src/game/behaviors/*.c)
 OBJ     = $(SRC:.c=.o)
 DEP     = $(OBJ:.o=.d)
@@ -44,6 +46,11 @@ $(TARGET): $(OBJ)
 
 %.o: %.c
 	$(CC) $(CFLAGS) -c $< -o $@
+
+# The campaign check promotes warnings in gameplay code to errors without
+# forcing unrelated legacy engine/asset-loader warnings into the same change.
+src/game/%.o: src/game/%.c
+	$(CC) $(CFLAGS) $(GAME_CFLAGS) -c $< -o $@
 
 clean:
 	rm -f $(OBJ) $(DEP) $(TARGET)
@@ -116,6 +123,30 @@ diff-native-capture:
 native-vs-capture-8881-review: native-level1 diff-native-capture
 	python3 tools/build_native_capture_side_by_side.py
 
+# --- Portable collaborator checks -----------------------------------------
+FIXTURE_GOLDEN_FRAMES ?= 8
+LEVEL1_GOLDEN_FRAMES  ?= 2
+
+check:
+	rm -rf build/check-artifacts
+	$(MAKE) clean
+	$(MAKE) GAME_CFLAGS=-Werror
+	python3 tools/check_determinism.py --level fixture0 --frames 300 --seed 1
+	python3 tools/check_goldens.py --level fixture0 --frames $(FIXTURE_GOLDEN_FRAMES) \
+		--goldens tests/goldens/fixture0
+
+check-assets: check
+	python3 tools/check_goldens.py --level level1 --frames $(LEVEL1_GOLDEN_FRAMES) \
+		--goldens tests/goldens/level1
+	python3 tools/check_oracle_diff.py
+	python3 tools/check_linkage_certificates.py --no-write
+
+regen-goldens: $(TARGET)
+	python3 tools/check_goldens.py --update --level fixture0 \
+		--frames $(FIXTURE_GOLDEN_FRAMES) --goldens tests/goldens/fixture0
+	python3 tools/check_goldens.py --update --level level1 \
+		--frames $(LEVEL1_GOLDEN_FRAMES) --goldens tests/goldens/level1
+
 capture-fixture:
 	python3 tools/build_level1_hudfix_fixture.py
 
@@ -168,7 +199,7 @@ web-jnvsjn:
 	  --preload-file build/jnvsjn_web/assets@/assets \
 	  -o $(WEB_JNV_OUT)/jnengine.html
 
-.PHONY: all clean web web-jnvsjn capture replay-hudfix capture-static capture-live-jimmy capture-live-hud capture-multiframe hybrid-level1 hybrid-level1-manifest native-level1-map native-level1 native-level1-keyframes diff-native-capture native-vs-capture-8881-review phase1-sky-tint phase4-capture-state capture-fixture capture-world-fixture solve-keyframe-views
+.PHONY: all clean web web-jnvsjn capture replay-hudfix capture-static capture-live-jimmy capture-live-hud capture-multiframe hybrid-level1 hybrid-level1-manifest native-level1-map native-level1 native-level1-keyframes diff-native-capture native-vs-capture-8881-review phase1-sky-tint phase4-capture-state capture-fixture capture-world-fixture solve-keyframe-views check check-assets regen-goldens
 
 -include $(DEP)
 
