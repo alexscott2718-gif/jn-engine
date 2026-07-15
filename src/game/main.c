@@ -18,6 +18,7 @@
 #include "../engine/assets/asset_cache.h"
 #include "../engine/assets/placement_loader.h"
 #include "../engine/assets/billboard_overrides.h"
+#include "../engine/assets/asset_paths.h"
 #include "entities.h"
 #include "entity_visual.h"
 #include "behaviors/behaviors.h"
@@ -348,31 +349,15 @@ static void dump_deterministic_state(FILE *f, unsigned int frame,
     }
 }
 
-static const char *env_root_default(const char *env_name, const char *fallback) {
-    const char *value = getenv(env_name);
-    return (value && value[0]) ? value : fallback;
-}
-
-static void join_path(char *out, size_t out_size, const char *root, const char *leaf) {
-    if (!out_size) return;
-    if (!root || !root[0]) root = ".";
-    if (!leaf || !leaf[0]) {
-        snprintf(out, out_size, "%s", root);
-        return;
-    }
-    size_t n = strlen(root);
-    snprintf(out, out_size, "%s%s%s", root, (n > 0 && root[n - 1] == '/') ? "" : "/", leaf);
-}
-
 /* Strip directory; try direct open then case-insensitive scan of the configured
-   GAM root. Default is assets/gam; JN_GAM_ROOT can point at another game. */
+   GAM root. Default is $JN_ASSET_ROOT/gam; JN_GAM_ROOT is a legacy override. */
 #include <dirent.h>
 #include <strings.h>
 static int resolve_gam_path(const char *name, char *out, size_t out_size) {
     if (!name || !name[0]) return 0;
-    const char *root = env_root_default("JN_GAM_ROOT", "assets/gam");
+    const char *root = asset_root(JN_ASSET_GAM);
     /* Try as-is first. */
-    join_path(out, out_size, root, name);
+    asset_path_join(out, out_size, root, name);
     FILE *f = fopen(out, "rb");
     if (f) { fclose(f); return 1; }
     /* Case-insensitive scan. */
@@ -382,7 +367,7 @@ static int resolve_gam_path(const char *name, char *out, size_t out_size) {
     int found = 0;
     while ((de = readdir(d)) != NULL) {
         if (strcasecmp(de->d_name, name) == 0) {
-            join_path(out, out_size, root, de->d_name);
+            asset_path_join(out, out_size, root, de->d_name);
             found = 1;
             break;
         }
@@ -435,22 +420,20 @@ static int level_desc_for(const char *name, LevelDesc *desc) {
     if (!resolve_gam_path(gam_name, desc->gam_path, sizeof(desc->gam_path)))
         return 0;
 
-    const char *placements_root = getenv("JN_PLACEMENTS_ROOT");
-    if (!placements_root || !placements_root[0])
-        placements_root = env_root_default("JN_PLB_ROOT", "assets/glb/omt");
+    const char *placements_root = asset_root(JN_ASSET_PLACEMENTS);
     char placements_name[80];
     snprintf(placements_name, sizeof(placements_name), "%s_placements.txt", desc->name);
-    join_path(desc->placements_path, sizeof(desc->placements_path),
-              placements_root, placements_name);
+    asset_path_join(desc->placements_path, sizeof(desc->placements_path),
+                    placements_root, placements_name);
     if (!file_exists_local(desc->placements_path))
         desc->placements_path[0] = '\0';
 
-    const char *native_root = env_root_default("JN_NATIVE_ROOT", "assets/native");
+    const char *native_root = asset_root(JN_ASSET_NATIVE);
     char overrides_name[96];
     snprintf(overrides_name, sizeof(overrides_name), "%s_billboard_overrides.txt",
              desc->name);
-    join_path(desc->billboard_overrides, sizeof(desc->billboard_overrides),
-              native_root, overrides_name);
+    asset_path_join(desc->billboard_overrides, sizeof(desc->billboard_overrides),
+                    native_root, overrides_name);
     if (!file_exists_local(desc->billboard_overrides))
         desc->billboard_overrides[0] = '\0';
 
@@ -1523,8 +1506,11 @@ int main(int argc, char **argv) {
     char keyframe_path[192];
     const char *keyframe = getenv("JN_NATIVE_LEVEL1_KEYFRAME");
     if ((!cam_path || !cam_path[0]) && keyframe && keyframe[0]) {
-        snprintf(keyframe_path, sizeof(keyframe_path),
-                 "assets/native/keyframe_cameras/%s.txt", keyframe);
+        char keyframe_leaf[96];
+        snprintf(keyframe_leaf, sizeof(keyframe_leaf),
+                 "keyframe_cameras/%s.txt", keyframe);
+        asset_path_join(keyframe_path, sizeof(keyframe_path),
+                        asset_root(JN_ASSET_NATIVE), keyframe_leaf);
         cam_path = keyframe_path;
     }
     if (cam_path && cam_path[0]) {
@@ -1655,7 +1641,7 @@ int main(int argc, char **argv) {
        sprites.omt, so SpriteIndex must resolve against the right extraction.
        The default GAM root is JNBG; a root naming jnvsjn selects the sequel. */
     entity_visual_set_jnbg(
-        strstr(env_root_default("JN_GAM_ROOT", "assets/gam"), "jnvsjn") == NULL);
+        strstr(asset_root(JN_ASSET_GAM), "jnvsjn") == NULL);
 
     /* Sandbox / verification mode (--sandbox, or ?sandbox=1 on the web): reveal
        the rideable C3DRocketShip and grant the combat tools so the player can
@@ -2442,7 +2428,7 @@ int main(int argc, char **argv) {
                     }
                 } else {
                     fprintf(stderr, "[SWAP] could not find %s under %s\n",
-                            level_buf, env_root_default("JN_GAM_ROOT", "assets/gam"));
+                            level_buf, asset_root(JN_ASSET_GAM));
                     gamestate_reset_for_new_level();
                 }
                 /* skip respawn/cam steps this tick — world just rebuilt */

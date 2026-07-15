@@ -70,9 +70,11 @@ def py_set_state(entities: list[list], tag: str, value: int) -> int:
 def build_dumper(tmp: Path) -> Path:
     binp = tmp / "tasklist_setstate_dump"
     src_game = REPO / "src" / "game"
+    src_assets = REPO / "src" / "engine" / "assets"
     cmd = [
         "cc", "-O0", "-I", str(src_game),
         str(HERE / "tasklist_setstate_dump.c"), str(src_game / "task_loader.c"),
+        str(src_assets / "asset_paths.c"),
         "-o", str(binp),
     ]
     r = subprocess.run(cmd, capture_output=True, text=True)

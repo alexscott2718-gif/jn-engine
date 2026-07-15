@@ -36,8 +36,9 @@ HERE = Path(__file__).resolve().parent
 REPO = HERE.parents[1]
 sys.path.insert(0, str(REPO / "tools"))
 import gam_parser  # noqa: E402  (reference parser)
+from asset_paths import gam_root  # noqa: E402
 
-GAM_DIR = REPO / "assets" / "gam"
+GAM_DIR = gam_root()
 
 # Comparison-harness defaults for properties a given LOAD row didn't author
 # (2/97 rows omit ExactLevel, 4/97 omit FadeType+FadeTime). Applied identically

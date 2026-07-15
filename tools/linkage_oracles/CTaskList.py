@@ -102,9 +102,11 @@ def golden_newgame() -> str:
 def build_dumper(tmp: Path) -> Path:
     binp = tmp / "ctasklist_dump"
     src_game = REPO / "src" / "game"
+    src_assets = REPO / "src" / "engine" / "assets"
     cmd = [
         "cc", "-O0", "-I", str(src_game),
         str(HERE / "ctasklist_dump.c"), str(src_game / "task_loader.c"),
+        str(src_assets / "asset_paths.c"),
         "-o", str(binp),
     ]
     r = subprocess.run(cmd, capture_output=True, text=True)
