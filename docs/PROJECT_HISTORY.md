@@ -2137,3 +2137,43 @@ cross-compiles to a native Win64 exe **with zero source changes**.
   Win7 hardware, FPS on low-end GPUs (the QA README asks testers for specs +
   console text to scotty@exentt.com). Publishing the zip (GitHub release /
   exentt.com) is deliberately left to the maintainer.
+
+## Portable collaborator and deterministic-CI campaign (2026-07-14)
+
+Executed the eight-phase Sol collaborator kit from a clean workstation baseline and landed each
+implementation phase as an independent pull request:
+
+- **Phase 1 / PR 2:** replaced workstation-only native defaults with stock `cc` + system
+  `pkg-config` dependencies, retained the opt-in `JN_VENDORED=1` path, added the missing `-lz`,
+  and added the idempotent Ubuntu bootstrap, Docker image, and devcontainer.
+- **Phase 2 / PR 3:** added deterministic `--headless`, fixed-step `--frames`, complete RNG
+  `--seed`, per-frame exact state dumps, and numbered PNG output. Two 120-frame Level 1 traces
+  were byte-identical.
+- **Phase 3 / PR 4:** added the entirely in-memory `fixture0` level with procedural geometry and
+  texture, shared production AI behavior, trigger, projectile, player, camera, animation, and
+  rendering. Its 300-frame gate succeeds with no asset tree.
+- **Phase 4 / PR 5:** added `make check` (warnings-as-errors gameplay build, determinism, fixture
+  goldens) and `make check-assets` (Level 1 goldens, accepted capture/native oracle, existing
+  linkage certificates). Goldens were generated under Docker llvmpipe. Reversing fixture AI X
+  velocity made all eight golden comparisons fail, proving the gate is mutation-sensitive.
+- **Phase 5 / PR 6:** added push/PR container CI, always-uploaded visual artifacts, and a manual
+  in-CI golden-regeneration PR workflow. `master` protection now strictly requires `core` and
+  `assets`, including for admins. Deliberate-regression PR 7 went red in both jobs and its
+  downloadable artifact was inspected: eight actual plus eight expected fixture PNGs. The proof
+  PR was closed and its branch deleted.
+- **Phase 6 / PR 8:** centralized runtime and tooling resolution under `JN_ASSET_ROOT`, retained
+  the four compatibility overrides, added a pluggable `fetch_assets.sh` with the shipped `repo`
+  backend, and documented relocation criteria. The full Docker `make check-assets` passed from a
+  source copy containing no `assets/`, with the tree mounted read-only at `/external`.
+- **Phase 7 / PR 9:** put the north-star test first in `CONTRIBUTING.md`, documented remote-agent
+  validation boundaries and submission rules, corrected active instructions/links from the
+  retired `native-port` branch to `master`, and tiered all 14 open tasks.
+
+Closeout audit found no stashes, additional worktrees, or stray `z` file. Remote `linked` and
+`native-port` are fully merged and safe to remove. `modify-source` is **not** safe to delete: it
+contains two master-unique commits (`ce67fe9`, camera-patch scaffold; `a450cc3`, its QA page).
+It remains intentionally preserved pending a maintainer decision to merge or archive it.
+
+Next campaign: gateway collaboration tools so remote contributors never hold maintainer secrets:
+server-side `open_pr` (PR only, never direct `master`), `check_status`, task claim/release, and a
+`request_ground_truth` flow backed by `docs/ground_truth_requests.md` for capture-only work.
