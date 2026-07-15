@@ -49,8 +49,9 @@ HERE = Path(__file__).resolve().parent
 REPO = HERE.parents[1]
 sys.path.insert(0, str(REPO / "tools"))
 import gam_parser  # noqa: E402  (reference parser, reused for real 3MCA data)
+from asset_paths import gam_root  # noqa: E402
 
-GAM_DIR = REPO / "assets" / "gam"
+GAM_DIR = gam_root()
 T_SAMPLES = (0.0, 1.0, 5.0, 10.0, 20.0, 60.0)  # sweeps at/above the 100-unit floor
 WORLD_T_SAMPLES = (0.0, 5.0, 20.0)
 FULL_EPS = 0.10

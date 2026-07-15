@@ -1,4 +1,5 @@
 #include "task_loader.h"
+#include "../engine/assets/asset_paths.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -153,9 +154,7 @@ int task_load(const char *name, TaskList *out) {
     if (!name || !out) return 0;
 
     if (try_load_from(getenv("JN_TSK_ROOT"), name, out)) return 1;
-    if (try_load_from(getenv("JN_GAM_ROOT"), name, out)) return 1;
-    if (try_load_from("assets/gam", name, out)) return 1;
-    if (try_load_from("/home/scotty/xp-jnbg-original", name, out)) return 1;
+    if (try_load_from(asset_root(JN_ASSET_GAM), name, out)) return 1;
 
     /* No on-disk .tsk (proprietary, not committed). Bake the NewGame default. */
     if (strcasecmp(name, "NewGame") == 0) {

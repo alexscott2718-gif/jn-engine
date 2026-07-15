@@ -1,4 +1,5 @@
 #include "asset_cache.h"
+#include "asset_paths.h"
 #include "tex_loader.h"
 #include "ase_loader.h"
 #include "gltf_loader.h"
@@ -50,14 +51,16 @@ void asset_cache_begin_level(void) {
 
 int asset_path_ci(char *out, int out_size, const char *dir, const char *name) {
     if (!out || out_size <= 0 || !dir || !name || !name[0]) return 0;
-    snprintf(out, (size_t)out_size, "%s/%s", dir, name);
+    char resolved_dir[1024];
+    if (!asset_path_resolve(resolved_dir, sizeof(resolved_dir), dir)) return 0;
+    snprintf(out, (size_t)out_size, "%s/%s", resolved_dir, name);
     if (access(out, R_OK) == 0) return 1;     /* exact case exists */
-    DIR *d = opendir(dir);
+    DIR *d = opendir(resolved_dir);
     if (!d) return 0;
     struct dirent *de;
     while ((de = readdir(d)) != NULL) {
         if (strcasecmp(de->d_name, name) == 0) {
-            snprintf(out, (size_t)out_size, "%s/%s", dir, de->d_name);
+            snprintf(out, (size_t)out_size, "%s/%s", resolved_dir, de->d_name);
             closedir(d);
             return 1;
         }
@@ -70,7 +73,9 @@ int asset_path_ci(char *out, int out_size, const char *dir, const char *name) {
 static unsigned int try_png_stem(const char *stem) {
     if (!stem || !stem[0]) return 0;
     char path[256];
-    snprintf(path, sizeof(path), "assets/png/%s.png", stem);
+    char logical[256];
+    snprintf(logical, sizeof(logical), "assets/png/%s.png", stem);
+    if (!asset_path_resolve(path, sizeof(path), logical)) return 0;
     if (access(path, R_OK) != 0) return 0;
     return tex_cache_get(path);
 }
@@ -138,7 +143,9 @@ static unsigned int tex_cache_get_keyed(const char *path, const char *key,
 }
 
 unsigned int tex_cache_get(const char *path) {
-    return tex_cache_get_keyed(path, path, tex_load);
+    char resolved[1024];
+    if (!asset_path_resolve(resolved, sizeof(resolved), path)) return 0;
+    return tex_cache_get_keyed(resolved, path, tex_load);
 }
 
 unsigned int tex_cache_get_vflip(const char *path) {
@@ -146,7 +153,9 @@ unsigned int tex_cache_get_vflip(const char *path) {
     char key[PATH_LEN];
     if (!path || !path[0]) return 0;
     snprintf(key, sizeof(key), "vflip|%s", path);
-    return tex_cache_get_keyed(path, key, tex_load_vflip);
+    char resolved[1024];
+    if (!asset_path_resolve(resolved, sizeof(resolved), path)) return 0;
+    return tex_cache_get_keyed(resolved, key, tex_load_vflip);
 }
 
 AseModel *model_cache_get(const char *path) {
@@ -163,7 +172,11 @@ AseModel *model_cache_get(const char *path) {
             g_model[i].used = 1;
             g_model[i].gen  = g_gen;
             snprintf(g_model[i].path, PATH_LEN, "%s", path);
-            g_model[i].loaded = load_model_by_ext(&g_model[i].model, path);
+            char resolved[1024];
+            if (!asset_path_resolve(resolved, sizeof(resolved), path))
+                resolved[0] = '\0';
+            g_model[i].loaded = resolved[0] &&
+                                load_model_by_ext(&g_model[i].model, resolved);
             if (!g_model[i].loaded) {
                 fprintf(stderr, "model_cache: failed to load %s\n", path);
                 return NULL;

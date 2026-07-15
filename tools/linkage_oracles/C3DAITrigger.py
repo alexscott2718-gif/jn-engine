@@ -58,6 +58,7 @@ def build_dumper(tmp: Path) -> Path:
         str(src_game / "camera_record.c"),
         str(src_game / "game_flow.c"),
         str(src_game / "task_loader.c"),
+        str(src_engine / "assets" / "asset_paths.c"),
         str(src_engine / "assets" / "gam_loader.c"),
         str(src_engine / "player_physics.c"),
         "-lm", "-o", str(binp),

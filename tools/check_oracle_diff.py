@@ -14,8 +14,10 @@ import subprocess
 import tempfile
 from pathlib import Path
 
+from asset_paths import asset_root
+
 ROOT = Path(__file__).resolve().parents[1]
-FIXTURE = ROOT / "assets" / "capture" / "level1_hudfix"
+FIXTURE = asset_root() / "capture" / "level1_hudfix"
 REQUIRED = ["draws.json", "draw_summary.json", "frame_meta.json", "scene_world.bin"]
 
 

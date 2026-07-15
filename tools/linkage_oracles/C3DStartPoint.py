@@ -56,6 +56,7 @@ HERE = Path(__file__).resolve().parent
 REPO = HERE.parents[1]
 sys.path.insert(0, str(REPO / "tools"))
 import gam_parser  # noqa: E402  (reference parser, reused for real STRT data)
+from asset_paths import gam_root  # noqa: E402
 
 # gam_parser rounds floats to 6 decimals at parse time (round(..., 6) -- fine
 # for its human-facing catalogs, but this oracle diffs IEEE-754 bit patterns).
@@ -63,7 +64,7 @@ import gam_parser  # noqa: E402  (reference parser, reused for real STRT data)
 # on the module restores the exact unpacked f32 without touching the parser.
 gam_parser.round = lambda v, ndigits=None: v
 
-GAM_DIR = REPO / "assets" / "gam"
+GAM_DIR = gam_root()
 MISS_TAG = "zz_no_such_start_zz"
 
 

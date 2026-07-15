@@ -1,4 +1,5 @@
 #include "audio.h"
+#include "assets/asset_paths.h"
 #include <SDL.h>
 #include <SDL_mixer.h>
 #include <ctype.h>
@@ -14,7 +15,7 @@ static int audio_initialized = 0;
 
 #define AUDIO_CACHE_MAX 128
 typedef struct {
-    char path[256];
+    char path[1024];
     Mix_Chunk *chunk;
 } AudioCacheEntry;
 
@@ -50,7 +51,9 @@ int audio_init(void) {
     }
 
     for (int i = 0; i < NUM_SOUNDS; i++) {
-        sounds[i] = Mix_LoadWAV(sound_paths[i]);
+        char path[1024];
+        if (!asset_path_resolve(path, sizeof(path), sound_paths[i])) path[0] = '\0';
+        sounds[i] = path[0] ? Mix_LoadWAV(path) : NULL;
         if (!sounds[i]) {
             fprintf(stderr, "Failed to load sound %d (%s): %s\n",
                     i, sound_names[i], Mix_GetError());
@@ -80,18 +83,20 @@ static void normalize_db_name(const char *db, char *out, size_t out_size) {
 }
 
 static Mix_Chunk *load_chunk_cached(const char *path) {
+    char resolved[1024];
+    if (!asset_path_resolve(resolved, sizeof(resolved), path)) return NULL;
     for (int i = 0; i < audio_cache_count; i++) {
-        if (strcmp(audio_cache[i].path, path) == 0)
+        if (strcmp(audio_cache[i].path, resolved) == 0)
             return audio_cache[i].chunk;
     }
     if (audio_cache_count >= AUDIO_CACHE_MAX) return NULL;
-    Mix_Chunk *chunk = Mix_LoadWAV(path);
+    Mix_Chunk *chunk = Mix_LoadWAV(resolved);
     if (!chunk) {
-        fprintf(stderr, "Failed to load audio %s: %s\n", path, Mix_GetError());
+        fprintf(stderr, "Failed to load audio %s: %s\n", resolved, Mix_GetError());
         return NULL;
     }
     AudioCacheEntry *e = &audio_cache[audio_cache_count++];
-    snprintf(e->path, sizeof(e->path), "%s", path);
+    snprintf(e->path, sizeof(e->path), "%s", resolved);
     e->chunk = chunk;
     return chunk;
 }
@@ -104,9 +109,11 @@ static int resolve_audio_handle(const char *db, int handle, int allow_single_fal
     char stem[96];
     normalize_db_name(db, stem, sizeof(stem));
 
-    char map_path[256];
-    snprintf(map_path, sizeof(map_path),
+    char logical_map[256];
+    char map_path[1024];
+    snprintf(logical_map, sizeof(logical_map),
              "assets/parsed/%s/%s_audio_handles.tsv", stem, stem);
+    if (!asset_path_resolve(map_path, sizeof(map_path), logical_map)) return 0;
     FILE *f = fopen(map_path, "r");
     if (!f) {
         fprintf(stderr, "[AUDIO] missing handle map %s\n", map_path);

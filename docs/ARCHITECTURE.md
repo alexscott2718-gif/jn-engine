@@ -355,8 +355,9 @@ Toolchain: **`zig cc`** cross-target, vendored **static SDL2/SDL2_mixer** under
 
 **Run the native game:** `./jnengine --level level1` (default level is `level1`).
 Controls: W/S forward-back, A/D turn, Space jump, Shift run, R respawn, LMB free-look,
-Esc quit. Path roots are overridable via `JN_GAM_ROOT`, `JN_PLACEMENTS_ROOT`,
-`JN_NATIVE_ROOT`, `JN_PLB_ROOT`.
+Esc quit. The complete runtime asset tree is overridable with `JN_ASSET_ROOT`;
+the compatibility roots `JN_GAM_ROOT`, `JN_PLACEMENTS_ROOT`, `JN_NATIVE_ROOT`,
+and `JN_PLB_ROOT` are resolved by the same layer. See `docs/ASSETS.md`.
 
 ---
 
