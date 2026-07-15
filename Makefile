@@ -1,3 +1,7 @@
+CC ?= cc
+PKG_CONFIG ?= pkg-config
+
+ifeq ($(JN_VENDORED),1)
 HOME_DIR     = $(HOME)
 TOOLCHAIN    = $(HOME_DIR)/toolchain/usr/bin
 CC           = $(HOME_DIR)/zig/zig cc -target x86_64-linux-gnu
@@ -15,7 +19,18 @@ LIBS    = $(SDL2_LIB)/libSDL2.a \
           $(SDL2_LIB)/libSDL2_mixer.a \
           $(SDL2_LIB)/libGL.so \
           -L$(X11_LIB) -lX11 -lXext \
-          -lm -ldl -lpthread -lz
+          -lz -lm -ldl -lpthread
+NATIVE_LDFLAGS = -Wl,-rpath,$(X11_LIB)
+else
+NATIVE_DEPS   = sdl2 SDL2_mixer x11 xext gl zlib
+NATIVE_CFLAGS = $(shell $(PKG_CONFIG) --cflags $(NATIVE_DEPS))
+NATIVE_LIBS   = $(shell $(PKG_CONFIG) --libs $(NATIVE_DEPS))
+
+CFLAGS  = -Wall -O2 -MMD -MP $(NATIVE_CFLAGS) -Isrc/engine
+# zlib is part of NATIVE_DEPS; keep -lz explicit so the engine link contract
+# remains obvious even when a pkg-config implementation reorders its output.
+LIBS    = $(filter-out -lz,$(NATIVE_LIBS)) -lz -lm -ldl -lpthread
+endif
 
 SRC     = $(wildcard src/engine/*.c src/engine/assets/*.c src/game/*.c src/game/behaviors/*.c)
 OBJ     = $(SRC:.c=.o)
@@ -25,7 +40,7 @@ TARGET  = jnengine
 all: $(TARGET)
 
 $(TARGET): $(OBJ)
-	$(CC) -o $@ $^ $(LIBS) -Wl,-rpath,$(X11_LIB)
+	$(CC) $(LDFLAGS) -o $@ $^ $(LIBS) $(NATIVE_LDFLAGS)
 
 %.o: %.c
 	$(CC) $(CFLAGS) -c $< -o $@
