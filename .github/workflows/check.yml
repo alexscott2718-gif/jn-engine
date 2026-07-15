@@ -1,0 +1,68 @@
+name: checks
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  core:
+    name: core
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build portable test image
+        run: docker build -t jn-engine-kit .
+
+      - name: Prove the core suite is asset-free
+        run: |
+          rm -rf assets
+          docker run --rm -v "$PWD:/w" -w /w jn-engine-kit make check
+
+      - name: Capture fixture frames
+        if: ${{ always() }}
+        run: |
+          mkdir -p build/check-artifacts/frames-fixture0
+          docker run --rm -v "$PWD:/w" -w /w jn-engine-kit \
+            bash -c './jnengine --level fixture0 --headless --frames 8 --seed 1 --dump-png build/check-artifacts/frames-fixture0' \
+            || true
+
+      - name: Upload core visual artifacts
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: core-visuals-${{ github.run_attempt }}
+          path: build/check-artifacts/
+          if-no-files-found: warn
+
+  assets:
+    name: assets
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build portable test image
+        run: docker build -t jn-engine-kit .
+
+      - name: Run asset-backed suite
+        run: docker run --rm -v "$PWD:/w" -w /w jn-engine-kit make check-assets
+
+      - name: Capture Level 1 frames
+        if: ${{ always() }}
+        run: |
+          mkdir -p build/check-artifacts/frames-level1
+          docker run --rm -v "$PWD:/w" -w /w jn-engine-kit \
+            bash -c './jnengine --level level1 --headless --frames 2 --seed 1 --dump-png build/check-artifacts/frames-level1' \
+            || true
+
+      - name: Upload asset visual artifacts
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: asset-visuals-${{ github.run_attempt }}
+          path: build/check-artifacts/
+          if-no-files-found: warn
