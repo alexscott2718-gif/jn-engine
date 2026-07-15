@@ -1,6 +1,6 @@
 # Next Session — Portable Collaboration Handoff
 
-Updated 2026-07-14. The active branch is `master`; `native-port` and `linked` are retired,
+Updated 2026-07-15. The active branch is `master`; `native-port` and `linked` are retired,
 fully merged campaign branches. The native C engine is the product. Godot remains retired.
 
 ## What just landed
@@ -86,12 +86,13 @@ Implement gateway-owned write tools so contributors do not receive a maintainer 
 
 1. `open_pr`: server-side credential, creates/updates a contributor branch and opens a PR; it
    must never push directly to protected `master`.
-2. `check_status`: reports required `core`/`assets` state and artifact links.
+2. `check_status`: implementation complete on gateway branch `gateway/check-status`;
+   PR creation, merge, credential provisioning, and deployment remain pending.
 3. `claim_task` / `release_task`: prevents duplicate work with auditable ownership and expiry.
 4. `request_ground_truth`: appends a structured request to
    `docs/ground_truth_requests.md` for the capture-only rows above.
 
-Gateway `check_status` implementation: sibling `jn-engine-ai-gateway` branch `gateway/check-status`, commit `508831d` (`docs/collaboration_tools.md`).
+Gateway `check_status` implementation: [`jn-engine-ai-gateway` commit `508831d`](https://github.com/alexscott2718-gif/jn-engine-ai-gateway/commit/508831df9606c6eed0f10497795b5a784958276d) on `gateway/check-status`; architecture is in `docs/collaboration_tools.md` and the PR creation page is `https://github.com/alexscott2718-gif/jn-engine-ai-gateway/pull/new/gateway/check-status`.
 
 Treat authentication, branch allowlists, path validation, audit logging, request idempotency, and
 PR-only enforcement as part of the feature—not deployment details. This is gateway work, not an
