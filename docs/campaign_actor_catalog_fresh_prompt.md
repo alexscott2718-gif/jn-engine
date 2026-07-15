@@ -1,6 +1,6 @@
 # Fresh Session Prompt
 
-Continue in `/home/scotty/jn-engine` on branch `native-port`.
+Continue in `/home/scotty/jn-engine` on branch `master`.
 
 Focus on the campaign non-player actor placement and animation catalog, not QA deployment.
 

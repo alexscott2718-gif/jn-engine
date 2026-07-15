@@ -49,15 +49,36 @@ and vice-versa).
   If a fact matters beyond this session, it must land in a shared markdown file or it doesn't
   count as remembered.
 
-## The current frontier — behavior coverage (the active question)
-Visual coverage is effectively complete (the Asset Catalog shows **0 used-in-level FourCCs draw a
-placeholder box**); the gap is **runtime behavior**. Of the ~93 FourCCs placed in levels, only ~32
-have a native vtable — enemies, friends/NPCs, and most vehicles are still static. Port them faithfully
-from `docs/decomp/<Class>.md` onto the existing N1–N4 bases (`behavior_ai.c`, `behavior_projectile.c`,
-`behavior_vehicle.c`, …); the next concrete target is in `docs/decomp/_next_session.md` (remaining
-enemy roster + NPCs). Use the Asset Catalog's behavior column to pick targets by instance count ×
-level reach. The captured `.omtc` D3D7 stream remains the **validator** for motion, not a runtime dep.
-Record findings in PROJECT_HISTORY as waves land.
+## The current frontier
+Visual routing and native-vtable coverage are complete for all 93 used FourCCs. The remaining
+work is semantic depth: several intentionally inert resolver rows need capture evidence, while
+the remote-ownable queue includes AITrigger-to-C3DAI state wiring, menu/HUD text, cutscene input
+locking, Goddard tails, and the active shrink mechanic. Use the tiered list in
+`docs/decomp/_next_session.md`; do not revive the old instance-count queue or infer behavior for
+capture-blocked rows.
+
+## If you have no access to the dev machines
+
+The repository deliberately supports useful work on a fresh Ubuntu host with no XP VM, gateway,
+RX 6400, private services, or credentials. You **can** validate:
+
+- the portable native build and warnings-as-errors gameplay compilation;
+- fixed-step determinism on the asset-free `fixture0` level;
+- Docker/llvmpipe fixture and Level 1 golden PNGs;
+- the accepted Level 1 replay/native oracle comparison when capture artifacts are present; and
+- every existing linkage certificate and its mutation-sensitive oracle.
+
+Run `make check` for every change. Run `make check-assets` when your checkout has the repository
+asset tree or a prepared `JN_ASSET_ROOT`. CI runs both and uploads visual artifacts.
+
+Without the dev machines you **cannot** create new D3D7 ground-truth captures, claim exact output
+from a particular physical GPU, or validate real controller/keyboard feel and audible mix. Mark
+those conclusions as blocked and request evidence; do not replace them with guessed constants or
+loosen a golden/oracle.
+
+Submit from a branch based on `master`, keep each PR to one reviewable behavior or infrastructure
+unit, include the exact commands and results, and attach focused state traces or PNGs when behavior
+or rendering changes. CI artifacts are the handoff surface for reviewers using a phone.
 
 ## Gotchas (carry forward)
 - `pkill -f jnengine` kills your own shell (cmdline contains "jnengine") — use `pkill -x jnengine`.

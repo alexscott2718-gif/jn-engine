@@ -24,7 +24,39 @@ This is a shared, committed campaign — read the shared docs, don't rely on too
 6. Exemplar behaviors before writing any: `src/game/behaviors/behavior_walker.c` (AI + nav),
    `behavior_player.c` (physics/input), `behavior_button.c` (activation wiring).
 
-## Current state (branch: `native-port`)
+## Ownership tiers for the 14 open work items
+
+### Remote-ownable
+
+These have enough checked-in specs, fixtures, and deterministic gates for a contributor with no
+dev-machine access:
+
+1. Wire `C3DAITrigger` `AIState`/`AISpeed` into the general `C3DAI` state machine.
+2. Add the real menu/HUD text renderer.
+3. Plumb the `PlayerControlled` cutscene input lock and restore timing.
+4. Port the remaining Goddard mode-vector/orbit/effect helper tail once its checked-in constants
+   are evidenced; do not guess unresolved vectors.
+5. Port the separate Goddard energy/menu side-effect tail against the checked-in state contracts.
+6. Implement the active `C3DShrinkRay` shrink-to-moving-pickup mechanic.
+
+### Alex-only: blocked on new capture
+
+7. `3SPR`: determine the missing default canvas/size behavior.
+8. `3ROK`: recover the runtime scatter/reposition controller for the origin pool.
+9. Bare `3DAI`: establish original runtime purpose/state with capture evidence.
+
+### Low ROI: label and leave queued
+
+These `no_visual_unused` catalog rows have no current `.gam` placement. Do not build speculative
+runtime systems merely to make their rows nonempty:
+
+10. `3HAR` / `C3DHarrier`
+11. `3MIN` / `C3DMine`
+12. `3MIS` / `C3DMissile`
+13. `3POD`
+14. `3TAN` / `C3DTank`
+
+## Current state (branch: `master`)
 - **Decomp spec campaign DONE:** all 208 `C*` gameplay classes have `docs/decomp/<Class>.md`
   at `status=spec`. Do not re-derive specs from the binary; consume them.
 - **Godot retired (2026-06-22):** `docs/godot_bridge_plan.md` is superseded. The specs feed
