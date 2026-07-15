@@ -91,6 +91,8 @@ Implement gateway-owned write tools so contributors do not receive a maintainer 
 4. `request_ground_truth`: appends a structured request to
    `docs/ground_truth_requests.md` for the capture-only rows above.
 
+Gateway `check_status` implementation: sibling `jn-engine-ai-gateway` branch `gateway/check-status`, commit `508831d` (`docs/collaboration_tools.md`).
+
 Treat authentication, branch allowlists, path validation, audit logging, request idempotency, and
 PR-only enforcement as part of the feature—not deployment details. This is gateway work, not an
 engine-runtime change.
