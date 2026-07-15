@@ -29,6 +29,7 @@
 #include "gamestate.h"
 #include "game_flow.h"
 #include "spawn.h"
+#include "fixture.h"
 #include "menu.h"
 #include "hud.h"
 #include "animated_dispatch.h"
@@ -427,6 +428,8 @@ static int level_desc_for(const char *name, LevelDesc *desc) {
     memset(desc, 0, sizeof(*desc));
     normalize_level_name(name, desc->name, sizeof(desc->name));
     if (!desc->name[0]) return 0;
+    if (strcmp(desc->name, "fixture0") == 0)
+        return 1;
 
     snprintf(gam_name, sizeof(gam_name), "%s.gam", desc->name);
     if (!resolve_gam_path(gam_name, desc->gam_path, sizeof(desc->gam_path)))
@@ -461,6 +464,8 @@ static int level_desc_for(const char *name, LevelDesc *desc) {
 }
 
 static int load_level(const LevelDesc *desc, World *world) {
+    if (strcmp(desc->name, "fixture0") == 0)
+        return fixture_level_build(world);
     int n = gam_load(world, desc->gam_path);
     if (n < 0) return -1;
     if (desc->placements_path[0])
@@ -869,6 +874,26 @@ static void draw_scene(World *world, int jim_model_ok)
         /* QA annotation: every drawable entity registers here so the pick
            pass and the main pass assign identical IDs. */
         qa_register_entity(e);
+
+        /* fixture0 is deliberately asset-free: render every synthetic object
+           through the engine's primitive cube instead of asking the authored
+           visual resolver for meshes or sprites. Patrol actors pulse from the
+           animation clock advanced by behavior_ai's shared animated base. */
+        if (strncmp(e->tag, "fixture_", 8) == 0) {
+            float r, g, b;
+            entity_color(e->type, &r, &g, &b);
+            float scale = e->half_extents[1] > 0.0f ? e->half_extents[1] : 35.0f;
+            if (strcmp(e->type, "3CAR") == 0) {
+                r = 0.95f; g = 0.25f; b = 0.20f;
+                scale *= 1.0f + 0.08f * sinf(e->anim_time * 6.2831853f);
+            } else if (strcmp(e->type, "PROJ") == 0) {
+                r = 1.0f; g = 0.75f; b = 0.1f;
+                scale = 12.0f;
+            }
+            renderer_draw_box(box_vao, box_idx, e->x, e->y, e->z,
+                              scale, r, g, b);
+            continue;
+        }
 
         if (draw_authored_button(e))
             continue;
@@ -1479,6 +1504,7 @@ int main(int argc, char **argv) {
         fprintf(stderr, "Failed to resolve level '%s'\n", start_level);
         return 1;
     }
+    int fixture_mode = strcmp(current_desc.name, "fixture0") == 0;
 
     Window w;
     if (!window_init(&w, "JN Engine - Step 4: Textured Scene", 1280, 720))
@@ -1487,9 +1513,11 @@ int main(int argc, char **argv) {
     SDL_SetWindowSize(w.sdl_win, 1280, 720);
     w.width = 1280;
     w.height = 720;
-    fprintf(stderr,
-            "[native_level] loading %s from %s\n",
-            current_desc.name, current_desc.gam_path);
+    if (fixture_mode)
+        fprintf(stderr, "[native_level] loading built-in fixture0\n");
+    else
+        fprintf(stderr, "[native_level] loading %s from %s\n",
+                current_desc.name, current_desc.gam_path);
 
     const char *cam_path = getenv("JN_NATIVE_LEVEL1_CAMERA");
     char keyframe_path[192];
@@ -1532,7 +1560,7 @@ int main(int argc, char **argv) {
     renderer_set_alpha_cutout(PHASE4_ALPHA_CUTOUT_ENABLED,
                               PHASE4_ALPHA_CUTOUT_THRESHOLD);
 
-    if (!audio_init()) {
+    if (!fixture_mode && !audio_init()) {
         renderer_destroy();
         window_destroy(&w);
         return 1;
@@ -1612,14 +1640,15 @@ int main(int argc, char **argv) {
        reference jimmylast.bmp (which doesn't exist); jimycarl.png is the
        atlas that matches the model UVs (red shirt, atom emblem, backpack). */
     asset_cache_begin_level();
-    unsigned int jim_tex = tex_cache_get("assets/png/jimycarl.png");
-    int jim_poses_loaded = player_anim_init(jim_tex);
+    unsigned int jim_tex = fixture_mode ? 0 : tex_cache_get("assets/png/jimycarl.png");
+    int jim_poses_loaded = fixture_mode ? 0 : player_anim_init(jim_tex);
     int jim_model_ok = (jim_poses_loaded > 0);
 
     /* 2D HUD overlay. Disabled when a matched-camera override is active (the
        game-1 native-vs-capture faithfulness validators render through this same
        loop and must stay pixel-identical) or via JN_DISABLE_HUD. */
-    int hud_enabled = !renderer_camera_override_active() && !env_enabled("JN_DISABLE_HUD");
+    int hud_enabled = !fixture_mode && !renderer_camera_override_active() &&
+                      !env_enabled("JN_DISABLE_HUD");
     if (hud_enabled) hud_init();
 
     /* Game selector for the per-instance sprite tier: each game ships its own
@@ -1866,7 +1895,14 @@ int main(int argc, char **argv) {
     /* Bind vtables + run on_spawn for every entity (must come after gam_load).
        Reset the cutscene shot list first so 3CAM on_spawn registers fresh. */
     cutscene_reset();
-    entity_bind_vtables(&world);
+    if (!fixture_mode) entity_bind_vtables(&world);
+    if (fixture_mode && !fixture_level_start_runtime(&world)) {
+        fprintf(stderr, "fixture0: failed to spawn projectile\n");
+        world_destroy(&world);
+        renderer_destroy();
+        window_destroy(&w);
+        return 1;
+    }
 
     /* Find JIM and frame the camera on him. JIM's spawn Y becomes the ground plane. */
     Camera *cam = renderer_camera();
@@ -1908,7 +1944,8 @@ int main(int argc, char **argv) {
        system (New Game -> NewGame.tsk -> level1b; VR items load directly). */
     if (want_menu)
         menu_open();
-    configure_safety_floor(&world, jim);
+    if (fixture_mode) fixture_level_configure_floor(&world);
+    else configure_safety_floor(&world, jim);
 
     /* Headless collision self-test seam (JN_TEST_COLLIDE=1): exercise the mesh
        CollisionWorld (ground-follow + wall clamp) and exit, mirroring the other
@@ -1916,6 +1953,7 @@ int main(int argc, char **argv) {
     if (getenv("JN_TEST_COLLIDE")) {
         int rc = collide_self_test(&world, jim);
         ground_destroy();
+        fixture_level_destroy();
         world_destroy(&world);
         renderer_destroy();
         window_destroy(&w);
@@ -2623,6 +2661,7 @@ int main(int argc, char **argv) {
     player_anim_destroy();
     world_box_destroy();
     ground_destroy();
+    fixture_level_destroy();
     world_destroy(&world);
     asset_cache_destroy_all();
     input_destroy();
