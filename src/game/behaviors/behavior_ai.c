@@ -48,7 +48,7 @@ BehaviorAIResult behavior_ai_seek_position(Entity *e, float x, float y, float z,
     if (step > dist) step = dist;
     float ox = e->x;
     float oz = e->z;
-    e->x += dx * inv * step;
+    e->x -= dx * inv * step;
     e->z += dz * inv * step;
     e->vx = (e->x - ox) / dt;
     e->vz = (e->z - oz) / dt;
