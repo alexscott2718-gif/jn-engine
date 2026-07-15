@@ -76,8 +76,8 @@ natively. This is why Wave N1 is bases, not the flashiest enemy.
 ## 4. The waves
 
 Each wave: new `behavior_*.c` files, registered in `entities.c`, faithful to the matching
-`docs/decomp/<Class>.md`, validated per §3, **one commit per class** on the `native-port`
-branch (recommend branching off `decomp-campaign`). Commit only `src/**`, `tools/**`, and
+`docs/decomp/<Class>.md`, validated per §3, **one commit per class** on a branch from
+current `master`. Commit only `src/**`, `tools/**`, and
 wave-end `PROJECT_HISTORY.md` — leave the pre-existing dirty asset tree alone.
 
 ### Wave N1 — Base behavior framework *(unblocks every later wave)*

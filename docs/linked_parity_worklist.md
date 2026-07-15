@@ -30,7 +30,7 @@ contract in `docs/linked_parity_plan.md` (Linkage Certificate L1-L5).
 6. **Gate (L5)** — `python3 tools/build_vtable_parity_report.py` (runs the gate),
    then `make` + `python3 tools/audit_faithfulness.py` (0/35) if you touched C.
 7. **Record** — regenerated `docs/linkage_progress.md` + a line in `PROJECT_HISTORY.md`.
-8. **Commit one row, push.** Small commits; the branch stays rebased on `native-port`.
+8. **Commit one row, push.** Small commits; branch from current `master`.
 
 ## Queue
 

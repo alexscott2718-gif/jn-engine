@@ -2,7 +2,7 @@
 
 > **Purpose:** survive a usage/context reset. This tracks a 4-ticket QA campaign so a
 > fresh session can resume without re-deriving. Update the **Status** column and the
-> **Resume here** section after every fix. Branch: `native-port`.
+> **Resume here** section after every fix. Branch: `master`.
 > Workflow contract: `docs/qa_ticket_resolution_workflow.md`.
 
 ## Context / what already shipped this session

@@ -5,7 +5,7 @@
 > Scoped 2026-06-24. Mission: replace the engine's patchwork ground/collision with a
 > decomp-faithful **mesh collision world** built from each level's `BLOCKING_*` collider meshes.
 
-You are working in `/home/scotty/jn-engine` on branch `native-port`. This is a faithful
+You are working in `/home/scotty/jn-engine` on branch `master`. This is a faithful
 reimplementation: the decomp specs + authored `.gam`/OMT data are ground truth.
 
 ## STATUS — Phases 0–3 DONE, Phase 4 BLOCKED (updated 2026-06-24)

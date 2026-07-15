@@ -14,7 +14,7 @@ visible or playable mismatch.
 
 ## Current baseline
 
-- Branch: `native-port`.
+- Branch: `master`.
 - Used-in-level behavior routing: 93 / 93 FourCCs have native vtables.
 - Decomp ledger: 208 class rows, all currently spec-level.
 - Web build: live at `https://exentt.com/jn-engine/`.

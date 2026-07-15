@@ -1,7 +1,7 @@
 # Fresh Session Handoff: Vtable Parity Track
 
 Date: 2026-06-25
-Branch: `native-port`
+Branch: `master`
 
 ## Progress log (most recent first)
 
@@ -65,7 +65,7 @@ that cannot be manually guessed without drifting from original-game behavior.
 
 ```bash
 cd ~/jn-engine
-git checkout native-port
+git checkout master
 git pull --ff-only
 sed -n '1,260p' docs/vtable_parity_plan.md
 sed -n '1,220p' docs/continuation_options.md
