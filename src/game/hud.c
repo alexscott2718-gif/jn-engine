@@ -1,4 +1,5 @@
 #include "hud.h"
+#include "ui_text.h"
 #include "../engine/renderer.h"
 #include "../engine/assets/asset_cache.h"
 #include "hud_layout_generated.h"
@@ -64,6 +65,7 @@ static void draw_counter(int vw, int vh, int value, const HudCounter *c) {
 }
 
 void hud_init(void) {
+    ui_text_init();
     for (int i = 0; i < HUD_LAYOUT_COUNT; i++)
         (void)tex_cache_get(HUD_LAYOUT[i].texture);
     for (int d = 0; d < 10; d++) {
@@ -97,4 +99,15 @@ void hud_draw(int vw, int vh, const GameState *gs) {
     if (t) sscanf(t, "%d,%d", &items, &score);
     draw_counter(vw, vh, items, &HUD_COUNTER_ITEMS);
     draw_counter(vw, vh, score, &HUD_COUNTER_SCORE);
+
+    /* The original functional HUD path exposed a level-clear message. Draw it
+       with the shipped menu font now that the shared atlas renderer exists. */
+    if (gs->level_done) {
+        float scale = 3.0f * (float)vh / HUD_REF_H;
+        float y = (float)vh * 0.18f;
+        ui_text_draw_centered(vw, vh, (float)vw * 0.5f + scale, y + scale,
+                              scale, "LEVEL CLEAR", 0.0f, 0.0f, 0.0f, 0.75f);
+        ui_text_draw_centered(vw, vh, (float)vw * 0.5f, y,
+                              scale, "LEVEL CLEAR", 0.25f, 1.0f, 0.35f, 1.0f);
+    }
 }

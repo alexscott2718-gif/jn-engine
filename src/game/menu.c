@@ -1,4 +1,5 @@
 #include "menu.h"
+#include "ui_text.h"
 #include "../engine/input.h"
 #include "../engine/renderer.h"
 #include <stdio.h>
@@ -8,7 +9,7 @@
    specced menu sequence, then Quit. New Game routes through the NewGame task
    (CTaskList -> level1b); VR items load their .gam directly. */
 typedef struct {
-    const char *label;     /* item identity (logged; no text renderer yet) */
+    const char *label;     /* item identity shown by the shared atlas renderer */
     const char *level;     /* normalized level to load, NULL for Quit */
     int         is_newgame;
 } MenuItem;
@@ -87,8 +88,7 @@ void menu_draw(int viewport_w, int viewport_h) {
                               0, 0, (float)viewport_w, (float)viewport_h,
                               0.02f, 0.04f, 0.10f, 0.55f);
 
-    /* A column of selectable bars; the current selection glows. With no text
-       renderer yet, the highlighted bar + console log identify the item. */
+    /* A column of selectable, labeled bars; the current selection glows. */
     float bw = viewport_w * 0.40f;
     float bh = 34.0f;
     float gap = 12.0f;
@@ -100,6 +100,12 @@ void menu_draw(int viewport_w, int viewport_h) {
     renderer_draw_screen_rect(viewport_w, viewport_h,
                               x, y - bh - gap, bw, bh,
                               0.85f, 0.70f, 0.15f, 0.9f);
+    const float text_scale = 2.0f;
+    const float text_h = ui_text_line_height(text_scale);
+    ui_text_draw_centered(viewport_w, viewport_h, x + bw * 0.5f,
+                          y - bh - gap + (bh - text_h) * 0.5f,
+                          text_scale, "JIMMY NEUTRON",
+                          0.08f, 0.05f, 0.02f, 1.0f);
 
     for (int i = 0; i < g_item_count; i++) {
         int on = (i == g_sel);
@@ -109,6 +115,12 @@ void menu_draw(int viewport_w, int viewport_h) {
         float a = on ? 0.95f : 0.70f;
         renderer_draw_screen_rect(viewport_w, viewport_h,
                                   x, y + i * (bh + gap), bw, bh, r, g, b, a);
+        float text_y = y + i * (bh + gap) + (bh - text_h) * 0.5f;
+        ui_text_draw_centered(viewport_w, viewport_h, x + bw * 0.5f,
+                              text_y, text_scale, g_items[i].label,
+                              on ? 0.08f : 0.95f,
+                              on ? 0.05f : 0.95f,
+                              on ? 0.02f : 1.00f, 1.0f);
         if (on)  /* selection pip on the left */
             renderer_draw_screen_rect(viewport_w, viewport_h,
                                       x - bh - gap, y + i * (bh + gap), bh, bh,

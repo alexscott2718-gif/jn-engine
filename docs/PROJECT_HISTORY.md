@@ -2193,3 +2193,26 @@ An authenticated ChatGPT call exercised the production tool and its audit path.
 `e29b8c6c86a67d8346b2ef52f6265f5f3a6c029b` was pushed and its exact contributor page was
 published. `check_status` is therefore complete; `open_pr`, `claim_task` / `release_task`, and
 `request_ground_truth` remain future workflow features.
+
+## Native menu/HUD text renderer (2026-07-16)
+
+Closed the portable-collaboration handoff item for visible native menu/HUD text. A shared
+`ui_text` module now maps `A-Z`, `a-z`, and `0-9` into the shipped
+`assets/png/fontsmall.png` atlas, measures strings, and draws tinted alpha-mask glyphs. The
+renderer gained source-region and alpha-mask sprite paths while preserving the existing
+full-sprite path. Half-texel atlas insets prevent neighboring rows from bleeding under linear
+filtering.
+
+The front-end stand-in now shows a `JIMMY NEUTRON` title plus labels for New Game, all eight VR
+routes, and Quit. The gameplay HUD uses the same renderer for a shadowed `LEVEL CLEAR` banner.
+These are deliberate native-port presentation features: they do not claim parity with the
+original canvas-menu graph or decoded `C2DInGameMenu::DrawHud` counters.
+
+Validation added a headless glyph/layout oracle to `make check`, including a deliberately shifted
+glyph-index mutant that the oracle rejects. A warnings-as-errors build, the existing CMainMenu
+routing oracle, and direct offscreen menu/Level 1 screenshots passed locally. The workstation's
+physical renderer reproduced pre-existing golden differences on an untouched `master` worktree,
+so canonical golden validation was run only in the repository Docker/llvmpipe environment. Both
+container gates passed: `make check` matched all eight fixture goldens, and `make check-assets`
+also matched both Level 1 goldens, the 3,523-draw capture/native oracle, and all 14 linked
+certificates (with the existing 15 explicitly linked-blocked rows preserved).

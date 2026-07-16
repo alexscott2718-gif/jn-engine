@@ -157,9 +157,12 @@ static const char *SPR2D_FRAG_SRC =
     "out vec4 FragColor;\n"
     "uniform sampler2D uTex;\n"
     "uniform vec4 uTint;\n"
+    "uniform int uAlphaMask;\n"
     "void main() {\n"
     "    vec4 c = texture(uTex, vUV);\n"
-    "    FragColor = vec4(c.rgb * uTint.rgb, c.a * uTint.a);\n"
+    "    FragColor = (uAlphaMask != 0)\n"
+    "        ? vec4(uTint.rgb, c.a * uTint.a)\n"
+    "        : vec4(c.rgb * uTint.rgb, c.a * uTint.a);\n"
     "}\n";
 
 /* Lit + textured shader — pos(0) uv(1) normal(2) */
@@ -302,7 +305,7 @@ static int g_rect_loc_color = -1;
 
 /* Screen-space textured sprite (HUD) program. */
 static unsigned int g_spr2d_prog = 0, g_spr2d_vao = 0, g_spr2d_vbo = 0;
-static int g_spr2d_loc_tex = -1, g_spr2d_loc_tint = -1;
+static int g_spr2d_loc_tex = -1, g_spr2d_loc_tint = -1, g_spr2d_loc_alpha_mask = -1;
 
 /* Billboard program state. */
 static unsigned int g_bb_prog = 0, g_bb_vao = 0, g_bb_vbo = 0;
@@ -489,6 +492,7 @@ int renderer_init(int w, int h) {
         glDeleteShader(svs2); glDeleteShader(sfs2);
         g_spr2d_loc_tex  = glGetUniformLocation(g_spr2d_prog, "uTex");
         g_spr2d_loc_tint = glGetUniformLocation(g_spr2d_prog, "uTint");
+        g_spr2d_loc_alpha_mask = glGetUniformLocation(g_spr2d_prog, "uAlphaMask");
         glGenVertexArrays(1, &g_spr2d_vao);
         glGenBuffers(1, &g_spr2d_vbo);
         glBindVertexArray(g_spr2d_vao);
@@ -704,9 +708,12 @@ void renderer_draw_screen_rect(int viewport_w, int viewport_h,
     glEnable(GL_DEPTH_TEST);
 }
 
-void renderer_draw_sprite_2d(unsigned int tex, int viewport_w, int viewport_h,
-                             float x, float y, float width, float height,
-                             float tint_r, float tint_g, float tint_b, float tint_a) {
+static void renderer_draw_sprite_region_internal(
+        unsigned int tex, int viewport_w, int viewport_h,
+        float x, float y, float width, float height,
+        float u0, float v_top, float u1, float v_bottom,
+        float tint_r, float tint_g, float tint_b, float tint_a,
+        int alpha_mask) {
     if (!tex || !g_spr2d_prog || !g_spr2d_vao || viewport_w <= 0 || viewport_h <= 0)
         return;
     if (width <= 0.0f || height <= 0.0f) return;
@@ -715,15 +722,13 @@ void renderer_draw_sprite_2d(unsigned int tex, int viewport_w, int viewport_h,
     float x1 = ((x + width) / (float)viewport_w) * 2.0f - 1.0f;
     float y0 = 1.0f - (y / (float)viewport_h) * 2.0f;          /* top */
     float y1 = 1.0f - ((y + height) / (float)viewport_h) * 2.0f; /* bottom */
-    /* tex_loader flips rows on load (stbi flip), so the bottom screen edge maps
-       to v=0 and the top edge to v=1 to render the image upright. */
     const float verts[24] = {
-        x0, y0, 0.0f, 1.0f,
-        x1, y0, 1.0f, 1.0f,
-        x1, y1, 1.0f, 0.0f,
-        x0, y0, 0.0f, 1.0f,
-        x1, y1, 1.0f, 0.0f,
-        x0, y1, 0.0f, 0.0f,
+        x0, y0, u0, v_top,
+        x1, y0, u1, v_top,
+        x1, y1, u1, v_bottom,
+        x0, y0, u0, v_top,
+        x1, y1, u1, v_bottom,
+        x0, y1, u0, v_bottom,
     };
 
     glDisable(GL_DEPTH_TEST);
@@ -733,6 +738,7 @@ void renderer_draw_sprite_2d(unsigned int tex, int viewport_w, int viewport_h,
     glUseProgram(g_spr2d_prog);
     glUniform1i(g_spr2d_loc_tex, 0);
     glUniform4f(g_spr2d_loc_tint, tint_r, tint_g, tint_b, tint_a);
+    glUniform1i(g_spr2d_loc_alpha_mask, alpha_mask);
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, tex);
     glBindVertexArray(g_spr2d_vao);
@@ -745,6 +751,34 @@ void renderer_draw_sprite_2d(unsigned int tex, int viewport_w, int viewport_h,
     glDisable(GL_BLEND);
     glDepthMask(GL_TRUE);
     glEnable(GL_DEPTH_TEST);
+}
+
+void renderer_draw_sprite_2d(unsigned int tex, int viewport_w, int viewport_h,
+                             float x, float y, float width, float height,
+                             float tint_r, float tint_g, float tint_b, float tint_a) {
+    /* tex_loader flips rows on load (stbi flip), so the bottom screen edge maps
+       to v=0 and the top edge to v=1 to render the image upright. */
+    renderer_draw_sprite_region_internal(tex, viewport_w, viewport_h,
+        x, y, width, height, 0.0f, 1.0f, 1.0f, 0.0f,
+        tint_r, tint_g, tint_b, tint_a, 0);
+}
+
+void renderer_draw_sprite_region_2d(unsigned int tex, int viewport_w, int viewport_h,
+                                    float x, float y, float width, float height,
+                                    float u0, float v_top, float u1, float v_bottom,
+                                    float tint_r, float tint_g, float tint_b, float tint_a) {
+    renderer_draw_sprite_region_internal(tex, viewport_w, viewport_h,
+        x, y, width, height, u0, v_top, u1, v_bottom,
+        tint_r, tint_g, tint_b, tint_a, 0);
+}
+
+void renderer_draw_mask_region_2d(unsigned int tex, int viewport_w, int viewport_h,
+                                  float x, float y, float width, float height,
+                                  float u0, float v_top, float u1, float v_bottom,
+                                  float r, float g, float b, float a) {
+    renderer_draw_sprite_region_internal(tex, viewport_w, viewport_h,
+        x, y, width, height, u0, v_top, u1, v_bottom,
+        r, g, b, a, 1);
 }
 
 void renderer_get_view_proj(float out[16]) {

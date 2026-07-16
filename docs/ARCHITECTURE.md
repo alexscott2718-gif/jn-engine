@@ -96,8 +96,10 @@ A small immediate-ish GL 3.3 / WebGL2 renderer. Public surface (see `renderer.h`
 - **Billboards:** `renderer_draw_billboard(...)` camera-facing alpha-tested quad
   (trees, pickups, sprite objects); `renderer_set_billboard_uv_flip_y()` matches the
   capture's FVF152 vertical convention.
-- **HUD:** `renderer_draw_sprite_2d` / `renderer_draw_screen_rect` — ortho, depth
-  off, blended; called after the 3D scene.
+- **HUD:** `renderer_draw_sprite_2d` / `renderer_draw_sprite_region_2d` /
+  `renderer_draw_mask_region_2d` / `renderer_draw_screen_rect` — ortho, depth off,
+  blended; called after the 3D scene. The region/mask path supports tinting glyphs from
+  an alpha atlas without changing existing full-sprite draws.
 - **Faithfulness switches** (each measured, see history Era 3/5):
   `renderer_set_scene_tint`, `renderer_set_hide_untextured_groups` (skip
   collision-only / unresolved canvas slots so they don't draw as gray slabs),
@@ -222,8 +224,9 @@ It's also the home of the many **`JN_*` test/QA env knobs** — see §10.
   `world_query_segment`).
 - **`gamestate.c`** — items/objectives, tool inventory, **level-swap requests**,
   respawn, per-level reset. The bridge between behaviors and `main.c`.
-- **`hud.c`** — items counter, tool icons, level-clear banner (drawn via
-  `renderer_draw_sprite_2d`).
+- **`hud.c` / `ui_text.c`** — items counter, tool icons, and a level-clear text banner;
+  the shared text renderer also labels the front-end menu from the shipped
+  `assets/png/fontsmall.png` atlas.
 - **`player_anim.c`** — Jimmy pose set + `player_anim_sample()` (frame blend).
 
 ### 5.4 Behaviors — `src/game/behaviors/` 🟢
