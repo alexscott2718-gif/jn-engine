@@ -2177,3 +2177,19 @@ It remains intentionally preserved pending a maintainer decision to merge or arc
 Next campaign: gateway collaboration tools so remote contributors never hold maintainer secrets:
 server-side `open_pr` (PR only, never direct `master`), `check_status`, task claim/release, and a
 `request_ground_truth` flow backed by `docs/ground_truth_requests.md` for capture-only work.
+
+## Gateway `check_status` production closeout (2026-07-16)
+
+Gateway PR [#1](https://github.com/alexscott2718-gif/jn-engine-ai-gateway/pull/1) merged and the
+production gateway source `f0893ac434f120a303e6fdde5384385ebf61f605` now serves six MCP tools.
+The immutable engine snapshot `04ba82b3584ffc307a34752c2fa75885fd8973cc` was active for the
+closeout validation. A mode-`0600` GitHub Actions read credential and durable audit bind are
+active; no credential value is stored here.
+
+An authenticated ChatGPT call exercised the production tool and its audit path.
+`check_status(pr=1)` returned the expected sanitized `not_found` response, while
+`check_status(branch=master)` returned `overall=success` with both required contexts, `core` and
+`assets`, successful. Contributor documentation commit
+`e29b8c6c86a67d8346b2ef52f6265f5f3a6c029b` was pushed and its exact contributor page was
+published. `check_status` is therefore complete; `open_pr`, `claim_task` / `release_task`, and
+`request_ground_truth` remain future workflow features.
