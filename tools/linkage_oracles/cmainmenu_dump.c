@@ -18,6 +18,7 @@
 #include <SDL.h>
 
 #include "../../src/game/menu.h"
+#include "../../src/game/ui_text.h"
 #include "../../src/engine/renderer.h"
 
 /* ---- input stub: scripted Down presses + a one-shot confirm ------------- */
@@ -45,6 +46,13 @@ void renderer_draw_screen_rect(int viewport_w, int viewport_h,
                                float r, float g, float b, float a) {
     (void)viewport_w; (void)viewport_h; (void)x; (void)y; (void)w; (void)h;
     (void)r; (void)g; (void)b; (void)a;
+}
+float ui_text_line_height(float scale) { return 10.0f * scale; }
+void ui_text_draw_centered(int viewport_w, int viewport_h,
+                           float center_x, float y, float scale, const char *text,
+                           float r, float g, float b, float a) {
+    (void)viewport_w; (void)viewport_h; (void)center_x; (void)y; (void)scale;
+    (void)text; (void)r; (void)g; (void)b; (void)a;
 }
 
 static int route_at(int idx, const char **level, int *is_newgame) {

@@ -173,6 +173,10 @@ index through the real `menu_open`/`menu_input`/`menu_take_confirm` path,
 diffing each routed `(level, is_newgame)` against the doc table; probing past
 the end must wrap to index 0, pinning the item count at 10.
 
+The native stand-in gained visible labels through the shared `ui_text.c`
+font-atlas renderer on 2026-07-16. That presentation change does not expand
+this certificate beyond the route ordering and no-route terminator above.
+
 ### Aspect: `menu-manager-screen-graph` -- status `linked-blocked` (target 4, 2026-07-02)
 
 Target 4 opens the original L1 menu-manager graph: `LoadMyMenu`/`displayMenu`

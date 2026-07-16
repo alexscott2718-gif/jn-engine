@@ -1,6 +1,6 @@
 # Next Session — Portable Collaboration Handoff
 
-Updated 2026-07-15. The active branch is `master`; `native-port` and `linked` are retired,
+Updated 2026-07-16. The active branch is `master`; `native-port` and `linked` are retired,
 fully merged campaign branches. The native C engine is the product. Godot remains retired.
 
 ## What just landed
@@ -50,33 +50,35 @@ For a relocated complete tree:
 JN_ASSET_ROOT=/path/to/assets make check-assets
 ```
 
-## Ownership tiers for the 14 open engine tasks
+## Ownership tiers for the 13 open engine tasks
+
+Completed 2026-07-16: the native menu/HUD text renderer now uses the shipped
+`fontsmall.png` atlas for front-end labels and the level-clear banner. The remaining tasks are:
 
 ### Remote-ownable
 
 1. Wire AITrigger `AIState`/`AISpeed` into the general `C3DAI` state machine.
-2. Add the menu/HUD text renderer.
-3. Port the `PlayerControlled` cutscene input lock and restore timing.
-4. Finish the Goddard mode-vector/orbit/effect helper tail when checked-in evidence pins the
+2. Port the `PlayerControlled` cutscene input lock and restore timing.
+3. Finish the Goddard mode-vector/orbit/effect helper tail when checked-in evidence pins the
    unresolved vectors; never guess them.
-5. Finish the separate Goddard energy/menu side-effect tail.
-6. Implement the active `C3DShrinkRay` shrink-to-moving-pickup mechanic.
+4. Finish the separate Goddard energy/menu side-effect tail.
+5. Implement the active `C3DShrinkRay` shrink-to-moving-pickup mechanic.
 
 ### Alex-only: requires new original-game capture
 
-7. `3SPR`: default canvas and size.
-8. `3ROK`: runtime scatter/reposition controller for the origin pool.
-9. Bare `3DAI`: original runtime purpose/state.
+6. `3SPR`: default canvas and size.
+7. `3ROK`: runtime scatter/reposition controller for the origin pool.
+8. Bare `3DAI`: original runtime purpose/state.
 
 Record requests for these instead of inventing behavior.
 
 ### Low ROI: `no_visual_unused`
 
-10. `3HAR` / `C3DHarrier`
-11. `3MIN` / `C3DMine`
-12. `3MIS` / `C3DMissile`
-13. `3POD`
-14. `3TAN` / `C3DTank`
+9. `3HAR` / `C3DHarrier`
+10. `3MIN` / `C3DMine`
+11. `3MIS` / `C3DMissile`
+12. `3POD`
+13. `3TAN` / `C3DTank`
 
 These have no current `.gam` placements; leave them labeled unless new reach evidence appears.
 

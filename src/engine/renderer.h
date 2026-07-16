@@ -71,6 +71,18 @@ void renderer_draw_screen_rect(int viewport_w, int viewport_h,
 void renderer_draw_sprite_2d(unsigned int tex, int viewport_w, int viewport_h,
                              float x, float y, float width, float height,
                              float tint_r, float tint_g, float tint_b, float tint_a);
+/* Draw a source sub-region of a screen-space texture. UVs use OpenGL texture
+   coordinates: v_top is sampled at the screen-space top edge and v_bottom at
+   the bottom edge. The mask variant ignores source RGB and uses source alpha
+   as a tintable glyph/icon mask. */
+void renderer_draw_sprite_region_2d(unsigned int tex, int viewport_w, int viewport_h,
+                                    float x, float y, float width, float height,
+                                    float u0, float v_top, float u1, float v_bottom,
+                                    float tint_r, float tint_g, float tint_b, float tint_a);
+void renderer_draw_mask_region_2d(unsigned int tex, int viewport_w, int viewport_h,
+                                  float x, float y, float width, float height,
+                                  float u0, float v_top, float u1, float v_bottom,
+                                  float r, float g, float b, float a);
 void renderer_end_frame(void);
 
 /* Set the sky gradient (top and bottom RGB). Drawn before depth-tested geometry. */

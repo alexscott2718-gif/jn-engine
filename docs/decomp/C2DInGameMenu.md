@@ -121,4 +121,7 @@ already-excluded C2DInGameMenu bridge, which does not load
 questions). No fidelity claim exists to certify — the same disposition shape
 as `C3DCheckPoint`/progress. Returns to native-port: porting the DrawHud
 layout/death path is behavior work, and `RestartLevel.tsk` recovery belongs
-to the CTaskList open item.
+to the CTaskList open item. The shared `ui_text.c` atlas renderer added on
+2026-07-16 provides native text infrastructure and a deliberate level-clear
+banner, but does not port these decoded counter coordinates, formats, or death
+behavior; this linkage status therefore remains blocked.
