@@ -43,6 +43,16 @@ If your conclusion depends on a new original-game capture, exact physical-GPU ou
 or audio judgment, report it as blocked for a dev-machine owner. The current ownership tiers are
 in `docs/decomp/_next_session.md`.
 
+## Contributing remotely via the MCP gateway
+
+Most work happens directly in this repository through the clone, build, test, and pull-request
+workflow above. If you are collaborating through an AI client over the project's MCP gateway,
+connection and tool usage are documented in the
+[public contributor guide](https://exentt.com/jn/mcp/). Onboarding requires a
+maintainer-granted GitHub collaborator invitation to this repository, followed by OAuth through
+your client. The gateway never grants push access; every change still lands as a pull request that
+must pass `core` and `assets`.
+
 ## Submit
 
 Open one focused pull request per phase or behavior. Include:
