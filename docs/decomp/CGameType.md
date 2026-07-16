@@ -116,3 +116,33 @@ Open questions:
 - Evidence: `DumpClass.java CGameType /tmp/decomp_CGameType.md` (`slots=366`, `owned_methods=17`, `offsets=1`).
 - Constructor/destructor evidence comes from local disassembly over `/home/scotty/xp-jnbg-original/Neutron.exe` at `004745a0..00474790`.
 - Terrain-loader false-positive evidence: raw class-id rows `@004756be` and `@0047590e` are inside slots `00475550` and `004757a0`, after database iteration and before terrain object lifecycle calls.
+
+## Native Linkage
+
+### Aspect: `initgame-camera-record-seed` -- status `linked`
+
+The address-backed `InitGame` body at `00474a10` writes the global camera
+record position at `DAT_00509a50+0x44/+0x48/+0x4c` to
+`(0.0f, 10000.0f, 0.0f)`.  The native method map is:
+
+| Decomp method | Native entry point | Deliberate deviation |
+|---|---|---|
+| `CGameType::InitGame` `00474a10` camera-record writes | `camera_record_init_game` in `src/game/camera_record.c` | None within this aspect. Adjacent angle and mode fields are preserved because the recovered body does not write them. |
+
+`tools/linkage_oracles/CGameType.py` compiles the real native module, seeds
+non-zero sentinels into the position, angle, and mode fields, calls the method
+twice, and checks bit-exact position writes plus preservation of every adjacent
+field.  No authored asset table feeds this lifecycle seed, so the oracle uses
+decomp-derived state vectors.  Its self-test rejects both a `10000 -> 9999`
+mutation and the previous native over-reset of an adjacent angle field.
+
+### Aspect: `pause-help-update-gates` -- status `linked-blocked`
+
+The immutable `9a2b908` evidence is not sufficient for an L1/L2 claim over the
+combined menu gate.  It identifies the `PauseGame(%d)` trace helper at
+`00475a00`, a separate writer at `00475a30`, `UpdateGameType` at `00475a70`,
+and `ToggleHelp` at `00475ce0`, but it explicitly leaves the exact meaning of
+`DAT_005099a9`, the update predicate producer, and the help show/hide target
+slots `0x13c`/`0x140` unresolved.  Those bodies/slots must be recovered before
+native menu input can be wired without guessing; visual help layout would then
+need original-game/capture evidence.

@@ -131,43 +131,43 @@ OVERRIDES: dict[str, list[Override]] = {
     "CMainMenu": [
         Override(
             "menus / UI flow",
-            "must-link",
-            "Front-end routing table is linked; target 4 recovered LoadMyMenu/displayMenu/activation screen graph, but native menu.c does not port the canvas menu subsystem.",
-            "Port the recovered DAT_004f8164 canvas menu graph, active/rollover records, counter pulses, mouse dispatch, and save/task refresh before another oracle.",
+            "linked-blocked",
+            "The level-routing table is linked, but 9a2b908 does not contain the DAT_004f8164 table contents or a complete screen graph; target 4 recovers manager mechanics only.",
+            "Recover the executable-backed menu table records, failed rollover helper, activation audio, and level handoff before porting the original layout; do not infer them from the native keyboard list.",
             "src/game/menu.c",
         )
     ],
     "CMenuElement": [
         Override(
             "menus / UI flow",
-            "must-link",
-            "UpdateItemLogic is recovered, but native menu.c has no CMenuElement canvas object, mouse cursor path, or target-slot dispatch.",
-            "Port CMenuElement canvas-item behavior and mouse/target dispatch before a linked oracle.",
+            "linked-blocked",
+            "UpdateItemLogic is recovered, but its DAT_004f8164 canvas owner is absent and the snapshot explicitly leaves hit-state polarity and target-slot semantics unresolved.",
+            "Recover the owning canvas records/target protocol and activation-sound caller, then port and oracle the item path as a dependency of CMainMenu.",
             "src/game/menu.c",
         )
     ],
     "C2DInGameMenu": [
         Override(
             "menus / UI flow",
-            "must-link",
-            "HUD draw and death/restart constants are decoded, but helper slots, counter producers, and restart/game-over flow are not fully linked.",
-            "Link DrawHud producers, pause/death/restart flow, HUD counters, and helper slots around 00402b40..00407490.",
+            "linked-blocked",
+            "DrawHud constants are decoded, but counter producers, eight owned helper bodies, RestartLevel.tsk, and the death/game-over condition remain unresolved; frame-8881 layout data cannot supply logic from one visual sample.",
+            "Recover 00402b40..00407490 producers/conditions and RestartLevel.tsk, then port the four-counter draw/death flow over the existing capture-backed HUD assets.",
             "src/game/hud.c; src/game/game_flow.c",
         )
     ],
     "CGameType": [
         Override(
             "menus / UI flow",
-            "must-link",
-            "CGameType owns pause/help/global update gates used by menus and input locks; native menu flow approximates these.",
-            "Decode PauseGame, ToggleHelp, show/hide help target slots, and update gate interactions with menu mode.",
+            "linked-blocked",
+            "The InitGame camera-record seed is separately linked, but the pause/help/update gate L1 still leaves DAT_005099a9 semantics, the update predicate, and help slots 0x13c/0x140 unresolved.",
+            "Recover PauseGame 00475a00/00475a30, the UpdateGameType predicate, and ToggleHelp target slots before wiring menu input locks; capture the help layout rather than approximating it.",
             "src/game/game_flow.c; src/game/menu.c",
         ),
         Override(
             "progression / objectives",
-            "must-link",
-            "Game lifecycle, database init, terrain load, global player/update target, and pause/block state affect level routing and campaign state.",
-            "Link InitGame/UnInitGame/UpdateGameType and current-game globals before broad campaign playthrough hardening.",
+            "linked-blocked",
+            "CGameType::InitGame's camera-record seed is linked and oracle-verified, but the broader lifecycle/database/update-target surface is not fully body-backed or ported.",
+            "Keep the initgame-camera-record-seed certificate scoped; recover and port UnInitGame/UpdateGameType/database/current-game globals before promoting the controller row.",
             "src/game/game_flow.c",
         ),
     ],
@@ -428,17 +428,17 @@ TOP25 = [
     ("8", "player movement", "C3DPlayer::UpdateSittingOrSmoothCamera", "0043a120", "Smooth/sitting camera path unlinked.", "Port smoothing offsets and turn-input camera behavior."),
     ("9", "player movement", "C3DPlayer motion/animation callbacks", "0043a420, 0043a5d0, 0043a750, 0043a900", "Rotate/project/stop/AnimEnded cluster is not linked.", "Port rotate-to-target, noisy camera target, stop, and fence/ladder completion."),
     ("10", "player movement", "C3DJimmy active controller", "00424600, 00425870, 00426030", "Raw Jimmy action/gadget/input/vehicle-mode cluster only partially understood.", "Repair function boundaries and link active-player/gadget locks plus vehicle insertion poses."),
-    ("11", "menus / UI flow", "CMainMenu menu manager", "LoadMyMenu/displayMenu/Activating Item traces", "Target 4 recovered the canvas screen graph; native menu remains a keyboard-list stand-in.", "Port DAT_004f8164 canvas items, counters, mouse dispatch, save/task refresh, and sounds."),
-    ("12", "menus / UI flow", "CMenuElement::UpdateItemLogic", "0045e650", "Target 4 recovered item dispatch; native menu has no canvas item object.", "Port hit/active state, target dispatch, cursor, and activation sound before linking."),
-    ("13", "menus / UI flow", "C2DInGameMenu HUD/death path", "00406690 plus 00402b40..00407490 helpers", "HUD draw constants known; flow helpers raw.", "Link counters, pause/death/restart/game-over producers."),
-    ("14", "menus / UI flow", "CGameType pause/help/update gates", "00475a70, 00475ce0", "Native pause/menu flow approximates global gates.", "Link PauseGame, ToggleHelp, input locks, and global update block state."),
+    ("11", "menus / UI flow", "CMainMenu menu manager", "LoadMyMenu/displayMenu/Activating Item traces", "Routing is linked; the screen graph is linked-blocked because DAT_004f8164 contents and rollover/audio bodies are absent.", "Recover the executable-backed table records and failed helper before porting layout."),
+    ("12", "menus / UI flow", "CMenuElement::UpdateItemLogic", "0045e650", "Structurally recovered but linked-blocked on the missing canvas owner, conservative hit polarity, target semantics, and sound caller.", "Recover the CMainMenu owner/target protocol before a runtime port/oracle."),
+    ("13", "menus / UI flow", "C2DInGameMenu HUD/death path", "00406690 plus 00402b40..00407490 helpers", "Draw constants are known; counter producers, death predicate, eight helper bodies, and RestartLevel.tsk are linked-blocked.", "Recover the producers/helpers/task file before replacing the current capture-backed HUD."),
+    ("14", "menus / UI flow", "CGameType pause/help/update gates", "00475a00..00475ce0", "InitGame's camera seed is linked; pause/help/update remains linked-blocked on unresolved globals, predicate, and target slots.", "Recover PauseGame, the update predicate, and help target slots before wiring input locks."),
     ("15", "inventory / items / gadgets", "CPickupType state table", "0045f1f0", "PickupIndex visibility/state table identified.", "Name global pickup service and inherited state toggles."),
     ("16", "inventory / items / gadgets", "C3DPickupType animated pickup gate", "00436b10, 00436b80", "Opt-in AI pickup table gates shrink targets.", "Find descendants enabling pickup fields and link moving-pickup state."),
     ("17", "inventory / items / gadgets", "C3DPickupItem::HandlePickupCollection", "00435ce0, 00436200, 00436830", "Collection path is only approximated in native.", "Port required-picture consume, score, sound, object activation, NextTrigger."),
     ("18", "inventory / items / gadgets", "Gadget/tool state cluster", "C3DShrinkRay, C3DGraplingHook, C3DToolChest", "Visual setup known; gameplay ownership/action states incomplete.", "Link shrink contact, grapple owner, and tool chest open/no-tools states."),
     ("19", "progression / objectives", "CTaskList streamer/parser", "CTaskList + NewGame.tsk/RestartLevel.tsk", "NewGame format measured; RestartLevel and streamer slot open.", "Recover RestartLevel and connect task store to level/restart flows."),
     ("20", "progression / objectives", "CLoadLevel/C3DStartPoint/C3DCheckPoint", "00458370, 00442740, 00414410", "Transition/spawn/checkpoint pieces decoded but not fully linked.", "Link request blocks, StartTrigger/music, checkpoint race progress."),
-    ("21", "progression / objectives", "CGameType/CJimmyGame campaign lifecycle", "InitGame/UpdateGameType/CLevel*Game inheritance", "Native has a best-effort campaign table.", "Link mission counters, level controller lifecycle, and campaign/VR routing."),
+    ("21", "progression / objectives", "CGameType/CJimmyGame campaign lifecycle", "InitGame/UpdateGameType/CLevel*Game inheritance", "CGameType's camera-record seed and CJimmyGame mission seed are linked; the broader lifecycle remains incomplete.", "Recover and port UpdateGameType/current-game/database lifecycle before broad campaign promotion."),
     ("22", "triggers / story sequencing", "CTrigger/C3DTriggerType core graph", "0047dfa0, 00447a70", "Proximity and NextTrigger decoded; concrete action binding open.", "Map enter/exit slots, watched-target registration, Toggle/Fade consumers."),
     ("23", "triggers / story sequencing", "C3DAITrigger/music/sound activation", "C3DAITrigger, C3DMusicTrigger, C3DSoundEffect", "SCENE subset linked; audio/ActivateObject/AIAnim graph incomplete.", "Link full activation graph after task/menu/HUD side effects are named."),
     ("24", "animation / actor pose", "C3DAnimated and actor pose callbacks", "0040e050, 0040dd90, animation-ended hooks", "Base loader/gates known; pose callbacks and material slots need names.", "Link animation completion, actor facing, talk/idle/action transitions; keep Goddard texture issue tracked."),
@@ -655,7 +655,8 @@ def build_rows(ledger: list[dict[str, str]], native_by_class: dict[str, str]) ->
             })
 
     order = {d: i for i, d in enumerate(DOMAINS)}
-    status_order = {"must-link": 0, "approximated": 1, "linked": 2, "wontfix-faithful": 3, "defer": 4, "unused": 5}
+    status_order = {"must-link": 0, "linked-blocked": 1, "approximated": 2,
+                    "linked": 3, "wontfix-faithful": 4, "defer": 5, "unused": 6}
     rows.sort(key=lambda r: (order.get(r["domain"], 99), status_order.get(r["status"], 99), r["class"]))
     return rows
 
@@ -667,14 +668,15 @@ def status_summary(rows: list[dict[str, str]]) -> str:
         by_domain[r["domain"]][r["status"]] += 1
 
     lines = ["| Status | Count |", "|---|---:|"]
-    for status in ["must-link", "approximated", "linked", "wontfix-faithful", "defer", "unused"]:
+    for status in ["must-link", "linked-blocked", "approximated", "linked",
+                   "wontfix-faithful", "defer", "unused"]:
         lines.append(f"| `{status}` | {by_status.get(status, 0)} |")
     lines.append("")
-    lines.extend(["| Parity domain | must-link | approximated | linked | wontfix-faithful | defer | unused |", "|---|---:|---:|---:|---:|---:|---:|"])
+    lines.extend(["| Parity domain | must-link | linked-blocked | approximated | linked | wontfix-faithful | defer | unused |", "|---|---:|---:|---:|---:|---:|---:|---:|"])
     for domain in DOMAINS:
         c = by_domain[domain]
         lines.append(
-            f"| {domain} | {c.get('must-link', 0)} | {c.get('approximated', 0)} | "
+            f"| {domain} | {c.get('must-link', 0)} | {c.get('linked-blocked', 0)} | {c.get('approximated', 0)} | "
             f"{c.get('linked', 0)} | {c.get('wontfix-faithful', 0)} | {c.get('defer', 0)} | {c.get('unused', 0)} |"
         )
     return "\n".join(lines)
@@ -736,6 +738,7 @@ Status meanings:
 | Status | Meaning |
 |---|---|
 | `linked` | Native behavior directly follows the recovered decomp behavior. |
+| `linked-blocked` | A scoped linkage investigation found missing evidence or an unported dependency; the blocker is recorded in the certificate manifest. |
 | `approximated` | Native engine has a manual behavior that works but is not proven faithful. |
 | `must-link` | Function/class affects core visual, gameplay, menu, inventory, progression, trigger, AI, animation, or vehicle feel and should be decoded/ported. |
 | `defer` | Low-visible, constructor-only, destructor-only, inherited-shell, cosmetic, or blocked on stronger evidence. |
@@ -760,7 +763,7 @@ Important carry-forward constraints:
 
 {status_summary(rows)}
 
-## Top 25 Must-Link Functions/Classes
+## Top 25 Priority Functions/Classes
 
 {top25_markdown()}
 

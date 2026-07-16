@@ -125,3 +125,10 @@ to the CTaskList open item. The shared `ui_text.c` atlas renderer added on
 2026-07-16 provides native text infrastructure and a deliberate level-clear
 banner, but does not port these decoded counter coordinates, formats, or death
 behavior; this linkage status therefore remains blocked.
+
+The capture-backed `hud_layout_generated.h` is valid visual evidence for the
+33 quads visible in frame 8881, but it cannot resolve the four `DrawHud`
+counter producers, the death predicate, or the eight raw owned methods in the
+`00402b40..00407490` range from one rendered sample. Those bodies plus
+`RestartLevel.tsk` are required before replacing the current two-counter HUD
+without guessing gameplay state.

@@ -19,6 +19,18 @@ The Sol collaborator-kit campaign made the repository independently buildable an
 - complete-tree relocation through `JN_ASSET_ROOT` and `scripts/fetch_assets.sh`; and
 - contributor/agent guidance for work without any dev-machine access.
 
+Current branch handoff (`codex/linked-menu-vtables`, 2026-07-16): a fresh
+`9a2b908` pass certified the `CGameType::InitGame` camera-record seed
+(`00474a10`) and removed the native path's extra angle/mode reset. The oracle
+is mutation-sensitive and raises the scoreboard to 15 linked / 16
+linked-blocked. The remaining menu targets are explicitly evidence-blocked:
+CGameType pause/help/update globals and target slots; CMainMenu's missing
+`DAT_004f8164` contents/rollover helper/audio/handoff; CMenuElement's canvas
+owner/polarity/target protocol; and C2DInGameMenu's counter producers/death
+predicate/raw helpers/`RestartLevel.tsk`. Do not port those from the native
+keyboard list or one HUD frame; recover the listed bodies/data first. See the
+final `PROJECT_HISTORY.md` section and generated linkage audit.
+
 The CI mutation gate was exercised live in PR 7: reversing fixture AI movement failed both
 required jobs, and the uploaded archive contained all eight actual and expected PNG pairs.
 

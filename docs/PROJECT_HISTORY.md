@@ -2216,3 +2216,43 @@ so canonical golden validation was run only in the repository Docker/llvmpipe en
 container gates passed: `make check` matched all eight fixture goldens, and `make check-assets`
 also matched both Level 1 goldens, the 3,523-draw capture/native oracle, and all 14 linked
 certificates (with the existing 15 explicitly linked-blocked rows preserved).
+
+## Menu-vtable linkage boundary + CGameType seed certificate (2026-07-16)
+
+Re-searched the JN Engine contributor snapshot at
+`9a2b908a5a47243e1ff4dc310345adccebc2ea72` before using any address IDs. The
+first complete slice is `CGameType::InitGame` (`00474a10`) writing the global
+camera-record position to `(0, 10000, 0)`. Native
+`camera_record_init_game` had also cleared adjacent angle/mode fields, which
+the recovered body does not write; that over-reset was removed.
+`tools/linkage_oracles/CGameType.py` compiles the real module and checks
+bit-exact writes, repeat calls, and preservation from non-zero sentinels. Its
+self-test rejects both a wrong Y seed and the old adjacent-field clear. The
+linkage gate is now 15 linked / 16 linked-blocked.
+
+The broader requested menu port is evidence-blocked in the immutable snapshot,
+so no native behavior was fabricated:
+
+- `CGameType` pause/help/update: `00475a00`, `00475a30`, `00475a70`, and
+  `00475ce0` are identified, but `DAT_005099a9` semantics, the update predicate,
+  and help slots `0x13c`/`0x140` remain unresolved.
+- `CMainMenu`: target 4 recovers 29-record manager mechanics, but not the
+  `DAT_004f8164` table contents; `Menu_ItemRolloverState_00403890` failed
+  recovery, and activation audio plus level-controller handoff are open.
+- `CMenuElement`: `0045e650` is structurally recovered, but depends on the
+  missing canvas owner and conservative hit-polarity/target semantics; no
+  activation-sound caller is body-backed.
+- `C2DInGameMenu`: `00406690` pins four draw positions/formats and death calls,
+  while counter producers, the death predicate, eight owned helper bodies, and
+  `RestartLevel.tsk` are absent. The frame-8881 layout cannot infer those
+  gameplay values from one visual sample.
+
+The generated vtable audit now reports all four menu/UI rows as
+`linked-blocked`, with exact recovery prerequisites. Validation passed for the
+focused CGameType oracle and mutation self-test, CMainMenu route oracle,
+UI-text oracle, linkage gate and gate self-test, `audit_faithfulness.py` (0
+findings), canonical Docker/llvmpipe `make check`, canonical Docker/llvmpipe
+`make check-assets` (Level 1 goldens, 3,523-draw oracle, all 15 linked
+certificates), and `make web` with the emsdk environment. A direct host
+`make check` reproduced the documented physical-renderer fixture PNG mismatch;
+no goldens were changed.
