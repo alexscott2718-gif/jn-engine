@@ -2378,3 +2378,45 @@ seven-tool `8bef00e` service. Do not claim `claim_task` or `release_task` is liv
 source snapshot is refreshed to `c06521f`, the authenticated engine profile is recreated from that
 merged source, ChatGPT lists exactly nine tools, and real claim/replay, conflict/expiry, release,
 and durable audit behavior are verified without exposing credentials.
+
+## Ground-truth request workflow proposed (2026-07-17)
+
+The final portable-collaboration campaign item is implemented as a composition over the existing
+gateway surface, not a tenth MCP tool. Engine PR
+[#15](https://github.com/alexscott2718-gif/jn-engine/pull/15), head
+`c3d14f1fa34b7c04ba17e4495ddb1b26d6298445`, adds the canonical append-only
+`docs/ground_truth_requests.md` queue and seeds the three known capture-only blockers: bare `3SPR`
+defaults, the `3ROK` origin-pool scatter controller, and the purpose/state of bare `3DAI`. Each
+request has a fixed target, bounded question, nested evidence list, capture suggestion, acceptance
+condition, delivery path, status, and matching idempotency key. Authenticated identity is kept out
+of caller-authored content; the gateway-generated commit trailer and durable audit record remain
+authoritative.
+
+The ledger is part of `make check`. Its validator restricts requests to the three capture-only
+targets, checks the exact field order and allowed statuses, bounds request slugs to the gateway's
+idempotency limit, rejects duplicate or mismatched keys, requires nested evidence bullets, and
+rejects free-form text outside the closed schema. The validator and its four mutation self-tests,
+the game build, and deterministic fixture run passed locally. The workstation's
+physical-GPU render differed from the llvmpipe-only goldens at all eight fixture frames, as expected
+under the repository's golden policy; no golden was changed, and protected `core` / `assets` CI is
+the authoritative render result.
+
+Gateway PR
+[#8](https://github.com/alexscott2718-gif/jn-engine-contributor-mcp/pull/8), head
+`a6b62793c05d8cd9f4f1ca417c2bd7d153880711`, adds optional
+`expected_base_commit` enforcement to `open_pr`. For a new branch, a mismatch between that commit
+and live `master` returns a typed conflict before any mutation. An already-created branch with the
+same idempotency key still replays after `master` advances, preserving safe retry semantics. The
+documented request flow is therefore `fetch` the ledger, require `check_status(branch=master)` to
+match the snapshot, append one request, and submit only that file through `open_pr` with the same
+expected commit. A concurrent merge forces refresh and a fresh branch instead of overwriting the
+new request.
+
+The repository-wide gateway surface sweep preserves exactly six read tools and three write tools;
+there is no `request_ground_truth` registration, new credential, or extra mutation path. All 369
+gateway tests, including stale-base no-mutation and post-advance replay coverage, passed locally;
+the public-tree privacy scan and whitespace check also passed. Both PRs were mergeable when opened,
+with remote checks still running. Neither open PR is merged or deployed. Production therefore
+remains the authenticated seven-tool gateway at source `8bef00e`; `claim_task`, `release_task`, and
+the expected-base request composition must not be described as live until their merged source and
+snapshots are deployed and the authenticated nine-tool/audit behavior is verified.
