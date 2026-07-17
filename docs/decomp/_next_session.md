@@ -109,12 +109,12 @@ token:
   writes sanitized fsynced audit records. **Deployment is still pending**: the public MCP
   remains the prior six-tool read-only service until the dedicated mode-`0600` credential,
   `ENABLE_WRITE_ACTIONS=true`, snapshot refresh, authenticated seven-tool listing, and audit
-  verification are complete. Do not represent `open_pr` as live before those checks.
-  A 2026-07-17 operator-side audit found the exact blocker: production has no separate
-  `github_pr_write_token` and no `GITHUB_PR_WRITE_TOKEN_FILE`; writes remain disabled. Existing
-  secret and audit permissions are correct, no read credential was reused, and no production
-  mutation was made. Provision the new fine-grained JN Engine credential (Contents write and Pull
-  requests write only, mode `0600`) before resuming this gate.
+  verification are complete. Production closeout completed later on 2026-07-17: source `8bef00e`
+  is deployed with a distinct mode-`0600` credential and writes enabled only for the authenticated
+  engine profile; the engine and source snapshots were refreshed; ChatGPT listed all seven tools;
+  and `check_status(branch=master)` returned both protected contexts successful while appending a
+  durable sanitized `github:alexscott2718-gif` audit record. `open_pr` is live. The separate
+  Actions-read credential was renewed rather than reusing the write token.
 1. `claim_task` / `release_task`: prevents duplicate work with auditable ownership and expiry.
 2. `request_ground_truth`: appends a structured request to
    `docs/ground_truth_requests.md` for the capture-only rows above.
@@ -136,9 +136,8 @@ engine-runtime change.
 
 ## Definition of done for the next session
 
-- Complete the blocked `open_pr` production gate before starting `claim_task` / `release_task`.
-  If the dedicated credential is still absent, stop without changing production and record that
-  exact blocker; do not substitute the collaborator or Actions credential.
+- Keep the deployed `open_pr` credential separate from collaborator and Actions credentials; do
+  not broaden its repository or permission scope while adding `claim_task` / `release_task`.
 - Keep changes on a branch from current `master` and submit one focused PR.
 - Run the proportional local gates, then require both protected CI contexts.
 - Prove any new oracle/golden catches a real mutation.

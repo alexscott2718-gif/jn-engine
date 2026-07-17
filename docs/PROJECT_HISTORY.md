@@ -2305,3 +2305,32 @@ remaining closeout is then to deploy merged source `8bef00e`, set the write-toke
 snapshots, verify the authenticated seven-tool listing, and exercise a sanitized fsynced record in
 the durable audit path. `claim_task` / `release_task` was deliberately not started while this gate
 is incomplete.
+
+## Gateway `open_pr` production closeout (2026-07-17)
+
+The dedicated fine-grained JN Engine credential was provisioned as a third mode-`0600` secret,
+positively distinct from both the collaborator-check and Actions-read credentials. Read-only API
+probes confirmed the fixed repository identity plus Contents and Pull requests access. Merged
+gateway source `8bef00e4c9b419fdd0527e628c9a513d0098f868` was deployed with
+`ENABLE_WRITE_ACTIONS=true` only for the authenticated engine profile;
+`ENABLE_SHELL_ACTIONS=false` remains enforced. The engine snapshot was refreshed at
+`9a2b908a5a47243e1ff4dc310345adccebc2ea72`, and the separate gateway-repository snapshot was
+refreshed at `8bef00e`.
+
+Production runtime inspection returned the exact seven-tool engine surface: `search`, `fetch`,
+`list_tasks`, `project_context`, `lookup_symbol`, `check_status`, and `open_pr`. A deliberately
+invalid operator `open_pr` smoke request failed before GitHub access, appended and fsynced a
+sanitized `bad_args` record, and made no GitHub mutation. ChatGPT then authenticated through the
+engine MCP, listed those same seven tools, and called `check_status(branch=master)`. The durable
+mode-`0600` audit record carries `caller_identity=github:alexscott2718-gif`, four successful GitHub
+API statuses, the resolved `9a2b908` commit, and `outcome=success`; both protected contexts were
+successful and both visual artifact sets were reported.
+
+One independent expired Actions-read credential surfaced during the closeout as HTTP 401. It was
+replaced with another dedicated fine-grained mode-`0600` token restricted to Actions read,
+Contents read, and metadata read; it was not replaced with or reused from the PR-write credential.
+The client also required one-time re-registration because the public release migrated the encrypted
+OAuth registry from its legacy SQLite store to the hardened file-tree store. The exact ChatGPT
+callback was added to the non-wildcard production allowlist. Both production profiles are healthy.
+`open_pr` is now **merged, deployed, authenticated, and audited**; `claim_task` / `release_task` is
+unblocked as the next gateway campaign.
