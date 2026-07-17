@@ -121,9 +121,9 @@ token:
   passed; the updated remote `test`, CodeQL Python, and CodeQL Actions checks were green at merge.
   This is **not deployed**: production remains the seven-tool `8bef00e` service.
 - [ ] `request_ground_truth`: implementation is proposed as a safe composition, not a tenth tool.
-  Engine PR [#15](https://github.com/alexscott2718-gif/jn-engine/pull/15), head `c3d14f1`, adds
-  the fixed append-only `docs/ground_truth_requests.md` schema, a `make check` validator, and
-  seeded requests for `3SPR`, `3ROK`, and bare `3DAI`. Gateway PR
+  Engine PR [#15](https://github.com/alexscott2718-gif/jn-engine/pull/15), implementation commit
+  `c3d14f1`, adds the fixed append-only `docs/ground_truth_requests.md` schema, a `make check`
+  validator, and seeded requests for `3SPR`, `3ROK`, and bare `3DAI`. Gateway PR
   [#8](https://github.com/alexscott2718-gif/jn-engine-contributor-mcp/pull/8), head `a6b6279`, adds
   optional `expected_base_commit` enforcement to `open_pr`, rejecting a stale new branch before
   mutation while preserving idempotent replay. The gateway remains exactly nine tools after both

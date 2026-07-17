@@ -2383,7 +2383,7 @@ and durable audit behavior are verified without exposing credentials.
 
 The final portable-collaboration campaign item is implemented as a composition over the existing
 gateway surface, not a tenth MCP tool. Engine PR
-[#15](https://github.com/alexscott2718-gif/jn-engine/pull/15), head
+[#15](https://github.com/alexscott2718-gif/jn-engine/pull/15), implementation commit
 `c3d14f1fa34b7c04ba17e4495ddb1b26d6298445`, adds the canonical append-only
 `docs/ground_truth_requests.md` queue and seeds the three known capture-only blockers: bare `3SPR`
 defaults, the `3ROK` origin-pool scatter controller, and the purpose/state of bare `3DAI`. Each
