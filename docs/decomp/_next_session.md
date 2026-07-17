@@ -1,6 +1,6 @@
 # Next Session — Portable Collaboration Handoff
 
-Updated 2026-07-16. The active branch is `master`; `native-port` and `linked` are retired,
+Updated 2026-07-17. The active branch is `master`; `native-port` and `linked` are retired,
 fully merged campaign branches. The native C engine is the product. Godot remains retired.
 
 ## What just landed
@@ -99,17 +99,23 @@ These have no current `.gam` placements; leave them labeled unless new reach evi
 Implement the remaining gateway-owned write tools so contributors do not receive a maintainer
 token:
 
-1. `open_pr`: server-side credential, creates/updates a contributor branch and opens a PR; it
-   must never push directly to protected `master`.
 - [x] `check_status`: gateway PR
   [#1](https://github.com/alexscott2718-gif/jn-engine-ai-gateway/pull/1) merged, deployed,
   served to ChatGPT, exercised, and audited; production closeout completed 2026-07-16.
-2. `claim_task` / `release_task`: prevents duplicate work with auditable ownership and expiry.
-3. `request_ground_truth`: appends a structured request to
+- [x] `open_pr`: gateway PR
+  [#6](https://github.com/alexscott2718-gif/jn-engine-contributor-mcp/pull/6) merged with all
+  required checks green on 2026-07-17. It uses a third dedicated credential, validates
+  `contrib/*` branches and paths, records idempotency keys, sends mutations exactly once, and
+  writes sanitized fsynced audit records. **Deployment is still pending**: the public MCP
+  remains the prior six-tool read-only service until the dedicated mode-`0600` credential,
+  `ENABLE_WRITE_ACTIONS=true`, snapshot refresh, authenticated seven-tool listing, and audit
+  verification are complete. Do not represent `open_pr` as live before those checks.
+1. `claim_task` / `release_task`: prevents duplicate work with auditable ownership and expiry.
+2. `request_ground_truth`: appends a structured request to
    `docs/ground_truth_requests.md` for the capture-only rows above.
 
 Gateway `check_status` architecture remains documented in `docs/collaboration_tools.md`; the
-implementation and deployment closeout are recorded in `docs/PROJECT_HISTORY.md`.
+implementation and deployment closeouts are recorded in `docs/PROJECT_HISTORY.md`.
 
 Treat authentication, branch allowlists, path validation, audit logging, request idempotency, and
 PR-only enforcement as part of the feature—not deployment details. This is gateway work, not an
@@ -130,3 +136,5 @@ engine-runtime change.
 - Prove any new oracle/golden catches a real mutation.
 - Append durable results to `docs/PROJECT_HISTORY.md`.
 - Rewrite this handoff to the new frontier before stopping.
+- Do not treat a merged gateway PR as a deployed MCP tool: record the live tool listing and
+  audit-path verification before closing a write feature.

@@ -2256,3 +2256,29 @@ findings), canonical Docker/llvmpipe `make check`, canonical Docker/llvmpipe
 certificates), and `make web` with the emsdk environment. A direct host
 `make check` reproduced the documented physical-renderer fixture PNG mismatch;
 no goldens were changed.
+
+## Gateway `open_pr` merged; production enablement pending (2026-07-17)
+
+Gateway PR [#6](https://github.com/alexscott2718-gif/jn-engine-contributor-mcp/pull/6)
+merged as `8bef00e4c9b419fdd0527e628c9a513d0098f868`. It adds the seventh MCP
+tool, `open_pr`: the gateway's sole write path, limited to creating a validated
+`contrib/*` branch and a non-draft PR against code-owned `master`. It cannot
+write another ref or push protected `master`. The implementation also validates
+all inputs before network access, rejects traversal, `.git/`, and workflow paths,
+requires an idempotency key recorded in the commit, sends mutations once only,
+and fails closed if its durable sanitized audit record cannot be appended.
+
+The merged source is not yet a production write capability. Production continues
+to serve the prior six-tool read-only gateway until an operator provisions the
+separate fine-grained JN Engine credential (Contents write and Pull requests
+write only), mounts it mode `0600`, enables `ENABLE_WRITE_ACTIONS=true` for the
+authenticated engine profile, refreshes the engine and gateway-repository
+snapshots, and verifies the live seven-tool surface and audit path. Until then,
+the truthful state is **merged, deployment pending**; do not publish or claim a
+live `open_pr` tool.
+
+PR #6's final required `test`, CodeQL, and static-analysis checks passed. A
+post-review fix added `open_pr` to the device-auth integration test's exact tool
+list; the final CI result was 340 passing tests. `claim_task` / `release_task`
+is the next implementation campaign only after this deployment closeout is
+recorded.
