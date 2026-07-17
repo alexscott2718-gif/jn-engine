@@ -2282,3 +2282,26 @@ post-review fix added `open_pr` to the device-auth integration test's exact tool
 list; the final CI result was 340 passing tests. `claim_task` / `release_task`
 is the next implementation campaign only after this deployment closeout is
 recorded.
+
+## Gateway `open_pr` production gate blocked on dedicated credential (2026-07-17)
+
+An operator-side read-only audit reached the live production host and confirmed that the engine
+gateway container is healthy in `APP_ENV=production` with GitHub authentication. Production still
+has `ENABLE_WRITE_ACTIONS=false` and `ENABLE_SHELL_ACTIONS=false`; it has no configured
+`GITHUB_PR_WRITE_TOKEN_FILE`. The secrets and audit directories are mode `0700`, and the existing
+OAuth, collaborator-check, Actions-read, signing, enrollment, and audit files are mode `0600`.
+There is no separate `github_pr_write_token` in the production secrets mount.
+
+That absence is the exact deployment blocker. No collaborator or Actions credential was reused,
+and no production source, snapshot, environment, secret, or container was changed. `open_pr`
+therefore remains **merged, deployment pending**, and the public authenticated engine profile must
+still be described as the earlier six-tool read-only service.
+
+The production gate can resume only after an operator creates a new fine-grained credential scoped
+solely to `alexscott2718-gif/jn-engine` with Contents write and Pull requests write, installs it as
+a distinct mode-`0600` secret, and positively verifies that it is not either read credential. The
+remaining closeout is then to deploy merged source `8bef00e`, set the write-token file and
+`ENABLE_WRITE_ACTIONS=true` only for the authenticated engine profile, refresh both immutable
+snapshots, verify the authenticated seven-tool listing, and exercise a sanitized fsynced record in
+the durable audit path. `claim_task` / `release_task` was deliberately not started while this gate
+is incomplete.
