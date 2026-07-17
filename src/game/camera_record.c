@@ -47,12 +47,13 @@ void camera_record_cycle_mode(void) {
 }
 
 void camera_record_init_game(void) {
-    /* CGameType::InitGame (00474a10): rec.pos = (0, 10000, 0). */
+    /* CGameType::InitGame (00474a10): rec.pos = (0, 10000, 0).
+       The recovered body does not write the angle or mode fields.  Preserve
+       them here: clearing those fields was a native convenience, not part of
+       the linked method. */
     g_rec.pos[0] = 0.0f;
     g_rec.pos[1] = 10000.0f;
     g_rec.pos[2] = 0.0f;
-    g_rec.angle[0] = g_rec.angle[1] = g_rec.angle[2] = 0;
-    g_rec.mode_flags = 0;
 }
 
 /* sin/cos of a 14-bit angle, quantized through the table index exactly like

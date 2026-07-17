@@ -98,3 +98,10 @@ The native menu has no `CMenuElement` canvas object, mouse cursor path, or
 target-slot dispatch; `src/game/menu.c` is a keyboard-list stand-in scoped to
 the routing-table certificate. A green oracle would require porting this
 canvas item behavior first.
+
+That port cannot be isolated from the missing `CMainMenu` table records: the
+snapshot explicitly leaves the `state == 0` hit/rollover polarity and the
+`parent_or_input[0x23]+0xc` target semantics conservative, and it does not
+recover the requested activation-sound caller. Keep this aspect blocked until
+the owning canvas protocol and table contents are recovered; do not substitute
+keyboard selection state for those fields.

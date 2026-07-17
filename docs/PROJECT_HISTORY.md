@@ -2216,3 +2216,165 @@ so canonical golden validation was run only in the repository Docker/llvmpipe en
 container gates passed: `make check` matched all eight fixture goldens, and `make check-assets`
 also matched both Level 1 goldens, the 3,523-draw capture/native oracle, and all 14 linked
 certificates (with the existing 15 explicitly linked-blocked rows preserved).
+
+## Menu-vtable linkage boundary + CGameType seed certificate (2026-07-16)
+
+Re-searched the JN Engine contributor snapshot at
+`9a2b908a5a47243e1ff4dc310345adccebc2ea72` before using any address IDs. The
+first complete slice is `CGameType::InitGame` (`00474a10`) writing the global
+camera-record position to `(0, 10000, 0)`. Native
+`camera_record_init_game` had also cleared adjacent angle/mode fields, which
+the recovered body does not write; that over-reset was removed.
+`tools/linkage_oracles/CGameType.py` compiles the real module and checks
+bit-exact writes, repeat calls, and preservation from non-zero sentinels. Its
+self-test rejects both a wrong Y seed and the old adjacent-field clear. The
+linkage gate is now 15 linked / 16 linked-blocked.
+
+The broader requested menu port is evidence-blocked in the immutable snapshot,
+so no native behavior was fabricated:
+
+- `CGameType` pause/help/update: `00475a00`, `00475a30`, `00475a70`, and
+  `00475ce0` are identified, but `DAT_005099a9` semantics, the update predicate,
+  and help slots `0x13c`/`0x140` remain unresolved.
+- `CMainMenu`: target 4 recovers 29-record manager mechanics, but not the
+  `DAT_004f8164` table contents; `Menu_ItemRolloverState_00403890` failed
+  recovery, and activation audio plus level-controller handoff are open.
+- `CMenuElement`: `0045e650` is structurally recovered, but depends on the
+  missing canvas owner and conservative hit-polarity/target semantics; no
+  activation-sound caller is body-backed.
+- `C2DInGameMenu`: `00406690` pins four draw positions/formats and death calls,
+  while counter producers, the death predicate, eight owned helper bodies, and
+  `RestartLevel.tsk` are absent. The frame-8881 layout cannot infer those
+  gameplay values from one visual sample.
+
+The generated vtable audit now reports all four menu/UI rows as
+`linked-blocked`, with exact recovery prerequisites. Validation passed for the
+focused CGameType oracle and mutation self-test, CMainMenu route oracle,
+UI-text oracle, linkage gate and gate self-test, `audit_faithfulness.py` (0
+findings), canonical Docker/llvmpipe `make check`, canonical Docker/llvmpipe
+`make check-assets` (Level 1 goldens, 3,523-draw oracle, all 15 linked
+certificates), and `make web` with the emsdk environment. A direct host
+`make check` reproduced the documented physical-renderer fixture PNG mismatch;
+no goldens were changed.
+
+## Gateway `open_pr` merged; production enablement pending (2026-07-17)
+
+Gateway PR [#6](https://github.com/alexscott2718-gif/jn-engine-contributor-mcp/pull/6)
+merged as `8bef00e4c9b419fdd0527e628c9a513d0098f868`. It adds the seventh MCP
+tool, `open_pr`: the gateway's sole write path, limited to creating a validated
+`contrib/*` branch and a non-draft PR against code-owned `master`. It cannot
+write another ref or push protected `master`. The implementation also validates
+all inputs before network access, rejects traversal, `.git/`, and workflow paths,
+requires an idempotency key recorded in the commit, sends mutations once only,
+and fails closed if its durable sanitized audit record cannot be appended.
+
+The merged source is not yet a production write capability. Production continues
+to serve the prior six-tool read-only gateway until an operator provisions the
+separate fine-grained JN Engine credential (Contents write and Pull requests
+write only), mounts it mode `0600`, enables `ENABLE_WRITE_ACTIONS=true` for the
+authenticated engine profile, refreshes the engine and gateway-repository
+snapshots, and verifies the live seven-tool surface and audit path. Until then,
+the truthful state is **merged, deployment pending**; do not publish or claim a
+live `open_pr` tool.
+
+PR #6's final required `test`, CodeQL, and static-analysis checks passed. A
+post-review fix added `open_pr` to the device-auth integration test's exact tool
+list; the final CI result was 340 passing tests. `claim_task` / `release_task`
+is the next implementation campaign only after this deployment closeout is
+recorded.
+
+## Gateway `open_pr` production gate blocked on dedicated credential (2026-07-17)
+
+An operator-side read-only audit reached the live production host and confirmed that the engine
+gateway container is healthy in `APP_ENV=production` with GitHub authentication. Production still
+has `ENABLE_WRITE_ACTIONS=false` and `ENABLE_SHELL_ACTIONS=false`; it has no configured
+`GITHUB_PR_WRITE_TOKEN_FILE`. The secrets and audit directories are mode `0700`, and the existing
+OAuth, collaborator-check, Actions-read, signing, enrollment, and audit files are mode `0600`.
+There is no separate `github_pr_write_token` in the production secrets mount.
+
+That absence is the exact deployment blocker. No collaborator or Actions credential was reused,
+and no production source, snapshot, environment, secret, or container was changed. `open_pr`
+therefore remains **merged, deployment pending**, and the public authenticated engine profile must
+still be described as the earlier six-tool read-only service.
+
+The production gate can resume only after an operator creates a new fine-grained credential scoped
+solely to `alexscott2718-gif/jn-engine` with Contents write and Pull requests write, installs it as
+a distinct mode-`0600` secret, and positively verifies that it is not either read credential. The
+remaining closeout is then to deploy merged source `8bef00e`, set the write-token file and
+`ENABLE_WRITE_ACTIONS=true` only for the authenticated engine profile, refresh both immutable
+snapshots, verify the authenticated seven-tool listing, and exercise a sanitized fsynced record in
+the durable audit path. `claim_task` / `release_task` was deliberately not started while this gate
+is incomplete.
+
+## Gateway `open_pr` production closeout (2026-07-17)
+
+The dedicated fine-grained JN Engine credential was provisioned as a third mode-`0600` secret,
+positively distinct from both the collaborator-check and Actions-read credentials. Read-only API
+probes confirmed the fixed repository identity plus Contents and Pull requests access. Merged
+gateway source `8bef00e4c9b419fdd0527e628c9a513d0098f868` was deployed with
+`ENABLE_WRITE_ACTIONS=true` only for the authenticated engine profile;
+`ENABLE_SHELL_ACTIONS=false` remains enforced. The engine snapshot was refreshed at
+`9a2b908a5a47243e1ff4dc310345adccebc2ea72`, and the separate gateway-repository snapshot was
+refreshed at `8bef00e`.
+
+Production runtime inspection returned the exact seven-tool engine surface: `search`, `fetch`,
+`list_tasks`, `project_context`, `lookup_symbol`, `check_status`, and `open_pr`. A deliberately
+invalid operator `open_pr` smoke request failed before GitHub access, appended and fsynced a
+sanitized `bad_args` record, and made no GitHub mutation. ChatGPT then authenticated through the
+engine MCP, listed those same seven tools, and called `check_status(branch=master)`. The durable
+mode-`0600` audit record carries `caller_identity=github:alexscott2718-gif`, four successful GitHub
+API statuses, the resolved `9a2b908` commit, and `outcome=success`; both protected contexts were
+successful and both visual artifact sets were reported.
+
+One independent expired Actions-read credential surfaced during the closeout as HTTP 401. It was
+replaced with another dedicated fine-grained mode-`0600` token restricted to Actions read,
+Contents read, and metadata read; it was not replaced with or reused from the PR-write credential.
+The client also required one-time re-registration because the public release migrated the encrypted
+OAuth registry from its legacy SQLite store to the hardened file-tree store. The exact ChatGPT
+callback was added to the non-wildcard production allowlist. Both production profiles are healthy.
+`open_pr` is now **merged, deployed, authenticated, and audited**; `claim_task` / `release_task` is
+unblocked as the next gateway campaign.
+
+## Gateway task ownership merged; production pending (2026-07-17)
+
+Gateway PR [#7](https://github.com/alexscott2718-gif/jn-engine-contributor-mcp/pull/7)
+was opened from `contrib/claim-release-task` at
+`15b60d707c05805ac381600b2914af9e34886973`. It expands the authenticated engine MCP from seven
+to nine tools with `claim_task` and `release_task`. Ownership is derived only from the
+authenticated caller and cannot be supplied as an argument. Claims accept exact committed open or
+blocked task IDs, expire after a bounded 15 minutes through 24 hours, replay only for the same
+owner and idempotency key, and return an opaque claim ID. Release requires both that claim ID and
+the authenticated owner, so a delayed retry cannot release a newer claim.
+
+Independent pre-merge review identified that using the general `tool_calls.ndjson` as ownership
+state contradicted its documented rotation lifecycle and made its shared 64 MiB bound an eventual
+claim outage. Follow-up commit `fcae7af4e24266d326cd09bfc1827a855b7f6679` split ownership into
+the dedicated `TASK_CLAIM_LEDGER_PATH=/audit/task_claims.ndjson`. The general status/PR audit log
+remains independently rotatable, and claim locking now serializes only claim/release traffic.
+
+Each claim-ledger record carries `schema_version=1`. A claim decision reads active events and
+appends its result under one exclusive file lock, preserving atomic state and evidence. Conflicts,
+invalid or completed tasks, replays, releases, and no-op release retries are sanitized outcomes.
+Symlinks, unsafe modes, malformed or partial records, unknown schema versions, oversized ledgers,
+and failed durable writes fail closed. The deployment runbook now monitors at 48 MiB, retains the
+64 MiB hard bound, and defines a write-disabled 24-hour TTL drain followed by archive-and-recreate
+for compaction or poison-record recovery; append-only evidence is never hand-edited. The ownership
+tools never receive the dedicated GitHub PR-write credential; `open_pr` remains the only
+repository-mutating tool.
+
+The repository-wide hardcoded MCP tool-list sweep updated the protocol and device-auth assertions,
+onboarding, security, deployment, and contributor documentation from seven to nine tools. Local
+CI-equivalent validation against the pinned immutable engine fixture passed all 359 tests; the
+public-tree privacy scan and whitespace check also passed. PR #7 was mergeable when opened, with
+its updated remote `test`, CodeQL Python, and CodeQL Actions checks green at `fcae7af`.
+
+PR #7 subsequently merged to gateway `main` as
+`c06521f15caa52eeaffb94112ca6a33ebbf74cd2` after the required review gate. The merge changes only
+the reviewed public gateway source. It does not refresh a production snapshot, recreate a running
+profile, or prove a live nine-tool surface.
+
+This is a merged implementation, not a deployment closeout. Production remains the authenticated
+seven-tool `8bef00e` service. Do not claim `claim_task` or `release_task` is live until the gateway
+source snapshot is refreshed to `c06521f`, the authenticated engine profile is recreated from that
+merged source, ChatGPT lists exactly nine tools, and real claim/replay, conflict/expiry, release,
+and durable audit behavior are verified without exposing credentials.

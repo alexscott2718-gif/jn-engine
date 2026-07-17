@@ -1,6 +1,6 @@
 # Vtable Linkage Audit
 
-Generated 2026-07-02 by `tools/build_vtable_parity_report.py`.
+Generated 2026-07-16 by `tools/build_vtable_parity_report.py`.
 
 Inputs:
 
@@ -20,6 +20,7 @@ Status meanings:
 | Status | Meaning |
 |---|---|
 | `linked` | Native behavior directly follows the recovered decomp behavior. |
+| `linked-blocked` | A scoped linkage investigation found missing evidence or an unported dependency; the blocker is recorded in the certificate manifest. |
 | `approximated` | Native engine has a manual behavior that works but is not proven faithful. |
 | `must-link` | Function/class affects core visual, gameplay, menu, inventory, progression, trigger, AI, animation, or vehicle feel and should be decoded/ported. |
 | `defer` | Low-visible, constructor-only, destructor-only, inherited-shell, cosmetic, or blocked on stronger evidence. |
@@ -44,27 +45,28 @@ Important carry-forward constraints:
 
 | Status | Count |
 |---|---:|
-| `must-link` | 35 |
+| `must-link` | 30 |
+| `linked-blocked` | 5 |
 | `approximated` | 109 |
 | `linked` | 0 |
 | `wontfix-faithful` | 0 |
 | `defer` | 63 |
 | `unused` | 3 |
 
-| Parity domain | must-link | approximated | linked | wontfix-faithful | defer | unused |
-|---|---:|---:|---:|---:|---:|---:|
-| camera / cutscene | 2 | 2 | 0 | 0 | 0 | 0 |
-| player movement | 2 | 0 | 0 | 0 | 0 | 0 |
-| menus / UI flow | 4 | 0 | 0 | 0 | 0 | 0 |
-| inventory / items / gadgets | 7 | 7 | 0 | 0 | 1 | 0 |
-| progression / objectives | 6 | 11 | 0 | 0 | 24 | 0 |
-| triggers / story sequencing | 5 | 3 | 0 | 0 | 0 | 0 |
-| animation / actor pose | 4 | 53 | 0 | 0 | 0 | 2 |
-| AI / pathing | 2 | 21 | 0 | 0 | 2 | 0 |
-| vehicles / special movement | 3 | 12 | 0 | 0 | 0 | 1 |
-| cosmetic / deferred | 0 | 0 | 0 | 0 | 36 | 0 |
+| Parity domain | must-link | linked-blocked | approximated | linked | wontfix-faithful | defer | unused |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| camera / cutscene | 2 | 0 | 2 | 0 | 0 | 0 | 0 |
+| player movement | 2 | 0 | 0 | 0 | 0 | 0 | 0 |
+| menus / UI flow | 0 | 4 | 0 | 0 | 0 | 0 | 0 |
+| inventory / items / gadgets | 7 | 0 | 7 | 0 | 0 | 1 | 0 |
+| progression / objectives | 5 | 1 | 11 | 0 | 0 | 24 | 0 |
+| triggers / story sequencing | 5 | 0 | 3 | 0 | 0 | 0 | 0 |
+| animation / actor pose | 4 | 0 | 53 | 0 | 0 | 0 | 2 |
+| AI / pathing | 2 | 0 | 21 | 0 | 0 | 2 | 0 |
+| vehicles / special movement | 3 | 0 | 12 | 0 | 0 | 0 | 1 |
+| cosmetic / deferred | 0 | 0 | 0 | 0 | 0 | 36 | 0 |
 
-## Top 25 Must-Link Functions/Classes
+## Top 25 Priority Functions/Classes
 
 | # | Parity domain | Function/class | Evidence | Current native state | Next action |
 |---:|---|---|---|---|---|
@@ -78,17 +80,17 @@ Important carry-forward constraints:
 | 8 | player movement | C3DPlayer::UpdateSittingOrSmoothCamera | 0043a120 | Smooth/sitting camera path unlinked. | Port smoothing offsets and turn-input camera behavior. |
 | 9 | player movement | C3DPlayer motion/animation callbacks | 0043a420, 0043a5d0, 0043a750, 0043a900 | Rotate/project/stop/AnimEnded cluster is not linked. | Port rotate-to-target, noisy camera target, stop, and fence/ladder completion. |
 | 10 | player movement | C3DJimmy active controller | 00424600, 00425870, 00426030 | Raw Jimmy action/gadget/input/vehicle-mode cluster only partially understood. | Repair function boundaries and link active-player/gadget locks plus vehicle insertion poses. |
-| 11 | menus / UI flow | CMainMenu menu manager | LoadMyMenu/displayMenu/Activating Item traces | Target 4 recovered the canvas screen graph; native menu remains a keyboard-list stand-in. | Port DAT_004f8164 canvas items, counters, mouse dispatch, save/task refresh, and sounds. |
-| 12 | menus / UI flow | CMenuElement::UpdateItemLogic | 0045e650 | Target 4 recovered item dispatch; native menu has no canvas item object. | Port hit/active state, target dispatch, cursor, and activation sound before linking. |
-| 13 | menus / UI flow | C2DInGameMenu HUD/death path | 00406690 plus 00402b40..00407490 helpers | HUD draw constants known; flow helpers raw. | Link counters, pause/death/restart/game-over producers. |
-| 14 | menus / UI flow | CGameType pause/help/update gates | 00475a70, 00475ce0 | Native pause/menu flow approximates global gates. | Link PauseGame, ToggleHelp, input locks, and global update block state. |
+| 11 | menus / UI flow | CMainMenu menu manager | LoadMyMenu/displayMenu/Activating Item traces | Routing is linked; the screen graph is linked-blocked because DAT_004f8164 contents and rollover/audio bodies are absent. | Recover the executable-backed table records and failed helper before porting layout. |
+| 12 | menus / UI flow | CMenuElement::UpdateItemLogic | 0045e650 | Structurally recovered but linked-blocked on the missing canvas owner, conservative hit polarity, target semantics, and sound caller. | Recover the CMainMenu owner/target protocol before a runtime port/oracle. |
+| 13 | menus / UI flow | C2DInGameMenu HUD/death path | 00406690 plus 00402b40..00407490 helpers | Draw constants are known; counter producers, death predicate, eight helper bodies, and RestartLevel.tsk are linked-blocked. | Recover the producers/helpers/task file before replacing the current capture-backed HUD. |
+| 14 | menus / UI flow | CGameType pause/help/update gates | 00475a00..00475ce0 | InitGame's camera seed is linked; pause/help/update remains linked-blocked on unresolved globals, predicate, and target slots. | Recover PauseGame, the update predicate, and help target slots before wiring input locks. |
 | 15 | inventory / items / gadgets | CPickupType state table | 0045f1f0 | PickupIndex visibility/state table identified. | Name global pickup service and inherited state toggles. |
 | 16 | inventory / items / gadgets | C3DPickupType animated pickup gate | 00436b10, 00436b80 | Opt-in AI pickup table gates shrink targets. | Find descendants enabling pickup fields and link moving-pickup state. |
 | 17 | inventory / items / gadgets | C3DPickupItem::HandlePickupCollection | 00435ce0, 00436200, 00436830 | Collection path is only approximated in native. | Port required-picture consume, score, sound, object activation, NextTrigger. |
 | 18 | inventory / items / gadgets | Gadget/tool state cluster | C3DShrinkRay, C3DGraplingHook, C3DToolChest | Visual setup known; gameplay ownership/action states incomplete. | Link shrink contact, grapple owner, and tool chest open/no-tools states. |
 | 19 | progression / objectives | CTaskList streamer/parser | CTaskList + NewGame.tsk/RestartLevel.tsk | NewGame format measured; RestartLevel and streamer slot open. | Recover RestartLevel and connect task store to level/restart flows. |
 | 20 | progression / objectives | CLoadLevel/C3DStartPoint/C3DCheckPoint | 00458370, 00442740, 00414410 | Transition/spawn/checkpoint pieces decoded but not fully linked. | Link request blocks, StartTrigger/music, checkpoint race progress. |
-| 21 | progression / objectives | CGameType/CJimmyGame campaign lifecycle | InitGame/UpdateGameType/CLevel*Game inheritance | Native has a best-effort campaign table. | Link mission counters, level controller lifecycle, and campaign/VR routing. |
+| 21 | progression / objectives | CGameType/CJimmyGame campaign lifecycle | InitGame/UpdateGameType/CLevel*Game inheritance | CGameType's camera-record seed and CJimmyGame mission seed are linked; the broader lifecycle remains incomplete. | Recover and port UpdateGameType/current-game/database lifecycle before broad campaign promotion. |
 | 22 | triggers / story sequencing | CTrigger/C3DTriggerType core graph | 0047dfa0, 00447a70 | Proximity and NextTrigger decoded; concrete action binding open. | Map enter/exit slots, watched-target registration, Toggle/Fade consumers. |
 | 23 | triggers / story sequencing | C3DAITrigger/music/sound activation | C3DAITrigger, C3DMusicTrigger, C3DSoundEffect | SCENE subset linked; audio/ActivateObject/AIAnim graph incomplete. | Link full activation graph after task/menu/HUD side effects are named. |
 | 24 | animation / actor pose | C3DAnimated and actor pose callbacks | 0040e050, 0040dd90, animation-ended hooks | Base loader/gates known; pose callbacks and material slots need names. | Link animation completion, actor facing, talk/idle/action transitions; keep Goddard texture issue tracked. |
@@ -116,10 +118,10 @@ Important carry-forward constraints:
 
 | Parity domain | Class | Decomp doc | Vtable address(es) | Owned method count | Current status | Reason | Native entry point, if known | Next action |
 |---|---|---|---|---:|---|---|---|---|
-| menus / UI flow | `C2DInGameMenu` | [C2DInGameMenu.md](./decomp/C2DInGameMenu.md) | `0048d414` | 17 | `must-link` | HUD draw and death/restart constants are decoded, but helper slots, counter producers, and restart/game-over flow are not fully linked. | src/game/hud.c; src/game/game_flow.c | Link DrawHud producers, pause/death/restart flow, HUD counters, and helper slots around 00402b40..00407490. |
-| menus / UI flow | `CGameType` | [CGameType.md](./decomp/CGameType.md) | `004d641c;004d642c;004d687c;004d6890` | 17 | `must-link` | CGameType owns pause/help/global update gates used by menus and input locks; native menu flow approximates these. | src/game/game_flow.c; src/game/menu.c | Decode PauseGame, ToggleHelp, show/hide help target slots, and update gate interactions with menu mode. |
-| menus / UI flow | `CMainMenu` | [CMainMenu.md](./decomp/CMainMenu.md) | `004d0bfc;004d0c0c;004d105c;004d1070` | 1 | `must-link` | Front-end routing table is linked; target 4 recovered LoadMyMenu/displayMenu/activation screen graph, but native menu.c does not port the canvas menu subsystem. | src/game/menu.c | Port the recovered DAT_004f8164 canvas menu graph, active/rollover records, counter pulses, mouse dispatch, and save/task refresh before another oracle. |
-| menus / UI flow | `CMenuElement` | [CMenuElement.md](./decomp/CMenuElement.md) | `004d11ec;004d11fc;004d161c;004d1630;004d1640` | 2 | `must-link` | UpdateItemLogic is recovered, but native menu.c has no CMenuElement canvas object, mouse cursor path, or target-slot dispatch. | src/game/menu.c | Port CMenuElement canvas-item behavior and mouse/target dispatch before a linked oracle. |
+| menus / UI flow | `C2DInGameMenu` | [C2DInGameMenu.md](./decomp/C2DInGameMenu.md) | `0048d414` | 17 | `linked-blocked` | DrawHud constants are decoded, but counter producers, eight owned helper bodies, RestartLevel.tsk, and the death/game-over condition remain unresolved; frame-8881 layout data cannot supply logic from one visual sample. | src/game/hud.c; src/game/game_flow.c | Recover 00402b40..00407490 producers/conditions and RestartLevel.tsk, then port the four-counter draw/death flow over the existing capture-backed HUD assets. |
+| menus / UI flow | `CGameType` | [CGameType.md](./decomp/CGameType.md) | `004d641c;004d642c;004d687c;004d6890` | 17 | `linked-blocked` | The InitGame camera-record seed is separately linked, but the pause/help/update gate L1 still leaves DAT_005099a9 semantics, the update predicate, and help slots 0x13c/0x140 unresolved. | src/game/game_flow.c; src/game/menu.c | Recover PauseGame 00475a00/00475a30, the UpdateGameType predicate, and ToggleHelp target slots before wiring menu input locks; capture the help layout rather than approximating it. |
+| menus / UI flow | `CMainMenu` | [CMainMenu.md](./decomp/CMainMenu.md) | `004d0bfc;004d0c0c;004d105c;004d1070` | 1 | `linked-blocked` | The level-routing table is linked, but 9a2b908 does not contain the DAT_004f8164 table contents or a complete screen graph; target 4 recovers manager mechanics only. | src/game/menu.c | Recover the executable-backed menu table records, failed rollover helper, activation audio, and level handoff before porting the original layout; do not infer them from the native keyboard list. |
+| menus / UI flow | `CMenuElement` | [CMenuElement.md](./decomp/CMenuElement.md) | `004d11ec;004d11fc;004d161c;004d1630;004d1640` | 2 | `linked-blocked` | UpdateItemLogic is recovered, but its DAT_004f8164 canvas owner is absent and the snapshot explicitly leaves hit-state polarity and target-slot semantics unresolved. | src/game/menu.c | Recover the owning canvas records/target protocol and activation-sound caller, then port and oracle the item path as a dependency of CMainMenu. |
 
 ## Inventory / Items / Gadgets
 
@@ -147,10 +149,10 @@ Important carry-forward constraints:
 |---|---|---|---|---:|---|---|---|---|
 | progression / objectives | `C3DCheckPoint` | [C3DCheckPoint.md](./decomp/C3DCheckPoint.md) | `00495998;004959a8;00495df8;00495e0c` | 3 | `must-link` | Race checkpoint/finish-line logic affects timed level completion and HUD timing. | src/game/behaviors/behavior_checkpoint.c | Link non-finish checkpoint progress, race timer, and FUN_004073b0 finish state machine. |
 | progression / objectives | `C3DStartPoint` | [C3DStartPoint.md](./decomp/C3DStartPoint.md) | `004b7644;004b7654;004b7aa4;004b7ab8` | 3 | `must-link` | Start points place the player, camera viewport, music, and StartTrigger on load/respawn. | src/game/game_flow.c; src/game/behaviors/behavior_load.c | Link PlacePlayer apply order, music selection, and StartTrigger firing against CTaskList/C3DPlayer.StartPoint. |
-| progression / objectives | `CGameType` | [CGameType.md](./decomp/CGameType.md) | `004d641c;004d642c;004d687c;004d6890` | 17 | `must-link` | Game lifecycle, database init, terrain load, global player/update target, and pause/block state affect level routing and campaign state. | src/game/game_flow.c | Link InitGame/UnInitGame/UpdateGameType and current-game globals before broad campaign playthrough hardening. |
 | progression / objectives | `CJimmyGame` | [CJimmyGame.md](./decomp/CJimmyGame.md) | `004c2c74;004c2c84;004c30d4;004c30e8` | 11 | `must-link` | CJimmyGame seeds mission counters and owns task/level lifecycle inherited by every CLevel*Game and CMainMenu. | src/game/game_flow.c | Link InitGame/update/load-level helpers against CTaskList and CGameType before per-level controller work. |
 | progression / objectives | `CLoadLevel` | [CLoadLevel.md](./decomp/CLoadLevel.md) | `004d024c;004d025c;004d06ac;004d06c0` | 2 | `must-link` | LOAD portals own in-world level transitions; ActivateLoad is decoded but request-block and inherited proximity/gate caller are open. | src/game/behaviors/behavior_load.c; src/game/game_flow.c | Decode request block, RequiredTask/RequiredLevel gate, fade values, and global loader slot 0x100 handoff. |
 | progression / objectives | `CTaskList` | [CTaskList.md](./decomp/CTaskList.md) | `004d1c7c` | 2 | `must-link` | .tsk format is measured for NewGame, but constructor/streamer slot and RestartLevel layout are still open. | src/game/task_loader.c; src/game/game_flow.c | Pin the streamer parser, recover RestartLevel.tsk, and link task-state reads/writes to level/load/restart flows. |
+| progression / objectives | `CGameType` | [CGameType.md](./decomp/CGameType.md) | `004d641c;004d642c;004d687c;004d6890` | 17 | `linked-blocked` | CGameType::InitGame's camera-record seed is linked and oracle-verified, but the broader lifecycle/database/update-target surface is not fully body-backed or ported. | src/game/game_flow.c | Keep the initgame-camera-record-seed certificate scoped; recover and port UnInitGame/UpdateGameType/database/current-game globals before promoting the controller row. |
 | progression / objectives | `CLevel02AGame` | [CLevel02AGame.md](./decomp/CLevel02AGame.md) | `004c5bfc;004c5c0c;004c605c;004c6070` | 1 | `approximated` | Native routing exists or the decomp spec is documented, but this row is not yet proven linked to the original method body. |  | Promote to must-link only if it affects current feel/progression or if a targeted mismatch points here. |
 | progression / objectives | `CLevel04BGame` | [CLevel04BGame.md](./decomp/CLevel04BGame.md) | `004c975c;004c976c;004c9bbc;004c9bd0` | 2 | `approximated` | Native routing exists or the decomp spec is documented, but this row is not yet proven linked to the original method body. |  | Promote to must-link only if it affects current feel/progression or if a targeted mismatch points here. |
 | progression / objectives | `CLevel05BGame` | [CLevel05BGame.md](./decomp/CLevel05BGame.md) | `004cb51c;004cb52c;004cb97c;004cb990` | 1 | `approximated` | Native routing exists or the decomp spec is documented, but this row is not yet proven linked to the original method body. |  | Promote to must-link only if it affects current feel/progression or if a targeted mismatch points here. |

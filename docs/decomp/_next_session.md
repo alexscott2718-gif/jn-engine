@@ -1,6 +1,6 @@
 # Next Session — Portable Collaboration Handoff
 
-Updated 2026-07-16. The active branch is `master`; `native-port` and `linked` are retired,
+Updated 2026-07-17. The active branch is `master`; `native-port` and `linked` are retired,
 fully merged campaign branches. The native C engine is the product. Godot remains retired.
 
 ## What just landed
@@ -18,6 +18,18 @@ The Sol collaborator-kit campaign made the repository independently buildable an
 - a manual llvmpipe-only golden-regeneration workflow that opens a PR;
 - complete-tree relocation through `JN_ASSET_ROOT` and `scripts/fetch_assets.sh`; and
 - contributor/agent guidance for work without any dev-machine access.
+
+Current branch handoff (`codex/linked-menu-vtables`, 2026-07-16): a fresh
+`9a2b908` pass certified the `CGameType::InitGame` camera-record seed
+(`00474a10`) and removed the native path's extra angle/mode reset. The oracle
+is mutation-sensitive and raises the scoreboard to 15 linked / 16
+linked-blocked. The remaining menu targets are explicitly evidence-blocked:
+CGameType pause/help/update globals and target slots; CMainMenu's missing
+`DAT_004f8164` contents/rollover helper/audio/handoff; CMenuElement's canvas
+owner/polarity/target protocol; and C2DInGameMenu's counter producers/death
+predicate/raw helpers/`RestartLevel.tsk`. Do not port those from the native
+keyboard list or one HUD frame; recover the listed bodies/data first. See the
+final `PROJECT_HISTORY.md` section and generated linkage audit.
 
 The CI mutation gate was exercised live in PR 7: reversing fixture AI movement failed both
 required jobs, and the uploaded archive contained all eight actual and expected PNG pairs.
@@ -87,17 +99,34 @@ These have no current `.gam` placements; leave them labeled unless new reach evi
 Implement the remaining gateway-owned write tools so contributors do not receive a maintainer
 token:
 
-1. `open_pr`: server-side credential, creates/updates a contributor branch and opens a PR; it
-   must never push directly to protected `master`.
 - [x] `check_status`: gateway PR
   [#1](https://github.com/alexscott2718-gif/jn-engine-ai-gateway/pull/1) merged, deployed,
   served to ChatGPT, exercised, and audited; production closeout completed 2026-07-16.
-2. `claim_task` / `release_task`: prevents duplicate work with auditable ownership and expiry.
-3. `request_ground_truth`: appends a structured request to
+- [x] `open_pr`: gateway PR
+  [#6](https://github.com/alexscott2718-gif/jn-engine-contributor-mcp/pull/6) merged with all
+  required checks green on 2026-07-17. It uses a third dedicated credential, validates
+  `contrib/*` branches and paths, records idempotency keys, sends mutations exactly once, and
+  writes sanitized fsynced audit records. Production closeout completed later on 2026-07-17:
+  source `8bef00e` is deployed with a distinct mode-`0600` credential and writes enabled only for
+  the authenticated engine profile; both snapshots were refreshed; ChatGPT listed all seven
+  tools; and `check_status(branch=master)` returned both protected contexts successful while
+  appending a durable sanitized `github:alexscott2718-gif` audit record. `open_pr` is live. The
+  separate Actions-read credential was renewed rather than reusing the write token.
+- [x] `claim_task` / `release_task`: gateway PR
+  [#7](https://github.com/alexscott2718-gif/jn-engine-contributor-mcp/pull/7) merged as
+  `c06521f` after all required checks and review. It binds exact committed tasks to the
+  authenticated owner, enforces 15-minute through
+  24-hour expiry, idempotent replay and claim-ID-guarded release, and uses a dedicated locked,
+  fsynced, schema-versioned claim ledger separate from the rotatable status/PR audit log. The
+  deployment runbook defines a 48 MiB maintenance threshold, 64 MiB hard bound, and safe 24-hour
+  drain-and-archive compaction/recovery. All 359 local CI-equivalent tests and the public-tree scan
+  passed; the updated remote `test`, CodeQL Python, and CodeQL Actions checks were green at merge.
+  This is **not deployed**: production remains the seven-tool `8bef00e` service.
+- [ ] `request_ground_truth`: appends a structured request to
    `docs/ground_truth_requests.md` for the capture-only rows above.
 
 Gateway `check_status` architecture remains documented in `docs/collaboration_tools.md`; the
-implementation and deployment closeout are recorded in `docs/PROJECT_HISTORY.md`.
+implementation and deployment closeouts are recorded in `docs/PROJECT_HISTORY.md`.
 
 Treat authentication, branch allowlists, path validation, audit logging, request idempotency, and
 PR-only enforcement as part of the feature—not deployment details. This is gateway work, not an
@@ -113,8 +142,14 @@ engine-runtime change.
 
 ## Definition of done for the next session
 
-- Keep changes on a branch from current `master` and submit one focused PR.
-- Run the proportional local gates, then require both protected CI contexts.
+- Keep the deployed `open_pr` credential separate from collaborator and Actions credentials; do
+  not broaden its repository or permission scope while adding `claim_task` / `release_task`.
+- Refresh the gateway source snapshot to merged commit `c06521f` and recreate only the
+  authenticated engine profile; do not change the read-only source profile into a write service.
+- Verify an authenticated exact nine-tool listing plus claim, replay, competing-owner conflict,
+  expiry, guarded release, and the corresponding mode-`0600` durable audit records.
 - Prove any new oracle/golden catches a real mutation.
 - Append durable results to `docs/PROJECT_HISTORY.md`.
 - Rewrite this handoff to the new frontier before stopping.
+- Do not treat a merged gateway PR as a deployed MCP tool: record the live tool listing and
+  audit-path verification before closing a write feature.

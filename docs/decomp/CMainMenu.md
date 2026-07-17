@@ -192,6 +192,14 @@ save/task stream refresh. A green oracle would require porting the recovered
 canvas menu subsystem first; do not expand the existing `level-routing-table`
 certificate to cover this behavior.
 
+Fresh `9a2b908` review also confirms that the immutable evidence does not carry
+the contents of the `DAT_004f8164` tables themselves. The target-4 dump proves
+the 29-record loop and state mechanics, but `Menu_ItemRolloverState_00403890`
+still failed function recovery, the concrete sprite/position records are
+absent, activation audio is not body-backed, and the document still lists the
+screen graph and level-controller handoff as open. Recreating those values
+from the native keyboard list would be a hand approximation, not a linked port.
+
 ### Not covered / open
 
 - The menu-manager screen graph is now decompiled, but it remains outside

@@ -7,8 +7,8 @@ row certifies one ``(class, aspect)`` at status ``linked`` or ``linked-blocked``
 A ``linked`` claim is only trusted when:
   * its ``oracle`` script exists and exits 0 (a headless faithfulness proof), and
   * its ``linkage_doc`` exists (the recovered-body + method-map evidence).
-A ``linked-blocked`` row must carry a ``note`` explaining which gameplay /
-by-eye / by-ear evidence it needs (that work returns to ``native-port``).
+A ``linked-blocked`` row must carry a ``note`` explaining the missing body,
+dependency, shipped data, gameplay, by-eye, or by-ear evidence it needs.
 
 This is the gate that makes the "% linked" metric un-fakeable: no green oracle,
 no ``linked``. ``tools/build_vtable_parity_report.py`` calls this at the end, so
@@ -138,7 +138,7 @@ def write_scoreboard(res: dict) -> None:
         lines.append("| _(none yet — gate armed)_ | | | | |")
     lines += [
         "",
-        "## linked-blocked (needs gameplay / by-eye / by-ear evidence)",
+        "## linked-blocked (missing evidence or an unported dependency)",
         "",
         "| class | aspect | domain | why it cannot be linked here |",
         "|---|---|---|---|",
