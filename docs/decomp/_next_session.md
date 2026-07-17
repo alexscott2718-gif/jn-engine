@@ -19,15 +19,15 @@ The Sol collaborator-kit campaign made the repository independently buildable an
 - complete-tree relocation through `JN_ASSET_ROOT` and `scripts/fetch_assets.sh`; and
 - contributor/agent guidance for work without any dev-machine access.
 
-Current baseline `master` is `3cdc7df`, which merged the linked-menu/vtable
-campaign from engine PR #14. The remaining menu targets are explicitly
+Current baseline `master` is `b36b794`, which merged the ground-truth request
+ledger and collaboration handoff from engine PR #15. The remaining menu targets are explicitly
 evidence-blocked: CGameType pause/help/update globals and target slots;
 CMainMenu's missing `DAT_004f8164` contents/rollover helper/audio/handoff;
 CMenuElement's canvas owner/polarity/target protocol; and C2DInGameMenu's
 counter producers/death predicate/raw helpers/`RestartLevel.tsk`. Do not port
 those from the native keyboard list or one HUD frame; recover the listed
-bodies/data first. The collaboration frontier is now engine PR #15 plus gateway
-PR #8, described below.
+bodies/data first. The collaboration implementation is merged; its production
+deployment gate is the immediate frontier described below.
 
 The CI mutation gate was exercised live in PR 7: reversing fixture AI movement failed both
 required jobs, and the uploaded archive contained all eight actual and expected PNG pairs.
@@ -120,14 +120,15 @@ token:
   drain-and-archive compaction/recovery. All 359 local CI-equivalent tests and the public-tree scan
   passed; the updated remote `test`, CodeQL Python, and CodeQL Actions checks were green at merge.
   This is **not deployed**: production remains the seven-tool `8bef00e` service.
-- [ ] `request_ground_truth`: implementation is proposed as a safe composition, not a tenth tool.
+- [x] `request_ground_truth`: implemented as a safe composition, not a tenth tool.
   Engine PR [#15](https://github.com/alexscott2718-gif/jn-engine/pull/15), implementation commit
   `c3d14f1`, adds the fixed append-only `docs/ground_truth_requests.md` schema, a `make check`
   validator, and seeded requests for `3SPR`, `3ROK`, and bare `3DAI`. Gateway PR
-  [#8](https://github.com/alexscott2718-gif/jn-engine-contributor-mcp/pull/8), head `a6b6279`, adds
-  optional `expected_base_commit` enforcement to `open_pr`, rejecting a stale new branch before
-  mutation while preserving idempotent replay. The gateway remains exactly nine tools after both
-  changes. Both PRs are open with their required checks green and are **not deployed**.
+  [#8](https://github.com/alexscott2718-gif/jn-engine-contributor-mcp/pull/8), implementation commit
+  `a6b6279`, adds optional `expected_base_commit` enforcement to `open_pr`, rejecting a stale new
+  branch before mutation while preserving idempotent replay. Gateway #8 merged as `c4d8ff4` and
+  engine #15 merged as `b36b794`, with required checks green. The gateway remains exactly nine
+  tools after both changes. The merged work is **not deployed**.
 
 Gateway `check_status` architecture remains documented in `docs/collaboration_tools.md`; the
 implementation and deployment closeouts are recorded in `docs/PROJECT_HISTORY.md`.
@@ -146,18 +147,21 @@ engine-runtime change.
 
 ## Definition of done for the next session
 
-- Land engine PR #15 only after protected `core` and `assets` are green; land gateway PR #8 only
-  after `test`, CodeQL Python, CodeQL Actions, and required review are green.
 - Keep the deployed `open_pr` credential separate from collaborator and Actions credentials; the
   request composition must use that existing path and must not broaden token scope.
-- After both gateway feature PRs are merged, refresh the gateway source snapshot from the exact
-  merged commit containing PR #7 and PR #8, refresh the engine snapshot from the exact merge
-  containing PR #15, and recreate only the authenticated engine profile. Do not turn the
-  read-only source profile into a write service.
+- Refresh the deployed gateway source and the separate JN Gateway Repository review snapshot to
+  exact merge `c4d8ff4`. Refresh the engine snapshot to exact merge `b36b794`, then recreate only
+  the authenticated engine profile. Do not turn the read-only source profile into a write service.
+- Confirm the dedicated `task_claims.ndjson` initializes on the audit mount with mode `0600`
+  alongside, but separate from, the general audit log. This deploy-time check is required evidence
+  for the `fcae7af` ledger split.
 - Verify an authenticated exact nine-tool listing plus claim, replay, competing-owner conflict,
   expiry, guarded release, expected-base stale rejection, and corresponding mode-`0600` durable
   audit records. Do not create a duplicate ground-truth request for the three seeded rows.
+- In a fresh independent connector session, repeat a live claim/replay/release cycle and an
+  `expected_base_commit` rejection so the closeout has a second set of eyes rather than only the
+  deploying agent's evidence.
 - Record the final merge commits, live snapshot commits, and audit-path evidence in
   `docs/PROJECT_HISTORY.md`, then rewrite this handoff to the next engine frontier.
-- Do not treat either open or merged PR as deployed behavior: production remains the seven-tool
+- Do not treat merged source as deployed behavior: production remains the seven-tool
   `8bef00e` service until the live listing and audit verification prove otherwise.
