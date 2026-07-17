@@ -114,11 +114,13 @@ token:
   separate Actions-read credential was renewed rather than reusing the write token.
 - [ ] `claim_task` / `release_task`: gateway PR
   [#7](https://github.com/alexscott2718-gif/jn-engine-contributor-mcp/pull/7) is open at
-  `15b60d7`. It binds exact committed tasks to the authenticated owner, enforces 15-minute through
-  24-hour expiry, idempotent replay and claim-ID-guarded release, and uses the locked fsynced audit
-  log as the event ledger. All 356 local CI-equivalent tests and the public-tree scan passed; the
-  remote `test`, CodeQL Python, and CodeQL Actions checks are green. This is **not deployed**:
-  production remains the seven-tool `8bef00e` service.
+  `fcae7af`. It binds exact committed tasks to the authenticated owner, enforces 15-minute through
+  24-hour expiry, idempotent replay and claim-ID-guarded release, and uses a dedicated locked,
+  fsynced, schema-versioned claim ledger separate from the rotatable status/PR audit log. The
+  deployment runbook defines a 48 MiB maintenance threshold, 64 MiB hard bound, and safe 24-hour
+  drain-and-archive compaction/recovery. All 359 local CI-equivalent tests and the public-tree scan
+  passed; the updated remote `test`, CodeQL Python, and CodeQL Actions checks are green. This is
+  **not deployed**: production remains the seven-tool `8bef00e` service.
 - [ ] `request_ground_truth`: appends a structured request to
    `docs/ground_truth_requests.md` for the capture-only rows above.
 

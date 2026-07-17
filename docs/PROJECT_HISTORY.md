@@ -2346,19 +2346,27 @@ blocked task IDs, expire after a bounded 15 minutes through 24 hours, replay onl
 owner and idempotency key, and return an opaque claim ID. Release requires both that claim ID and
 the authenticated owner, so a delayed retry cannot release a newer claim.
 
-The existing mode-`0600` fsynced audit NDJSON is also the ownership event ledger. A claim decision
-reads active events and appends its result under one exclusive file lock, avoiding separate state
-and audit files that could diverge. Conflicts, invalid or completed tasks, replays, releases, and
-no-op release retries are sanitized audit outcomes. Symlinks, unsafe modes, malformed or partial
-records, oversized ledgers, and failed durable writes fail closed. The ownership tools never
-receive the dedicated GitHub PR-write credential; `open_pr` remains the only repository-mutating
-tool.
+Independent pre-merge review identified that using the general `tool_calls.ndjson` as ownership
+state contradicted its documented rotation lifecycle and made its shared 64 MiB bound an eventual
+claim outage. Follow-up commit `fcae7af4e24266d326cd09bfc1827a855b7f6679` split ownership into
+the dedicated `TASK_CLAIM_LEDGER_PATH=/audit/task_claims.ndjson`. The general status/PR audit log
+remains independently rotatable, and claim locking now serializes only claim/release traffic.
+
+Each claim-ledger record carries `schema_version=1`. A claim decision reads active events and
+appends its result under one exclusive file lock, preserving atomic state and evidence. Conflicts,
+invalid or completed tasks, replays, releases, and no-op release retries are sanitized outcomes.
+Symlinks, unsafe modes, malformed or partial records, unknown schema versions, oversized ledgers,
+and failed durable writes fail closed. The deployment runbook now monitors at 48 MiB, retains the
+64 MiB hard bound, and defines a write-disabled 24-hour TTL drain followed by archive-and-recreate
+for compaction or poison-record recovery; append-only evidence is never hand-edited. The ownership
+tools never receive the dedicated GitHub PR-write credential; `open_pr` remains the only
+repository-mutating tool.
 
 The repository-wide hardcoded MCP tool-list sweep updated the protocol and device-auth assertions,
 onboarding, security, deployment, and contributor documentation from seven to nine tools. Local
-CI-equivalent validation against the pinned immutable engine fixture passed all 356 tests; the
+CI-equivalent validation against the pinned immutable engine fixture passed all 359 tests; the
 public-tree privacy scan and whitespace check also passed. PR #7 was mergeable when opened, with
-its remote `test`, CodeQL Python, and CodeQL Actions checks subsequently green.
+its updated remote `test`, CodeQL Python, and CodeQL Actions checks green at `fcae7af`.
 
 This is an implementation PR, not a deployment closeout. Production remains the authenticated
 seven-tool `8bef00e` service. Do not claim `claim_task` or `release_task` is live until PR #7 is
