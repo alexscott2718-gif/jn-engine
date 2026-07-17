@@ -2335,7 +2335,7 @@ callback was added to the non-wildcard production allowlist. Both production pro
 `open_pr` is now **merged, deployed, authenticated, and audited**; `claim_task` / `release_task` is
 unblocked as the next gateway campaign.
 
-## Gateway task ownership implementation opened (2026-07-17)
+## Gateway task ownership merged; production pending (2026-07-17)
 
 Gateway PR [#7](https://github.com/alexscott2718-gif/jn-engine-contributor-mcp/pull/7)
 was opened from `contrib/claim-release-task` at
@@ -2368,8 +2368,13 @@ CI-equivalent validation against the pinned immutable engine fixture passed all 
 public-tree privacy scan and whitespace check also passed. PR #7 was mergeable when opened, with
 its updated remote `test`, CodeQL Python, and CodeQL Actions checks green at `fcae7af`.
 
-This is an implementation PR, not a deployment closeout. Production remains the authenticated
-seven-tool `8bef00e` service. Do not claim `claim_task` or `release_task` is live until PR #7 is
-reviewed and merged, the gateway source snapshot is refreshed, the authenticated engine profile
-is recreated from the merged source, ChatGPT lists exactly nine tools, and real claim/replay,
-conflict/expiry, release, and durable audit behavior are verified without exposing credentials.
+PR #7 subsequently merged to gateway `main` as
+`c06521f15caa52eeaffb94112ca6a33ebbf74cd2` after the required review gate. The merge changes only
+the reviewed public gateway source. It does not refresh a production snapshot, recreate a running
+profile, or prove a live nine-tool surface.
+
+This is a merged implementation, not a deployment closeout. Production remains the authenticated
+seven-tool `8bef00e` service. Do not claim `claim_task` or `release_task` is live until the gateway
+source snapshot is refreshed to `c06521f`, the authenticated engine profile is recreated from that
+merged source, ChatGPT lists exactly nine tools, and real claim/replay, conflict/expiry, release,
+and durable audit behavior are verified without exposing credentials.

@@ -112,15 +112,16 @@ token:
   tools; and `check_status(branch=master)` returned both protected contexts successful while
   appending a durable sanitized `github:alexscott2718-gif` audit record. `open_pr` is live. The
   separate Actions-read credential was renewed rather than reusing the write token.
-- [ ] `claim_task` / `release_task`: gateway PR
-  [#7](https://github.com/alexscott2718-gif/jn-engine-contributor-mcp/pull/7) is open at
-  `fcae7af`. It binds exact committed tasks to the authenticated owner, enforces 15-minute through
+- [x] `claim_task` / `release_task`: gateway PR
+  [#7](https://github.com/alexscott2718-gif/jn-engine-contributor-mcp/pull/7) merged as
+  `c06521f` after all required checks and review. It binds exact committed tasks to the
+  authenticated owner, enforces 15-minute through
   24-hour expiry, idempotent replay and claim-ID-guarded release, and uses a dedicated locked,
   fsynced, schema-versioned claim ledger separate from the rotatable status/PR audit log. The
   deployment runbook defines a 48 MiB maintenance threshold, 64 MiB hard bound, and safe 24-hour
   drain-and-archive compaction/recovery. All 359 local CI-equivalent tests and the public-tree scan
-  passed; the updated remote `test`, CodeQL Python, and CodeQL Actions checks are green. This is
-  **not deployed**: production remains the seven-tool `8bef00e` service.
+  passed; the updated remote `test`, CodeQL Python, and CodeQL Actions checks were green at merge.
+  This is **not deployed**: production remains the seven-tool `8bef00e` service.
 - [ ] `request_ground_truth`: appends a structured request to
    `docs/ground_truth_requests.md` for the capture-only rows above.
 
@@ -143,9 +144,8 @@ engine-runtime change.
 
 - Keep the deployed `open_pr` credential separate from collaborator and Actions credentials; do
   not broaden its repository or permission scope while adding `claim_task` / `release_task`.
-- Review PR #7, require its test and CodeQL checks, and merge only after they are green.
-- After merge, refresh the gateway source snapshot and recreate only the authenticated engine
-  profile; do not change the read-only source profile into a write service.
+- Refresh the gateway source snapshot to merged commit `c06521f` and recreate only the
+  authenticated engine profile; do not change the read-only source profile into a write service.
 - Verify an authenticated exact nine-tool listing plus claim, replay, competing-owner conflict,
   expiry, guarded release, and the corresponding mode-`0600` durable audit records.
 - Prove any new oracle/golden catches a real mutation.
