@@ -127,7 +127,7 @@ token:
   [#8](https://github.com/alexscott2718-gif/jn-engine-contributor-mcp/pull/8), head `a6b6279`, adds
   optional `expected_base_commit` enforcement to `open_pr`, rejecting a stale new branch before
   mutation while preserving idempotent replay. The gateway remains exactly nine tools after both
-  changes. Both PRs are open and **not deployed**.
+  changes. Both PRs are open with their required checks green and are **not deployed**.
 
 Gateway `check_status` architecture remains documented in `docs/collaboration_tools.md`; the
 implementation and deployment closeouts are recorded in `docs/PROJECT_HISTORY.md`.

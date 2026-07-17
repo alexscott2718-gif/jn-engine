@@ -2415,8 +2415,9 @@ new request.
 The repository-wide gateway surface sweep preserves exactly six read tools and three write tools;
 there is no `request_ground_truth` registration, new credential, or extra mutation path. All 369
 gateway tests, including stale-base no-mutation and post-advance replay coverage, passed locally;
-the public-tree privacy scan and whitespace check also passed. Both PRs were mergeable when opened,
-with remote checks still running. Neither open PR is merged or deployed. Production therefore
-remains the authenticated seven-tool gateway at source `8bef00e`; `claim_task`, `release_task`, and
-the expected-base request composition must not be described as live until their merged source and
+the public-tree privacy scan and whitespace check also passed. Gateway `test`, CodeQL Python, and
+CodeQL Actions passed remotely; both engine `core` and `assets` runs passed remotely. Both PRs were
+mergeable when checked. Neither open PR is merged or deployed. Production therefore remains the
+authenticated seven-tool gateway at source `8bef00e`; `claim_task`, `release_task`, and the
+expected-base request composition must not be described as live until their merged source and
 snapshots are deployed and the authenticated nine-tool/audit behavior is verified.
