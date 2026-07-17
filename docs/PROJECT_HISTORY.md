@@ -2334,3 +2334,34 @@ OAuth registry from its legacy SQLite store to the hardened file-tree store. The
 callback was added to the non-wildcard production allowlist. Both production profiles are healthy.
 `open_pr` is now **merged, deployed, authenticated, and audited**; `claim_task` / `release_task` is
 unblocked as the next gateway campaign.
+
+## Gateway task ownership implementation opened (2026-07-17)
+
+Gateway PR [#7](https://github.com/alexscott2718-gif/jn-engine-contributor-mcp/pull/7)
+was opened from `contrib/claim-release-task` at
+`15b60d707c05805ac381600b2914af9e34886973`. It expands the authenticated engine MCP from seven
+to nine tools with `claim_task` and `release_task`. Ownership is derived only from the
+authenticated caller and cannot be supplied as an argument. Claims accept exact committed open or
+blocked task IDs, expire after a bounded 15 minutes through 24 hours, replay only for the same
+owner and idempotency key, and return an opaque claim ID. Release requires both that claim ID and
+the authenticated owner, so a delayed retry cannot release a newer claim.
+
+The existing mode-`0600` fsynced audit NDJSON is also the ownership event ledger. A claim decision
+reads active events and appends its result under one exclusive file lock, avoiding separate state
+and audit files that could diverge. Conflicts, invalid or completed tasks, replays, releases, and
+no-op release retries are sanitized audit outcomes. Symlinks, unsafe modes, malformed or partial
+records, oversized ledgers, and failed durable writes fail closed. The ownership tools never
+receive the dedicated GitHub PR-write credential; `open_pr` remains the only repository-mutating
+tool.
+
+The repository-wide hardcoded MCP tool-list sweep updated the protocol and device-auth assertions,
+onboarding, security, deployment, and contributor documentation from seven to nine tools. Local
+CI-equivalent validation against the pinned immutable engine fixture passed all 356 tests; the
+public-tree privacy scan and whitespace check also passed. PR #7 was mergeable when opened, with
+its remote `test`, CodeQL Python, and CodeQL Actions checks subsequently green.
+
+This is an implementation PR, not a deployment closeout. Production remains the authenticated
+seven-tool `8bef00e` service. Do not claim `claim_task` or `release_task` is live until PR #7 is
+reviewed and merged, the gateway source snapshot is refreshed, the authenticated engine profile
+is recreated from the merged source, ChatGPT lists exactly nine tools, and real claim/replay,
+conflict/expiry, release, and durable audit behavior are verified without exposing credentials.

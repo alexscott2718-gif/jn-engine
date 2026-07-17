@@ -106,17 +106,20 @@ token:
   [#6](https://github.com/alexscott2718-gif/jn-engine-contributor-mcp/pull/6) merged with all
   required checks green on 2026-07-17. It uses a third dedicated credential, validates
   `contrib/*` branches and paths, records idempotency keys, sends mutations exactly once, and
-  writes sanitized fsynced audit records. **Deployment is still pending**: the public MCP
-  remains the prior six-tool read-only service until the dedicated mode-`0600` credential,
-  `ENABLE_WRITE_ACTIONS=true`, snapshot refresh, authenticated seven-tool listing, and audit
-  verification are complete. Production closeout completed later on 2026-07-17: source `8bef00e`
-  is deployed with a distinct mode-`0600` credential and writes enabled only for the authenticated
-  engine profile; the engine and source snapshots were refreshed; ChatGPT listed all seven tools;
-  and `check_status(branch=master)` returned both protected contexts successful while appending a
-  durable sanitized `github:alexscott2718-gif` audit record. `open_pr` is live. The separate
-  Actions-read credential was renewed rather than reusing the write token.
-1. `claim_task` / `release_task`: prevents duplicate work with auditable ownership and expiry.
-2. `request_ground_truth`: appends a structured request to
+  writes sanitized fsynced audit records. Production closeout completed later on 2026-07-17:
+  source `8bef00e` is deployed with a distinct mode-`0600` credential and writes enabled only for
+  the authenticated engine profile; both snapshots were refreshed; ChatGPT listed all seven
+  tools; and `check_status(branch=master)` returned both protected contexts successful while
+  appending a durable sanitized `github:alexscott2718-gif` audit record. `open_pr` is live. The
+  separate Actions-read credential was renewed rather than reusing the write token.
+- [ ] `claim_task` / `release_task`: gateway PR
+  [#7](https://github.com/alexscott2718-gif/jn-engine-contributor-mcp/pull/7) is open at
+  `15b60d7`. It binds exact committed tasks to the authenticated owner, enforces 15-minute through
+  24-hour expiry, idempotent replay and claim-ID-guarded release, and uses the locked fsynced audit
+  log as the event ledger. All 356 local CI-equivalent tests and the public-tree scan passed; the
+  remote `test`, CodeQL Python, and CodeQL Actions checks are green. This is **not deployed**:
+  production remains the seven-tool `8bef00e` service.
+- [ ] `request_ground_truth`: appends a structured request to
    `docs/ground_truth_requests.md` for the capture-only rows above.
 
 Gateway `check_status` architecture remains documented in `docs/collaboration_tools.md`; the
@@ -138,8 +141,11 @@ engine-runtime change.
 
 - Keep the deployed `open_pr` credential separate from collaborator and Actions credentials; do
   not broaden its repository or permission scope while adding `claim_task` / `release_task`.
-- Keep changes on a branch from current `master` and submit one focused PR.
-- Run the proportional local gates, then require both protected CI contexts.
+- Review PR #7, require its test and CodeQL checks, and merge only after they are green.
+- After merge, refresh the gateway source snapshot and recreate only the authenticated engine
+  profile; do not change the read-only source profile into a write service.
+- Verify an authenticated exact nine-tool listing plus claim, replay, competing-owner conflict,
+  expiry, guarded release, and the corresponding mode-`0600` durable audit records.
 - Prove any new oracle/golden catches a real mutation.
 - Append durable results to `docs/PROJECT_HISTORY.md`.
 - Rewrite this handoff to the new frontier before stopping.
