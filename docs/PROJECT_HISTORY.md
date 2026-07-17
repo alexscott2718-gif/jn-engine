@@ -2379,7 +2379,7 @@ source snapshot is refreshed to `c06521f`, the authenticated engine profile is r
 merged source, ChatGPT lists exactly nine tools, and real claim/replay, conflict/expiry, release,
 and durable audit behavior are verified without exposing credentials.
 
-## Ground-truth request workflow proposed (2026-07-17)
+## Ground-truth request workflow merged; production pending (2026-07-17)
 
 The final portable-collaboration campaign item is implemented as a composition over the existing
 gateway surface, not a tenth MCP tool. Engine PR
@@ -2402,7 +2402,7 @@ under the repository's golden policy; no golden was changed, and protected `core
 the authoritative render result.
 
 Gateway PR
-[#8](https://github.com/alexscott2718-gif/jn-engine-contributor-mcp/pull/8), head
+[#8](https://github.com/alexscott2718-gif/jn-engine-contributor-mcp/pull/8), implementation commit
 `a6b62793c05d8cd9f4f1ca417c2bd7d153880711`, adds optional
 `expected_base_commit` enforcement to `open_pr`. For a new branch, a mismatch between that commit
 and live `master` returns a typed conflict before any mutation. An already-created branch with the
@@ -2417,7 +2417,20 @@ there is no `request_ground_truth` registration, new credential, or extra mutati
 gateway tests, including stale-base no-mutation and post-advance replay coverage, passed locally;
 the public-tree privacy scan and whitespace check also passed. Gateway `test`, CodeQL Python, and
 CodeQL Actions passed remotely; both engine `core` and `assets` runs passed remotely. Both PRs were
-mergeable when checked. Neither open PR is merged or deployed. Production therefore remains the
-authenticated seven-tool gateway at source `8bef00e`; `claim_task`, `release_task`, and the
-expected-base request composition must not be described as live until their merged source and
-snapshots are deployed and the authenticated nine-tool/audit behavior is verified.
+mergeable when checked. Gateway PR #8 subsequently merged as
+`c4d8ff427a46ad67ab3378aaba705eabcf5a4165`; engine PR #15 merged as
+`b36b794a87381b4b3f98df0c22a1bf7682c99fc3`.
+
+Those merges do not constitute deployment. Production remains the authenticated seven-tool
+gateway at source `8bef00e`. Closeout requires refreshing the deployed gateway source and its
+separate JN Gateway Repository review snapshot to the exact `c4d8ff4` merge, refreshing the engine
+snapshot to `b36b794`, and recreating only the authenticated engine profile. In addition to the
+exact nine-tool listing and claim/replay/conflict/expiry/release/expected-base checks, deployment
+must prove that the dedicated `task_claims.ndjson` initializes on the audit mount with mode `0600`
+alongside—but separate from—the general audit log. That is the deploy-time manifestation of the
+`fcae7af` ledger split and cannot be inferred from CI.
+
+After operator verification, an independent fresh connector session should repeat a real
+claim/replay/release cycle and an `expected_base_commit` rejection against live state. Record both
+sets of sanitized evidence before calling the campaign shipped. Until then, `claim_task`,
+`release_task`, and the expected-base request composition must not be described as live.
