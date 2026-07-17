@@ -131,6 +131,7 @@ check:
 	rm -rf build/check-artifacts
 	$(MAKE) clean
 	$(MAKE) GAME_CFLAGS=-Werror
+	python3 tools/check_ground_truth_requests.py --selftest
 	python3 tools/check_ui_text.py --selftest
 	python3 tools/check_determinism.py --level fixture0 --frames 300 --seed 1
 	python3 tools/check_goldens.py --level fixture0 --frames $(FIXTURE_GOLDEN_FRAMES) \
