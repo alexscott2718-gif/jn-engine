@@ -139,6 +139,14 @@ Treat authentication, branch allowlists, path validation, audit logging, request
 PR-only enforcement as part of the feature—not deployment details. This is gateway work, not an
 engine-runtime change.
 
+## Recommended next campaign: engine porting waves
+
+- [ ] Wire AITrigger `AIState` / `AISpeed` into the general `C3DAI` state machine.
+- [ ] Port the `PlayerControlled` cutscene input lock and restore timing.
+- [ ] Finish the Goddard mode-vector, orbit, and effect helper tail when evidence pins the vectors.
+- [ ] Finish the separate Goddard energy and menu side-effect tail.
+- [ ] Implement the active `C3DShrinkRay` shrink-to-moving-pickup mechanic.
+
 ## Closeout state and one preserved branch
 
 - GitHub `master` protection requires strict `core` and `assets` checks and includes admins.
