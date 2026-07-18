@@ -2434,3 +2434,52 @@ After operator verification, an independent fresh connector session should repea
 claim/replay/release cycle and an `expected_base_commit` rejection against live state. Record both
 sets of sanitized evidence before calling the campaign shipped. Until then, `claim_task`,
 `release_task`, and the expected-base request composition must not be described as live.
+
+## Portable collaboration campaign production closeout (2026-07-18)
+
+The production gateway checkout and the separate JN Gateway Repository review snapshot were
+refreshed to gateway merge `c4d8ff427a46ad67ab3378aaba705eabcf5a4165`. The engine snapshot
+was refreshed to then-current `master`,
+`061dbe8ea294d6109d932ecf93617d1483372d08`, which contains engine PR #15 plus the PR #16
+deployment-gate documentation. The source profile remained `SERVICE_PROFILE=gateway_repository`
+with `ENABLE_WRITE_ACTIONS=false`; only the authenticated engine profile received the nine-tool
+write-enabled service.
+
+The first engine recreation attempt exposed an operational project-name mismatch: the production
+containers belonged to Compose project `jn-engine-ai-gateway`, while the renamed checkout defaulted
+to `jn-engine-contributor-mcp`. Docker rejected the replacement before start because the still-
+healthy seven-tool container owned loopback port 1675. The failed, non-running container and empty
+network were removed, the prior snapshot selector was restored mode `0600`, and
+`COMPOSE_PROJECT_NAME=jn-engine-ai-gateway` was pinned in the production mode-`0600` environment.
+The retry recreated the established authenticated service and passed health verification at
+`061dbe8`; no read-only source profile was converted into a write service.
+
+Operator-side runtime inspection returned exactly `search`, `fetch`, `list_tasks`, `claim_task`,
+`release_task`, `project_context`, `lookup_symbol`, `check_status`, and `open_pr`. A real 15-minute
+claim on `catalog:3har:c3dharrier`, identical-key replay, deliberately wrong claim-ID release, and
+correct guarded release produced `claimed`, `replayed`, `conflict`, and `released`. The dedicated
+`task_claims.ndjson` and general `tool_calls.ndjson` were separate regular-file inodes on the same
+mode-`0700` audit mount; both were mode `0600`, owned by runtime UID/GID `10001:10001`. This is the
+required deploy-time evidence for the `fcae7af` ledger split.
+
+The operator then called `open_pr` on absent branch `contrib/deployment-stale-061dbe8` with an
+all-zero expected base. It returned typed `conflict`; the sanitized fsynced audit record carried
+live base `061dbe8`, `head_commit=null`, `pr_number=null`, and GitHub statuses `[200,404]`, proving
+that only the base and absent-branch GETs occurred. No branch, commit, PR, or sentinel file was
+created.
+
+An independent fresh Fable connector session reproduced the exact nine-tool listing and confirmed
+`check_status(branch=master)` at `061dbe8` with both protected contexts successful. Under
+authenticated identity `github:alexscott2718-gif`, it claimed the same catalog task for 15 minutes
+with key `fable-closeout-061dbe8`, replayed the same claim ID and timestamps, received typed
+`conflict` for a bogus claim ID, and released the real claim. Its separate stale-base call on
+`contrib/fable-stale-061dbe8` also returned typed `conflict`; the durable record again had
+`head_commit=null`, `pr_number=null`, and statuses `[200,404]`. A final status call left `master`
+unchanged, and an independent ref query confirmed the sentinel branch was absent.
+
+The collaboration campaign is therefore deployed and independently verified: `check_status`,
+`open_pr`, `claim_task` / `release_task`, and the zero-extra-surface `request_ground_truth`
+composition all fail closed under their reviewed contracts. Because this closeout documentation
+itself advances `master`, the merge commit containing this section is the final engine snapshot
+refresh target. Its exact merge/snapshot SHA is recorded on the closeout PR after promotion; that
+out-of-tree record avoids creating an infinite sequence of self-staling documentation commits.
