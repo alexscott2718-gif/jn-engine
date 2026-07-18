@@ -19,15 +19,16 @@ The Sol collaborator-kit campaign made the repository independently buildable an
 - complete-tree relocation through `JN_ASSET_ROOT` and `scripts/fetch_assets.sh`; and
 - contributor/agent guidance for work without any dev-machine access.
 
-Current baseline `master` is `b36b794`, which merged the ground-truth request
-ledger and collaboration handoff from engine PR #15. The remaining menu targets are explicitly
+The portable collaboration campaign is deployed and independently verified. The live verification
+snapshot was `061dbe8`; the merge containing this closeout handoff is the final refresh target and
+its exact promoted SHA is recorded on that PR. The remaining menu targets are explicitly
 evidence-blocked: CGameType pause/help/update globals and target slots;
 CMainMenu's missing `DAT_004f8164` contents/rollover helper/audio/handoff;
 CMenuElement's canvas owner/polarity/target protocol; and C2DInGameMenu's
 counter producers/death predicate/raw helpers/`RestartLevel.tsk`. Do not port
 those from the native keyboard list or one HUD frame; recover the listed
-bodies/data first. The collaboration implementation is merged; its production
-deployment gate is the immediate frontier described below.
+bodies/data first. The frontier now returns to the remote-ownable porting waves and the three
+capture-only requests in `docs/ground_truth_requests.md`.
 
 The CI mutation gate was exercised live in PR 7: reversing fixture AI movement failed both
 required jobs, and the uploaded archive contained all eight actual and expected PNG pairs.
@@ -92,9 +93,9 @@ Record requests for these instead of inventing behavior.
 
 These have no current `.gam` placements; leave them labeled unless new reach evidence appears.
 
-## Recommended next campaign: gateway collaboration tools
+## Completed campaign: gateway collaboration tools
 
-Implement the remaining gateway-owned write tools so contributors do not receive a maintainer
+The gateway-owned collaboration tools were completed without giving contributors a maintainer
 token:
 
 - [x] `check_status`: gateway PR
@@ -119,7 +120,7 @@ token:
   deployment runbook defines a 48 MiB maintenance threshold, 64 MiB hard bound, and safe 24-hour
   drain-and-archive compaction/recovery. All 359 local CI-equivalent tests and the public-tree scan
   passed; the updated remote `test`, CodeQL Python, and CodeQL Actions checks were green at merge.
-  This is **not deployed**: production remains the seven-tool `8bef00e` service.
+  Production deployment and independent verification completed 2026-07-18.
 - [x] `request_ground_truth`: implemented as a safe composition, not a tenth tool.
   Engine PR [#15](https://github.com/alexscott2718-gif/jn-engine/pull/15), implementation commit
   `c3d14f1`, adds the fixed append-only `docs/ground_truth_requests.md` schema, a `make check`
@@ -127,8 +128,9 @@ token:
   [#8](https://github.com/alexscott2718-gif/jn-engine-contributor-mcp/pull/8), implementation commit
   `a6b6279`, adds optional `expected_base_commit` enforcement to `open_pr`, rejecting a stale new
   branch before mutation while preserving idempotent replay. Gateway #8 merged as `c4d8ff4` and
-  engine #15 merged as `b36b794`, with required checks green. The gateway remains exactly nine
-  tools after both changes. The merged work is **not deployed**.
+  engine #15 merged as `b36b794`, with required checks green. The merged source defines exactly
+  nine tools, and the live authenticated listing matched it during production verification on
+  2026-07-18; `request_ground_truth` added no tenth tool.
 
 Gateway `check_status` architecture remains documented in `docs/collaboration_tools.md`; the
 implementation and deployment closeouts are recorded in `docs/PROJECT_HISTORY.md`.
@@ -147,21 +149,13 @@ engine-runtime change.
 
 ## Definition of done for the next session
 
-- Keep the deployed `open_pr` credential separate from collaborator and Actions credentials; the
-  request composition must use that existing path and must not broaden token scope.
-- Refresh the deployed gateway source and the separate JN Gateway Repository review snapshot to
-  exact merge `c4d8ff4`. Refresh the engine snapshot to exact merge `b36b794`, then recreate only
-  the authenticated engine profile. Do not turn the read-only source profile into a write service.
-- Confirm the dedicated `task_claims.ndjson` initializes on the audit mount with mode `0600`
-  alongside, but separate from, the general audit log. This deploy-time check is required evidence
-  for the `fcae7af` ledger split.
-- Verify an authenticated exact nine-tool listing plus claim, replay, competing-owner conflict,
-  expiry, guarded release, expected-base stale rejection, and corresponding mode-`0600` durable
-  audit records. Do not create a duplicate ground-truth request for the three seeded rows.
-- In a fresh independent connector session, repeat a live claim/replay/release cycle and an
-  `expected_base_commit` rejection so the closeout has a second set of eyes rather than only the
-  deploying agent's evidence.
-- Record the final merge commits, live snapshot commits, and audit-path evidence in
-  `docs/PROJECT_HISTORY.md`, then rewrite this handoff to the next engine frontier.
-- Do not treat merged source as deployed behavior: production remains the seven-tool
-  `8bef00e` service until the live listing and audit verification prove otherwise.
+- Begin with `check_status(branch=master)` and require the live engine snapshot to match before
+  composing any whole-file request.
+- Claim one remote-ownable task before changing it and release the claim before stopping. The
+  recommended first candidates remain AITrigger state wiring or cutscene input lock/restore.
+- Keep `3SPR`, `3ROK`, and bare `3DAI` evidence-blocked until the queued ground-truth requests are
+  captured; do not infer their behavior from subclasses or one visual frame.
+- Preserve the credential split, exact nine-tool surface, dedicated claim ledger, and PR-only
+  mutation boundary. Collaboration work is complete unless new evidence exposes a concrete defect.
+- Prove any new oracle/golden catches a real mutation, append durable results to
+  `docs/PROJECT_HISTORY.md`, and rewrite this handoff to the next engine frontier before stopping.
