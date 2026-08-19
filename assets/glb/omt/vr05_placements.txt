@@ -1,0 +1,4 @@
+# OMT glTF placements emitted by omt_asset_toolkit.gltf_export
+# format: <name>\t<glb_path>\t<center_x>\t<center_y>\t<center_z>
+# native GL translation = (center_x, 0, -center_z); height baked into mesh
+dirt	assets/glb/omt/vr05/dirt.glb	2801.6572	3786.3455	-10727.9395

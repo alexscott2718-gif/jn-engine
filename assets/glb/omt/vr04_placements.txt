@@ -1,0 +1,4 @@
+# OMT glTF placements emitted by omt_asset_toolkit.gltf_export
+# format: <name>\t<glb_path>\t<center_x>\t<center_y>\t<center_z>
+# native GL translation = (center_x, 0, -center_z); height baked into mesh
+Box01	assets/glb/omt/vr04/Box01.glb	-868.8784	3906.7217	-2308.9265
