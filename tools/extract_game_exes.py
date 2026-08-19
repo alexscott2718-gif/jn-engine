@@ -33,7 +33,23 @@ import sys
 import tempfile
 from pathlib import Path
 
-REPO = Path(__file__).resolve().parent.parent
+def _find_repo() -> Path:
+    """Locate the jn-engine checkout.
+
+    Walks up from the working directory first, so the copy shipped in the
+    contributor bundle still targets the real checkout rather than the bundle
+    folder it happens to sit in. Falls back to the script's own parent.
+    """
+    marker = Path("docs") / "binaries.sha256"
+    for base in (Path.cwd(), Path(__file__).resolve().parent.parent):
+        for candidate in (base, *base.parents):
+            if (candidate / marker).is_file() or (candidate / ".git").exists():
+                if (candidate / "docs").is_dir():
+                    return candidate
+    return Path(__file__).resolve().parent.parent
+
+
+REPO = _find_repo()
 
 TITLES = {
     "jnbg": {
