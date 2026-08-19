@@ -34,6 +34,23 @@ make check                      # the full gate — see §4
 The repository already contains the level data (`assets/gam`, `assets/omt`) and every
 derived catalog. **You do not need the game to build, run, or work on most tasks.**
 
+### Staying current
+
+```bash
+./scripts/update.sh
+```
+
+Pulls, then re-checks everything that depends on the tree: assets present, your
+`assets/exe/` copies still matching their checksums, and the spec gate. It refuses to
+touch a dirty tree, and on a feature branch it tells you what's upstream rather than
+merging behind your back.
+
+From the contributor bundle, with no checkout yet:
+
+```bash
+bash update.sh --clone jn-engine
+```
+
 ## 3. If you want the original binaries
 
 Only needed for binary-backed tooling. You supply them from a disc you own — they are
