@@ -39,6 +39,8 @@ Entity *behavior_friend_talk_nearest(World *w);          /* T-key: talk nearest 
 Entity *behavior_friend_talk_tag(World *w, const char *tag); /* JN_TEST_TALK headless hook */
 extern const EntityVTable vt_goddard;     /* 3GOD — C3DGoddard runtime companion/controller */
 void behavior_goddard_reset(void);
+void behavior_player_reset(void);   /* clear g_player on world teardown */
+void behavior_vehicle_reset(void);  /* clear the ridden-vehicle cache */
 Entity *behavior_goddard_ensure(World *w, const char *level_name);
 Entity *behavior_goddard_get(void);
 int behavior_goddard_request_mode(Entity *target, int mode);

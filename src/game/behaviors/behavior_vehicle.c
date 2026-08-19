@@ -67,6 +67,10 @@ static unsigned int s_saved_player_flags = 0;
 int     behavior_vehicle_riding(void)  { return s_ride != NULL; }
 Entity *behavior_vehicle_current(void) { return s_ride; }
 
+/* Forget the ridden vehicle across a world teardown; the saved player flags
+   describe an entity that no longer exists. */
+void behavior_vehicle_reset(void) { s_ride = NULL; s_saved_player_flags = 0; }
+
 static void rocket_mount(Entity *e) {
     if (s_ride || !e) return;
     s_ride = e;

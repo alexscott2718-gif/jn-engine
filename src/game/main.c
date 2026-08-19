@@ -2406,6 +2406,17 @@ int main(int argc, char **argv) {
                     printf("[SWAP] loading %s (cache: %d tex, %d models)\n",
                            swap_desc.gam_path, asset_cache_tex_count(), asset_cache_model_count());
                     world_destroy(&world);
+                    /* Every cached Entity* is dangling the instant the old
+                       entities are freed. Clear them here, at the free site,
+                       so nothing can read one before the new level re-arms
+                       them on spawn. g_player matters most: it is armed
+                       first-write-wins, so a stale value is permanent. */
+                    jim = NULL;
+                    behavior_player_reset();
+                    behavior_vehicle_reset();
+                    behavior_goddard_reset();
+                    g_camrec_player = NULL;
+                    s_sandbox_prepped_rocket = NULL;
                     world_init(&world);
                     gamestate_reset_for_new_level();
                     asset_cache_begin_level();

@@ -45,6 +45,11 @@ static void player_on_spawn(Entity *e, World *w) {
     if (!g_player) g_player = e;
 }
 
+/* Drop the cached player. Must be called whenever the world is torn down:
+   the arming above is first-write-wins, so a stale g_player would keep the
+   next level's player from ever claiming it. */
+void behavior_player_reset(void) { g_player = NULL; }
+
 /* Phase 4 contextual state: is the player standing near a playground swing
    (3SWN)? Level 1's only contextual prop with a player animation. */
 #define SWING_RADIUS 400.0f
