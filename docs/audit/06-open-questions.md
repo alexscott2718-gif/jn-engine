@@ -540,7 +540,7 @@ qualifier at `ARCHITECTURE.md:420` and `PROJECT_HISTORY.md:1246`, while
 `C:\Users\alexa\Operation Krabby Patty.rep` is a Ghidra project holding **exactly one** imported
 program, `SpongeBob.exe` (`idata/00/00000000.prp`, `NAME="SpongeBob.exe"`), with a 23 MB program
 database, 344 KB of user data and an **empty `versioned/` store**. The lock file records creation on
-**2026-08-10 19:55:55 EDT** on host `DESKTOP-586TJOK`; directory mtimes run to 20:55 — about one hour
+**2026-08-10 19:55:55 EDT** on host `the operator's Windows host`; directory mtimes run to 20:55 — about one hour
 of work — and nothing since. No repo, no ledger row, no notes, no exported markup, and the `.lock` is
 still present. **CONFIRMED.** This is audit gap **G9** (new-target work outside every committed gate)
 with a name and a timestamp.
@@ -585,7 +585,7 @@ The entire evidentiary basis is **one operator sentence**, at
 
 The ledger page `09 Project Ledger/projects/awe-games-mcp.md` records `status: next`,
 `ledgerstatus: planned`, `mentions: 1`, era `2026-07-12..2026-07-12`, with empty `Next` and `Notes`
-sections. **Searched:** the whole Obsidian vault, `/home/scotty`, `project-ledger` and
+sections. **Searched:** the whole Obsidian vault, `the operator's home tree`, `project-ledger` and
 `micro-agent-context` for `awe-games-mcp`, `AWE Games MCP` and `awe_games_mcp` — every hit is ledger
 machinery, this audit, or a session log quoting the same sentence. **No design document exists.**
 **CONFIRMED** (as an absence, with the search recorded).
