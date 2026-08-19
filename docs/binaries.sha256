@@ -1,0 +1,25 @@
+# Original game executables — reference checksums
+#
+# These files are NOT distributed with this repository. They are the property of
+# their respective rights holders. Populate assets/exe/ from a disc you own:
+#
+#   python3 tools/extract_game_exes.py --source <install dir | disc | .iso>
+#
+# Format:  <sha256>  <size in bytes>  <filename>
+# See docs/GAME_FILES.md.
+
+# jnbg — Jimmy Neutron: Boy Genius (PC, retail; binaries linked 2001-09-30 UTC)
+f5281076e1a2492f2d61f87aae3f4544b6d0f535ebe33f9fbb6f78710fe1aea8     1019904  Neutron.exe
+0bbc2a37fd1c089cd475e4ca688d2bd33e59444c4f3629a9f9135cdf765976f5     1019904  NeutronSW.exe
+a94f13e148bff790aab556d0381055df57f2ff4f9abc5947c25847c7370b0fea     1339392  OMT2.dll
+
+# jnvsjn — Jimmy Neutron vs. Jimmy Negatron (binaries linked 2002-08-27 UTC)
+67ae58738ac508e7ec81ba4f25c8d4538ec34647383a70449c317faceefd4ceb     1327104  Neutron2.exe
+bf307a7d9c88810d9d75aabf01361acf1043d08aa1add0fd2358a9c6bd695733     1327104  Neutron2SW.exe
+bedd1aa0bc81e83129bca91d5ebefd9d7992578eb6c86c2c39dff9110607c725     1368064  OMT2.dll
+d1b4b5912c7e32d354157a0d510a6af0728e7e3e7665bd637e5387d884c9f4dc      488960  granny.dll
+
+# mechanix — Hot Wheels: Mechanix (binaries linked 2001-08-01 UTC)
+6c9c08bbbe2b037872dd453aeae4683a76a0e29724e5bd42b5e476cae109906e      557056  MECHANIX.exe
+40d42297f78efa2f105d8c8b8875fcdf2b2184a3474948f624d3a3ce67e3167a      487424  Mechanixsw.exe
+00bc1a645eb3b9eb386eea34acb74cbe301f1a85aef37db67ea8332c31d06c8f     1343488  OMT2.dll
