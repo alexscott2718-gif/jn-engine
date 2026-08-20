@@ -33,8 +33,14 @@ int gamestate_player_health(void) {
     return g_state.health;
 }
 
+static int g_invulnerable = 0;
+
+void gamestate_set_invulnerable(int on) { g_invulnerable = on ? 1 : 0; }
+int  gamestate_invulnerable(void)       { return g_invulnerable; }
+
 void gamestate_damage_player(int amount) {
     if (amount <= 0) return;
+    if (g_invulnerable) return;   /* --nodamage */
     g_state.health -= amount;
     if (g_state.health <= 0) {
         g_state.health = 0;

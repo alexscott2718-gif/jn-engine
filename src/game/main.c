@@ -32,6 +32,11 @@
 #include "spawn.h"
 #include "fixture.h"
 #include "menu.h"
+#include "help_overlay.h"
+#include "level_select.h"
+
+/* The controls card greets the player at every level boot, then fades. */
+#define HELP_BOOT_SECONDS 10.0f
 #include "hud.h"
 #include "animated_dispatch.h"
 #include "player_anim.h"
@@ -1422,6 +1427,7 @@ int main(int argc, char **argv) {
     const char *start_level = "level1";
     int want_newgame = 0;
     int want_menu = 0;
+    int want_nodamage = 0;
     int want_sandbox = 0;
     int headless = 0;
     long frame_limit = -1;
@@ -1437,6 +1443,9 @@ int main(int argc, char **argv) {
             want_newgame = 1;
         } else if (strcmp(argv[i], "--menu") == 0) {
             want_menu = 1;
+        } else if (strcmp(argv[i], "--nodamage") == 0 ||
+                   strcmp(argv[i], "--invincible") == 0) {
+            want_nodamage = 1;
         } else if (strcmp(argv[i], "--sandbox") == 0) {
             want_sandbox = 1;
         } else if (strcmp(argv[i], "--headless") == 0) {
@@ -1467,6 +1476,13 @@ int main(int argc, char **argv) {
             return 2;
         }
     }
+
+    /* A frame grabber must never catch the controls card. Decided once,
+       here, rather than at each help_show_timed() call site. */
+    help_set_auto(!headless &&
+                  getenv("JN_HEADLESS")   == NULL &&
+                  getenv("JN_SCREENSHOT") == NULL &&
+                  getenv("JN_CAPTURE")    == NULL);
 
     if (headless) {
         SDL_setenv("SDL_VIDEODRIVER", "offscreen", 1);
@@ -1937,6 +1953,11 @@ int main(int argc, char **argv) {
     /* CMainMenu front-end: --menu opens the title/level-select over the loaded
        level as a backdrop; the player's choice routes into the level/task
        system (New Game -> NewGame.tsk -> level1b; VR items load directly). */
+    help_show_timed(HELP_BOOT_SECONDS);   /* greet the first level too */
+    if (want_nodamage) {
+        gamestate_set_invulnerable(1);
+        fprintf(stderr, "[nodamage] player damage disabled; kill plane still respawns\n");
+    }
     if (want_menu)
         menu_open();
     if (fixture_mode) fixture_level_configure_floor(&world);
@@ -2147,6 +2168,7 @@ int main(int argc, char **argv) {
             : SDL_GetTicks();
         float frame_time = frame_limit >= 0 ? DT : (now - last_time) / 1000.0f;
         last_time = now;
+        help_tick(frame_time);   /* fade the boot-time controls card */
 
         /* Cap frame time to prevent spiral of death (lag spike) */
         if (frame_time > 0.1f) frame_time = 0.1f;
@@ -2172,6 +2194,23 @@ int main(int argc, char **argv) {
             /* Front-end menu (CMainMenu): while open, gameplay is frozen and
                the player's selection routes into the level/task system. The
                currently-loaded level renders as a static backdrop. */
+            help_input();
+            if (!menu_active() && !help_active() &&
+                input_just_pressed(SDL_SCANCODE_M)) {
+                if (level_select_active()) level_select_close();
+                else                       level_select_open();
+            }
+
+            /* QA level browser. Separate from the menu above: that one is the
+               certified CMainMenu routing table and must stay ten entries. */
+            if (level_select_active()) {
+                level_select_input();
+                const char *ls_level = NULL;
+                if (level_select_take_confirm(&ls_level) && ls_level) {
+                    gamestate_request_level_swap(ls_level, "");
+                    level_select_close();
+                }
+            }
             if (menu_active()) {
                 menu_input();
                 const char *sel_level = NULL;
@@ -2199,7 +2238,7 @@ int main(int argc, char **argv) {
                 }
             }
 
-          if (!menu_active()) {
+          if (!menu_active() && !level_select_active()) {
             /* Per-entity behavior tick (player reads input, platforms move, etc.) */
             for (Entity *e = world.head; e; e = e->next) {
                 entity_update(e, &world, DT);
@@ -2389,7 +2428,7 @@ int main(int argc, char **argv) {
 
             /* Physics: gravity, AABB collision, trigger detection. */
             physics_step(&world, DT);
-          }  /* end if (!menu_active()) — gameplay frozen while the menu is up */
+          }  /* end gameplay block — frozen while the menu or browser is up */
 
             /* Drain a pending level swap (also the menu's New Game / VR route).
                Done outside the entity-update iteration above so we don't mutate
@@ -2406,6 +2445,17 @@ int main(int argc, char **argv) {
                     printf("[SWAP] loading %s (cache: %d tex, %d models)\n",
                            swap_desc.gam_path, asset_cache_tex_count(), asset_cache_model_count());
                     world_destroy(&world);
+                    /* Every cached Entity* is dangling the instant the old
+                       entities are freed. Clear them here, at the free site,
+                       so nothing can read one before the new level re-arms
+                       them on spawn. g_player matters most: it is armed
+                       first-write-wins, so a stale value is permanent. */
+                    jim = NULL;
+                    behavior_player_reset();
+                    behavior_vehicle_reset();
+                    behavior_goddard_reset();
+                    g_camrec_player = NULL;
+                    s_sandbox_prepped_rocket = NULL;
                     world_init(&world);
                     gamestate_reset_for_new_level();
                     asset_cache_begin_level();
@@ -2432,6 +2482,7 @@ int main(int argc, char **argv) {
                         printf("[SWAP] post-purge cache: %d tex, %d models\n",
                                asset_cache_tex_count(), asset_cache_model_count());
                         follow_cam_snap(&fcam, cam, jim);
+                        help_show_timed(HELP_BOOT_SECONDS);   /* and every level swapped into */
                     } else {
                         fprintf(stderr, "[SWAP] gam_load failed for %s\n", swap_desc.gam_path);
                     }
@@ -2495,7 +2546,13 @@ int main(int argc, char **argv) {
         SDL_Event ev;
         while (SDL_PollEvent(&ev)) {
             if (ev.type == SDL_QUIT) w.should_quit = 1;
-            if (ev.type == SDL_KEYDOWN && ev.key.keysym.sym == SDLK_ESCAPE) w.should_quit = 1;
+            /* An open controls card swallows the first ESC, the way any
+               modal should; a second ESC quits as it always has. */
+            if (ev.type == SDL_KEYDOWN && ev.key.keysym.sym == SDLK_ESCAPE) {
+                if      (help_active())         help_set(0);
+                else if (level_select_active()) level_select_close();
+                else                            w.should_quit = 1;
+            }
             if (ev.type == SDL_KEYDOWN && ev.key.keysym.sym == SDLK_c) g_show_coords = !g_show_coords;
             /* B ("bug"), not Q: in noclip Q is held-to-fly-down
                (behavior_player.c) and reporters fly constantly while
@@ -2587,6 +2644,8 @@ int main(int argc, char **argv) {
 
         /* CMainMenu overlay (drawn over the backdrop scene when open). */
         menu_draw(w.width, w.height);
+        level_select_draw(w.width, w.height);
+        help_draw(w.width, w.height);
 
         /* Live coordinate readout (QA) — player draw-space pos + facing. */
         dbg_coords_overlay(w.width, w.height, jim);

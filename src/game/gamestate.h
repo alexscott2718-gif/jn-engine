@@ -46,6 +46,10 @@ void gamestate_gem_collected(void);
 void gamestate_add_points(int points);
 /* Player health / hit model (Wave N2). Enemies call damage; HUD reads health. */
 int  gamestate_player_health(void);
+/* --nodamage: make gamestate_damage_player() a no-op. The kill plane still
+   respawns, so falling out of the world behaves normally. */
+void gamestate_set_invulnerable(int on);
+int  gamestate_invulnerable(void);
 void gamestate_damage_player(int amount);
 void gamestate_heal_player(int amount);
 /* 1 when health has hit 0 (death pending). The game-flow controller resolves

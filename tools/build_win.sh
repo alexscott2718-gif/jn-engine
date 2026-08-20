@@ -61,6 +61,7 @@ echo "[build_win] compiling jnengine.exe"
   -o "$DIST/jnengine.exe"
 
 cp -u "$SDL/bin/SDL2.dll" "$MIX/bin/SDL2_mixer.dll" "$DIST/"
+cp "$ROOT/tools/win/level-select.ps1" "$DIST/"
 
 cat > "$DIST/README_WINDOWS.txt" <<"EOF"
 jn-engine -- Windows 64-bit build (experimental QA build)
@@ -73,16 +74,35 @@ everything lives in this folder.
 
 HOW TO RUN
 ----------
-Double-click PLAY.bat   (or run jnengine.exe from a command prompt inside
-this folder -- it must start with this folder as the working directory so it
-can find assets\).
+Double-click PLAY.bat. A small window opens where you pick a level and press
+Play; closing the game brings it back so you can pick another.
 
-Useful flags:  jnengine.exe --level level1
+If Windows blocks the picker (PowerShell execution policy), PLAY.bat falls
+back to the in-game menu automatically -- nothing is lost, you just choose
+the level with the keyboard instead.
+
+To run a level directly:  PLAY.bat --level level3
+The engine must start with this folder as the working directory so it can
+find assets\, which is why PLAY.bat exists rather than a shortcut.
 
 CONTROLS
 --------
-W/S move,  A/D turn,  Space jump,  Shift run,  R respawn,
-Left mouse free-look,  Esc quit.
+Press H in-game for the full list; it also appears for ten seconds each time
+a level loads.
+
+  W A S D      move                 Space   jump
+  Mouse        look around          Shift   run
+  M            level select         R       respawn
+  N            noclip               F       use the active tool
+  T            talk to a friend     E       ride a vehicle
+  H            show/hide controls   Esc     quit
+
+FLAGS
+-----
+  --level <id>   start straight in a level (level1 .. level7, vr01 .. vr08)
+  --menu         open the in-game level menu
+  --nodamage     hazards and enemies cannot kill you (the picker ticks this
+                 on by default; falling out of the world still respawns you)
 
 REQUIREMENTS
 ------------
@@ -115,12 +135,21 @@ EOF
 cat > "$DIST/PLAY.bat" <<"EOF"
 @echo off
 cd /d "%~dp0"
-jnengine.exe %*
+rem With arguments, run the engine directly: PLAY.bat --level level3
+if not "%~1"=="" (
+  jnengine.exe %*
+  goto done
+)
+rem Otherwise open the level picker. If PowerShell is blocked by policy,
+rem fall back to the in-game menu so the build still starts.
+powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0level-select.ps1"
+if errorlevel 1 jnengine.exe --menu --nodamage
+:done
 echo.
 echo (engine exited -- press any key to close)
 pause >nul
 EOF
-sed -i "s/$/\r/" "$DIST/README_WINDOWS.txt" "$DIST/PLAY.bat"
+sed -i "s/$/\r/" "$DIST/README_WINDOWS.txt" "$DIST/PLAY.bat" "$DIST/level-select.ps1"
 
 echo "[build_win] zipping standalone bundle (dist + assets/)"
 python3 - "$ROOT" "$DIST" <<"PYZIP"
@@ -128,7 +157,8 @@ import sys, os, zipfile
 root, dist = sys.argv[1], sys.argv[2]
 out = os.path.join(root, "build/win/jn-engine-win64.zip")
 zf = zipfile.ZipFile(out, "w", zipfile.ZIP_DEFLATED, compresslevel=6)
-for f in ["jnengine.exe", "SDL2.dll", "SDL2_mixer.dll", "README_WINDOWS.txt", "PLAY.bat"]:
+for f in ["jnengine.exe", "SDL2.dll", "SDL2_mixer.dll", "README_WINDOWS.txt",
+          "PLAY.bat", "level-select.ps1"]:
     zf.write(os.path.join(dist, f), "jn-engine-win64/" + f)
 aroot = os.path.join(root, "assets")
 n = 0
