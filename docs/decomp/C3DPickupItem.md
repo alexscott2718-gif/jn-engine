@@ -144,7 +144,22 @@ Open questions:
 - Create Ghidra functions and names for raw vtable targets `00436200` and `00436550`, then re-run `DumpClass` so these methods appear with ownership and cleaner decompilation.
 - Name the global player pointer at `DAT_005099e4` and confirm whether non-player pickups can ever call slot 16.
 - Name the picture/inventory helpers around `FUN_004038c0` and `FUN_004061b0` with evidence from UI/inventory classes.
-- Confirm the exact consumers of `PassThru` and `ShowArrow`; they are registered and defaulted here but not consumed by the owned methods examined.
+- Confirm the exact consumer of `PassThru`; it is registered and defaulted
+  here but not consumed by the owned methods examined.
+- ~~Confirm the exact consumer of `ShowArrow`~~ — **observed 2026-08-20**
+  (owner, original game on the XP machine): a pickup displays a **3D red
+  translucent arrow**. The static evidence agrees on every point: 353 rows
+  author `ShowArrow` and **all of them are `3PIC`**, 347 of those are `1`,
+  and the only 6 exceptions are pickups that are invisible or inactive
+  anyway (`mumticket`/`mumticket2`/`refill` author the "hidden" sprite
+  canvas 106; `gcan`/`rescue` author `InitallyActive=0`). The asset is
+  `assets/ase/3Darrow.ASE` — 60 verts / 28 faces with real UVs, whose own
+  `*BITMAP` path in the export reads
+  `D:\Jimmy (ken)\3D Items (pick up)\3D ARROW\3Darrow.bmp`, and whose
+  texture `assets/png/3Darrow.png` is red (`rgba(255,89,89)` dominant).
+  The exact height, scale, motion and blend mode are still unmeasured.
+  Note this is a *different* arrow from `3ARR`/`C3DArrow`, which is a
+  `C3DSpriteType` billboard using sprites.omt canvas 33 (2026-06-12 QA #3).
 - Resolve the inherited owner of the registered `Radius` field; current registration uses seed offset `0xd` but the consuming collision code is outside this class.
 
 ## Notes
