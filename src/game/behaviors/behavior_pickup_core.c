@@ -15,23 +15,40 @@
  *                                    collected-state check in the original.
  *   2. behavior_pickup_taken         the DAT_004f8438[PickupIndex] test.
  *   3. behavior_pickup_mark_taken    the DAT_004f8438 write.
- *   4. behavior_pickup_award_pictures the PIC_NUMBER award.
+ *   4. behavior_pickup_dispatch_state ActivateObject then ToggleObject, each
+ *                                    handed the authored Toggle.
+ *   5. behavior_pickup_award_pictures the PIC_NUMBER award.
+ *   6. behavior_pickup_dispatch_next NextTrigger, after the award.
  *
- * plus behavior_pickup_restore_taken, which is the load-time half:
- * PostLoadPickupItem (00436200) and ResetPickupItemVisibility (00435b20) both
- * consult the same table and leave an already-collected pickup hidden. Without
- * that, the save-global table would be write-only -- re-entering a level would
- * re-award every picture in it, an infinite farm that trivially defeats the
- * gate -- and, because the gate runs first, re-touching one would also drain
- * the pictures it costs.
+ * plus behavior_pickup_spawn_gate, the load-time half. PostLoadPickupItem
+ * (00436200) and ResetPickupItemVisibility (00435b20) both consult the pickup
+ * state table and leave an already-collected pickup hidden, and PostLoad also
+ * applies InitallyActive. Without the first, the save-global table would be
+ * write-only -- re-entering a level would re-award every picture in it, and,
+ * because the gate runs first, re-touching one would also drain the pictures it
+ * costs. Without the second, the vending machines below do not exist.
+ *
+ * THE VENDING MACHINES. Twelve authored pairs across nine levels -- cmach/cand,
+ * fmach/flurp, mdiam/diam, gdish/refill, piggy1/piggy2, cjar/coins2 -- are a
+ * two-object exchange. The machine authors InitallyActive=1 and a
+ * RequiredPicNum gate (typically 2 coins, picture 10); the product authors
+ * InitallyActive=0 and awards a picture. Paying the machine fires its
+ * ActivateObject/ToggleObject at the product with Toggle=1, which is
+ * SetPickupItemState state 1: clear the product's collected flag and show it.
+ * Collecting the product fires its ToggleObject back at the machine, re-arming
+ * it. The loop is a real cycle in the authored graph and it terminates only
+ * because the gate consumes -- every full pass is picture-negative (-2 coins,
+ * +1 product). This is the strongest evidence that RequiredPicNum consumes
+ * rather than thresholds.
  *
  * Not ported here (documented deferrals, not oversights):
  *   - PickedUpIndex: the original swaps the sprite to the replacement index on
  *     pickup state 2 instead of hiding. Native hides in both cases.
- *   - ActivateObject / ToggleObject / NextTrigger dispatch: phase 4 of the
- *     plan, which lifts behavior_ai_trigger.c's existing tag-dispatch into a
- *     shared helper rather than writing a second copy. The call sites in
- *     item_on_trigger are marked.
+ *   - Every state slot except the pickup family's. ActivateObject/ToggleObject
+ *     resolve to 3RCK, 3OMT, 3HYD, 3SWN and 3KIT targets too, and NextTrigger
+ *     resolves overwhelmingly to cutscene cameras (3CAM 19, 3MCA 20). None of
+ *     those classes has a recovered state body, so the dispatch reaches them
+ *     and finds no slot. That is reported, not silently swallowed.
  */
 #include "behaviors.h"
 #include "behavior_base.h"
@@ -39,6 +56,12 @@
 #include "../../engine/audio.h"
 #include <stdio.h>
 #include <string.h>
+#include <strings.h>
+
+/* on_trigger carries no World, but every side effect needs one to resolve a
+   tag. The spawn hook does carry it, runs for every pickup in the level, and
+   re-runs on every level load, so it is the natural place to capture it. */
+static World *s_world;
 
 /* The original consults its pickup-state table only for PickupIndex > 0. */
 static int pickup_index_of(const Entity *e) {
@@ -53,13 +76,74 @@ void behavior_pickup_mark_taken(const Entity *e) {
     gamestate_pickup_mark(gamestate_level(), pickup_index_of(e));
 }
 
-int behavior_pickup_restore_taken(Entity *e) {
-    if (!behavior_pickup_taken(e)) return 0;
-    e->user_flag = 1;               /* per-entity once-only guard, pre-armed */
-    e->visible = 0;
-    e->alive = 0;
+/* Make a pickup uncollectible without touching the collected-state table.
+   `hide` is a separate decision from `disable` on purpose -- see the
+   InitallyActive note in behavior_pickup_spawn_gate. */
+static void pickup_deactivate(Entity *e, int hide) {
+    e->user_flag = 1;
     e->runtime_flags &= ~(ENTITY_FLAG_SOLID | ENTITY_FLAG_TRIGGER);
-    return 1;
+    if (hide) {
+        e->visible = 0;
+        e->alive = 0;
+    }
+}
+
+/* C3DPickupItem::SetPickupItemState (004360b0), reached through the state slot
+   (vtable offset 0x428) that a C3DTriggerType's ActivateObject / ToggleObject
+   dispatch calls with the authored Toggle.
+
+   State 0 shows and enables the pickup. State 1 additionally clears its
+   collected flag, which is what re-arms a vending-machine product that the
+   player already took on an earlier pass. Any other value -- including the -1
+   that 25 side-effect rows author -- has no recovered body, so it writes
+   nothing rather than guessing. In the shipped corpus every row whose target is
+   a pickup authors Toggle=1, so state 1 is the only path the data exercises. */
+void behavior_pickup_set_state(Entity *e, int state) {
+    if (!e) return;
+    if (state != 0 && state != 1) return;
+
+    if (state == 1)
+        gamestate_pickup_clear(gamestate_level(), pickup_index_of(e));
+
+    e->user_flag = 0;
+    e->alive = 1;
+    e->visible = 1;
+    e->runtime_flags |= ENTITY_FLAG_TRIGGER;
+    printf("[PICSTATE] level=%s index=%d tag='%s' -> state %d\n",
+           gamestate_level(), pickup_index_of(e), e->tag, state);
+}
+
+/* PostLoadPickupItem (00436200): capture the world, then apply the two load
+   time gates -- already-collected, and InitallyActive. Returns 1 when the
+   pickup ends up unavailable, so the caller can skip the rest of its spawn
+   work (notably the level item tally). */
+int behavior_pickup_spawn_gate(Entity *e, World *w) {
+    if (w) s_world = w;
+    /* Already collected: hidden, and the decomp says so -- PostLoad only shows
+       the canvas when the pickup-state slot is 0. */
+    if (behavior_pickup_taken(e)) {
+        pickup_deactivate(e, 1);
+        return 1;
+    }
+    /* InitallyActive == 0 (note the misspelling: it matches the executable
+       string and the .gam schema). 28 rows author it -- the vending-machine
+       products, which must not be collectible until their machine has been
+       paid.
+
+       Disabled but NOT hidden, deliberately. That an inactive pickup cannot be
+       collected is well supported: the field is the "initial active state", the
+       vending data only works that way, and ActivateObject names the transition
+       out of it. That it is also *invisible* is not: the recovered slot-266
+       body describes states 0 and 1, both of which show, and never says what
+       inactive looks like. Hiding these rows was tried and changed the level1
+       golden by ~0.05% of the frame, which is the project telling us we were
+       guessing at a visual. So the gameplay half lands and the visual half
+       waits for evidence. */
+    if (gam_prop_i(e, "InitallyActive", 1) == 0) {
+        pickup_deactivate(e, 0);
+        return 1;
+    }
+    return 0;
 }
 
 /* CheckRequiredPicAndConsume (00436830): RequiredPicNum == -1 passes; otherwise
@@ -98,6 +182,41 @@ void behavior_pickup_award_pictures(const Entity *e) {
     gamestate_pic_award(id, 1);
 }
 
+/* One dispatch, with enough reporting to tell the three outcomes apart:
+   the tag did not resolve, it resolved but the target class has no native
+   entry point for this kind, or it fired. */
+static void pickup_report(const Entity *e, const char *kind, const char *tag,
+                          const Entity *target, int fired) {
+    printf("[PICFIRE] level=%s index=%d kind=%s tag='%s' target=%s outcome=%s\n",
+           gamestate_level(), pickup_index_of(e), kind, tag,
+           target ? target->type : "-",
+           !target ? "unresolved" : (fired ? "fired" : "no-native-slot"));
+}
+
+/* HandlePickupCollection fires ActivateObject and then ToggleObject, each
+   through the target's state slot with the authored Toggle. */
+void behavior_pickup_dispatch_state(const Entity *e) {
+    int toggle = gam_prop_i(e, "Toggle", -1);
+    static const char *const FIELDS[2] = { "ActivateObject", "ToggleObject" };
+    for (int i = 0; i < 2; i++) {
+        const char *tag = gam_str(e, FIELDS[i], "none");
+        if (!tag[0] || strcasecmp(tag, "none") == 0) continue;
+        Entity *t = behavior_trigger_set_state_tag(s_world, tag, toggle);
+        pickup_report(e, FIELDS[i], tag, t,
+                      t && t->vt && t->vt->on_set_state ? 1 : 0);
+    }
+}
+
+/* ...and NextTrigger after the award, as a trigger-chain forward rather than a
+   state write -- the same dispatch C3DAITrigger uses. */
+void behavior_pickup_dispatch_next(const Entity *e) {
+    const char *tag = gam_str(e, "NextTrigger", "none");
+    if (!tag[0] || strcasecmp(tag, "none") == 0) return;
+    Entity *t = behavior_trigger_fire_tag(s_world, tag, g_player);
+    pickup_report(e, "NextTrigger", tag, t,
+                  t && t->vt && t->vt->on_trigger ? 1 : 0);
+}
+
 /* JN_TEST_PICTURES sweep. Force every picture-economy pickup row in the level
    through its own on_trigger, exactly as a player touch would, and report how
    many newly collected. Needed because two of the three award paths are
@@ -105,7 +224,8 @@ void behavior_pickup_award_pictures(const Entity *e) {
    it, and the 3FIS/3GIR/3DIN creatures are deliberately left non-trigger (see
    behavior_creature.c). Call it in a loop until it returns 0 -- one pass is not
    a fixpoint, because collecting a picture can unlock a gate the sweep already
-   walked past.
+   walked past, and paying a vending machine reveals a product that was inactive
+   when the sweep started.
 
    Scoped to vt_item and vt_creature on purpose. PickupIndex is a CPickupType
    field, so 3RED (70 rows) and 3ANI (6) carry one too, but neither authors

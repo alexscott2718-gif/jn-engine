@@ -40,6 +40,11 @@ GATE = re.compile(
     r"(?: have=(\d+))? -> (ok|REFUSED)"
 )
 SWEEP = re.compile(r"\[PICSWEEP\] level=(\S+) done: (\d+) collected in (\d+) pass")
+FIRE = re.compile(
+    r"\[PICFIRE\] level=(\S+) index=(-?\d+) kind=(\S+) tag='([^']*)' "
+    r"target=(\S+) outcome=(\S+)"
+)
+STATE = re.compile(r"\[PICSTATE\] level=(\S+) index=(-?\d+) tag='([^']*)' -> state (-?\d+)")
 
 
 class Run:
@@ -62,8 +67,19 @@ class Run:
         self.refusals = [(m.group(1), int(m.group(2)), int(m.group(3)))
                          for m in GATE.finditer(proc.stdout)
                          if m.group(6) == "REFUSED"]
+        # gates that actually passed, by pickup index and by required id
+        self.gate_ok_index = {int(m.group(2)) for m in GATE.finditer(proc.stdout)
+                              if m.group(6) == "ok"}
+        self.gate_ok_ids = {int(m.group(3)) for m in GATE.finditer(proc.stdout)
+                            if m.group(6) == "ok"}
         self.passes = [(m.group(1), int(m.group(2)), int(m.group(3)))
                        for m in SWEEP.finditer(proc.stdout)]
+        # (index, kind, tag, target FourCC, outcome) -- deduped, because the
+        # sweep retries a refused row and a vending machine fires repeatedly.
+        self.fires = {(int(m.group(2)), m.group(3), m.group(4), m.group(5),
+                       m.group(6)) for m in FIRE.finditer(proc.stdout)}
+        self.states = [(int(m.group(2)), int(m.group(4)))
+                       for m in STATE.finditer(proc.stdout)]
         self.pregranted = "pre-granted" in proc.stdout
         self.stdout = proc.stdout
 
@@ -88,6 +104,54 @@ def corpus_expectations(gam_dir):
             if req >= 0:
                 gate_rows += 1
     return award_ids, gate_rows, levels, rows
+
+
+SIDE_EFFECT_FIELDS = ("ActivateObject", "ToggleObject", "NextTrigger")
+
+
+def side_effects_and_vending(gam_dir):
+    """Authored side-effect rows, plus the vending-machine cycles they form.
+
+    A cycle is a pair of pickups that each fire the other's state slot. One is
+    the machine (InitallyActive=1, gated); the other is the product
+    (InitallyActive=0), which only becomes collectible once the machine pays
+    out. Verifying those pairs is the sharpest test that the state dispatch and
+    the InitallyActive gate are both real."""
+    authored = set()        # (level, index, kind, tag)
+    vending = collections.defaultdict(list)   # level -> [(machine, product)]
+
+    for path in sorted(gam_dir.glob("*.gam")):
+        level = path.stem.lower()
+        objs = parse_gam(path)["objects"]
+        tags, edges, by_index, inactive = {}, collections.defaultdict(set), {}, set()
+        for obj in objs:
+            tag = obj["properties"].get("ObjectTag")
+            if isinstance(tag, str) and tag.lower() not in ("none", ""):
+                tags.setdefault(tag.lower(), obj)
+        for obj in objs:
+            if obj["type"] not in ("3PIC", "3FIS", "3GIR", "3DIN"):
+                continue
+            props = obj["properties"]
+            index = props.get("PickupIndex", -1)
+            by_index[index] = obj
+            if props.get("InitallyActive", 1) == 0:
+                inactive.add(index)
+            for kind in SIDE_EFFECT_FIELDS:
+                tag = props.get(kind, "none")
+                if not isinstance(tag, str) or tag.lower() in ("none", ""):
+                    continue
+                authored.add((level, index, kind, tag))
+                target = tags.get(tag.lower())
+                if kind != "NextTrigger" and target and target["type"] == "3PIC":
+                    edges[index].add(target["properties"].get("PickupIndex", -1))
+
+        for a in edges:
+            for b in edges[a]:
+                if b in edges and a in edges[b] and a < b:
+                    machine, product = (a, b) if b in inactive else (b, a)
+                    if product in inactive:
+                        vending[level].append((machine, product))
+    return authored, vending
 
 
 def carry_in_donor(rows, missing_id):
@@ -116,7 +180,10 @@ def main() -> int:
         return 0
 
     expected_ids, gate_rows, all_levels, rows = corpus_expectations(gam_dir)
+    authored_fx, vending = side_effects_and_vending(gam_dir)
     levels = [a.lower() for a in sys.argv[1:]] or all_levels
+    observed_fx = set()
+    outcomes = collections.Counter()
 
     failures = []
     seen_ids = set()
@@ -137,6 +204,9 @@ def main() -> int:
 
         seen_ids |= cold.award_ids()
         total_refusals += len(cold.refusals)
+        for index, kind, tag, _target, outcome in cold.fires:
+            observed_fx.add((level, index, kind, tag))
+            outcomes[(kind, outcome)] += 1
         # phase 3: a later pass collecting rows an earlier one refused is the
         # "collect the prerequisite, then succeed" case.
         if len(cold.passes[0][2:]) and cold.passes[0][2] > 1:
@@ -188,6 +258,9 @@ def main() -> int:
 
     # phase 3: the four pre-grant levels must stop refusing the ids they cannot
     # supply once the cold-entry grant is applied.
+    # The claim is that the gated content becomes *reachable*, not that nothing
+    # ever refuses again: a vending machine re-arms and is retried until the
+    # currency runs out, so a healthy pre-granted level still ends on refusals.
     print()
     print("pre-grant effect (cold entry, gate ids the level never awards):")
     for level, ids in (("level1a", {10}), ("level1b", {12, 14}),
@@ -196,16 +269,66 @@ def main() -> int:
             continue
         without = Run(level, pregrant=False)
         with_ = Run(level, pregrant=True)
-        blocked = collections.Counter(i for _, _, i in without.refusals if i in ids)
-        still = collections.Counter(i for _, _, i in with_.refusals if i in ids)
-        print(f"  {level:8s} refused without pre-grant: {dict(blocked) or '{}'}"
-              f"   with: {dict(still) or '{}'}")
+        opened_without = sorted(ids & without.gate_ok_ids)
+        opened_with = sorted(ids & with_.gate_ok_ids)
+        print(f"  {level:8s} gates opened on {sorted(ids)} -- "
+              f"without pre-grant: {opened_without or 'none'}, "
+              f"with: {opened_with or 'none'}")
         if not with_.pregranted:
             failures.append(f"{level}: pre-grant did not fire")
-        if still:
-            failures.append(f"{level}: still refuses {sorted(still)} after pre-grant")
-        if not blocked:
-            failures.append(f"{level}: expected refusals without pre-grant")
+        if opened_without:
+            failures.append(f"{level}: opened {opened_without} with no pre-grant "
+                            f"-- the level was not actually dead-ended")
+        if sorted(ids) != opened_with:
+            failures.append(f"{level}: pre-grant left {sorted(ids - set(opened_with))} "
+                            f"unopenable")
+
+    # phase 4: the side-effect dispatch. A row only fires if its own pickup was
+    # collected, so a cold sweep cannot reach all 97; what must hold is that
+    # every dispatch the engine emitted is an authored row, and that the
+    # outcomes are reported rather than assumed.
+    print()
+    print(f"side-effect dispatch: {len(authored_fx)} authored rows, "
+          f"{len(observed_fx)} reached on a cold sweep")
+    spurious = sorted(observed_fx - authored_fx)
+    if spurious:
+        failures.append(f"dispatched {len(spurious)} rows the corpus does not "
+                        f"author, e.g. {spurious[0]}")
+    for (kind, outcome), n in sorted(outcomes.items()):
+        print(f"  {kind:15s} {outcome:16s} {n}")
+    print("  ('no-native-slot' is honest coverage: the target class has no "
+          "recovered state/trigger body yet)")
+
+    # The vending-machine pairs are the sharpest check that the state dispatch
+    # and the InitallyActive gate are both real: the product starts inactive and
+    # must be revealed by the machine's Toggle=1 write before it can be taken.
+    # The wiring claim is conditional: *when the machine's gate passes*, the
+    # product gets its state-1 write. Whether a cold entry can afford the
+    # machine at all is economy, and three pairs genuinely cannot be paid on a
+    # single-level visit -- the same count shortfall recorded in the plan.
+    print()
+    print("vending-machine pairs (machine pays -> product revealed by state 1):")
+    unaffordable = 0
+    for level in sorted(vending):
+        if level not in levels:
+            continue
+        run = Run(level, pregrant=True)
+        rearmed = {index for index, state in run.states if state == 1}
+        for machine, product in sorted(vending[level]):
+            paid = machine in run.gate_ok_index
+            if not paid:
+                unaffordable += 1
+                print(f"  {level:8s} machine {machine} -> product {product}: "
+                      f"machine never affordable on a cold entry (economy)")
+                continue
+            ok = product in rearmed
+            print(f"  {level:8s} machine {machine} -> product {product}: "
+                  f"{'revealed' if ok else 'PAID BUT NOT REVEALED'}")
+            if not ok:
+                failures.append(f"{level}: machine {machine} was paid but "
+                                f"product {product} never got a state-1 write")
+    print(f"  ({unaffordable} pair(s) unaffordable cold -- see the plan's "
+          f"count-shortfall table, not a wiring failure)")
 
     if load_failures:
         print()

@@ -60,13 +60,68 @@
 
 #define AITRIG_DEFAULT_RADIUS 100.0f
 
-static Entity *aitrig_find_by_tag(World *w, const char *tag) {
+/* --- shared C3DTriggerType tag dispatch ----------------------------------
+   ObjectTag lookup and the two ways the original activates what it finds.
+   C3DPickupItem authors the same three fields (ActivateObject / ToggleObject /
+   NextTrigger) and needs the identical behaviour, so this is the one copy.
+
+   It lives in this file on purpose: the C3DAITrigger/dispatch-graph oracle
+   compiles a fixed file list, and a new module here would break that link. */
+Entity *behavior_trigger_find_by_tag(World *w, const char *tag) {
     if (!w || !tag || !tag[0] || strcasecmp(tag, "none") == 0) return NULL;
     for (Entity *o = w->head; o; o = o->next) {
         if (!o->tag[0]) continue;
         if (strcasecmp(o->tag, tag) == 0) return o;
     }
     return NULL;
+}
+
+/* Native guard with no counterpart in the decomp. The authored graph contains
+   real cycles -- the twelve vending-machine pairs (cmach/cand, fmach/flurp,
+   piggy1/piggy2, ...) where the machine re-arms its product and the product
+   re-arms the machine. Those terminate because the machine's RequiredPicNum
+   gate consumes on every pass, but a chain that ever failed to consume would
+   recurse until the stack died. Cap the depth and say so. */
+#define TRIGGER_DISPATCH_MAX_DEPTH 16
+static int g_trigger_depth = 0;
+
+static int trigger_depth_enter(const char *kind, const char *tag) {
+    if (g_trigger_depth >= TRIGGER_DISPATCH_MAX_DEPTH) {
+        printf("[TRIGGER] dispatch depth %d exceeded at %s '%s' -- stopping\n",
+               TRIGGER_DISPATCH_MAX_DEPTH, kind, tag ? tag : "(null)");
+        return 0;
+    }
+    g_trigger_depth++;
+    return 1;
+}
+
+/* Trigger-chain dispatch: forward the target's collision entry point, which is
+   how the native port models "fire this trigger". Used for NextTrigger and for
+   C3DAITrigger's own ToggleObject (whose certified behaviour this is). */
+Entity *behavior_trigger_fire_tag(World *w, const char *tag, Entity *by) {
+    Entity *t = behavior_trigger_find_by_tag(w, tag);
+    if (!t || !t->vt || !t->vt->on_trigger) return t;
+    if (!trigger_depth_enter("fire", tag)) return t;
+    t->vt->on_trigger(t, by);
+    g_trigger_depth--;
+    return t;
+}
+
+/* State dispatch (vtable offset 0x428): hand the target the authored `Toggle`.
+   Returns the resolved entity even when its class has no state slot yet, so a
+   caller can report the difference between "tag did not resolve" and "target
+   class has no native state body". */
+Entity *behavior_trigger_set_state_tag(World *w, const char *tag, int state) {
+    Entity *t = behavior_trigger_find_by_tag(w, tag);
+    if (!t || !t->vt || !t->vt->on_set_state) return t;
+    if (!trigger_depth_enter("setstate", tag)) return t;
+    t->vt->on_set_state(t, state);
+    g_trigger_depth--;
+    return t;
+}
+
+static Entity *aitrig_find_by_tag(World *w, const char *tag) {
+    return behavior_trigger_find_by_tag(w, tag);
 }
 
 /* The activator-gate slice of ActivateAITrigger: can the player trip this? */
@@ -179,17 +234,14 @@ static void aitrig_activate(Entity *e, World *w) {
                                         gam_prop_i(e, "AISpeed", -1));
     }
 
-    Entity *toggle = aitrig_find_by_tag(w, gam_str(e, "ToggleObject", "none"));
-    if (toggle && toggle->vt && toggle->vt->on_trigger)
-        toggle->vt->on_trigger(toggle, g_player);
+    (void)behavior_trigger_fire_tag(w, gam_str(e, "ToggleObject", "none"), g_player);
 
     /* ActivateAITrigger order: target mutations -> ToggleObject -> story-progress
        SCENE patch table -> NextTrigger dispatch. */
     aitrig_apply_story_progress(e);
 
-    Entity *next = aitrig_find_by_tag(w, gam_str(e, "NextTrigger", "none"));
-    if (next && next->vt && next->vt->on_trigger)
-        next->vt->on_trigger(next, g_player);
+    Entity *next = behavior_trigger_fire_tag(w, gam_str(e, "NextTrigger", "none"),
+                                            g_player);
 
     /* C3DTriggerType slot-242 record retarget (00447a70): with the record
        camera demo enabled, swing the global camera record to the fixed

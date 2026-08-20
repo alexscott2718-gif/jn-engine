@@ -6,7 +6,7 @@ original's picture-flag economy — and open a certifiable `linked` aspect on
 `C3DPickupItem`, which `docs/linkage_certificates.csv` currently records as
 having "no decompiled-body fidelity to certify".
 
-Status: **phases 0-3 implemented** 2026-08-19 (see §8); 4-6 open. Measurements below were taken
+Status: **phases 0-4 implemented** (0-3 2026-08-19 §8, 4 2026-08-20 §9); 5-6 open. Measurements below were taken
 2026-08-19 against `assets/gam/*.gam` (35 files) with `tools/gam_parser.py`.
 
 ---
@@ -335,3 +335,144 @@ level1c cannot supply the 3 copies of picture 6 it costs on top of its other
 picture-6 gate. Carrying picture 6 in from level2b opens it — a live
 demonstration that the flags really are save-global, which the verifier now
 performs and asserts.
+
+---
+
+## 9. Phase 4 as built (2026-08-20)
+
+Status: phase 4 **implemented**. It turned out to be bigger and more
+interesting than the plan's one-line entry, because the side-effect fields are
+not a trigger chain — they are a **vending-machine mechanism**, and wiring them
+the obvious way would have been wrong.
+
+### 9.1 The dispatch is a state write, not a trigger forward
+
+`docs/decomp/C3DPickupItem.md` pins `Toggle` (inherited `C3DTriggerType`,
+0x584) as "state argument passed to `ToggleObject` and `ActivateObject` targets
+through vtable offset `0x428`", and `HandlePickupCollection` calls
+`fire_tag(ActivateObject, Toggle)` / `fire_tag(ToggleObject, Toggle)`. That slot
+is a **state setter**, not the collision entry point. For a pickup target the
+two are opposites: forwarding `on_trigger` *collects* the target, while
+`SetPickupItemState` (004360b0) state 1 *clears its collected flag and shows
+it*. 36 of the 97 side-effect rows target a `3PIC`, so getting this wrong would
+have silently auto-collected pickups across the level.
+
+Native now models the slot: `EntityVTable` gained `on_set_state`, `vt_item`
+implements it, and `behavior_trigger_set_state_tag` dispatches through it.
+`NextTrigger` keeps the trigger-chain forward, matching the decomp's separate
+`fire_next_trigger`.
+
+### 9.2 The vending machines
+
+Twelve authored pairs across nine levels are a two-object exchange:
+
+| Level | machine | product | price | product awards |
+|---|---|---|---|---|
+| Level1a | `cmach` 204 | `cand` 205 | 2 x pic 10 | pic 8 |
+| Level1a | `fmach` 207 | `flurp` 206 | 2 x pic 10 | pic 7 |
+| level1b | `mdiam` 303 | `diam` 305 | 1 x pic 19 | pic 16 |
+| level1b | `gdish` 317 | `refill` 318 | 1 x pic 4 | — |
+| level1c | `piggy1` 424 | `piggy2` 451 | 1 x pic 10 | — |
+| level2a | `fp` 1026 | `anewflurp` 1025 | 2 x pic 10 | pic 7 |
+| level2a | `cm` 1027 | `cmc` 1028 | 2 x pic 10 | pic 8 |
+| level4 | `mach` 2407 | `cand` 2406 | 2 x pic 10 | pic 8 |
+| level4 | `fmach` 2409 | `flurp` 2408 | 2 x pic 10 | pic 7 |
+| level4a | `cjar` 1501 | `coins2` 1508 | 2 x pic 8 | pic 10 |
+| level5 | `cmach` 2739 | `cbar` 2740 | 2 x pic 10 | pic 8 |
+| level5 | `fmach` 2747 | `flurp` 2748 | 2 x pic 10 | pic 7 |
+
+The machine authors `InitallyActive=1` and the `RequiredPicNum` gate; the
+product authors `InitallyActive=0` and awards a picture. Paying the machine
+fires its `ActivateObject`/`ToggleObject` at the product with `Toggle=1` — state
+1, which reveals it. Collecting the product fires its `ToggleObject` back at the
+machine, re-arming it. **Every one of the twelve is a real cycle in the authored
+graph**, and every full pass is picture-negative (-2 coins, +1 product), so the
+consume gate is the only thing that terminates it.
+
+This is the strongest evidence yet that §8.3's reading is right: if
+`RequiredPicNum` were a threshold rather than a consume, these twelve loops
+would be infinite point-and-picture farms.
+
+`level4a`'s `cjar`/`coins2` runs the exchange the other way — pay 2 candy
+(pic 8) for 1 coin (pic 10) — and is still negative.
+
+### 9.3 `InitallyActive` had to land with it — and the golden trimmed it
+
+The mechanism does not exist without the other half of `PostLoadPickupItem`:
+28 rows author `InitallyActive=0` and must not be collectible until their
+machine pays out. Native ignored the field entirely, so every product was free.
+`behavior_pickup_spawn_gate` now applies both load-time gates — already
+collected, and initially inactive. (Preserve the misspelling; it matches the
+executable string and the schema.)
+
+**The first attempt treated inactive as hidden, and the `level1` golden caught
+it.** Two `level1` rows author `InitallyActive=0` (`egg2b` 834, `hsounds` 837),
+one of them in frame at the capture pose; hiding them changed ~0.05% of both
+golden frames (499 and 564 pixels).
+
+That is the gate doing its job, because the two halves of "inactive" are not
+equally supported. *Not collectible* is solid: the field is the "initial active
+state", `ActivateObject` names the transition out of it, and the vending data
+only works that way. *Invisible* is not: the recovered slot-266 body describes
+states 0 and 1, both of which **show** the pickup, and never says what the
+inactive state looks like — `set_state_inactive()` is a name in the doc's
+pseudocode, not a recovered body.
+
+So the visual half was withdrawn. `InitallyActive=0` now clears the trigger flag
+and latches the once-only guard, and leaves `visible`/`alive` alone. The vending
+machines behave identically (the product still cannot be taken until its
+machine's `Toggle=1` write arrives) and the golden is byte-identical again. The
+open question — does the original hide an inactive pickup? — belongs in a
+capture comparison, not in a guess.
+
+### 9.4 Where the shared helper lives, and why it is not in a new module
+
+`tools/linkage_oracles/C3DAITrigger.py` compiles a **fixed list of `.c` files**
+with a fixed set of stubs in `c3daitrigger_dump.c`. Putting the shared dispatch
+in a new module would make `behavior_ai_trigger.c` reference a symbol that link
+cannot resolve, and the only repair would be editing the oracle. So the helper
+lives *in* `behavior_ai_trigger.c` — the file that owns the certified
+`dispatch-graph` aspect — and `behaviors.h` exports it. The feature moved; the
+contract did not. The oracle passes unchanged.
+
+`behavior_trigger_fire_tag` also carries a native depth cap
+(`TRIGGER_DISPATCH_MAX_DEPTH` 16) with no counterpart in the decomp, because the
+authored graph has real cycles. It logs when it trips; nothing in the corpus
+trips it.
+
+### 9.5 What "the 97 rows fire" actually means
+
+97 authored rows. On a cold corpus-wide sweep, 62 are reached (a row only
+dispatches if its own pickup is collected, and refused rows never get there):
+
+| kind | fired | no native slot | unresolved |
+|---|---:|---:|---:|
+| `ActivateObject` | 8 | 1 | 0 |
+| `ToggleObject` | 7 | 9 | 1 |
+| `NextTrigger` | 0 | 36 | 0 |
+
+`no-native-slot` is honest coverage, not a silent drop: the target class has no
+recovered state or trigger body yet. By target FourCC across all 97 rows,
+`ActivateObject` reaches `3PIC` 21 / `3RCK` 1; `ToggleObject` reaches `3PIC` 15
+/ `3RCK` 8 / `3OMT` 3 / `3HYD` 2 / `3SWN` 2 / `3KIT` 1 / unresolved 1; and
+`NextTrigger` reaches `3CAM` 19 / `3MCA` 20 / `3AIT` 4 — **none** of which has an
+`on_trigger` today. Wiring pickups to start cutscenes was considered and
+deliberately deferred (owner decision, 2026-08-20): it couples the pickup path
+to the cutscene system, and both cutscene-camera aspects are separately
+certified.
+
+### 9.6 Verification
+
+`tools/verify_picture_economy.py` now additionally checks that every dispatch
+the engine emits is an authored row (no spurious targets), reports the outcome
+histogram above, and proves the vending mechanism end to end: **8 of the 12
+pairs pay, reveal and re-arm** on a cold entry. The other 4 are unaffordable on
+a single-level visit — `level1b` 303, `level4` 2407, `level5` 2739 and 2747 —
+which is the §8.3 count shortfall showing up in gameplay rather than a wiring
+failure, so the tool asserts the conditional claim (*when the machine's gate
+passes, the product is revealed*) and reports affordability separately.
+
+`tools/check_pictures.py --selftest` now rejects **4** mutants; the new one
+makes `gamestate_pickup_clear` a no-op, which breaks the re-arm. The clear is a
+flag flip, never a slot eviction — evicting from an open-addressed table would
+strand every key that probed past the hole, and the unit test pins that too.

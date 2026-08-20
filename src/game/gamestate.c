@@ -180,14 +180,26 @@ int gamestate_pickup_taken(const char *level, int pickup_index) {
     /* HandlePickupCollection only consults the table for PickupIndex > 0;
        index 0 is its special non-table pickup. */
     if (pickup_index <= 0) return 0;
-    return pickup_slot(level, pickup_index, 0) != NULL;
+    PickupTakenSlot *s = pickup_slot(level, pickup_index, 0);
+    return s && s->taken;
 }
 
 void gamestate_pickup_mark(const char *level, int pickup_index) {
     if (pickup_index <= 0) return;
-    if (!pickup_slot(level, pickup_index, 1))
+    PickupTakenSlot *s = pickup_slot(level, pickup_index, 1);
+    if (!s) {
         printf("[PICKUP] ERROR: collected-state table full (%d slots)\n",
                PICKUP_TAKEN_SLOTS);
+        return;
+    }
+    s->taken = 1;
+}
+
+void gamestate_pickup_clear(const char *level, int pickup_index) {
+    if (pickup_index <= 0) return;
+    /* create=0: nothing to clear if it was never marked. */
+    PickupTakenSlot *s = pickup_slot(level, pickup_index, 0);
+    if (s) s->taken = 0;
 }
 
 void gamestate_set_level(const char *level) {

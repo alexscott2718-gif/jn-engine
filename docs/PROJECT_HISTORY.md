@@ -2565,3 +2565,63 @@ by hand — 21 of 21 authored picture ids awarded at runtime across all 35 level
 row an earlier pass refused, and all four pre-grant levels clear. Goldens,
 oracle diff and the linkage gate are unchanged; no certificate or oracle was
 edited.
+
+## Picture economy phase 4: the side effects are a vending machine (2026-08-20)
+
+Phase 4 of `docs/picture_flag_wiring_plan.md` reads as one line — dispatch
+`ActivateObject` / `ToggleObject` / `NextTrigger` through a shared helper. The
+data says otherwise, and getting it wrong would have been invisible.
+
+**The dispatch is a state write, not a trigger forward.** `Toggle` (0x584) is
+"state argument passed to `ToggleObject` and `ActivateObject` targets through
+vtable offset 0x428" — a state setter, not the collision entry point. For a
+pickup target those are opposites: forwarding `on_trigger` *collects* the
+target, while `SetPickupItemState` (004360b0) state 1 *clears its collected flag
+and shows it*. 36 of the 97 side-effect rows target a `3PIC`, so the lazy
+reading would have auto-collected pickups from across the level. `EntityVTable`
+gained an `on_set_state` slot; `NextTrigger` keeps the trigger-chain forward,
+matching the decomp's separate `fire_next_trigger`.
+
+**Twelve of the authored graphs are vending machines.** `cmach`/`cand`,
+`fmach`/`flurp`, `mdiam`/`diam`, `gdish`/`refill`, `piggy1`/`piggy2`,
+`cjar`/`coins2`, across nine levels. The machine authors `InitallyActive=1` and
+a `RequiredPicNum` gate (typically 2 coins); the product authors
+`InitallyActive=0` and awards a picture. Paying the machine fires its
+`ActivateObject`/`ToggleObject` at the product with `Toggle=1`, revealing it;
+collecting the product fires its `ToggleObject` back, re-arming the machine.
+**Every one is a genuine cycle in the authored graph**, and each full pass is
+picture-negative (-2 coins, +1 product), so the consume gate is the only thing
+that terminates it. If `RequiredPicNum` thresholded instead of consuming, all
+twelve would be infinite point farms — the strongest evidence yet that the
+consume reading is correct.
+
+**`InitallyActive` had to land with it, and the golden trimmed it.** Native
+ignored the field, so every vending product was free. Applying it revealed a
+second lesson: the first attempt treated inactive as *hidden*, and the `level1`
+golden went red on ~0.05% of both frames (two `level1` rows author 0, one in
+frame). The two halves of "inactive" are not equally supported — *not
+collectible* is solid (the field is the initial active state; `ActivateObject`
+names the transition out of it; the vending data only works that way), but
+*invisible* is not: the recovered slot-266 body describes states 0 and 1, both
+of which **show** the pickup, and never says what inactive looks like.
+`set_state_inactive()` is a name in the spec's pseudocode, not a recovered body.
+The visual half was withdrawn; the gameplay half stands and the golden is
+byte-identical. Whether the original hides an inactive pickup is a capture
+question.
+
+**The shared helper lives in `behavior_ai_trigger.c` on purpose.**
+`tools/linkage_oracles/C3DAITrigger.py` compiles a fixed list of `.c` files with
+fixed stubs, so a new module would make that file reference an unresolvable
+symbol and the only repair would be editing the oracle. The feature moved
+instead; the certified `dispatch-graph` aspect passes unchanged. The dispatcher
+also carries a native depth cap with no decomp counterpart, because the authored
+graph really does contain cycles.
+
+**What "the 97 rows fire" honestly means.** 62 are reached on a cold corpus
+sweep (a row only dispatches if its own pickup was collected). Of those, 15
+fire; the rest resolve to a class with no native activation entry point —
+`NextTrigger` points at cutscene cameras (3CAM 19, 3MCA 20) and 3AIT, none of
+which has an `on_trigger`. The tools report that as `no-native-slot` rather than
+counting it as success. Wiring pickups to start cutscenes was considered and
+deferred by owner decision: it couples the pickup path to the cutscene system,
+and both cutscene-camera aspects are separately certified.

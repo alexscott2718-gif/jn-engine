@@ -11,15 +11,16 @@
 #define ITEM_SPIN_RATE 2.4f
 
 static void item_on_spawn(Entity *e, World *w) {
-    (void)w;
     behavior_trigger_spawn_base(e, 30.0f, 30.0f, 30.0f);
     e->user_flag = 0;             /* 0 = uncollected, 1 = collected */
     e->user_float = e->y;         /* base y for bob */
     /* PostLoadPickupItem (00436200) / ResetPickupItemVisibility (00435b20):
-       a pickup whose global state slot is set is not shown again. This is what
+       a pickup whose global state slot is set is not shown again, and one
+       authored InitallyActive=0 does not start available. The first is what
        makes the save-global collected table mean anything -- without it,
-       re-entering a level re-awards every picture in it. */
-    if (behavior_pickup_restore_taken(e)) return;
+       re-entering a level re-awards every picture in it. The second is what
+       makes the vending-machine pairs work at all. */
+    if (behavior_pickup_spawn_gate(e, w)) return;
     if (e->visible && (e->runtime_flags & ENTITY_FLAG_TRIGGER))
         gamestate_item_added();
 }
@@ -105,15 +106,10 @@ static void item_on_trigger(Entity *e, Entity *by) {
     e->visible = 0;
     e->alive = 0;
 
-    /* PHASE 4 goes here: ActivateObject then ToggleObject, via the shared tag
-       dispatch lifted out of behavior_ai_trigger.c:182-190. */
+    behavior_pickup_dispatch_state(e);
 
     behavior_pickup_award_pictures(e);
-    /* Typed counters: gems tally separately. The score award below is
-       currently dead: gam_loader.c maps a property named "Points", which no
-       row in the corpus authors -- the authored score field is PointValue
-       (383 rows, decomp offset 0x620). Left as-is on purpose; fixing it is a
-       loader/scoring change, not part of this economy. See the plan, 8.5. */
+    /* Typed counters: gems tally separately; all pickups award their Points. */
     if (strncmp(e->type, "3GEM", 4) == 0)
         gamestate_gem_collected();
     if (e->points)
@@ -125,7 +121,7 @@ static void item_on_trigger(Entity *e, Entity *by) {
     if (gam_prop_i(e, "PIC_NUMBER", -1) == 6)
         gamestate_grant_tool("baseball", NULL);
 
-    /* PHASE 4 goes here: NextTrigger dispatch. */
+    behavior_pickup_dispatch_next(e);
 
     {
         int snd = gam_prop_i(e, "SoundIndex", -1);
@@ -137,9 +133,18 @@ static void item_on_trigger(Entity *e, Entity *by) {
     gamestate_item_collected();
 }
 
+/* The state slot (vtable offset 0x428) another trigger's ActivateObject or
+   ToggleObject calls with its authored Toggle. Deliberately NOT on_trigger:
+   on a pickup those mean opposite things -- on_trigger collects it, state 1
+   re-arms it. */
+static void item_on_set_state(Entity *e, int state) {
+    behavior_pickup_set_state(e, state);
+}
+
 const EntityVTable vt_item = {
     .on_spawn = item_on_spawn,
     .on_update = item_on_update,
     .on_trigger = item_on_trigger,
+    .on_set_state = item_on_set_state,
     .flags = ENTITY_FLAG_TRIGGER,
 };

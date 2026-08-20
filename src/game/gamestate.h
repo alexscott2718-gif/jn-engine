@@ -32,6 +32,7 @@ struct Entity;
 typedef struct {
     char level[PICKUP_LEVEL_MAX];  /* lowercased level key; empty = free slot */
     int  index;                    /* PickupIndex */
+    int  taken;                    /* the stored state; 0 once cleared */
 } PickupTakenSlot;
 
 typedef struct {
@@ -131,11 +132,17 @@ int  gamestate_pic_count(int id);
 void gamestate_pic_award(int id, int n);
 int  gamestate_pic_consume(int id, int n);
 
-/* Collected-state table (DAT_004f8438). Both calls no-op for pickup_index <= 0,
+/* Collected-state table (DAT_004f8438). All three no-op for pickup_index <= 0,
    mirroring HandlePickupCollection's `PickupIndex > 0` table gate -- the
-   original treats index 0 as a special non-table pickup. */
+   original treats index 0 as a special non-table pickup.
+
+   clear() is the write in SetPickupItemState state 1 (004360b0): a vending
+   machine re-arms its product by clearing the product's collected flag. It is
+   deliberately not a table *deletion* -- the slot stays claimed and flips back
+   to 0 -- so the open-addressed probe chain is never broken. */
 int  gamestate_pickup_taken(const char *level, int pickup_index);
 void gamestate_pickup_mark(const char *level, int pickup_index);
+void gamestate_pickup_clear(const char *level, int pickup_index);
 
 /* The level key the collected-state table is written under. Set this before the
    level's entities spawn. */

@@ -80,6 +80,14 @@ EXPECTED = {
     "pregrant_level2": 0,
     "pregrant_unknown": 0,
     "pregrant_empty": 0,
+    # clear (SetPickupItemState state 1: the vending-machine re-arm)
+    "clear_before": 1,
+    "clear_after": 0,
+    "clear_leaves_neighbour": 1,   # clearing must not evict the probe chain
+    "remark_after_clear": 1,
+    "clear_unmarked": 0,
+    "clear_is_level_scoped": 1,
+    "clear_index_zero": 0,
     # table capacity
     "bulk_first": 1,
     "bulk_last": 1,
@@ -105,6 +113,11 @@ MUTANTS = [
         "off-by-one in the required-amount test",
         "    if (g_state.pic_count[id] < n) return 0;",
         "    if (g_state.pic_count[id] < n - 1) return 0;",
+    ),
+    (
+        "vending-machine re-arm does not actually clear",
+        "    if (s) s->taken = 0;",
+        "    if (s) s->taken = 1;",
     ),
 ]
 

@@ -116,6 +116,30 @@ int main(void) {
     k("pregrant_unknown", gamestate_pregrant_pictures("nosuchlevel"));
     k("pregrant_empty", gamestate_pregrant_pictures(""));
 
+    /* --- clear: the vending-machine re-arm ------------------------------- */
+    /* SetPickupItemState state 1 clears the product's collected flag so the
+       machine can dispense it again. Clearing must not evict the slot: these
+       are open-addressed probe chains, and a hole would strand every key that
+       probed past it. */
+    gamestate_new_game();
+    gamestate_pickup_mark("level1a", 205);   /* cand, the product */
+    gamestate_pickup_mark("level1a", 206);   /* flurp, a neighbour */
+    k("clear_before", gamestate_pickup_taken("level1a", 205));
+    gamestate_pickup_clear("level1a", 205);
+    k("clear_after", gamestate_pickup_taken("level1a", 205));
+    k("clear_leaves_neighbour", gamestate_pickup_taken("level1a", 206));
+    gamestate_pickup_mark("level1a", 205);
+    k("remark_after_clear", gamestate_pickup_taken("level1a", 205));
+    /* Clearing a key that was never marked is a no-op, not a table write. */
+    gamestate_pickup_clear("level1a", 999);
+    k("clear_unmarked", gamestate_pickup_taken("level1a", 999));
+    /* ...and clear is level-scoped exactly like mark. */
+    gamestate_pickup_mark("level5", 205);
+    gamestate_pickup_clear("level1a", 205);
+    k("clear_is_level_scoped", gamestate_pickup_taken("level5", 205));
+    k("clear_index_zero", (gamestate_pickup_clear("level1a", 0),
+                           gamestate_pickup_taken("level1a", 0)));
+
     /* --- the table survives a full level's worth of marks ---------------- */
     gamestate_new_game();
     for (int i = 1; i <= 400; i++)

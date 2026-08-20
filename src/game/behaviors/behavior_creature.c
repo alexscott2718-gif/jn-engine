@@ -57,15 +57,15 @@
 #define CREATURE_HALF_Z        70.0f
 
 static void creature_on_spawn(Entity *e, World *w) {
-    (void)w;
     behavior_ai_spawn_patrol(e);
     e->half_extents[0] = CREATURE_HALF_X;
     e->half_extents[1] = CREATURE_HALF_Y;
     e->half_extents[2] = CREATURE_HALF_Z;
     e->user_flag = 0;
     /* A creature already taken on an earlier visit stays taken; same
-       PostLoadPickupItem rule the 3PIC rows follow. */
-    behavior_pickup_restore_taken(e);
+       PostLoadPickupItem rule the 3PIC rows follow. No creature row authors
+       InitallyActive, so the other half of the gate is inert here. */
+    behavior_pickup_spawn_gate(e, w);
 }
 
 static void creature_on_update(Entity *e, World *w, float dt) {
