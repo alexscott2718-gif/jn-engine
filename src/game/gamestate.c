@@ -258,7 +258,18 @@ void gamestate_new_game(void) {
     memset(g_state.pic_count, 0, sizeof g_state.pic_count);
     memset(g_state.pickup_taken, 0, sizeof g_state.pickup_taken);
     g_state.pickup_taken_count = 0;
-    printf("[PICTURE] new game: picture counts and collected pickups cleared\n");
+    /* The inventory has to go too. Everything else here was already cleared
+       and argued for; the inventory was simply never mentioned, so gadgets
+       from the previous run survived into the new one and every level looked
+       like it started with them already in hand. That is not the deliberate
+       carry-over the picture flags get -- those outlive a level on purpose,
+       because level1b gates on a picture only level2 awards. Nothing wants a
+       gadget to outlive a New Game. */
+    memset(g_state.inventory, 0, sizeof g_state.inventory);
+    g_state.inventory_count = 0;
+    g_state.active_tool = 0;
+    printf("[PICTURE] new game: picture counts, collected pickups, "
+           "and inventory cleared\n");
 }
 
 int gamestate_pregrant_pictures(const char *level) {
