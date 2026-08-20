@@ -180,6 +180,38 @@ static void hud_draw_pickup_card(int vw, int vh, const GameState *gs) {
     }
 }
 
+/* The gadget panel, bottom-left. The four capture-backed "gadget" quads are
+   a bezel: a 64x64 body plus its right edge, bottom edge and corner. The
+   selected gadget's sprite goes inside the body, inset so the frame still
+   reads as a frame.
+
+   Empty-handed draws nothing extra, which is what the panel has always looked
+   like and keeps the level1 goldens still: those frames are captured before
+   anything has been picked up. */
+static void hud_draw_gadget_panel(int vw, int vh, const GameState *gs) {
+    const InventorySlot *g = gamestate_active_gadget();
+    if (!g) return;
+
+    const HudLayoutElem *body = NULL;
+    for (int i = 0; i < HUD_LAYOUT_COUNT; i++)
+        if (strcmp(HUD_LAYOUT[i].role, "gadget") == 0) { body = &HUD_LAYOUT[i]; break; }
+    if (!body) return;
+
+    const char *icon = g->icon_path;
+    if (!icon && g->sprite > 0 && !sprite_chunk_is_hidden(g->sprite))
+        icon = sprite_chunk_path(g->sprite);
+    if (!icon) return;
+    unsigned int tex = tex_cache_get(icon);
+    if (!tex) return;
+
+    float x, y, w, h;
+    rect_to_screen(body->nx, body->ny, body->nw, body->nh, vw, vh, &x, &y, &w, &h);
+    float inset = w * 0.18f;
+    renderer_draw_sprite_2d(tex, vw, vh, x + inset, y + inset,
+                            w - inset * 2.0f, h - inset * 2.0f, 1, 1, 1, 1);
+    (void)gs;
+}
+
 void hud_init(void) {
     ui_text_init();
     for (int i = 0; i < HUD_LAYOUT_COUNT; i++)
@@ -216,6 +248,7 @@ void hud_draw(int vw, int vh, const GameState *gs) {
     draw_counter(vw, vh, items, &HUD_COUNTER_ITEMS);
     draw_counter(vw, vh, score, &HUD_COUNTER_SCORE);
 
+    hud_draw_gadget_panel(vw, vh, gs);
     hud_draw_pictures(vw, vh, gs);
     hud_draw_pickup_card(vw, vh, gs);
 
