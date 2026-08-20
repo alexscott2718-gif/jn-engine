@@ -6,7 +6,7 @@ original's picture-flag economy — and open a certifiable `linked` aspect on
 `C3DPickupItem`, which `docs/linkage_certificates.csv` currently records as
 having "no decompiled-body fidelity to certify".
 
-Status: **phases 0-4 implemented** (0-3 2026-08-19 §8, 4 2026-08-20 §9); 5-6 open. Measurements below were taken
+Status: **phases 0-5 implemented** (0-3 2026-08-19 §8, 4-5 2026-08-20 §9-10); 6 open. Measurements below were taken
 2026-08-19 against `assets/gam/*.gam` (35 files) with `tools/gam_parser.py`.
 
 ---
@@ -476,3 +476,61 @@ passes, the product is revealed*) and reports affordability separately.
 makes `gamestate_pickup_clear` a no-op, which breaks the re-arm. The clear is a
 flag flip, never a slot eviction — evicting from an open-addressed table would
 strand every key that probed past the hole, and the unit test pins that too.
+
+---
+
+## 10. Phase 5 as built (2026-08-20)
+
+Status: phase 5 **implemented**, but not the way the plan's one-liner implies.
+
+### 10.1 The plan pointed at a counter that is not identified
+
+Phase 5 reads "HUD picture counter (`C2DInGameMenu.md` documents three counters
++ `DAT_004f83c0`)". That doc does decode `DrawHud` (00406690) to four literal
+positions and formats — `this[0x140]` `%3.0d` at `(0x7d, 0x8c)`, `this[0x13f]`
+`%3.0d` at `(400, 0x8c)`, `this[0x141]` `%5.0d` at `(0x185, 0x10e)`, and
+`DAT_004f83c0` `%6.0d` at `(0x1a9, 0x1b3)` — but it also lists this as an **open
+question**:
+
+> Map each `this[0x13f..0x141]` + `DAT_004f83c0` counter to its gameplay meaning
+> (score, fuel, gadget count, lives) — the capture shows positions; the source
+> values need the producer functions.
+
+So nothing identifies any of the four as the picture counter. The
+`C2DInGameMenu/hud-draw` certificate row is `linked-blocked` for exactly this
+reason ("doing so from one frame would fabricate parity"), and the extracted
+`hud_layout_generated.h` carries only the two counters the capture actually
+shows. Feeding the picture store into one of those slots would have invented the
+mapping the certificate refuses to invent.
+
+### 10.2 What landed instead
+
+A native readout, in the shipped menu font, in the one screen corner the
+extracted layout leaves empty (top right; atom / status icons / gauge are
+top-left, the gadget cluster is bottom-left, the score counter bottom-right).
+Same drop-shadow idiom as the existing LEVEL CLEAR banner, which is the
+precedent for native chrome that makes no parity claim. It reads
+
+```
+PICTURES 18   23 x18
+```
+
+— total held, then up to six held ids with their counts, then `more`. (The
+shipped atlas is A-Z a-z 0-9 only, so an ellipsis would render as three blanks.)
+
+It draws **only while something is held**. That is a design choice — the readout
+is about an economy that is idle most of the time — and it is also why the
+`level1` golden is untouched: at the capture pose the store is empty, so nothing
+is emitted. No counter position, format or producer from `DrawHud` is used, and
+`hud_layout_generated.h` is not modified.
+
+### 10.3 Verification
+
+`make check-assets` green: `level1` golden byte-identical, so the new chrome
+provably stays out of the capture path. Visual check by screenshot on `level1c`
+after a cold pre-granted entry (18 x picture 23) confirms the readout tracks the
+store and clears every captured widget.
+
+When the `DrawHud` producers are eventually recovered and one of the four
+counters is shown to be the picture count, this readout is the thing to replace
+— it is deliberately easy to delete.

@@ -64,6 +64,61 @@ static void draw_counter(int vw, int vh, int value, const HudCounter *c) {
     }
 }
 
+/* Picture-store readout (docs/picture_flag_wiring_plan.md phase 5).
+
+   NATIVE CHROME, NOT A PARITY CLAIM. DrawHud (00406690) is decoded to four
+   literal counter positions and formats, but which gameplay value feeds each is
+   an open question in docs/decomp/C2DInGameMenu.md -- the capture gives
+   positions, not producers -- and the C2DInGameMenu/hud-draw certificate is
+   linked-blocked precisely so nobody reconstructs a counter from one frame.
+   So this uses the shipped menu font at a position of our own choosing, like
+   the LEVEL CLEAR banner below, and makes no claim about DAT_004f83c0 or
+   this[0x13f..0x141].
+
+   Drawn only while something is held. That keeps it out of the way when the
+   economy is idle, and it is also why the level1 golden is unaffected: at the
+   capture pose the store is empty, so nothing is emitted. */
+#define HUD_PIC_MAX_LISTED 6
+
+static void hud_draw_pictures(int vw, int vh, const GameState *gs) {
+    int total = 0, distinct = 0;
+    for (int id = 0; id < PIC_ID_MAX; id++) {
+        if (gs->pic_count[id] <= 0) continue;
+        total += gs->pic_count[id];
+        distinct++;
+    }
+    if (total <= 0) return;
+
+    char line[96];
+    int n = snprintf(line, sizeof(line), "PICTURES %d", total);
+    int listed = 0;
+    for (int id = 0; id < PIC_ID_MAX && listed < HUD_PIC_MAX_LISTED; id++) {
+        if (gs->pic_count[id] <= 0) continue;
+        int room = (int)sizeof(line) - n;
+        if (room <= 1) break;
+        n += snprintf(line + n, (size_t)room, "  %d x%d", id, gs->pic_count[id]);
+        listed++;
+    }
+    /* The shipped atlas is A-Z a-z 0-9 only, so an ellipsis would render as
+       three blanks -- say it in letters instead. */
+    if (listed < distinct && n < (int)sizeof(line) - 6)
+        snprintf(line + n, sizeof(line) - (size_t)n, " more");
+
+    /* Top-right, right-aligned, in the same drop-shadow idiom as the
+       level-clear banner. That corner is the one the extracted capture layout
+       leaves empty -- atom, status icons and gauge sit top/mid-left, the gadget
+       cluster bottom-left, the score counter bottom-right -- so native chrome
+       there cannot be mistaken for one of the four decoded counters. */
+    float scale = (float)vh / HUD_REF_H;
+    if (scale < 1.0f) scale = 1.0f;
+    float margin = 12.0f * scale;
+    float x = (float)vw - ui_text_measure(line, scale) - margin;
+    float y = margin;
+    if (x < margin) x = margin;
+    ui_text_draw(vw, vh, x + scale, y + scale, scale, line, 0.0f, 0.0f, 0.0f, 0.7f);
+    ui_text_draw(vw, vh, x, y, scale, line, 0.95f, 0.85f, 0.35f, 1.0f);
+}
+
 void hud_init(void) {
     ui_text_init();
     for (int i = 0; i < HUD_LAYOUT_COUNT; i++)
@@ -99,6 +154,8 @@ void hud_draw(int vw, int vh, const GameState *gs) {
     if (t) sscanf(t, "%d,%d", &items, &score);
     draw_counter(vw, vh, items, &HUD_COUNTER_ITEMS);
     draw_counter(vw, vh, score, &HUD_COUNTER_SCORE);
+
+    hud_draw_pictures(vw, vh, gs);
 
     /* The original functional HUD path exposed a level-clear message. Draw it
        with the shipped menu font now that the shared atlas renderer exists. */
