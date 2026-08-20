@@ -15,6 +15,11 @@ static void item_on_spawn(Entity *e, World *w) {
     behavior_trigger_spawn_base(e, 30.0f, 30.0f, 30.0f);
     e->user_flag = 0;             /* 0 = uncollected, 1 = collected */
     e->user_float = e->y;         /* base y for bob */
+    /* PostLoadPickupItem (00436200) / ResetPickupItemVisibility (00435b20):
+       a pickup whose global state slot is set is not shown again. This is what
+       makes the save-global collected table mean anything -- without it,
+       re-entering a level re-awards every picture in it. */
+    if (behavior_pickup_restore_taken(e)) return;
     if (e->visible && (e->runtime_flags & ENTITY_FLAG_TRIGGER))
         gamestate_item_added();
 }
@@ -31,7 +36,10 @@ static void item_on_update(Entity *e, World *w, float dt) {
 
 /* Tool-granting pickups. Matched as a case-insensitive substring of the GAM
    ObjectTag so variants (pickupwatergun / WATERGUN1 / activatewatergun) all map
-   to one inventory tool. Icons are authentic sprites pulled from sprites.omt. */
+   to one inventory tool. Icons are authentic sprites pulled from sprites.omt.
+   Kept alongside the picture economy, not replaced by it: the watergun,
+   jetpack and keys gate real progression in the native port today, so the
+   picture path is additive. */
 typedef struct { const char *tag; const char *tool; const char *icon; } ToolGrant;
 static const ToolGrant TOOL_GRANTS[] = {
     { "watergun", "watergun", "assets/hud/tool_watergun.png" },
@@ -67,16 +75,58 @@ static void item_grant_tool(const Entity *e) {
     }
 }
 
+/* C3DPickupItem::HandlePickupCollection (00435ce0). The order below is the
+   decompiled order, which is where the observable behaviour lives:
+ *
+ *     if toucher != player            return
+ *     if !CheckRequiredPicAndConsume  return          <- gate, BEFORE the
+ *     if state[PickupIndex] != 0      return             collected check
+ *     update state + visibility (or PickedUpIndex sprite)
+ *     fire ActivateObject / ToggleObject
+ *     award PIC_NUMBER + score
+ *     fire NextTrigger
+ *     play pickup sound
+ *
+ * The gate really does run before the collected-state check in the original;
+ * that is safe there because a collected pickup is hidden and disabled at load
+ * (PostLoadPickupItem) and so never re-collides. item_on_spawn reproduces that,
+ * and the native per-entity user_flag guard below is a second belt for the same
+ * thing -- without either, the gate would re-charge a player who walks back
+ * into a pickup they already took. */
 static void item_on_trigger(Entity *e, Entity *by) {
     (void)by;
     if (e->user_flag) return;
+
+    if (!behavior_pickup_gate_allows(e)) return;
+    if (behavior_pickup_taken(e)) return;
+
     e->user_flag = 1;
+    behavior_pickup_mark_taken(e);
+    e->visible = 0;
     e->alive = 0;
-    /* Typed counters: gems tally separately; all pickups award their Points. */
+
+    /* PHASE 4 goes here: ActivateObject then ToggleObject, via the shared tag
+       dispatch lifted out of behavior_ai_trigger.c:182-190. */
+
+    behavior_pickup_award_pictures(e);
+    /* Typed counters: gems tally separately. The score award below is
+       currently dead: gam_loader.c maps a property named "Points", which no
+       row in the corpus authors -- the authored score field is PointValue
+       (383 rows, decomp offset 0x620). Left as-is on purpose; fixing it is a
+       loader/scoring change, not part of this economy. See the plan, 8.5. */
     if (strncmp(e->type, "3GEM", 4) == 0)
         gamestate_gem_collected();
     if (e->points)
         gamestate_add_points(e->points);
+    item_grant_tool(e);
+    /* A 3PIC that awards the baseball picture (PIC_NUMBER==6, the same id
+       C3DBaseballPickup sets) grants the throw ability -- the faithful,
+       in-level way to obtain the baseball (level1c / level2a / Level2b). */
+    if (gam_prop_i(e, "PIC_NUMBER", -1) == 6)
+        gamestate_grant_tool("baseball", NULL);
+
+    /* PHASE 4 goes here: NextTrigger dispatch. */
+
     {
         int snd = gam_prop_i(e, "SoundIndex", -1);
         if (snd >= 0) {
@@ -84,12 +134,6 @@ static void item_on_trigger(Entity *e, Entity *by) {
             audio_play_db(db, snd, 0, 128);
         }
     }
-    item_grant_tool(e);
-    /* A 3PIC that awards the baseball picture (PIC_NUMBER==6, the same id
-       C3DBaseballPickup sets) grants the throw ability — the faithful, in-level
-       way to obtain the baseball (level1c / level2a / Level2b). */
-    if (gam_prop_i(e, "PIC_NUMBER", -1) == 6)
-        gamestate_grant_tool("baseball", NULL);
     gamestate_item_collected();
 }
 

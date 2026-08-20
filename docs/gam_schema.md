@@ -12,8 +12,13 @@
 
 **How to use (decomp):** for any placeable class, the *field map*, *constants*,
 and *wiring* deliverables are mostly free here — RE only needs to recover the
-*consuming logic*. Props marked ✓ are already read by `gam_loader.c`; ✗ are
-dropped today (recoverable tuning/wiring).
+*consuming logic*. Props marked ✓ are mapped onto a named `Entity` field
+by `gam_loader.c`. ✗ does **not** mean dropped: both loader branches end in
+a `prop_bag_add` / `str_prop_bag_add` fallback, so every unmapped numeric prop
+lands in `Entity.props[]` and every unmapped string in `Entity.strs[]`, readable
+right now through `gam_prop_f()` / `gam_prop_i()` / `gam_str()`
+(`src/engine/world.h`). Read ✗ as **captured in the prop bag, unconsumed**:
+reaching one needs no loader work, only a behavior that reads it.
 
 ## FourCC ↔ class map (from binary class-id registrars)
 

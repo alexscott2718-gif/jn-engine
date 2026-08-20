@@ -22,6 +22,7 @@
 #include "entities.h"
 #include "entity_visual.h"
 #include "behaviors/behaviors.h"
+#include "behaviors/behavior_base.h"
 #include "behaviors/behavior_projectile.h"
 #include "behaviors/behavior_enemy.h"
 #include "behaviors/behavior_vehicle.h"
@@ -458,6 +459,27 @@ static int level_desc_for(const char *name, LevelDesc *desc) {
         snprintf(desc->sky_type, sizeof(desc->sky_type), "dusksky");
     }
     return 1;
+}
+
+/* Headless picture-economy test (JN_TEST_PICTURES=1): force every authored
+   pickup row in the loaded level through its own on_trigger, repeatedly until
+   no further collection happens. Two of the three award paths are otherwise
+   unreachable headlessly -- 3PIC needs a physical player overlap, and the
+   3FIS/3GIR/3DIN creatures are deliberately non-trigger -- and a single pass is
+   not a fixpoint, because collecting a picture can open a gate the sweep
+   already walked past. Runs on the launch level and again after every swap, so
+   JN_TEST_SWAP=<same level> proves re-entry awards nothing a second time.
+   tools/verify_picture_economy.py drives this. */
+static void picture_sweep_if_requested(World *world) {
+    if (!env_enabled("JN_TEST_PICTURES")) return;
+    int pass = 0, took = 0, total = 0;
+    while ((took = behavior_pickup_sweep_collect(world)) > 0) {
+        total += took;
+        printf("[PICSWEEP] pass %d collected %d\n", ++pass, took);
+        if (pass > 64) break;   /* cannot happen: every pass consumes rows */
+    }
+    printf("[PICSWEEP] level=%s done: %d collected in %d pass(es)\n",
+           gamestate_level(), total, pass);
 }
 
 static int load_level(const LevelDesc *desc, World *world) {
@@ -1502,6 +1524,7 @@ int main(int argc, char **argv) {
        mission, restart flow). Direct `--level X` keeps campaign mode OFF so the
        audit + screenshot harnesses render exactly as before Wave N5. */
     char newgame_gam[64] = {0};
+    if (want_newgame) gamestate_new_game();   /* clears the picture stores */
     if (want_newgame &&
         game_flow_begin_task("NewGame", newgame_gam, sizeof(newgame_gam), NULL) &&
         newgame_gam[0])
@@ -1680,6 +1703,21 @@ int main(int argc, char **argv) {
         gamestate_grant_tool("helmet", NULL);
         printf("[SANDBOX] rocketship revealed; baseball/bubble/helmet granted\n");
     }
+
+    /* Key the collected-pickup table to this level before anything spawns.
+       game_flow_enter_level() cannot serve here: it runs after
+       entity_bind_vtables(), so at on_spawn time game_flow_current_level() is
+       still the previous level (empty on the launch load). */
+    gamestate_set_level(current_desc.name);
+
+    /* Cold entry: the launch level was jumped into, not walked into, so
+       pre-grant the pictures it gates on but never awards (level1a/level1b/
+       level1c/level4a). Campaign play is excluded -- there the player is meant
+       to backtrack for them, which is why level1b gates on picture 14 and only
+       level2/level2b award it. JN_NO_PREGRANT=1 turns it off so the refusal
+       path stays testable. */
+    if (!want_newgame && !env_enabled("JN_NO_PREGRANT"))
+        gamestate_pregrant_pictures(current_desc.name);
 
     int n = load_level(&current_desc, &world);
     if (n < 0) {
@@ -2047,6 +2085,8 @@ int main(int argc, char **argv) {
         if (s && *s) n4_ride_tick = atoi(s);
     }
 
+    picture_sweep_if_requested(&world);
+
     /* Headless trigger test (Wave N2.x): at warmup tick JN_TEST_AITRIG, force the
        first eligible TouchActivated 3AIT through its activate core so the
        C3DAITrigger mission-wiring (hide/teleport/repoint/chain) can be exercised
@@ -2207,6 +2247,11 @@ int main(int argc, char **argv) {
                 level_select_input();
                 const char *ls_level = NULL;
                 if (level_select_take_confirm(&ls_level) && ls_level) {
+                    /* A browser jump is a cold entry -- pre-grant, unless this
+                       is campaign play (where the backtracking is the design). */
+                    if (!game_flow_campaign_active() &&
+                        !env_enabled("JN_NO_PREGRANT"))
+                        gamestate_pregrant_pictures(ls_level);
                     gamestate_request_level_swap(ls_level, "");
                     level_select_close();
                 }
@@ -2228,6 +2273,7 @@ int main(int argc, char **argv) {
                         w.should_quit = 1;   /* Quit item */
                     } else {
                         char ng[64] = {0};
+                        if (sel_newgame) gamestate_new_game();
                         if (sel_newgame &&
                             game_flow_begin_task("NewGame", ng, sizeof ng, NULL) &&
                             ng[0])
@@ -2458,6 +2504,9 @@ int main(int argc, char **argv) {
                     s_sandbox_prepped_rocket = NULL;
                     world_init(&world);
                     gamestate_reset_for_new_level();
+                    /* Re-key the collected-pickup table before the new level's
+                       entities spawn (see the launch load for why). */
+                    gamestate_set_level(swap_desc.name);
                     asset_cache_begin_level();
                     if (load_level(&swap_desc, &world) >= 0) {
                         current_desc = swap_desc;
@@ -2477,6 +2526,7 @@ int main(int argc, char **argv) {
                         game_flow_enter_level(swap_desc.name);
                         behavior_goddard_reset();
                         goddard_reconcile_after_level_load(&world, swap_desc.name);
+                        picture_sweep_if_requested(&world);
                         configure_safety_floor(&world, jim);
                         asset_cache_purge_stale();
                         printf("[SWAP] post-purge cache: %d tex, %d models\n",
