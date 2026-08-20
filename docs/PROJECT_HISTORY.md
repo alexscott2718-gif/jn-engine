@@ -2483,3 +2483,180 @@ composition all fail closed under their reviewed contracts. Because this closeou
 itself advances `master`, the merge commit containing this section is the final engine snapshot
 refresh target. Its exact merge/snapshot SHA is recorded on the closeout PR after promotion; that
 out-of-tree record avoids creating an infinite sequence of self-staling documentation commits.
+
+## Picture-flag pickup economy, phases 0–3 (2026-08-19)
+
+The shipped `.gam` levels have always carried a pickup gating economy the native
+port ignored: `PIC_NUMBER` awards a picture id, `RequiredPicNum` /
+`ReqPicNumAmount` charge for one, `NeedMoreSound` plays when you cannot pay.
+237 rows award, 62 gate. `behavior_item.c` read exactly one of those fields, for
+one special case (`PIC_NUMBER == 6`, the baseball). Phases 0–3 of
+`docs/picture_flag_wiring_plan.md` consume the rest; phases 4–6 (side-effect
+dispatch, HUD counter, oracle) stay open.
+
+**There was no loader work, and the schema doc was the reason anyone thought
+there was.** `gam_loader.c` ends both its float and its int branch with a
+`prop_bag_add` fallback, so every unmapped property is already in
+`Entity.props[]` / `Entity.strs[]` and readable through `gam_prop_i()` /
+`gam_str()`. `docs/gam_schema.md` nonetheless said ✗-marked props "are dropped
+today", which scopes this job several times too large. That sentence is now
+"captured in the prop bag, unconsumed", fixed in the generator
+(`tools/gam_schema.py`) rather than the generated file. Fixing it exposed a
+second problem: the generator was **not** idempotent against its own committed
+output — regenerating reverted `TRIG` to unnamed, silently discarding the
+`CTrigger` identity the CTrigger linkage certificate had recovered by hand. The
+generator now carries that override, and a curated `CLASS_OVERRIDES` row no
+longer gets the low-confidence `?` marker.
+
+**The store is save-global, and that is forced by the data.** `level1b` gates on
+picture 14, which is awarded only in `level2` and `level2b`, so the flags must
+outlive a level or the shipped corpus is uncompletable — the original expects
+backtracking. `gamestate_reset_for_new_level()` therefore preserves both the
+picture counts and the collected-pickup table; only `gamestate_new_game()`
+clears them.
+
+**The collected-pickup table is keyed on (level, PickupIndex), not index.** The
+456 authored indices never repeat within a level, but 22 collide across levels —
+`1901..1907` in `Level3` and `level5a`, `2101..2106` in `Level7` and `level4b`,
+`3401..3409` in `VR04` and `VR05`. A flat index-keyed table is the obvious first
+implementation and it silently marks `level5a`'s pickups collected because the
+player took `Level3`'s. `tools/check_pictures.py --selftest` mutation-tests
+exactly that defect.
+
+**The table is read at load, not only written at collection.** The plan
+described the write; the decompiled body reads it in `PostLoadPickupItem`
+(00436200) and `ResetPickupItemVisibility` (00435b20), which leave an
+already-collected pickup hidden. Without that half the table is write-only:
+re-entering a level re-awards every picture in it, and — because
+`CheckRequiredPicAndConsume` runs *before* the collected-state check in
+`HandlePickupCollection` — re-touching a taken pickup also charges for it again.
+
+**The gate consumes.** Slot 54 (00436830) subtracts `ReqPicNumAmount` on success
+and clears the flag at zero, so counts are the model, not bits, and a level's
+demand is the sum of its gates' amounts. That is why the level-selector
+pre-grant (`tools/gen_picture_pregrants.py` → `picture_pregrants_generated.h`)
+grants `level1c` eighteen copies of picture 23 and not one. Eight levels — not
+the four the plan's set-difference table names — cannot meet their own demand by
+count; the four extra shortfalls are recorded in the plan as an open owner
+decision, not papered over. `level1c` demands 18 of picture 23 against 13 in the
+whole corpus, which reads as intended scarcity but should be confirmed before a
+HUD counter exposes it.
+
+**3FIS/3GIR/3DIN award pictures but stay non-collectible.** 19 awarding rows
+route to `vt_creature`, not `vt_item`, so the award path is a second call site.
+It is built and swept by the test hook, but the vtable keeps `flags = 0`:
+`behavior_creature.c` already records the owner's 2026-06-23 ground truth that
+these become pickups only after the shrink ray shrinks them, and the shrink
+transition is undecompiled. Setting `ENTITY_FLAG_TRIGGER` would have invented
+that mechanic.
+
+**`Points` is a phantom property.** `gam_loader.c` maps a property named
+`Points` onto `Entity.points`; that name appears nowhere in the 35-file corpus.
+The authored score field is `PointValue` (383 rows, decomp offset 0x620), so
+`e->points` has always been 0 and no pickup in the native port has ever awarded
+score. Left unfixed deliberately — it is a loader/scoring change, not part of
+this economy, and wants its own reviewable commit.
+
+Verification: `tools/check_pictures.py --selftest` in `make check` (3 mutants
+rejected), `--corpus` in `make check-assets` (pre-grant header cannot drift from
+the corpus; every required id is obtainable), and `tools/verify_picture_economy.py`
+by hand — 21 of 21 authored picture ids awarded at runtime across all 35 levels,
+0 re-awards on re-entry anywhere, 7 levels where a later sweep pass collects a
+row an earlier pass refused, and all four pre-grant levels clear. Goldens,
+oracle diff and the linkage gate are unchanged; no certificate or oracle was
+edited.
+
+## Picture economy phase 4: the side effects are a vending machine (2026-08-20)
+
+Phase 4 of `docs/picture_flag_wiring_plan.md` reads as one line — dispatch
+`ActivateObject` / `ToggleObject` / `NextTrigger` through a shared helper. The
+data says otherwise, and getting it wrong would have been invisible.
+
+**The dispatch is a state write, not a trigger forward.** `Toggle` (0x584) is
+"state argument passed to `ToggleObject` and `ActivateObject` targets through
+vtable offset 0x428" — a state setter, not the collision entry point. For a
+pickup target those are opposites: forwarding `on_trigger` *collects* the
+target, while `SetPickupItemState` (004360b0) state 1 *clears its collected flag
+and shows it*. 36 of the 97 side-effect rows target a `3PIC`, so the lazy
+reading would have auto-collected pickups from across the level. `EntityVTable`
+gained an `on_set_state` slot; `NextTrigger` keeps the trigger-chain forward,
+matching the decomp's separate `fire_next_trigger`.
+
+**Twelve of the authored graphs are vending machines.** `cmach`/`cand`,
+`fmach`/`flurp`, `mdiam`/`diam`, `gdish`/`refill`, `piggy1`/`piggy2`,
+`cjar`/`coins2`, across nine levels. The machine authors `InitallyActive=1` and
+a `RequiredPicNum` gate (typically 2 coins); the product authors
+`InitallyActive=0` and awards a picture. Paying the machine fires its
+`ActivateObject`/`ToggleObject` at the product with `Toggle=1`, revealing it;
+collecting the product fires its `ToggleObject` back, re-arming the machine.
+**Every one is a genuine cycle in the authored graph**, and each full pass is
+picture-negative (-2 coins, +1 product), so the consume gate is the only thing
+that terminates it. If `RequiredPicNum` thresholded instead of consuming, all
+twelve would be infinite point farms — the strongest evidence yet that the
+consume reading is correct.
+
+**`InitallyActive` had to land with it, and the golden trimmed it.** Native
+ignored the field, so every vending product was free. Applying it revealed a
+second lesson: the first attempt treated inactive as *hidden*, and the `level1`
+golden went red on ~0.05% of both frames (two `level1` rows author 0, one in
+frame). The two halves of "inactive" are not equally supported — *not
+collectible* is solid (the field is the initial active state; `ActivateObject`
+names the transition out of it; the vending data only works that way), but
+*invisible* is not: the recovered slot-266 body describes states 0 and 1, both
+of which **show** the pickup, and never says what inactive looks like.
+`set_state_inactive()` is a name in the spec's pseudocode, not a recovered body.
+The visual half was withdrawn; the gameplay half stands and the golden is
+byte-identical. Whether the original hides an inactive pickup is a capture
+question.
+
+**The shared helper lives in `behavior_ai_trigger.c` on purpose.**
+`tools/linkage_oracles/C3DAITrigger.py` compiles a fixed list of `.c` files with
+fixed stubs, so a new module would make that file reference an unresolvable
+symbol and the only repair would be editing the oracle. The feature moved
+instead; the certified `dispatch-graph` aspect passes unchanged. The dispatcher
+also carries a native depth cap with no decomp counterpart, because the authored
+graph really does contain cycles.
+
+**What "the 97 rows fire" honestly means.** 62 are reached on a cold corpus
+sweep (a row only dispatches if its own pickup was collected). Of those, 15
+fire; the rest resolve to a class with no native activation entry point —
+`NextTrigger` points at cutscene cameras (3CAM 19, 3MCA 20) and 3AIT, none of
+which has an `on_trigger`. The tools report that as `no-native-slot` rather than
+counting it as success. Wiring pickups to start cutscenes was considered and
+deferred by owner decision: it couples the pickup path to the cutscene system,
+and both cutscene-camera aspects are separately certified.
+
+## C3DPickupItem/collection is linked (2026-08-20)
+
+Phase 6 closes the picture-economy work: the aspect the certificate recorded as
+having "no decompiled-body fidelity to certify" is now `linked`, and the
+scoreboard goes 15 -> 16 oracle-verified aspects. The blocked row's own closing
+line invited it ("a future pass that ports the actual RequiredPicNum/
+PickupIndex/ActivateObject mechanism could open a real linked aspect here"), so
+this follows the certificate rather than editing one to make room.
+
+`tools/linkage_oracles/C3DPickupItem.py` compiles the real, unmodified
+behaviour and drives it over all 383 shipped 3PIC rows, diffing four things per
+row against expectations computed from the recovered bodies and that row's own
+authored properties: the post-spawn `InitallyActive` gate, the whole ordered
+event sequence on a funded collection, the refusal path one unit short
+(including that nothing is partially consumed), and the ordering claim that
+matters most -- the gate runs *before* the collected-state check, proved by
+re-touching a collected row and watching the currency still go. `--selftest`
+mutation-tests it against swapping those two checks, moving the award ahead of
+the side-effect dispatch, and consuming on a refusal.
+
+The dumper reads the engine's own `[PICGATE]`/`[PICSTATE]`/`[PICFIRE]`/
+`[PICAWARD]` lines rather than paraphrasing them, so the instrumentation cannot
+drift from the behaviour it certifies.
+
+**Building the oracle found two real defects, which is the argument for
+building one.** `gam_loader.c` mapped a property named `Points` that no shipped
+level authors -- the field is `PointValue` (383 rows, offset 0x620) -- so no
+pickup in the native port had ever awarded score. And once `PointValue` loaded,
+the award tested truthiness, so every row authoring the format's `-1` unset
+subtracted a point. Both are fixed. The first had been reported and
+deliberately deferred as a scoring change outside the picture economy;
+certifying `HandlePickupCollection` made it in-scope, because the recovered
+award step is "PIC_NUMBER *and* score" and certifying half of it would be
+certifying a different function.

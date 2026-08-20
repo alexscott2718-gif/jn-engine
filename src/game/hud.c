@@ -3,6 +3,7 @@
 #include "../engine/renderer.h"
 #include "../engine/assets/asset_cache.h"
 #include "hud_layout_generated.h"
+#include "entity_visual.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -64,6 +65,121 @@ static void draw_counter(int vw, int vh, int value, const HudCounter *c) {
     }
 }
 
+/* Picture-store readout (docs/picture_flag_wiring_plan.md phase 5).
+
+   NATIVE CHROME, NOT A PARITY CLAIM. DrawHud (00406690) is decoded to four
+   literal counter positions and formats, but which gameplay value feeds each is
+   an open question in docs/decomp/C2DInGameMenu.md -- the capture gives
+   positions, not producers -- and the C2DInGameMenu/hud-draw certificate is
+   linked-blocked precisely so nobody reconstructs a counter from one frame.
+   So this uses the shipped menu font at a position of our own choosing, like
+   the LEVEL CLEAR banner below, and makes no claim about DAT_004f83c0 or
+   this[0x13f..0x141].
+
+   Drawn only while something is held. That keeps it out of the way when the
+   economy is idle, and it is also why the level1 golden is unaffected: at the
+   capture pose the store is empty, so nothing is emitted. */
+#define HUD_PIC_MAX_LISTED 6
+
+static void hud_draw_pictures(int vw, int vh, const GameState *gs) {
+    int total = 0, distinct = 0;
+    for (int id = 0; id < PIC_ID_MAX; id++) {
+        if (gs->pic_count[id] <= 0) continue;
+        total += gs->pic_count[id];
+        distinct++;
+    }
+    if (total <= 0) return;
+
+    char line[96];
+    int n = snprintf(line, sizeof(line), "PICTURES %d", total);
+    int listed = 0;
+    for (int id = 0; id < PIC_ID_MAX && listed < HUD_PIC_MAX_LISTED; id++) {
+        if (gs->pic_count[id] <= 0) continue;
+        int room = (int)sizeof(line) - n;
+        if (room <= 1) break;
+        n += snprintf(line + n, (size_t)room, "  %d x%d", id, gs->pic_count[id]);
+        listed++;
+    }
+    /* The shipped atlas is A-Z a-z 0-9 only, so an ellipsis would render as
+       three blanks -- say it in letters instead. */
+    if (listed < distinct && n < (int)sizeof(line) - 6)
+        snprintf(line + n, sizeof(line) - (size_t)n, " more");
+
+    /* Top-right, right-aligned, in the same drop-shadow idiom as the
+       level-clear banner. That corner is the one the extracted capture layout
+       leaves empty -- atom, status icons and gauge sit top/mid-left, the gadget
+       cluster bottom-left, the score counter bottom-right -- so native chrome
+       there cannot be mistaken for one of the four decoded counters. */
+    float scale = (float)vh / HUD_REF_H;
+    if (scale < 1.0f) scale = 1.0f;
+    float margin = 12.0f * scale;
+    float x = (float)vw - ui_text_measure(line, scale) - margin;
+    float y = margin;
+    if (x < margin) x = margin;
+    ui_text_draw(vw, vh, x + scale, y + scale, scale, line, 0.0f, 0.0f, 0.0f, 0.7f);
+    ui_text_draw(vw, vh, x, y, scale, line, 0.95f, 0.85f, 0.35f, 1.0f);
+}
+
+/* Pickup card (docs/picture_flag_wiring_plan.md phase 5, owner request
+   2026-08-20): the item just collected, with how many of it are now held in
+   the top-right corner of the card.
+
+   The HOOK is decomp-supported -- C3DPickupItem's collection path calls the
+   picture/inventory service whose FUN_004061d0 docs/decomp/_scene_sequencer.md
+   names as the on-screen "+counter" notify queue -- but the LAYOUT is not.
+   The original draws it from C2DInGameMenu canvas records that the hud-draw
+   certificate is still linked-blocked on, and assets/omt/inventory.omt's
+   icons cannot be tied to picture ids without the unrecovered reward-grid
+   table. So this is native chrome showing the pickup's own sprite, which we do
+   know: SpriteIndex resolves through the generated chunk map.
+
+   It fades out over its last half second and is drawn under the picture
+   readout, which is the only other thing in that corner. */
+static void hud_draw_pickup_card(int vw, int vh, const GameState *gs) {
+    if (gs->popup_timer <= 0.0f) return;
+
+    float alpha = gs->popup_timer < 0.5f ? gs->popup_timer / 0.5f : 1.0f;
+    float s = (float)vh / HUD_REF_H;
+    if (s < 1.0f) s = 1.0f;
+
+    const float card = 56.0f * s;          /* square card, 640x480-ref units */
+    const float pad  = 6.0f * s;
+    float margin = 12.0f * s;
+    float x = (float)vw - card - margin;
+    float y = margin + ui_text_line_height(s) + 8.0f * s;   /* under the readout */
+
+    /* Card body + a lighter inner well for the icon. */
+    renderer_draw_screen_rect(vw, vh, x, y, card, card,
+                              0.06f, 0.07f, 0.12f, 0.78f * alpha);
+    renderer_draw_screen_rect(vw, vh, x + pad, y + pad,
+                              card - pad * 2.0f, card - pad * 2.0f,
+                              0.16f, 0.18f, 0.26f, 0.70f * alpha);
+
+    const char *icon = (gs->popup_sprite > 0 &&
+                        !sprite_chunk_is_hidden(gs->popup_sprite))
+                     ? sprite_chunk_path(gs->popup_sprite) : NULL;
+    if (icon) {
+        unsigned int tex = tex_cache_get(icon);
+        if (tex)
+            renderer_draw_sprite_2d(tex, vw, vh, x + pad, y + pad,
+                                    card - pad * 2.0f, card - pad * 2.0f,
+                                    1.0f, 1.0f, 1.0f, alpha);
+    }
+
+    /* The count, top-right of the card. Scoring-only pickups award no picture,
+       so they get the card without a number rather than a misleading zero. */
+    if (gs->popup_id >= 0) {
+        char n[16];
+        snprintf(n, sizeof(n), "%d", gs->popup_count);
+        float ts = s;
+        float tw = ui_text_measure(n, ts);
+        float tx = x + card - tw - pad;
+        float ty = y + pad * 0.5f;
+        ui_text_draw(vw, vh, tx + ts, ty + ts, ts, n, 0.0f, 0.0f, 0.0f, 0.8f * alpha);
+        ui_text_draw(vw, vh, tx, ty, ts, n, 1.0f, 0.95f, 0.45f, alpha);
+    }
+}
+
 void hud_init(void) {
     ui_text_init();
     for (int i = 0; i < HUD_LAYOUT_COUNT; i++)
@@ -99,6 +215,9 @@ void hud_draw(int vw, int vh, const GameState *gs) {
     if (t) sscanf(t, "%d,%d", &items, &score);
     draw_counter(vw, vh, items, &HUD_COUNTER_ITEMS);
     draw_counter(vw, vh, score, &HUD_COUNTER_SCORE);
+
+    hud_draw_pictures(vw, vh, gs);
+    hud_draw_pickup_card(vw, vh, gs);
 
     /* The original functional HUD path exposed a level-clear message. Draw it
        with the shipped menu font now that the shared atlas renderer exists. */

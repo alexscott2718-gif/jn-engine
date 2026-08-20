@@ -51,8 +51,12 @@ const char *sprite_chunk_path(int chunk_id) {
    (level geometry hydrant/nests/rocket pads, the 3KIT cat...). The original
    draws nothing for them — they are invisible trigger volumes
    (2026-06-12 QA #3). */
+int sprite_chunk_is_hidden(int chunk_id) {
+    return g_is_jnbg && chunk_id == 106;
+}
+
 int sprite_ref_hidden(const Entity *e) {
-    return g_is_jnbg && e && e->sprite_index == 106 &&
+    return e && sprite_chunk_is_hidden(e->sprite_index) &&
            strcasecmp(e->sprite_database, "sprites.omt") == 0;
 }
 

@@ -58,5 +58,8 @@ const char *sprite_chunk_path(int chunk_id);
 /* 1 when the entity's authored sprite ref is JNBG sprites.omt chunk 106 —
    the "hidden" canvas: an invisible pickup-trigger stand-in. Draw nothing. */
 int sprite_ref_hidden(const Entity *e);
+/* Same test without an Entity: is this sprites.omt chunk the "hidden"
+   canvas? Used by the HUD, which only has a chunk id. */
+int sprite_chunk_is_hidden(int chunk_id);
 
 #endif

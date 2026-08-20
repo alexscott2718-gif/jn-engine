@@ -283,7 +283,13 @@ int gam_load(World *w, const char *path) {
                     e->omt_index = ival;
                 } else if (strcmp(prop_name, "EffectType") == 0) {
                     e->effect_type = ival;
-                } else if (strcmp(prop_name, "Points") == 0) {
+                } else if (strcmp(prop_name, "PointValue") == 0 ||
+                           strcmp(prop_name, "Points") == 0) {
+                    /* PointValue is the authored name -- 383 rows, all 3PIC,
+                       C3DPickupItem offset 0x620, awarded through FUN_0042adc0
+                       in HandlePickupCollection. "Points" is not authored by any
+                       shipped level; kept only because dropping a name the
+                       loader already accepted proves nothing. */
                     e->points = ival;
                 } else {
                     prop_bag_add(e, prop_name, (float)ival, ival);

@@ -6,7 +6,7 @@ original's picture-flag economy — and open a certifiable `linked` aspect on
 `C3DPickupItem`, which `docs/linkage_certificates.csv` currently records as
 having "no decompiled-body fidelity to certify".
 
-Status: **proposal**, nothing implemented. Measurements below were taken
+Status: **phases 0-6 complete** (0-3 2026-08-19 §8, 4-6 2026-08-20 §9-11). C3DPickupItem/collection is `linked`; remaining items are decisions and capture evidence, not wiring (§11.5). Measurements below were taken
 2026-08-19 against `assets/gam/*.gam` (35 files) with `tools/gam_parser.py`.
 
 ---
@@ -186,3 +186,647 @@ Phases 0–3 are roughly a focused day: the store and its test are the bulk, the
 collection rewrite is ~80 lines in one file, and the measurements above are
 already done. Phases 4–6 are a second pass — 6 in particular is an oracle plus
 mutation test, which the project treats as its own kind of work.
+
+---
+
+## 8. Phases 0–3 as built (2026-08-19)
+
+Status: phases 0–3 **implemented**; 4–6 remain a separate pass. Everything below
+was measured on this checkout, not carried over from §2.
+
+### 8.1 What landed
+
+| Phase | Where |
+|---|---|
+| 0 | `tools/gam_schema.py` legend + regenerated `docs/gam_schema.md` |
+| 1 | `gamestate.{h,c}` store; `tools/pictures_dump.c` + `tools/check_pictures.py --selftest` (in `make check`) |
+| 2 | `behavior_pickup_core.c`; `behavior_item.c` rewrite; `behavior_creature.c` award path |
+| 3 | the gate + `NeedMoreSound` in `behavior_pickup_core.c`; `tools/gen_picture_pregrants.py` → `src/game/picture_pregrants_generated.h`; cold-entry wiring in `main.c` |
+
+Runtime evidence: `tools/verify_picture_economy.py` (not in `make check` — it
+needs assets *and* a built binary, and loads every level twice).
+
+### 8.2 Corrections to §3.3
+
+The decompiled order in `docs/decomp/C3DPickupItem.md` is not the order §3.3
+lists. `HandlePickupCollection` (00435ce0) is:
+
+```
+if toucher != player            return
+if !CheckRequiredPicAndConsume  return      <- gate BEFORE the collected check
+if PickupIndex > 0 and state[PickupIndex] != 0  return
+update state + visibility (or the PickedUpIndex sprite)
+fire ActivateObject / ToggleObject          <- BEFORE the award
+award PIC_NUMBER + score
+fire NextTrigger                            <- AFTER the award
+play the pickup sound
+```
+
+Two consequences the plan did not carry:
+
+- **The gate runs before the collected-state check.** That is only safe because
+  a collected pickup is hidden and disabled *at load* — `PostLoadPickupItem`
+  (00436200) and `ResetPickupItemVisibility` (00435b20) both read the same
+  table. §3.2 described the table as a write on collection and never said where
+  it is read; without the load-time half it is write-only, re-entry re-awards
+  every picture, **and** — because the gate is first — walking back into a
+  pickup you already took charges you for it again. `behavior_pickup_restore_taken`
+  is that half, called from both `item_on_spawn` and `creature_on_spawn`.
+- **The side effects straddle the award.** Phase 4 has two insertion points, not
+  one; both are marked `PHASE 4 goes here` in `behavior_item.c`.
+
+### 8.3 The gate consumes, and the corpus is short in more places than §5 says
+
+`CheckRequiredPicAndConsume` (vtable 3 slot 54, 00436830) "consumes
+`ReqPicNumAmount` on success, clears the picture flag when the count reaches
+zero". Consume, not threshold — so a level's demand for a picture is the *sum*
+of its gates' amounts, not the number of distinct ids.
+
+§5 derives its four levels by set difference (an id the level never awards).
+Under consume, eight levels cannot meet their own demand:
+
+| Level | id | needs | awards in level |
+|---|---:|---:|---:|
+| Level1 | 3 | 2 | 1 |
+| Level1a | 10 | 4 | 0 |
+| Level3 | 27 | 4 | 3 |
+| level1b | 2 | 3 | 1 |
+| level1b | 12 | 4 | 0 |
+| level1b | 14 | 1 | 0 |
+| level1c | 6 | 9 | 4 |
+| level1c | 8 | 6 | 1 |
+| level1c | 12 | 4 | 2 |
+| level1c | 23 | 18 | 0 |
+| level4 | 3 | 3 | 2 |
+| level4a | 8 | 12 | 0 |
+| level5 | 10 | 4 | 1 |
+
+The pre-grant implements the decision exactly as recorded — the same four levels
+and five ids — with the count set to that level's whole demand, because granting
+one copy of picture 23 would open one of level1c's nine gates. **The remaining
+count shortfalls are left alone and need an owner decision.** They are not
+soft-locks in linear play: the pictures are awarded elsewhere and the flags are
+save-global, which is the design. They *are* differences in what a cold jump can
+finish. `level1c` id 23 is the extreme case: 18 demanded, 13 awarded in the
+entire corpus, so even a perfect linear playthrough can open at most 6 of its 9
+gates — that reads as intended scarcity ("spend your money"), not as a data bug,
+but it is worth confirming before phase 5 puts a counter on the HUD.
+
+### 8.4 The creatures award, but nothing may collect them yet
+
+3FIS/3GIR/3DIN authored 19 of the 237 awarding rows, and `vt_creature`'s award
+path is built and tested. Its vtable **keeps `flags = 0`**, so the engine's
+overlap dispatch never calls it. Adding `ENTITY_FLAG_TRIGGER` would make walking
+into a dino collect it, and `behavior_creature.c` already records the owner's
+2026-06-23 ground truth: these become pickups only *after* the shrink ray
+shrinks them, and the shrink transition is undecompiled. The award path is
+therefore reachable only from the eventual shrink caller and from the
+`JN_TEST_PICTURES` sweep. Wiring the trigger flag would have invented the
+mechanic that note refuses.
+
+### 8.5 Other measured facts
+
+- **`PickupIndex` is wider than the picture economy.** 478 rows carry one:
+  3PIC 383, 3RED 70, 3FIS 12, 3ANI 6, 3GIR 5, 3DIN 2. Only 3PIC/3FIS/3GIR/3DIN
+  author `PIC_NUMBER`, so award coverage is complete, but 3RED and 3ANI descend
+  from `CPickupType` too and their collected state is *not* tracked yet — they
+  re-collect on every level entry. Out of scope here; worth a row in phase 4+.
+- **No row authors `PickupIndex == 0`,** so the original's special non-table
+  pickup branch has no shipped instance. The store still honours it.
+- **`NeedMoreSound`:** 46 rows author a real (>= 0) value; 45 of those are
+  gating rows. The 46th is on a row with no `RequiredPicNum`, so it can never
+  play. (§2's "46" counts all rows; the gate only ever reaches 45.)
+- **`Points` is a phantom.** `gam_loader.c:286` maps a property named `Points`
+  onto `Entity.points`. That name appears **nowhere** in the 35-file corpus; the
+  authored field is `PointValue` (383 rows), which the decomp confirms is the
+  score award (offset 0x620, `FUN_0042adc0`). So `e->points` has always been 0
+  and no pickup in the native port has ever awarded score. Left unfixed on
+  purpose — it is a scoring change in the loader, not part of the picture
+  economy, and it deserves its own reviewable change.
+- **`tools/gam_schema.py` was not idempotent** against its own committed output:
+  regenerating reverted `TRIG` to unnamed, dropping the identity the CTrigger
+  certificate recovered. Phase 0 had to regenerate, so the generator learned the
+  override; a curated `CLASS_OVERRIDES` row also no longer gets the
+  low-confidence `?` marker.
+
+### 8.6 Verification
+
+```
+python3 tools/check_pictures.py --selftest        # in make check
+python3 tools/check_pictures.py --corpus          # in make check-assets
+python3 tools/verify_picture_economy.py           # by hand, needs assets + binary
+```
+
+`--selftest` rejects three mutants: a flat index-keyed collected table (the
+§6 trap), a level swap that clears the picture store, and an off-by-one in the
+required-amount test. `--corpus` re-derives the pre-grant header from the corpus
+and fails if it is stale, and re-checks that every required id is awarded
+somewhere.
+
+`verify_picture_economy.py` over all 35 levels: **21 of 21** authored picture ids
+awarded at runtime; re-entry collects **0** in every level; 105 gate refusals on
+cold un-pre-granted entries; 7 levels where a later sweep pass collected a row an
+earlier pass had refused (the "collect the prerequisite, then succeed" case); and
+all four pre-grant levels go from refusing to clear.
+
+Picture id 0 is the one id no single cold level run can reach: its row (level1c,
+`PickupIndex` 411) is the corpus's only row that both awards and gates, and
+level1c cannot supply the 3 copies of picture 6 it costs on top of its other
+picture-6 gate. Carrying picture 6 in from level2b opens it — a live
+demonstration that the flags really are save-global, which the verifier now
+performs and asserts.
+
+---
+
+## 9. Phase 4 as built (2026-08-20)
+
+Status: phase 4 **implemented**. It turned out to be bigger and more
+interesting than the plan's one-line entry, because the side-effect fields are
+not a trigger chain — they are a **vending-machine mechanism**, and wiring them
+the obvious way would have been wrong.
+
+### 9.1 The dispatch is a state write, not a trigger forward
+
+`docs/decomp/C3DPickupItem.md` pins `Toggle` (inherited `C3DTriggerType`,
+0x584) as "state argument passed to `ToggleObject` and `ActivateObject` targets
+through vtable offset `0x428`", and `HandlePickupCollection` calls
+`fire_tag(ActivateObject, Toggle)` / `fire_tag(ToggleObject, Toggle)`. That slot
+is a **state setter**, not the collision entry point. For a pickup target the
+two are opposites: forwarding `on_trigger` *collects* the target, while
+`SetPickupItemState` (004360b0) state 1 *clears its collected flag and shows
+it*. 36 of the 97 side-effect rows target a `3PIC`, so getting this wrong would
+have silently auto-collected pickups across the level.
+
+Native now models the slot: `EntityVTable` gained `on_set_state`, `vt_item`
+implements it, and `behavior_trigger_set_state_tag` dispatches through it.
+`NextTrigger` keeps the trigger-chain forward, matching the decomp's separate
+`fire_next_trigger`.
+
+### 9.2 The vending machines
+
+Twelve authored pairs across nine levels are a two-object exchange:
+
+| Level | machine | product | price | product awards |
+|---|---|---|---|---|
+| Level1a | `cmach` 204 | `cand` 205 | 2 x pic 10 | pic 8 |
+| Level1a | `fmach` 207 | `flurp` 206 | 2 x pic 10 | pic 7 |
+| level1b | `mdiam` 303 | `diam` 305 | 1 x pic 19 | pic 16 |
+| level1b | `gdish` 317 | `refill` 318 | 1 x pic 4 | — |
+| level1c | `piggy1` 424 | `piggy2` 451 | 1 x pic 10 | — |
+| level2a | `fp` 1026 | `anewflurp` 1025 | 2 x pic 10 | pic 7 |
+| level2a | `cm` 1027 | `cmc` 1028 | 2 x pic 10 | pic 8 |
+| level4 | `mach` 2407 | `cand` 2406 | 2 x pic 10 | pic 8 |
+| level4 | `fmach` 2409 | `flurp` 2408 | 2 x pic 10 | pic 7 |
+| level4a | `cjar` 1501 | `coins2` 1508 | 2 x pic 8 | pic 10 |
+| level5 | `cmach` 2739 | `cbar` 2740 | 2 x pic 10 | pic 8 |
+| level5 | `fmach` 2747 | `flurp` 2748 | 2 x pic 10 | pic 7 |
+
+The machine authors `InitallyActive=1` and the `RequiredPicNum` gate; the
+product authors `InitallyActive=0` and awards a picture. Paying the machine
+fires its `ActivateObject`/`ToggleObject` at the product with `Toggle=1` — state
+1, which reveals it. Collecting the product fires its `ToggleObject` back at the
+machine, re-arming it. **Every one of the twelve is a real cycle in the authored
+graph**, and every full pass is picture-negative (-2 coins, +1 product), so the
+consume gate is the only thing that terminates it.
+
+This is the strongest evidence yet that §8.3's reading is right: if
+`RequiredPicNum` were a threshold rather than a consume, these twelve loops
+would be infinite point-and-picture farms.
+
+`level4a`'s `cjar`/`coins2` runs the exchange the other way — pay 2 candy
+(pic 8) for 1 coin (pic 10) — and is still negative.
+
+### 9.3 `InitallyActive` had to land with it — and the golden trimmed it
+
+The mechanism does not exist without the other half of `PostLoadPickupItem`:
+28 rows author `InitallyActive=0` and must not be collectible until their
+machine pays out. Native ignored the field entirely, so every product was free.
+`behavior_pickup_spawn_gate` now applies both load-time gates — already
+collected, and initially inactive. (Preserve the misspelling; it matches the
+executable string and the schema.)
+
+**The first attempt treated inactive as hidden, and the `level1` golden caught
+it.** Two `level1` rows author `InitallyActive=0` (`egg2b` 834, `hsounds` 837),
+one of them in frame at the capture pose; hiding them changed ~0.05% of both
+golden frames (499 and 564 pixels).
+
+The mechanism is worth stating exactly, because it is not "the engine used to
+show these and now hides them". `behavior_trigger_spawn_base` **already**
+cleared `visible` for an `InitallyActive=0` row — but
+`behavior_animated_update_base` sets `visible = 1` again on the very next tick,
+so the sprite reappeared one frame later and the golden encodes it as **shown**.
+What actually moved the pixels was the first attempt also setting `alive = 0`,
+which stops `item_on_update` and so makes the hide stick. The shipped look has
+always been "visible"; nothing was ever really hidden.
+
+That matters because the two halves of "inactive" are not equally supported.
+*Not collectible* is solid: the field is the "initial active state",
+`ActivateObject` names the transition out of it, and the vending data only works
+that way. *Invisible* is not: the recovered slot-266 body describes states 0 and
+1, both of which **show** the pickup, and never says what the inactive state
+looks like — `set_state_inactive()` is a name in the doc's pseudocode, not a
+recovered body.
+
+So the visual half was withdrawn. `InitallyActive=0` clears the trigger flag and
+latches the once-only guard, and leaves `visible`/`alive` alone. The vending
+machines behave identically (the product still cannot be taken until its
+machine's `Toggle=1` write arrives) and the golden is byte-identical. The open
+question — does the original hide an inactive pickup? — belongs in a capture
+comparison, not in a guess. Owner playtest 2026-08-20: the candy is not
+noticeable in the tray in the native build either way, so nothing about the
+current behaviour looks wrong on screen.
+
+### 9.4 Where the shared helper lives, and why it is not in a new module
+
+`tools/linkage_oracles/C3DAITrigger.py` compiles a **fixed list of `.c` files**
+with a fixed set of stubs in `c3daitrigger_dump.c`. Putting the shared dispatch
+in a new module would make `behavior_ai_trigger.c` reference a symbol that link
+cannot resolve, and the only repair would be editing the oracle. So the helper
+lives *in* `behavior_ai_trigger.c` — the file that owns the certified
+`dispatch-graph` aspect — and `behaviors.h` exports it. The feature moved; the
+contract did not. The oracle passes unchanged.
+
+`behavior_trigger_fire_tag` also carries a native depth cap
+(`TRIGGER_DISPATCH_MAX_DEPTH` 16) with no counterpart in the decomp, because the
+authored graph has real cycles. It logs when it trips; nothing in the corpus
+trips it.
+
+### 9.5 What "the 97 rows fire" actually means
+
+97 authored rows. On a cold corpus-wide sweep, 62 are reached (a row only
+dispatches if its own pickup is collected, and refused rows never get there):
+
+| kind | fired | no native slot | unresolved |
+|---|---:|---:|---:|
+| `ActivateObject` | 8 | 1 | 0 |
+| `ToggleObject` | 7 | 9 | 1 |
+| `NextTrigger` | 0 | 36 | 0 |
+
+`no-native-slot` is honest coverage, not a silent drop: the target class has no
+recovered state or trigger body yet. By target FourCC across all 97 rows,
+`ActivateObject` reaches `3PIC` 21 / `3RCK` 1; `ToggleObject` reaches `3PIC` 15
+/ `3RCK` 8 / `3OMT` 3 / `3HYD` 2 / `3SWN` 2 / `3KIT` 1 / unresolved 1; and
+`NextTrigger` reaches `3CAM` 19 / `3MCA` 20 / `3AIT` 4 — **none** of which has an
+`on_trigger` today. Wiring pickups to start cutscenes was considered and
+deliberately deferred (owner decision, 2026-08-20): it couples the pickup path
+to the cutscene system, and both cutscene-camera aspects are separately
+certified.
+
+### 9.6 Verification
+
+`tools/verify_picture_economy.py` now additionally checks that every dispatch
+the engine emits is an authored row (no spurious targets), reports the outcome
+histogram above, and proves the vending mechanism end to end: **8 of the 12
+pairs pay, reveal and re-arm** on a cold entry. The other 4 are unaffordable on
+a single-level visit — `level1b` 303, `level4` 2407, `level5` 2739 and 2747 —
+which is the §8.3 count shortfall showing up in gameplay rather than a wiring
+failure, so the tool asserts the conditional claim (*when the machine's gate
+passes, the product is revealed*) and reports affordability separately.
+
+`tools/check_pictures.py --selftest` now rejects **4** mutants; the new one
+makes `gamestate_pickup_clear` a no-op, which breaks the re-arm. The clear is a
+flag flip, never a slot eviction — evicting from an open-addressed table would
+strand every key that probed past the hole, and the unit test pins that too.
+
+---
+
+## 10. Phase 5 as built (2026-08-20)
+
+Status: phase 5 **implemented**, but not the way the plan's one-liner implies.
+
+### 10.1 The plan pointed at a counter that is not identified
+
+Phase 5 reads "HUD picture counter (`C2DInGameMenu.md` documents three counters
++ `DAT_004f83c0`)". That doc does decode `DrawHud` (00406690) to four literal
+positions and formats — `this[0x140]` `%3.0d` at `(0x7d, 0x8c)`, `this[0x13f]`
+`%3.0d` at `(400, 0x8c)`, `this[0x141]` `%5.0d` at `(0x185, 0x10e)`, and
+`DAT_004f83c0` `%6.0d` at `(0x1a9, 0x1b3)` — but it also lists this as an **open
+question**:
+
+> Map each `this[0x13f..0x141]` + `DAT_004f83c0` counter to its gameplay meaning
+> (score, fuel, gadget count, lives) — the capture shows positions; the source
+> values need the producer functions.
+
+So nothing identifies any of the four as the picture counter. The
+`C2DInGameMenu/hud-draw` certificate row is `linked-blocked` for exactly this
+reason ("doing so from one frame would fabricate parity"), and the extracted
+`hud_layout_generated.h` carries only the two counters the capture actually
+shows. Feeding the picture store into one of those slots would have invented the
+mapping the certificate refuses to invent.
+
+### 10.2 What landed instead
+
+A native readout, in the shipped menu font, in the one screen corner the
+extracted layout leaves empty (top right; atom / status icons / gauge are
+top-left, the gadget cluster is bottom-left, the score counter bottom-right).
+Same drop-shadow idiom as the existing LEVEL CLEAR banner, which is the
+precedent for native chrome that makes no parity claim. It reads
+
+```
+PICTURES 18   23 x18
+```
+
+— total held, then up to six held ids with their counts, then `more`. (The
+shipped atlas is A-Z a-z 0-9 only, so an ellipsis would render as three blanks.)
+
+It draws **only while something is held**. That is a design choice — the readout
+is about an economy that is idle most of the time — and it is also why the
+`level1` golden is untouched: at the capture pose the store is empty, so nothing
+is emitted. No counter position, format or producer from `DrawHud` is used, and
+`hud_layout_generated.h` is not modified.
+
+### 10.3 Verification
+
+`make check-assets` green: `level1` golden byte-identical, so the new chrome
+provably stays out of the capture path. Visual check by screenshot on `level1c`
+after a cold pre-granted entry (18 x picture 23) confirms the readout tracks the
+store and clears every captured widget.
+
+When the `DrawHud` producers are eventually recovered and one of the four
+counters is shown to be the picture count, this readout is the thing to replace
+— it is deliberately easy to delete.
+
+---
+
+## 11. Phase 6 as built (2026-08-20) — the aspect is linked
+
+Status: phase 6 **implemented**. `C3DPickupItem` / `collection` moved from
+`linked-blocked` to **`linked`**; the scoreboard goes 15 → **16** oracle-verified
+aspects. Phases 0–6 are complete.
+
+### 11.1 The row invited this
+
+The blocked row's own closing line was "A future pass that ports the actual
+`RequiredPicNum`/`PickupIndex`/`ActivateObject` mechanism could open a real
+`linked` aspect here." Phases 2–4 were that pass, so promoting the row is
+following the certificate, not editing one to make room for a feature.
+
+### 11.2 The oracle
+
+`tools/linkage_oracles/C3DPickupItem.py` compiles the real, unmodified
+`behavior_item.c` / `behavior_pickup_core.c` / `gamestate.c` (plus
+`behavior_ai_trigger.c` for the shared tag dispatch) and drives them over
+**every one of the 383 shipped `3PIC` rows** in the 35 levels. Per row it
+diffs four things against expectations computed from the recovered bodies and
+that row's own authored properties — never from a tuned constant:
+
+1. **Load gate.** After the real `on_spawn`, a row authoring
+   `InitallyActive=0` is latched uncollectible and one authoring 1 is not.
+2. **Order and effects, funded.** Seed exactly `ReqPicNumAmount` of
+   `RequiredPicNum`, touch the row, and diff the *whole ordered event
+   sequence* — gate, each state dispatch and its outcome, the award, the
+   next-trigger, the sound — against what the decompiled order predicts.
+3. **Refusal.** Seed one short: the gate must refuse, play `NeedMoreSound`
+   where one is authored, emit nothing else, and consume nothing (no partial
+   drain).
+4. **Gate before collected-check.** Mark the row collected, fund it, touch it
+   again — the currency must still be taken, because the gate runs first. A
+   port that reordered those two leaves the count untouched and is rejected.
+
+`--selftest` mutation-tests the oracle against three defects it must catch:
+swapping the gate and the collected-state check, moving the award ahead of the
+side-effect dispatch, and consuming on a refusal. All three turn it red.
+
+The dumper reads the engine's own `[PICGATE]` / `[PICSTATE]` / `[PICFIRE]` /
+`[PICAWARD]` lines rather than paraphrasing them, so the instrumentation cannot
+drift from the behaviour; it adds only what the engine cannot say for itself
+(post-spawn state, score delta, the stubbed sound's position, and the three
+probe separators).
+
+### 11.3 Two real defects the oracle found
+
+Both while it was being written, which is the point of building one:
+
+- **`Points` is a phantom property.** `gam_loader.c` mapped a property named
+  `Points` onto `Entity.points`. That name appears nowhere in the 35-file
+  corpus — the authored field is `PointValue` (383 rows, class doc offset
+  `0x620`, awarded through `FUN_0042adc0`). `Entity.points` had therefore always
+  been 0 and **no pickup in the native port had ever awarded score**. §8.5
+  recorded this and deliberately left it; certifying `HandlePickupCollection`
+  made it in-scope, because the recovered award step is "PIC_NUMBER *and*
+  score" and excluding half of it would certify a different function.
+- **Unset scored negative.** With `PointValue` loading, the award tested
+  truthiness (`if (e->points)`), and `-1` is the format's universal unset
+  convention — so every row authoring no score subtracted a point. Now it
+  awards only a positive value.
+
+### 11.4 What the certificate does not claim
+
+Carried into the certificate note and the class doc, not buried here:
+`PickedUpIndex`'s replacement-sprite swap; `TimesToTrigger`/`trigger_count`
+repeat limiting (native latches once-only); `IsAmbient`; `PassThru`/`ShowArrow`
+(no isolated consumer in the decomp either); the state slot on every class
+except the pickup family, so non-`3PIC` `ActivateObject`/`ToggleObject` targets
+and **all** `NextTrigger` targets resolve and find no native body; the sound
+*mix*, of which only the sequence position is certified; whether the original
+hides an `InitallyActive=0` pickup (§9.3); and the `3FIS`/`3GIR`/`3DIN`
+creature leaf, which is a different FourCC on a different vtable.
+
+### 11.5 Where this leaves the plan
+
+Phases 0–6 are done. The open items are no longer wiring:
+
+- the count shortfall in §8.3 — four levels beyond the pre-grant table cannot
+  meet their own picture demand, and four vending machines are unaffordable on
+  a cold single-level entry. An owner call, not a bug.
+- whether an inactive pickup is invisible (§9.3) — needs a capture.
+- `3RED` (70 rows) and `3ANI` (6) carry `PickupIndex` and share `CPickupType`
+  but do not consult the collected-state table, so they re-collect on every
+  level entry.
+- the `DrawHud` counter producers (§10), which would let the native readout be
+  replaced by the real one.
+
+---
+
+## 12. Owner playtest, 2026-08-20
+
+The first time a human drove this, Level 1A announced **LEVEL CLEARED** after the
+second candy. Two defects, both introduced by phase 4, neither reachable by any
+existing check:
+
+**`InitallyActive` had two owners.** `behavior_trigger_spawn_base` already
+handled the field (`behavior_base.c`), so phase 4's
+`behavior_pickup_spawn_gate` was a second copy — and the base's copy cleared
+`ENTITY_FLAG_TRIGGER` *before* `item_on_spawn` could read it to decide whether
+the row belongs in the level's item tally. Level 1A therefore counted **3**
+items instead of 5 and cleared three pickups early. `InitallyActive` is a
+`CPickupType` field and only `3PIC` authors it (376 rows, 28 of them 0), so the
+block was inert for every other caller of the shared trigger base — button,
+checkpoint, laser trigger, load, neutron, pickup, switch, trig, trophy. It now
+lives only in the pickup core.
+
+**A re-armed machine was counted every purchase.** `items_collected` ran past
+`items_total` ("collected 4 / 3") because a vending machine can be bought
+repeatedly. A pickup now counts once, tracked by `Entity.pickup_counted` — a
+flag distinct from `user_flag` precisely because `SetPickupItemState` state 1
+clears that one to re-arm the product.
+
+That fix would in turn have broken the pickup animation, which
+`behavior_player.c` triggers by watching `items_collected` rise: a second
+purchase would no longer have animated. Two questions were riding on one
+counter — "how much of this level is done" (count once) and "did something just
+get picked up" (every time). They are now separate: `gamestate_pickup_events()`
+is the edge, `items_collected` is the total.
+
+**Why nothing caught this.** The `C3DPickupItem` oracle stubs
+`behavior_trigger_spawn_base`, so it could not see the duplicated handling — the
+bug lived exactly in the seam the stub covers. `verify_picture_economy.py`
+drives collection through the sweep, which ignores the item tally entirely. A
+useful reminder that a green oracle certifies the body it compiles, not the
+lifecycle around it.
+
+### Still open from the playtest
+
+`jimpickup.ASE` is the odd clip out: **792 faces where every other player
+animation has 814**, and it is the only clip besides `jimstop` that carries a
+real texture reference (`jimycarl.png`; the rest export `tex='(none)'`). Every
+player clip except `jimstop` also lacks `MESH_TVERT` and gets object-space UVs
+generated at load. That is an asset/export problem, not a picture-economy one,
+and it is the likely source of the long-standing "pickup animation is broken"
+report — swapping to a differently-topologised mesh mid-play would visibly pop.
+Not investigated further here.
+
+---
+
+## 13. Owner playtest round 2, 2026-08-20
+
+### 13.1 `InitallyActive` had a *third* owner, and it was the renderer
+
+The empty vending tray was not a decision, it was a bug. `draw_scene`
+(`main.c`) skipped any entity whose **authored** `InitallyActive` is 0 —
+forever. That is correct at boot (2026-06-11 QA established the original does
+not draw these) but it reads a `.gam` property, not runtime state, so nothing
+could ever un-hide one. The candy stayed invisible in the tray even after the
+machine released it.
+
+Together with §12's discovery in `behavior_trigger_spawn_base`, the field had
+**three** owners: the spawn base, the renderer, and phase 4's pickup gate. It
+now has one. `behavior_pickup_spawn_gate` raises `Entity.pickup_inactive` from
+the authored property at spawn; `SetPickupItemState` (004360b0) lowers it,
+because both recovered states show the pickup; the renderer reads the flag.
+Boot behaviour is unchanged — the `level1` golden is byte-identical — and
+activation now actually reveals the product, which is the entire point of an
+activation.
+
+That also settles §9.3's open question in the only direction the evidence
+allows. The original *does* hide these at boot (QA-established); what was
+missing was the un-hide on activation, not the hide.
+
+### 13.2 The pickup card
+
+Owner request: *"typically when you pick up, you get a popup with the item card
+with a number in the top right hand corner of the card to show how many of that
+item you have."*
+
+The **hook** is decomp-supported. `C3DPickupItem`'s Assets table lists
+`FUN_004061b0` / `FUN_004061c0` / `FUN_004061d0` as the picture/inventory
+service its collection path calls, and `docs/decomp/_scene_sequencer.md` names
+`FUN_004061d0(id, _)` as the "On-screen `+counter` notify queue". So a pickup
+really does raise a counter notification, at the point we now raise one.
+
+The **layout** is not. The original draws it from the `C2DInGameMenu` canvas
+records the `hud-draw` certificate is still `linked-blocked` on, and
+`assets/omt/inventory.omt`'s twelve 50x50 / 40x40 / 20x100 chunks cannot be
+tied to picture ids without the reward-grid table (`FUN_004038c0(list, slot,
+v)`), which is also unrecovered. So the card is native chrome — same stance as
+§10 — and it shows **the pickup's own sprite**, which we do know, because
+`SpriteIndex` resolves through the generated chunk map. Nothing unrecovered is
+invented.
+
+It sits under the picture readout, holds for 2.5 s, fades over the last half
+second, and carries the count in its top-right corner. A pickup that awards no
+picture gets the card without a number rather than a misleading zero.
+
+### 13.3 The pickup animation is an asset defect, and it is now pinned
+
+`assets/ase/jimpickup.ASE` is broken as exported, in two ways:
+
+- It contains **28 `GEOMOBJECT`s**: the character mesh `01jimmy` *plus the
+  entire Biped rig* (`Bip01`, `Bip01 Head`, `Bip01 L Calf`, `Bip01 Footsteps`,
+  …). The loader takes only `01jimmy`, so the bone soup is not drawn — but the
+  export is plainly wrong.
+- Its `01jimmy` is **407 vertices / 792 faces**, where every other player clip
+  is **426 / 814**, and the file has **no `MESH_TVERTEX` at all**.
+
+Only `jimstop.ase` ships real texture coordinates (3551 tverts); every other
+clip gets them at runtime from `player_anim.c`'s `copy_shared_jimmy_uvs`, which
+copies UVs from `jimstop` — and **bails when the vertex counts differ**. That is
+true for exactly one clip: the pickup. So `jimpickup` alone renders with the
+loader's generated object-space UVs, which is why Jimmy's head becomes a flat
+slab and his body a jumble of colour blocks for the 0.45 s the pose is up.
+
+**Not fixed here, deliberately.** The honest repairs are (a) re-export the clip
+with UVs and without the rig, or (b) transfer UVs from `jimstop` by nearest
+vertex. (b) is tempting and cheap, but the two meshes are in *different poses*
+at frame 0 — idle versus reaching down — so nearest-position matching would tie
+a hand vertex to a knee. That is guessing at a hero character's texturing, which
+is exactly the class of thing this project refuses to do without evidence. It
+wants the source asset, or a decision to accept an approximation.
+
+---
+
+## 14. The pickup animation was never a shipped animation (2026-08-20)
+
+§13.3 recorded `assets/ase/jimpickup.ASE` as a broken export and offered to
+re-export it. **There is nothing to re-export from, and the owner's reading is
+the better one: it is a leftover.**
+
+### 14.1 The search for a source, and what it found
+
+| Candidate | Result |
+|---|---|
+| `/home/scotty/xp-jnbg-original/` | 8 `VR*.omt` files only — no character source |
+| `.grn` (Granny) anywhere in `assets/` | none |
+| `assets/glb/ase/jimpickup.glb` | has `TEXCOORD_0`, but **one distinct UV pair, all zeros** — a placeholder, generated from the same broken ASE |
+| `assets/glb/ase/jimstop.glb` | same: all-zero UVs |
+| repo history | the ASEs arrived in one bulk `phase12 baseline` commit; no extractor reproduces them |
+
+`jimstop.ase` is the **only** Jimmy file in the tree carrying real texture
+coordinates (3551 tverts). Every other clip borrows them by vertex index at
+runtime. Nothing here can supply UVs for a 407-vertex mesh.
+
+### 14.2 It is the odd one out on every axis
+
+| | the other 21 clips | `jimpickup` |
+|---|---|---|
+| mesh | 426 verts / 814 faces | **407 / 792** |
+| `GEOMOBJECT`s | 1 (`01jimmy`) | **28** — `01jimmy` *plus the whole Biped rig* (`Bip01`, `Bip01 Head`, `Bip01 L Calf`, `Bip01 Footsteps`, …) |
+| pose space | shares `jimstop`'s | **different**: 0 of 407 vertices coincide with `jimstop`'s, median nearest-vertex distance **11.8 units** on a ~145-unit character, and the bbox spans differ on every axis |
+| texture coords | none (borrowed by index) | none, and **cannot** borrow — the vertex counts differ, so `copy_shared_jimmy_uvs` bails |
+
+A clip that is alone in shipping the raw Max rig, alone in its topology, and
+alone in its pose space is not a damaged member of the set — it never went
+through the pipeline the other 21 did. Combined with the owner's report that no
+pickup animation appears in an original playthrough, the conclusion is that this
+is an unused leftover asset.
+
+### 14.3 What was removed
+
+The player no longer selects `PA_PICKUP`. The 0.45 s countdown, the
+`items_collected` edge watch that armed it, and `gamestate`'s pickup-event
+counter all go with it — that counter existed only to keep this animation firing
+once the level tally became count-once (§12), so with the animation gone it had
+no consumer.
+
+Kept on purpose: the `PA_PICKUP` enum value and its `PICKUP`/`HIPICKUP` dispatch
+alias, so pose ids do not shift and the `C3DAnimated` dispatch surface is
+undisturbed; and `jimpickup.ASE` on disk, because `entity_visual.c` uses it as
+the `3PIC`/`ITEM` fallback mesh.
+
+### 14.4 The hovering pickups
+
+Unrelated bug, found in the same pass. `item_on_update` advanced a
+**function-static** clock shared by every pickup, incremented once per pickup
+per frame — so the hover ran N times too fast in a level with N pickups, and
+changed speed whenever one was collected. Each entity already carries its own
+clock (`anim_time`, advanced once per frame by the animated base); the bob now
+uses that, with the existing `x` term keeping neighbours out of phase.
+
+This is a real change to what level 1 looks like in frame 0, so the `level1`
+goldens were regenerated — in the repository Docker image via
+`make regen-goldens`, never on a physical GPU. The change was isolated first:
+reverting only the bob line and re-running `make check-assets` turns everything
+green, which proves the animation removal contributes nothing to the pixels and
+the bob is the sole cause. Delta: **559 px (0.061%)** in frame 0 and **681 px
+(0.074%)** in frame 1, confined to the band the pickups occupy. The 8 `fixture0`
+goldens regenerated byte-identical.

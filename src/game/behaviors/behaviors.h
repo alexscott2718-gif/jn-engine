@@ -50,6 +50,18 @@ int behavior_goddard_mode(void);
 int behavior_goddard_apply_ai_state(Entity *g, int ai_state, int ai_speed); /* 3AIT C3DAI-target branch -> Goddard scripted mode */
 extern const EntityVTable vt_escort;      /* 3SUM/3PIR — C3DSumo/C3DPirate exit-escort actors */
 extern const EntityVTable vt_ai_trigger;  /* 3AIT — C3DAITrigger AI/script mission-wiring volume */
+/* Shared C3DTriggerType tag dispatch (defined in behavior_ai_trigger.c, which
+   owns the certified dispatch-graph aspect -- see the note there). Both
+   C3DAITrigger and C3DPickupItem author ActivateObject / ToggleObject /
+   NextTrigger and must dispatch them identically.
+     find_by_tag     ObjectTag -> entity, or NULL.
+     fire_tag        forward the target's on_trigger (the trigger chain).
+     set_state_tag   call the target's state slot with `state` (the original's
+                     vtable offset 0x428, fed by the authored Toggle).
+   Both dispatchers resolve first and are depth-capped against cycles. */
+Entity *behavior_trigger_find_by_tag(World *w, const char *tag);
+Entity *behavior_trigger_fire_tag(World *w, const char *tag, Entity *by);
+Entity *behavior_trigger_set_state_tag(World *w, const char *tag, int state);
 Entity *behavior_ai_trigger_test_fire(World *w);  /* JN_TEST_AITRIG headless hook */
 Entity *behavior_ai_trigger_fire_tag(World *w, const char *tag); /* JN_TEST_SCENE headless hook */
 extern const EntityVTable vt_tesla;       /* 3TES — C3DTesla electric hazard */

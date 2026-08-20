@@ -134,6 +134,7 @@ check:
 	python3 tools/audit/spec_check.py
 	python3 tools/check_ground_truth_requests.py --selftest
 	python3 tools/check_ui_text.py --selftest
+	python3 tools/check_pictures.py --selftest
 	python3 tools/check_determinism.py --level fixture0 --frames 300 --seed 1
 	python3 tools/check_goldens.py --level fixture0 --frames $(FIXTURE_GOLDEN_FRAMES) \
 		--goldens tests/goldens/fixture0
@@ -141,6 +142,7 @@ check:
 check-assets: check
 	python3 tools/check_goldens.py --level level1 --frames $(LEVEL1_GOLDEN_FRAMES) \
 		--goldens tests/goldens/level1
+	python3 tools/check_pictures.py --corpus
 	python3 tools/check_oracle_diff.py
 	python3 tools/check_linkage_certificates.py --no-write
 

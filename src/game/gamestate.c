@@ -1,7 +1,9 @@
 #include "gamestate.h"
 #include "game_flow.h"
 #include "entity_visual.h"
+#include "picture_pregrants_generated.h"
 #include "../engine/world.h"
+#include <ctype.h>
 #include <stdio.h>
 #include <string.h>
 #include <strings.h>
@@ -102,6 +104,135 @@ void gamestate_cycle_active_tool(void) {
            g_state.inventory[g_state.active_tool].tag, g_state.active_tool + 1);
 }
 
+/* --- Picture-flag economy (CPickupType) ---------------------------------
+   The count store behind CheckRequiredPicAndConsume (00436830) and the
+   PIC_NUMBER award in HandlePickupCollection (00435ce0). The original keeps a
+   flag *and* a count per picture id and clears the flag when the count reaches
+   zero; a single count carries both -- count > 0 is the flag. */
+int gamestate_pic_count(int id) {
+    if (id < 0 || id >= PIC_ID_MAX) return 0;
+    return g_state.pic_count[id];
+}
+
+void gamestate_pic_award(int id, int n) {
+    if (id < 0 || id >= PIC_ID_MAX) return;
+    if (n < 1) return;
+    g_state.pic_count[id] += n;
+    printf("[PICTURE] award id=%d +%d -> %d\n", id, n, g_state.pic_count[id]);
+}
+
+int gamestate_pic_consume(int id, int n) {
+    if (id < 0 || id >= PIC_ID_MAX) return 0;
+    /* ReqPicNumAmount defaults to 1 in the 3PIC constructor (004358b0); the
+       authored rows that leave it at -1 mean the same thing. */
+    if (n < 1) n = 1;
+    if (g_state.pic_count[id] < n) return 0;
+    g_state.pic_count[id] -= n;
+    printf("[PICTURE] consume id=%d -%d -> %d\n", id, n, g_state.pic_count[id]);
+    return 1;
+}
+
+/* --- Collected-state table (DAT_004f8438) -------------------------------- */
+static void pickup_level_key(const char *level, char *out, size_t out_size) {
+    size_t i = 0;
+    if (level)
+        for (; level[i] && i + 1 < out_size; i++)
+            out[i] = (char)tolower((unsigned char)level[i]);
+    out[i] = '\0';
+}
+
+static unsigned pickup_hash(const char *key, int index) {
+    unsigned h = 2166136261u;
+    for (const char *p = key; *p; p++) {
+        h ^= (unsigned char)*p;
+        h *= 16777619u;
+    }
+    h ^= (unsigned)index;
+    h *= 16777619u;
+    return h;
+}
+
+/* Find the slot for (level, index). With create=0 a miss returns NULL; with
+   create=1 a miss claims the first free slot (NULL only if the table is full,
+   which 478 authored rows in 1024 slots cannot reach). */
+static PickupTakenSlot *pickup_slot(const char *level, int index, int create) {
+    char key[PICKUP_LEVEL_MAX];
+    pickup_level_key(level, key, sizeof key);
+    if (!key[0]) return NULL;
+
+    unsigned h = pickup_hash(key, index);
+    for (unsigned probe = 0; probe < PICKUP_TAKEN_SLOTS; probe++) {
+        PickupTakenSlot *s =
+            &g_state.pickup_taken[(h + probe) & (PICKUP_TAKEN_SLOTS - 1)];
+        if (!s->level[0]) {
+            if (!create) return NULL;
+            snprintf(s->level, sizeof(s->level), "%s", key);
+            s->index = index;
+            g_state.pickup_taken_count++;
+            return s;
+        }
+        if (s->index == index && strcmp(s->level, key) == 0) return s;
+    }
+    return NULL;
+}
+
+int gamestate_pickup_taken(const char *level, int pickup_index) {
+    /* HandlePickupCollection only consults the table for PickupIndex > 0;
+       index 0 is its special non-table pickup. */
+    if (pickup_index <= 0) return 0;
+    PickupTakenSlot *s = pickup_slot(level, pickup_index, 0);
+    return s && s->taken;
+}
+
+void gamestate_pickup_mark(const char *level, int pickup_index) {
+    if (pickup_index <= 0) return;
+    PickupTakenSlot *s = pickup_slot(level, pickup_index, 1);
+    if (!s) {
+        printf("[PICKUP] ERROR: collected-state table full (%d slots)\n",
+               PICKUP_TAKEN_SLOTS);
+        return;
+    }
+    s->taken = 1;
+}
+
+void gamestate_pickup_clear(const char *level, int pickup_index) {
+    if (pickup_index <= 0) return;
+    /* create=0: nothing to clear if it was never marked. */
+    PickupTakenSlot *s = pickup_slot(level, pickup_index, 0);
+    if (s) s->taken = 0;
+}
+
+void gamestate_set_level(const char *level) {
+    pickup_level_key(level, g_state.level, sizeof g_state.level);
+}
+
+const char *gamestate_level(void) {
+    return g_state.level;
+}
+
+void gamestate_new_game(void) {
+    memset(g_state.pic_count, 0, sizeof g_state.pic_count);
+    memset(g_state.pickup_taken, 0, sizeof g_state.pickup_taken);
+    g_state.pickup_taken_count = 0;
+    printf("[PICTURE] new game: picture counts and collected pickups cleared\n");
+}
+
+int gamestate_pregrant_pictures(const char *level) {
+    char key[PICKUP_LEVEL_MAX];
+    int granted = 0;
+    pickup_level_key(level, key, sizeof key);
+    if (!key[0]) return 0;
+    for (size_t i = 0; i < PICTURE_PREGRANT_COUNT; i++) {
+        if (strcmp(PICTURE_PREGRANTS[i].level, key) != 0) continue;
+        gamestate_pic_award(PICTURE_PREGRANTS[i].id, PICTURE_PREGRANTS[i].count);
+        granted += PICTURE_PREGRANTS[i].count;
+    }
+    if (granted)
+        printf("[PICTURE] pre-granted %d picture(s) for a cold jump into '%s'\n",
+               granted, key);
+    return granted;
+}
+
 /* --- Sandbox / verification mode (web Use-Tool/vehicle/sandbox UI) -------
    Runtime toggle of the sandbox flag (entity_visual draws the otherwise-hidden
    rideable rocket when on; main.c spawns one where the level has none). Turning
@@ -146,6 +277,7 @@ int gamestate_toggle_campaign_web(void) {
         return 0;
     }
     char ng[64] = {0};
+    gamestate_new_game();   /* a campaign start is a new game */
     if (game_flow_begin_task("NewGame", ng, sizeof ng, NULL) && ng[0])
         gamestate_request_level_swap(ng, "");
     else
@@ -159,6 +291,22 @@ int gamestate_campaign_active_web(void) { return game_flow_campaign_active(); }
 
 void gamestate_item_added(void) {
     g_state.items_total++;
+}
+
+#define PICKUP_POPUP_SECONDS 2.5f
+
+void gamestate_notify_pickup(int sprite_index, int picture_id, int count) {
+    g_state.popup_sprite = sprite_index;
+    g_state.popup_id = picture_id;
+    g_state.popup_count = count;
+    g_state.popup_timer = PICKUP_POPUP_SECONDS;
+}
+
+void gamestate_tick(float dt) {
+    if (g_state.popup_timer > 0.0f) {
+        g_state.popup_timer -= dt;
+        if (g_state.popup_timer < 0.0f) g_state.popup_timer = 0.0f;
+    }
 }
 
 void gamestate_item_collected(void) {
@@ -197,7 +345,11 @@ void gamestate_reset_for_new_level(void) {
     g_state.swap_level[0] = '\0';
     g_state.swap_spawn[0] = '\0';
     g_state.spawn_set = 0;
-    /* items_collected intentionally preserved (lifetime tally). */
+    /* items_collected intentionally preserved (lifetime tally).
+       pic_count and pickup_taken are intentionally preserved too: the picture
+       flags are save-global and outlive a level. level1b gates on picture 14,
+       which is only awarded in level2/level2b, so clearing here would make the
+       shipped corpus uncompletable. Only gamestate_new_game() clears them. */
 }
 
 void gamestate_set_spawn(float x, float y, float z) {

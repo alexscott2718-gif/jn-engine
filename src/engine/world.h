@@ -11,6 +11,13 @@ typedef struct EntityVTable {
     void (*on_spawn)  (struct Entity *e, struct World *w);
     void (*on_update) (struct Entity *e, struct World *w, float dt);
     void (*on_trigger)(struct Entity *e, struct Entity *by);
+    /* CGameObject state setter -- the original's vtable offset 0x428, the slot
+       a C3DTriggerType's ActivateObject / ToggleObject dispatch calls on its
+       target with the authored `Toggle` value. Distinct from on_trigger: for a
+       pickup, on_trigger collects it, while state 1 re-arms it (see
+       C3DPickupItem::SetPickupItemState, 004360b0). NULL on every class whose
+       state body is not recovered yet, which is all but the pickup family. */
+    void (*on_set_state)(struct Entity *e, int state);
     unsigned int flags; /* see ENTITY_FLAG_* */
 } EntityVTable;
 
@@ -98,6 +105,15 @@ typedef struct Entity {
     float move_vert;              /* shared movement-base vertical velocity */
     float move_lean;              /* shared movement-base lean angle */
     int   user_flag;             /* per-type: door open, item collected, ... */
+    int   pickup_inactive;       /* CPickupType: authored InitallyActive=0 and
+                                    not activated yet. The renderer skips it
+                                    while set; SetPickupItemState clears it. */
+    int   pickup_counted;        /* CPickupType: already in the level item
+                                    tally. Distinct from user_flag because
+                                    SetPickupItemState state 1 clears that
+                                    one to re-arm a vending-machine product,
+                                    and a re-armed pickup must not be counted
+                                    twice. */
     float user_float;            /* per-type: phase, timer, ... */
     float hp;                    /* enemy/destructible health points (0 = unset) */
     GamProp props[ENTITY_MAX_PROPS]; /* generic .gam property bag (see above) */
