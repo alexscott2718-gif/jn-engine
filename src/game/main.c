@@ -825,29 +825,84 @@ static int draw_authored_button(const Entity *e) {
     return 1;
 }
 
-static int draw_goddard_dish_arrow(const Entity *e) {
-    if (!e || strcmp(e->type, "3PIC") != 0) return 0;
-    if (!sprite_ref_hidden(e)) return 0;
-    if (gam_prop_i(e, "ShowArrow", -1) != 1) return 0;
-    if (gam_prop_i(e, "RequiredPicNum", -1) != 4) return 0;
-    const char *toggle = gam_str(e, "ToggleObject", NULL);
-    const char *next = gam_str(e, "NextTrigger", NULL);
-    if (!toggle || strcasecmp(toggle, "refill") != 0 ||
-        !next || strcasecmp(next, "godeat") != 0)
-        return 0;
+/* C3DPickupItem ShowArrow (0x6a0, ctor default 1). Observed in the original
+   2026-08-20: a red arrow spins clockwise above the pickup and points down at
+   it. 353 rows author the flag and every one is a 3PIC; 347 are 1. The asset is
+   assets/ase/3Darrow.ASE, whose own export path reads
+   "D:\Jimmy (ken)\3D Items (pick up)\3D ARROW\3Darrow.bmp".
 
-    const char *arrow = sprite_chunk_path(33);  /* sprites.omt "arrow" */
-    unsigned int tex = arrow ? tex_cache_get(arrow) : 0;
-    if (!tex) {
-        audit_line("entity", e->type, e->tag, "sprite-unresolved",
-                   arrow, NULL, 0);
-        return 1;
-    }
-    renderer_draw_billboard(tex, e->x, e->y + 180.0f, e->z,
-                            200.0f, 200.0f, 0.0f, 0.0f, 0.0f, 0.0f);
-    audit_line("entity", e->type, e->tag, "pickup-arrow", arrow, NULL, tex);
-    return 1;
+   Measurements are from the owner's description at the Level 1A candy machine:
+   the arrow's lower tip sits a little below the top of Jimmy's head and it is
+   about the size of his torso. Jimmy's mesh spans 209 units with his head
+   145 above his origin; the arrow mesh is 103 tall, so a 0.70 scale gives ~72
+   units (a torso) and a 110-unit rise puts it in that band above a low pickup.
+
+   Drawn for authored-inactive pickups too: the only rows that switch the flag
+   off (gcan, refill, rescue) are themselves InitallyActive=0, which would be
+   pointless if inactive pickups never carried one. Not drawn once collected.
+
+   NOT translucent yet -- the model path has no alpha parameter and the texture
+   has no alpha channel, so that needs a renderer change (see the plan, 15.3). */
+/* pointarrow.ASE, not 3Darrow.ASE. 3Darrow is the flat source spline
+   (node "Line04", zero depth); pointarrow is the real 3D arrow -- 11 verts,
+   55 x 13 x 76 -- and the artist shipped a Jimmy reference model in the same
+   file, which is how the scale and height below are measured rather than
+   guessed. Its own *BITMAP is D:
+eutron
+un\pngDarrow.png, the red
+   swatch, so both files share that texture and the catalog name. */
+#define PICKUP_ARROW_MODEL "assets/ase/pointarrow.ASE"
+#define PICKUP_ARROW_TEX   "assets/png/3Darrow.png"
+#define PICKUP_ARROW_RISE  0.0f     /* none needed: in the authoring scene the
+                                      arrow spans 39.7..115.2 above the origin
+                                      while Jimmy spans 0.6..215.3, so the mesh
+                                      is built with the ITEM at the origin and
+                                      the arrow already floating over it. */
+#define PICKUP_ARROW_SCALE 1.0f     /* authored size: 75.5 tall against a 214.7
+                                      Jimmy in the same file -- 35% of him, i.e.
+                                      a torso, exactly as observed. */
+#define PICKUP_ARROW_SPIN  2.0f     /* rad/s; negated below for clockwise */
+#define PICKUP_ARROW_ALPHA 0.35f     /* observed translucent; exact value unmeasured */
+
+/* C3DArrow (3ARR), the yellow navigation billboard on sprites.omt canvas 33.
+   Observed 2026-08-20: "a vertical pulse scale wave with the red tint glow
+   pulse". So the arrow stretches and squashes along its HEIGHT only -- the
+   width holds -- and the red tint rides the same wave as a glow rather than
+   being painted on constantly. One phase drives both, so the stretch and the
+   glow peak together. Numbers are calibration guesses; the mechanism is what
+   was observed. */
+#define NAV_ARROW_PULSE_AMP  0.38f   /* +/- fraction of the authored HEIGHT */
+#define NAV_ARROW_PULSE_RATE 6.5f    /* rad/s, shared by stretch and glow */
+#define NAV_ARROW_GLOW_R     1.00f   /* tint at the red end of the pulse; */
+#define NAV_ARROW_GLOW_G     0.45f   /* the other end is untinted yellow */
+#define NAV_ARROW_GLOW_B     0.35f
+
+/* Advanced once per frame by the main loop, never per entity -- draw_scene runs
+   twice a frame when the QA pick pass is armed. */
+static float s_arrow_clock = 0.0f;
+
+static void draw_pickup_arrow(const Entity *e) {
+    if (strncmp(e->type, "3PIC", 4) != 0) return;
+    if (gam_prop_i(e, "ShowArrow", -1) != 1) return;
+    /* The arrow marks what you can take right now. user_flag is latched by
+       collection AND by the InitallyActive spawn gate, and both should stop
+       the arrow: a collected pickup is gone, and an undispensed one is not
+       yours yet. Observed at the vending machine -- before paying the arrow
+       sits mid-machine (that is the machine trigger's own arrow) and only
+       after dispensing does one appear above the product. */
+    if (e->user_flag) return;
+    AseModel *m = model_cache_get(PICKUP_ARROW_MODEL);
+    if (!m) return;
+    unsigned int tex = tex_cache_get(PICKUP_ARROW_TEX);
+    renderer_set_model_alpha(PICKUP_ARROW_ALPHA);
+    renderer_draw_model_euler(m, tex, e->x, e->y + PICKUP_ARROW_RISE, e->z,
+                              -s_arrow_clock * PICKUP_ARROW_SPIN, 0.0f, 0.0f,
+                              PICKUP_ARROW_SCALE);
+    renderer_set_model_alpha(1.0f);
+    audit_line("entity", e->type, e->tag, "pickup-arrow",
+               PICKUP_ARROW_MODEL, m, tex);
 }
+
 
 /* Draw every pickable scene object: entities, then static OMT placements.
    This is the single enumeration path shared by the main render pass and the
@@ -1078,8 +1133,10 @@ static void draw_scene(World *world, int jim_model_ok)
                pickup trigger whose visible referent is level geometry or a
                separate entity (2026-06-12 QA #3 — hydrant/nests/boat). */
             if (sprite_ref_hidden(e)) {
-                if (draw_goddard_dish_arrow(e))
-                    continue;
+                /* The hardcoded level1b gdish arrow used to live here, drawing
+                   the 2D canvas-33 billboard for one specific row. The general
+                   ShowArrow path above covers it (and every other pickup), so
+                   the special case is gone. */
                 audit_line("entity", e->type, e->tag, "hidden", NULL, NULL, 0);
                 continue;
             }
@@ -1136,8 +1193,19 @@ static void draw_scene(World *world, int jim_model_ok)
                 unsigned int tex = tex_cache_get(v.sprite_path);
                 if (tex) {
                     float sz = v.sprite_size > 0.0f ? v.sprite_size : 64.0f;
-                    renderer_draw_billboard(tex, e->x, e->y, e->z, sz, sz,
-                                            v.tint_r, v.tint_g, v.tint_b, v.tint_a);
+                    float tr = v.tint_r, tg = v.tint_g, tb = v.tint_b, ta = v.tint_a;
+                    float sw = sz, sh = sz;
+                    if (strncmp(e->type, "3ARR", 4) == 0) {
+                        float wave = sinf(s_arrow_clock * NAV_ARROW_PULSE_RATE);
+                        sh *= 1.0f + NAV_ARROW_PULSE_AMP * wave;   /* height only */
+                        float glow = 0.5f + 0.5f * wave;           /* 0..1 */
+                        tr = 1.0f + (NAV_ARROW_GLOW_R - 1.0f) * glow;
+                        tg = 1.0f + (NAV_ARROW_GLOW_G - 1.0f) * glow;
+                        tb = 1.0f + (NAV_ARROW_GLOW_B - 1.0f) * glow;
+                        ta = 1.0f;   /* tint_a == 0 would mean "no tint" */
+                    }
+                    renderer_draw_billboard(tex, e->x, e->y, e->z, sw, sh,
+                                            tr, tg, tb, ta);
                     audit_line("entity", e->type, e->tag, "sprite",
                                v.sprite_path, NULL, tex);
                     continue;
@@ -1344,6 +1412,15 @@ static void draw_scene(World *world, int jim_model_ok)
         if (foliage_wall)
             renderer_set_color_key(0, 0, 0, 0, 0.08f);
         audit_line("placement", pl->name, NULL, "mesh", pl->ase_path, pm, 0);
+    }
+
+    /* Translucent markers last, after every opaque draw. They blend with
+       depth writes masked, so anything drawn afterwards would paint straight
+       over them -- which is exactly what the vending machines did while this
+       lived in the entity loop above. */
+    for (Entity *e = world->head; e; e = e->next) {
+        if (!e->alive) continue;
+        draw_pickup_arrow(e);
     }
 }
 
@@ -2290,6 +2367,7 @@ int main(int argc, char **argv) {
 
           if (!menu_active() && !level_select_active()) {
             gamestate_tick(DT);   /* pickup-card decay */
+            s_arrow_clock += DT;  /* ShowArrow spin; once per frame */
 
             /* Per-entity behavior tick (player reads input, platforms move, etc.) */
             for (Entity *e = world.head; e; e = e->next) {
