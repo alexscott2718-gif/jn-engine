@@ -123,7 +123,7 @@ int behavior_pickup_spawn_gate(Entity *e, World *w) {
        the canvas when the pickup-state slot is 0. */
     if (behavior_pickup_taken(e)) {
         pickup_deactivate(e, 1);
-        return 1;
+        return PICKUP_SPAWN_TAKEN;
     }
     /* InitallyActive == 0 (note the misspelling: it matches the executable
        string and the .gam schema). 28 rows author it -- the vending-machine
@@ -141,9 +141,9 @@ int behavior_pickup_spawn_gate(Entity *e, World *w) {
        waits for evidence. */
     if (gam_prop_i(e, "InitallyActive", 1) == 0) {
         pickup_deactivate(e, 0);
-        return 1;
+        return PICKUP_SPAWN_INACTIVE;
     }
-    return 0;
+    return PICKUP_SPAWN_AVAILABLE;
 }
 
 /* CheckRequiredPicAndConsume (00436830): RequiredPicNum == -1 passes; otherwise

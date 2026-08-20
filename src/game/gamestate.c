@@ -293,7 +293,16 @@ void gamestate_item_added(void) {
     g_state.items_total++;
 }
 
+void gamestate_note_pickup(void) {
+    g_state.pickup_events++;
+}
+
+int gamestate_pickup_events(void) {
+    return g_state.pickup_events;
+}
+
 void gamestate_item_collected(void) {
+    gamestate_note_pickup();
     g_state.items_collected++;
     printf("[ITEM] collected %d / %d\n", g_state.items_collected, g_state.items_total);
     if (g_state.items_total > 0 && g_state.items_collected >= g_state.items_total) {

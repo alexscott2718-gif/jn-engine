@@ -159,8 +159,10 @@ static void player_on_update(Entity *e, World *w, float dt) {
         }
     }
 
-    /* Detect pickups: gamestate counter rising means an item triggered this tick. */
-    int cur_items = gamestate_get()->items_collected;
+    /* Detect pickups: the pickup-event counter rising means something was
+       collected this tick. Deliberately not items_collected, which counts a
+       given pickup once however many times a vending machine re-arms it. */
+    int cur_items = gamestate_pickup_events();
     if (cur_items > s_last_items_collected) e->user_float = PICKUP_ANIM_TIME;
     s_last_items_collected = cur_items;
     if (e->user_float > 0.0f) e->user_float -= dt;

@@ -43,6 +43,10 @@ typedef struct {
 typedef struct {
     int items_total;
     int items_collected;
+    /* Bumped by every successful collection, including a repeat purchase
+       from a re-armed vending machine, which items_collected deliberately
+       does not count twice. Consumers want an edge, not a total. */
+    int pickup_events;
     /* Typed counters (Step 3). */
     int gems_collected;      /* 3GEM pickups */
     int points;              /* accumulated GAM "Points" */
@@ -80,6 +84,9 @@ typedef struct {
 void gamestate_init(void);
 void gamestate_item_added(void);
 void gamestate_item_collected(void);
+/* Note that a pickup was just collected, without touching the level tally. */
+void gamestate_note_pickup(void);
+int  gamestate_pickup_events(void);
 /* Typed pickups (Step 3). */
 void gamestate_gem_collected(void);
 void gamestate_add_points(int points);

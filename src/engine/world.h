@@ -105,6 +105,12 @@ typedef struct Entity {
     float move_vert;              /* shared movement-base vertical velocity */
     float move_lean;              /* shared movement-base lean angle */
     int   user_flag;             /* per-type: door open, item collected, ... */
+    int   pickup_counted;        /* CPickupType: already in the level item
+                                    tally. Distinct from user_flag because
+                                    SetPickupItemState state 1 clears that
+                                    one to re-arm a vending-machine product,
+                                    and a re-armed pickup must not be counted
+                                    twice. */
     float user_float;            /* per-type: phase, timer, ... */
     float hp;                    /* enemy/destructible health points (0 = unset) */
     GamProp props[ENTITY_MAX_PROPS]; /* generic .gam property bag (see above) */

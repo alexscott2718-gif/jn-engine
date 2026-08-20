@@ -13,16 +13,22 @@
 static void item_on_spawn(Entity *e, World *w) {
     behavior_trigger_spawn_base(e, 30.0f, 30.0f, 30.0f);
     e->user_flag = 0;             /* 0 = uncollected, 1 = collected */
+    e->pickup_counted = 0;        /* not yet in the level item tally */
     e->user_float = e->y;         /* base y for bob */
+    int was_trigger = (e->runtime_flags & ENTITY_FLAG_TRIGGER) != 0;
     /* PostLoadPickupItem (00436200) / ResetPickupItemVisibility (00435b20):
        a pickup whose global state slot is set is not shown again, and one
        authored InitallyActive=0 does not start available. The first is what
        makes the save-global collected table mean anything -- without it,
        re-entering a level re-awards every picture in it. The second is what
        makes the vending-machine pairs work at all. */
-    if (behavior_pickup_spawn_gate(e, w)) return;
-    if (e->visible && (e->runtime_flags & ENTITY_FLAG_TRIGGER))
+    int gate = behavior_pickup_spawn_gate(e, w);
+    /* An InitallyActive=0 product still counts toward the level's items --
+       it is gated, not absent. Only one already collected on an earlier
+       visit drops out of the tally. */
+    if (gate != PICKUP_SPAWN_TAKEN && was_trigger && e->visible)
         gamestate_item_added();
+    if (gate != PICKUP_SPAWN_AVAILABLE) return;
 }
 
 static void item_on_update(Entity *e, World *w, float dt) {
@@ -133,7 +139,15 @@ static void item_on_trigger(Entity *e, Entity *by) {
             audio_play_db(db, snd, 0, 128);
         }
     }
-    gamestate_item_collected();
+    /* Every collection is a pickup event (the animation trigger), but the
+       level tally counts each pickup once -- a vending machine re-arms and
+       can be bought repeatedly, and without this the lifetime tally runs
+       past the level total and trips the win bridge ("collected 4 / 3"). */
+    gamestate_note_pickup();
+    if (!e->pickup_counted) {
+        e->pickup_counted = 1;
+        gamestate_item_collected();
+    }
 }
 
 /* The state slot (vtable offset 0x428) another trigger's ActivateObject or

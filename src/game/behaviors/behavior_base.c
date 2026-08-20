@@ -91,10 +91,9 @@ void behavior_trigger_spawn_base(Entity *e, float hx, float hy, float hz) {
     e->half_extents[0] = hx;
     e->half_extents[1] = hy;
     e->half_extents[2] = hz;
-
-    /* CPickupType descendants use the misspelled authored flag. */
-    if (gam_prop_i(e, "InitallyActive", -1) == 0) {
-        e->visible = 0;
-        e->runtime_flags &= ~(ENTITY_FLAG_SOLID | ENTITY_FLAG_TRIGGER);
-    }
+    /* InitallyActive lives in behavior_pickup_core.c's spawn gate, not here.
+       It is a CPickupType field -- only 3PIC authors it -- and handling it in
+       this shared base cleared ENTITY_FLAG_TRIGGER before item_on_spawn could
+       read it, which is what made a gated vending-machine product drop out of
+       the level's item tally. */
 }

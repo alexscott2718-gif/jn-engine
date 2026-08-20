@@ -31,10 +31,11 @@ void behavior_trigger_spawn_base(Entity *e, float hx, float hy, float hz);
    taken/mark     the DAT_004f8438[PickupIndex] read and write, keyed on
                   (level, PickupIndex) because indices collide across levels.
    spawn_gate     the load-time half (PostLoadPickupItem, 00436200): capture the
-                  World for later tag dispatch, then hide and disable a pickup
-                  that is already collected or authored InitallyActive=0.
-                  Returns 1 when it did, so the caller can skip the rest of its
-                  spawn work.
+                  World for later tag dispatch, then disable a pickup that is
+                  already collected or authored InitallyActive=0. Returns which
+                  of the two it was (see PICKUP_SPAWN_*), because they differ
+                  for the level item tally: an inactive product is still one of
+                  the level's items, an already-collected one is not.
    set_state      SetPickupItemState (004360b0), the pickup family's state slot:
                   state 0 shows/enables, state 1 also clears the collected flag
                   (how a vending machine re-arms its product).
@@ -48,6 +49,13 @@ void behavior_trigger_spawn_base(Entity *e, float hx, float hy, float hz);
    sweep_collect  JN_TEST_PICTURES: force every authored pickup row in the world
                   through its own on_trigger; returns how many newly collected.
                   Call in a loop until it returns 0. */
+/* behavior_pickup_spawn_gate results. */
+enum {
+    PICKUP_SPAWN_AVAILABLE = 0,  /* collectible right now */
+    PICKUP_SPAWN_INACTIVE  = 1,  /* InitallyActive=0: a level item, not yet */
+    PICKUP_SPAWN_TAKEN     = 2   /* collected on an earlier visit */
+};
+
 int  behavior_pickup_taken(const Entity *e);
 void behavior_pickup_mark_taken(const Entity *e);
 int  behavior_pickup_spawn_gate(Entity *e, World *w);

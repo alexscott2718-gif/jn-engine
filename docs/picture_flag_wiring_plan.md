@@ -410,20 +410,31 @@ it.** Two `level1` rows author `InitallyActive=0` (`egg2b` 834, `hsounds` 837),
 one of them in frame at the capture pose; hiding them changed ~0.05% of both
 golden frames (499 and 564 pixels).
 
-That is the gate doing its job, because the two halves of "inactive" are not
-equally supported. *Not collectible* is solid: the field is the "initial active
-state", `ActivateObject` names the transition out of it, and the vending data
-only works that way. *Invisible* is not: the recovered slot-266 body describes
-states 0 and 1, both of which **show** the pickup, and never says what the
-inactive state looks like — `set_state_inactive()` is a name in the doc's
-pseudocode, not a recovered body.
+The mechanism is worth stating exactly, because it is not "the engine used to
+show these and now hides them". `behavior_trigger_spawn_base` **already**
+cleared `visible` for an `InitallyActive=0` row — but
+`behavior_animated_update_base` sets `visible = 1` again on the very next tick,
+so the sprite reappeared one frame later and the golden encodes it as **shown**.
+What actually moved the pixels was the first attempt also setting `alive = 0`,
+which stops `item_on_update` and so makes the hide stick. The shipped look has
+always been "visible"; nothing was ever really hidden.
 
-So the visual half was withdrawn. `InitallyActive=0` now clears the trigger flag
-and latches the once-only guard, and leaves `visible`/`alive` alone. The vending
+That matters because the two halves of "inactive" are not equally supported.
+*Not collectible* is solid: the field is the "initial active state",
+`ActivateObject` names the transition out of it, and the vending data only works
+that way. *Invisible* is not: the recovered slot-266 body describes states 0 and
+1, both of which **show** the pickup, and never says what the inactive state
+looks like — `set_state_inactive()` is a name in the doc's pseudocode, not a
+recovered body.
+
+So the visual half was withdrawn. `InitallyActive=0` clears the trigger flag and
+latches the once-only guard, and leaves `visible`/`alive` alone. The vending
 machines behave identically (the product still cannot be taken until its
-machine's `Toggle=1` write arrives) and the golden is byte-identical again. The
-open question — does the original hide an inactive pickup? — belongs in a
-capture comparison, not in a guess.
+machine's `Toggle=1` write arrives) and the golden is byte-identical. The open
+question — does the original hide an inactive pickup? — belongs in a capture
+comparison, not in a guess. Owner playtest 2026-08-20: the candy is not
+noticeable in the tray in the native build either way, so nothing about the
+current behaviour looks wrong on screen.
 
 ### 9.4 Where the shared helper lives, and why it is not in a new module
 
@@ -624,3 +635,53 @@ Phases 0–6 are done. The open items are no longer wiring:
   level entry.
 - the `DrawHud` counter producers (§10), which would let the native readout be
   replaced by the real one.
+
+---
+
+## 12. Owner playtest, 2026-08-20
+
+The first time a human drove this, Level 1A announced **LEVEL CLEARED** after the
+second candy. Two defects, both introduced by phase 4, neither reachable by any
+existing check:
+
+**`InitallyActive` had two owners.** `behavior_trigger_spawn_base` already
+handled the field (`behavior_base.c`), so phase 4's
+`behavior_pickup_spawn_gate` was a second copy — and the base's copy cleared
+`ENTITY_FLAG_TRIGGER` *before* `item_on_spawn` could read it to decide whether
+the row belongs in the level's item tally. Level 1A therefore counted **3**
+items instead of 5 and cleared three pickups early. `InitallyActive` is a
+`CPickupType` field and only `3PIC` authors it (376 rows, 28 of them 0), so the
+block was inert for every other caller of the shared trigger base — button,
+checkpoint, laser trigger, load, neutron, pickup, switch, trig, trophy. It now
+lives only in the pickup core.
+
+**A re-armed machine was counted every purchase.** `items_collected` ran past
+`items_total` ("collected 4 / 3") because a vending machine can be bought
+repeatedly. A pickup now counts once, tracked by `Entity.pickup_counted` — a
+flag distinct from `user_flag` precisely because `SetPickupItemState` state 1
+clears that one to re-arm the product.
+
+That fix would in turn have broken the pickup animation, which
+`behavior_player.c` triggers by watching `items_collected` rise: a second
+purchase would no longer have animated. Two questions were riding on one
+counter — "how much of this level is done" (count once) and "did something just
+get picked up" (every time). They are now separate: `gamestate_pickup_events()`
+is the edge, `items_collected` is the total.
+
+**Why nothing caught this.** The `C3DPickupItem` oracle stubs
+`behavior_trigger_spawn_base`, so it could not see the duplicated handling — the
+bug lived exactly in the seam the stub covers. `verify_picture_economy.py`
+drives collection through the sweep, which ignores the item tally entirely. A
+useful reminder that a green oracle certifies the body it compiles, not the
+lifecycle around it.
+
+### Still open from the playtest
+
+`jimpickup.ASE` is the odd clip out: **792 faces where every other player
+animation has 814**, and it is the only clip besides `jimstop` that carries a
+real texture reference (`jimycarl.png`; the rest export `tex='(none)'`). Every
+player clip except `jimstop` also lacks `MESH_TVERT` and gets object-space UVs
+generated at load. That is an asset/export problem, not a picture-economy one,
+and it is the likely source of the long-standing "pickup animation is broken"
+report — swapping to a differently-topologised mesh mid-play would visibly pop.
+Not investigated further here.
