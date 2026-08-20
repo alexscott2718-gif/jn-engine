@@ -60,6 +60,7 @@ static const int g_section_count = (int)(sizeof(g_sections) / sizeof(g_sections[
 /* Rarely-needed keys get one muted footer line rather than rows of their own. */
 static const char *g_footer = "C coordinates    V camera    B bug report    Esc quit";
 
+static int   g_auto     = 1;   /* automatic level-boot greeting allowed */
 static int   g_active   = 0;
 static float g_timer    = 0.0f;   /* seconds left when auto-shown; 0 means pinned */
 static const float g_fade_len = 1.5f;   /* length of the tail fade, in seconds */
@@ -76,7 +77,10 @@ void help_toggle(void) {
 
 int help_active(void) { return g_active; }
 
+void help_set_auto(int enabled) { g_auto = enabled ? 1 : 0; }
+
 void help_show_timed(float seconds) {
+    if (!g_auto) return;   /* headless / screenshot / capture run */
     g_active = 1;
     g_timer  = seconds > 0.0f ? seconds : 0.0f;
 }

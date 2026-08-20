@@ -15,7 +15,13 @@ void help_toggle(void);
 void help_set(int on);
 int  help_active(void);
 
-/* Show for `seconds`, then fade out on its own. Called at each level boot. */
+/* Allow or suppress the automatic level-boot greeting. Off for headless,
+   screenshot and capture runs: the card is a player affordance, and a frame
+   grabber must never see it. Manual H is unaffected. */
+void help_set_auto(int enabled);
+
+/* Show for `seconds`, then fade out on its own. Called at each level boot.
+   Does nothing when the automatic greeting is suppressed. */
 void help_show_timed(float seconds);
 
 /* Advance the auto-hide timer. Pass the real frame delta, in seconds. */

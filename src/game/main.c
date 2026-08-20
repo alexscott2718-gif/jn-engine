@@ -33,6 +33,7 @@
 #include "fixture.h"
 #include "menu.h"
 #include "help_overlay.h"
+#include "level_select.h"
 
 /* The controls card greets the player at every level boot, then fades. */
 #define HELP_BOOT_SECONDS 10.0f
@@ -1476,6 +1477,13 @@ int main(int argc, char **argv) {
         }
     }
 
+    /* A frame grabber must never catch the controls card. Decided once,
+       here, rather than at each help_show_timed() call site. */
+    help_set_auto(!headless &&
+                  getenv("JN_HEADLESS")   == NULL &&
+                  getenv("JN_SCREENSHOT") == NULL &&
+                  getenv("JN_CAPTURE")    == NULL);
+
     if (headless) {
         SDL_setenv("SDL_VIDEODRIVER", "offscreen", 1);
         SDL_setenv("SDL_AUDIODRIVER", "dummy", 1);
@@ -2188,8 +2196,21 @@ int main(int argc, char **argv) {
                currently-loaded level renders as a static backdrop. */
             help_input();
             if (!menu_active() && !help_active() &&
-                input_just_pressed(SDL_SCANCODE_M))
-                menu_open();
+                input_just_pressed(SDL_SCANCODE_M)) {
+                if (level_select_active()) level_select_close();
+                else                       level_select_open();
+            }
+
+            /* QA level browser. Separate from the menu above: that one is the
+               certified CMainMenu routing table and must stay ten entries. */
+            if (level_select_active()) {
+                level_select_input();
+                const char *ls_level = NULL;
+                if (level_select_take_confirm(&ls_level) && ls_level) {
+                    gamestate_request_level_swap(ls_level, "");
+                    level_select_close();
+                }
+            }
             if (menu_active()) {
                 menu_input();
                 const char *sel_level = NULL;
@@ -2217,7 +2238,7 @@ int main(int argc, char **argv) {
                 }
             }
 
-          if (!menu_active()) {
+          if (!menu_active() && !level_select_active()) {
             /* Per-entity behavior tick (player reads input, platforms move, etc.) */
             for (Entity *e = world.head; e; e = e->next) {
                 entity_update(e, &world, DT);
@@ -2407,7 +2428,7 @@ int main(int argc, char **argv) {
 
             /* Physics: gravity, AABB collision, trigger detection. */
             physics_step(&world, DT);
-          }  /* end if (!menu_active()) — gameplay frozen while the menu is up */
+          }  /* end gameplay block — frozen while the menu or browser is up */
 
             /* Drain a pending level swap (also the menu's New Game / VR route).
                Done outside the entity-update iteration above so we don't mutate
@@ -2528,8 +2549,9 @@ int main(int argc, char **argv) {
             /* An open controls card swallows the first ESC, the way any
                modal should; a second ESC quits as it always has. */
             if (ev.type == SDL_KEYDOWN && ev.key.keysym.sym == SDLK_ESCAPE) {
-                if (help_active()) help_set(0);
-                else               w.should_quit = 1;
+                if      (help_active())         help_set(0);
+                else if (level_select_active()) level_select_close();
+                else                            w.should_quit = 1;
             }
             if (ev.type == SDL_KEYDOWN && ev.key.keysym.sym == SDLK_c) g_show_coords = !g_show_coords;
             /* B ("bug"), not Q: in noclip Q is held-to-fly-down
@@ -2622,6 +2644,7 @@ int main(int argc, char **argv) {
 
         /* CMainMenu overlay (drawn over the backdrop scene when open). */
         menu_draw(w.width, w.height);
+        level_select_draw(w.width, w.height);
         help_draw(w.width, w.height);
 
         /* Live coordinate readout (QA) — player draw-space pos + facing. */
