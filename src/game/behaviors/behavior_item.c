@@ -35,9 +35,13 @@ static void item_on_update(Entity *e, World *w, float dt) {
     (void)w;
     if (!e->alive) return;
     if (!behavior_animated_update_base(e, w, dt)) return;
-    static float t = 0.0f;
-    t += dt;
-    e->y  = e->user_float + ITEM_BOB_AMP * sinf(6.28318f * ITEM_BOB_FREQ * t + e->x * 0.01f);
+    /* anim_time is THIS entity's clock, advanced once per frame by the animated
+       base. It used to be a function-static shared by every pickup and bumped
+       once per pickup per frame, so the hover ran N times too fast in a level
+       with N pickups and changed speed whenever one was collected. The x term
+       keeps neighbouring pickups out of phase. */
+    e->y  = e->user_float +
+            ITEM_BOB_AMP * sinf(6.28318f * ITEM_BOB_FREQ * e->anim_time + e->x * 0.01f);
     e->ry += ITEM_SPIN_RATE * dt;
 }
 
@@ -139,11 +143,10 @@ static void item_on_trigger(Entity *e, Entity *by) {
             audio_play_db(db, snd, 0, 128);
         }
     }
-    /* Every collection is a pickup event (the animation trigger), but the
-       level tally counts each pickup once -- a vending machine re-arms and
-       can be bought repeatedly, and without this the lifetime tally runs
-       past the level total and trips the win bridge ("collected 4 / 3"). */
-    gamestate_note_pickup();
+    /* The card shows on every collection; the level tally counts each pickup
+       once -- a vending machine re-arms and can be bought repeatedly, and
+       without that the lifetime tally runs past the level total and trips the
+       win bridge ("collected 4 / 3"). */
     {
         /* The card shows what was just taken. SpriteIndex is the pickup's
            own canvas id, so no unrecovered icon mapping is involved; the

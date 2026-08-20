@@ -25,9 +25,7 @@ Entity *g_player = NULL;
 #define PLAYER_JUMP_VEL   650.0f
 #define PLAYER_NOCLIP_VERTICAL_SPEED 600.0f
 #define PLAYER_TURN_RATE  2.8f     /* radians / sec (~160 deg/s) */
-#define PICKUP_ANIM_TIME  0.45f    /* seconds the pickup pose overrides */
 
-static int s_last_items_collected = 0;
 
 static float clampf(float v, float lo, float hi) {
     return v < lo ? lo : (v > hi ? hi : v);
@@ -40,7 +38,6 @@ static void player_on_spawn(Entity *e, World *w) {
     e->half_extents[2] = PLAYER_HALF_Z;
     e->user_flag = PA_IDLE;
     e->user_float = 0.0f;       /* pickup-animation countdown (sec) */
-    s_last_items_collected = 0;
     player_anim_bind_entity(e);
     if (!g_player) g_player = e;
 }
@@ -159,20 +156,18 @@ static void player_on_update(Entity *e, World *w, float dt) {
         }
     }
 
-    /* Detect pickups: the pickup-event counter rising means something was
-       collected this tick. Deliberately not items_collected, which counts a
-       given pickup once however many times a vending machine re-arms it. */
-    int cur_items = gamestate_pickup_events();
-    if (cur_items > s_last_items_collected) e->user_float = PICKUP_ANIM_TIME;
-    s_last_items_collected = cur_items;
-    if (e->user_float > 0.0f) e->user_float -= dt;
+    /* No pickup pose. jimpickup.ASE is a leftover export, not a shipped clip:
+       it is the only one of the 22 Jimmy animations on a different mesh
+       (407 verts / 792 faces against 426/814), the only one carrying the raw
+       Biped rig, the only one in a different pose space, and the only one with
+       no texture coordinates -- which is why it rendered as a smear. Owner
+       confirmed 2026-08-20 it does not appear in an original playthrough.
+       PA_PICKUP and its HIPICKUP dispatch alias are kept so pose ids do not
+       shift; nothing selects them. See docs/picture_flag_wiring_plan.md 14.
 
-    /* Animation state machine. PICKUP wins while its countdown is active.
-       jimleft/jimright are now the turn-in-place lean clips. */
+       jimleft/jimright are the turn-in-place lean clips. */
     PlayerAnim anim;
-    if (e->user_float > 0.0f) {
-        anim = PA_PICKUP;
-    } else if (!noclip && !e->on_ground) {
+    if (!noclip && !e->on_ground) {
         anim = (e->vy > 0.0f) ? PA_JUMP : PA_FALL;
     } else if (fabsf(turn) > fabsf(fwd) && fabsf(turn) > 0.0001f) {
         /* Turn-dominant input plays the sidestep/strafe clip (LEFT->jimleft). */

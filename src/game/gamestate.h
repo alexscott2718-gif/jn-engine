@@ -46,7 +46,6 @@ typedef struct {
     /* Bumped by every successful collection, including a repeat purchase
        from a re-armed vending machine, which items_collected deliberately
        does not count twice. Consumers want an edge, not a total. */
-    int pickup_events;
     /* Pickup notify card (the original's counter-popup hook,
        FUN_004061d0). One slot deep: a newer pickup replaces the card
        rather than queueing behind it. */
@@ -93,14 +92,11 @@ typedef struct {
 void gamestate_init(void);
 void gamestate_item_added(void);
 void gamestate_item_collected(void);
-/* Note that a pickup was just collected, without touching the level tally. */
-void gamestate_note_pickup(void);
 /* Raise the pickup card. sprite_index < 0 means no icon; picture_id < 0
    means the pickup awards no picture, so no count shows. */
 void gamestate_notify_pickup(int sprite_index, int picture_id, int count);
 /* Per-frame decay for the card. Called once per tick by the main loop. */
 void gamestate_tick(float dt);
-int  gamestate_pickup_events(void);
 /* Typed pickups (Step 3). */
 void gamestate_gem_collected(void);
 void gamestate_add_points(int points);
