@@ -311,6 +311,15 @@ static void save_screenshot(const char *path, int w, int h) {
     printf("Screenshot saved: %s (%dx%d)\n", path, w, h);
 }
 
+/* mingw-w64 declares mkdir(const char *) with no mode argument, unlike POSIX.
+   Everything else this file relies on -- access(), getpid(), <unistd.h> --
+   compiles unchanged under zig's mingw headers; mkdir is the one exception. */
+#ifdef _WIN32
+#define JN_MKDIR(path) mkdir(path)
+#else
+#define JN_MKDIR(path) mkdir((path), 0777)
+#endif
+
 static int make_directory_tree(const char *path) {
     char buf[PATH_MAX];
     size_t len;
@@ -321,10 +330,10 @@ static int make_directory_tree(const char *path) {
     for (char *p = buf + 1; *p; p++) {
         if (*p != '/') continue;
         *p = '\0';
-        if (mkdir(buf, 0777) != 0 && errno != EEXIST) return 0;
+        if (JN_MKDIR(buf) != 0 && errno != EEXIST) return 0;
         *p = '/';
     }
-    return mkdir(buf, 0777) == 0 || errno == EEXIST;
+    return JN_MKDIR(buf) == 0 || errno == EEXIST;
 }
 
 static void dump_deterministic_state(FILE *f, unsigned int frame,
