@@ -6,7 +6,7 @@ original's picture-flag economy — and open a certifiable `linked` aspect on
 `C3DPickupItem`, which `docs/linkage_certificates.csv` currently records as
 having "no decompiled-body fidelity to certify".
 
-Status: **phases 0-5 implemented** (0-3 2026-08-19 §8, 4-5 2026-08-20 §9-10); 6 open. Measurements below were taken
+Status: **phases 0-6 complete** (0-3 2026-08-19 §8, 4-6 2026-08-20 §9-11). C3DPickupItem/collection is `linked`; remaining items are decisions and capture evidence, not wiring (§11.5). Measurements below were taken
 2026-08-19 against `assets/gam/*.gam` (35 files) with `tools/gam_parser.py`.
 
 ---
@@ -534,3 +534,93 @@ store and clears every captured widget.
 When the `DrawHud` producers are eventually recovered and one of the four
 counters is shown to be the picture count, this readout is the thing to replace
 — it is deliberately easy to delete.
+
+---
+
+## 11. Phase 6 as built (2026-08-20) — the aspect is linked
+
+Status: phase 6 **implemented**. `C3DPickupItem` / `collection` moved from
+`linked-blocked` to **`linked`**; the scoreboard goes 15 → **16** oracle-verified
+aspects. Phases 0–6 are complete.
+
+### 11.1 The row invited this
+
+The blocked row's own closing line was "A future pass that ports the actual
+`RequiredPicNum`/`PickupIndex`/`ActivateObject` mechanism could open a real
+`linked` aspect here." Phases 2–4 were that pass, so promoting the row is
+following the certificate, not editing one to make room for a feature.
+
+### 11.2 The oracle
+
+`tools/linkage_oracles/C3DPickupItem.py` compiles the real, unmodified
+`behavior_item.c` / `behavior_pickup_core.c` / `gamestate.c` (plus
+`behavior_ai_trigger.c` for the shared tag dispatch) and drives them over
+**every one of the 383 shipped `3PIC` rows** in the 35 levels. Per row it
+diffs four things against expectations computed from the recovered bodies and
+that row's own authored properties — never from a tuned constant:
+
+1. **Load gate.** After the real `on_spawn`, a row authoring
+   `InitallyActive=0` is latched uncollectible and one authoring 1 is not.
+2. **Order and effects, funded.** Seed exactly `ReqPicNumAmount` of
+   `RequiredPicNum`, touch the row, and diff the *whole ordered event
+   sequence* — gate, each state dispatch and its outcome, the award, the
+   next-trigger, the sound — against what the decompiled order predicts.
+3. **Refusal.** Seed one short: the gate must refuse, play `NeedMoreSound`
+   where one is authored, emit nothing else, and consume nothing (no partial
+   drain).
+4. **Gate before collected-check.** Mark the row collected, fund it, touch it
+   again — the currency must still be taken, because the gate runs first. A
+   port that reordered those two leaves the count untouched and is rejected.
+
+`--selftest` mutation-tests the oracle against three defects it must catch:
+swapping the gate and the collected-state check, moving the award ahead of the
+side-effect dispatch, and consuming on a refusal. All three turn it red.
+
+The dumper reads the engine's own `[PICGATE]` / `[PICSTATE]` / `[PICFIRE]` /
+`[PICAWARD]` lines rather than paraphrasing them, so the instrumentation cannot
+drift from the behaviour; it adds only what the engine cannot say for itself
+(post-spawn state, score delta, the stubbed sound's position, and the three
+probe separators).
+
+### 11.3 Two real defects the oracle found
+
+Both while it was being written, which is the point of building one:
+
+- **`Points` is a phantom property.** `gam_loader.c` mapped a property named
+  `Points` onto `Entity.points`. That name appears nowhere in the 35-file
+  corpus — the authored field is `PointValue` (383 rows, class doc offset
+  `0x620`, awarded through `FUN_0042adc0`). `Entity.points` had therefore always
+  been 0 and **no pickup in the native port had ever awarded score**. §8.5
+  recorded this and deliberately left it; certifying `HandlePickupCollection`
+  made it in-scope, because the recovered award step is "PIC_NUMBER *and*
+  score" and excluding half of it would certify a different function.
+- **Unset scored negative.** With `PointValue` loading, the award tested
+  truthiness (`if (e->points)`), and `-1` is the format's universal unset
+  convention — so every row authoring no score subtracted a point. Now it
+  awards only a positive value.
+
+### 11.4 What the certificate does not claim
+
+Carried into the certificate note and the class doc, not buried here:
+`PickedUpIndex`'s replacement-sprite swap; `TimesToTrigger`/`trigger_count`
+repeat limiting (native latches once-only); `IsAmbient`; `PassThru`/`ShowArrow`
+(no isolated consumer in the decomp either); the state slot on every class
+except the pickup family, so non-`3PIC` `ActivateObject`/`ToggleObject` targets
+and **all** `NextTrigger` targets resolve and find no native body; the sound
+*mix*, of which only the sequence position is certified; whether the original
+hides an `InitallyActive=0` pickup (§9.3); and the `3FIS`/`3GIR`/`3DIN`
+creature leaf, which is a different FourCC on a different vtable.
+
+### 11.5 Where this leaves the plan
+
+Phases 0–6 are done. The open items are no longer wiring:
+
+- the count shortfall in §8.3 — four levels beyond the pre-grant table cannot
+  meet their own picture demand, and four vending machines are unaffordable on
+  a cold single-level entry. An owner call, not a bug.
+- whether an inactive pickup is invisible (§9.3) — needs a capture.
+- `3RED` (70 rows) and `3ANI` (6) carry `PickupIndex` and share `CPickupType`
+  but do not consult the collected-state table, so they re-collect on every
+  level entry.
+- the `DrawHud` counter producers (§10), which would let the native readout be
+  replaced by the real one.

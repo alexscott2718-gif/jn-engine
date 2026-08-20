@@ -155,47 +155,94 @@ Open questions:
 
 ## Native Linkage (linked-parity branch)
 
-Aspect: **`collection`** — status `linked-blocked`.
+Aspect: **`collection`** — status `linked`.
 Certificate: `docs/linkage_certificates.csv`.
+Oracle: `tools/linkage_oracles/C3DPickupItem.py`.
 
-Investigated 2026-07-02 (linked-parity pass). The worklist row named
-`behavior_pickup.c` as the native counterpart, but that file actually
-implements `C3DBaseballPickup`/`C3DBubblePickup`/`C3DHelmet`/`C3DMetalPickup`
-(`3BPU`/`3BUP`/`3HEL`/`3MEP`) — different classes entirely, none of them
-placed in the shipped `.gam` corpus (code-spawned in the original). The real
-native counterpart to the `3PIC` FourCC this class owns is
-`src/game/behaviors/behavior_item.c`'s `vt_item` (`item_on_trigger`).
+Opened 2026-08-20 by the picture-flag economy port
+(`docs/picture_flag_wiring_plan.md`, phases 2–4). The 2026-07-02 investigation
+below is preserved because it explains the shape of the gap that was closed.
 
-`item_on_trigger` is a **deliberate simplification**, not a port of the
-decompiled `HandlePickupCollection` (`00435ce0`): it grants a "tool" by
-case-insensitive substring match on `ObjectTag` against a hardcoded table
-(`TOOL_GRANTS`), a native inventory abstraction with no counterpart in the
-decompiled body. Specifically absent:
+### What is ported
 
-- **No `RequiredPicNum`/`ReqPicNumAmount` consume-and-gate**
-  (`CheckRequiredPicAndConsume`, vtable 3 slot `00436830`) — the collection
-  in `item_on_trigger` is unconditional (bar the `user_flag` once-only guard).
-- **No `PickupIndex`-keyed global pickup-state table** (`DAT_004f8438`) —
-  native tracks collection per-entity (`user_flag`) only.
-- **No `ActivateObject`/`ToggleObject`/`NextTrigger` dispatch** — none of
-  these three fields are even read in `item_on_trigger`.
-- **No `NeedMoreSound`** (the "can't collect, missing required picture" sound).
-- **No `PickedUpIndex` replacement-sprite swap** — native just hides
-  (`alive = 0`) unconditionally.
-- **`PIC_NUMBER` is only special-cased for `==6`** (the baseball ability),
-  not generally awarded.
+`src/game/behaviors/behavior_item.c`'s `vt_item` (`item_on_trigger` /
+`item_on_spawn`) over `behavior_pickup_core.c` and the `gamestate` picture
+store now follows `HandlePickupCollection` (`00435ce0`) in its recovered order:
 
-Same shape as `CJimmyGame`'s win-bridge and `C3DCheckPoint`'s progress
-exclusions this session: a working native behavior the project built as its
-own simpler mechanism, not attempting 1:1 fidelity to the recovered body — no
-fidelity claim to certify. Porting the real `PickupIndex`/`RequiredPicNum`/
-`ActivateObject` machinery is real behavior-porting work, out of scope for a
-linkage-certification pass.
+1. `CheckRequiredPicAndConsume` (vtable 3 slot 54, `00436830`) — consume
+   `ReqPicNumAmount` of `RequiredPicNum`, or play `NeedMoreSound` and refuse.
+   It runs **before** the collected-state check, as the recovered body does.
+2. the `DAT_004f8438` collected-state test and write, keyed on
+   `(level, PickupIndex)` — 22 indices collide across levels, so an
+   index-keyed table would be silently wrong.
+3. `ActivateObject` then `ToggleObject`, each through the target's state slot
+   (the original's vtable offset `0x428`) carrying the authored `Toggle`.
+4. the `PIC_NUMBER` and `PointValue` award.
+5. `NextTrigger`, as a trigger-chain forward.
+6. the pickup sound.
 
-### Not covered / open
+`SetPickupItemState` (`004360b0`) states 0 and 1 are ported as the pickup
+family's state slot, and the load-time half of `PostLoadPickupItem`
+(`00436200`) — already-collected, and `InitallyActive` — runs at spawn. Those
+two together are what make the twelve authored vending-machine pairs
+(`cmach`/`cand`, `fmach`/`flurp`, `mdiam`/`diam`, `gdish`/`refill`,
+`piggy1`/`piggy2`, `cjar`/`coins2`) behave as an exchange: the machine's gate
+consumes, its `Toggle=1` write reveals the product, and the product's write
+re-arms the machine. Each cycle is picture-negative, which is why the consume
+reading of `RequiredPicNum` is the only one that terminates.
 
-- No decompiled-body fidelity to certify — the native behavior is an
-  intentional divergence (a different inventory model: tools + typed
-  counters, vs. the original's picture-flag/pickup-state-table model).
-- A future pass that ports the actual `RequiredPicNum`/`PickupIndex`/
-  `ActivateObject` mechanism could open a real `linked` aspect here.
+### How it is proven
+
+`tools/linkage_oracles/C3DPickupItem.py` compiles the real, unmodified
+behaviour and drives it over **all 383 shipped `3PIC` rows** in the 35 shipped
+levels, diffing four things per row against expectations computed from the
+recovered bodies and that row's own authored properties: the post-spawn load
+gate, the full ordered event sequence on a funded collection, the refusal path
+one unit short (including that nothing is partially consumed), and the
+gate-before-collected-check ordering (re-touching a collected row still takes
+the currency). `--selftest` mutation-tests the oracle against three defects it
+must catch: swapping the gate and the collected-state check, moving the award
+ahead of the side-effect dispatch, and consuming on a refusal.
+
+Building it found two real defects: `gam_loader.c` mapped a property named
+`Points`, which no shipped level authors — the field is `PointValue` (`0x620`)
+— so no pickup in the native port had ever awarded score; and the award tested
+truthiness, so every row authoring the format's `-1` unset scored minus one
+point.
+
+### Not covered
+
+- `PickedUpIndex`'s replacement-sprite swap on pickup state 2 — native hides.
+- `TimesToTrigger` / `trigger_count` repeat limiting — native latches once-only.
+- `IsAmbient` / `UpdateAmbientPickupSound` (slot 241); no shipped row enables it.
+- `PassThru`, `ShowArrow` — registered and defaulted here, but the decomp does
+  not isolate their consumers either.
+- The state slot on every class except the pickup family. `ActivateObject` /
+  `ToggleObject` targets that are not `3PIC` (`3RCK`, `3OMT`, `3HYD`, `3SWN`,
+  `3KIT`) and **all** `NextTrigger` targets (`3CAM` 19, `3MCA` 20, `3AIT` 4)
+  resolve and then find no native body. The oracle records that outcome rather
+  than counting it as success.
+- The sound *mix*; only its position in the sequence is certified.
+- Whether the original also *hides* an `InitallyActive=0` pickup. The recovered
+  slot-266 body describes states 0 and 1, both of which show, and never
+  describes the inactive state. Asserting invisibility changed the `level1`
+  golden, so the claim was withdrawn and needs capture evidence.
+- The `3FIS`/`3GIR`/`3DIN` creature leaf, which shares `CPickupType` and
+  authors `PIC_NUMBER`, is a different FourCC on a different vtable and is not
+  part of this aspect. Its award path exists but nothing collects it: the
+  shrink transition that turns those creatures into pickups is undecompiled.
+
+### Investigated 2026-07-02 (the gap this closed)
+
+The worklist row named `behavior_pickup.c`, but that file implements
+`C3DBaseballPickup`/`C3DBubblePickup`/`C3DHelmet`/`C3DMetalPickup`
+(`3BPU`/`3BUP`/`3HEL`/`3MEP`) — different classes entirely, none of them placed
+in the shipped `.gam` corpus. The real native counterpart to `3PIC` is
+`behavior_item.c`'s `vt_item`, which at the time granted a "tool" by
+case-insensitive substring match on `ObjectTag` against a hardcoded table, with
+no `RequiredPicNum` gate, no `PickupIndex` state table, no
+`ActivateObject`/`ToggleObject`/`NextTrigger` dispatch, no `NeedMoreSound`, and
+`PIC_NUMBER` special-cased only for the baseball. That inventory model is still
+present and still load-bearing — the watergun, jetpack and keys gate real
+progression — but it is now additive to the ported picture economy rather than
+a replacement for it.

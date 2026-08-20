@@ -2625,3 +2625,38 @@ which has an `on_trigger`. The tools report that as `no-native-slot` rather than
 counting it as success. Wiring pickups to start cutscenes was considered and
 deferred by owner decision: it couples the pickup path to the cutscene system,
 and both cutscene-camera aspects are separately certified.
+
+## C3DPickupItem/collection is linked (2026-08-20)
+
+Phase 6 closes the picture-economy work: the aspect the certificate recorded as
+having "no decompiled-body fidelity to certify" is now `linked`, and the
+scoreboard goes 15 -> 16 oracle-verified aspects. The blocked row's own closing
+line invited it ("a future pass that ports the actual RequiredPicNum/
+PickupIndex/ActivateObject mechanism could open a real linked aspect here"), so
+this follows the certificate rather than editing one to make room.
+
+`tools/linkage_oracles/C3DPickupItem.py` compiles the real, unmodified
+behaviour and drives it over all 383 shipped 3PIC rows, diffing four things per
+row against expectations computed from the recovered bodies and that row's own
+authored properties: the post-spawn `InitallyActive` gate, the whole ordered
+event sequence on a funded collection, the refusal path one unit short
+(including that nothing is partially consumed), and the ordering claim that
+matters most -- the gate runs *before* the collected-state check, proved by
+re-touching a collected row and watching the currency still go. `--selftest`
+mutation-tests it against swapping those two checks, moving the award ahead of
+the side-effect dispatch, and consuming on a refusal.
+
+The dumper reads the engine's own `[PICGATE]`/`[PICSTATE]`/`[PICFIRE]`/
+`[PICAWARD]` lines rather than paraphrasing them, so the instrumentation cannot
+drift from the behaviour it certifies.
+
+**Building the oracle found two real defects, which is the argument for
+building one.** `gam_loader.c` mapped a property named `Points` that no shipped
+level authors -- the field is `PointValue` (383 rows, offset 0x620) -- so no
+pickup in the native port had ever awarded score. And once `PointValue` loaded,
+the award tested truthiness, so every row authoring the format's `-1` unset
+subtracted a point. Both are fixed. The first had been reported and
+deliberately deferred as a scoring change outside the picture economy;
+certifying `HandlePickupCollection` made it in-scope, because the recovered
+award step is "PIC_NUMBER *and* score" and certifying half of it would be
+certifying a different function.

@@ -112,7 +112,10 @@ static void item_on_trigger(Entity *e, Entity *by) {
     /* Typed counters: gems tally separately; all pickups award their Points. */
     if (strncmp(e->type, "3GEM", 4) == 0)
         gamestate_gem_collected();
-    if (e->points)
+    /* PointValue is -1 on rows that author no score: the format's unset
+       convention (docs/decomp/C3DPickupItem.md records the range as -1..1000).
+       Testing truthiness scored minus one point for every one of them. */
+    if (e->points > 0)
         gamestate_add_points(e->points);
     item_grant_tool(e);
     /* A 3PIC that awards the baseball picture (PIC_NUMBER==6, the same id
