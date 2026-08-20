@@ -34,6 +34,7 @@
 #include "fixture.h"
 #include "menu.h"
 #include "help_overlay.h"
+#include "gadget_menu.h"
 #include "level_select.h"
 
 /* The controls card greets the player at every level boot, then fades. */
@@ -461,6 +462,23 @@ static int level_desc_for(const char *name, LevelDesc *desc) {
     return 1;
 }
 
+/* Headless AMI test (JN_TEST_AMI=1): drive every action-menu request id
+   through the real dispatch and print the mode and VR route it produces, so
+   the transcribed 00428d50 switch can be diffed against the evidence rather
+   than trusted. Runs once at startup and does not touch the world. */
+static void ami_dump_if_requested(void) {
+    if (!env_enabled("JN_TEST_AMI")) return;
+    for (int id = 0; id <= AMI_ID_MAX; id++) {
+        int before = action_mode();
+        int mode = ami_dispatch(id);
+        const char *vr = ami_vr_level(id);
+        printf("[AMITABLE] id=%d mode=%d changed=%d vr=%s\n",
+               id, mode, mode != before, vr ? vr : "-");
+        action_mode_set(ACTION_MODE_NONE);
+    }
+    printf("[AMITABLE] done\n");
+}
+
 /* Headless picture-economy test (JN_TEST_PICTURES=1): force every authored
    pickup row in the loaded level through its own on_trigger, repeatedly until
    no further collection happens. Two of the three award paths are otherwise
@@ -471,6 +489,7 @@ static int level_desc_for(const char *name, LevelDesc *desc) {
    JN_TEST_SWAP=<same level> proves re-entry awards nothing a second time.
    tools/verify_picture_economy.py drives this. */
 static void picture_sweep_if_requested(World *world) {
+    ami_dump_if_requested();
     if (!env_enabled("JN_TEST_PICTURES")) return;
     int pass = 0, took = 0, total = 0;
     while ((took = behavior_pickup_sweep_collect(world)) > 0) {
@@ -2316,6 +2335,15 @@ int main(int argc, char **argv) {
                the player's selection routes into the level/task system. The
                currently-loaded level renders as a static backdrop. */
             help_input();
+            /* The action menu (AMI). The original opens it from Jimmy's own
+               input dispatcher; here it is Tab, and it refuses to stack on top
+               of the front-end menu or the QA browser. */
+            if (gadget_menu_is_open()) {
+                gadget_menu_input();
+            } else if (!menu_active() && !level_select_active() &&
+                       !help_active() && input_just_pressed(SDL_SCANCODE_TAB)) {
+                gadget_menu_open(0);
+            }
             if (!menu_active() && !help_active() &&
                 input_just_pressed(SDL_SCANCODE_M)) {
                 if (level_select_active()) level_select_close();
@@ -2365,7 +2393,8 @@ int main(int argc, char **argv) {
                 }
             }
 
-          if (!menu_active() && !level_select_active()) {
+          if (!menu_active() && !level_select_active() &&
+              !gadget_menu_is_open()) {
             gamestate_tick(DT);   /* pickup-card decay */
             s_arrow_clock += DT;  /* ShowArrow spin; once per frame */
 
@@ -2778,6 +2807,7 @@ int main(int argc, char **argv) {
 
         /* CMainMenu overlay (drawn over the backdrop scene when open). */
         menu_draw(w.width, w.height);
+        gadget_menu_draw(w.width, w.height);
         level_select_draw(w.width, w.height);
         help_draw(w.width, w.height);
 
