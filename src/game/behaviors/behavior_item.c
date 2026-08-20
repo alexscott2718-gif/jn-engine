@@ -6,15 +6,12 @@
 #include <string.h>
 #include <math.h>
 
-#define ITEM_BOB_AMP   12.0f
-#define ITEM_BOB_FREQ  1.2f
 #define ITEM_SPIN_RATE 2.4f
 
 static void item_on_spawn(Entity *e, World *w) {
     behavior_trigger_spawn_base(e, 30.0f, 30.0f, 30.0f);
     e->user_flag = 0;             /* 0 = uncollected, 1 = collected */
     e->pickup_counted = 0;        /* not yet in the level item tally */
-    e->user_float = e->y;         /* base y for bob */
     int was_trigger = (e->runtime_flags & ENTITY_FLAG_TRIGGER) != 0;
     /* PostLoadPickupItem (00436200) / ResetPickupItemVisibility (00435b20):
        a pickup whose global state slot is set is not shown again, and one
@@ -35,13 +32,15 @@ static void item_on_update(Entity *e, World *w, float dt) {
     (void)w;
     if (!e->alive) return;
     if (!behavior_animated_update_base(e, w, dt)) return;
-    /* anim_time is THIS entity's clock, advanced once per frame by the animated
-       base. It used to be a function-static shared by every pickup and bumped
-       once per pickup per frame, so the hover ran N times too fast in a level
-       with N pickups and changed speed whenever one was collected. The x term
-       keeps neighbouring pickups out of phase. */
-    e->y  = e->user_float +
-            ITEM_BOB_AMP * sinf(6.28318f * ITEM_BOB_FREQ * e->anim_time + e->x * 0.01f);
+    /* No bob. The original does not hover its pickups at all (owner comparison
+       2026-08-20), so the item stays at its authored height. That earlier
+       "the hover runs N times too fast" fix was treating the symptom of a
+       mechanism that should not exist; it also dragged the ShowArrow marker up
+       and down, since the arrow is drawn at e->y.
+
+       The spin stays: a 3PIC resolves to a camera-facing billboard, so its yaw
+       was never visible anyway, and the few mesh-drawn pickups keep the
+       behaviour they had. */
     e->ry += ITEM_SPIN_RATE * dt;
 }
 
