@@ -105,6 +105,9 @@ void behavior_pickup_set_state(Entity *e, int state) {
     if (state == 1)
         gamestate_pickup_clear(gamestate_level(), pickup_index_of(e));
 
+    /* Both recovered states show the pickup. This is the only way an
+       InitallyActive=0 product ever becomes visible. */
+    e->pickup_inactive = 0;
     e->user_flag = 0;
     e->alive = 1;
     e->visible = 1;
@@ -141,8 +144,12 @@ int behavior_pickup_spawn_gate(Entity *e, World *w) {
        waits for evidence. */
     if (gam_prop_i(e, "InitallyActive", 1) == 0) {
         pickup_deactivate(e, 0);
+        /* The renderer reads this, not the authored property, so activating
+           the pickup can actually reveal it. */
+        e->pickup_inactive = 1;
         return PICKUP_SPAWN_INACTIVE;
     }
+    e->pickup_inactive = 0;
     return PICKUP_SPAWN_AVAILABLE;
 }
 

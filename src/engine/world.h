@@ -105,6 +105,9 @@ typedef struct Entity {
     float move_vert;              /* shared movement-base vertical velocity */
     float move_lean;              /* shared movement-base lean angle */
     int   user_flag;             /* per-type: door open, item collected, ... */
+    int   pickup_inactive;       /* CPickupType: authored InitallyActive=0 and
+                                    not activated yet. The renderer skips it
+                                    while set; SetPickupItemState clears it. */
     int   pickup_counted;        /* CPickupType: already in the level item
                                     tally. Distinct from user_flag because
                                     SetPickupItemState state 1 clears that

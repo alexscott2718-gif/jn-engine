@@ -297,6 +297,22 @@ void gamestate_note_pickup(void) {
     g_state.pickup_events++;
 }
 
+#define PICKUP_POPUP_SECONDS 2.5f
+
+void gamestate_notify_pickup(int sprite_index, int picture_id, int count) {
+    g_state.popup_sprite = sprite_index;
+    g_state.popup_id = picture_id;
+    g_state.popup_count = count;
+    g_state.popup_timer = PICKUP_POPUP_SECONDS;
+}
+
+void gamestate_tick(float dt) {
+    if (g_state.popup_timer > 0.0f) {
+        g_state.popup_timer -= dt;
+        if (g_state.popup_timer < 0.0f) g_state.popup_timer = 0.0f;
+    }
+}
+
 int gamestate_pickup_events(void) {
     return g_state.pickup_events;
 }

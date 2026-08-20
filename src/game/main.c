@@ -884,8 +884,12 @@ static void draw_scene(World *world, int jim_model_ok)
         /* Same shape for pickups: InitallyActive=0 (sic — the original's
            registrar typo) marks quest-spawned pickups (level1 egg2b nest
            egg, ...) that scripting activates later; the original never
-           draws them at boot (2026-06-11 QA). */
-        if (gam_prop_i(e, "InitallyActive", -1) == 0) {
+           draws them at boot (2026-06-11 QA). Read the runtime flag, not the
+           authored property: behavior_pickup_spawn_gate raises it from that
+           property at spawn (so boot is unchanged) and SetPickupItemState
+           lowers it, which is how a vending machine's product becomes visible
+           in the tray once the machine has been paid. */
+        if (e->pickup_inactive) {
             audit_line("entity", e->type, e->tag, "gated", NULL, NULL, 0);
             continue;
         }
@@ -2285,6 +2289,8 @@ int main(int argc, char **argv) {
             }
 
           if (!menu_active() && !level_select_active()) {
+            gamestate_tick(DT);   /* pickup-card decay */
+
             /* Per-entity behavior tick (player reads input, platforms move, etc.) */
             for (Entity *e = world.head; e; e = e->next) {
                 entity_update(e, &world, DT);

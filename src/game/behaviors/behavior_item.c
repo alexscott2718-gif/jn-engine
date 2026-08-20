@@ -144,6 +144,14 @@ static void item_on_trigger(Entity *e, Entity *by) {
        can be bought repeatedly, and without this the lifetime tally runs
        past the level total and trips the win bridge ("collected 4 / 3"). */
     gamestate_note_pickup();
+    {
+        /* The card shows what was just taken. SpriteIndex is the pickup's
+           own canvas id, so no unrecovered icon mapping is involved; the
+           HUD resolves it to an image. */
+        int pic = gam_prop_i(e, "PIC_NUMBER", -1);
+        gamestate_notify_pickup(e->sprite_index, pic,
+                                pic >= 0 ? gamestate_pic_count(pic) : 0);
+    }
     if (!e->pickup_counted) {
         e->pickup_counted = 1;
         gamestate_item_collected();

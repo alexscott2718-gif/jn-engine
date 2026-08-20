@@ -685,3 +685,80 @@ generated at load. That is an asset/export problem, not a picture-economy one,
 and it is the likely source of the long-standing "pickup animation is broken"
 report — swapping to a differently-topologised mesh mid-play would visibly pop.
 Not investigated further here.
+
+---
+
+## 13. Owner playtest round 2, 2026-08-20
+
+### 13.1 `InitallyActive` had a *third* owner, and it was the renderer
+
+The empty vending tray was not a decision, it was a bug. `draw_scene`
+(`main.c`) skipped any entity whose **authored** `InitallyActive` is 0 —
+forever. That is correct at boot (2026-06-11 QA established the original does
+not draw these) but it reads a `.gam` property, not runtime state, so nothing
+could ever un-hide one. The candy stayed invisible in the tray even after the
+machine released it.
+
+Together with §12's discovery in `behavior_trigger_spawn_base`, the field had
+**three** owners: the spawn base, the renderer, and phase 4's pickup gate. It
+now has one. `behavior_pickup_spawn_gate` raises `Entity.pickup_inactive` from
+the authored property at spawn; `SetPickupItemState` (004360b0) lowers it,
+because both recovered states show the pickup; the renderer reads the flag.
+Boot behaviour is unchanged — the `level1` golden is byte-identical — and
+activation now actually reveals the product, which is the entire point of an
+activation.
+
+That also settles §9.3's open question in the only direction the evidence
+allows. The original *does* hide these at boot (QA-established); what was
+missing was the un-hide on activation, not the hide.
+
+### 13.2 The pickup card
+
+Owner request: *"typically when you pick up, you get a popup with the item card
+with a number in the top right hand corner of the card to show how many of that
+item you have."*
+
+The **hook** is decomp-supported. `C3DPickupItem`'s Assets table lists
+`FUN_004061b0` / `FUN_004061c0` / `FUN_004061d0` as the picture/inventory
+service its collection path calls, and `docs/decomp/_scene_sequencer.md` names
+`FUN_004061d0(id, _)` as the "On-screen `+counter` notify queue". So a pickup
+really does raise a counter notification, at the point we now raise one.
+
+The **layout** is not. The original draws it from the `C2DInGameMenu` canvas
+records the `hud-draw` certificate is still `linked-blocked` on, and
+`assets/omt/inventory.omt`'s twelve 50x50 / 40x40 / 20x100 chunks cannot be
+tied to picture ids without the reward-grid table (`FUN_004038c0(list, slot,
+v)`), which is also unrecovered. So the card is native chrome — same stance as
+§10 — and it shows **the pickup's own sprite**, which we do know, because
+`SpriteIndex` resolves through the generated chunk map. Nothing unrecovered is
+invented.
+
+It sits under the picture readout, holds for 2.5 s, fades over the last half
+second, and carries the count in its top-right corner. A pickup that awards no
+picture gets the card without a number rather than a misleading zero.
+
+### 13.3 The pickup animation is an asset defect, and it is now pinned
+
+`assets/ase/jimpickup.ASE` is broken as exported, in two ways:
+
+- It contains **28 `GEOMOBJECT`s**: the character mesh `01jimmy` *plus the
+  entire Biped rig* (`Bip01`, `Bip01 Head`, `Bip01 L Calf`, `Bip01 Footsteps`,
+  …). The loader takes only `01jimmy`, so the bone soup is not drawn — but the
+  export is plainly wrong.
+- Its `01jimmy` is **407 vertices / 792 faces**, where every other player clip
+  is **426 / 814**, and the file has **no `MESH_TVERTEX` at all**.
+
+Only `jimstop.ase` ships real texture coordinates (3551 tverts); every other
+clip gets them at runtime from `player_anim.c`'s `copy_shared_jimmy_uvs`, which
+copies UVs from `jimstop` — and **bails when the vertex counts differ**. That is
+true for exactly one clip: the pickup. So `jimpickup` alone renders with the
+loader's generated object-space UVs, which is why Jimmy's head becomes a flat
+slab and his body a jumble of colour blocks for the 0.45 s the pose is up.
+
+**Not fixed here, deliberately.** The honest repairs are (a) re-export the clip
+with UVs and without the rig, or (b) transfer UVs from `jimstop` by nearest
+vertex. (b) is tempting and cheap, but the two meshes are in *different poses*
+at frame 0 — idle versus reaching down — so nearest-position matching would tie
+a hand vertex to a knee. That is guessing at a hero character's texturing, which
+is exactly the class of thing this project refuses to do without evidence. It
+wants the source asset, or a decision to accept an approximation.
