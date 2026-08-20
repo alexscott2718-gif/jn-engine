@@ -60,15 +60,22 @@ AMI_EXPECTED = {
 }
 
 # --- expected grants, mirroring GADGET_GRANTS ------------------------------
-# .gam ObjectTag -> (inventory tag, kind)
+# .gam ObjectTag -> (inventory tag, kind, artist's canvas name for its sprite)
+#
+# The third column is the point. The level designer's ObjectTag and the
+# artist's canvas name disagree for every row here, and for three of them they
+# disagree about what the object *is* -- level1b's "shrinkray" row draws the
+# canvas named "Jetpack 1". Pinning both means the next person to read this
+# cannot quietly assume they agree, which is the mistake this table already
+# shipped once.
 GRANTS = {
-    "shrinkray":    ("shrinkray",    "gadget"),
-    "invisibility": ("invisibility", "gadget"),
-    "bubblepickup": ("bubble",       "gadget"),
-    "scooterpart":  ("scooterpart",  "part"),
-    "sewerpart":    ("sewerpart",    "part"),
-    "foil":         ("foil",         "part"),
-    "godphone":     ("godphone",     "part"),
+    "shrinkray":    ("shrinkray",    "gadget", "Jetpack 1"),
+    "invisibility": ("invisibility", "gadget", "yokpart"),
+    "bubblepickup": ("bubble",       "gadget", "bubshadw"),
+    "scooterpart":  ("scooterpart",  "part",   "wheel"),
+    "sewerpart":    ("sewerpart",    "part",   "CompPart"),
+    "foil":         ("foil",         "part",   "foil"),
+    "godphone":     ("godphone",     "part",   "phone"),
 }
 
 # Tags that must NOT produce an inventory line. wrench1/wrench2 award
@@ -77,6 +84,7 @@ GRANTS = {
 NO_GRANT = ("wrench1", "wrench2", "passcard", "water2", "hydrant")
 
 INV = re.compile(r"\[INVENTORY\] \+(gadget|part) '([^']+)'")
+DUMP = re.compile(r"\[INVDUMP\] slot=\d+ tag='([^']*)' sprite=(-?\d+) art='([^']*)'")
 AMIT = re.compile(r"\[AMITABLE\] id=(\d+) mode=(-?\d+) changed=(\d+) vr=(\S+)")
 
 
@@ -159,7 +167,9 @@ def main():
         got = {(t, k) for k, t in INV.findall(out)}
         got_tags = {t for t, _ in got}
 
-        for tag, (inv_tag, kind) in GRANTS.items():
+        art = {t: a for t, _s, a in DUMP.findall(out)}
+
+        for tag, (inv_tag, kind, want_art) in GRANTS.items():
             if lvl not in where[tag]:
                 continue
             checked += 1
@@ -171,6 +181,12 @@ def main():
             if (inv_tag, kind) not in got:
                 fails.append(f"{lvl}: expected {kind} '{inv_tag}' from '{tag}', "
                              f"got {sorted(got) or 'nothing'}")
+            # Only gadgets are dumped (parts are not menu-selectable), so the
+            # art assertion applies to those.
+            if kind == "gadget" and inv_tag in art and art[inv_tag] != want_art:
+                fails.append(f"{lvl}: '{inv_tag}' draws canvas "
+                             f"'{art[inv_tag]}', expected '{want_art}' -- the "
+                             f"sprite map moved under the table")
 
         for tag in NO_GRANT:
             if lvl in where[tag] and tag in got_tags:

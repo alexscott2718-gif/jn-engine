@@ -1025,7 +1025,12 @@ shape.
 item.** Every `RequiredPicNum`-gated machine in the corpus uses 106 — `cmach`,
 `fmach`, `mach`, `mdiam`, `fp`, `cm`, `cjar`, `book`, `kitty`, `nest1/2`. This
 is what a vending machine actually *is*: a blank trigger sitting over the
-machine's model. It also retro-explains §16.2 — the machine's `ShowArrow`
+machine's model.
+
+This half was not new — `entity_visual.c` has carried `sprite_chunk_is_hidden`
+and the note that chunk 106 is *literally the canvas the artist named "hidden"*
+since QA #3 on 2026-06-12. What the corpus scan adds is the correlation with
+`RequiredPicNum`: it is specifically the gated machines that use it. It also retro-explains §16.2 — the machine's `ShowArrow`
 marker floats at mid-machine height because the pickup there is the invisible
 trigger, and there is no visible item for it to sit above until one is
 dispensed.
@@ -1147,3 +1152,64 @@ agreement with itself.
 Whether the `2` that suppresses the cursor on enter is the same `2` that
 suppresses hiding it on exit (`controller+0x4d4`). Both are unrecovered, and
 native has no controller to ask, so the exit path always restores the cursor.
+
+### 17.9 Correction: the art names the item, not the tag (2026-08-20, same day)
+
+Owner, playing the build within the hour: *"so i collected the jetpack, shows
+up as shrink ray in the inventory."*
+
+They were right. §17.2 built its table on the `.gam` **ObjectTag** and never
+looked at what the pickup actually *draws*. `sprites.omt` canvases carry the
+**artist's own name**, and it disagrees with the designer's tag on every row in
+the table — and on three of them it disagrees about what the object *is*:
+
+| ObjectTag | sprite | artist's canvas name | agree? |
+|---|---:|---|---|
+| `shrinkray` | 99 | **Jetpack 1** | no |
+| `invisibility` | 114 | **yokpart** | no |
+| `bubblepickup` | 26 | **bubshadw** | no |
+| `scooterpart` | 111 | wheel | yes, in substance |
+| `sewerpart` | 134 | CompPart | yes, in substance |
+| `godphone` | 184 | phone | yes |
+| `foil` | 183 | foil | yes |
+
+The player is looking at the art. So the canvas names anything shown to them,
+and the ObjectTag stays what it always was: the key that finds the row in the
+corpus.
+
+The name was already being read out of `sprites.json` by
+`gen_sprite_chunk_map.py` and then thrown away into a C comment. It is a real
+field now, and `[INVDUMP]` prints both, so this class of disagreement is
+visible from a console screenshot instead of silent.
+
+**This also corrects §17.1.** That section said four of the old table's nine
+tags "match no ObjectTag anywhere in the corpus", and used it to call the table
+invention. The count is right and `watergun`, `glasses` and `burpgun` have no
+canvas either — but `jetpack` was not invention. It named a real item that is
+really in level1b; it was keyed on the wrong field, which is the same mistake
+§17.2 then made in the other direction. The old table knew something this one
+had to be told.
+
+**Open, and an owner call rather than mine:** whether `invisibility` (drawing
+`yokpart`) and `bubblepickup` (drawing `bubshadw` — a bubble *shadow*, odd art
+for a pickup) are gadgets at all, or quest parts like `scooterpart`. The three
+rows I classified as gadgets are exactly the three where tag and art disagree,
+which is not a comfortable coincidence. Only the jetpack is unambiguous.
+
+### 17.10 Correction: New Game did not clear the inventory
+
+Same session: *"we start every level with shrinkray anyway."*
+
+`gamestate_new_game()` cleared `pic_count` and the `pickup_taken` table and said
+so in its log line, but never touched the inventory, so gadgets survived into
+the next run and every level looked like it began with them in hand.
+
+Not a deliberate carry-over. The picture flags are preserved across levels on
+purpose and there is a comment arguing why — level1b gates on a picture only
+level2 awards, so clearing per level would make the shipped corpus
+uncompletable. The inventory was simply never mentioned. Nothing wants a gadget
+to outlive a New Game.
+
+Note that the pickup remains ~4300 units from level1b's `STARTEXP` spawn, so it
+was never being auto-collected; the inventory really was surviving from an
+earlier run.
