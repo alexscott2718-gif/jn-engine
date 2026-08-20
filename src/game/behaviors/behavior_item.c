@@ -44,43 +44,79 @@ static void item_on_update(Entity *e, World *w, float dt) {
     e->ry += ITEM_SPIN_RATE * dt;
 }
 
-/* Tool-granting pickups. Matched as a case-insensitive substring of the GAM
-   ObjectTag so variants (pickupwatergun / WATERGUN1 / activatewatergun) all map
-   to one inventory tool. Icons are authentic sprites pulled from sprites.omt.
-   Kept alongside the picture economy, not replaced by it: the watergun,
-   jetpack and keys gate real progression in the native port today, so the
-   picture path is additive. */
-typedef struct { const char *tag; const char *tool; const char *icon; } ToolGrant;
-static const ToolGrant TOOL_GRANTS[] = {
-    { "watergun", "watergun", "assets/hud/tool_watergun.png" },
-    { "glasses",  "glasses",  "assets/hud/tool_glasses.png"  },
-    { "jetpack",  "jetpack",  "assets/hud/tool_jetpack.png"  },
-    { "wrench",   "wrench",   "assets/hud/tool_wrench.png"   },
-    { "megaburp", "burpgun",  "assets/hud/tool_burpgun.png"  },
-    { "burpgun",  "burpgun",  "assets/hud/tool_burpgun.png"  },
-    { "tools04",  "tools",    "assets/hud/tool_wrench.png"   },
-    { "fowlkey",  "fowlkey",  "assets/hud/tool_key.png"      },
-    { "key",      "key",      "assets/hud/tool_key.png"      },
+/* Gadget and part pickups, read off the .gam corpus (scan of every 3PIC row in
+   all 35 shipped levels, 2026-08-20).
+ *
+ * The table this replaces was mostly invention. Four of its nine tags --
+ * watergun, jetpack, burpgun, glasses -- match no ObjectTag anywhere in the
+ * corpus, and its comment claimed they "gate real progression in the native
+ * port today". Nothing does: the only consumer of the inventory in the whole
+ * tree is behavior_player.c, and it asks only for "baseball".
+ *
+ * Two rules separate a carried gadget from the other ~80 named pickup rows,
+ * and both come from the data rather than from naming:
+ *
+ *   1. A row that awards or requires a picture is an economy item, not a
+ *      gadget. wrench1 and wrench2 award PIC_NUMBER 18; hydrant and water2 in
+ *      the same level require 18. The wrench is spent at the hydrant, not
+ *      carried in a pocket -- so modelling it as a permanent tool was wrong in
+ *      both directions. passcard (PIC_NUMBER 25) is the same shape.
+ *
+ *   2. A row drawn on sprites.omt chunk 106 is an invisible trigger volume,
+ *      not an item. Every RequiredPicNum-gated machine in the corpus -- cmach,
+ *      fmach, mach, mdiam, fp, cm, cjar, book, kitty, nest1/2 -- uses 106.
+ *      That is what the vending machine actually is: a blank trigger sitting
+ *      over the machine's model, which is also why its ShowArrow marker floats
+ *      at the machine's mid height rather than over any visible item.
+ *
+ * What survives both rules -- visible, and outside the picture economy -- is
+ * the list below. GADGET rows are the ones the action menu offers. PART rows
+ * are carried quest items that the menu does not offer, distinguished by their
+ * wiring rather than their names: sewerpart fires movegoddard on pickup, and
+ * scooterpart is the scooter the AMI mode table already knows about.
+ *
+ * Deliberately absent: applepie x3 (level1c) and vertitem (level4) are visible
+ * and picture-free but carry only a PointValue and no wiring at all, so there
+ * is no evidence they are carried rather than simply scored. They stay out
+ * until something says otherwise.
+ *
+ * The icon is the pickup's own sprite. The original draws its inventory from
+ * C2DInGameMenu canvas records that the hud-draw certificate is still blocked
+ * on, but SpriteIndex is right there in the row, so the art is authentic even
+ * though the layout is ours. Resolution happens in hud.c, not here -- this
+ * file is on the C3DPickupItem oracle's fixed file list and must not grow a
+ * dependency on entity_visual.c. */
+typedef struct {
+    const char *tag;    /* .gam ObjectTag, matched case-insensitively, exact */
+    const char *tool;   /* inventory identity */
+    int         kind;   /* INV_KIND_GADGET (menu-selectable) or INV_KIND_PART */
+} GadgetGrant;
+static const GadgetGrant GADGET_GRANTS[] = {
+    /* tag            tool            kind             level    sprite */
+    { "shrinkray",    "shrinkray",    INV_KIND_GADGET },  /* level1b     99 */
+    { "invisibility", "invisibility", INV_KIND_GADGET },  /* level5     114 */
+    { "bubblepickup", "bubble",       INV_KIND_GADGET },  /* level7      26 */
+    { "scooterpart",  "scooterpart",  INV_KIND_PART   },  /* level1c    111 */
+    { "sewerpart",    "sewerpart",    INV_KIND_PART   },  /* level1a    134 */
+    { "foil",         "foil",         INV_KIND_PART   },  /* level1b    183 */
+    { "godphone",     "godphone",     INV_KIND_PART   },  /* level1     184 */
 };
 
-/* Case-insensitive substring search (needle in haystack). */
-static int tag_contains(const char *haystack, const char *needle) {
-    if (!haystack[0] || !needle[0]) return 0;
-    size_t nl = strlen(needle);
-    for (const char *p = haystack; *p; p++) {
-        size_t i = 0;
-        while (i < nl && p[i] &&
-               (p[i] | 0x20) == (needle[i] | 0x20)) i++;
-        if (i == nl) return 1;
-    }
-    return 0;
+/* Exact, case-insensitive. Every tag in GADGET_GRANTS occurs exactly once in
+   the corpus, so substring matching buys nothing and costs precision -- it is
+   what let the old "wrench" entry swallow wrench1 and wrench2. */
+static int tag_equals(const char *a, const char *b) {
+    if (!a[0] || !b[0]) return 0;
+    while (*a && *b && (*a | 0x20) == (*b | 0x20)) { a++; b++; }
+    return *a == 0 && *b == 0;
 }
 
 static void item_grant_tool(const Entity *e) {
-    for (size_t i = 0; i < sizeof(TOOL_GRANTS) / sizeof(TOOL_GRANTS[0]); i++) {
-        if (tag_contains(e->tag, TOOL_GRANTS[i].tag)) {
-            gamestate_grant_tool(TOOL_GRANTS[i].tool, TOOL_GRANTS[i].icon);
-            return;  /* first match wins */
+    for (size_t i = 0; i < sizeof(GADGET_GRANTS) / sizeof(GADGET_GRANTS[0]); i++) {
+        if (tag_equals(e->tag, GADGET_GRANTS[i].tag)) {
+            gamestate_grant_gadget(GADGET_GRANTS[i].tool, e->sprite_index,
+                                   GADGET_GRANTS[i].kind);
+            return;
         }
     }
 }
