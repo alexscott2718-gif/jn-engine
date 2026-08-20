@@ -6,7 +6,7 @@ original's picture-flag economy — and open a certifiable `linked` aspect on
 `C3DPickupItem`, which `docs/linkage_certificates.csv` currently records as
 having "no decompiled-body fidelity to certify".
 
-Status: **proposal**, nothing implemented. Measurements below were taken
+Status: **phases 0-3 implemented** 2026-08-19 (see §8); 4-6 open. Measurements below were taken
 2026-08-19 against `assets/gam/*.gam` (35 files) with `tools/gam_parser.py`.
 
 ---
@@ -186,3 +186,152 @@ Phases 0–3 are roughly a focused day: the store and its test are the bulk, the
 collection rewrite is ~80 lines in one file, and the measurements above are
 already done. Phases 4–6 are a second pass — 6 in particular is an oracle plus
 mutation test, which the project treats as its own kind of work.
+
+---
+
+## 8. Phases 0–3 as built (2026-08-19)
+
+Status: phases 0–3 **implemented**; 4–6 remain a separate pass. Everything below
+was measured on this checkout, not carried over from §2.
+
+### 8.1 What landed
+
+| Phase | Where |
+|---|---|
+| 0 | `tools/gam_schema.py` legend + regenerated `docs/gam_schema.md` |
+| 1 | `gamestate.{h,c}` store; `tools/pictures_dump.c` + `tools/check_pictures.py --selftest` (in `make check`) |
+| 2 | `behavior_pickup_core.c`; `behavior_item.c` rewrite; `behavior_creature.c` award path |
+| 3 | the gate + `NeedMoreSound` in `behavior_pickup_core.c`; `tools/gen_picture_pregrants.py` → `src/game/picture_pregrants_generated.h`; cold-entry wiring in `main.c` |
+
+Runtime evidence: `tools/verify_picture_economy.py` (not in `make check` — it
+needs assets *and* a built binary, and loads every level twice).
+
+### 8.2 Corrections to §3.3
+
+The decompiled order in `docs/decomp/C3DPickupItem.md` is not the order §3.3
+lists. `HandlePickupCollection` (00435ce0) is:
+
+```
+if toucher != player            return
+if !CheckRequiredPicAndConsume  return      <- gate BEFORE the collected check
+if PickupIndex > 0 and state[PickupIndex] != 0  return
+update state + visibility (or the PickedUpIndex sprite)
+fire ActivateObject / ToggleObject          <- BEFORE the award
+award PIC_NUMBER + score
+fire NextTrigger                            <- AFTER the award
+play the pickup sound
+```
+
+Two consequences the plan did not carry:
+
+- **The gate runs before the collected-state check.** That is only safe because
+  a collected pickup is hidden and disabled *at load* — `PostLoadPickupItem`
+  (00436200) and `ResetPickupItemVisibility` (00435b20) both read the same
+  table. §3.2 described the table as a write on collection and never said where
+  it is read; without the load-time half it is write-only, re-entry re-awards
+  every picture, **and** — because the gate is first — walking back into a
+  pickup you already took charges you for it again. `behavior_pickup_restore_taken`
+  is that half, called from both `item_on_spawn` and `creature_on_spawn`.
+- **The side effects straddle the award.** Phase 4 has two insertion points, not
+  one; both are marked `PHASE 4 goes here` in `behavior_item.c`.
+
+### 8.3 The gate consumes, and the corpus is short in more places than §5 says
+
+`CheckRequiredPicAndConsume` (vtable 3 slot 54, 00436830) "consumes
+`ReqPicNumAmount` on success, clears the picture flag when the count reaches
+zero". Consume, not threshold — so a level's demand for a picture is the *sum*
+of its gates' amounts, not the number of distinct ids.
+
+§5 derives its four levels by set difference (an id the level never awards).
+Under consume, eight levels cannot meet their own demand:
+
+| Level | id | needs | awards in level |
+|---|---:|---:|---:|
+| Level1 | 3 | 2 | 1 |
+| Level1a | 10 | 4 | 0 |
+| Level3 | 27 | 4 | 3 |
+| level1b | 2 | 3 | 1 |
+| level1b | 12 | 4 | 0 |
+| level1b | 14 | 1 | 0 |
+| level1c | 6 | 9 | 4 |
+| level1c | 8 | 6 | 1 |
+| level1c | 12 | 4 | 2 |
+| level1c | 23 | 18 | 0 |
+| level4 | 3 | 3 | 2 |
+| level4a | 8 | 12 | 0 |
+| level5 | 10 | 4 | 1 |
+
+The pre-grant implements the decision exactly as recorded — the same four levels
+and five ids — with the count set to that level's whole demand, because granting
+one copy of picture 23 would open one of level1c's nine gates. **The remaining
+count shortfalls are left alone and need an owner decision.** They are not
+soft-locks in linear play: the pictures are awarded elsewhere and the flags are
+save-global, which is the design. They *are* differences in what a cold jump can
+finish. `level1c` id 23 is the extreme case: 18 demanded, 13 awarded in the
+entire corpus, so even a perfect linear playthrough can open at most 6 of its 9
+gates — that reads as intended scarcity ("spend your money"), not as a data bug,
+but it is worth confirming before phase 5 puts a counter on the HUD.
+
+### 8.4 The creatures award, but nothing may collect them yet
+
+3FIS/3GIR/3DIN authored 19 of the 237 awarding rows, and `vt_creature`'s award
+path is built and tested. Its vtable **keeps `flags = 0`**, so the engine's
+overlap dispatch never calls it. Adding `ENTITY_FLAG_TRIGGER` would make walking
+into a dino collect it, and `behavior_creature.c` already records the owner's
+2026-06-23 ground truth: these become pickups only *after* the shrink ray
+shrinks them, and the shrink transition is undecompiled. The award path is
+therefore reachable only from the eventual shrink caller and from the
+`JN_TEST_PICTURES` sweep. Wiring the trigger flag would have invented the
+mechanic that note refuses.
+
+### 8.5 Other measured facts
+
+- **`PickupIndex` is wider than the picture economy.** 478 rows carry one:
+  3PIC 383, 3RED 70, 3FIS 12, 3ANI 6, 3GIR 5, 3DIN 2. Only 3PIC/3FIS/3GIR/3DIN
+  author `PIC_NUMBER`, so award coverage is complete, but 3RED and 3ANI descend
+  from `CPickupType` too and their collected state is *not* tracked yet — they
+  re-collect on every level entry. Out of scope here; worth a row in phase 4+.
+- **No row authors `PickupIndex == 0`,** so the original's special non-table
+  pickup branch has no shipped instance. The store still honours it.
+- **`NeedMoreSound`:** 46 rows author a real (>= 0) value; 45 of those are
+  gating rows. The 46th is on a row with no `RequiredPicNum`, so it can never
+  play. (§2's "46" counts all rows; the gate only ever reaches 45.)
+- **`Points` is a phantom.** `gam_loader.c:286` maps a property named `Points`
+  onto `Entity.points`. That name appears **nowhere** in the 35-file corpus; the
+  authored field is `PointValue` (383 rows), which the decomp confirms is the
+  score award (offset 0x620, `FUN_0042adc0`). So `e->points` has always been 0
+  and no pickup in the native port has ever awarded score. Left unfixed on
+  purpose — it is a scoring change in the loader, not part of the picture
+  economy, and it deserves its own reviewable change.
+- **`tools/gam_schema.py` was not idempotent** against its own committed output:
+  regenerating reverted `TRIG` to unnamed, dropping the identity the CTrigger
+  certificate recovered. Phase 0 had to regenerate, so the generator learned the
+  override; a curated `CLASS_OVERRIDES` row also no longer gets the
+  low-confidence `?` marker.
+
+### 8.6 Verification
+
+```
+python3 tools/check_pictures.py --selftest        # in make check
+python3 tools/check_pictures.py --corpus          # in make check-assets
+python3 tools/verify_picture_economy.py           # by hand, needs assets + binary
+```
+
+`--selftest` rejects three mutants: a flat index-keyed collected table (the
+§6 trap), a level swap that clears the picture store, and an off-by-one in the
+required-amount test. `--corpus` re-derives the pre-grant header from the corpus
+and fails if it is stale, and re-checks that every required id is awarded
+somewhere.
+
+`verify_picture_economy.py` over all 35 levels: **21 of 21** authored picture ids
+awarded at runtime; re-entry collects **0** in every level; 105 gate refusals on
+cold un-pre-granted entries; 7 levels where a later sweep pass collected a row an
+earlier pass had refused (the "collect the prerequisite, then succeed" case); and
+all four pre-grant levels go from refusing to clear.
+
+Picture id 0 is the one id no single cold level run can reach: its row (level1c,
+`PickupIndex` 411) is the corpus's only row that both awards and gates, and
+level1c cannot supply the 3 copies of picture 6 it costs on top of its other
+picture-6 gate. Carrying picture 6 in from level2b opens it — a live
+demonstration that the flags really are save-global, which the verifier now
+performs and asserts.

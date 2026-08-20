@@ -29,6 +29,10 @@ CLASSIDS = ROOT / "docs" / "_gam_classids.tsv"
 # belong to one candidate. Keep the raw rows in _gam_classids.tsv, but display
 # the .gam-facing class here.
 CLASS_OVERRIDES = {
+    # Target 5 pinned TRIG = CTrigger (factory FUN_0047dcf0 installs the four
+    # CTrigger vftables; class id 'TRIG' @0047de03). The committed scan row carries
+    # no RTTI name, so without this a regeneration drops the recovered identity.
+    "TRIG": ("FUN_0047dcf0", "CTrigger()"),
     "3YSH": ("FUN_0044b7d0", "C3DYokianShip()"),
 }
 
@@ -38,7 +42,10 @@ DUPLICATE_CLASS_NOTES = [
     "ship-tagged AI objects and map to `C3DYokianShip` (`FUN_0044b7d0`).",
 ]
 
-# Property names gam_loader.c currently consumes (everything else is dropped today).
+# Property names gam_loader.c maps onto a *named* Entity field. Everything else is
+# still captured: prop_bag_add / str_prop_bag_add put it in Entity.props[] /
+# Entity.strs[], readable via gam_prop_f/gam_prop_i/gam_str, so "not in this set"
+# means unconsumed, not dropped.
 PARSED = set("""ObjectTag LevelName StartPoint PositionX PositionY PositionZ RotationX RotationY
 RotationZ SpriteSize InitiallyVisible SpriteIndex EffectType Points MaxSpeed AccelRate DecelRate
 MaxHeight UpRate DownRate MaxVertVelocity AccelLean DecelLean ASEStop ASEWalk PNGFile PatrolPoint
@@ -156,8 +163,13 @@ def main():
     lines.append(f"- Property value types: `1=str 2=flag4 3=float 4=raw4 6=int`\n")
     lines.append("**How to use (decomp):** for any placeable class, the *field map*, *constants*,")
     lines.append("and *wiring* deliverables are mostly free here — RE only needs to recover the")
-    lines.append("*consuming logic*. Props marked ✓ are already read by `gam_loader.c`; ✗ are")
-    lines.append("dropped today (recoverable tuning/wiring).\n")
+    lines.append("*consuming logic*. Props marked ✓ are mapped onto a named `Entity` field")
+    lines.append("by `gam_loader.c`. ✗ does **not** mean dropped: both loader branches end in")
+    lines.append("a `prop_bag_add` / `str_prop_bag_add` fallback, so every unmapped numeric prop")
+    lines.append("lands in `Entity.props[]` and every unmapped string in `Entity.strs[]`, readable")
+    lines.append("right now through `gam_prop_f()` / `gam_prop_i()` / `gam_str()`")
+    lines.append("(`src/engine/world.h`). Read ✗ as **captured in the prop bag, unconsumed**:")
+    lines.append("reaching one needs no loader work, only a behavior that reads it.\n")
 
     # FourCC <-> class map
     cmap = load_class_map([f for f, _ in fccs])
@@ -181,7 +193,10 @@ def main():
         for fcc, _ in fccs:
             func, name, nc = cmap.get(fcc, ("", "", 0))
             disp = name.replace("()", "") if name else "— (name pending Phase 0)"
-            q = "" if ("C3D" in name or "C2D" in name) else (" ?" if name else "")
+            # CLASS_OVERRIDES rows are curated identities with committed evidence;
+            # they are not low-confidence guesses, so they skip the "?" marker.
+            low_conf = not ("C3D" in name or "C2D" in name or fcc in CLASS_OVERRIDES)
+            q = (" ?" if (name and low_conf) else "")
             func_s = f"`{func}`" if func else "—"
             lines.append(f"| `{fcc}` | {disp}{q} | {func_s} | {nc} |")
         lines.append("")

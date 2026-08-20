@@ -22,6 +22,19 @@
  * fire input / scale / scoring. Per user direction (2026-06-23) we only record the
  * truth here; see docs/decomp/C3DShrinkRay.md + PROJECT_HISTORY.
  *
+ * PICTURE AWARD (2026-08-19): 19 creature rows author PIC_NUMBER — 3FIS 12,
+ * 3GIR 5, 3DIN 2 — so they are part of the picture economy and their award path
+ * lives here, not in behavior_item.c's vt_item (different FourCC, different
+ * vtable). creature_on_trigger runs the shared CPickupType collection core.
+ *
+ * What is deliberately NOT done: the vtable keeps flags = 0, so the engine's
+ * overlap dispatch never calls that on_trigger. Adding ENTITY_FLAG_TRIGGER would
+ * make walking into a dino collect it, which is exactly the invented mechanic the
+ * note above refuses — in the original these are collectible only *after* the
+ * shrink ray turns them into pickups. The award path is built and testable
+ * (JN_TEST_PICTURES sweeps it directly); the thing that should fire it is still
+ * the undecompiled shrink transition. When that lands, it calls this.
+ *
  * Native model (the inherited C3DAI base, matching the vt_friend idiom without the
  * friend look-at / talk plumbing):
  *   - Spawn through behavior_ai_spawn_patrol (C3DAI patrol base).
@@ -32,7 +45,10 @@
  * camel Box01/vulture01).
  */
 #include "behavior_ai.h"
+#include "behavior_base.h"
+#include "../gamestate.h"
 #include <stddef.h>
+#include <string.h>
 
 #define CREATURE_WALK_SPEED   120.0f   /* C3DAI patrol pace for the wandering few */
 #define CREATURE_ARRIVE        60.0f
@@ -46,6 +62,10 @@ static void creature_on_spawn(Entity *e, World *w) {
     e->half_extents[0] = CREATURE_HALF_X;
     e->half_extents[1] = CREATURE_HALF_Y;
     e->half_extents[2] = CREATURE_HALF_Z;
+    e->user_flag = 0;
+    /* A creature already taken on an earlier visit stays taken; same
+       PostLoadPickupItem rule the 3PIC rows follow. */
+    behavior_pickup_restore_taken(e);
 }
 
 static void creature_on_update(Entity *e, World *w, float dt) {
@@ -63,9 +83,27 @@ static void creature_on_update(Entity *e, World *w, float dt) {
     behavior_ai_idle(e);
 }
 
+/* The CPickupType half of the chain. Reachable only from a caller that has
+   decided the creature is collectible (the deferred shrink transition, or the
+   JN_TEST_PICTURES sweep) — see the header note on why flags stays 0. */
+static void creature_on_trigger(Entity *e, Entity *by) {
+    (void)by;
+    if (e->user_flag) return;
+    if (!behavior_pickup_gate_allows(e)) return;   /* no creature row authors
+                                                      RequiredPicNum today */
+    if (behavior_pickup_taken(e)) return;
+
+    e->user_flag = 1;
+    behavior_pickup_mark_taken(e);
+    e->visible = 0;
+    e->alive = 0;
+    behavior_pickup_award_pictures(e);
+    if (e->points) gamestate_add_points(e->points);
+}
+
 const EntityVTable vt_creature = {
     .on_spawn   = creature_on_spawn,
     .on_update  = creature_on_update,
-    .on_trigger = NULL,
+    .on_trigger = creature_on_trigger,
     .flags      = 0,
 };
