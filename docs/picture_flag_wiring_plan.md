@@ -991,3 +991,159 @@ top of the draw code.
 
 Whether the arrow also appears over a dispensed item *before* it is picked up.
 The current rule says yes.
+
+---
+
+## 17. The gadget inventory and the action menu (2026-08-20)
+
+The picture economy is one of two things `C3DPickupItem` does. This section is
+the other one: what a pickup *gives* you, and the menu the original used to
+choose between them.
+
+### 17.1 The old tool table was mostly invention
+
+`behavior_item.c` carried a `TOOL_GRANTS` table mapping `.gam` ObjectTags to
+inventory tools. Scanned against all 35 levels, four of its nine entries --
+`watergun`, `jetpack`, `burpgun`, `glasses` -- match **no ObjectTag anywhere in
+the corpus.** Its comment claimed they "gate real progression in the native
+port today"; nothing in the tree gates on them. The only consumer of the
+inventory is `behavior_player.c`, and it asks only for `"baseball"`.
+
+### 17.2 Two rules separate a gadget from the other eighty pickups
+
+A scan of every named `3PIC` row produces ~80 tags. Two properties in the data
+sort them, and neither is the name:
+
+**A row that awards or requires a picture is an economy item, not a gadget.**
+`wrench1` and `wrench2` award `PIC_NUMBER 18`; `hydrant` and `water2` in the
+same level carry `RequiredPicNum 18`. So the wrench is *spent at the hydrant*,
+not carried in a pocket — the old table modelling it as a permanent tool was
+wrong in both directions at once. `passcard` (`PIC_NUMBER 25`) has the same
+shape.
+
+**A row drawn on `sprites.omt` chunk 106 is an invisible trigger volume, not an
+item.** Every `RequiredPicNum`-gated machine in the corpus uses 106 — `cmach`,
+`fmach`, `mach`, `mdiam`, `fp`, `cm`, `cjar`, `book`, `kitty`, `nest1/2`. This
+is what a vending machine actually *is*: a blank trigger sitting over the
+machine's model. It also retro-explains §16.2 — the machine's `ShowArrow`
+marker floats at mid-machine height because the pickup there is the invisible
+trigger, and there is no visible item for it to sit above until one is
+dispensed.
+
+What survives both rules is small:
+
+| tag | level | sprite | kind |
+|---|---|---:|---|
+| `shrinkray` | level1b | 99 | gadget |
+| `invisibility` | level5 | 114 | gadget |
+| `bubblepickup` | level7 | 26 | gadget |
+| `scooterpart` | level1c | 111 | part |
+| `sewerpart` | level1a | 134 | part |
+| `foil` | level1b | 183 | part |
+| `godphone` | level1 | 184 | part |
+
+Gadget vs part is drawn from wiring rather than names: `sewerpart` fires
+`movegoddard` on pickup, and `scooterpart` is the scooter the AMI mode table
+already knows about. `applepie` x3 and `vertitem` are visible and picture-free
+but carry only a `PointValue` and no wiring at all, so there is no evidence they
+are carried rather than simply scored; they stay out.
+
+The icon is the pickup's own `SpriteIndex`. The original fills its inventory
+from `C2DInGameMenu` canvas records that the `hud-draw` certificate is still
+blocked on, but the sprite id is right there in the row — so the art is
+authentic even though the layout is ours.
+
+### 17.3 The HUD already had a gadget panel, drawing nothing
+
+`hud_layout_generated.h` has carried four capture-backed quads tagged `gadget`
+since the frame-8881 extraction — a 64x64 body with its right edge, bottom edge
+and corner, bottom-left of the screen. They have been drawing as an empty bezel
+ever since, because nothing ever put anything in them. The selected gadget's
+sprite now goes inside, inset so the frame still reads as a frame.
+
+Empty-handed draws nothing extra, which is both what the panel always looked
+like and why `level1`'s goldens are unmoved: those frames are captured before
+anything has been picked up.
+
+### 17.4 The action menu — "AMI", the original's own word for it
+
+`JimmyEnterActionMenuLock` (`00425ef0`) and its reverse (`00425b20`) are
+recovered, and `SelectJimmyGadgetOrVRMode` (`00428d50`) logs `"CAll in AMI %d"`
+on entry and `"Exiting AMI"` on the way out.
+
+Most of both bodies is traffic to Jimmy's `0xa18` — a code-created
+`C2DInGameMenu` that is simultaneously the HUD overlay and the gadget command
+endpoint, addressed through eighteen vtable slots. **None of that is ported and
+none of it should be.** The `C3DJimmy/gadget-mode-dispatch` certificate is
+`linked-blocked` precisely because native has no such controller; building a
+fake one would certify a different design.
+
+What survives translation is the observable half, in the decompiled order: the
+`DAT_004ec494 && !DAT_004f8181` guard, the open latch, the pause, the cursor
+(shown on enter unless the argument is `2` — what `2` means was not recovered,
+so it stays a parameter rather than being folded away), the gadget-cooldown
+clear, and the `DAT_004f8434` / `DAT_004f8182` flips.
+
+The pause is not a new mechanism. `main` already freezes the entire simulation
+while the front-end menu or the QA browser is open; the action menu joins that
+same gate, which is the native analogue of global game slot `0x168(1)`.
+
+### 17.5 The AMI tables, and a free cross-check
+
+`00428d50` is one switch over the request id. Every arm writes `DAT_004f0588`
+and, when the game-type probe returns `2`, routes to a VR level through
+`(vrNN.gam, "PHONEBOOTH", ...)`:
+
+| id | mode | VR route |
+|---:|---:|---|
+| 0 | 0 *(or -1 on the other arm)* | vr01 |
+| 1 | 1 — Rocket | vr02 |
+| 2 | 2 *(or -1 on the other arm)* | vr03 |
+| 3 | *(default arm, no mode write)* | vr04 |
+| 4 | 4 | vr05 |
+| 5 | 5 | vr06 |
+| 6 | 6 — aim/shoot | vr07 |
+| 7 | 7 | vr08 |
+| 8 | *(no mode write)* | — |
+
+The routes are a clean `id -> vr(id+1)` ladder, and that is worth stating
+because it is an **independent cross-check**: `CMainMenu`'s already-`linked`
+level-routing table carries the same eight VR levels, recovered separately, and
+the two agree.
+
+Only two modes are named in the port. Mode 1 is Rocket — its arm traces
+`"Activating Rocket"` / `"ACT 2 Rocket"` and plays `DRIVE`. Mode 6 is aim/shoot
+— the controller update clamps pitch to `[0,45]`, builds `(0, aim+80, 45)`
+through slot `0x384`, and uses `SHOOT`. The rest keep their numbers with the
+evidence in a comment; naming them would be interpretation dressed as fact.
+
+### 17.6 What is deliberately missing
+
+**Which AMI id a given gadget corresponds to.** That mapping lives in the
+`C2DInGameMenu` canvas records the `hud-draw` certificate is blocked on. So the
+menu selects a gadget (native chrome, our layout) and the AMI table is exposed
+separately for callers holding a real id. The two are not joined by a guess,
+because a guess there is exactly what would make a future oracle certify the
+wrong thing.
+
+### 17.7 Evidence
+
+`tools/verify_gadget_menu.py` holds its own copy of both the AMI table and the
+expected grants, read off the evidence rather than off the engine, so a
+transcription slip in either place shows up as a disagreement rather than as
+agreement with itself.
+
+- `JN_TEST_AMI=1` drives all nine ids through the real `ami_dispatch()`; all
+  nine modes and routes match.
+- Seven tag/level pairs collect through the `JN_TEST_PICTURES` sweep and land
+  in the inventory with the right kind.
+- The negative holds: `wrench1`, `wrench2`, `passcard`, `water2` and `hydrant`
+  grant no inventory slot at all.
+- `foil` and `refill` are `InitallyActive=0` and correctly stay out of a cold
+  sweep's reach — the gate from §16.2 doing its job.
+
+### 17.8 Not settled
+
+Whether the `2` that suppresses the cursor on enter is the same `2` that
+suppresses hiding it on exit (`controller+0x4d4`). Both are unrecovered, and
+native has no controller to ask, so the exit path always restores the cursor.
