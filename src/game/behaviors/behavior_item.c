@@ -91,15 +91,22 @@ typedef struct {
     const char *tool;   /* inventory identity */
     int         kind;   /* INV_KIND_GADGET (menu-selectable) or INV_KIND_PART */
 } GadgetGrant;
+/* Classification confirmed by the owner 2026-08-20 against the retail game.
+   The tool name is the artist's canvas, not the designer's ObjectTag, wherever
+   the two disagree -- the level1b row tagged "shrinkray" draws the canvas named
+   "Jetpack 1", and it is a jetpack. */
 static const GadgetGrant GADGET_GRANTS[] = {
-    /* tag            tool            kind             level    sprite */
-    { "shrinkray",    "shrinkray",    INV_KIND_GADGET },  /* level1b     99 */
-    { "invisibility", "invisibility", INV_KIND_GADGET },  /* level5     114 */
-    { "bubblepickup", "bubble",       INV_KIND_GADGET },  /* level7      26 */
-    { "scooterpart",  "scooterpart",  INV_KIND_PART   },  /* level1c    111 */
-    { "sewerpart",    "sewerpart",    INV_KIND_PART   },  /* level1a    134 */
-    { "foil",         "foil",         INV_KIND_PART   },  /* level1b    183 */
-    { "godphone",     "godphone",     INV_KIND_PART   },  /* level1     184 */
+    /* .gam tag       inventory       kind                          level  sprite/art */
+    { "shrinkray",    "jetpack",      INV_KIND_GADGET },          /* level1b   99 Jetpack 1 */
+    { "bubblepickup", "bubble",       INV_KIND_GADGET },          /* level7    26 bubshadw  */
+    /* Both at once, which is why the kinds are flags: it gates progression and
+       the menu offers it. */
+    { "invisibility", "invisibility", INV_KIND_PART |
+                                      INV_KIND_GADGET },          /* level5   114 yokpart   */
+    { "scooterpart",  "scooterpart",  INV_KIND_PART   },          /* level1c  111 wheel     */
+    { "sewerpart",    "sewerpart",    INV_KIND_PART   },          /* level1a  134 CompPart  */
+    { "foil",         "foil",         INV_KIND_PART   },          /* level1b  183 foil      */
+    { "godphone",     "godphone",     INV_KIND_PART   },          /* level1   184 phone     */
 };
 
 /* Exact, case-insensitive. Every tag in GADGET_GRANTS occurs exactly once in

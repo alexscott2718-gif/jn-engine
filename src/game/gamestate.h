@@ -35,12 +35,16 @@ typedef struct {
     int  taken;                    /* the stored state; 0 once cleared */
 } PickupTakenSlot;
 
-/* What an inventory slot is for. A GADGET is offered by the action menu and
-   can be made active; a PART is a carried quest item that the menu does not
-   list. The split is read off the .gam corpus, not off the names -- see the
-   GADGET_GRANTS table in behavior_item.c for the two rules that produce it. */
-#define INV_KIND_PART   0
-#define INV_KIND_GADGET 1
+/* What an inventory slot is for. Flags, not an enum: "does the action menu
+   offer it" and "does progression need it" are independent questions, and at
+   least one pickup answers yes to both -- level5's invisibility is a quest part
+   AND a gadget pickup (owner, 2026-08-20). An enum forced a choice that the
+   game does not.
+
+   Which pickups qualify is read off the .gam corpus, not off the names -- see
+   the GADGET_GRANTS table in behavior_item.c. */
+#define INV_KIND_PART   1
+#define INV_KIND_GADGET 2
 
 typedef struct {
     char        tag[24];     /* tool/key identity, e.g. "shrinkray" */

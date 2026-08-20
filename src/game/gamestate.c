@@ -90,7 +90,9 @@ static int inventory_add(const char *tag, const char *icon_path,
     s->sprite    = sprite_index;
     s->kind      = kind;
     printf("[INVENTORY] +%s '%s' (slot %d)\n",
-           kind == INV_KIND_GADGET ? "gadget" : "part",
+           (kind & (INV_KIND_GADGET | INV_KIND_PART)) ==
+               (INV_KIND_GADGET | INV_KIND_PART) ? "part+gadget" :
+           (kind & INV_KIND_GADGET) ? "gadget" : "part",
            s->tag, g_state.inventory_count);
     return 1;
 }
@@ -106,14 +108,14 @@ int gamestate_grant_gadget(const char *tag, int sprite_index, int kind) {
 int gamestate_gadget_count(void) {
     int n = 0;
     for (int i = 0; i < g_state.inventory_count; i++)
-        if (g_state.inventory[i].kind == INV_KIND_GADGET) n++;
+        if (g_state.inventory[i].kind & INV_KIND_GADGET) n++;
     return n;
 }
 
 const InventorySlot *gamestate_gadget_at(int i) {
     if (i < 0) return NULL;
     for (int k = 0; k < g_state.inventory_count; k++) {
-        if (g_state.inventory[k].kind != INV_KIND_GADGET) continue;
+        if (!(g_state.inventory[k].kind & INV_KIND_GADGET)) continue;
         if (i-- == 0) return &g_state.inventory[k];
     }
     return NULL;
@@ -123,13 +125,13 @@ const InventorySlot *gamestate_active_gadget(void) {
     if (g_state.active_tool < 0 || g_state.active_tool >= g_state.inventory_count)
         return NULL;
     const InventorySlot *s = &g_state.inventory[g_state.active_tool];
-    return s->kind == INV_KIND_GADGET ? s : NULL;
+    return (s->kind & INV_KIND_GADGET) ? s : NULL;
 }
 
 void gamestate_set_active_gadget(int gadget_ordinal) {
     if (gadget_ordinal < 0) return;
     for (int k = 0; k < g_state.inventory_count; k++) {
-        if (g_state.inventory[k].kind != INV_KIND_GADGET) continue;
+        if (!(g_state.inventory[k].kind & INV_KIND_GADGET)) continue;
         if (gadget_ordinal-- == 0) { g_state.active_tool = k; return; }
     }
 }

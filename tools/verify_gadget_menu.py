@@ -69,13 +69,13 @@ AMI_EXPECTED = {
 # cannot quietly assume they agree, which is the mistake this table already
 # shipped once.
 GRANTS = {
-    "shrinkray":    ("shrinkray",    "gadget", "Jetpack 1"),
-    "invisibility": ("invisibility", "gadget", "yokpart"),
-    "bubblepickup": ("bubble",       "gadget", "bubshadw"),
-    "scooterpart":  ("scooterpart",  "part",   "wheel"),
-    "sewerpart":    ("sewerpart",    "part",   "CompPart"),
-    "foil":         ("foil",         "part",   "foil"),
-    "godphone":     ("godphone",     "part",   "phone"),
+    "shrinkray":    ("jetpack",      "gadget",      "Jetpack 1"),
+    "bubblepickup": ("bubble",       "gadget",      "bubshadw"),
+    "invisibility": ("invisibility", "part+gadget", "yokpart"),
+    "scooterpart":  ("scooterpart",  "part",        "wheel"),
+    "sewerpart":    ("sewerpart",    "part",        "CompPart"),
+    "foil":         ("foil",         "part",        "foil"),
+    "godphone":     ("godphone",     "part",        "phone"),
 }
 
 # Tags that must NOT produce an inventory line. wrench1/wrench2 award
@@ -83,7 +83,7 @@ GRANTS = {
 # are economy items; the table they replaced modelled them as a tool.
 NO_GRANT = ("wrench1", "wrench2", "passcard", "water2", "hydrant")
 
-INV = re.compile(r"\[INVENTORY\] \+(gadget|part) '([^']+)'")
+INV = re.compile(r"\[INVENTORY\] \+(part\+gadget|gadget|part) '([^']+)'")
 DUMP = re.compile(r"\[INVDUMP\] slot=\d+ tag='([^']*)' sprite=(-?\d+) art='([^']*)'")
 AMIT = re.compile(r"\[AMITABLE\] id=(\d+) mode=(-?\d+) changed=(\d+) vr=(\S+)")
 
@@ -183,7 +183,7 @@ def main():
                              f"got {sorted(got) or 'nothing'}")
             # Only gadgets are dumped (parts are not menu-selectable), so the
             # art assertion applies to those.
-            if kind == "gadget" and inv_tag in art and art[inv_tag] != want_art:
+            if "gadget" in kind and inv_tag in art and art[inv_tag] != want_art:
                 fails.append(f"{lvl}: '{inv_tag}' draws canvas "
                              f"'{art[inv_tag]}', expected '{want_art}' -- the "
                              f"sprite map moved under the table")
