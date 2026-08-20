@@ -192,8 +192,16 @@ void gadget_menu_draw(int vw, int vh) {
             }
         }
 
+        /* Label from the artist's canvas name, not the .gam ObjectTag. The
+           two disagree for every gadget in the table -- level1b's `shrinkray`
+           row draws the canvas named "Jetpack 1", and the owner collected it
+           and quite reasonably called it a jetpack. The player is looking at
+           the art, so the art names it. The tag stays the corpus key. */
+        const char *label = g->sprite > 0 ? sprite_chunk_name(g->sprite) : "";
+        if (!label[0]) label = g->tag;
+
         ui_text_draw(vw, vh, x + cell + gap, cy + (cell - th) * 0.5f, ts,
-                     g->tag,
+                     label,
                      on ? 1.00f : 0.85f,
                      on ? 0.95f : 0.85f,
                      on ? 0.45f : 0.90f, 1.0f);

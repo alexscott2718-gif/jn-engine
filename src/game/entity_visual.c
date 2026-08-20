@@ -46,6 +46,14 @@ const char *sprite_chunk_path(int chunk_id) {
     return sprite_db_path("sprites.omt", chunk_id);
 }
 
+const char *sprite_chunk_name(int chunk_id) {
+    for (int i = 0; i < SPRITE_CHUNK_MAP_N; i++)
+        if (SPRITE_CHUNK_MAP[i].chunk_id == chunk_id &&
+            strcasecmp(SPRITE_CHUNK_MAP[i].db, "sprites.omt") == 0)
+            return SPRITE_CHUNK_MAP[i].name;
+    return "";
+}
+
 /* JNBG sprites.omt chunk 106 is the canvas literally named "hidden": the
    editor's stand-in for pickups whose visible referent is something else
    (level geometry hydrant/nests/rocket pads, the 3KIT cat...). The original

@@ -499,6 +499,16 @@ static void picture_sweep_if_requested(World *world) {
     }
     printf("[PICSWEEP] level=%s done: %d collected in %d pass(es)\n",
            gamestate_level(), total, pass);
+
+    /* Both names, so a mismatch between what the designer called a row and
+       what the artist drew is visible instead of silent. */
+    for (int i = 0; ; i++) {
+        const InventorySlot *g = gamestate_gadget_at(i);
+        if (!g) break;
+        const char *art = g->sprite > 0 ? sprite_chunk_name(g->sprite) : "";
+        printf("[INVDUMP] slot=%d tag='%s' sprite=%d art='%s'\n",
+               i, g->tag, g->sprite, art);
+    }
 }
 
 static int load_level(const LevelDesc *desc, World *world) {
