@@ -202,6 +202,7 @@ static const char *LIT_FRAG_SRC =
     "uniform int  uPickOn;\n"        /* QA pick pass: flat ID color after discards */
     "uniform vec4 uPickColor;\n"
     "uniform vec4 uHighlight;\n"     /* QA hover/select tint: rgb + mix strength */
+    "uniform float uModelAlpha;\n"   /* translucency; 1.0 = opaque (the default) */
     "void main() {\n"
     "    vec3 n = normalize(vNorm);\n"
     "    /* Match the original's measured lighting. With LIGHTING OFF (Phase 12\n"
@@ -233,7 +234,7 @@ static const char *LIT_FRAG_SRC =
     "       alpha cutout above already handles transparency via discard). */\n"
     "    if (uPickOn != 0) { FragColor = uPickColor; return; }\n"
     "    vec3 rgb = base * lightTerm * uSceneTint;\n"
-    "    FragColor = vec4(mix(rgb, uHighlight.rgb, uHighlight.a), 1.0);\n"
+    "    FragColor = vec4(mix(rgb, uHighlight.rgb, uHighlight.a), uModelAlpha);\n"
     "}\n";
 
 static unsigned int compile_shader(GLenum type, const char *src) {
@@ -253,6 +254,8 @@ static unsigned int g_prog = 0;
 static int g_loc_mvp = -1, g_loc_color = -1;
 
 static unsigned int g_lit_prog = 0;
+static int   g_lit_loc_model_alpha = -1;
+static float g_model_alpha = 1.0f;   /* renderer_set_model_alpha */
 static int g_lit_loc_mvp = -1, g_lit_loc_model = -1;
 static int g_lit_loc_tex = -1, g_lit_loc_light = -1;
 static int g_lit_loc_tint = -1, g_lit_loc_hastex = -1;
@@ -379,6 +382,7 @@ int renderer_init(int w, int h) {
     g_lit_loc_pick_on    = glGetUniformLocation(g_lit_prog, "uPickOn");
     g_lit_loc_pick_color = glGetUniformLocation(g_lit_prog, "uPickColor");
     g_lit_loc_highlight  = glGetUniformLocation(g_lit_prog, "uHighlight");
+    g_lit_loc_model_alpha = glGetUniformLocation(g_lit_prog, "uModelAlpha");
 
     /* Sky-gradient program + fullscreen quad. Each vertex carries an NDC
        position and a t value (1 at top, 0 at bottom) used to lerp top/bot. */
@@ -785,6 +789,12 @@ void renderer_get_view_proj(float out[16]) {
     memcpy(out, g_view_proj, 64);
 }
 
+void renderer_set_model_alpha(float a) {
+    if (a < 0.0f) a = 0.0f;
+    if (a > 1.0f) a = 1.0f;
+    g_model_alpha = a;
+}
+
 void renderer_draw_model_matrix(const AseModel *m, unsigned int texture_id_override,
                                 const float model[16]) {
     Mat4 mvp, vp;
@@ -820,6 +830,17 @@ void renderer_draw_model_matrix(const AseModel *m, unsigned int texture_id_overr
     glUniform1f(g_lit_loc_colorkey_tol, g_colorkey_tol);
     glUniform4fv(g_lit_loc_pick_color, 1, g_pick_color);
     glUniform4fv(g_lit_loc_highlight, 1, g_highlight);
+    glUniform1f(g_lit_loc_model_alpha, g_model_alpha);
+    /* Blend only while translucency was asked for, so the opaque path keeps
+       exactly the GL state -- and the output -- it always had. Depth writes
+       are masked off so a translucent marker cannot occlude what is behind
+       it, while still being depth-tested against the world. */
+    int blend_for_alpha = (g_model_alpha < 1.0f);
+    if (blend_for_alpha) {
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        glDepthMask(GL_FALSE);
+    }
     glActiveTexture(GL_TEXTURE0);
 
     /* OMT-sourced meshes need back-face culling (see AseModel.cull_backfaces):
@@ -903,6 +924,10 @@ void renderer_draw_model_matrix(const AseModel *m, unsigned int texture_id_overr
     }
 
     if (cull) glDisable(GL_CULL_FACE);
+    if (blend_for_alpha) {
+        glDepthMask(GL_TRUE);
+        glDisable(GL_BLEND);
+    }
     glBindVertexArray(0);
     glBindTexture(GL_TEXTURE_2D, 0);
 }

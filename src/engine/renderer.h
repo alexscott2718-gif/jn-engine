@@ -21,6 +21,11 @@ void renderer_begin_frame(int viewport_w, int viewport_h);
 void renderer_begin_overlay(int viewport_w, int viewport_h);
 /* texture_id_override = 0 means use m->texture_id (model's bound texture).
    scale is a uniform mesh scale (1.0 = original ASE units). */
+/* Translucency for subsequent model draws. 1.0 (the default) is the opaque
+   path and is bit-identical to the behaviour before this existed; anything
+   less enables alpha blending with depth writes masked. Set it back to 1.0
+   when done -- it is sticky, like the other renderer state. */
+void renderer_set_model_alpha(float a);
 void renderer_draw_model(const AseModel *m, unsigned int texture_id_override,
                          float tx, float ty, float tz, float yaw, float scale);
 void renderer_draw_model_matrix(const AseModel *m, unsigned int texture_id_override,
