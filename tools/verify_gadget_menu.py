@@ -72,7 +72,7 @@ GRANTS = {
     "shrinkray":    ("jetpack",      "gadget",      "Jetpack 1"),
     "bubblepickup": ("bubble",       "gadget",      "bubshadw"),
     "invisibility": ("invisibility", "part+gadget", "yokpart"),
-    "scooterpart":  ("scooterpart",  "part",        "wheel"),
+    "scooterpart":  ("scooter",      "part+gadget", "wheel"),
     "sewerpart":    ("sewerpart",    "part",        "CompPart"),
     "foil":         ("foil",         "part",        "foil"),
     "godphone":     ("godphone",     "part",        "phone"),
