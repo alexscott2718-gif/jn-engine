@@ -451,6 +451,21 @@ def read_ledger() -> list[dict[str, str]]:
         return list(csv.DictReader(f))
 
 
+def _require(parsed, what: str, src) -> None:
+    """Refuse to build a report out of a source that came back empty.
+
+    This report is where the project's own coverage numbers come from, so a
+    parse that silently reads nothing does not produce a small report -- it
+    produces a confident one that says zero. The same shape cost
+    build_asset_catalog.py a committed checklist of seven phantom FourCCs when
+    a generated struct grew a field its regex did not expect.
+    """
+    if not parsed:
+        raise SystemExit(
+            "build_vtable_parity_report: parsed 0 %s from %s -- the format "
+            "changed and this parser did not." % (what, src))
+
+
 def parse_entities() -> tuple[dict[str, tuple[str, str]], dict[str, list[str]]]:
     fourcc_to_vt: dict[str, tuple[str, str]] = {}
     vt_to_fourcc: dict[str, list[str]] = defaultdict(list)
@@ -462,6 +477,7 @@ def parse_entities() -> tuple[dict[str, tuple[str, str]], dict[str, list[str]]]:
         fourcc, desc, vt = m.groups()
         fourcc_to_vt[fourcc] = (vt, desc)
         vt_to_fourcc[vt].append(fourcc)
+    _require(fourcc_to_vt, "entity_types[] rows", ENTITIES)
     return fourcc_to_vt, vt_to_fourcc
 
 
@@ -475,6 +491,7 @@ def parse_fourcc_to_class() -> dict[str, str]:
         cls = re.sub(r"\(.*$", "", fields[4]).strip()
         if fourcc and cls and cls != "??":
             out.setdefault(fourcc, cls)
+    _require(out, "FourCC-to-class rows", CLASSIDS)
     return out
 
 
@@ -487,6 +504,7 @@ def parse_vtable_sources() -> dict[str, str]:
             out[m.group(1)] = rel
         for m in re.finditer(r"DEF_PICKUP_VT\((vt_\w+),", text):
             out[m.group(1)] = rel
+    _require(out, "EntityVTable definitions", REPO / "src" / "game" / "behaviors")
     return out
 
 

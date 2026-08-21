@@ -10,6 +10,12 @@ everything else needs only a clone.
 Evidence for every claim: `docs/audit/06-open-questions.md`, with 44 tagged records in
 `docs/audit/06-openq.jsonl`. Published write-up: <https://exentt.com/jn/audit.html>.
 
+**Status 2026-08-21.** A-01, A-02, B-01, B-02, C-01, C-02 and D-01 are done and
+annotated in place. **B-03 is the only one still genuinely blocked** — it needs
+`assets/exe/` populated. D-02 is open with a reason rather than a patch: it asks to
+hand-edit one row of raw scan output, which the note there argues is the option that
+helps least.
+
 ---
 
 ## P0 — documents that mislead every new reader
