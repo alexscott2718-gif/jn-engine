@@ -1304,9 +1304,30 @@ Jimmy gets two new poses, `PA_SCOOT` and `PA_SCOOTSTOP`, appended so every
 existing `PlayerAnim` keeps its value, mapping to the aliases `HISCOOT` and
 `HISCOOTSTOP` the decomp already documented.
 
-**One inference, flagged as such:** the corpus has no scooter pickup, so
-`scooterpart` in level1c — art `wheel` — is what grants it. It is both a part
-and a gadget, like `invisibility`.
+**The scooter grant, confirmed (2026-08-20).** Owner: *"there is a wheel part
+placement for the house map, level1 somewhere A-E. that typically grants it."*
+It holds — `sprites.omt` chunk 111, the canvas named `wheel`, has **exactly one
+placement in all 35 levels**: `SCOOTERPART` in level1c, whose start points are
+`FRONTDOOR` and `BACKDOOR`, the Neutron house interior. No other candidate
+exists. It is both a part and a gadget, like `invisibility`.
+
+### 18.6 The scan that should have run first
+
+Confirming that exposed a flaw in how §17 and §18.1 were built. Both grouped
+`3PIC` rows by **ObjectTag** and skipped rows carrying the default tag
+`c3dpickupitem` — which is most of the corpus. Any pickup with distinctive art
+under a generic tag was invisible to the method.
+
+Re-running the sweep grouped by **sprite** instead finds nothing new: every
+generic-tagged row is a consumable — apple, coins, candy, soda, flower,
+candybar, bone, vase, egg, cards, coal, cake, burger, banana, cookies, gems,
+stars. The one-off art rows are exactly the seven already in the table, plus
+`wrench` (×2) and `pass`, which §17.2's picture rule already excluded.
+
+So the table was right and the method was not, and only luck kept those two
+facts together. **Group pickups by art, not by tag** — the tag is the level
+designer's note and is frequently just the class default, while the sprite is
+always there and is what the player sees.
 
 ### 18.5 Still missing
 

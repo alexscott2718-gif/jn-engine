@@ -103,9 +103,12 @@ static const GadgetGrant GADGET_GRANTS[] = {
        the menu offers it. */
     { "invisibility", "invisibility", INV_KIND_PART |
                                       INV_KIND_GADGET },          /* level5   114 yokpart   */
-    /* Inference, not evidence: the corpus has no scooter pickup and 3JEE is
-       never placed, so the wheel in level1c is the only thing that could grant
-       it. Both kinds, like invisibility -- it is a quest part you also ride. */
+    /* The scooter grant. Confirmed by the owner against the retail game, and
+       corroborated by the corpus: sprites.omt chunk 111 -- the canvas the artist
+       named "wheel" -- has exactly ONE placement in all 35 levels, and it is in
+       level1c, the Neutron house interior (start points FRONTDOOR/BACKDOOR).
+       There is no other candidate. Both kinds, like invisibility: a quest part
+       you also ride. */
     { "scooterpart",  "scooter",      INV_KIND_PART |
                                       INV_KIND_GADGET },          /* level1c  111 wheel     */
     { "sewerpart",    "sewerpart",    INV_KIND_PART   },          /* level1a  134 CompPart  */
