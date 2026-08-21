@@ -87,10 +87,16 @@ static void projectile_on_update(Entity *e, World *w, float dt) {
         return;
     }
 
-    /* PROJ_TEAM_PLAYER: defeat the first enemy it touches. */
+    /* PROJ_TEAM_PLAYER: knock down the first target or defeat the first enemy
+       it touches. Targets come first because C3DMovingTarget's hit handler
+       accepts only a C3DBASEBALL, and this is that baseball. */
     for (Entity *it = w->head; it; it = it->next) {
         if (it == e || !it->alive) continue;
         if (!physics_aabb_overlap(e, it)) continue;
+        if (behavior_moving_target_take_hit(it, w)) {
+            projectile_despawn(e);
+            return;
+        }
         if (behavior_enemy_take_hit(it, e->points)) {
             projectile_despawn(e);
             return;

@@ -5,7 +5,7 @@
 | Item | Value |
 |---|---|
 | RTTI name | `C3DRocketFuel` |
-| FourCC | (not resolved; not a `.gam`-placed object or id unmapped) |
+| FourCC | `3FUE` |
 | Base chain | `C3DSpriteType -> C3DSprite -> OMediaCanvasElement -> OMediaElement -> OMediaWorldPosition -> OMediaWorldAngle -> OMediaElementContainer -> OMediaDBObject -> OMediaClassStreamer -> OMediaListener -> OMediaMessagePort -> CLocalGameObject -> CGameObject` |
 | Vftable(s) | `004b2048, 004b2058, 004b24a8, 004b24bc` |
 | Ctor(s) | factory/constructor installs the vftables and registers the class id (see `docs/_gam_classids.tsv`) |
@@ -16,7 +16,13 @@
 
 ## Field Map (registered `.gam` properties)
 
-No own `.gam` properties registered in `InitObject` (inherits its parent's property set, or is created at runtime rather than placed). See `docs/gam_schema.md` for any inherited properties.
+`InitObject` registers no properties of its own -- the set this class receives is inherited.
+
+That is not the same as there being no data. The corpus places `3FUE` **7 times** and
+`docs/gam_schema.md` harvests **14 properties** from those instances, with names,
+types and value ranges; see its `3FUE` section. Which of them a parent registers
+rather than this class is not recoverable from the schema -- its check marks record
+whether `gam_loader.c` maps a property onto a named `Entity` field, not who declared it.
 
 ## Vtable Methods (owned)
 
@@ -85,7 +91,9 @@ No direct ASE/PNG/anim references in `InitObject` (inherited visual path or runt
 
 ## Validation
 
-No registered `.gam` properties to cross-check (inherited property set or runtime-created object).
+No field map of this class's own to cross-check -- `InitObject` registers none. The
+inherited set is not empty: 14 properties across 7 instances of `3FUE` are harvested
+in `docs/gam_schema.md`.
 
 ## Confidence
 

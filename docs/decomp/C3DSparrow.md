@@ -5,7 +5,7 @@
 | Item | Value |
 |---|---|
 | RTTI name | `C3DSparrow` |
-| FourCC | `5VEL` |
+| FourCC | `3SPW` |
 | Base chain | `C3DAI -> C3DAnimated -> C3DObject -> OMedia3DMorphAnim -> OMedia3DShapeElement -> OMediaElement -> OMediaWorldPosition -> OMediaWorldAngle -> OMediaElementContainer -> OMediaDBObject -> OMediaClassStreamer -> OMediaListener -> OMediaMessagePort -> OMediaAnim -> CLocalGameObject -> CGameObject` |
 | Vftable(s) | `004b64d8, 004b64e8, 004b6938, 004b6974, 004b6988` |
 | Ctor(s) | factory/constructor installs the vftables and registers the class id (see `docs/_gam_classids.tsv`) |
@@ -16,7 +16,15 @@
 
 ## Field Map (registered `.gam` properties)
 
-No own `.gam` properties registered in `InitObject` (inherits its parent's property set, or is created at runtime rather than placed). See `docs/gam_schema.md` for any inherited properties.
+`3SPW` has one placement in the corpus -- `vulta` in level5 -- and
+`docs/gam_schema.md` harvests **25 properties** from it, all inherited
+(`ObjectTag`, transform, `AIState`, `WanderRange`, `TargetName`, ...); none are
+owned by this class. See the `3SPW` section of `docs/gam_schema.md` for the
+harvested set.
+
+This section used to claim the class registered none of its own, which was
+only ever true because the spec named FourCC `5VEL` -- a level id, not a class
+id -- so there was no data to cross-check it against.
 
 ## Vtable Methods (owned)
 
@@ -87,7 +95,9 @@ LAB_00441897:
 
 ## Validation
 
-FourCC `5VEL` has no rows in the 35-level `.gam` corpus (`docs/gam_schema.md`) — this object type is not placed in any shipped level, so there is no `.gam` data to cross-check against.
+FourCC `3SPW` has one row in the 35-level `.gam` corpus (`docs/gam_schema.md`): the vulture `vulta` in level5, at (3840, -37.8, 4440), carrying `AIState` 3 and `WanderRange` 1500. 25 properties are harvested from it, all inherited.
+
+This section previously named FourCC `5VEL` and reported the class as unplaced. `5VEL` is "LEV5" reversed -- a level id that reached the FourCC field through the class-id table's reversed-immediate column -- and "unplaced" followed from looking for a class id that does not exist.
 
 ## Confidence
 

@@ -5,7 +5,7 @@
 | Item | Value |
 |---|---|
 | RTTI name | `C3DGrill` |
-| FourCC | (not resolved; not a `.gam`-placed object or id unmapped) |
+| FourCC | `3GRI` |
 | Base chain | `C3DAnimated -> C3DObject -> OMedia3DMorphAnim -> OMedia3DShapeElement -> OMediaElement -> OMediaWorldPosition -> OMediaWorldAngle -> OMediaElementContainer -> OMediaDBObject -> OMediaClassStreamer -> OMediaListener -> OMediaMessagePort -> OMediaAnim -> CLocalGameObject -> CGameObject` |
 | Vftable(s) | `004a00c8, 004a00d8, 004a0528, 004a0564, 004a0578` |
 | Ctor(s) | factory/constructor installs the vftables and registers the class id (see `docs/_gam_classids.tsv`) |

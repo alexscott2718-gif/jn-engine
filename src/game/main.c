@@ -504,6 +504,39 @@ static void picture_sweep_if_requested(World *world) {
        mount, drive one step, dismount -- since the menu itself needs a window. */
     /* JN_TEST_GADGETRUN=1: activate each gadget in turn and report what it
        did, since the menu itself needs a window. */
+    /* JN_TEST_TARGETS=1: hit the linked shooting-range target until its
+       threshold trips, waiting out RespawnTime between hits, and report
+       whether the linked object was activated. */
+    if (env_enabled("JN_TEST_TARGETS")) {
+        Entity *tgt = NULL;
+        for (Entity *e = world->head; e; e = e->next) {
+            if (!e->alive || strncmp(e->type, "3TAR", 4) != 0) continue;
+            const char *lk = gam_str(e, "ActivateObject", "");
+            if (lk && lk[0] && strcasecmp(lk, "none") != 0) { tgt = e; break; }
+        }
+        if (!tgt) {
+            printf("[TARGETTEST] no linked target in this level\n");
+        } else {
+            const char *link = gam_str(tgt, "ActivateObject", "");
+            int need = gam_prop_i(tgt, "HitsRequired", 3);
+            float respawn = gam_prop_f(tgt, "RespawnTime", 5.0f);
+            int before = gamestate_get()->points;
+            printf("[TARGETTEST] target '%s' link='%s' need=%d respawn=%.0f\n",
+                   tgt->tag, link, need, respawn);
+            for (int h = 0; h < need; h++) {
+                int took = behavior_moving_target_take_hit(tgt, world);
+                printf("[TARGETTEST]   hit %d/%d took=%d visible=%d\n",
+                       h + 1, need, took, tgt->visible);
+                /* Wait out the cooldown so it stands back up for the next one. */
+                for (float t = 0.0f; t <= respawn + 0.1f; t += 1.0f / 60.0f)
+                    entity_update(tgt, world, 1.0f / 60.0f);
+            }
+            printf("[TARGETTEST] points %d -> %d (+%d), expected +%d\n",
+                   before, gamestate_get()->points, gamestate_get()->points - before,
+                   need * gam_prop_i(tgt, "NumPoints", 0));
+        }
+    }
+
     if (env_enabled("JN_TEST_GADGETRUN")) {
         /* Each gadget, and the FourCC it is supposed to put in the world.
            "----" means the gadget acts on Jimmy or a companion and spawns
@@ -2817,6 +2850,7 @@ int main(int argc, char **argv) {
                     behavior_goddard_reset();
                     behavior_scooter_reset();
                     behavior_gadgets_reset();
+                    behavior_moving_target_reset();
                     g_camrec_player = NULL;
                     s_sandbox_prepped_rocket = NULL;
                     world_init(&world);
@@ -2844,6 +2878,7 @@ int main(int argc, char **argv) {
                         behavior_goddard_reset();
                         behavior_scooter_reset();
                     behavior_gadgets_reset();
+                    behavior_moving_target_reset();
                         goddard_reconcile_after_level_load(&world, swap_desc.name);
                         picture_sweep_if_requested(&world);
                         configure_safety_floor(&world, jim);

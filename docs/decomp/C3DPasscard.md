@@ -5,7 +5,7 @@
 | Item | Value |
 |---|---|
 | RTTI name | `C3DPasscard` |
-| FourCC | (not resolved; not a `.gam`-placed object or id unmapped) |
+| FourCC | `3PAS` |
 | Base chain | `C3DSpriteType -> C3DSprite -> OMediaCanvasElement -> OMediaElement -> OMediaWorldPosition -> OMediaWorldAngle -> OMediaElementContainer -> OMediaDBObject -> OMediaClassStreamer -> OMediaListener -> OMediaMessagePort -> CLocalGameObject -> CGameObject` |
 | Vftable(s) | `004ac980, 004ac990, 004acde0, 004acdf4` |
 | Ctor(s) | factory/constructor installs the vftables and registers the class id (see `docs/_gam_classids.tsv`) |

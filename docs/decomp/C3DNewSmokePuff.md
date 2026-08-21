@@ -5,7 +5,7 @@
 | Item | Value |
 |---|---|
 | RTTI name | `C3DNewSmokePuff` |
-| FourCC | (not resolved; not a `.gam`-placed object or id unmapped) |
+| FourCC | `3NSM` |
 | Base chain | `C3DSpriteType -> C3DSprite -> OMediaCanvasElement -> OMediaElement -> OMediaWorldPosition -> OMediaWorldAngle -> OMediaElementContainer -> OMediaDBObject -> OMediaClassStreamer -> OMediaListener -> OMediaMessagePort -> CLocalGameObject -> CGameObject` |
 | Vftable(s) | `004ab22c, 004ab23c, 004ab68c, 004ab6a0` |
 | Ctor(s) | factory/constructor installs the vftables and registers the class id (see `docs/_gam_classids.tsv`) |

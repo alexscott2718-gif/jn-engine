@@ -80,6 +80,10 @@ extern const EntityVTable vt_shrinkray;       /* 3SHR — C3DShrinkRay, the fire
 extern const EntityVTable vt_bubble;          /* 3BUB — C3DBubble */
 extern const EntityVTable vt_grapple_rope;    /* 3GRA — C3DGraplingHook rope */
 extern const EntityVTable vt_rocket_fuel;     /* 3FUE — C3DRocketFuel (plutonium rods) */
+extern const EntityVTable vt_moving_target;   /* 3TAR — C3DMovingTarget (shooting range) */
+/* The baseball's hit. Returns 1 when the entity consumed it. */
+int  behavior_moving_target_take_hit(Entity *e, World *w);
+void behavior_moving_target_reset(void);
 
 /* The eight gadgets (docs/picture_flag_wiring_plan.md section 18). */
 enum {
