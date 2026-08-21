@@ -1,6 +1,6 @@
 # Session note — 2026-08-21: CLoadLevel, and two checks that could not fail
 
-Branch `feat/loadlevel-gate-return`, sixteen commits on top of
+Branch `feat/loadlevel-gate-return`, twenty-one commits on top of
 `chore/cleanup-2` (PR #28).
 `make check` and `make check-assets` green in the repo Docker image at every
 commit; `level1` and `fixture0` goldens byte-identical throughout (no golden
@@ -260,6 +260,135 @@ to get that ratio down, and would then be worth roughly two findings. I fixed
 the two and did not land the check. If someone wants it later, the shape is
 right and the false-positive classes above are the work.
 
+### 10. The start point picks the cutscene, and native was ignoring it (94de63e, 1b7aed4)
+
+Found by sweeping the placed FourCCs bound to a generic native vtable — the
+brief's work-source #4, and the shape 3TAR had. Most hits were false (`3OMT` on
+`vt_omtobj` is its own leaf, not a generic), but `STRT` on `vt_default` led
+somewhere: `C3DStartPoint` registers a `StartTrigger` that **nothing native
+read**.
+
+What it names is not incidental. Of the 100 shipped `STRT` rows, 31 name
+something, and **22 of those name a cutscene camera** — 15 a `3MCA` sequence, 7
+a standalone `3CAM`; the other 9 name a `3AIT`. Every VR level's `PHONEBOOTH`
+start names one — VR01 `bu`, VR02 `rs`, VR03 `inv`, VR04 `sr1`, VR05 `scooter`,
+VR06 `remote`, VR07 `bb1`, VR08 `gr`: the bubble / ray / invisibility /
+shrinkray / scooter / remote / baseball / grappler briefings. `level1e`'s four
+start points each name a different sequence and `level4b`'s two both name `pp1`,
+so the choice tracks *which entrance was used*, not just the level.
+
+Native had no such selection: `cutscene_request_intro()` plays **every**
+standalone `3CAM` the level registered, in registration order, and never
+touches the `3MCA` sequences — so `level1` played 14 unrelated shots as its
+"intro" and every VR briefing was unreachable.
+
+Now the start point selects, inside the same opt-in (campaign entry or
+`JN_CUTSCENE`), falling back to the old intro when nothing is named.
+Resolution order: `3MCA` sequence, standalone `3CAM`, then the certified by-tag
+trigger dispatch.
+
+**Labelled as design, not port.** The property and its meaning are confirmed,
+but the recovered `PlacePlayer` (`00442740`) does not show the firing and the
+spec lists "verify how `StartTrigger` is fired" as an open question. What it
+*selects* is corpus evidence; how it fires is inferred, and the call site says
+so. The `spawn` certificate is untouched — and `C3DStartPoint.py`'s prose,
+which called `StartTrigger` an unported gap, is corrected to say why it is
+still out of scope: there is no decomp equivalence to certify.
+
+Observed per level through the real resolver, then fired end to end:
+
+```
+vr01     'bu' -> 3MCA sequence 0 -> play bu: 3 shot(s), voicepractice.omt[24]
+level4d  'ending1' -> 3MCA sequence 0 -> play ending1: 6 shot(s)
+level1   no StartTrigger -> play intro: 14 shot(s), unchanged
+level5a  'starting' -> UNRESOLVED (the level places no such tag)
+```
+
+Three authored `StartTrigger`s name a tag their level does not place —
+`level5a`'s `starting`, `Level2`'s `yokian2`, `level1e`'s `ZOOM1` (`level1d`
+has a `ZOOM1`; `level1e` does not). Designer dangles; the resolver says so
+rather than silently doing nothing.
+
+### 11. The audit's own P0 tasks, still open (f7be7b9)
+
+`docs/audit/TASKS.md` A-01 and A-02 are marked **"Good first task"** and had
+been open since the audit. Both are about documents on the "read these first"
+path:
+
+* **A-01** — `ARCHITECTURE.md:290` and `PROJECT_HISTORY.md:257` still asserted
+  the static OMT reader "reproduces the capture oracle ~94%". The validator
+  shipped in the same commit produces **1 of 70**, and
+  `track0_static_reader_findings.md` has carried the retraction since May. Both
+  lines now state the real figure and link the retraction — *and* carry its
+  explanation of why they disagree (the oracle's per-triangle UV vote
+  cross-attributes textures between meshes sharing UV triples, so the **oracle**
+  is the unreliable side). Without that, a reader who learns only that the
+  number is smaller concludes the static reader is broken, which is backwards.
+* **A-02** — both invariant lists stated `canvas_id = Canv + 1` unconditionally,
+  inside a section telling readers not to re-examine it. Both now name the path.
+* **C-02** — the `3TAR` duplicate-registrar caveat `gam_schema.md` carried for
+  `3YSH` and not for `3TAR`. Added; its other half (decide which class the
+  instances drive) was already settled by 265c3b6 and §7.
+
+`ONBOARDING.md` pointed at A-01 as open and told readers both entry documents
+still carried the bad figure; updated, including the evidence-rule bullet that
+uses it as its example — the example stands, and is stronger for saying the
+statistic outlived its own retraction by three months.
+
+**D-02 left open, with a reason.** It asks to drop `C3DTrophy` from
+`_gam_classids.tsv:141`, but that file is raw `Scan_ClassIds.java` output whose
+column header says `class_or_nearby_string`. Editing one row to remove a nearby
+string the scan really did find makes it less faithful while looking more
+authoritative, and a regeneration undoes it. The same shape appears at least
+twice more (`3NEU` catches `C3DSprite`, `3TAR` catches `C3DShadow`), so the fix
+is an identity check in the scan or consuming the column as the heuristic it is
+— which is what `spec_check`'s baseline notes already do for all three.
+
+### 12. The spec generator still guessed FourCCs by address proximity (cdbea03, 24f40ca)
+
+The audit's **B-01**, "the single highest-leverage fix", and the half of it that
+was still undone. Earlier commits on this branch fixed the 17 defective FourCCs
+in the *specs* by hand and trimmed the baseline to match — which is why
+`spec_check` is down to 3. `tools/gen_placeable_specs.py`, which produced them,
+was never touched: **a regeneration would have put all 17 back.**
+
+`fourcc_for()` now matches case-insensitively (14 classes differed from the
+schema by case alone), reads the scan's class column (which spells out
+`C3DCorona()`, `C3DGRILL`, `C3DPASSCARD`, `C3DSmokePuff()` in plain text and was
+being dropped on the floor), and gains the dominant `ObjectTag` of the shipped
+rows — `spec_check`'s own tier T2, and a source that *names the class*.
+
+The address-proximity branch is **gone, not tightened.** The audit offered
+both; the vtable identity check it suggests needs the Ghidra dumps and would
+then be the thing doing the work. A guess that looks like a resolution is worse
+than an honest unresolved — that branch is what gave `C3DDarwinFish` the id of
+`C3DDino` and `C3DSparrow` the id of a *level*.
+
+Measured over the 208 ledger classes, resolving from names only:
+
+| | before | after |
+|---|---:|---:|
+| agrees with the spec | 21 | 53 |
+| contradicts the spec | 0 | 0 |
+| spec has one, resolver does not | 43 | 11 |
+
+Sixteen of the audit's 17 now resolve correctly. The seventeenth,
+`C3DSparrow`, comes back **unresolved** — its one placed row is tagged `vulta`
+— which is the honest answer and what its own spec already says.
+
+`tools/check_fourcc_resolver.py` locks it in inside `make check`: the resolver
+must agree with each spec's stated FourCC or say None, and must never return a
+level id. Its `--selftest` is a negative control of the script and says so.
+
+The PE load also moved from import time to first use — generating a spec needs
+`Neutron.exe`, resolving a FourCC does not, and the module could not be imported
+at all without the binaries, which is what had made the resolver untestable.
+
+**Still untested, and out of reach here:** the generator end to end. It needs
+`Neutron.exe` *and* the `/tmp/dumps2` dumps, so the decompiled-immediate branch
+is exercised by no test I can run. Every branch that resolves from checked-in
+data is covered — which is where all 17 defects came from.
+
 ---
 
 ## Contradictions found and not resolved
@@ -449,6 +578,13 @@ sprite chunk map was the only naive one in the file.
 ---
 
 ## What I would pick up next
+
+0. **`C3DSprite` (`3SPR`)** is the best remaining lead from the generic-vtable
+   sweep: 15 placed rows over 4 levels, 10 owned methods (9 non-trivial), bound
+   to `vt_resolver_inert`. It already has an open ground-truth request
+   (`GTR-20260717-3spr-defaults`) for the default canvas binding, so it is
+   blocked on capture evidence rather than on effort — but the *behavior* half
+   may not be. Worth reading the spec before assuming the request blocks it all.
 2. **`C3DCheckPoint`, now that §6 has mapped the circuits.** `UpdateCheckPoint`
    (`00414410`) is recovered, `vt_checkpoint` is a deliberate simplification by
    its own comment, and the certificate says porting the `FINISHLINE` /
