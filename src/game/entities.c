@@ -99,7 +99,10 @@ static const EntityTypeInfo entity_types[] = {
     { "3CON", "Cone sprite decor",     &vt_cone },
     { "3TRO", "VR trophy (objective)", &vt_trophy },
     { "3LEA", "Leaves sprite decor",   &vt_leaves },
-    { "3TAR", "Shadow sprite decor",   &vt_shadow },
+    /* 3TAR is registered by BOTH C3DMovingTarget and C3DShadow. All 22
+       placed rows are tagged C3DMOVINGTARGET, so the levels mean the
+       target; see docs/decomp/C3DMovingTarget.md. */
+    { "3TAR", "Moving target (shooting range)", &vt_moving_target },
     { "3AIO", "AI OMT shape prop",     &vt_ai_omtobj },
     /* Base/effect tail pass 4. */
     { "3LIG", "Scene light (data row)",              &vt_light },
