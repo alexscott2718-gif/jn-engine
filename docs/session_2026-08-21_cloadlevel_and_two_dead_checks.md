@@ -1,6 +1,6 @@
 # Session note — 2026-08-21: CLoadLevel, and two checks that could not fail
 
-Branch `feat/loadlevel-gate-return`, fourteen commits on top of
+Branch `feat/loadlevel-gate-return`, sixteen commits on top of
 `chore/cleanup-2` (PR #28).
 `make check` and `make check-assets` green in the repo Docker image at every
 commit; `level1` and `fixture0` goldens byte-identical throughout (no golden
@@ -399,6 +399,53 @@ entry-to-departure promotion turns the round-trip red (`no recorded departure
 point`, exit 1), and restoring it returns green with a clean tree. That is the
 mutation that matters here, because it is exactly the inferred step.
 
+### 9. The same shape in `spec_check`, the gate the audit called its own P1 item (f630ede)
+
+Picked off this note's next-up list too: audit the other parsers that straddle
+the seam that broke the sprite chunk map.
+
+`spec_check` reads four sources — `gam_schema.md`'s three tables, the classids
+registrar scan, `entities.c`'s binding table, and the 209 class specs — and
+every finding it can produce is a disagreement between a spec and one of them.
+A source that parses **empty** therefore makes it agree with everything, print
+`OK: no spec disagrees`, and exit 0. It checked that its inputs *exist*, never
+that it could read them.
+
+`require_parsed()` now refuses to continue when anything that can only be zero
+through format drift is zero, exiting **2** — the status already documented for
+"bad invocation / missing inputs", which is what this is. No thresholds: a
+minimum row count would go stale and start lying on its own.
+
+The two spec templates are guarded **separately** rather than as a union. The
+generated one carries a `| FourCC |` row, the hand-written one hides the id in
+`Ctor(s)`, and guarding the union let a drift in either hide behind the other —
+measured: renaming the generated template's FourCC row drops the findings from
+3 to 1 while the union stays at a comfortable 117 and the check still exits 0.
+Split, it exits 2. That is the difference between a floor that means something
+and one that doesn't.
+
+Verified by drifting a copy of the tree one input at a time — control green,
+all seven drifts caught:
+
+```
+gam_schema: class-map heading renamed          exit 2
+gam_schema: instances heading renamed          exit 2
+gam_schema: property heading renamed           exit 2
+classids: columns reflowed to single spaces    exit 2
+entities.c: binding table gains a field        exit 2
+specs: generated template FourCC row renamed   exit 2
+specs: hand-written template Ctor row renamed  exit 2
+```
+
+The docstring states the limit rather than implying more: this is a floor, not
+a ceiling. It catches "parsed nothing", not "parsed less".
+
+**Audited alongside, no change needed:** `spec_check`'s own `entities.c` parse
+reads all 110 rows with no misses; `check_pictures.py` already asserts its
+generated pre-grant header is current; and the other table parsers in
+`build_asset_catalog.py` use a brace tokenizer rather than a line regex — the
+sprite chunk map was the only naive one in the file.
+
 ---
 
 ## What I would pick up next
@@ -414,9 +461,10 @@ mutation that matters here, because it is exactly the inferred step.
    `vt_trig` is a one-shot log stub — but the corpus has one `TRIG` row and no
    static registrar, so a faithful port would be inert. Worth doing for the
    record, not for the game; decide which of those the project wants.
-4. **Check the other generated-header parsers.** `parse_sprite_chunk_map` was
-   the only naive-regex one in `build_asset_catalog.py` — the rest use a brace
-   tokenizer — but `extract_hud_layout.py`, `gen_picture_pregrants.py` and
-   `build_campaign_actor_catalog.py` all straddle the same seam.
-   `check_pictures.py` already asserts its header is current; nothing does for
-   the others.
+4. ~~Check the other generated-header parsers.~~ Done in §9 for the ones that
+   gate something. Still unaudited, and none of them gates anything today:
+   `extract_hud_layout.py`, `build_campaign_actor_catalog.py`,
+   `export_godot_registry.py` and `build_asset_portal.py` all read engine
+   sources and none has a guard. They feed docs and exports rather than checks,
+   so the blast radius is a stale artifact rather than a false green — which is
+   why they are still on this list rather than in §9.
