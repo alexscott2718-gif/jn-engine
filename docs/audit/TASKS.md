@@ -137,7 +137,16 @@ spec's vtables within +0x1200 of the pinned address.
 
 ## P2 — explanations that are wrong
 
-### C-01 · Correct two invariant explanations
+### C-01 · Correct two invariant explanations — **DONE 2026-08-21**
+> Both corrected in place, with the rules themselves left standing and no rendering
+> code touched, as the task requires. The `PROJ[3][3]=1` invariant keeps its
+> "don't repair it"; the cull-off fix for `assets/glb/omt/` models keeps its
+> justification. What changed is the *reason* printed next to each, and both now
+> cite the source lines the audit read (`OMediaDXRenderer.cpp:400-406` and
+> `:275,294`, `OMediaCanvasElement.cpp:124`) plus the audit record itself. Relayed
+> from `docs/audit/06-open-questions.md` Q2.3 and Q2.6 rather than re-verified:
+> the toolkit source (`~/omt-src`) is not on this machine.
+
 Both were checked against the engine's own LGPL source. The *observations* stand; the
 *reasons* printed next to them do not.
 

@@ -420,7 +420,12 @@ phase history (cross-referenced from `PROJECT_HISTORY.md`):
 Repeated from `PROJECT_HISTORY.md` because they bite at the code level:
 
 1. Matrix convention is **column-major / column-vector**; captured **`PROJ[3][3]=1`**
-   is the real w-buffer projection — don't "repair" it.
+   is real — don't "repair" it. It is **not** a w-buffer, though: the audit read
+   `OMediaDXRenderPort::set_zbuffer_test` (`OMediaDXRenderer.cpp:400-406`) and found
+   `D3DRENDERSTATE_ZENABLE` only ever set to `D3DZB_TRUE`/`D3DZB_FALSE`, never
+   `D3DZB_USEW`, with no reference to w-buffering anywhere in the toolkit source
+   (`docs/audit/06-open-questions.md` Q2.3). The matrix value stands; only the name
+   for the depth mode was wrong.
 2. The engine does **zero UV flips**; flips happen at *export* (3DSP is DX-convention).
    No X-mirror after the diff fix.
 3. **`canvas_id = Canv + 1` — for the heuristic-scanned `0MF2` path only.** Read
