@@ -7,7 +7,7 @@
  * RequiredLevel/ExactLevel window the original does not use. The recovered
  * order is:
  *
- *     if !toucher.IsA("C3DJIMMY"):            return
+ *     if !toucher.IsA("C3DJIMMY"):            return   # ENTITY_FLAG_PLAYER here
  *     if RequiredTask != "none":
  *         state = task_state(RequiredTask)     # -1 when the task is missing
  *         if state != -1:
@@ -124,9 +124,13 @@ static void load_hide(Entity *e) {
 
 static void load_on_trigger(Entity *e, Entity *by) {
     if (!e || !by) return;
-    /* IsA("C3DJIMMY"): the engine's trigger dispatch (physics.c) only ever
-       passes the player, so the identity test is satisfied upstream and is not
-       duplicated here. */
+    /* IsA("C3DJIMMY"): the body's first branch, and the native predicate for
+       it is ENTITY_FLAG_PLAYER -- the same one physics.c picks the toucher
+       with. Worth keeping even though the physics dispatch can only pass the
+       player, because the indirect paths (behavior_button link targets,
+       behavior_ai_trigger NextTrigger, behavior_laser_trigger) forward
+       whatever toucher they were handed. */
+    if (!(by->runtime_flags & ENTITY_FLAG_PLAYER)) return;
     if (e->user_flag) return;
     if (!behavior_load_gate_allows(e)) return;
 
