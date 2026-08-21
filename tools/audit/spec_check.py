@@ -127,7 +127,10 @@ def parse_entities(p: Path):
 def parse_spec(path: Path):
     s = {"class": path.stem, "fourcc": None, "fourcc_line": None,
          "unresolved": False, "notplaced": False, "notplaced_line": None,
-         "noprops": False, "noprops_line": None, "validation_noprops": False}
+         "noprops": False, "noprops_line": None, "validation_noprops": False,
+         # which of the two templates supplied the FourCC; require_parsed()
+         # wants both alive, so a drift in one is not masked by the other
+         "fourcc_from": None}
     sec = None
     for i, ln in enumerate(lines_of(path), 1):
         if ln.startswith("## "):
@@ -142,6 +145,7 @@ def parse_spec(path: Path):
                 mm = re.search(r"`([A-Za-z0-9]{4})`", v)
                 if mm:
                     s["fourcc"] = mm.group(1)
+                    s["fourcc_from"] = "fourcc-row"
             m = re.match(r"^\|\s*Ctor\(s\)\s*\|\s*(.*?)\s*\|?\s*$", ln)
             if m and s["fourcc"] is None:
                 mm = re.search(r"(?:FourCC|class id|class-id immediate)\s+`([A-Za-z0-9]{4})`"
@@ -149,6 +153,7 @@ def parse_spec(path: Path):
                 if mm:
                     s["fourcc"] = mm.group(2) or mm.group(1)
                     s["fourcc_line"] = i
+                    s["fourcc_from"] = "ctor-row"
         if sec and sec.startswith("Field Map") and "No own `.gam` properties registered" in ln:
             s["noprops"] = True
             s["noprops_line"] = i
@@ -164,6 +169,35 @@ def parse_spec(path: Path):
 
 
 # ---------------------------------------------------------------- the check
+def require_parsed(counts) -> None:
+    """Refuse to report a clean check that was never performed.
+
+    Every finding here is a disagreement between a spec and a parsed source, so
+    a source that parses EMPTY makes this check agree with everything and exit
+    0. That is not hypothetical: the same shape sat in
+    tools/build_asset_catalog.py, whose sprite-chunk-map regex stopped matching
+    the day the generated struct grew a field. It reported `sprite_chunk_map: 0`
+    in its own log, carried on, and put seven FourCCs the engine draws fine into
+    a committed "would draw a box" checklist.
+
+    Anything that can be zero only through format drift is checked here. No
+    thresholds -- a minimum row count would go stale and start lying on its own.
+
+    This is a floor, not a ceiling: it catches "parsed nothing", not "parsed
+    less". A drift that halves a source still passes. Where a structural
+    invariant exists it is used instead of the union -- see the two spec
+    templates below.
+    """
+    for label, n, src in counts:
+        if n:
+            continue
+        print("spec-check: %s parsed EMPTY from %s.\n"
+              "  The format changed and this parser did not. Refusing to report "
+              "a clean check that was never performed." % (label, src),
+              file=sys.stderr)
+        raise SystemExit(2)
+
+
 def run(repo: Path):
     gs = repo / "docs" / "gam_schema.md"
     ci = repo / "docs" / "_gam_classids.tsv"
@@ -177,6 +211,14 @@ def run(repo: Path):
     classmap, instances, props = parse_gam_schema(gs)
     cids = parse_classids(ci)
     ents = parse_entities(ec)
+    require_parsed((
+        ("gam_schema FourCC map", len(classmap), gs),
+        ("gam_schema instance counts", len(instances), gs),
+        ("gam_schema harvested properties",
+         sum(1 for v in props.values() if v.get("props")), gs),
+        ("classids registrar scan", len(cids), ci),
+        ("entities.c vtable bindings", len(ents), ec),
+    ))
 
     t1 = defaultdict(list)
     for cc, d in classmap.items():
@@ -200,6 +242,18 @@ def run(repo: Path):
             owner.setdefault(r["fourcc"], set()).add(r["class"].rstrip("()"))
 
     specs = [parse_spec(p) for p in sorted(dd.glob("*.md")) if p.name not in NONSPEC]
+    require_parsed((
+        ("class specs", len(specs), dd),
+        # Both templates, separately: the generated one carries a `| FourCC |`
+        # row and the hand-written one hides the id in `Ctor(s)`. Checking only
+        # their union lets a drift in either hide behind the other -- renaming
+        # the generated template's FourCC row silently drops two thirds of the
+        # findings while the union stays comfortably non-zero.
+        ("specs stating a FourCC (generated template)",
+         sum(1 for s in specs if s["fourcc_from"] == "fourcc-row"), dd),
+        ("specs stating a FourCC (hand-written template)",
+         sum(1 for s in specs if s["fourcc_from"] == "ctor-row"), dd),
+    ))
     findings = []
 
     def add(cls, code, tier, line, desc, ref):
