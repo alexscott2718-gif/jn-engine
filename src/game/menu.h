@@ -30,6 +30,12 @@ int  menu_take_confirm(const char **level_out, int *is_newgame_out);
 /* Current selection without an Enter press (headless auto-confirm path). */
 void menu_current(const char **level_out, int *is_newgame_out);
 
+/* Move the selection onto the item routing to `level` (case-insensitive),
+   as Up/Down would. 1 when the table has such an item. Headless seam: it
+   lets a probe reach a VR item, which the auto-confirm path alone cannot --
+   that one only ever takes item 0. The routing table is untouched. */
+int  menu_select_level(const char *level);
+
 /* Draw the menu overlay (call after the 3D scene, before end_frame). */
 void menu_draw(int viewport_w, int viewport_h);
 

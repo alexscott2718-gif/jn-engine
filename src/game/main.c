@@ -811,6 +811,169 @@ static void configure_safety_floor(World *world, const Entity *jim) {
             world->safety_floor_y, cx, cz, half_x, half_z);
 }
 
+/* Headless CLoadLevel portal probe (JN_TEST_LOAD=1). For every LOAD row in the
+   loaded level: print what it authors, what the recovered gate (00457ec0)
+   decides at the current story state, and then -- one portal at a time, with
+   the pending request drained in between -- what firing it actually asks the
+   loader for. Firing is a direct on_trigger call, so this observes the ported
+   body itself rather than a flag.
+
+   Pair it with JN_TEST_SET_SCENE=<n> to move the story counter, and with
+   JN_TEST_LOAD_RETURN=<level>[:<spawn>] to seed a departure point so the VR
+   levels' RETURN portals have somewhere to go.
+
+   Returns 0 always: it is a probe, not an assertion. What it prints is the
+   evidence -- compare it against the authored .gam rows. */
+/* C3DStartPoint's StartTrigger: the tag a start point names, fired once when
+   the player spawns there.
+
+   Status: the property and its meaning are CONFIRMED -- C3DStartPoint's
+   InitObject registers it and the class doc calls it "Trigger fired once on
+   spawn here" -- but the recovered PlacePlayer body (00442740) does not show
+   the firing, and the spec lists "verify how StartTrigger is fired" as an open
+   question. So the mechanism below is INFERRED, not ported.
+
+   What the corpus says it selects is much stronger than the mechanism. 31 of
+   the 100 shipped STRT rows name something, and 22 of those name a cutscene
+   camera -- 15 a 3MCA sequence, 7 a standalone 3CAM -- with the remaining 9
+   naming a 3AIT. Every VR level's PHONEBOOTH start names one (VR01 "bu", VR02
+   "rs", VR03 "inv", VR04 "sr1", VR05 "scooter", VR06 "remote", VR07 "bb1",
+   VR08 "gr"), and level1e's four start points each name a different one. That
+   is a start point choosing which cutscene plays for the way you came in.
+
+   Native had no such selection: cutscene_request_intro() plays *every*
+   standalone 3CAM the level registered, in registration order, and never
+   touches the 3MCA sequences. This narrows that to what the data authored,
+   inside the same opt-in -- a campaign entry or JN_CUTSCENE, unchanged -- and
+   falls back to the old behavior when a start point names nothing.
+
+   Returns 1 when it fired something. */
+static int start_trigger_fire(World *world) {
+    const char *tag = spawn_start_trigger();
+    if (!tag || !tag[0]) return 0;
+
+    int seq = cutscene_find_sequence_by_tag(tag);
+    if (seq >= 0) {
+        printf("[STARTTRIGGER] '%s' -> 3MCA sequence %d\n", tag, seq);
+        return cutscene_request_index(seq);
+    }
+    int shot = cutscene_find_shot_by_tag(tag);
+    if (shot >= 0) {
+        printf("[STARTTRIGGER] '%s' -> 3CAM shot %d\n", tag, shot);
+        return cutscene_request_shot_index(shot);
+    }
+    /* Anything else goes through the certified by-tag trigger dispatch, which
+       is how the port models "fire this trigger" everywhere else. */
+    Entity *t = behavior_trigger_fire_tag(world, tag, g_player);
+    if (t) {
+        printf("[STARTTRIGGER] '%s' -> fired %s\n", tag, t->type);
+        return 1;
+    }
+    printf("[STARTTRIGGER] '%s' names nothing this level places\n", tag);
+    return 0;
+}
+
+/* JN_TEST_STARTTRIGGER=1: report what this level's spawn would fire, and
+   leave. Resolution only -- it does not fire, so a sweep over all 35 levels
+   stays side-effect free. */
+static int start_trigger_probe(World *world) {
+    const char *tag = spawn_start_trigger();
+    if (!tag || !tag[0]) {
+        printf("[JN_TEST_STARTTRIGGER] %-8s (none)\n", gamestate_level());
+        return 0;
+    }
+    int seq = cutscene_find_sequence_by_tag(tag);
+    if (seq >= 0) {
+        printf("[JN_TEST_STARTTRIGGER] %-8s '%s' -> 3MCA sequence %d\n",
+               gamestate_level(), tag, seq);
+        return 0;
+    }
+    int shot = cutscene_find_shot_by_tag(tag);
+    if (shot >= 0) {
+        printf("[JN_TEST_STARTTRIGGER] %-8s '%s' -> 3CAM shot %d\n",
+               gamestate_level(), tag, shot);
+        return 0;
+    }
+    Entity *t = behavior_trigger_find_by_tag(world, tag);
+    printf("[JN_TEST_STARTTRIGGER] %-8s '%s' -> %s\n", gamestate_level(), tag,
+           t ? t->type : "UNRESOLVED (this level places no such tag)");
+    return 0;
+}
+
+/* JN_TEST_RETURN phase 2 (see the arming site): in the level the menu just
+   loaded, fire the first LOAD portal whose LevelName is RETURN and check it
+   asks to go back to the level the menu left from.
+
+   This is the half of the CLoadLevel port that is inferred rather than
+   recovered -- gamestate_request_level_swap promoting the current entry to the
+   departure pair, that pair surviving the swap's reset, and behavior_load.c
+   reading it back -- so it is worth observing through a real route instead of
+   a seeded one. JN_TEST_LOAD_RETURN seeds the pair directly and proves only
+   the read-back. */
+static int return_roundtrip_check(World *world, Entity *jim,
+                                  const char *expect_level) {
+    if (!jim) { printf("[JN_TEST_RETURN] FAIL: no player\n"); return 1; }
+
+    Entity *portal = NULL;
+    for (Entity *e = world->head; e; e = e->next) {
+        if (!e->alive || strcmp(e->type, "LOAD") != 0) continue;
+        if (strcasecmp(e->target_level, "RETURN") != 0) continue;
+        portal = e;
+        break;
+    }
+    if (!portal) {
+        printf("[JN_TEST_RETURN] FAIL: %s has no RETURN portal\n",
+               gamestate_level());
+        return 1;
+    }
+
+    printf("[JN_TEST_RETURN] in %s; departure recorded as '%s' (spawn '%s')\n",
+           gamestate_level(), gamestate_return_level(), gamestate_return_spawn());
+    if (portal->vt && portal->vt->on_trigger)
+        portal->vt->on_trigger(portal, jim);
+
+    const GameState *gs = gamestate_get();
+    int ok = gs->swap_level[0] && strcasecmp(gs->swap_level, expect_level) == 0;
+    printf("[JN_TEST_RETURN] %s: menu route %s -> %s, then portal '%s' asks for "
+           "'%s' (spawn '%s'), expected '%s'\n",
+           ok ? "PASS" : "FAIL", expect_level, gamestate_level(), portal->tag,
+           gs->swap_level[0] ? gs->swap_level : "(none)",
+           gs->swap_spawn[0] ? gs->swap_spawn : "(none)", expect_level);
+    return ok ? 0 : 1;
+}
+
+static int load_portal_probe(World *world, Entity *jim) {
+    if (!jim) { printf("[JN_TEST_LOAD] FAIL: no player\n"); return 1; }
+    int portals = 0;
+    for (Entity *e = world->head; e; e = e->next) {
+        if (!e->alive || strcmp(e->type, "LOAD") != 0) continue;
+        portals++;
+        const char *task = gam_str(e, "RequiredTask", "none");
+        printf("[JN_TEST_LOAD] portal tag=%-20s level=%-14s spawn=%-14s "
+               "task=%-8s req=%-5d exact=%-5d radius=%.0f gate=%s\n",
+               e->tag, e->target_level[0] ? e->target_level : "(empty)",
+               e->start_point[0] ? e->start_point : "(empty)",
+               task, gam_prop_i(e, "RequiredLevel", -1),
+               gam_prop_i(e, "ExactLevel", -1), e->half_extents[0],
+               behavior_load_gate_allows(e) ? "OPEN" : "SHUT");
+    }
+    for (Entity *e = world->head; e; e = e->next) {
+        if (!e->alive || strcmp(e->type, "LOAD") != 0) continue;
+        if (!e->vt || !e->vt->on_trigger) continue;
+        e->vt->on_trigger(e, jim);
+        const GameState *gs = gamestate_get();
+        printf("[JN_TEST_LOAD] fire tag=%-20s -> request=%s spawn=%s\n",
+               e->tag, gs->swap_level[0] ? gs->swap_level : "(none)",
+               gs->swap_spawn[0] ? gs->swap_spawn : "(none)");
+        /* Drain the request so the next portal is observed on its own. This
+           also clears level_done/spawn_set, which is why the probe exits
+           straight afterwards. */
+        gamestate_reset_for_new_level();
+    }
+    printf("[JN_TEST_LOAD] %s: %d portal(s)\n", gamestate_level(), portals);
+    return 0;
+}
+
 /* Headless collision self-test (JN_TEST_COLLIDE=1). Validates the mesh
    CollisionWorld end-to-end without a windowed session:
      (1) Ground-follow: from spawn, run physics ticks with the safety floor
@@ -2019,6 +2182,9 @@ int main(int argc, char **argv) {
        entity_bind_vtables(), so at on_spawn time game_flow_current_level() is
        still the previous level (empty on the launch load). */
     gamestate_set_level(current_desc.name);
+    /* The launch level was entered without a start point; a RETURN portal in
+       it therefore has no departure point to read (see behavior_load.c). */
+    gamestate_set_level_entry(current_desc.name, "");
 
     /* Cold entry: the launch level was jumped into, not walked into, so
        pre-grant the pictures it gates on but never awards (level1a/level1b/
@@ -2319,8 +2485,12 @@ int main(int argc, char **argv) {
        launch (audit + matched-camera validators) leaves campaign mode OFF and
        JN_CUTSCENE unset, so the camera stays on the follow cam — rendering is
        unchanged from before Wave N5. */
-    if (game_flow_campaign_active() || env_enabled("JN_CUTSCENE"))
-        cutscene_request_intro();
+    if (game_flow_campaign_active() || env_enabled("JN_CUTSCENE")) {
+        /* The start point picks the shot when it names one; otherwise the old
+           play-everything intro. See start_trigger_fire(). */
+        if (!start_trigger_fire(&world))
+            cutscene_request_intro();
+    }
 
     /* CMainMenu front-end: --menu opens the title/level-select over the loaded
        level as a backdrop; the player's choice routes into the level/task
@@ -2332,12 +2502,77 @@ int main(int argc, char **argv) {
     }
     if (want_menu)
         menu_open();
+
+    /* Headless RETURN round-trip (JN_TEST_RETURN=<vr level>): open the real
+       CMainMenu, land the selection on that level's item, and let the main
+       loop's confirm path take it -- the same call the shipped front end
+       makes. When the swap lands, return_roundtrip_check() fires the RETURN
+       portal there and asserts it comes back to this level. Phases: 1 armed,
+       2 confirmed and swapping, 3 checked. */
+    const char *rt_level = getenv("JN_TEST_RETURN");
+    char rt_expect_level[64] = {0};
+    int  rt_phase = 0;
+    if (rt_level && *rt_level) {
+        snprintf(rt_expect_level, sizeof rt_expect_level, "%s", current_desc.name);
+        menu_open();
+        if (menu_select_level(rt_level)) {
+            rt_phase = 1;
+            printf("[JN_TEST_RETURN] armed: menu route %s -> %s\n",
+                   rt_expect_level, rt_level);
+        } else {
+            fprintf(stderr, "[JN_TEST_RETURN] FAIL: no menu item routes to '%s'\n",
+                    rt_level);
+            ground_destroy();
+            fixture_level_destroy();
+            world_destroy(&world);
+            renderer_destroy();
+            window_destroy(&w);
+            return 1;
+        }
+    }
+
     if (fixture_mode) fixture_level_configure_floor(&world);
     else configure_safety_floor(&world, jim);
 
     /* Headless collision self-test seam (JN_TEST_COLLIDE=1): exercise the mesh
        CollisionWorld (ground-follow + wall clamp) and exit, mirroring the other
        JN_TEST_* hooks. */
+    if (getenv("JN_TEST_STARTTRIGGER")) {
+        int rc = start_trigger_probe(&world);
+        ground_destroy();
+        fixture_level_destroy();
+        world_destroy(&world);
+        renderer_destroy();
+        window_destroy(&w);
+        return rc;
+    }
+
+    /* Headless CLoadLevel portal probe. Seed a departure point first if one
+       was asked for, so a VR level's RETURN portals have somewhere to go. */
+    if (getenv("JN_TEST_LOAD")) {
+        const char *ret = getenv("JN_TEST_LOAD_RETURN");
+        if (ret && *ret) {
+            char lvl[64], sp[32];
+            const char *colon = strchr(ret, ':');
+            snprintf(lvl, sizeof lvl, "%.*s",
+                     colon ? (int)(colon - ret) : (int)strlen(ret), ret);
+            snprintf(sp, sizeof sp, "%s", colon ? colon + 1 : "");
+            gamestate_set_level_entry(lvl, sp);
+            gamestate_request_level_swap(lvl, sp);   /* promotes entry -> departure */
+            gamestate_reset_for_new_level();         /* ...and drop the swap itself */
+            gamestate_set_level_entry(current_desc.name, "");
+            printf("[JN_TEST_LOAD] seeded departure point %s (spawn %s)\n",
+                   gamestate_return_level(), gamestate_return_spawn());
+        }
+        int rc = load_portal_probe(&world, jim);
+        ground_destroy();
+        fixture_level_destroy();
+        world_destroy(&world);
+        renderer_destroy();
+        window_destroy(&w);
+        return rc;
+    }
+
     if (getenv("JN_TEST_COLLIDE")) {
         int rc = collide_self_test(&world, jim);
         ground_destroy();
@@ -2605,11 +2840,15 @@ int main(int argc, char **argv) {
                 int sel_newgame = 0;
                 int confirmed = menu_take_confirm(&sel_level, &sel_newgame);
                 /* Headless: auto-confirm the default item (New Game) so the
-                   menu route is exercised in screenshot/CI runs. */
-                if (!confirmed && screenshot_mode &&
-                    screenshot_warmup_ticks >= menu_auto_tick) {
+                   menu route is exercised in screenshot/CI runs. The RETURN
+                   round-trip takes the same path, having moved the selection
+                   onto a VR item first. */
+                if (!confirmed &&
+                    ((screenshot_mode && screenshot_warmup_ticks >= menu_auto_tick) ||
+                     rt_phase == 1)) {
                     menu_current(&sel_level, &sel_newgame);
                     confirmed = 1;
+                    if (rt_phase == 1) rt_phase = 2;
                 }
                 if (confirmed) {
                     if (!sel_level) {
@@ -2858,6 +3097,10 @@ int main(int argc, char **argv) {
                     /* Re-key the collected-pickup table before the new level's
                        entities spawn (see the launch load for why). */
                     gamestate_set_level(swap_desc.name);
+                    /* Where this level was entered, for a RETURN portal in it.
+                       The departure pair was already promoted out of the
+                       previous entry by gamestate_request_level_swap(). */
+                    gamestate_set_level_entry(swap_desc.name, spawn_buf);
                     asset_cache_begin_level();
                     if (load_level(&swap_desc, &world) >= 0) {
                         current_desc = swap_desc;
@@ -2887,6 +3130,19 @@ int main(int argc, char **argv) {
                                asset_cache_tex_count(), asset_cache_model_count());
                         follow_cam_snap(&fcam, cam, jim);
                         help_show_timed(HELP_BOOT_SECONDS);   /* and every level swapped into */
+                        /* The menu route has landed: fire this level's RETURN
+                           portal and report, then leave. */
+                        if (rt_phase == 2) {
+                            rt_phase = 3;
+                            int rc = return_roundtrip_check(&world, jim,
+                                                            rt_expect_level);
+                            ground_destroy();
+                            fixture_level_destroy();
+                            world_destroy(&world);
+                            renderer_destroy();
+                            window_destroy(&w);
+                            return rc;
+                        }
                     } else {
                         fprintf(stderr, "[SWAP] gam_load failed for %s\n", swap_desc.gam_path);
                     }

@@ -253,13 +253,46 @@ def parse_entity_visual():
             "grn": grn_rows, "specials": specials}
 
 
+# One SPRITE_CHUNK_MAP entry. The canvas name is the struct's own 4th field
+# since ac61e0d ("inventory: name items after the art"); before that it was a
+# trailing comment, and both forms are accepted so an older tree still parses.
+SCM_ENTRY = re.compile(
+    r'\{\s*"([^"]+)"\s*,\s*(\d+)\s*,\s*"([^"]*)"\s*'
+    r'(?:,\s*"([^"]*)"\s*)?\}\s*,?\s*(?:/\*\s*(.*?)\s*\*/)?\s*$')
+
+
 def parse_sprite_chunk_map():
+    """(SpriteDatabase, chunk id) -> extracted PNG + the artist's canvas name.
+
+    Parsed per line and checked, not scanned. This used to be one re.finditer
+    over the whole file, which silently returned ZERO rows the day the struct
+    grew its 4th field: every authored sprite reference then resolved to no
+    path, so every FourCC whose visual is a sprite fell through to `no_visual`
+    and unresolved.md grew seven "would draw a box" entries for FourCCs the
+    engine draws fine (verified: all 35 levels boot with zero placeholder
+    boxes). A generator that reports an empty map in its own log and carries on
+    is how that reached a committed checklist, so an entry line that does not
+    parse is now an error."""
     raw = (GAME / "sprite_chunk_map_generated.h").read_text()
     rows = []
-    for m in re.finditer(r'\{\s*"([^"]+)",\s*(\d+),\s*"([^"]+)"\s*\}\s*,?\s*(?:/\*\s*(.*?)\s*\*/)?',
-                         raw):
+    for line in raw.splitlines():
+        stripped = line.strip()
+        if not stripped.startswith("{"):
+            continue
+        m = SCM_ENTRY.match(stripped)
+        if not m:
+            raise SystemExit(
+                "build_asset_catalog: cannot parse a SPRITE_CHUNK_MAP entry in "
+                "src/game/sprite_chunk_map_generated.h -- the struct layout "
+                f"changed and this parser did not:\n  {stripped}")
         rows.append({"db": m.group(1), "chunk": int(m.group(2)),
-                     "path": m.group(3), "name": (m.group(4) or "").strip()})
+                     "path": m.group(3),
+                     "name": (m.group(4) or m.group(5) or "").strip()})
+    if not rows:
+        raise SystemExit(
+            "build_asset_catalog: SPRITE_CHUNK_MAP parsed empty. Every sprite "
+            "visual would be reported unresolved; refusing to write a catalog "
+            "that says so.")
     return rows
 
 

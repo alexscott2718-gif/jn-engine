@@ -147,11 +147,22 @@ void cutscene_request_intro(void);            /* begin playing the level's shots
 int  cutscene_request_index(int index);       /* play a registered 3MCA sequence */
 int  cutscene_request_shot_index(int index);  /* play one registered standalone 3CAM */
 int  cutscene_sequence_count(void);
+/* Resolve a .gam ObjectTag to a registered 3MCA sequence / 3CAM shot, or -1.
+   The C3DStartPoint StartTrigger path uses these to pick which cutscene a
+   spawn plays. */
+int  cutscene_find_sequence_by_tag(const char *tag);
+int  cutscene_find_shot_by_tag(const char *tag);
 int  cutscene_active(void);
 void cutscene_stop(void);
 void cutscene_update(Camera *cam, World *w, float dt);
 int  cutscene_player_control_locked(void);   /* active shot suppresses player input */
 int  cutscene_player_anim_override(void);    /* PlayerAnim id, or -1 when none */
+
+/* CLoadLevel's recovered contact gate (behavior_load.c, from 00457ec0):
+   RequiredTask lookup, then RequiredLevel minimum and optional ExactLevel.
+   1 = the touch proceeds. Exposed so a headless probe can evaluate a level's
+   portals without firing them. */
+int behavior_load_gate_allows(const Entity *e);
 
 /* The currently-controlled player; resolved at spawn. NULL until first 3JIM resolved. */
 extern Entity *g_player;

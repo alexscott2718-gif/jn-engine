@@ -18,7 +18,8 @@ Legend used throughout:
 ## 1. The 10,000-foot view
 
 `jn-engine` is a clean-room C reimplementation of the **Open Media Toolkit 2.0**
-engine that ran *Jimmy Neutron: Boy Genius* (2002), plus the toolchain that
+engine that ran *Jimmy Neutron: Boy Genius* (retail 2002; the shipped build
+links 2001-09-30), plus the toolchain that
 **captures the original game's Direct3D 7 output on real Windows XP** to use as
 ground truth. One codebase produces:
 
@@ -287,8 +288,14 @@ The reconciliation toolbox behind history Eras 5 & 7:
   frame (feeds replay).
 - **`diff.py`** — compare jn-engine capture vs original capture.
 - **`track0_*.py`** — the **static OMT reader** (Era 7 breakthrough): builds a static
-  mesh→canvas map, validates it against the capture oracle (~94%), resolves textures
-  deterministically. **This is the current texture-resolution source of truth.**
+  mesh→canvas map and resolves textures deterministically. **This is the current
+  texture-resolution source of truth.** Its agreement with the capture oracle is
+  **poor — 1 of 70 high-tier cases** — because the oracle's per-triangle UV vote
+  cross-attributes textures between meshes that share UV triples, so the capture is
+  not a usable validator for many meshes; the static map's own chain-internal
+  evidence is what supports it (material name == canvas name, 31/58). Figures and
+  the retraction of the earlier 94% claim:
+  [`track0_static_reader_findings.md`](./track0_static_reader_findings.md).
 - **`extract_texture_groundtruth.py`**, `match_textures.py`, `build_replay_texmap.py`,
   `inject_pixels_v3.py` (validate v3 locally with PNG-injected pixels),
   `extract_camera.py` / `extract_canon.py` / `gen_canon_header.py`.
@@ -414,11 +421,21 @@ phase history (cross-referenced from `PROJECT_HISTORY.md`):
 Repeated from `PROJECT_HISTORY.md` because they bite at the code level:
 
 1. Matrix convention is **column-major / column-vector**; captured **`PROJ[3][3]=1`**
-   is the real w-buffer projection — don't "repair" it.
+   is real — don't "repair" it. It is **not** a w-buffer, though: the audit read
+   `OMediaDXRenderPort::set_zbuffer_test` (`OMediaDXRenderer.cpp:400-406`) and found
+   `D3DRENDERSTATE_ZENABLE` only ever set to `D3DZB_TRUE`/`D3DZB_FALSE`, never
+   `D3DZB_USEW`, with no reference to w-buffering anywhere in the toolkit source
+   (`docs/audit/06-open-questions.md` Q2.3). The matrix value stands; only the name
+   for the depth mode was wrong.
 2. The engine does **zero UV flips**; flips happen at *export* (3DSP is DX-convention).
    No X-mirror after the diff fix.
-3. **`canvas_id = Canv + 1`**; the static OMT reader (`track0`) is texture truth,
-   capture is validator.
+3. **`canvas_id = Canv + 1` — for the heuristic-scanned `0MF2` path only.** Read
+   through the OMT header's `3DSh` chunk table instead and the canvas id comes out
+   directly, with no `+1`. Both paths are tabulated side by side at
+   [`omt_rendering_breakthrough.md`](./omt_rendering_breakthrough.md) §6. The static
+   OMT reader (`track0`) is texture truth; the capture agrees with it on only 1 of 70
+   high-tier cases and is not a usable validator for many meshes (see the tools list
+   above).
 4. **D3D7 DIFFUSE alpha is commonly 0** — never `discard` on vertex alpha; force
    opaque fragment alpha for the live window.
 5. The capture has **no D3D fog** — don't add fog to fix edges.

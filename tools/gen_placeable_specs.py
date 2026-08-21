@@ -38,22 +38,36 @@ PNG_DIR = ROOT / "assets" / "png"
 HAND_MARKER = "Hand-"                 # "Hand-written"/"Hand-deepened" -> protected
 
 # ---- PE virtual-address -> string -------------------------------------------
-_DATA = EXE.read_bytes()
-_e = struct.unpack_from("<I", _DATA, 0x3C)[0]
-_coff = _e + 4
-_nsec = struct.unpack_from("<H", _DATA, _coff + 2)[0]
-_optsz = struct.unpack_from("<H", _DATA, _coff + 16)[0]
-_opt = _coff + 20
-_IMAGE_BASE = struct.unpack_from("<I", _DATA, _opt + 28)[0]
+# Loaded on first use, not at import. Generating a spec needs the executable;
+# resolving a FourCC does not, and keeping the import cheap is what lets
+# fourcc_for() be tested on a checkout with no assets/exe/ (the repo's stated
+# position is that most work needs no game files).
+_DATA = None
+_IMAGE_BASE = None
 _SECS = []
-for _i in range(_nsec):
-    _o = _opt + _optsz + _i * 40
-    # section header: VirtualSize@8, VirtualAddress@12, SizeOfRawData@16, PointerToRawData@20
-    _vsize, _va, _rawsize, _rawptr = struct.unpack_from("<IIII", _DATA, _o + 8)
-    _SECS.append((_va, _vsize, _rawptr))
+
+
+def _load_pe():
+    global _DATA, _IMAGE_BASE, _SECS
+    if _DATA is not None:
+        return
+    _DATA = EXE.read_bytes()
+    _e = struct.unpack_from("<I", _DATA, 0x3C)[0]
+    _coff = _e + 4
+    _nsec = struct.unpack_from("<H", _DATA, _coff + 2)[0]
+    _optsz = struct.unpack_from("<H", _DATA, _coff + 16)[0]
+    _opt = _coff + 20
+    _IMAGE_BASE = struct.unpack_from("<I", _DATA, _opt + 28)[0]
+    _SECS = []
+    for _i in range(_nsec):
+        _o = _opt + _optsz + _i * 40
+        # section header: VirtualSize@8, VirtualAddress@12, SizeOfRawData@16, PointerToRawData@20
+        _vsize, _va, _rawsize, _rawptr = struct.unpack_from("<IIII", _DATA, _o + 8)
+        _SECS.append((_va, _vsize, _rawptr))
 
 
 def vstr(vaddr):
+    _load_pe()
     rva = vaddr - _IMAGE_BASE
     for va, vs, rp in _SECS:
         if va <= rva < va + vs:
@@ -206,39 +220,106 @@ CLASSIDS = ROOT / "docs" / "_gam_classids.tsv"
 
 
 def _load_registrars():
-    """(fourcc, registrar_fn_addr) pairs from the class-id scan, for matching a
-    class's InitObject to the nearest preceding class-id registrar."""
+    """(fourcc, registrar_fn_addr, class_or_nearby_string) from the class-id scan.
+
+    The third column used to be dropped on the floor, which is why classes the
+    scan names in plain text -- C3DCorona(), C3DGRILL, C3DPASSCARD,
+    C3DSmokePuff() -- still fell through to address proximity."""
     out = []
     for ln in CLASSIDS.read_text().splitlines()[1:]:
         p = ln.split()
         if len(p) >= 4 and p[3].startswith("FUN_"):
             try:
-                out.append((p[1], int(p[3][4:], 16)))
+                addr = int(p[3][4:], 16)
             except ValueError:
-                pass
+                continue
+            name = p[4].rstrip("()").strip() if len(p) >= 5 else ""
+            out.append((p[1], addr, name))
     return sorted(out, key=lambda t: t[1])
 
 
 REGISTRARS = _load_registrars()
 
+# class name (folded) -> FourCC, from the scan's own class column. A name that
+# the scan attributes to two different ids is dropped rather than guessed: the
+# column is `class_or_nearby_string`, so a second hit means it caught a
+# neighbour, not an owner.
+def _scan_names():
+    seen = {}
+    for fcc, _addr, name in REGISTRARS:
+        if not name:
+            continue
+        k = name.lower()
+        if k in seen and seen[k] != fcc:
+            seen[k] = None
+        else:
+            seen.setdefault(k, fcc)
+    return {k: v for k, v in seen.items() if v}
+
+
+SCAN_NAMES = _scan_names()
+CLS2FCC_FOLDED = {k.lower(): v for k, v in CLS2FCC.items()}
+LEVEL_ID = re.compile(r"^LEV\d", re.I)
+
+
+def _load_shipped_tags():
+    """folded dominant ObjectTag -> FourCC, from gam_schema's instance table.
+
+    What the level designers tagged the placed rows: `3ROK` -> C3DROCK,
+    `3TAR` -> C3DMOVINGTARGET, `3FIS` -> C3DDARWINFISH. spec_check calls this
+    tier T2 (shipped data), one below a registrar naming the class and well
+    above address proximity -- the tag names the class outright."""
+    out, sec = {}, None
+    for ln in GAM_SCHEMA.read_text().splitlines():
+        if ln.startswith("## "):
+            sec = ln[3:].strip()
+            continue
+        if not sec or not sec.startswith("Object types"):
+            continue
+        m = re.match(r"^\|\s*`(\w{4})`\s*\|\s*\d+\s*\|.*\|\s*([A-Za-z0-9_]+)\s*\|\s*$", ln)
+        if m:
+            out.setdefault(m.group(2).lower(), m.group(1))
+    return out
+
+
+SHIPPED_TAGS = _load_shipped_tags()
+
 
 def fourcc_for(cls, init_code, init_addr=None):
-    """Resolve a class's FourCC: gam_schema map -> class-id immediate in
-    InitObject -> nearest preceding class-id registrar address."""
-    if cls in CLS2FCC:
-        return CLS2FCC[cls]
+    """Resolve a class's FourCC, or None.
+
+    Three identity-bearing sources, in descending strength; None when none of
+    them names this class. What is NOT here any more is the fourth: "nearest
+    preceding class-id registrar within 0x800". That branch matched on address
+    proximity with no identity check at all, and it is what gave
+    C3DDarwinFish the id of C3DDino and C3DSparrow the id of a *level*. A
+    guess that looks like a resolution is worse than an honest unresolved, so
+    it is gone rather than tightened -- tightening it into a vtable-identity
+    check needs the Ghidra dumps, and that check would then be the thing doing
+    the work, not the proximity.
+    """
+    # 1. the gam_schema FourCC-to-class map, case-insensitively. The schema
+    #    stores C3DEYE where the ledger says C3DEye; 14 classes differed by
+    #    case alone and every one of them used to fall through to proximity.
+    hit = CLS2FCC.get(cls) or CLS2FCC_FOLDED.get(cls.lower())
+    if hit:
+        return hit
+    # 2. the class-id immediate the decompiler printed in InitObject.
     m = re.search(r"0x([0-9a-f]{8})\)", init_code or "")
     if m:
         b = bytes.fromhex(m.group(1))
         if all(0x20 <= c < 0x7f for c in b):
             return b[::-1].decode("latin-1")
-    if init_addr is not None:
-        best = None
-        for fcc, addr in REGISTRARS:
-            if addr <= init_addr and init_addr - addr < 0x800:
-                best = fcc            # nearest preceding within window
-        if best:
-            return best
+    # 3. the scan's own class column, which names the class in plain text.
+    hit = SCAN_NAMES.get(cls.lower())
+    if hit and not LEVEL_ID.match(hit):
+        return hit
+    # 4. the dominant ObjectTag of the shipped rows. Weaker than a registrar --
+    #    a designer tag is not a registration -- but it still *names the class*,
+    #    which is the property address proximity never had.
+    hit = SHIPPED_TAGS.get(cls.lower())
+    if hit and not LEVEL_ID.match(hit):
+        return hit
     return None
 
 

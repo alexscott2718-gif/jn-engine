@@ -83,7 +83,75 @@ Open questions:
 - Why are `time_minutes`/`time_seconds` printed `/2` — is the timer stored at double
   resolution (half-seconds)?
 - Identify `FUN_004073b0` and `DAT_004eefc8` precisely (race state machine + timer).
-- Map non-finish checkpoint progress (does crossing one arm the next / update a lap?).
+- ~~Map non-finish checkpoint progress (does crossing one arm the next / update a
+  lap?).~~ **The corpus answers the shape of it — see "The authored circuits"
+  below. What is still open is whether `InitObject` reads it.**
+
+## The authored circuits (corpus evidence, 2026-08-21)
+
+Every one of the **22** shipped `3CHK` rows authors a `Next` string that the Field
+Map above does not list, and they are not decoration: in the two racing levels they
+form a **closed ordered circuit**, which is the mechanism the open question above
+was asking about.
+
+`Level2b.gam` — 11 rows, a 10-node loop plus one orphan:
+
+    startline -> CHECK1 -> CHECK2 -> CHECK2_5 -> CHECK3 -> CHECK4
+              -> CHECK5 -> CHECK6 -> CHECK7 -> FINISHLINE -> STARTLINE (= startline)
+    check1a   -> CHECK1        (nothing points at check1a)
+
+`level2a.gam` — 10 rows, a closed loop with no node left out:
+
+    STARTLINE -> CHECK2 -> CHECK3 -> CHECK4 -> CHECK5 -> CHECK6
+              -> CHECK7 -> CHECK8 -> CHECK9 -> FINISHLINE -> STARTLINE
+
+`VR04.gam` — one lone checkpoint, `Next = "none"`.
+
+Two details worth keeping:
+
+- **The links resolve case-insensitively.** `Level2b`'s `startline` authors
+  `Next = "check1"` and the tag it reaches is `CHECK1`; `FINISHLINE` authors
+  `"STARTLINE"` and reaches `startline`. That matches the house convention and this
+  class's own `__strcmpi` name compare against `FINISHLINE`.
+- **`FINISHLINE` closes the loop rather than ending it**, in both levels — which fits
+  a lap counter, and fits `UpdateCheckPoint` returning after the finish branch rather
+  than advancing progress.
+
+`CheckAvail` is authored `0` on all 22 rows, so it is per-run state and not
+configuration: `Reset` (`00414b20`) "re-arms when `CheckAvail` is clear" reads as the
+between-runs re-arm of a flag the crossing sets.
+
+### What is NOT established
+
+Whether `C3DCheckPoint::InitObject` (`00414aa0`) actually **registers** `Next`. The
+Vtable Methods table above says it registers `CheckAvail` plus the checkpoint name,
+and that came off the decompiled body. A `.gam` property that no registrar declares is
+still serialized by the editor and simply never read, so both readings survive the
+data:
+
+1. `InitObject` registers `Next` and this spec's summary of it is incomplete; or
+2. the editor wrote a successor chain the runtime never reads, and the ordering comes
+   from somewhere else — or from nowhere.
+
+`Next` is a **per-class** registration in this engine, not an inherited one, which is
+what makes the question worth asking: `C3DYokDoor::InitObject` (`00449f70`) registers
+it at dword `0x181`, and `C3DLaserTrigger::InitObject` (`0042c2a0`) registers it
+alongside `ItemActive` and `Toggle`. Three unrelated classes declaring it separately
+is the pattern; a checkpoint chain authored on every shipped instance and read by
+nobody would be the exception.
+
+**Falsifier, and it is a small one:** re-read the registrar calls in `00414aa0`. If
+`Next` is among them, reading 1 is right and the Field Map above is missing a row. The
+workstation has no `Neutron.exe` or Ghidra project, so it cannot be settled here.
+
+### Native gap (unchanged by this note)
+
+`src/game/behaviors/behavior_checkpoint.c` reads none of it — not `Next`, not
+`CheckAvail`, not the `FINISHLINE` name. It relocates the respawn point to the
+last-touched checkpoint, which its own comment calls a match for the *feel*. Nothing
+about the circuits above was ported: doing that would be design, since the consumer of
+`Next` is not in the recovered body, and it is recorded here as evidence for whoever
+does port the race, not as a change.
 
 ## Notes
 

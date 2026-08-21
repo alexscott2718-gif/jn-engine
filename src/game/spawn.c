@@ -13,9 +13,17 @@
 #include <string.h>
 #include <strings.h>
 
+/* The matched start point's StartTrigger, for the caller to fire once the
+   level's entities are bound. See spawn.h for why this is only recorded here
+   and not acted on. */
+static char g_start_trigger[64];
+
+const char *spawn_start_trigger(void) { return g_start_trigger; }
+
 /* Place player at the named STRT in the world (case-insensitive on tag).
    Falls back to the 3JIM spawn if start_point is empty or not found. */
 Entity *place_player(World *world, const char *start_point) {
+    g_start_trigger[0] = '\0';
     Entity *jim = world_find_type(world, "3JIM");
     if (!jim) return NULL;
     const char *want = start_point;
@@ -41,6 +49,15 @@ Entity *place_player(World *world, const char *start_point) {
     if (selected_start && selected_start->music_database[0]) {
         int music_index = gam_prop_i(selected_start, "MusicIndex", -1);
         audio_set_music_db(selected_start->music_database, music_index);
+    }
+    if (selected_start) {
+        /* gam_loader filters an authored "none" out of the string bag, so a
+           start point that authors one leaves this NULL. Of the corpus's 100
+           STRT rows, 67 author "none" and 2 omit the property; the other 31
+           name something. */
+        const char *st = gam_str(selected_start, "StartTrigger", NULL);
+        if (st && st[0])
+            snprintf(g_start_trigger, sizeof g_start_trigger, "%s", st);
     }
     jim->vx = jim->vy = jim->vz = 0.0f;
     jim->on_ground = 0;

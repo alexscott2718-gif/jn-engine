@@ -93,7 +93,52 @@ Open questions:
 - Create/label raw Ghidra functions `004646c0`, `00464700`, `00464040`, `00464120`, and `00464430`.
 - Name `FUN_0046a910`, `FUN_00477630`, `FUN_00477780`, and the adjusted canvas setter slots.
 - Apply full `OMediaCanvasElement` and `CGameObject` structs so inherited transform/canvas offsets are exact.
-- Determine default `SpriteSize`/database/index values used by `3SPR` instances.
+- ~~Determine default `SpriteSize`/database/index values used by `3SPR` instances.~~
+  **Database and index: answered below. `SpriteSize` is still open** -- it comes
+  from the constructor at `00464070`, which is not recovered.
+
+## What a bare `3SPR` binds (2026-08-21)
+
+This page already contains the answer to two thirds of its own open question,
+and to the same two thirds of `GTR-20260717-3spr-defaults` ("What default canvas
+binding and sprite size/database/index values do bare `3SPR` instances use at
+runtime?").
+
+All **15** shipped `3SPR` rows are bare: not one authors `SpriteDatabase`,
+`SpriteIndex` or `SpriteSize` (Level1 x1, level1b x1, level1c x4, level2a x9;
+every one tagged `C3DSPRITE`). So `LoadSpriteCanvas` (`00464810`, and `00464780`
+with the base hook) necessarily takes its **else** arm -- the `SpriteDatabase`
+lookup through `FUN_0046a910` cannot succeed on a value no level sets -- and
+binds:
+
+> `icons.omt`, canvas index **3**
+
+which `src/game/sprite_chunk_map_generated.h` names as the canvas the artist
+called **`question`** -- the editor's question-mark placeholder. Its neighbours
+in that database are `triger`, `dispatch`, `load`, `sprite`, `start`, `camera`,
+`AITRIG`: this is the authoring toolkit's icon set, and index 3 is the one that
+means "nothing bound here".
+
+That reads as a complete answer rather than a coincidence: a bare `3SPR` is an
+object a designer placed and never finished, and the engine drew a question mark
+over it. Note that `3NEU` -- the concrete class that inherits these same three
+fields -- authors `icons.omt` index **4** (`sprite`) on all 294 of its rows, so
+the neighbouring index is in real use by real data.
+
+**Still open, and it does need the executable:** the `SpriteSize` the fallback
+passes as its third argument. It is whatever the constructor at `00464070` left
+in `0x4b4`, and that body is not recovered. `3NEU`'s authored sizes run 100..1300
+with 100 the mode, which bounds a guess but does not make one.
+
+### Why native still draws nothing for these
+
+`entity_visual.c` resolves `3SPR` to an invisible row and `entities.c` binds it
+to `vt_resolver_inert`. Making the fallback fire would put 15 question-mark
+icons into four shipped levels -- and one of them is in `Level1`, so it would
+move the `level1` golden. Faithful, probably; but "the original drew editor
+placeholders in the retail game" is a claim worth an owner's confirmation before
+a golden moves for it, and the size the icon would be drawn at is exactly the
+part still unrecovered. Recorded here rather than acted on.
 
 ## Notes
 

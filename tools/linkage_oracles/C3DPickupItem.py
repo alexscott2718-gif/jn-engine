@@ -95,15 +95,24 @@ FIRE = re.compile(r"\[PICFIRE\] .*kind=(\S+) tag='([^']*)' target=\S+ outcome=(\
 AWARD = re.compile(r"\[PICAWARD\] .*id=(\d+)")
 
 
+# --selftest compiles its mutant from a temp directory, where a quoted include
+# resolves against that directory and not against the real source's. -iquote
+# puts the real one back on the search path; without it every mutant failed to
+# build, and build_dumper's failure return read as a rejection.
+BUILD_FAILED = "dumper failed to compile"
+
+
 def build_dumper(tmp: Path, replace: dict[Path, Path] | None = None) -> Path:
     replace = replace or {}
     binp = tmp / "c3dpickup_dump"
     cmd = ["cc", "-O0", str(HERE / "c3dpickupitem_dump.c")]
+    for d in sorted({s.parent for s in SOURCES}):
+        cmd += ["-iquote", str(d)]
     cmd += [str(replace.get(s, s)) for s in SOURCES]
     cmd += ["-lm", "-o", str(binp)]
     r = subprocess.run(cmd, capture_output=True, text=True)
     if r.returncode != 0:
-        return None, "dumper failed to compile\n" + r.stderr
+        return None, BUILD_FAILED + "\n" + r.stderr
     return binp, ""
 
 
@@ -360,7 +369,13 @@ def selftest() -> int:
         if total is not None:
             print(f"selftest FAIL: mutant survived -- {label}")
             return 1
-    print(f"selftest PASS: oracle rejects {len(MUTANTS)} ordering/consume mutants")
+        if err.startswith(BUILD_FAILED):
+            print(f"selftest FAIL: the {label!r} mutant did not build, so it was "
+                  f"never executed -- a mutation test that cannot run proves "
+                  f"nothing\n{err}")
+            return 1
+    print(f"selftest PASS: oracle rejects {len(MUTANTS)} ordering/consume mutants "
+          f"(each built and executed)")
     return 0
 
 

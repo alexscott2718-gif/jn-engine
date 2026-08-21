@@ -30,10 +30,18 @@ def bits(value: float) -> int:
     return struct.unpack("<I", struct.pack("<f", value))[0]
 
 
+# --selftest compiles its mutant from a temp directory, where a quoted include
+# resolves against that directory and not against the real source's. -iquote
+# puts the real one back on the search path; without it every mutant failed to
+# build, and a build failure used to read as a rejection.
+BUILD_FAILED = "BUILD FAILED: "
+
+
 def build(tmp: Path, source: Path) -> Path:
     binary = tmp / "cgametype_dump"
     cmd = [
         "cc", "-O0", "-I", str(REPO / "src" / "engine"),
+        "-iquote", str(REAL_SOURCE.parent),
         str(HERE / "cgametype_dump.c"), str(source), "-lm", "-o", str(binary),
     ]
     run = subprocess.run(cmd, capture_output=True, text=True)
@@ -48,7 +56,7 @@ def run_check(source: Path) -> tuple[bool, str]:
         try:
             binary = build(tmp, source)
         except RuntimeError as exc:
-            return False, str(exc)
+            return False, BUILD_FAILED + str(exc)
         run = subprocess.run([str(binary)], capture_output=True, text=True)
         if run.returncode:
             return False, f"dumper exited {run.returncode}: {run.stderr.strip()}"
@@ -78,6 +86,17 @@ def run_check(source: Path) -> tuple[bool, str]:
     return True, "two exact seeds; adjacent angles/mode preserved"
 
 
+def expect_rejected(source: Path, label: str) -> str | None:
+    """None when the mutant built AND the oracle went red on it."""
+    ok, detail = run_check(source)
+    if detail.startswith(BUILD_FAILED):
+        return (f"the {label} mutant did not build, so it was never executed -- "
+                f"a mutation test that cannot run proves nothing\n{detail}")
+    if ok:
+        return f"the {label} mutant escaped"
+    return None
+
+
 def selftest() -> int:
     with tempfile.TemporaryDirectory() as directory:
         tmp = Path(directory)
@@ -88,9 +107,9 @@ def selftest() -> int:
             print("selftest FAIL: mutation anchor missing")
             return 1
         mutant.write_text(text.replace(needle, "g_rec.pos[1] = 9999.0f;", 1))
-        ok, _ = run_check(mutant)
-        if ok:
-            print("selftest FAIL: wrong-seed mutant escaped")
+        bad = expect_rejected(mutant, "wrong-seed")
+        if bad:
+            print("selftest FAIL: " + bad)
             return 1
 
         overreset = tmp / "camera_record_overreset.c"
@@ -99,12 +118,13 @@ def selftest() -> int:
         overreset.write_text(text.replace(
             anchor, anchor + "\n    g_rec.angle[0] = 0;", 1
         ))
-        ok, _ = run_check(overreset)
-        if ok:
-            print("selftest FAIL: adjacent-field over-reset mutant escaped")
+        bad = expect_rejected(overreset, "adjacent-field over-reset")
+        if bad:
+            print("selftest FAIL: " + bad)
             return 1
 
-    print("selftest PASS: rejects wrong seed and adjacent-field over-reset mutants")
+    print("selftest PASS: rejects wrong seed and adjacent-field over-reset mutants "
+          "(both built and executed)")
     return 0
 
 

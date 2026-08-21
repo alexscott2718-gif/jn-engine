@@ -63,6 +63,11 @@ def parse_entities():
         m = row_re.search(line)
         if m:
             out.append((m.group(1), m.group(2)))
+    if not out:
+        raise SystemExit(
+            "verify_behaviors: parsed 0 rows from src/game/entities.c -- the "
+            "entity_types[] layout changed and this regex did not. Refusing to "
+            "report every mapping consistent when none was read.")
     return out
 
 

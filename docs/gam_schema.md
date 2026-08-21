@@ -36,6 +36,8 @@ MaxVertVelocity/NewGravity/AccelLean/DecelLean, which C3DPlayer/C3DJimmy inherit
 
 **Duplicate FourCC caveat:** `3YSH` has two registrars: `C3DYokianShield` (`FUN_0044b510`) is a runtime helper created by `C3DYokian`, while current `.gam` rows are ship-tagged AI objects and map to `C3DYokianShip` (`FUN_0044b7d0`).
 
+**Duplicate FourCC caveat:** `3TAR` also has two registrars — `FUN_00430220` (`@00430405`, `C3DMovingTarget`, no RTTI string captured at the site) and `FUN_004453b0` (`@00445467`, `C3DShadow`). The table below attributes it to `C3DShadow` only because that is the site where a name was captured; the `class_or_nearby_string` column is a heuristic, not an attribution. **The shipped rows are the moving target's:** all 22 are tagged `C3DMOVINGTARGET` (16 in `Level3C`, 6 in `VR07`'s shooting range) and author `StartPosX/Y/Z`, `DestPosX/Y/Z`, `Speed`, `HitsRequired`, `RespawnTime` and `NumPoints`. The engine binds `3TAR` to `vt_moving_target` accordingly (`3TAR: bind the moving target, not the shadow`); before that it drew decor. See `docs/decomp/C3DMovingTarget.md`, the note on `docs/decomp/C3DShadow.md`, and the annotated `C3DMovingTarget::FOURCC_OWNED_BY_ANOTHER_CLASS` entry in `docs/audit/spec_check_baseline.json`.
+
 | FourCC | Class | InitObject fn | id sites |
 |---|---|---|---:|
 | `3PAT` | C3DPatrolPoint | `FUN_00434b30` | 1 |

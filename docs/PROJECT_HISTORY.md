@@ -1,7 +1,8 @@
 # jn-engine — Project History
 
 *A living narrative of how this project got from "I want to unlock the resolution"
-to a faithful, asset-complete reimplementation of a 2002 Direct3D 7 game — and why
+to a faithful, asset-complete reimplementation of a Direct3D 7 game released in
+2002 — and why
 the code is shaped the way it is.*
 
 **Audience:** new contributors, QA, and modders. If you're trying to understand
@@ -13,10 +14,12 @@ fit," read [`ARCHITECTURE.md`](./ARCHITECTURE.md) alongside this.
 credentials, and the raw per-session ledger live in the private companion. Nothing
 load-bearing for understanding the code is omitted here.
 
-**The game:** *Jimmy Neutron: Boy Genius* (THQ, 2002), a licensed kids' platformer
+**The game:** *Jimmy Neutron: Boy Genius* (THQ, retail 2002), a licensed kids' platformer
 for Windows. Its sequel, *Jimmy Neutron vs. Jimmy Negatron* (a.k.a. **JNvsJN**), is
 covered in the final era. The original runs on **Open Media Toolkit 2.0 DR4**
 (`OMT2.dll`), which renders **exclusively through Direct3D 7**.
+
+> **Which year.** Every date this project can measure is a *build* date: `Neutron.exe` and `NeutronSW.exe` link **2001-09-30**, `OMT2.dll` 2001-08-27 (PE TimeDateStamps, read with `tools/audit/pe.py`; `docs/audit/06-open-questions.md` Q3). A PE header does not establish a street date, so "2002" above is the retail year and is not something the binaries confirm. The other years that turn up nearby belong elsewhere: 2002-08 is the *JNvsJN* build, and 2003 is the OMT 2.5.0 LGPL release.
 
 ---
 
@@ -253,10 +256,17 @@ original reader resolves geometry, materials, and the canvas table. The object
 boundary in the captured stream is a `SetTransform(WORLD)` call — **not** a texture
 set — which is what made per-object attribution reliable.
 
-**What landed.** A **static OMT mesh→canvas map** that reproduces the capture
-"oracle" ~**94%**, with the rule `canvas_id = Canv + 1`. Where they disagree on
-UV-collisions, the *static* reader is **more** correct than the capture, and it covers
-27 meshes that were never captured. Result: **all 195 Level-1 meshes render
+**What landed.** A **static OMT mesh→canvas map**, with the rule
+`canvas_id = Canv + 1` for the heuristic-scanned `0MF2` path (read through the OMT
+header's `3DSh` chunk table and the id comes out directly, with no `+1`). It agrees
+with the capture "oracle" on only **1 of 70** high-tier cases -- an earlier summary
+here claimed ~94%, which the validator in the same commit does not produce; see the
+retraction in
+[`track0_static_reader_findings.md`](./track0_static_reader_findings.md). The
+disagreement is the oracle's fault rather than the map's: its per-triangle UV vote
+cross-attributes textures between meshes that share UV triples, so where they differ
+on UV collisions the *static* reader is **more** correct than the capture, and it
+covers 27 meshes that were never captured. Result: **all 195 Level-1 meshes render
 correctly.** Full write-up:
 [`omt_rendering_breakthrough.md`](./omt_rendering_breakthrough.md).
 
@@ -501,8 +511,17 @@ same-day with public before/after logs at `exentt.com/jn-engine/qa/`
   default gap — `glDepthFunc(GL_LEQUAL)` to match `D3DCMP_LESSEQUAL`, without which
   co-planar decal layers (START banner text) can never draw.
 - **Ticket #2 (12 reports):** the second, bigger default gap — **back-face culling**.
-  The OMT `OMediaPipeline` software-culls every poly before submitting (that's why the
-  capture shows `CULLMODE=NONE` on 3209/3235 draws), and OMT meshes bake two-sided
+  The capture shows `CULLMODE=NONE` on 3209/3235 draws. This used to be explained by
+  `OMediaPipeline` software-culling every poly before submitting, which the audit
+  contradicted: `OMediaPipeline` is the *software* renderer's, referenced by
+  `OMediaOMTRenderer` and nothing else, so it cannot explain a D3D7 capture. In the DX
+  path culling is initialised **on** (`D3DCULL_CW`, `OMediaDXRenderer.cpp:275,294`)
+  and then driven by the per-batch `om3pf_TwoSided` flag and by explicit
+  `disable_faceculling()` calls — the unconditional one in
+  `OMediaCanvasElement::render_geometry` (`OMediaCanvasElement.cpp:124`) being the
+  likely real cause, since `om3pf_TwoSided` is unused in the whole level-1 corpus
+  (`docs/audit/06-open-questions.md` Q2.6). The observation and the fix below are
+  unaffected; only the mechanism was wrong. OMT meshes bake two-sided
   surfaces as explicit reversed-winding twin polys with their own UVs
   (`om3pf_TwoSided` is unused in the whole level1 corpus). Cull-off + LEQUAL let the
   later twin overdraw the front: every sign text in the game was blanked and closed
@@ -1240,11 +1259,20 @@ Paid for with measured evidence. Changing one needs *new* measurement, not argum
 1. **Wine cannot run this game's renderer** — D3D7 support is broken in Wine 6 and 11.
    The XP capture path exists because of this.
 2. **Matrix convention is column-major / column-vector**, and the captured
-   `PROJ[3][3] = 1` is the game's real w-buffer projection — **do not "repair" it.**
+   `PROJ[3][3] = 1` is real — **do not "repair" it.** It is not a w-buffer:
+   `set_zbuffer_test` (`OMediaDXRenderer.cpp:400-406`) sets `ZENABLE` only to
+   `D3DZB_TRUE`/`D3DZB_FALSE`, never `D3DZB_USEW`, and the software backend
+   allocates a plain 16-bit z-buffer (`OMediaOMTRenderer.cpp:52-53`). Read against
+   the toolkit's own LGPL source by the audit
+   (`docs/audit/06-open-questions.md` Q2.3); the matrix value stands and only the
+   characterisation was wrong.
 3. **No X-mirror** after the UV-flip fix; mirroring is identity. The engine does
    **zero** UV flips — flips happen at *export* (3DSP is DX-convention).
-4. **`canvas_id = Canv + 1`**; the static OMT reader is the source of truth for
-   texture resolution (capture is a validator).
+4. **`canvas_id = Canv + 1` — for the heuristic-scanned `0MF2` path only**; through
+   the OMT header's `3DSh` chunk table the id is direct, with no `+1`
+   (`omt_rendering_breakthrough.md` §6). The static OMT reader is the source of truth
+   for texture resolution; the capture agrees on 1 of 70 high-tier cases and is not a
+   usable validator for many meshes (`track0_static_reader_findings.md`).
 5. **D3D7 vertex DIFFUSE alpha is commonly 0** — never `discard` on it, and force
    opaque fragment alpha for the live window (alpha-0 textures look like silhouettes
    on X compositors).

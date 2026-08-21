@@ -10,12 +10,26 @@ everything else needs only a clone.
 Evidence for every claim: `docs/audit/06-open-questions.md`, with 44 tagged records in
 `docs/audit/06-openq.jsonl`. Published write-up: <https://exentt.com/jn/audit.html>.
 
+**Status 2026-08-21.** A-01, A-02, B-01, B-02, C-01, C-02 and D-01 are done and
+annotated in place. **B-03 is the only one still genuinely blocked** — it needs
+`assets/exe/` populated. D-02 is open with a reason rather than a patch: it asks to
+hand-edit one row of raw scan output, which the note there argues is the option that
+helps least.
+
 ---
 
 ## P0 — documents that mislead every new reader
 
-### A-01 · Remove the retracted 94% statistic
+### A-01 · Remove the retracted 94% statistic — **DONE 2026-08-21**
 **Good first task.** No binaries, no build.
+
+> Both lines now state the real figure (1 of 70 high-tier cases), say the 94% was
+> retracted, and link `track0_static_reader_findings.md`. They also carry the
+> retraction's own explanation of *why* the two disagree -- the capture oracle's
+> per-triangle UV vote cross-attributes textures between meshes sharing UV triples,
+> so the oracle is the unreliable side -- because a reader who only learns the number
+> is smaller is likely to conclude the static reader is the broken one. The audit's
+> proposed minimal patch is below and this follows it.
 
 Two documents still print a figure that was retracted in May. Re-running the validator
 shipped in the same commit gives **1/70**, not 94%. Both files are on the "read these
@@ -28,8 +42,12 @@ first" path, and both still carry it on `origin/master`.
 **Done when:** neither file asserts 94%, both point at the corrected document, and
 `grep -rn '94%' docs/` returns only the retraction itself.
 
-### A-02 · Qualify the `canvas_id = Canv + 1` invariant
+### A-02 · Qualify the `canvas_id = Canv + 1` invariant — **DONE 2026-08-21**
 **Good first task.**
+
+> Both invariant lists now name the path: `+1` on the heuristic-scanned `0MF2` path,
+> direct from the OMT header's `3DSh` chunk table, with the side-by-side table in
+> `omt_rendering_breakthrough.md` §6 cited at both sites.
 
 The rule holds for the *heuristic-scanned* `0MF2` path only. The OMT header chunk
 table yields the canvas id directly. Both invariant lists state it unconditionally —
@@ -44,8 +62,30 @@ inside a section that tells readers not to re-examine it.
 
 ## P1 — specs that assert what the data denies
 
-### B-01 · Fix the FourCC resolver, then regenerate
+### B-01 · Fix the FourCC resolver, then regenerate — **DONE 2026-08-21**
 The single highest-leverage fix: it closes 17 spec defects at the source.
+
+> The 17 defective FourCCs were fixed in the *specs* by hand (4fbdef3,
+> 54151fc) and the baseline trimmed to match, which is why `spec_check` is down
+> to 3 findings. The generator was not touched, so a regeneration would have put
+> all 17 back; that half is now done too.
+>
+> `fourcc_for()` matches case-insensitively, reads the scan's class column, and
+> gains the dominant `ObjectTag` of the shipped rows (`spec_check`'s own tier
+> T2). The address-proximity branch is **gone**, not tightened -- the vtable
+> identity check the task suggests needs the Ghidra dumps, and would then be the
+> thing doing the work. Resolving from names only, over the 208 ledger classes:
+> agrees with the spec 21 -> 53, contradicts 0 -> 0, falls through 43 -> 11.
+> Of the audit's 17, sixteen now resolve correctly; `C3DSparrow` comes back
+> unresolved because its one placed row is tagged `vulta`, which is the honest
+> answer and what its spec already says.
+>
+> `tools/check_fourcc_resolver.py` (in `make check`) locks it in: the resolver
+> must agree with each spec's stated FourCC or say None, and must never return a
+> level id. **Still untested here:** the generator cannot run on a machine
+> without `Neutron.exe` *and* the `/tmp/dumps2` dumps, so the decompiled-immediate
+> branch is exercised by no test. Every branch that resolves from checked-in
+> data is covered, which is where all 17 defects came from.
 
 `tools/gen_placeable_specs.py:225-241` `fourcc_for()` resolves in three branches and
 each leaks:
@@ -69,7 +109,11 @@ drop it and emit "unresolved" honestly.
 **Done when:** `python3 tools/audit/spec_check.py` reports fewer findings, the baseline
 is trimmed by the same amount, and no regenerated spec claims a `LEV\d` id.
 
-### B-02 · Re-run validation on 29 specs
+### B-02 · Re-run validation on 29 specs — **DONE** (06d0496)
+> All 29 fixed; the task's own command,
+> `python3 tools/audit/spec_check.py --all | grep NOPROPS_BUT_HARVESTED`, now
+> returns nothing.
+
 Each states *"No registered `.gam` properties to cross-check"* while `gam_schema.md`
 holds harvested properties for its FourCC — **627 property rows across 617 shipped
 instances**, including `C3DTree` (169 instances) and `C3DRock` (99).
@@ -99,7 +143,16 @@ spec's vtables within +0x1200 of the pinned address.
 
 ## P2 — explanations that are wrong
 
-### C-01 · Correct two invariant explanations
+### C-01 · Correct two invariant explanations — **DONE 2026-08-21**
+> Both corrected in place, with the rules themselves left standing and no rendering
+> code touched, as the task requires. The `PROJ[3][3]=1` invariant keeps its
+> "don't repair it"; the cull-off fix for `assets/glb/omt/` models keeps its
+> justification. What changed is the *reason* printed next to each, and both now
+> cite the source lines the audit read (`OMediaDXRenderer.cpp:400-406` and
+> `:275,294`, `OMediaCanvasElement.cpp:124`) plus the audit record itself. Relayed
+> from `docs/audit/06-open-questions.md` Q2.3 and Q2.6 rather than re-verified:
+> the toolkit source (`~/omt-src`) is not on this machine.
+
 Both were checked against the engine's own LGPL source. The *observations* stand; the
 *reasons* printed next to them do not.
 
@@ -115,7 +168,17 @@ Both were checked against the engine's own LGPL source. The *observations* stand
 **Done when:** both explanations are corrected without weakening the rules themselves.
 No ported behaviour changes — do not "fix" any rendering code for this.
 
-### C-02 · Flag the `3TAR` duplicate FourCC
+### C-02 · Flag the `3TAR` duplicate FourCC — **DONE 2026-08-21**
+
+> Both halves. `gam_schema.md` now carries a `3TAR` duplicate-registrar caveat in the
+> same shape as the `3YSH` one, naming both sites and saying the shipped rows are the
+> moving target's. The decision half was already made: the engine binds `3TAR` to
+> `vt_moving_target` ("3TAR: bind the moving target, not the shadow"), and
+> `docs/decomp/C3DShadow.md` -- which still described itself as placed 22 times with
+> 25 harvested properties, all of them the moving target's -- now claims none of the
+> instances. Worth noting for whoever reads the baseline: `spec_check` fires on the
+> spec that *disagrees* with the registrar scan, and the scan agrees with `C3DShadow`,
+> so the flagged row is `C3DMovingTarget` -- the class that is right.
 `3TAR` has two registrars — the same shape `docs/gam_schema.md:32` already flags a
 caveat for on `3YSH`, and only on `3YSH`. Its 22 shipped instances are tagged
 `C3DMOVINGTARGET`, while `src/game/entities.c:98` binds `3TAR` to `vt_shadow`
@@ -128,7 +191,13 @@ has decided which class the shipped instances should actually drive.
 
 ## P3 — facts to correct
 
-### D-01 · Say which year is meant
+### D-01 · Say which year is meant — **DONE 2026-08-21**
+> All three sites now say "retail 2002", and PROJECT_HISTORY carries one note
+> stating the distinction once rather than four times: every date the project can
+> measure is a build date (Neutron.exe and NeutronSW.exe link 2001-09-30, OMT2.dll
+> 2001-08-27, PE TimeDateStamps via tools/audit/pe.py), a PE header does not
+> establish a street date, and the neighbouring years belong elsewhere -- 2002-08
+> is the JNvsJN build, 2003 the OMT 2.5.0 LGPL release.
 Three documents say the game is from 2002 without distinguishing build from release.
 The binaries were linked **2001-09-30**; the stray "2003" elsewhere is the toolkit's
 open-source release, not the game. A PE header dates a build, not a street date — so
@@ -136,11 +205,22 @@ open-source release, not the game. A PE header dates a build, not a street date 
 
 `README.md:4` · `docs/ARCHITECTURE.md:21` · `docs/PROJECT_HISTORY.md:16`
 
-### D-02 · Drop a phantom class from the registrar scan
+### D-02 · Drop a phantom class from the registrar scan — **needs a decision first**
 `docs/_gam_classids.tsv:141` assigns `3TRO` to a class `C3DTrophy` that does not exist
 in `docs/decomp/_hierarchy.md`. The column is documented as
 "class *or nearby string*", and here it caught a nearby string. The real owner is
 `C3DVRTrophy`, confirmed against the binary.
+
+> **Not done, deliberately (2026-08-21).** `_gam_classids.tsv` is raw
+> `Scan_ClassIds.java` output, and its column header says `class_or_nearby_string`.
+> Hand-editing one row to remove a nearby string it really did find makes the file
+> *less* faithful to the scan while making it look more authoritative, and a
+> regeneration would silently undo it. The same shape appears at least twice more --
+> `3NEU` catches `C3DSprite()` and `3TAR` catches `C3DShadow()` -- so the general fix
+> is either to teach the scan an identity check or to consume the column as the
+> heuristic it is, which is what `spec_check`'s baseline notes already do for all
+> three. Someone should pick one; editing this row alone is the option that helps
+> least.
 
 ---
 

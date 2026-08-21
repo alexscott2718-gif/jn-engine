@@ -3,6 +3,7 @@
 #include "../engine/input.h"
 #include "../engine/renderer.h"
 #include <stdio.h>
+#include <strings.h>
 
 /* Level routing table — the executable's level-file menu order
    (docs/decomp/CMainMenu.md): New Game first, then the 8 VR levels in their
@@ -77,6 +78,21 @@ void menu_current(const char **level_out, int *is_newgame_out) {
     const MenuItem *it = &g_items[g_sel];
     if (level_out)      *level_out = it->level;
     if (is_newgame_out) *is_newgame_out = it->is_newgame;
+}
+
+/* Land the selection on a named item, as Up/Down would. Reads the same table
+   and changes nothing about it; the auto-confirm path can only ever take item
+   0, so a headless probe needs this to reach a VR route. */
+int menu_select_level(const char *level) {
+    if (!level || !level[0]) return 0;
+    for (int i = 0; i < g_item_count; i++) {
+        if (g_items[i].level && strcasecmp(g_items[i].level, level) == 0) {
+            g_sel = i;
+            printf("[MAINMENU] selection='%s'\n", g_items[i].label);
+            return 1;
+        }
+    }
+    return 0;
 }
 
 void menu_draw(int viewport_w, int viewport_h) {
