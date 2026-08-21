@@ -730,8 +730,28 @@ static void configure_safety_floor(World *world, const Entity *jim) {
        computed unconditionally so the visible procedural ground keeps drawing
        at the same height regardless of the gate. */
     {
+        /* Per-level opt-out. The backstop stays on by default for the reason
+           above, but Area 51 (level5) is authored to be fallen out of and the
+           flat plane 1000 units under the ground gets in the way of that, so
+           it is excluded (owner, 2026-08-21).
+
+           Note this only disables the *collision* backstop. The procedural
+           ground below still draws, because ground_init runs unconditionally
+           so the visible floor keeps its height regardless of the gate --
+           removing the visual too is a separate call. */
+        static const char *NO_SAFETY_FLOOR[] = { "level5" };
+        const char *lvl = game_flow_current_level();
+        int excluded = 0;
+        for (size_t i = 0; lvl && i < sizeof(NO_SAFETY_FLOOR) /
+                                     sizeof(NO_SAFETY_FLOOR[0]); i++)
+            if (strcasecmp(lvl, NO_SAFETY_FLOOR[i]) == 0) { excluded = 1; break; }
+
         const char *s = getenv("JN_SAFETY_FLOOR");
-        world->safety_floor_enabled = (s && strcmp(s, "0") == 0) ? 0 : 1;
+        if (s && strcmp(s, "0") == 0)      world->safety_floor_enabled = 0;
+        else if (s && strcmp(s, "1") == 0) world->safety_floor_enabled = 1;
+        else                               world->safety_floor_enabled = !excluded;
+        if (excluded)
+            fprintf(stderr, "[safety_floor] disabled for '%s'\n", lvl);
     }
     world->safety_floor_y = world->ground_y - 1000.0f;
     world->safety_floor_cx = cx;
@@ -2109,7 +2129,12 @@ int main(int argc, char **argv) {
        stand-in for testing and free play rather than a claim about how the
        game hands them over. Icons are the pickups' own sprites where one
        exists (see plan section 18.1); -1 falls back to the name. */
-    if (env_enabled("JN_TEST_GADGETS") || gamestate_sandbox_enabled()) {
+    /* TEMPORARY (owner, 2026-08-21): every gadget in hand at the start of
+       every level, so the whole set can be exercised anywhere without hunting
+       for the four pickups that exist. Four of the eight have no pickup in the
+       corpus at all, so there is no faithful acquisition to fall back on yet.
+       Set JN_NO_GADGETS=1 to get the pickup-only behaviour back. */
+    if (!env_enabled("JN_NO_GADGETS")) {
         gamestate_grant_gadget("jetpack",       99, INV_KIND_GADGET);
         gamestate_grant_gadget("shrinkray",     -1, INV_KIND_GADGET);
         gamestate_grant_gadget("bubble",        26, INV_KIND_GADGET);
@@ -2118,7 +2143,7 @@ int main(int argc, char **argv) {
         gamestate_grant_gadget("rocket",       136, INV_KIND_GADGET);
         gamestate_grant_gadget("scooter",      111, INV_KIND_PART | INV_KIND_GADGET);
         gamestate_grant_gadget("invisibility", 114, INV_KIND_PART | INV_KIND_GADGET);
-        printf("[GADGET] all eight granted (test/sandbox)\n");
+        printf("[GADGET] all eight granted (temporary: every level)\n");
     }
 
     if (getenv("JN_TEST_TOOLS")) {
