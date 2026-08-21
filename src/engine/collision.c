@@ -358,9 +358,14 @@ void collision_resolve_horizontal(const CollisionWorld *cw,
                     float d = sqrtf(d2);
                     float nx, nz;
                     if (d > 1.0e-4f) { nx = dx/d; nz = dz/d; }
-                    else { nx = t->n[0]; nz = t->n[2];           /* on the face: use its normal */
-                           float l = sqrtf(nx*nx+nz*nz);
-                           if (l < 1.0e-4f) continue; nx/=l; nz/=l; }
+                    else {
+                        nx = t->n[0];                    /* on the face: use its normal */
+                        nz = t->n[2];
+                        float l = sqrtf(nx*nx + nz*nz);
+                        if (l < 1.0e-4f) continue;       /* degenerate normal: skip */
+                        nx /= l;
+                        nz /= l;
+                    }
                     float push = radius - d;
                     pos[0] += nx * push;
                     pos[2] += nz * push;

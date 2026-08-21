@@ -53,6 +53,19 @@ static void baseball_pickup_trigger(Entity *e, Entity *by) {
 static void bubble_pickup_trigger(Entity *e, Entity *by) {
     (void)by; pickup_collect(e, "bubble", NULL, -1);
 }
+/* C3DRocketFuel (3FUE): the plutonium rods in level4b -- seven of them, all on
+   sprite 40, the canvas the artist named "plutrod". The decompiled Jimmy-touch
+   handler deactivates the object and drives SCENE state; the deactivate half
+   needs nothing we do not have, so it lands here, and the SCENE write stays
+   deferred. That half is moot on this data anyway: every 3FUE row authors
+   TaskName "none", so there is no mission tag for a SCENE write to advance.
+   The rows author no PointValue and no SoundIndex either, so collecting is
+   silent and scoreless -- it counts toward the level tally and disappears,
+   which is what the original's handler does. */
+static void rocket_fuel_trigger(Entity *e, Entity *by) {
+    (void)by; pickup_collect(e, NULL, NULL, -1);
+}
+
 /* C3DHelmet (3HEL): grants the helmet. The HELMET task-state visibility hook
    (slot 264) lands with the Wave N5 task system. */
 static void helmet_trigger(Entity *e, Entity *by) {
@@ -123,6 +136,17 @@ static void metal_pickup_trigger(Entity *e, Entity *by) {
 DEF_PICKUP_VT(vt_baseball_pickup, baseball_pickup_trigger);
 DEF_PICKUP_VT(vt_bubble_pickup,   bubble_pickup_trigger);
 DEF_PICKUP_VT(vt_helmet,          helmet_trigger);
+const EntityVTable vt_rocket_fuel = {
+    .on_spawn   = pickup_spawn,
+    .on_update  = NULL,
+    .on_trigger = rocket_fuel_trigger,
+    /* Without this the rods spawn as inert geometry: behavior_trigger_spawn_base
+       deliberately does NOT set the trigger flag (see its comment), the vtable
+       does, and pickup_spawn only counts an entity toward the level tally if
+       it is already flagged. */
+    .flags      = ENTITY_FLAG_TRIGGER
+};
+
 const EntityVTable vt_metal_pickup = {
     .on_spawn   = metal_pickup_spawn,
     .on_update  = metal_pickup_update,

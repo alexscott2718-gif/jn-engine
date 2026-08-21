@@ -33,6 +33,7 @@ LIBS    = $(filter-out -lz,$(NATIVE_LIBS)) -lz -lm -ldl -lpthread
 endif
 
 GAME_CFLAGS ?=
+ENGINE_CFLAGS ?=
 
 SRC     = $(wildcard src/engine/*.c src/engine/assets/*.c src/game/*.c src/game/behaviors/*.c)
 OBJ     = $(SRC:.c=.o)
@@ -45,10 +46,12 @@ $(TARGET): $(OBJ)
 	$(CC) $(LDFLAGS) -o $@ $^ $(LIBS) $(NATIVE_LDFLAGS)
 
 %.o: %.c
-	$(CC) $(CFLAGS) -c $< -o $@
+	$(CC) $(CFLAGS) $(ENGINE_CFLAGS) -c $< -o $@
 
-# The campaign check promotes warnings in gameplay code to errors without
-# forcing unrelated legacy engine/asset-loader warnings into the same change.
+# `make check` promotes warnings to errors. This was gameplay-only for a long
+# time, to keep legacy engine/asset-loader warnings out of unrelated changes --
+# but the engine is down to zero of them now, so it is held to the same bar and
+# the two halves are separate variables only so one can be relaxed alone.
 src/game/%.o: src/game/%.c
 	$(CC) $(CFLAGS) $(GAME_CFLAGS) -c $< -o $@
 
@@ -130,7 +133,7 @@ LEVEL1_GOLDEN_FRAMES  ?= 2
 check:
 	rm -rf build/check-artifacts
 	$(MAKE) clean
-	$(MAKE) GAME_CFLAGS=-Werror
+	$(MAKE) GAME_CFLAGS=-Werror ENGINE_CFLAGS=-Werror
 	python3 tools/audit/spec_check.py
 	python3 tools/check_ground_truth_requests.py --selftest
 	python3 tools/check_ui_text.py --selftest

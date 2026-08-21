@@ -88,7 +88,15 @@ int window_init(Window *w, const char *title, int width, int height) {
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-    printf("OpenGL: %s\n", (const char*)SDL_GL_GetProcAddress == 0 ? "n/a" : "ok");
+    /* This used to read `(const char*)SDL_GL_GetProcAddress == 0 ? "n/a" : "ok"`,
+       which compares the address of a function against NULL -- never true, so it
+       printed "ok" unconditionally whatever the driver had done. Report what GL
+       actually says; the QA README asks testers for exactly this. */
+    int gl_major = 0, gl_minor = 0;
+    SDL_GL_GetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, &gl_major);
+    SDL_GL_GetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, &gl_minor);
+    if (gl_major) printf("OpenGL: %d.%d\n", gl_major, gl_minor);
+    else          printf("OpenGL: n/a\n");
     printf("Window: %dx%d\n", width, height);
     return 1;
 }

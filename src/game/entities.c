@@ -128,7 +128,7 @@ static const EntityTypeInfo entity_types[] = {
     { "3MER", "Merry-go-round (static prop)",        &vt_prop },
     { "3TRA", "Trans-replicator (set-dressing prop)", &vt_prop },
     { "3SM1", "Smoke (effect sprite)",               &vt_prop },
-    { "3FUE", "Rocket fuel (pickup sprite)",         &vt_prop },
+    { "3FUE", "Rocket fuel (plutonium rod)",         &vt_rocket_fuel },
     { "3TRI", "Trigger (base marker, inert)",        &vt_prop },
     /* Resolver/positioning tail: native-inert rows whose visuals deliberately
        remain hidden until a faithful placement/canvas source exists. */

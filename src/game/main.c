@@ -710,6 +710,7 @@ static void configure_safety_floor(World *world, const Entity *jim) {
         max_x = max_z =  20000.0f;
     }
 
+    int excluded = 0;          /* level opts out of the safety floor entirely */
     const float margin = 12000.0f;
     float cx = (min_x + max_x) * 0.5f;
     float cz = (min_z + max_z) * 0.5f;
@@ -741,7 +742,7 @@ static void configure_safety_floor(World *world, const Entity *jim) {
            removing the visual too is a separate call. */
         static const char *NO_SAFETY_FLOOR[] = { "level5" };
         const char *lvl = game_flow_current_level();
-        int excluded = 0;
+        excluded = 0;
         for (size_t i = 0; lvl && i < sizeof(NO_SAFETY_FLOOR) /
                                      sizeof(NO_SAFETY_FLOOR[0]); i++)
             if (strcasecmp(lvl, NO_SAFETY_FLOOR[i]) == 0) { excluded = 1; break; }
@@ -759,8 +760,18 @@ static void configure_safety_floor(World *world, const Entity *jim) {
     world->safety_floor_half_x = half_x;
     world->safety_floor_half_z = half_z;
 
-    unsigned int ground_tex = tex_cache_get(CANON_GROUND_TEXTURE);
-    ground_init(ground_tex, half_x, half_z, cx, cz, 120.0f, 0.0f);
+    /* The collision backstop and the visible plane are two separate things:
+       the gate above only turns off the former, and ground_init used to run
+       unconditionally so the procedural ground kept drawing regardless. For a
+       level that opts out, neither should be there -- so tear it down instead
+       of rebuilding it. (Owner, 2026-08-21: the first pass removed the floor
+       you could stand on and left the floor you could see.) */
+    if (!world->safety_floor_enabled && excluded) {
+        ground_destroy();
+    } else {
+        unsigned int ground_tex = tex_cache_get(CANON_GROUND_TEXTURE);
+        ground_init(ground_tex, half_x, half_z, cx, cz, 120.0f, 0.0f);
+    }
     fprintf(stderr,
             "[safety_floor] %s y=%.1f center=(%.0f, %.0f) half=(%.0f, %.0f)\n",
             world->safety_floor_enabled ? "on" : "off",
@@ -2146,13 +2157,14 @@ int main(int argc, char **argv) {
         printf("[GADGET] all eight granted (temporary: every level)\n");
     }
 
-    if (getenv("JN_TEST_TOOLS")) {
-        gamestate_grant_tool("watergun", "assets/hud/tool_watergun.png");
-        gamestate_grant_tool("glasses",  "assets/hud/tool_glasses.png");
-        gamestate_grant_tool("jetpack",  "assets/hud/tool_jetpack.png");
-        gamestate_grant_tool("wrench",   "assets/hud/tool_wrench.png");
+    /* JN_TEST_TOOLS used to grant watergun/glasses/jetpack/wrench as well.
+       The first three came from the speculative tool table the corpus-derived
+       one replaced -- no .gam row is tagged for any of them and nothing reads
+       those names -- and the jetpack is now a real gadget granted with the
+       other seven. Only the baseball is left, because behavior_player really
+       does gate the F throw on it. */
+    if (getenv("JN_TEST_TOOLS"))
         gamestate_grant_tool("baseball", NULL);   /* enables the F throw */
-    }
 
     /* Wave N3: grant the baseball so the gated F-key throw (and the balloon-pop
        path) can be exercised without first walking to a PIC_NUMBER==6 pickup. */
