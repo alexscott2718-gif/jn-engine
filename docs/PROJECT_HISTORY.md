@@ -253,10 +253,17 @@ original reader resolves geometry, materials, and the canvas table. The object
 boundary in the captured stream is a `SetTransform(WORLD)` call — **not** a texture
 set — which is what made per-object attribution reliable.
 
-**What landed.** A **static OMT mesh→canvas map** that reproduces the capture
-"oracle" ~**94%**, with the rule `canvas_id = Canv + 1`. Where they disagree on
-UV-collisions, the *static* reader is **more** correct than the capture, and it covers
-27 meshes that were never captured. Result: **all 195 Level-1 meshes render
+**What landed.** A **static OMT mesh→canvas map**, with the rule
+`canvas_id = Canv + 1` for the heuristic-scanned `0MF2` path (read through the OMT
+header's `3DSh` chunk table and the id comes out directly, with no `+1`). It agrees
+with the capture "oracle" on only **1 of 70** high-tier cases -- an earlier summary
+here claimed ~94%, which the validator in the same commit does not produce; see the
+retraction in
+[`track0_static_reader_findings.md`](./track0_static_reader_findings.md). The
+disagreement is the oracle's fault rather than the map's: its per-triangle UV vote
+cross-attributes textures between meshes that share UV triples, so where they differ
+on UV collisions the *static* reader is **more** correct than the capture, and it
+covers 27 meshes that were never captured. Result: **all 195 Level-1 meshes render
 correctly.** Full write-up:
 [`omt_rendering_breakthrough.md`](./omt_rendering_breakthrough.md).
 
@@ -1243,8 +1250,11 @@ Paid for with measured evidence. Changing one needs *new* measurement, not argum
    `PROJ[3][3] = 1` is the game's real w-buffer projection — **do not "repair" it.**
 3. **No X-mirror** after the UV-flip fix; mirroring is identity. The engine does
    **zero** UV flips — flips happen at *export* (3DSP is DX-convention).
-4. **`canvas_id = Canv + 1`**; the static OMT reader is the source of truth for
-   texture resolution (capture is a validator).
+4. **`canvas_id = Canv + 1` — for the heuristic-scanned `0MF2` path only**; through
+   the OMT header's `3DSh` chunk table the id is direct, with no `+1`
+   (`omt_rendering_breakthrough.md` §6). The static OMT reader is the source of truth
+   for texture resolution; the capture agrees on 1 of 70 high-tier cases and is not a
+   usable validator for many meshes (`track0_static_reader_findings.md`).
 5. **D3D7 vertex DIFFUSE alpha is commonly 0** — never `discard` on it, and force
    opaque fragment alpha for the live window (alpha-0 textures look like silhouettes
    on X compositors).

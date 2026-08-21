@@ -110,8 +110,10 @@ paid for by a specific bug.
   silently dropped a term, because the decompiler missed a stack argument. Anyone
   implementing from it in good faith would have shipped a subtly wrong transform.
 - **A number in prose must match what the code prints.** The audit's headline finding
-  is a fabricated 94% statistic that reached two entry-point documents and is still
-  live on `master`. If you quote a figure, quote the command that produced it.
+  is a fabricated 94% statistic that reached two entry-point documents and outlived
+  its own retraction by three months (fixed 2026-08-21, task A-01; the retraction is
+  `docs/track0_static_reader_findings.md`). If you quote a figure, quote the command
+  that produced it.
 - **"We don't know" is a deliverable.** Use the ground-truth queue. The best sessions
   in the corpus are the ones that refused to certify without evidence.
 
@@ -126,10 +128,10 @@ paid for by a specific bug.
 | Check a claim before trusting it | `docs/audit/06-open-questions.md` |
 | Use an agent on the repo | the contributor MCP — bounded, commit-pinned, `claim_task` |
 
-Two caveats on the docs above, both from the audit: `ARCHITECTURE.md` and
-`PROJECT_HISTORY.md` still carry the retracted 94% figure and an under-qualified
-`canvas_id` invariant. They are otherwise the right places to start — and fixing those
-two lines is task A-01.
+Both audit caveats on the docs above are fixed as of 2026-08-21 (tasks A-01 and
+A-02): `ARCHITECTURE.md` and `PROJECT_HISTORY.md` no longer assert the retracted 94%
+figure, and both now name which parsing path the `canvas_id = Canv + 1` invariant
+applies to. Start there.
 
 ## 7. Legal
 

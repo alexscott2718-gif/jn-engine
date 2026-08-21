@@ -287,8 +287,14 @@ The reconciliation toolbox behind history Eras 5 & 7:
   frame (feeds replay).
 - **`diff.py`** — compare jn-engine capture vs original capture.
 - **`track0_*.py`** — the **static OMT reader** (Era 7 breakthrough): builds a static
-  mesh→canvas map, validates it against the capture oracle (~94%), resolves textures
-  deterministically. **This is the current texture-resolution source of truth.**
+  mesh→canvas map and resolves textures deterministically. **This is the current
+  texture-resolution source of truth.** Its agreement with the capture oracle is
+  **poor — 1 of 70 high-tier cases** — because the oracle's per-triangle UV vote
+  cross-attributes textures between meshes that share UV triples, so the capture is
+  not a usable validator for many meshes; the static map's own chain-internal
+  evidence is what supports it (material name == canvas name, 31/58). Figures and
+  the retraction of the earlier 94% claim:
+  [`track0_static_reader_findings.md`](./track0_static_reader_findings.md).
 - **`extract_texture_groundtruth.py`**, `match_textures.py`, `build_replay_texmap.py`,
   `inject_pixels_v3.py` (validate v3 locally with PNG-injected pixels),
   `extract_camera.py` / `extract_canon.py` / `gen_canon_header.py`.
@@ -417,8 +423,13 @@ Repeated from `PROJECT_HISTORY.md` because they bite at the code level:
    is the real w-buffer projection — don't "repair" it.
 2. The engine does **zero UV flips**; flips happen at *export* (3DSP is DX-convention).
    No X-mirror after the diff fix.
-3. **`canvas_id = Canv + 1`**; the static OMT reader (`track0`) is texture truth,
-   capture is validator.
+3. **`canvas_id = Canv + 1` — for the heuristic-scanned `0MF2` path only.** Read
+   through the OMT header's `3DSh` chunk table instead and the canvas id comes out
+   directly, with no `+1`. Both paths are tabulated side by side at
+   [`omt_rendering_breakthrough.md`](./omt_rendering_breakthrough.md) §6. The static
+   OMT reader (`track0`) is texture truth; the capture agrees with it on only 1 of 70
+   high-tier cases and is not a usable validator for many meshes (see the tools list
+   above).
 4. **D3D7 DIFFUSE alpha is commonly 0** — never `discard` on vertex alpha; force
    opaque fragment alpha for the live window.
 5. The capture has **no D3D fog** — don't add fog to fix edges.
