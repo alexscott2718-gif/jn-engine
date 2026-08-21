@@ -146,6 +146,7 @@ check-assets: check
 	python3 tools/check_goldens.py --level level1 --frames $(LEVEL1_GOLDEN_FRAMES) \
 		--goldens tests/goldens/level1
 	python3 tools/check_pictures.py --corpus
+	python3 tools/check_return_roundtrip.py --selftest
 	python3 tools/check_oracle_diff.py
 	python3 tools/check_linkage_certificates.py --no-write
 

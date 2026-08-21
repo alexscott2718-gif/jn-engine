@@ -824,6 +824,48 @@ static void configure_safety_floor(World *world, const Entity *jim) {
 
    Returns 0 always: it is a probe, not an assertion. What it prints is the
    evidence -- compare it against the authored .gam rows. */
+/* JN_TEST_RETURN phase 2 (see the arming site): in the level the menu just
+   loaded, fire the first LOAD portal whose LevelName is RETURN and check it
+   asks to go back to the level the menu left from.
+
+   This is the half of the CLoadLevel port that is inferred rather than
+   recovered -- gamestate_request_level_swap promoting the current entry to the
+   departure pair, that pair surviving the swap's reset, and behavior_load.c
+   reading it back -- so it is worth observing through a real route instead of
+   a seeded one. JN_TEST_LOAD_RETURN seeds the pair directly and proves only
+   the read-back. */
+static int return_roundtrip_check(World *world, Entity *jim,
+                                  const char *expect_level) {
+    if (!jim) { printf("[JN_TEST_RETURN] FAIL: no player\n"); return 1; }
+
+    Entity *portal = NULL;
+    for (Entity *e = world->head; e; e = e->next) {
+        if (!e->alive || strcmp(e->type, "LOAD") != 0) continue;
+        if (strcasecmp(e->target_level, "RETURN") != 0) continue;
+        portal = e;
+        break;
+    }
+    if (!portal) {
+        printf("[JN_TEST_RETURN] FAIL: %s has no RETURN portal\n",
+               gamestate_level());
+        return 1;
+    }
+
+    printf("[JN_TEST_RETURN] in %s; departure recorded as '%s' (spawn '%s')\n",
+           gamestate_level(), gamestate_return_level(), gamestate_return_spawn());
+    if (portal->vt && portal->vt->on_trigger)
+        portal->vt->on_trigger(portal, jim);
+
+    const GameState *gs = gamestate_get();
+    int ok = gs->swap_level[0] && strcasecmp(gs->swap_level, expect_level) == 0;
+    printf("[JN_TEST_RETURN] %s: menu route %s -> %s, then portal '%s' asks for "
+           "'%s' (spawn '%s'), expected '%s'\n",
+           ok ? "PASS" : "FAIL", expect_level, gamestate_level(), portal->tag,
+           gs->swap_level[0] ? gs->swap_level : "(none)",
+           gs->swap_spawn[0] ? gs->swap_spawn : "(none)", expect_level);
+    return ok ? 0 : 1;
+}
+
 static int load_portal_probe(World *world, Entity *jim) {
     if (!jim) { printf("[JN_TEST_LOAD] FAIL: no player\n"); return 1; }
     int portals = 0;
@@ -2380,6 +2422,35 @@ int main(int argc, char **argv) {
     }
     if (want_menu)
         menu_open();
+
+    /* Headless RETURN round-trip (JN_TEST_RETURN=<vr level>): open the real
+       CMainMenu, land the selection on that level's item, and let the main
+       loop's confirm path take it -- the same call the shipped front end
+       makes. When the swap lands, return_roundtrip_check() fires the RETURN
+       portal there and asserts it comes back to this level. Phases: 1 armed,
+       2 confirmed and swapping, 3 checked. */
+    const char *rt_level = getenv("JN_TEST_RETURN");
+    char rt_expect_level[64] = {0};
+    int  rt_phase = 0;
+    if (rt_level && *rt_level) {
+        snprintf(rt_expect_level, sizeof rt_expect_level, "%s", current_desc.name);
+        menu_open();
+        if (menu_select_level(rt_level)) {
+            rt_phase = 1;
+            printf("[JN_TEST_RETURN] armed: menu route %s -> %s\n",
+                   rt_expect_level, rt_level);
+        } else {
+            fprintf(stderr, "[JN_TEST_RETURN] FAIL: no menu item routes to '%s'\n",
+                    rt_level);
+            ground_destroy();
+            fixture_level_destroy();
+            world_destroy(&world);
+            renderer_destroy();
+            window_destroy(&w);
+            return 1;
+        }
+    }
+
     if (fixture_mode) fixture_level_configure_floor(&world);
     else configure_safety_floor(&world, jim);
 
@@ -2679,11 +2750,15 @@ int main(int argc, char **argv) {
                 int sel_newgame = 0;
                 int confirmed = menu_take_confirm(&sel_level, &sel_newgame);
                 /* Headless: auto-confirm the default item (New Game) so the
-                   menu route is exercised in screenshot/CI runs. */
-                if (!confirmed && screenshot_mode &&
-                    screenshot_warmup_ticks >= menu_auto_tick) {
+                   menu route is exercised in screenshot/CI runs. The RETURN
+                   round-trip takes the same path, having moved the selection
+                   onto a VR item first. */
+                if (!confirmed &&
+                    ((screenshot_mode && screenshot_warmup_ticks >= menu_auto_tick) ||
+                     rt_phase == 1)) {
                     menu_current(&sel_level, &sel_newgame);
                     confirmed = 1;
+                    if (rt_phase == 1) rt_phase = 2;
                 }
                 if (confirmed) {
                     if (!sel_level) {
@@ -2965,6 +3040,19 @@ int main(int argc, char **argv) {
                                asset_cache_tex_count(), asset_cache_model_count());
                         follow_cam_snap(&fcam, cam, jim);
                         help_show_timed(HELP_BOOT_SECONDS);   /* and every level swapped into */
+                        /* The menu route has landed: fire this level's RETURN
+                           portal and report, then leave. */
+                        if (rt_phase == 2) {
+                            rt_phase = 3;
+                            int rc = return_roundtrip_check(&world, jim,
+                                                            rt_expect_level);
+                            ground_destroy();
+                            fixture_level_destroy();
+                            world_destroy(&world);
+                            renderer_destroy();
+                            window_destroy(&w);
+                            return rc;
+                        }
                     } else {
                         fprintf(stderr, "[SWAP] gam_load failed for %s\n", swap_desc.gam_path);
                     }
