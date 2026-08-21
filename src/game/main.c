@@ -502,6 +502,106 @@ static void picture_sweep_if_requested(World *world) {
 
     /* JN_TEST_SCOOTER=1: exercise the action-menu selection headlessly --
        mount, drive one step, dismount -- since the menu itself needs a window. */
+    /* JN_TEST_GADGETRUN=1: activate each gadget in turn and report what it
+       did, since the menu itself needs a window. */
+    if (env_enabled("JN_TEST_GADGETRUN")) {
+        /* Each gadget, and the FourCC it is supposed to put in the world.
+           "----" means the gadget acts on Jimmy or a companion and spawns
+           nothing of its own. */
+        static const struct { const char *tag; const char *fourcc; } ALL[] = {
+            { "jetpack",      "3JFI" },   /* C3DJetpackFire, the flame     */
+            { "shrinkray",    "3SHR" },   /* C3DShrinkRay, the fired ray   */
+            { "bubble",       "3BUB" },   /* C3DBubble                     */
+            { "grappler",     "3GRA" },   /* C3DGraplingHook rope          */
+            { "goddard",      "----" },   /* drives the companion's mode   */
+            { "rocket",       "----" },   /* boards a placed 3ROC          */
+            { "scooter",      "----" },   /* reveals the hidden 3JEE       */
+            { "invisibility", "----" },   /* hides Jimmy                   */
+        };
+        for (size_t i = 0; i < sizeof(ALL) / sizeof(ALL[0]); i++) {
+            /* Settle first: the shared fire cooldown and anything still in
+               flight from the previous gadget would otherwise be counted
+               here, or would block this one from firing at all. */
+            for (int f = 0; f < 120; f++) {
+                behavior_gadgets_update(world, 1.0f / 60.0f);
+                for (Entity *e = world->head; e; e = e->next)
+                    entity_update(e, world, 1.0f / 60.0f);
+            }
+            /* level4b's single hook sits ~10600 units from the start, so a
+               grapple fired at spawn correctly finds nothing. Stand Jimmy next
+               to it first, or this step only ever proves the reach check. */
+            if (strcmp(ALL[i].tag, "grappler") == 0 && g_player) {
+                for (Entity *h = world->head; h; h = h->next)
+                    if (h->alive && strncmp(h->type, "3HOO", 4) == 0) {
+                        g_player->x = h->x + 300.0f;
+                        g_player->y = h->y;
+                        g_player->z = h->z;
+                        break;
+                    }
+            }
+            int on = behavior_gadget_activate(ALL[i].tag, world);
+            int fired = behavior_gadget_fire(world);
+            behavior_gadgets_update(world, 1.0f / 60.0f);
+
+            int n = 0;
+            if (strcmp(ALL[i].fourcc, "----") != 0)
+                for (Entity *e = world->head; e; e = e->next)
+                    if (e->alive && strncmp(e->type, ALL[i].fourcc, 4) == 0) n++;
+            printf("[GADGETRUN] %-13s on=%d fired=%d mode=%2d %s=%d\n",
+                   ALL[i].tag, on, fired, action_mode(), ALL[i].fourcc, n);
+            behavior_gadget_activate(ALL[i].tag, world);
+        }
+        /* The shrink ray end to end: stand Jimmy at a shrinkable creature,
+           fire, and watch the target scale down and turn into a pickup. This
+           is the half the decomp could not give us -- the hit/contact body was
+           never recovered -- so it is worth proving rather than assuming. */
+        {
+            Entity *target = NULL;
+            for (Entity *e = world->head; e; e = e->next)
+                /* NOT filtered on visible: every shrinkable creature in the
+                   corpus authors a RequiredLevel between 10 and 260, so in a
+                   cold --level run they are all story-gated off and the ray
+                   has nothing to shoot. The test un-gates one to exercise the
+                   hit path; in a real playthrough the story does that. */
+                if (e->alive &&
+                    (strncmp(e->type, "3DIN", 4) == 0 ||
+                     strncmp(e->type, "3FIS", 4) == 0 ||
+                     strncmp(e->type, "3GIR", 4) == 0 ||
+                     strncmp(e->type, "3HUM", 4) == 0)) { target = e; break; }
+            if (!target) {
+                printf("[SHRINKTEST] no shrinkable creature in this level\n");
+            } else if (g_player) {
+                target->visible = 1;              /* un-gate for the test */
+                unsigned int saved = g_player->runtime_flags;
+                g_player->runtime_flags = 0;      /* no gravity while parked */
+                g_player->x = target->x;
+                g_player->y = target->y;
+                g_player->z = target->z - 200.0f;
+                g_player->ry = 0.0f;
+                g_player->vx = g_player->vy = g_player->vz = 0.0f;
+                behavior_gadget_activate("shrinkray", world);
+                for (int f = 0; f < 120; f++)
+                    behavior_gadgets_update(world, 1.0f / 60.0f);
+                int fired = behavior_gadget_fire(world);
+                for (int f = 0; f < 90; f++) {
+                    behavior_gadgets_update(world, 1.0f / 60.0f);
+                    for (Entity *e = world->head; e; e = e->next)
+                        entity_update(e, world, 1.0f / 60.0f);
+                }
+                printf("[SHRINKTEST] target alive=%d visible=%d at (%.0f,%.0f,%.0f) player (%.0f,%.0f,%.0f)\n",
+                       target->alive, target->visible, target->x, target->y, target->z,
+                       g_player->x, g_player->y, g_player->z);
+                printf("[SHRINKTEST] %s '%s' fired=%d scale=%.2f trigger=%d pts=%d\n",
+                       target->type, target->tag, fired, target->draw_scale,
+                       (target->runtime_flags & ENTITY_FLAG_TRIGGER) != 0,
+                       target->points);
+                behavior_gadget_activate("shrinkray", world);
+                g_player->runtime_flags = saved;
+            }
+        }
+        printf("[GADGETRUN] done\n");
+    }
+
     if (env_enabled("JN_TEST_SCOOTER")) {
         Entity *sc = behavior_scooter_get();
         printf("[SCOOTERTEST] spawned=%d visible=%d\n",
@@ -816,6 +916,12 @@ static int entity_visual_water_anchors(const Entity *e) {
     return e && strncmp(e->type, "3SAI", 4) == 0;
 }
 
+/* Per-entity uniform mesh scale. 0 means unset, which is 1.0; the shrink ray
+   drives this down on its targets. */
+static float ent_draw_scale(const Entity *e) {
+    return e->draw_scale > 0.0f ? e->draw_scale : 1.0f;
+}
+
 static float clamp01(float v) {
     if (v < 0.0f) return 0.0f;
     if (v > 1.0f) return 1.0f;
@@ -861,7 +967,7 @@ static int draw_authored_button(const Entity *e) {
     float pulse = 0.5f + 0.5f * sinf(e->anim_time * 6.2831853f * 2.0f);
     renderer_set_model_tint(red * pulse, green * pulse, blue * pulse);
     renderer_set_hide_untextured_groups(0);
-    renderer_draw_model(m, tex, e->x, e->y, e->z, e->ry, 1.0f);
+    renderer_draw_model(m, tex, e->x, e->y, e->z, e->ry, ent_draw_scale(e));
     renderer_set_hide_untextured_groups(1);
     renderer_set_model_tint(1.0f, 1.0f, 1.0f);
 
@@ -1072,7 +1178,7 @@ static void draw_scene(World *world, int jim_model_ok)
                     renderer_draw_model_anim(m, tex, e->x, e->y, e->z,
                                              e->ry, 1.0f, a, b, lerp);
                 } else {
-                    renderer_draw_model(m, tex, e->x, e->y, e->z, e->ry, 1.0f);
+                    renderer_draw_model(m, tex, e->x, e->y, e->z, e->ry, ent_draw_scale(e));
                 }
                 renderer_set_hide_untextured_groups(1);
                 audit_line("entity", e->type, e->tag, "cutscene-anim",
@@ -1097,7 +1203,7 @@ static void draw_scene(World *world, int jim_model_ok)
             if (m) {
                 unsigned int tex = e->png_file[0] ? tex_cache_resolve_bmp(e->png_file) : 0;
                 renderer_set_hide_untextured_groups(0);
-                renderer_draw_model(m, tex, e->x, e->y, e->z, e->ry, 1.0f);
+                renderer_draw_model(m, tex, e->x, e->y, e->z, e->ry, ent_draw_scale(e));
                 renderer_set_hide_untextured_groups(1);
                 audit_line("entity", e->type, e->tag, "mesh", path, m, tex);
                 continue;
@@ -1151,7 +1257,7 @@ static void draw_scene(World *world, int jim_model_ok)
                 tex = from_glb ? tex_cache_get_vflip(tpath)
                                : tex_cache_get(tpath);
             if (m) {
-                renderer_draw_model(m, tex, e->x, e->y, e->z, e->ry, 1.0f);
+                renderer_draw_model(m, tex, e->x, e->y, e->z, e->ry, ent_draw_scale(e));
                 audit_line("entity", e->type, e->tag, "mesh", path, m, tex);
                 continue;
             }
@@ -1239,7 +1345,17 @@ static void draw_scene(World *world, int jim_model_ok)
                     float sz = v.sprite_size > 0.0f ? v.sprite_size : 64.0f;
                     float tr = v.tint_r, tg = v.tint_g, tb = v.tint_b, ta = v.tint_a;
                     float sw = sz, sh = sz;
-                    if (strncmp(e->type, "3ARR", 4) == 0) {
+                    if (strncmp(e->type, "3BUB", 4) == 0) {
+                        /* C3DBubble::UpdateBubbleState: the width holds at
+                           SpriteSize while the height carries
+                           sin(t*10)*30, and the grow/fade transition scales
+                           both and drives alpha. */
+                        float bw, bh, ba;
+                        behavior_bubble_size(e, &bw, &bh, &ba);
+                        sw = bw; sh = bh;
+                        tr = tg = tb = 1.0f;
+                        ta = ba;
+                    } else if (strncmp(e->type, "3ARR", 4) == 0) {
                         float wave = sinf(s_arrow_clock * NAV_ARROW_PULSE_RATE);
                         sh *= 1.0f + NAV_ARROW_PULSE_AMP * wave;   /* height only */
                         float glow = 0.5f + 0.5f * wave;           /* 0..1 */
@@ -1264,7 +1380,8 @@ static void draw_scene(World *world, int jim_model_ok)
                                v.model_path, NULL, 0);
                 if (m) {
                     unsigned int tex = v.texture_path ? tex_cache_get(v.texture_path) : 0;
-                    float sc = v.scale > 0.0f ? v.scale : 1.0f;
+                    float sc = (v.scale > 0.0f ? v.scale : 1.0f) *
+                               ent_draw_scale(e);
                     /* Absolute-positioned placement meshes used as entity
                        meshes bake their level world position into vertices;
                        offset by the mesh bbox center so the mesh sits at the
@@ -1524,6 +1641,7 @@ static void goddard_reconcile_after_level_load(World *w, const char *level_name)
     /* JimmySetupOrReset spawns Goddard at 0x95c and the scooter at 0x970,
        one after the other, and hides the scooter immediately. Same here. */
     behavior_scooter_ensure(w);
+    gadget_menu_set_world(w);
     Entity *g = behavior_goddard_ensure(w, level_name);
     if (!g || !env_enabled("JN_TEST_GODDARD")) return;
     if (g->visible) {
@@ -1985,6 +2103,24 @@ int main(int argc, char **argv) {
         }
     }
 
+    /* All eight gadgets. Four of them -- shrinkray, grappler, goddard and
+       rocket -- have no pickup anywhere in the 35-level corpus; the original
+       grants them through task/story logic nobody has recovered, so this is a
+       stand-in for testing and free play rather than a claim about how the
+       game hands them over. Icons are the pickups' own sprites where one
+       exists (see plan section 18.1); -1 falls back to the name. */
+    if (env_enabled("JN_TEST_GADGETS") || gamestate_sandbox_enabled()) {
+        gamestate_grant_gadget("jetpack",       99, INV_KIND_GADGET);
+        gamestate_grant_gadget("shrinkray",     -1, INV_KIND_GADGET);
+        gamestate_grant_gadget("bubble",        26, INV_KIND_GADGET);
+        gamestate_grant_gadget("grappler",      -1, INV_KIND_GADGET);
+        gamestate_grant_gadget("goddard",       -1, INV_KIND_GADGET);
+        gamestate_grant_gadget("rocket",       136, INV_KIND_GADGET);
+        gamestate_grant_gadget("scooter",      111, INV_KIND_PART | INV_KIND_GADGET);
+        gamestate_grant_gadget("invisibility", 114, INV_KIND_PART | INV_KIND_GADGET);
+        printf("[GADGET] all eight granted (test/sandbox)\n");
+    }
+
     if (getenv("JN_TEST_TOOLS")) {
         gamestate_grant_tool("watergun", "assets/hud/tool_watergun.png");
         gamestate_grant_tool("glasses",  "assets/hud/tool_glasses.png");
@@ -2424,6 +2560,7 @@ int main(int argc, char **argv) {
           if (!menu_active() && !level_select_active() &&
               !gadget_menu_is_open()) {
             gamestate_tick(DT);   /* pickup-card decay */
+            behavior_gadgets_update(&world, DT);
             s_arrow_clock += DT;  /* ShowArrow spin; once per frame */
 
             /* Per-entity behavior tick (player reads input, platforms move, etc.) */
@@ -2642,6 +2779,7 @@ int main(int argc, char **argv) {
                     behavior_vehicle_reset();
                     behavior_goddard_reset();
                     behavior_scooter_reset();
+                    behavior_gadgets_reset();
                     g_camrec_player = NULL;
                     s_sandbox_prepped_rocket = NULL;
                     world_init(&world);
@@ -2668,6 +2806,7 @@ int main(int argc, char **argv) {
                         game_flow_enter_level(swap_desc.name);
                         behavior_goddard_reset();
                         behavior_scooter_reset();
+                    behavior_gadgets_reset();
                         goddard_reconcile_after_level_load(&world, swap_desc.name);
                         picture_sweep_if_requested(&world);
                         configure_safety_floor(&world, jim);

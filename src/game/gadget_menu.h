@@ -88,4 +88,10 @@ void gadget_menu_input(void);
 /* Draw the overlay. Call after the 3D scene, like menu_draw. */
 void gadget_menu_draw(int viewport_w, int viewport_h);
 
+/* Gadgets spawn objects and search for targets, so the menu needs the
+   world main is running. Set once after the level loads. */
+struct World;
+void gadget_menu_set_world(struct World *w);
+struct World *gadget_menu_world(void);
+
 #endif

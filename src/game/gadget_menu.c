@@ -24,6 +24,10 @@ static int   g_input_latch = 0;    /* DAT_004f8182  -- cleared on exit */
 static float g_menu_timer  = 0.0f; /* DAT_004f8188  -- seeded 20.0 on enter */
 
 static int g_sel = 0;              /* selected gadget ordinal */
+static World *g_world = NULL;      /* for gadgets that need to spawn/search */
+
+void gadget_menu_set_world(World *w) { g_world = w; }
+World *gadget_menu_world(void)       { return g_world; }
 
 /* --- AMI tables ----------------------------------------------------------
    SelectJimmyGadgetOrVRMode (00428d50) is one switch over the request id.
@@ -137,12 +141,10 @@ void gadget_menu_input(void) {
         gamestate_set_active_gadget(g_sel);
         const InventorySlot *s = gamestate_gadget_at(g_sel);
         if (s) printf("[AMI] Activating Item %d ('%s')\n", g_sel, s->tag);
-        /* One gadget is live so far. The original routes a selection through
-           the C2DInGameMenu controller and an AMI id; that mapping is not
-           recovered (see the header), so the selection dispatches by identity
-           until it is. */
-        if (s && strcmp(s->tag, "scooter") == 0)
-            behavior_scooter_activate();
+        /* The original routes a selection through the C2DInGameMenu
+           controller and an AMI id; that mapping is not recovered (see the
+           header), so the selection dispatches by identity until it is. */
+        if (s) behavior_gadget_activate(s->tag, gadget_menu_world());
         gadget_menu_close();
     }
 }
