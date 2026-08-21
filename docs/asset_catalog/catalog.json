@@ -1,14 +1,14 @@
 {
  "summary": {
-  "generated": "2026-08-21 07:28 UTC",
-  "commit": "d2a834a",
+  "generated": "2026-08-21 09:11 UTC",
+  "commit": "742f7f6",
   "counts": {
    "resolution": 219,
-   "st_mesh": 76,
-   "st_sprite": 7,
+   "st_mesh": 75,
+   "st_sprite": 15,
    "st_invisible": 41,
    "st_mesh_untextured": 4,
-   "st_no_visual": 91,
+   "st_no_visual": 84,
    "native_behaviors": 110,
    "used_fourccs": 93,
    "used_native_behaviors": 93,
@@ -799,7 +799,15 @@
    "visual": {
     "kind": "invisible"
    },
-   "variants": [],
+   "variants": [
+    {
+     "by": "sprite:icons.omt#9",
+     "kind": "sprite",
+     "sprite": "assets/parsed/icons/icons_images/0009_32x32d32.png",
+     "name": "AITRIG",
+     "count": 166
+    }
+   ],
    "texture_truth": {
     "resolved": true,
     "source": "n/a",
@@ -844,7 +852,29 @@
    "visual": {
     "kind": "invisible"
    },
-   "variants": [],
+   "variants": [
+    {
+     "by": "sprite:sprites.omt#177",
+     "kind": "sprite",
+     "sprite": "assets/parsed/sprites/sprites_images/0047_100x100d32.png",
+     "name": "01",
+     "count": 3
+    },
+    {
+     "by": "sprite:sprites.omt#124",
+     "kind": "sprite",
+     "sprite": "assets/parsed/sprites/sprites_images/0148_100x100d32.png",
+     "name": "apple0000",
+     "count": 1
+    },
+    {
+     "by": "sprite:sprites.omt#171",
+     "kind": "sprite",
+     "sprite": "assets/parsed/sprites/sprites_images/0184_128x128d32.png",
+     "name": "fishbowl2",
+     "count": 1
+    }
+   ],
    "texture_truth": {
     "resolved": true,
     "source": "n/a",
@@ -948,19 +978,28 @@
    ],
    "instances": 47,
    "visual": {
-    "kind": "none"
+    "kind": "sprite",
+    "sprite": "assets/parsed/sprites/sprites_images/0057_64x64d32.png",
+    "name": "arrow",
+    "note": "authored sprites.omt #33 (arrow)"
    },
-   "variants": [],
+   "variants": [
+    {
+     "by": "sprite:sprites.omt#33",
+     "kind": "sprite",
+     "sprite": "assets/parsed/sprites/sprites_images/0057_64x64d32.png",
+     "name": "arrow",
+     "count": 47
+    }
+   ],
    "texture_truth": {
     "resolved": true,
-    "source": "n/a",
-    "value": null,
-    "note": "no visual (trigger/effect/invisible)"
+    "source": "sprite_canvas",
+    "value": "assets/parsed/sprites/sprites_images/0057_64x64d32.png",
+    "note": "sprites.omt canvas (authored SpriteIndex)"
    },
-   "status": "no_visual",
-   "status_flags": [
-    "unresolved_sprite"
-   ]
+   "status": "sprite",
+   "status_flags": []
   },
   {
    "kind": "fourcc",
@@ -996,19 +1035,28 @@
    ],
    "instances": 30,
    "visual": {
-    "kind": "none"
+    "kind": "sprite",
+    "sprite": "assets/parsed/sprites/sprites_images/0071_128x128d32.png",
+    "name": "balloon",
+    "note": "authored sprites.omt #50 (balloon)"
    },
-   "variants": [],
+   "variants": [
+    {
+     "by": "sprite:sprites.omt#50",
+     "kind": "sprite",
+     "sprite": "assets/parsed/sprites/sprites_images/0071_128x128d32.png",
+     "name": "balloon",
+     "count": 30
+    }
+   ],
    "texture_truth": {
     "resolved": true,
-    "source": "n/a",
-    "value": null,
-    "note": "no visual (trigger/effect/invisible)"
+    "source": "sprite_canvas",
+    "value": "assets/parsed/sprites/sprites_images/0071_128x128d32.png",
+    "note": "sprites.omt canvas (authored SpriteIndex)"
    },
-   "status": "no_visual",
-   "status_flags": [
-    "unresolved_sprite"
-   ]
+   "status": "sprite",
+   "status_flags": []
   },
   {
    "kind": "fourcc",
@@ -1595,7 +1643,15 @@
    "visual": {
     "kind": "invisible"
    },
-   "variants": [],
+   "variants": [
+    {
+     "by": "sprite:icons.omt#10",
+     "kind": "sprite",
+     "sprite": "assets/parsed/icons/icons_images/0007_32x32d32.png",
+     "name": "camera",
+     "count": 132
+    }
+   ],
    "texture_truth": {
     "resolved": true,
     "source": "n/a",
@@ -1749,7 +1805,15 @@
     "sprite": "assets/parsed/sprites/jnvsjn/spr_checkpoint.png",
     "sprite_size": 160.0
    },
-   "variants": [],
+   "variants": [
+    {
+     "by": "sprite:sprites.omt#42",
+     "kind": "sprite",
+     "sprite": "assets/parsed/sprites/sprites_images/0068_128x128d32.png",
+     "name": "flag",
+     "count": 22
+    }
+   ],
    "texture_truth": {
     "resolved": true,
     "source": "sprite_canvas",
@@ -1878,19 +1942,28 @@
    ],
    "instances": 56,
    "visual": {
-    "kind": "none"
+    "kind": "sprite",
+    "sprite": "assets/parsed/sprites/sprites_images/0062_64x64d32.png",
+    "name": "cone",
+    "note": "authored sprites.omt #41 (cone)"
    },
-   "variants": [],
+   "variants": [
+    {
+     "by": "sprite:sprites.omt#41",
+     "kind": "sprite",
+     "sprite": "assets/parsed/sprites/sprites_images/0062_64x64d32.png",
+     "name": "cone",
+     "count": 56
+    }
+   ],
    "texture_truth": {
     "resolved": true,
-    "source": "n/a",
-    "value": null,
-    "note": "no visual (trigger/effect/invisible)"
+    "source": "sprite_canvas",
+    "value": "assets/parsed/sprites/sprites_images/0062_64x64d32.png",
+    "note": "sprites.omt canvas (authored SpriteIndex)"
    },
-   "status": "no_visual",
-   "status_flags": [
-    "unresolved_sprite"
-   ]
+   "status": "sprite",
+   "status_flags": []
   },
   {
    "kind": "fourcc",
@@ -2860,19 +2933,28 @@
    ],
    "instances": 7,
    "visual": {
-    "kind": "none"
+    "kind": "sprite",
+    "sprite": "assets/parsed/sprites/sprites_images/0065_64x64d32.png",
+    "name": "plutrod",
+    "note": "authored sprites.omt #40 (plutrod)"
    },
-   "variants": [],
+   "variants": [
+    {
+     "by": "sprite:sprites.omt#40",
+     "kind": "sprite",
+     "sprite": "assets/parsed/sprites/sprites_images/0065_64x64d32.png",
+     "name": "plutrod",
+     "count": 7
+    }
+   ],
    "texture_truth": {
     "resolved": true,
-    "source": "n/a",
-    "value": null,
-    "note": "no visual (trigger/effect/invisible)"
+    "source": "sprite_canvas",
+    "value": "assets/parsed/sprites/sprites_images/0065_64x64d32.png",
+    "note": "sprites.omt canvas (authored SpriteIndex)"
    },
-   "status": "no_visual",
-   "status_flags": [
-    "unresolved_sprite"
-   ]
+   "status": "sprite",
+   "status_flags": []
   },
   {
    "kind": "fourcc",
@@ -3938,7 +4020,15 @@
     "sprite": "assets/parsed/sprites/sprites_images/0008_64x64d32.png",
     "sprite_size": 100.0
    },
-   "variants": [],
+   "variants": [
+    {
+     "by": "sprite:icons.omt#4",
+     "kind": "sprite",
+     "sprite": "assets/parsed/icons/icons_images/0004_32x32d32.png",
+     "name": "sprite",
+     "count": 26
+    }
+   ],
    "texture_truth": {
     "resolved": true,
     "source": "sprite_canvas",
@@ -4081,7 +4171,15 @@
    "visual": {
     "kind": "invisible"
    },
-   "variants": [],
+   "variants": [
+    {
+     "by": "sprite:sprites.omt#36",
+     "kind": "sprite",
+     "sprite": "assets/parsed/sprites/sprites_images/0175_64x64d32.png",
+     "name": "corona",
+     "count": 37
+    }
+   ],
    "texture_truth": {
     "resolved": true,
     "source": "n/a",
@@ -4362,7 +4460,15 @@
    "visual": {
     "kind": "invisible"
    },
-   "variants": [],
+   "variants": [
+    {
+     "by": "sprite:icons.omt#7",
+     "kind": "sprite",
+     "sprite": "assets/parsed/icons/icons_images/0010_32x32d32.png",
+     "name": "multi",
+     "count": 108
+    }
+   ],
    "texture_truth": {
     "resolved": true,
     "source": "n/a",
@@ -4652,7 +4758,15 @@
    "visual": {
     "kind": "invisible"
    },
-   "variants": [],
+   "variants": [
+    {
+     "by": "sprite:icons.omt#11",
+     "kind": "sprite",
+     "sprite": "assets/parsed/icons/icons_images/0011_32x32d32.png",
+     "name": "musicicon",
+     "count": 8
+    }
+   ],
    "texture_truth": {
     "resolved": true,
     "source": "n/a",
@@ -4849,7 +4963,15 @@
     "sprite": "assets/parsed/sprites/sprites_images/0000_100x100d32.png",
     "sprite_size": 90.0
    },
-   "variants": [],
+   "variants": [
+    {
+     "by": "sprite:icons.omt#4",
+     "kind": "sprite",
+     "sprite": "assets/parsed/icons/icons_images/0004_32x32d32.png",
+     "name": "sprite",
+     "count": 294
+    }
+   ],
    "texture_truth": {
     "resolved": true,
     "source": "sprite_canvas",
@@ -5982,7 +6104,15 @@
    "visual": {
     "kind": "invisible"
    },
-   "variants": [],
+   "variants": [
+    {
+     "by": "sprite:icons.omt#6",
+     "kind": "sprite",
+     "sprite": "assets/parsed/icons/icons_images/0006_32x32d32.png",
+     "name": "apple",
+     "count": 732
+    }
+   ],
    "texture_truth": {
     "resolved": true,
     "source": "n/a",
@@ -6343,25 +6473,374 @@
    ],
    "instances": 383,
    "visual": {
-    "kind": "mesh",
-    "model": "assets/ase/jimpickup.ASE",
-    "texture": null,
-    "scale": 0.5,
-    "recenter": 0
+    "kind": "sprite",
+    "sprite": "assets/parsed/sprites/sprites_images/0159_128x128d32.png",
+    "name": "star",
+    "note": "authored sprites.omt #135 overrides the jimpickup.ASE type default"
    },
    "variants": [
     {
      "by": "tag:hsounds",
      "kind": "invisible"
+    },
+    {
+     "by": "sprite:sprites.omt#135",
+     "kind": "sprite",
+     "sprite": "assets/parsed/sprites/sprites_images/0159_128x128d32.png",
+     "name": "star",
+     "count": 57
+    },
+    {
+     "by": "sprite:sprites.omt#52",
+     "kind": "sprite",
+     "sprite": "assets/parsed/sprites/sprites_images/0080_64x64d32.png",
+     "name": "2coin0000",
+     "count": 22
+    },
+    {
+     "by": "sprite:sprites.omt#187",
+     "kind": "sprite",
+     "sprite": "assets/parsed/sprites/sprites_images/0136_128x127d16.png",
+     "name": "Gem3",
+     "count": 22
+    },
+    {
+     "by": "sprite:sprites.omt#189",
+     "kind": "sprite",
+     "sprite": "assets/parsed/sprites/sprites_images/0138_128x127d16.png",
+     "name": "Gem1",
+     "count": 20
+    },
+    {
+     "by": "sprite:sprites.omt#70",
+     "kind": "sprite",
+     "sprite": "assets/parsed/sprites/sprites_images/0097_100x100d32.png",
+     "name": "ufo",
+     "count": 19
+    },
+    {
+     "by": "sprite:sprites.omt#188",
+     "kind": "sprite",
+     "sprite": "assets/parsed/sprites/sprites_images/0137_128x127d16.png",
+     "name": "Gem2",
+     "count": 19
+    },
+    {
+     "by": "sprite:sprites.omt#68",
+     "kind": "sprite",
+     "sprite": "assets/parsed/sprites/sprites_images/0113_64x64d32.png",
+     "name": "diamond",
+     "count": 15
+    },
+    {
+     "by": "sprite:sprites.omt#74",
+     "kind": "sprite",
+     "sprite": "assets/parsed/sprites/sprites_images/0101_64x64d32.png",
+     "name": "flower",
+     "count": 13
+    },
+    {
+     "by": "sprite:sprites.omt#116",
+     "kind": "sprite",
+     "sprite": "assets/parsed/sprites/sprites_images/0033_64x64d16.png",
+     "name": "retrotickets",
+     "count": 11
+    },
+    {
+     "by": "sprite:sprites.omt#87",
+     "kind": "sprite",
+     "sprite": "assets/parsed/sprites/sprites_images/0070_64x64d32.png",
+     "name": "candybar",
+     "count": 10
+    },
+    {
+     "by": "sprite:sprites.omt#137",
+     "kind": "sprite",
+     "sprite": "assets/parsed/sprites/sprites_images/0076_128x128d16.png",
+     "name": "Vase",
+     "count": 9
+    },
+    {
+     "by": "sprite:sprites.omt#168",
+     "kind": "sprite",
+     "sprite": "assets/parsed/sprites/sprites_images/0037_128x128d16.png",
+     "name": "candyjaremty",
+     "count": 9
+    },
+    {
+     "by": "sprite:sprites.omt#142",
+     "kind": "sprite",
+     "sprite": "assets/parsed/sprites/sprites_images/0164_100x100d16.png",
+     "name": "coal",
+     "count": 9
+    },
+    {
+     "by": "sprite:sprites.omt#69",
+     "kind": "sprite",
+     "sprite": "assets/parsed/sprites/sprites_images/0096_64x64d32.png",
+     "name": "gold",
+     "count": 9
+    },
+    {
+     "by": "sprite:sprites.omt#73",
+     "kind": "sprite",
+     "sprite": "assets/parsed/sprites/sprites_images/0100_64x64d32.png",
+     "name": "soda",
+     "count": 8
+    },
+    {
+     "by": "sprite:sprites.omt#136",
+     "kind": "sprite",
+     "sprite": "assets/parsed/sprites/sprites_images/0160_128x128d16.png",
+     "name": "rocket",
+     "count": 8
+    },
+    {
+     "by": "sprite:sprites.omt#71",
+     "kind": "sprite",
+     "sprite": "assets/parsed/sprites/sprites_images/0098_64x64d32.png",
+     "name": "candy01",
+     "count": 8
+    },
+    {
+     "by": "sprite:sprites.omt#172",
+     "kind": "sprite",
+     "sprite": "assets/parsed/sprites/sprites_images/0183_128x128d32.png",
+     "name": "fishbowl",
+     "count": 8
+    },
+    {
+     "by": "sprite:sprites.omt#51",
+     "kind": "sprite",
+     "sprite": "assets/parsed/sprites/sprites_images/0072_64x64d32.png",
+     "name": "apple",
+     "count": 7
+    },
+    {
+     "by": "sprite:sprites.omt#140",
+     "kind": "sprite",
+     "sprite": "assets/parsed/sprites/sprites_images/0174_100x100d16.png",
+     "name": "egg",
+     "count": 6
+    },
+    {
+     "by": "sprite:sprites.omt#25",
+     "kind": "sprite",
+     "sprite": "assets/parsed/sprites/sprites_images/0045_128x128d32.png",
+     "name": "cans128",
+     "count": 5
+    },
+    {
+     "by": "sprite:sprites.omt#145",
+     "kind": "sprite",
+     "sprite": "assets/parsed/sprites/sprites_images/0168_128x99d16.png",
+     "name": "Burger",
+     "count": 4
+    },
+    {
+     "by": "sprite:sprites.omt#104",
+     "kind": "sprite",
+     "sprite": "assets/parsed/sprites/sprites_images/0115_64x64d16.png",
+     "name": "bone",
+     "count": 4
+    },
+    {
+     "by": "sprite:sprites.omt#144",
+     "kind": "sprite",
+     "sprite": "assets/parsed/sprites/sprites_images/0166_128x128d16.png",
+     "name": "Cake1",
+     "count": 3
+    },
+    {
+     "by": "sprite:sprites.omt#166",
+     "kind": "sprite",
+     "sprite": "assets/parsed/sprites/sprites_images/0075_128x128d16.png",
+     "name": "coal",
+     "count": 3
+    },
+    {
+     "by": "sprite:sprites.omt#157",
+     "kind": "sprite",
+     "sprite": "assets/parsed/sprites/sprites_images/0043_128x128d16.png",
+     "name": "FruitbowlEmty",
+     "count": 3
+    },
+    {
+     "by": "sprite:sprites.omt#146",
+     "kind": "sprite",
+     "sprite": "assets/parsed/sprites/sprites_images/0060_128x128d16.png",
+     "name": "pie1",
+     "count": 3
+    },
+    {
+     "by": "sprite:sprites.omt#56",
+     "kind": "sprite",
+     "sprite": "assets/parsed/sprites/sprites_images/0084_64x64d32.png",
+     "name": "coin0000",
+     "count": 3
+    },
+    {
+     "by": "sprite:sprites.omt#72",
+     "kind": "sprite",
+     "sprite": "assets/parsed/sprites/sprites_images/0099_64x64d32.png",
+     "name": "popsicle",
+     "count": 2
+    },
+    {
+     "by": "sprite:sprites.omt#107",
+     "kind": "sprite",
+     "sprite": "assets/parsed/sprites/sprites_images/0095_64x64d16.png",
+     "name": "cans",
+     "count": 2
+    },
+    {
+     "by": "sprite:sprites.omt#117",
+     "kind": "sprite",
+     "sprite": "assets/parsed/sprites/sprites_images/0004_64x64d16.png",
+     "name": "wrench",
+     "count": 2
+    },
+    {
+     "by": "sprite:sprites.omt#153",
+     "kind": "sprite",
+     "sprite": "assets/parsed/sprites/sprites_images/0049_128x128d16.png",
+     "name": "banana",
+     "count": 2
+    },
+    {
+     "by": "sprite:sprites.omt#161",
+     "kind": "sprite",
+     "sprite": "assets/parsed/sprites/sprites_images/0039_128x128d16.png",
+     "name": "cookiejaremty",
+     "count": 2
+    },
+    {
+     "by": "sprite:sprites.omt#160",
+     "kind": "sprite",
+     "sprite": "assets/parsed/sprites/sprites_images/0041_128x128d16.png",
+     "name": "piggybank",
+     "count": 2
+    },
+    {
+     "by": "sprite:sprites.omt#184",
+     "kind": "sprite",
+     "sprite": "assets/parsed/sprites/sprites_images/0178_128x128d32.png",
+     "name": "phone",
+     "count": 1
+    },
+    {
+     "by": "sprite:sprites.omt#134",
+     "kind": "sprite",
+     "sprite": "assets/parsed/sprites/sprites_images/0172_100x100d16.png",
+     "name": "CompPart",
+     "count": 1
+    },
+    {
+     "by": "sprite:sprites.omt#159",
+     "kind": "sprite",
+     "sprite": "assets/parsed/sprites/sprites_images/0126_128x128d16.png",
+     "name": "orange",
+     "count": 1
+    },
+    {
+     "by": "sprite:sprites.omt#8",
+     "kind": "sprite",
+     "sprite": "assets/parsed/sprites/sprites_images/0013_100x100d32.png",
+     "name": "neut0009",
+     "count": 1
+    },
+    {
+     "by": "sprite:sprites.omt#26",
+     "kind": "sprite",
+     "sprite": "assets/parsed/sprites/sprites_images/0031_128x128d32.png",
+     "name": "bubshadw",
+     "count": 1
+    },
+    {
+     "by": "sprite:sprites.omt#99",
+     "kind": "sprite",
+     "sprite": "assets/parsed/sprites/sprites_images/0139_110x110d32.png",
+     "name": "Jetpack 1",
+     "count": 1
+    },
+    {
+     "by": "sprite:sprites.omt#183",
+     "kind": "sprite",
+     "sprite": "assets/parsed/sprites/sprites_images/0182_100x100d32.png",
+     "name": "foil",
+     "count": 1
+    },
+    {
+     "by": "sprite:sprites.omt#111",
+     "kind": "sprite",
+     "sprite": "assets/parsed/sprites/sprites_images/0180_100x100d16.png",
+     "name": "wheel",
+     "count": 1
+    },
+    {
+     "by": "sprite:sprites.omt#154",
+     "kind": "sprite",
+     "sprite": "assets/parsed/sprites/sprites_images/0040_128x128d16.png",
+     "name": "cookies",
+     "count": 1
+    },
+    {
+     "by": "sprite:sprites.omt#152",
+     "kind": "sprite",
+     "sprite": "assets/parsed/sprites/sprites_images/0177_128x128d16.png",
+     "name": "book",
+     "count": 1
+    },
+    {
+     "by": "sprite:sprites.omt#148",
+     "kind": "sprite",
+     "sprite": "assets/parsed/sprites/sprites_images/0173_256x256d16.png",
+     "name": "mobile",
+     "count": 1
+    },
+    {
+     "by": "sprite:sprites.omt#63",
+     "kind": "sprite",
+     "sprite": "assets/parsed/sprites/sprites_images/0088_64x64d32.png",
+     "name": "duck",
+     "count": 1
+    },
+    {
+     "by": "sprite:sprites.omt#163",
+     "kind": "sprite",
+     "sprite": "assets/parsed/sprites/sprites_images/0143_128x128d16.png",
+     "name": "rocket",
+     "count": 1
+    },
+    {
+     "by": "sprite:sprites.omt#141",
+     "kind": "sprite",
+     "sprite": "assets/parsed/sprites/sprites_images/0163_128x128d16.png",
+     "name": "cards",
+     "count": 1
+    },
+    {
+     "by": "sprite:sprites.omt#38",
+     "kind": "sprite",
+     "sprite": "assets/parsed/sprites/sprites_images/0063_128x128d32.png",
+     "name": "pass",
+     "count": 1
+    },
+    {
+     "by": "sprite:sprites.omt#114",
+     "kind": "sprite",
+     "sprite": "assets/parsed/sprites/sprites_images/0134_64x64d16.png",
+     "name": "yokpart",
+     "count": 1
     }
    ],
    "texture_truth": {
     "resolved": true,
-    "source": "ase_bitmap",
-    "value": "assets/png/jimycarl.png",
-    "note": "ASE *BITMAP jimycarl.png -> jimycarl.png"
+    "source": "sprite_canvas",
+    "value": "assets/parsed/sprites/sprites_images/0159_128x128d32.png",
+    "note": "sprites.omt canvas (authored SpriteIndex)"
    },
-   "status": "mesh",
+   "status": "sprite",
    "status_flags": []
   },
   {
@@ -6650,7 +7129,15 @@
      1.0
     ]
    },
-   "variants": [],
+   "variants": [
+    {
+     "by": "sprite:icons.omt#4",
+     "kind": "sprite",
+     "sprite": "assets/parsed/icons/icons_images/0004_32x32d32.png",
+     "name": "sprite",
+     "count": 70
+    }
+   ],
    "texture_truth": {
     "resolved": true,
     "source": "sprite_canvas",
@@ -7239,19 +7726,28 @@
    ],
    "instances": 1,
    "visual": {
-    "kind": "none"
+    "kind": "sprite",
+    "sprite": "assets/parsed/sprites/sprites_images/0059_64x64d32.png",
+    "name": "smoke",
+    "note": "authored sprites.omt #37 (smoke)"
    },
-   "variants": [],
+   "variants": [
+    {
+     "by": "sprite:sprites.omt#37",
+     "kind": "sprite",
+     "sprite": "assets/parsed/sprites/sprites_images/0059_64x64d32.png",
+     "name": "smoke",
+     "count": 1
+    }
+   ],
    "texture_truth": {
     "resolved": true,
-    "source": "n/a",
-    "value": null,
-    "note": "no visual (trigger/effect/invisible)"
+    "source": "sprite_canvas",
+    "value": "assets/parsed/sprites/sprites_images/0059_64x64d32.png",
+    "note": "sprites.omt canvas (authored SpriteIndex)"
    },
-   "status": "no_visual",
-   "status_flags": [
-    "unresolved_sprite"
-   ]
+   "status": "sprite",
+   "status_flags": []
   },
   {
    "kind": "fourcc",
@@ -7425,7 +7921,15 @@
    "visual": {
     "kind": "invisible"
    },
-   "variants": [],
+   "variants": [
+    {
+     "by": "sprite:icons.omt#8",
+     "kind": "sprite",
+     "sprite": "assets/parsed/icons/icons_images/0008_32x32d32.png",
+     "name": "sound",
+     "count": 105
+    }
+   ],
    "texture_truth": {
     "resolved": true,
     "source": "n/a",
@@ -8056,8 +8560,8 @@
    "decomp_status": null,
    "decomp_confidence": null,
    "family": null,
-   "native_behavior": "vt_shadow",
-   "native_desc": "Shadow sprite decor",
+   "native_behavior": "vt_moving_target",
+   "native_desc": "Moving target (shooting range)",
    "tags": [
     "C3DMOVINGTARGET",
     "c3dmovingtarget"
@@ -8078,7 +8582,36 @@
     "sprite": "assets/parsed/sprites/jnvsjn/spr_target.png",
     "sprite_size": 90.0
    },
-   "variants": [],
+   "variants": [
+    {
+     "by": "sprite:sprites.omt#98",
+     "kind": "sprite",
+     "sprite": "assets/parsed/sprites/sprites_images/0125_128x128d32.png",
+     "name": "rocket",
+     "count": 8
+    },
+    {
+     "by": "sprite:sprites.omt#135",
+     "kind": "sprite",
+     "sprite": "assets/parsed/sprites/sprites_images/0159_128x128d32.png",
+     "name": "star",
+     "count": 6
+    },
+    {
+     "by": "sprite:sprites.omt#175",
+     "kind": "sprite",
+     "sprite": "assets/parsed/sprites/sprites_images/0035_64x64d32.png",
+     "name": "s-star",
+     "count": 5
+    },
+    {
+     "by": "sprite:sprites.omt#176",
+     "kind": "sprite",
+     "sprite": "assets/parsed/sprites/sprites_images/0034_100x100d32.png",
+     "name": "martian",
+     "count": 3
+    }
+   ],
    "texture_truth": {
     "resolved": true,
     "source": "sprite_canvas",
@@ -8418,19 +8951,91 @@
    ],
    "instances": 169,
    "visual": {
-    "kind": "none"
+    "kind": "sprite",
+    "sprite": "assets/parsed/sprites/sprites_images/0024_128x128d32.png",
+    "name": "treetop3",
+    "note": "authored sprites.omt #16 (treetop3)"
    },
-   "variants": [],
+   "variants": [
+    {
+     "by": "sprite:sprites.omt#16",
+     "kind": "sprite",
+     "sprite": "assets/parsed/sprites/sprites_images/0024_128x128d32.png",
+     "name": "treetop3",
+     "count": 135
+    },
+    {
+     "by": "sprite:sprites.omt#151",
+     "kind": "sprite",
+     "sprite": "assets/parsed/sprites/sprites_images/0176_256x256d16.png",
+     "name": "Palmtree",
+     "count": 10
+    },
+    {
+     "by": "sprite:sprites.omt#41",
+     "kind": "sprite",
+     "sprite": "assets/parsed/sprites/sprites_images/0062_64x64d32.png",
+     "name": "cone",
+     "count": 8
+    },
+    {
+     "by": "sprite:sprites.omt#13",
+     "kind": "sprite",
+     "sprite": "assets/parsed/sprites/sprites_images/0021_244x244d32.png",
+     "name": "cactus",
+     "count": 6
+    },
+    {
+     "by": "sprite:sprites.omt#101",
+     "kind": "sprite",
+     "sprite": "assets/parsed/sprites/sprites_images/0187_256x256d32.png",
+     "name": "Moon256",
+     "count": 3
+    },
+    {
+     "by": "sprite:sprites.omt#64",
+     "kind": "sprite",
+     "sprite": "assets/parsed/sprites/sprites_images/0089_257x256d32.png",
+     "name": "trees4",
+     "count": 2
+    },
+    {
+     "by": "sprite:sprites.omt#173",
+     "kind": "sprite",
+     "sprite": "assets/parsed/sprites/sprites_images/0030_128x128d16.png",
+     "name": "treestops2",
+     "count": 2
+    },
+    {
+     "by": "sprite:sprites.omt#108",
+     "kind": "sprite",
+     "sprite": "assets/parsed/sprites/sprites_images/0141_256x256d16.png",
+     "name": "jupiter",
+     "count": 1
+    },
+    {
+     "by": "sprite:sprites.omt#100",
+     "kind": "sprite",
+     "sprite": "assets/parsed/sprites/sprites_images/0135_256x256d16.png",
+     "name": "Earth",
+     "count": 1
+    },
+    {
+     "by": "sprite:sprites.omt#66",
+     "kind": "sprite",
+     "sprite": "assets/parsed/sprites/sprites_images/0091_256x256d32.png",
+     "name": "trees6",
+     "count": 1
+    }
+   ],
    "texture_truth": {
     "resolved": true,
-    "source": "n/a",
-    "value": null,
-    "note": "no visual (trigger/effect/invisible)"
+    "source": "sprite_canvas",
+    "value": "assets/parsed/sprites/sprites_images/0024_128x128d32.png",
+    "note": "sprites.omt canvas (authored SpriteIndex)"
    },
-   "status": "no_visual",
-   "status_flags": [
-    "unresolved_sprite"
-   ]
+   "status": "sprite",
+   "status_flags": []
   },
   {
    "kind": "fourcc",
@@ -8453,19 +9058,28 @@
    ],
    "instances": 1,
    "visual": {
-    "kind": "none"
+    "kind": "sprite",
+    "sprite": "assets/parsed/icons/icons_images/0000_32x32d32.png",
+    "name": "triger",
+    "note": "authored sprites.omt #0 (triger)"
    },
-   "variants": [],
+   "variants": [
+    {
+     "by": "sprite:icons.omt#0",
+     "kind": "sprite",
+     "sprite": "assets/parsed/icons/icons_images/0000_32x32d32.png",
+     "name": "triger",
+     "count": 1
+    }
+   ],
    "texture_truth": {
     "resolved": true,
-    "source": "n/a",
-    "value": null,
-    "note": "no visual (trigger/effect/invisible)"
+    "source": "sprite_canvas",
+    "value": "assets/parsed/icons/icons_images/0000_32x32d32.png",
+    "note": "sprites.omt canvas (authored SpriteIndex)"
    },
-   "status": "no_visual",
-   "status_flags": [
-    "unresolved_sprite"
-   ]
+   "status": "sprite",
+   "status_flags": []
   },
   {
    "kind": "fourcc",
@@ -9561,7 +10175,15 @@
    "visual": {
     "kind": "invisible"
    },
-   "variants": [],
+   "variants": [
+    {
+     "by": "sprite:icons.omt#2",
+     "kind": "sprite",
+     "sprite": "assets/parsed/icons/icons_images/0002_32x32d32.png",
+     "name": "load",
+     "count": 96
+    }
+   ],
    "texture_truth": {
     "resolved": true,
     "source": "n/a",
@@ -10411,7 +11033,15 @@
    "visual": {
     "kind": "invisible"
    },
-   "variants": [],
+   "variants": [
+    {
+     "by": "sprite:icons.omt#5",
+     "kind": "sprite",
+     "sprite": "assets/parsed/icons/icons_images/0005_32x32d32.png",
+     "name": "start",
+     "count": 97
+    }
+   ],
    "texture_truth": {
     "resolved": true,
     "source": "n/a",
