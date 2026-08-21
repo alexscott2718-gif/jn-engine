@@ -12,17 +12,39 @@
 | Dtor(s) | inherited deleting destructor (none owned) |
 | Ledger row | `docs/decomp_ledger.csv` |
 
-`C3DShadow` is a placeable **world props terrain** object (family `world_props_terrain`, wave 7). It walks the class vtable with 0 owned methods; its `.gam`-driven parameters and assets are registered in `InitObject` and listed below.
+`C3DShadow` walks the class vtable with 0 owned methods.
+
+> **`3TAR` has two registrars, and the shipped rows are not this class's.**
+> The id is registered twice in `Neutron.exe`: at `00430405` (`FUN_00430220`,
+> `C3DMovingTarget`, no RTTI string captured at the site) and at `00445467`
+> (`FUN_004453b0`, `C3DShadow`). `docs/_gam_classids.tsv` attributes it here only
+> because this is the site where a name was captured — its last column is
+> `class_or_nearby_string`, a heuristic, not an attribution.
+>
+> The shipped data settles it: all **22** placed `3TAR` rows are tagged
+> `C3DMOVINGTARGET` (21 upper-case, one lower — 16 in `Level3C.gam`, 6 in
+> `VR07.gam`'s shooting range) and
+> author `StartPosX/Y/Z`, `DestPosX/Y/Z`, `Speed`, `HitsRequired`, `RespawnTime`
+> and `NumPoints` — a moving shooting-range target, not a shadow. The engine binds
+> `3TAR` to `vt_moving_target` (265c3b6, "3TAR: bind the moving target, not the
+> shadow"); before that it drew decor for months. See
+> [`C3DMovingTarget.md`](./C3DMovingTarget.md) and the annotated
+> `C3DMovingTarget::FOURCC_OWNED_BY_ANOTHER_CLASS` entry in
+> `docs/audit/spec_check_baseline.json`.
+>
+> This page keeps the `3TAR` cell because this class really is one of the two
+> registrars. It claims none of the instances.
 
 ## Field Map (registered `.gam` properties)
 
-`InitObject` registers no properties of its own -- the set this class receives is inherited.
+`InitObject` registers no properties of its own -- the set this class receives is
+inherited.
 
-That is not the same as there being no data. The corpus places `3TAR` **22 times** and
-`docs/gam_schema.md` harvests **25 properties** from those instances, with names,
-types and value ranges; see its `3TAR` section. Which of them a parent registers
-rather than this class is not recoverable from the schema -- its check marks record
-whether `gam_loader.c` maps a property onto a named `Entity` field, not who declared it.
+**No shipped `.gam` row is known to be an instance of this class**, so there is no
+authored data to describe here. `docs/gam_schema.md`'s `3TAR` section harvests 25
+properties across 22 instances; those belong to `C3DMovingTarget` (above), and this
+page previously presented them as its own. What a `C3DShadow` looks like in a level,
+or whether one is ever placed at all, is unresolved.
 
 ## Vtable Methods (owned)
 
@@ -34,9 +56,9 @@ No direct ASE/PNG/anim references in `InitObject` (inherited visual path or runt
 
 ## Validation
 
-No field map of this class's own to cross-check -- `InitObject` registers none. The
-inherited set is not empty: 25 properties across 22 instances of `3TAR` are harvested
-in `docs/gam_schema.md`.
+No field map of this class's own to cross-check -- `InitObject` registers none, and
+no shipped instance is attributable to this class (see the Identity note). The 25
+properties across 22 `3TAR` instances in `docs/gam_schema.md` are `C3DMovingTarget`'s.
 
 ## Confidence
 
@@ -46,7 +68,10 @@ Validation: Ghidra `DumpClass.java C3DShadow` (owned methods decompiled); `.gam`
 
 Open questions:
 - Confirm the gameplay semantics of the per-frame/owned override method(s) beyond the decompiled control flow.
-- Pin the constructor address and class-id immediate (FourCC).
+- Pin the constructor address and class-id immediate (FourCC). `00445467` /
+  `FUN_004453b0` is the registration site the scan captured for this class; whether
+  a `C3DShadow` is ever placed in a level, or is only ever created in code, is open.
+  Nothing in the shipped corpus is one.
 
 ## Notes
 
