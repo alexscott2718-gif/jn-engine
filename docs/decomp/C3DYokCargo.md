@@ -5,7 +5,7 @@
 | Item | Value |
 |---|---|
 | RTTI name | `C3DYokCargo` |
-| FourCC | (not resolved; not a `.gam`-placed object or id unmapped) |
+| FourCC | `3YCA` (class-id table; RTTI string absent at the site) |
 | Base chain | `C3DAI -> C3DAnimated -> C3DObject -> OMedia3DMorphAnim -> OMedia3DShapeElement -> OMediaElement -> OMediaWorldPosition -> OMediaWorldAngle -> OMediaElementContainer -> OMediaDBObject -> OMediaClassStreamer -> OMediaListener -> OMediaMessagePort -> OMediaAnim -> CLocalGameObject -> CGameObject` |
 | Vftable(s) | `004befac, 004befbc, 004bf40c, 004bf448, 004bf45c` |
 | Ctor(s) | factory/constructor installs the vftables and registers the class id (see `docs/_gam_classids.tsv`) |

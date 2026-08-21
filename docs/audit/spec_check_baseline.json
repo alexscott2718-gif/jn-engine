@@ -1,34 +1,13 @@
 {
   "_comment": "Known spec/data disagreements accepted at the time of recording. spec_check.py fails on anything NOT listed here. Remove an entry when the underlying spec is fixed, to lock the fix in.",
   "accepted": [
-    "C3DCorona::FOURCC_UNRESOLVED_BUT_KNOWN",
-    "C3DEye::FOURCC_UNRESOLVED_BUT_KNOWN",
-    "C3DEye::NATIVE_VTABLE_BOUND",
-    "C3DFireStrato::FOURCC_UNRESOLVED_BUT_SHIPPED",
-    "C3DFireStrato::NATIVE_VTABLE_BOUND",
-    "C3DGirlEatingPlant::FOURCC_UNRESOLVED_BUT_SHIPPED",
-    "C3DGirlEatingPlant::NATIVE_VTABLE_BOUND",
-    "C3DGrill::FOURCC_UNRESOLVED_BUT_KNOWN",
-    "C3DMerryGo::FOURCC_UNRESOLVED_BUT_KNOWN",
-    "C3DMerryGo::NATIVE_VTABLE_BOUND",
-    "C3DMovingTarget::FOURCC_UNRESOLVED_BUT_SHIPPED",
-    "C3DMovingTarget::NATIVE_VTABLE_BOUND",
+    "C3DMovingTarget::FOURCC_OWNED_BY_ANOTHER_CLASS",
     "C3DNeutron::FOURCC_OWNED_BY_ANOTHER_CLASS",
-    "C3DNewSmokePuff::FOURCC_UNRESOLVED_BUT_KNOWN",
-    "C3DPasscard::FOURCC_UNRESOLVED_BUT_KNOWN",
-    "C3DRock::FOURCC_UNRESOLVED_BUT_SHIPPED",
-    "C3DRock::NATIVE_VTABLE_BOUND",
-    "C3DRocketFuel::FOURCC_UNRESOLVED_BUT_KNOWN",
-    "C3DRocketFuel::NATIVE_VTABLE_BOUND",
-    "C3DSmokePuff::FOURCC_UNRESOLVED_BUT_KNOWN",
-    "C3DTeleportFX::FOURCC_UNRESOLVED_BUT_SHIPPED",
-    "C3DTeleportFX::NATIVE_VTABLE_BOUND",
-    "C3DVRTrophy::FOURCC_OWNED_BY_ANOTHER_CLASS",
-    "C3DYokCargo::FOURCC_UNRESOLVED_BUT_SHIPPED",
-    "C3DYokCargo::NATIVE_VTABLE_BOUND"
+    "C3DVRTrophy::FOURCC_OWNED_BY_ANOTHER_CLASS"
   ],
   "notes": {
     "C3DVRTrophy::FOURCC_OWNED_BY_ANOTHER_CLASS": "Heuristic, not a real conflict. _gam_classids.tsv's last column is `class_or_nearby_string` -- whatever class string sits near the registration site, not the registering class. 3TRO's neighbour is C3DTrophy(); the spec's RTTI name is C3DVRTrophy. No separate C3DTrophy spec exists, and the native registry binds 3TRO to the VR trophy.",
-    "C3DNeutron::FOURCC_OWNED_BY_ANOTHER_CLASS": "Same heuristic. 3NEU's neighbouring string is C3DSprite(), but the spec cites registration at 00432a53 and the table's site for 3NEU is exactly 00432a53 -- the spec is right and the nearby-string column is the weak signal."
+    "C3DNeutron::FOURCC_OWNED_BY_ANOTHER_CLASS": "Same heuristic. 3NEU's neighbouring string is C3DSprite(), but the spec cites registration at 00432a53 and the table's site for 3NEU is exactly 00432a53 -- the spec is right and the nearby-string column is the weak signal.",
+    "C3DMovingTarget::FOURCC_OWNED_BY_ANOTHER_CLASS": "Duplicate registrar, not a conflict. 3TAR is registered twice: @00430405 FUN_00430220 (this class, no RTTI string captured) and @00445467 FUN_004453b0 C3DShadow(). The scan attributes the id to C3DShadow because that is the site where a name was captured. The shipped data settles which class the levels mean: all 22 placed 3TAR rows carry ObjectTag=C3DMOVINGTARGET, 16 in level3c and 6 in vr07's shooting range. See the note under C3DMovingTarget's Identity table."
   }
 }
