@@ -1,5 +1,10 @@
 # JNBG Asset Catalog
 
+> **Not to be confused with [`asset_catalog.md`](./asset_catalog.md)** (underscore).
+> That one is the *generated* resolution-and-usage truth table: how each asset
+> resolves, its texture source, and where the game uses it. **This** file is the
+> hand-annotated visual reference behind the gallery portal.
+
 Comprehensive visual reference and annotation log for all extracted assets: textures, sprites, icons, effects, 3D models, and more.
 
 > **Full catalog (2026-06-06):** every OMT container is now extracted — **all 58
