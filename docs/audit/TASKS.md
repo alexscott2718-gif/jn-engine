@@ -56,8 +56,30 @@ inside a section that tells readers not to re-examine it.
 
 ## P1 — specs that assert what the data denies
 
-### B-01 · Fix the FourCC resolver, then regenerate
+### B-01 · Fix the FourCC resolver, then regenerate — **DONE 2026-08-21**
 The single highest-leverage fix: it closes 17 spec defects at the source.
+
+> The 17 defective FourCCs were fixed in the *specs* by hand (4fbdef3,
+> 54151fc) and the baseline trimmed to match, which is why `spec_check` is down
+> to 3 findings. The generator was not touched, so a regeneration would have put
+> all 17 back; that half is now done too.
+>
+> `fourcc_for()` matches case-insensitively, reads the scan's class column, and
+> gains the dominant `ObjectTag` of the shipped rows (`spec_check`'s own tier
+> T2). The address-proximity branch is **gone**, not tightened -- the vtable
+> identity check the task suggests needs the Ghidra dumps, and would then be the
+> thing doing the work. Resolving from names only, over the 208 ledger classes:
+> agrees with the spec 21 -> 53, contradicts 0 -> 0, falls through 43 -> 11.
+> Of the audit's 17, sixteen now resolve correctly; `C3DSparrow` comes back
+> unresolved because its one placed row is tagged `vulta`, which is the honest
+> answer and what its spec already says.
+>
+> `tools/check_fourcc_resolver.py` (in `make check`) locks it in: the resolver
+> must agree with each spec's stated FourCC or say None, and must never return a
+> level id. **Still untested here:** the generator cannot run on a machine
+> without `Neutron.exe` *and* the `/tmp/dumps2` dumps, so the decompiled-immediate
+> branch is exercised by no test. Every branch that resolves from checked-in
+> data is covered, which is where all 17 defects came from.
 
 `tools/gen_placeable_specs.py:225-241` `fourcc_for()` resolves in three branches and
 each leaks:
@@ -81,7 +103,11 @@ drop it and emit "unresolved" honestly.
 **Done when:** `python3 tools/audit/spec_check.py` reports fewer findings, the baseline
 is trimmed by the same amount, and no regenerated spec claims a `LEV\d` id.
 
-### B-02 · Re-run validation on 29 specs
+### B-02 · Re-run validation on 29 specs — **DONE** (06d0496)
+> All 29 fixed; the task's own command,
+> `python3 tools/audit/spec_check.py --all | grep NOPROPS_BUT_HARVESTED`, now
+> returns nothing.
+
 Each states *"No registered `.gam` properties to cross-check"* while `gam_schema.md`
 holds harvested properties for its FourCC — **627 property rows across 617 shipped
 instances**, including `C3DTree` (169 instances) and `C3DRock` (99).
