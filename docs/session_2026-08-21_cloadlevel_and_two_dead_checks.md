@@ -1,6 +1,6 @@
 # Session note — 2026-08-21: CLoadLevel, and two checks that could not fail
 
-Branch `feat/loadlevel-gate-return`, ten commits on top of `chore/cleanup-2`
+Branch `feat/loadlevel-gate-return`, twelve commits on top of `chore/cleanup-2`
 (PR #28).
 `make check` and `make check-assets` green in the repo Docker image at every
 commit; `level1` and `fixture0` goldens byte-identical throughout (no golden
@@ -97,8 +97,9 @@ the port: `ExactLevel` precedence on `Level3.gam` `carlcapt`, a blocking
 missing task on `Level1.gam` row 2, an ungated row put through the window on
 `level1c.gam` `yokian2`.
 
-**It is not wired to a certificate row.** Adding one is a status change and the
-owner's call. See "For the owner" below.
+**Wired to a certificate row** — `CLoadLevel`/`contact-gate`, `linked`, after
+the owner approved it. See "The certificate row" below for what it does and
+does not claim.
 
 ### 3. Three mutation tests that never ran (d1f2b20)
 
@@ -328,20 +329,31 @@ is a structural gap, not a one-off: the certificate gate runs only the oracles
 
 ---
 
-## For the owner — one decision
+## The certificate row (owner-approved, landed)
 
-`CLoadLevel_gate.py` is green and mutation-tested but unreferenced, so nothing
-runs it. Wiring it in is a certificate status change, which the brief reserves
-for you. The row I would propose:
+`CLoadLevel_gate.py` was left unreferenced pending the owner's call, since
+wiring an oracle in is a certificate status change. **Approved and landed:**
 
 ```
-C3DLoadLevel,contact-gate,progression / objectives,linked,tools/linkage_oracles/CLoadLevel_gate.py,docs/decomp/CLoadLevel.md,"..."
+CLoadLevel,contact-gate,progression / objectives,linked,tools/linkage_oracles/CLoadLevel_gate.py,docs/decomp/CLoadLevel.md,"…"
 ```
 
-— as a **new, narrower aspect** (`contact-gate`) rather than by moving
-`activate-load`, which should stay `linked-blocked`: the handoff, fade, sound
-and mode-switch halves of `00457ec0`/`00458370` are still unported, and its note
-now records exactly which. Say the word and I will write the row and its note.
+A **new, narrower aspect** rather than a move of `activate-load` — which stays
+`linked-blocked`, because the recovered body splits cleanly into a verdict
+(certifiable against every shipped row) and a set of side effects that are not:
+the sound/fade tail, the `DAT_004f0588` mode switch, player slots
+`0x178`/`0x11c`/`0x2c4`, and `ActivateLoad`'s own `+0x17a` request block. One
+sentence was appended to `activate-load`'s note so it stops asking for a port
+that has since happened; its status is untouched, and no other row changed
+(field-level diff against the pre-edit manifest: one field).
+
+Scoreboard: **17 linked**, 15 linked-blocked. `make check-assets` green with
+the gate running the new oracle, and `check_linkage_certificates.py --selftest`
+still proves the gate rejects a failing oracle.
+
+That also closes the "an oracle no gate runs will rot" exposure for this one —
+`C3DAnimated_runtime.py` remains in that position, since its rows are
+`linked-blocked` by design.
 
 ---
 

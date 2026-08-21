@@ -270,6 +270,12 @@ the swap through `gamestate` instead). The `RETURN` departure pair is ported
 but its *source* is INFERRED from the handoff call shape; the writer of the
 player's `+0x88c`/`+0x8f0` is not recovered.
 
-**The certificate row is deliberately unchanged.** Whether `activate-load` (or
-a narrower `contact-gate` aspect) can now go `linked` is the owner's call, not
-this session's.
+**Certificate:** the gate half is now its own row —
+`CLoadLevel` / `contact-gate`, status `linked`, oracle
+`tools/linkage_oracles/CLoadLevel_gate.py` (owner-approved 2026-08-21).
+`activate-load` **stays `linked-blocked`** and its note records why: the parts
+listed above are still unported, and the `RETURN` departure pair's source is
+inferred from the handoff call shape rather than recovered. A narrower aspect
+was the right shape here precisely because the recovered body splits cleanly
+into a verdict (certifiable against every shipped row) and a set of side
+effects that are not.
