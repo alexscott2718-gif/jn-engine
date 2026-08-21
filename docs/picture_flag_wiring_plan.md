@@ -1213,3 +1213,106 @@ to outlive a New Game.
 Note that the pickup remains ~4300 units from level1b's `STARTEXP` spawn, so it
 was never being auto-collected; the inventory really was surviving from an
 earlier run.
+
+---
+
+## 18. The eight gadgets (2026-08-20)
+
+Owner, naming the set from the retail game: *"so we should have jetpack,
+shrinkray, bubble, grappler, remote goddard, rocket, scooter, invisibility."*
+
+§17 found two of those by scanning `3PIC` rows, which was the wrong net.
+**Five of the eight are never placed in level data at all** — they are objects
+the executable creates in code, so a corpus scan cannot see them. What the
+corpus shows is at most the *pickup*, and only for three.
+
+### 18.1 The map
+
+| # | Gadget | Gadget object | FourCC | Ctor | Placed | Pickup that grants it | Jimmy alias |
+|---|---|---|---|---|---:|---|---|
+| 1 | Jetpack | `C3DJetpackFire` (the flame) | `3JFI` | `00421d80` | 0 | `3PIC` `shrinkray`, level1b, art `Jetpack 1` | `HIFLY` → `jimfly.ase` |
+| 2 | Shrink ray | `C3DShrinkRay` | `3SHR` | `0043fe20` | 0 | — none in corpus — | `HISHOOT` → `jimshoot.ase` |
+| 3 | Bubble | `C3DBubble` | `3BUB` | `00410840` | 0 | `3PIC` `bubblepickup`, level7 | — |
+| 4 | Grappler | `C3DGraplingHook` | `3GRA` | `0041eeb0` | 0 | — none — | — |
+| 5 | Remote Goddard | `C3DGoddard` | `3GOD` | `0041c810` | 0 | — code-spawned, Jimmy `0x95c` — | — |
+| 6 | Rocket | `C3DRocketShip` | `3ROC` | `0043d840` | 32 | placed directly | `HIDRIVE` → `jimdrive.ase` |
+| 7 | Scooter | `C3DJeep` | `3JEE` | `004211a0` | 0 | — code-spawned, Jimmy `0x970` — | `HISCOOT` / `HISCOOTSTOP` |
+| 8 | Invisibility | *no class registered* | — | — | — | `3PIC` `invisibility`, level5, art `yokpart` | — |
+
+Related classes that are not the gadget itself: `3BUP` `C3DBubblePickup`,
+`3HOO` `C3DHook` (what the grappler attaches *to* — one placement, level4b),
+`3RCK` `C3DRocket` (the AI patrol rocket), `3PAS` `C3DPASSCARD`, `3MEP`
+`C3DMetalPickup`, `3HEL`/`3YHE` helmets, `3BAS`/`3BPU` baseball.
+
+### 18.2 The scooter is `C3DJeep`, and Goddard is the scooter
+
+The class name and FourCC say Jeep. `InitObjectJeep` (`004213f0`) loads
+`omt\scooter.omt`; `UpdateJeep` (`00421580`) switches an attached child between
+`SCOOT` and `SCOOTSTOP`; the repo carries parsed `scooter.omt`,
+`jimscooter.ASE`, `jimscooterstop.ASE`, `godscooter.ASE`.
+
+Two facts settle what the player sees:
+
+- `scooter.omt` contains **exactly two textures**: `scooterwheel2` and
+  **`goddard128`**.
+- Goddard's animation table registers `HISCOOT -> godscooter.ASE`, beside
+  `HIROCK -> godrocket.ASE` and `HIFLY -> godfly.ASE`.
+
+Goddard *is* the scooter — he transforms into it. That is why the vehicle
+carries his texture, and why `jimscooter.ASE` contains only the node `01jimmy`
+with no vehicle mesh anywhere in it. The Jeep is the physics body, Goddard is
+the bodywork, Jimmy is the pose on top. It also explains why
+`JimmySetupOrReset` spawns the two together, Goddard at `0x95c` and the hidden
+Jeep at `0x970`.
+
+`3GRA` is spelled `C3DGraplingHook` in the original — one L. It binds
+`rope01.ase` under shape `HIROPE`, textures it `jimycarl.png`, and tags the
+state `ROPE`.
+
+### 18.3 Which AMI modes are pinned
+
+Three of the eight are tied to an action mode by a recovered body:
+
+- **mode 1 = rocket** — the arm traces `"Activating Rocket"` / `"ACT 2 Rocket"`
+  and plays `DRIVE`
+- **mode 6 = shrink ray** — aim/shoot, pitch clamped `[0,45]`, `SHOOT`; and
+  vr07, which AMI id 6 routes to, is the only VR level with no collectables and
+  six `C3DMovingTarget`s
+- **mode 5 = remote Goddard** — `C3DMetalPickup` points the companion at a can
+  with mode 5 and releases it back to mode 2
+
+Eight gadgets, eight AMI ids, eight VR levels is a tempting correspondence and
+probably the real one, but only the shrink ray is proven, so the other five are
+not written into the table on symmetry alone.
+
+### 18.4 The scooter, ported
+
+`vt_scooter` (`behavior_scooter.c`) mirrors the original's lifecycle: one
+instance code-spawned hidden per level next to Goddard, revealed and mounted
+when the action menu selects it, hidden again on dismount. That is the first
+thing the action menu actually *does*.
+
+Ported constants are the ones the decompiled bodies pin: the constructor's
+`drive_state = 1` seed, and the `0.3s` child-animation refresh from `UpdateJeep`
+— the refresh is genuinely on a timer rather than a state edge, so a stop/start
+inside one interval does not restart the clip. Speeds and turn rates are **not**
+recovered: they come from vehicle-database entry 0 of `scooter.omt`, and our
+parse of that file holds only its two textures. Those are tuned and grouped at
+the top of the file.
+
+Jimmy gets two new poses, `PA_SCOOT` and `PA_SCOOTSTOP`, appended so every
+existing `PlayerAnim` keeps its value, mapping to the aliases `HISCOOT` and
+`HISCOOTSTOP` the decomp already documented.
+
+**One inference, flagged as such:** the corpus has no scooter pickup, so
+`scooterpart` in level1c — art `wheel` — is what grants it. It is both a part
+and a gadget, like `invisibility`.
+
+### 18.5 Still missing
+
+The shrink ray, grappler and remote Goddard have no pickup anywhere in the
+corpus and no way to acquire them; Goddard at least already exists natively with
+a mode API. The shrink ray is the odd one: there is no `3SHR` placement and no
+pickup that grants it, so on current evidence it is **not obtainable from the
+shipped level data at all** — it must be granted by task/story logic. Worth
+knowing before anyone builds its firing path.
