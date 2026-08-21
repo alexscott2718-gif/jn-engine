@@ -270,6 +270,10 @@ void gamestate_new_game(void) {
     memset(g_state.inventory, 0, sizeof g_state.inventory);
     g_state.inventory_count = 0;
     g_state.active_tool = 0;
+    /* The RETURN portal's departure point is a property of this playthrough's
+       route, so a new game starts with none recorded. */
+    g_state.entry_level[0] = g_state.entry_spawn[0] = '\0';
+    g_state.return_level[0] = g_state.return_spawn[0] = '\0';
     printf("[PICTURE] new game: picture counts, collected pickups, "
            "and inventory cleared\n");
 }
@@ -391,8 +395,33 @@ void gamestate_request_level_swap(const char *level, const char *start_point) {
     snprintf(g_state.swap_level, sizeof(g_state.swap_level), "%s", level ? level : "");
     snprintf(g_state.swap_spawn, sizeof(g_state.swap_spawn), "%s", start_point ? start_point : "");
     g_state.level_change_requested = 1;
+    /* The departure point the RETURN portal reads back (see the header). */
+    snprintf(g_state.return_level, sizeof(g_state.return_level), "%s", g_state.entry_level);
+    snprintf(g_state.return_spawn, sizeof(g_state.return_spawn), "%s", g_state.entry_spawn);
     printf("[GAMESTATE] swap requested -> '%s' (spawn '%s')\n",
            g_state.swap_level, g_state.swap_spawn);
+}
+
+void gamestate_set_level_entry(const char *level, const char *start_point) {
+    snprintf(g_state.entry_level, sizeof(g_state.entry_level), "%s", level ? level : "");
+    snprintf(g_state.entry_spawn, sizeof(g_state.entry_spawn), "%s", start_point ? start_point : "");
+}
+
+const char *gamestate_return_level(void) { return g_state.return_level; }
+const char *gamestate_return_spawn(void) { return g_state.return_spawn; }
+
+int gamestate_request_level_return(void) {
+    char level[sizeof g_state.return_level];
+    char spawn[sizeof g_state.return_spawn];
+    if (!g_state.return_level[0]) return 0;
+    snprintf(level, sizeof level, "%s", g_state.return_level);
+    snprintf(spawn, sizeof spawn, "%s", g_state.return_spawn);
+    gamestate_request_level_swap(level, spawn);
+    /* 00457ec0 hands the stored pair to the loader as the destination AND as
+       the return point, so it has to survive the promotion above unchanged. */
+    snprintf(g_state.return_level, sizeof(g_state.return_level), "%s", level);
+    snprintf(g_state.return_spawn, sizeof(g_state.return_spawn), "%s", spawn);
+    return 1;
 }
 
 void gamestate_reset_for_new_level(void) {

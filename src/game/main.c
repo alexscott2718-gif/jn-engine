@@ -811,6 +811,51 @@ static void configure_safety_floor(World *world, const Entity *jim) {
             world->safety_floor_y, cx, cz, half_x, half_z);
 }
 
+/* Headless CLoadLevel portal probe (JN_TEST_LOAD=1). For every LOAD row in the
+   loaded level: print what it authors, what the recovered gate (00457ec0)
+   decides at the current story state, and then -- one portal at a time, with
+   the pending request drained in between -- what firing it actually asks the
+   loader for. Firing is a direct on_trigger call, so this observes the ported
+   body itself rather than a flag.
+
+   Pair it with JN_TEST_SET_SCENE=<n> to move the story counter, and with
+   JN_TEST_LOAD_RETURN=<level>[:<spawn>] to seed a departure point so the VR
+   levels' RETURN portals have somewhere to go.
+
+   Returns 0 always: it is a probe, not an assertion. What it prints is the
+   evidence -- compare it against the authored .gam rows. */
+static int load_portal_probe(World *world, Entity *jim) {
+    if (!jim) { printf("[JN_TEST_LOAD] FAIL: no player\n"); return 1; }
+    int portals = 0;
+    for (Entity *e = world->head; e; e = e->next) {
+        if (!e->alive || strcmp(e->type, "LOAD") != 0) continue;
+        portals++;
+        const char *task = gam_str(e, "RequiredTask", "none");
+        printf("[JN_TEST_LOAD] portal tag=%-20s level=%-14s spawn=%-14s "
+               "task=%-8s req=%-5d exact=%-5d radius=%.0f gate=%s\n",
+               e->tag, e->target_level[0] ? e->target_level : "(empty)",
+               e->start_point[0] ? e->start_point : "(empty)",
+               task, gam_prop_i(e, "RequiredLevel", -1),
+               gam_prop_i(e, "ExactLevel", -1), e->half_extents[0],
+               behavior_load_gate_allows(e) ? "OPEN" : "SHUT");
+    }
+    for (Entity *e = world->head; e; e = e->next) {
+        if (!e->alive || strcmp(e->type, "LOAD") != 0) continue;
+        if (!e->vt || !e->vt->on_trigger) continue;
+        e->vt->on_trigger(e, jim);
+        const GameState *gs = gamestate_get();
+        printf("[JN_TEST_LOAD] fire tag=%-20s -> request=%s spawn=%s\n",
+               e->tag, gs->swap_level[0] ? gs->swap_level : "(none)",
+               gs->swap_spawn[0] ? gs->swap_spawn : "(none)");
+        /* Drain the request so the next portal is observed on its own. This
+           also clears level_done/spawn_set, which is why the probe exits
+           straight afterwards. */
+        gamestate_reset_for_new_level();
+    }
+    printf("[JN_TEST_LOAD] %s: %d portal(s)\n", gamestate_level(), portals);
+    return 0;
+}
+
 /* Headless collision self-test (JN_TEST_COLLIDE=1). Validates the mesh
    CollisionWorld end-to-end without a windowed session:
      (1) Ground-follow: from spawn, run physics ticks with the safety floor
@@ -2019,6 +2064,9 @@ int main(int argc, char **argv) {
        entity_bind_vtables(), so at on_spawn time game_flow_current_level() is
        still the previous level (empty on the launch load). */
     gamestate_set_level(current_desc.name);
+    /* The launch level was entered without a start point; a RETURN portal in
+       it therefore has no departure point to read (see behavior_load.c). */
+    gamestate_set_level_entry(current_desc.name, "");
 
     /* Cold entry: the launch level was jumped into, not walked into, so
        pre-grant the pictures it gates on but never awards (level1a/level1b/
@@ -2338,6 +2386,32 @@ int main(int argc, char **argv) {
     /* Headless collision self-test seam (JN_TEST_COLLIDE=1): exercise the mesh
        CollisionWorld (ground-follow + wall clamp) and exit, mirroring the other
        JN_TEST_* hooks. */
+    /* Headless CLoadLevel portal probe. Seed a departure point first if one
+       was asked for, so a VR level's RETURN portals have somewhere to go. */
+    if (getenv("JN_TEST_LOAD")) {
+        const char *ret = getenv("JN_TEST_LOAD_RETURN");
+        if (ret && *ret) {
+            char lvl[64], sp[32];
+            const char *colon = strchr(ret, ':');
+            snprintf(lvl, sizeof lvl, "%.*s",
+                     colon ? (int)(colon - ret) : (int)strlen(ret), ret);
+            snprintf(sp, sizeof sp, "%s", colon ? colon + 1 : "");
+            gamestate_set_level_entry(lvl, sp);
+            gamestate_request_level_swap(lvl, sp);   /* promotes entry -> departure */
+            gamestate_reset_for_new_level();         /* ...and drop the swap itself */
+            gamestate_set_level_entry(current_desc.name, "");
+            printf("[JN_TEST_LOAD] seeded departure point %s (spawn %s)\n",
+                   gamestate_return_level(), gamestate_return_spawn());
+        }
+        int rc = load_portal_probe(&world, jim);
+        ground_destroy();
+        fixture_level_destroy();
+        world_destroy(&world);
+        renderer_destroy();
+        window_destroy(&w);
+        return rc;
+    }
+
     if (getenv("JN_TEST_COLLIDE")) {
         int rc = collide_self_test(&world, jim);
         ground_destroy();
@@ -2858,6 +2932,10 @@ int main(int argc, char **argv) {
                     /* Re-key the collected-pickup table before the new level's
                        entities spawn (see the launch load for why). */
                     gamestate_set_level(swap_desc.name);
+                    /* Where this level was entered, for a RETURN portal in it.
+                       The departure pair was already promoted out of the
+                       previous entry by gamestate_request_level_swap(). */
+                    gamestate_set_level_entry(swap_desc.name, spawn_buf);
                     asset_cache_begin_level();
                     if (load_level(&swap_desc, &world) >= 0) {
                         current_desc = swap_desc;

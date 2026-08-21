@@ -153,6 +153,12 @@ void cutscene_update(Camera *cam, World *w, float dt);
 int  cutscene_player_control_locked(void);   /* active shot suppresses player input */
 int  cutscene_player_anim_override(void);    /* PlayerAnim id, or -1 when none */
 
+/* CLoadLevel's recovered contact gate (behavior_load.c, from 00457ec0):
+   RequiredTask lookup, then RequiredLevel minimum and optional ExactLevel.
+   1 = the touch proceeds. Exposed so a headless probe can evaluate a level's
+   portals without firing them. */
+int behavior_load_gate_allows(const Entity *e);
+
 /* The currently-controlled player; resolved at spawn. NULL until first 3JIM resolved. */
 extern Entity *g_player;
 

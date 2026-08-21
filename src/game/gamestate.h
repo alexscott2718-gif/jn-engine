@@ -84,6 +84,14 @@ typedef struct {
     /* Pending swap, drained by main loop. Empty strings = no swap. */
     char  swap_level[64];
     char  swap_spawn[32];
+    /* Where the current level was entered, and where the last transition left
+       from -- the pair CLoadLevel's RETURN portal reads back. See
+       gamestate_set_level_entry() / gamestate_request_level_return(). Both
+       survive a level swap; only a new game clears them. */
+    char  entry_level[64];
+    char  entry_spawn[32];
+    char  return_level[64];
+    char  return_spawn[32];
     /* Inventory / tools (Step 4). */
     InventorySlot inventory[INVENTORY_MAX];
     int           inventory_count;
@@ -151,8 +159,30 @@ void        gamestate_cycle_active_tool(void);
 int  gamestate_toggle_sandbox(void);
 int  gamestate_sandbox_enabled(void);
 void gamestate_request_level_change(void);
-/* Stash a target level path + spawn-point name for the main loop to drain. */
+/* Stash a target level path + spawn-point name for the main loop to drain.
+   Requesting a swap also promotes the current level entry to the departure
+   point: the recovered CLoadLevel handoff (slot 0x168, 00457ec0) carries the
+   level being left and the start point it was entered at as its 3rd and 4th
+   arguments on every normal transition, and the RETURN path reads that pair
+   straight back. The original keeps it on the player object (+0x88c/+0x8f0);
+   native keeps it here because the swap destroys the player entity.
+
+   Which two strings the player holds is INFERRED from that call shape -- the
+   writer of +0x88c/+0x8f0 is not recovered. Doing it for every swap and not
+   just for a LOAD portal is native-defined, and is what makes the 10 shipped
+   RETURN rows work: they are all in VR01..VR08, and no portal in the corpus
+   loads a VR level, so the only route in is the main menu. */
 void gamestate_request_level_swap(const char *level, const char *start_point);
+/* Record how the current level was entered. Called by the main loop at each
+   level load, before the level's entities spawn. */
+void gamestate_set_level_entry(const char *level, const char *start_point);
+/* CLoadLevel RETURN: request a swap back to the recorded departure point,
+   leaving that pair intact (the recovered body passes it back as both the
+   destination and the new return point). 0 = nothing recorded yet, e.g. a
+   direct --level VRxx launch; the caller decides what that means. */
+int  gamestate_request_level_return(void);
+const char *gamestate_return_level(void);
+const char *gamestate_return_spawn(void);
 /* Reset per-level state (items, level_done, pending requests). spawn is also
    cleared -- caller will set the new one after loading. items_collected is
    intentionally preserved to act as a lifetime tally, and so are the picture
