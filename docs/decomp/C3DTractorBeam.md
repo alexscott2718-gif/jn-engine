@@ -16,7 +16,13 @@
 
 ## Field Map (registered `.gam` properties)
 
-No own `.gam` properties registered in `InitObject` (inherits its parent's property set, or is created at runtime rather than placed). See `docs/gam_schema.md` for any inherited properties.
+`InitObject` registers no properties of its own -- the set this class receives is inherited.
+
+That is not the same as there being no data. The corpus places `3TRC` **6 times** and
+`docs/gam_schema.md` harvests **19 properties** from those instances, with names,
+types and value ranges; see its `3TRC` section. Which of them a parent registers
+rather than this class is not recoverable from the schema -- its check marks record
+whether `gam_loader.c` maps a property onto a named `Entity` field, not who declared it.
 
 ## Vtable Methods (owned)
 
@@ -64,7 +70,9 @@ void __thiscall C3DTractorBeam::vfunc_01_007(C3DTractorBeam *this)
 
 ## Validation
 
-No registered `.gam` properties to cross-check (inherited property set or runtime-created object).
+No field map of this class's own to cross-check -- `InitObject` registers none. The
+inherited set is not empty: 19 properties across 6 instances of `3TRC` are harvested
+in `docs/gam_schema.md`.
 
 ## Confidence
 
