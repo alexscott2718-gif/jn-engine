@@ -1,6 +1,6 @@
 # Session note — 2026-08-21: CLoadLevel, and two checks that could not fail
 
-Branch `feat/loadlevel-gate-return`, twenty-one commits on top of
+Branch `feat/loadlevel-gate-return`, twenty-three commits on top of
 `chore/cleanup-2` (PR #28).
 `make check` and `make check-assets` green in the repo Docker image at every
 commit; `level1` and `fixture0` goldens byte-identical throughout (no golden
@@ -389,6 +389,41 @@ at all without the binaries, which is what had made the resolver untestable.
 is exercised by no test I can run. Every branch that resolves from checked-in
 data is covered — which is where all 17 defects came from.
 
+### 13. `C3DSprite` already answers two thirds of its own open question (fbb4970)
+
+The spec asks "determine default `SpriteSize`/database/index values used by
+`3SPR` instances", and `GTR-20260717-3spr-defaults` asks the same. The binding
+half is three sections further up the same page.
+
+All **15** shipped `3SPR` rows are bare — not one authors `SpriteDatabase`,
+`SpriteIndex` or `SpriteSize`. So `LoadSpriteCanvas` (`00464810`) necessarily
+takes its **else** arm — the `FUN_0046a910` lookup cannot succeed on a value no
+level sets — and binds `icons.omt` index **3**, which
+`sprite_chunk_map_generated.h` names as the canvas the artist called
+**`question`**. Its neighbours there are `triger`, `dispatch`, `load`, `sprite`,
+`start`, `camera`, `AITRIG`: the authoring toolkit's icon set, and index 3 is
+the one that means *nothing is bound here*. `3NEU`, which inherits the same
+three fields, authors index **4** (`sprite`) on all 294 of its rows, so the
+neighbouring index is in real use by real data.
+
+A bare `3SPR` is an object a designer placed and never finished, and the engine
+drew a question mark over it.
+
+**Still open, and it does need the executable:** the `SpriteSize` the fallback
+passes — whatever the constructor at `00464070` left in `0x4b4`. `3NEU`'s
+authored sizes run 100..1300 with 100 the mode, which bounds a guess without
+making one.
+
+**Not acted on, deliberately.** Firing the fallback would put 15 question marks
+into four shipped levels, one of them in `Level1` — so it would move the
+`level1` golden, on an inference, at a size that is exactly the unrecovered
+part. "The original drew editor placeholders in the retail game" is worth an
+owner's confirmation before a golden moves for it.
+
+The ground-truth ledger is untouched: its own contract says a status change goes
+through a separate reviewed PR. That `GTR-20260717-3spr-defaults` is now
+partly answerable from in-repo evidence is the owner's call to record.
+
 ---
 
 ## Contradictions found and not resolved
@@ -579,12 +614,10 @@ sprite chunk map was the only naive one in the file.
 
 ## What I would pick up next
 
-0. **`C3DSprite` (`3SPR`)** is the best remaining lead from the generic-vtable
-   sweep: 15 placed rows over 4 levels, 10 owned methods (9 non-trivial), bound
-   to `vt_resolver_inert`. It already has an open ground-truth request
-   (`GTR-20260717-3spr-defaults`) for the default canvas binding, so it is
-   blocked on capture evidence rather than on effort — but the *behavior* half
-   may not be. Worth reading the spec before assuming the request blocks it all.
+0. **Decide whether a bare `3SPR` should draw its question mark** (§13). The
+   binding is settled; what is not settled is whether the retail game really
+   showed editor placeholders, and at what size. It needs an owner's call and
+   a `level1` golden regeneration, in that order.
 2. **`C3DCheckPoint`, now that §6 has mapped the circuits.** `UpdateCheckPoint`
    (`00414410`) is recovered, `vt_checkpoint` is a deliberate simplification by
    its own comment, and the certificate says porting the `FINISHLINE` /
