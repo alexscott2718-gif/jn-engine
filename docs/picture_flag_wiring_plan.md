@@ -991,3 +991,452 @@ top of the draw code.
 
 Whether the arrow also appears over a dispensed item *before* it is picked up.
 The current rule says yes.
+
+---
+
+## 17. The gadget inventory and the action menu (2026-08-20)
+
+The picture economy is one of two things `C3DPickupItem` does. This section is
+the other one: what a pickup *gives* you, and the menu the original used to
+choose between them.
+
+### 17.1 The old tool table was mostly invention
+
+`behavior_item.c` carried a `TOOL_GRANTS` table mapping `.gam` ObjectTags to
+inventory tools. Scanned against all 35 levels, four of its nine entries --
+`watergun`, `jetpack`, `burpgun`, `glasses` -- match **no ObjectTag anywhere in
+the corpus.** Its comment claimed they "gate real progression in the native
+port today"; nothing in the tree gates on them. The only consumer of the
+inventory is `behavior_player.c`, and it asks only for `"baseball"`.
+
+### 17.2 Two rules separate a gadget from the other eighty pickups
+
+A scan of every named `3PIC` row produces ~80 tags. Two properties in the data
+sort them, and neither is the name:
+
+**A row that awards or requires a picture is an economy item, not a gadget.**
+`wrench1` and `wrench2` award `PIC_NUMBER 18`; `hydrant` and `water2` in the
+same level carry `RequiredPicNum 18`. So the wrench is *spent at the hydrant*,
+not carried in a pocket — the old table modelling it as a permanent tool was
+wrong in both directions at once. `passcard` (`PIC_NUMBER 25`) has the same
+shape.
+
+**A row drawn on `sprites.omt` chunk 106 is an invisible trigger volume, not an
+item.** Every `RequiredPicNum`-gated machine in the corpus uses 106 — `cmach`,
+`fmach`, `mach`, `mdiam`, `fp`, `cm`, `cjar`, `book`, `kitty`, `nest1/2`. This
+is what a vending machine actually *is*: a blank trigger sitting over the
+machine's model.
+
+This half was not new — `entity_visual.c` has carried `sprite_chunk_is_hidden`
+and the note that chunk 106 is *literally the canvas the artist named "hidden"*
+since QA #3 on 2026-06-12. What the corpus scan adds is the correlation with
+`RequiredPicNum`: it is specifically the gated machines that use it. It also retro-explains §16.2 — the machine's `ShowArrow`
+marker floats at mid-machine height because the pickup there is the invisible
+trigger, and there is no visible item for it to sit above until one is
+dispensed.
+
+What survives both rules is small:
+
+| tag | level | sprite | kind |
+|---|---|---:|---|
+| `shrinkray` | level1b | 99 | gadget |
+| `invisibility` | level5 | 114 | gadget |
+| `bubblepickup` | level7 | 26 | gadget |
+| `scooterpart` | level1c | 111 | part |
+| `sewerpart` | level1a | 134 | part |
+| `foil` | level1b | 183 | part |
+| `godphone` | level1 | 184 | part |
+
+Gadget vs part is drawn from wiring rather than names: `sewerpart` fires
+`movegoddard` on pickup, and `scooterpart` is the scooter the AMI mode table
+already knows about. `applepie` x3 and `vertitem` are visible and picture-free
+but carry only a `PointValue` and no wiring at all, so there is no evidence they
+are carried rather than simply scored; they stay out.
+
+The icon is the pickup's own `SpriteIndex`. The original fills its inventory
+from `C2DInGameMenu` canvas records that the `hud-draw` certificate is still
+blocked on, but the sprite id is right there in the row — so the art is
+authentic even though the layout is ours.
+
+### 17.3 The HUD already had a gadget panel, drawing nothing
+
+`hud_layout_generated.h` has carried four capture-backed quads tagged `gadget`
+since the frame-8881 extraction — a 64x64 body with its right edge, bottom edge
+and corner, bottom-left of the screen. They have been drawing as an empty bezel
+ever since, because nothing ever put anything in them. The selected gadget's
+sprite now goes inside, inset so the frame still reads as a frame.
+
+Empty-handed draws nothing extra, which is both what the panel always looked
+like and why `level1`'s goldens are unmoved: those frames are captured before
+anything has been picked up.
+
+### 17.4 The action menu — "AMI", the original's own word for it
+
+`JimmyEnterActionMenuLock` (`00425ef0`) and its reverse (`00425b20`) are
+recovered, and `SelectJimmyGadgetOrVRMode` (`00428d50`) logs `"CAll in AMI %d"`
+on entry and `"Exiting AMI"` on the way out.
+
+Most of both bodies is traffic to Jimmy's `0xa18` — a code-created
+`C2DInGameMenu` that is simultaneously the HUD overlay and the gadget command
+endpoint, addressed through eighteen vtable slots. **None of that is ported and
+none of it should be.** The `C3DJimmy/gadget-mode-dispatch` certificate is
+`linked-blocked` precisely because native has no such controller; building a
+fake one would certify a different design.
+
+What survives translation is the observable half, in the decompiled order: the
+`DAT_004ec494 && !DAT_004f8181` guard, the open latch, the pause, the cursor
+(shown on enter unless the argument is `2` — what `2` means was not recovered,
+so it stays a parameter rather than being folded away), the gadget-cooldown
+clear, and the `DAT_004f8434` / `DAT_004f8182` flips.
+
+The pause is not a new mechanism. `main` already freezes the entire simulation
+while the front-end menu or the QA browser is open; the action menu joins that
+same gate, which is the native analogue of global game slot `0x168(1)`.
+
+### 17.5 The AMI tables, and a free cross-check
+
+`00428d50` is one switch over the request id. Every arm writes `DAT_004f0588`
+and, when the game-type probe returns `2`, routes to a VR level through
+`(vrNN.gam, "PHONEBOOTH", ...)`:
+
+| id | mode | VR route |
+|---:|---:|---|
+| 0 | 0 *(or -1 on the other arm)* | vr01 |
+| 1 | 1 — Rocket | vr02 |
+| 2 | 2 *(or -1 on the other arm)* | vr03 |
+| 3 | *(default arm, no mode write)* | vr04 |
+| 4 | 4 | vr05 |
+| 5 | 5 | vr06 |
+| 6 | 6 — aim/shoot | vr07 |
+| 7 | 7 | vr08 |
+| 8 | *(no mode write)* | — |
+
+The routes are a clean `id -> vr(id+1)` ladder, and that is worth stating
+because it is an **independent cross-check**: `CMainMenu`'s already-`linked`
+level-routing table carries the same eight VR levels, recovered separately, and
+the two agree.
+
+Only two modes are named in the port. Mode 1 is Rocket — its arm traces
+`"Activating Rocket"` / `"ACT 2 Rocket"` and plays `DRIVE`. Mode 6 is aim/shoot
+— the controller update clamps pitch to `[0,45]`, builds `(0, aim+80, 45)`
+through slot `0x384`, and uses `SHOOT`. The rest keep their numbers with the
+evidence in a comment; naming them would be interpretation dressed as fact.
+
+### 17.6 What is deliberately missing
+
+**Which AMI id a given gadget corresponds to.** That mapping lives in the
+`C2DInGameMenu` canvas records the `hud-draw` certificate is blocked on. So the
+menu selects a gadget (native chrome, our layout) and the AMI table is exposed
+separately for callers holding a real id. The two are not joined by a guess,
+because a guess there is exactly what would make a future oracle certify the
+wrong thing.
+
+### 17.7 Evidence
+
+`tools/verify_gadget_menu.py` holds its own copy of both the AMI table and the
+expected grants, read off the evidence rather than off the engine, so a
+transcription slip in either place shows up as a disagreement rather than as
+agreement with itself.
+
+- `JN_TEST_AMI=1` drives all nine ids through the real `ami_dispatch()`; all
+  nine modes and routes match.
+- Seven tag/level pairs collect through the `JN_TEST_PICTURES` sweep and land
+  in the inventory with the right kind.
+- The negative holds: `wrench1`, `wrench2`, `passcard`, `water2` and `hydrant`
+  grant no inventory slot at all.
+- `foil` and `refill` are `InitallyActive=0` and correctly stay out of a cold
+  sweep's reach — the gate from §16.2 doing its job.
+
+### 17.8 Not settled
+
+Whether the `2` that suppresses the cursor on enter is the same `2` that
+suppresses hiding it on exit (`controller+0x4d4`). Both are unrecovered, and
+native has no controller to ask, so the exit path always restores the cursor.
+
+### 17.9 Correction: the art names the item, not the tag (2026-08-20, same day)
+
+Owner, playing the build within the hour: *"so i collected the jetpack, shows
+up as shrink ray in the inventory."*
+
+They were right. §17.2 built its table on the `.gam` **ObjectTag** and never
+looked at what the pickup actually *draws*. `sprites.omt` canvases carry the
+**artist's own name**, and it disagrees with the designer's tag on every row in
+the table — and on three of them it disagrees about what the object *is*:
+
+| ObjectTag | sprite | artist's canvas name | agree? |
+|---|---:|---|---|
+| `shrinkray` | 99 | **Jetpack 1** | no |
+| `invisibility` | 114 | **yokpart** | no |
+| `bubblepickup` | 26 | **bubshadw** | no |
+| `scooterpart` | 111 | wheel | yes, in substance |
+| `sewerpart` | 134 | CompPart | yes, in substance |
+| `godphone` | 184 | phone | yes |
+| `foil` | 183 | foil | yes |
+
+The player is looking at the art. So the canvas names anything shown to them,
+and the ObjectTag stays what it always was: the key that finds the row in the
+corpus.
+
+The name was already being read out of `sprites.json` by
+`gen_sprite_chunk_map.py` and then thrown away into a C comment. It is a real
+field now, and `[INVDUMP]` prints both, so this class of disagreement is
+visible from a console screenshot instead of silent.
+
+**This also corrects §17.1.** That section said four of the old table's nine
+tags "match no ObjectTag anywhere in the corpus", and used it to call the table
+invention. The count is right and `watergun`, `glasses` and `burpgun` have no
+canvas either — but `jetpack` was not invention. It named a real item that is
+really in level1b; it was keyed on the wrong field, which is the same mistake
+§17.2 then made in the other direction. The old table knew something this one
+had to be told.
+
+**Open, and an owner call rather than mine:** whether `invisibility` (drawing
+`yokpart`) and `bubblepickup` (drawing `bubshadw` — a bubble *shadow*, odd art
+for a pickup) are gadgets at all, or quest parts like `scooterpart`. The three
+rows I classified as gadgets are exactly the three where tag and art disagree,
+which is not a comfortable coincidence. Only the jetpack is unambiguous.
+
+### 17.10 Correction: New Game did not clear the inventory
+
+Same session: *"we start every level with shrinkray anyway."*
+
+`gamestate_new_game()` cleared `pic_count` and the `pickup_taken` table and said
+so in its log line, but never touched the inventory, so gadgets survived into
+the next run and every level looked like it began with them in hand.
+
+Not a deliberate carry-over. The picture flags are preserved across levels on
+purpose and there is a comment arguing why — level1b gates on a picture only
+level2 awards, so clearing per level would make the shipped corpus
+uncompletable. The inventory was simply never mentioned. Nothing wants a gadget
+to outlive a New Game.
+
+Note that the pickup remains ~4300 units from level1b's `STARTEXP` spawn, so it
+was never being auto-collected; the inventory really was surviving from an
+earlier run.
+
+---
+
+## 18. The eight gadgets (2026-08-20)
+
+Owner, naming the set from the retail game: *"so we should have jetpack,
+shrinkray, bubble, grappler, remote goddard, rocket, scooter, invisibility."*
+
+§17 found two of those by scanning `3PIC` rows, which was the wrong net.
+**Five of the eight are never placed in level data at all** — they are objects
+the executable creates in code, so a corpus scan cannot see them. What the
+corpus shows is at most the *pickup*, and only for three.
+
+### 18.1 The map
+
+| # | Gadget | Gadget object | FourCC | Ctor | Placed | Pickup that grants it | Jimmy alias |
+|---|---|---|---|---|---:|---|---|
+| 1 | Jetpack | `C3DJetpackFire` (the flame) | `3JFI` | `00421d80` | 0 | `3PIC` `shrinkray`, level1b, art `Jetpack 1` | `HIFLY` → `jimfly.ase` |
+| 2 | Shrink ray | `C3DShrinkRay` | `3SHR` | `0043fe20` | 0 | — none in corpus — | `HISHOOT` → `jimshoot.ase` |
+| 3 | Bubble | `C3DBubble` | `3BUB` | `00410840` | 0 | `3PIC` `bubblepickup`, level7 | — |
+| 4 | Grappler | `C3DGraplingHook` | `3GRA` | `0041eeb0` | 0 | — none — | — |
+| 5 | Remote Goddard | `C3DGoddard` | `3GOD` | `0041c810` | 0 | — code-spawned, Jimmy `0x95c` — | — |
+| 6 | Rocket | `C3DRocketShip` | `3ROC` | `0043d840` | 32 | placed directly | `HIDRIVE` → `jimdrive.ase` |
+| 7 | Scooter | `C3DJeep` | `3JEE` | `004211a0` | 0 | — code-spawned, Jimmy `0x970` — | `HISCOOT` / `HISCOOTSTOP` |
+| 8 | Invisibility | *no class registered* | — | — | — | `3PIC` `invisibility`, level5, art `yokpart` | — |
+
+Related classes that are not the gadget itself: `3BUP` `C3DBubblePickup`,
+`3HOO` `C3DHook` (what the grappler attaches *to* — one placement, level4b),
+`3RCK` `C3DRocket` (the AI patrol rocket), `3PAS` `C3DPASSCARD`, `3MEP`
+`C3DMetalPickup`, `3HEL`/`3YHE` helmets, `3BAS`/`3BPU` baseball.
+
+### 18.2 The scooter is `C3DJeep`, and Goddard is the scooter
+
+The class name and FourCC say Jeep. `InitObjectJeep` (`004213f0`) loads
+`omt\scooter.omt`; `UpdateJeep` (`00421580`) switches an attached child between
+`SCOOT` and `SCOOTSTOP`; the repo carries parsed `scooter.omt`,
+`jimscooter.ASE`, `jimscooterstop.ASE`, `godscooter.ASE`.
+
+Two facts settle what the player sees:
+
+- `scooter.omt` contains **exactly two textures**: `scooterwheel2` and
+  **`goddard128`**.
+- Goddard's animation table registers `HISCOOT -> godscooter.ASE`, beside
+  `HIROCK -> godrocket.ASE` and `HIFLY -> godfly.ASE`.
+
+Goddard *is* the scooter — he transforms into it. That is why the vehicle
+carries his texture, and why `jimscooter.ASE` contains only the node `01jimmy`
+with no vehicle mesh anywhere in it. The Jeep is the physics body, Goddard is
+the bodywork, Jimmy is the pose on top. It also explains why
+`JimmySetupOrReset` spawns the two together, Goddard at `0x95c` and the hidden
+Jeep at `0x970`.
+
+`3GRA` is spelled `C3DGraplingHook` in the original — one L. It binds
+`rope01.ase` under shape `HIROPE`, textures it `jimycarl.png`, and tags the
+state `ROPE`.
+
+### 18.3 Which AMI modes are pinned
+
+Three of the eight are tied to an action mode by a recovered body:
+
+- **mode 1 = rocket** — the arm traces `"Activating Rocket"` / `"ACT 2 Rocket"`
+  and plays `DRIVE`
+- **mode 6 = shrink ray** — aim/shoot, pitch clamped `[0,45]`, `SHOOT`; and
+  vr07, which AMI id 6 routes to, is the only VR level with no collectables and
+  six `C3DMovingTarget`s
+- **mode 5 = remote Goddard** — `C3DMetalPickup` points the companion at a can
+  with mode 5 and releases it back to mode 2
+
+Eight gadgets, eight AMI ids, eight VR levels is a tempting correspondence and
+probably the real one, but only the shrink ray is proven, so the other five are
+not written into the table on symmetry alone.
+
+### 18.4 The scooter, ported
+
+`vt_scooter` (`behavior_scooter.c`) mirrors the original's lifecycle: one
+instance code-spawned hidden per level next to Goddard, revealed and mounted
+when the action menu selects it, hidden again on dismount. That is the first
+thing the action menu actually *does*.
+
+Ported constants are the ones the decompiled bodies pin: the constructor's
+`drive_state = 1` seed, and the `0.3s` child-animation refresh from `UpdateJeep`
+— the refresh is genuinely on a timer rather than a state edge, so a stop/start
+inside one interval does not restart the clip. Speeds and turn rates are **not**
+recovered: they come from vehicle-database entry 0 of `scooter.omt`, and our
+parse of that file holds only its two textures. Those are tuned and grouped at
+the top of the file.
+
+Jimmy gets two new poses, `PA_SCOOT` and `PA_SCOOTSTOP`, appended so every
+existing `PlayerAnim` keeps its value, mapping to the aliases `HISCOOT` and
+`HISCOOTSTOP` the decomp already documented.
+
+**The scooter grant, confirmed (2026-08-20).** Owner: *"there is a wheel part
+placement for the house map, level1 somewhere A-E. that typically grants it."*
+It holds — `sprites.omt` chunk 111, the canvas named `wheel`, has **exactly one
+placement in all 35 levels**: `SCOOTERPART` in level1c, whose start points are
+`FRONTDOOR` and `BACKDOOR`, the Neutron house interior. No other candidate
+exists. It is both a part and a gadget, like `invisibility`.
+
+### 18.6 The scan that should have run first
+
+Confirming that exposed a flaw in how §17 and §18.1 were built. Both grouped
+`3PIC` rows by **ObjectTag** and skipped rows carrying the default tag
+`c3dpickupitem` — which is most of the corpus. Any pickup with distinctive art
+under a generic tag was invisible to the method.
+
+Re-running the sweep grouped by **sprite** instead finds nothing new: every
+generic-tagged row is a consumable — apple, coins, candy, soda, flower,
+candybar, bone, vase, egg, cards, coal, cake, burger, banana, cookies, gems,
+stars. The one-off art rows are exactly the seven already in the table, plus
+`wrench` (×2) and `pass`, which §17.2's picture rule already excluded.
+
+So the table was right and the method was not, and only luck kept those two
+facts together. **Group pickups by art, not by tag** — the tag is the level
+designer's note and is frequently just the class default, while the sprite is
+always there and is what the player sees.
+
+### 18.5 Still missing
+
+The shrink ray, grappler and remote Goddard have no pickup anywhere in the
+corpus and no way to acquire them; Goddard at least already exists natively with
+a mode API. The shrink ray is the odd one: there is no `3SHR` placement and no
+pickup that grants it, so on current evidence it is **not obtainable from the
+shipped level data at all** — it must be granted by task/story logic. Worth
+knowing before anyone builds its firing path.
+
+---
+
+## 19. All eight gadgets, running (2026-08-20)
+
+§18 mapped the eight and ported one. This ports the rest. Five of the eight are
+objects the executable creates in code and never places in level data, so each
+had to be stood up rather than loaded.
+
+### 19.1 What each one is, and what is actually recovered
+
+| Gadget | Object | Ported from | Tuned |
+|---|---|---|---|
+| Jetpack | `3JFI` `C3DJetpackFire` | the fly path's `FLY`/`HIFLY` and its 5.0s window | thrust, hover fall |
+| Shrink ray | `3SHR` `C3DShrinkRay` | `ray.ASE` under alias `HIRAY`; textures `ray0000..0002` cycled on a **0.1s** timer (fields `0x5fc`/`0x600`) | ray speed, reach, cooldown |
+| Bubble | `3BUB` `C3DBubble` | the whole `UpdateBubbleState` machine — see below | drift |
+| Grappler | `3GRA` `C3DGraplingHook` | `rope01.ASE` under `HIROPE`, `jimycarl.png`, scale **10.0**, tag `ROPE`; targets are `3HOO` | reach, pull speed |
+| Remote Goddard | `3GOD` `C3DGoddard` | the mode protocol `C3DMetalPickup` uses: **5** = fetch that object, **2** = release and follow | — |
+| Rocket | `3ROC` `C3DRocketShip` | already rideable; the menu now boards it | — |
+| Scooter | `3JEE` `C3DJeep` | §18.2 | speeds |
+| Invisibility | *no class* | nothing — no class is registered anywhere | all of it |
+
+The bubble is the one where the decomp gave us everything. `UpdateBubbleState`
+is three phases and they are ported exactly: **grow**, transition scale rises to
+1.0 then hands over; **steady pulse**, offset `sin(t * 10.0) * 30.0` applied to
+the **height only** while the width holds at `SpriteSize`; **fade**, transition
+falls `1.0 → 0.0` and the object hides. `SpriteSize` is the constructor's 240,
+and the sprite is `RetainedSprites.omt` chunk 1, `orangebubble`.
+
+Only three action modes are asserted, because only three are pinned by a
+recovered body: rocket = 1, remote Goddard = 5, shrink ray = 6. The other five
+gadgets leave `DAT_004f0588` alone rather than guess an id.
+
+### 19.2 The shrink ray's second half is design, not port
+
+`C3DShrinkRay` only animates the ray. The owner-confirmed effect — fired at
+Dino, Darwin fish, girl-eating plant or Humphrey, the target plays `HISHRINK`,
+scales down and becomes a small moving pickup — lives in a hit/contact body that
+was never decompiled. So the ray is a port and the consequence is native design:
+the target scales to 30% over 0.6s and becomes a collectable worth 100.
+
+Making that work needed one engine addition: `Entity.draw_scale`, a per-entity
+uniform mesh scale (0 = unset = 1.0). There was no way to scale a single entity
+before — only a per-type constant in the visual table.
+
+### 19.3 Nothing is shootable in a cold run, and that is correct
+
+Every shrinkable creature in the corpus authors a `RequiredLevel` between 10 and
+260 — they are story-gated, and a `--level` free-roam entry legitimately has
+none of them active. The runtime test has to un-gate one to exercise the hit
+path at all. Worth writing down before someone reads "the shrink ray does
+nothing" as a bug.
+
+### 19.4 How you get them
+
+Four of the eight — shrink ray, grappler, remote Goddard, rocket — have **no
+pickup anywhere in the 35 levels**. The original grants them through task/story
+logic nobody has recovered, so there is nothing faithful to port.
+`JN_TEST_GADGETS=1` and the sandbox toggle grant the whole set. That is a
+stand-in for testing and free play, and is labelled as one in the source; it is
+not a claim about how the game hands them over.
+
+The four that *are* obtainable come from the corpus: jetpack (level1b),
+bubble (level7), invisibility (level5), scooter (level1c's wheel).
+
+### 19.5 Evidence
+
+`JN_TEST_GADGETRUN=1` activates each gadget in turn, pulls its trigger, and
+counts the object it is supposed to have produced **by FourCC** — so a passing
+line means that specific spawn path ran, not merely that a toggle flipped:
+
+```
+jetpack       on=1 fired=0 mode=-1 3JFI=1
+shrinkray     on=1 fired=1 mode= 6 3SHR=1
+bubble        on=1 fired=1 mode=-1 3BUB=1
+grappler      on=1 fired=1 mode=-1 3GRA=1     (level4b, standing at HOOK1)
+goddard       on=1 fired=0 mode= 5 ----=0
+rocket        on=1 fired=0 mode= 1 ----=0
+scooter       on=1 fired=0 mode=-1 ----=0
+invisibility  on=1 fired=0 mode=-1 ----=0
+```
+
+and the shrink ray end to end:
+
+```
+[SHRINKRAY] hit 3HUM 'C3DHUMPHREY' -> HISHRINK
+[SHRINKRAY] 3HUM 'C3DHUMPHREY' is a pickup now
+[SHRINKTEST] fired=1 scale=0.30 pts=100
+```
+
+Two artefacts the first version of that test produced, kept here because both
+looked like gadget bugs and were not: every gadget reporting one object was the
+*previous* gadget's ray still in flight, and bubble/grappler reporting
+`fired=0` was the shared fire cooldown from the shrink ray blocking them. The
+test now settles between gadgets.
+
+### 19.6 Still open
+
+`C3DJetpackFire` has one owned method and no recovered assets, so the flame is
+drawn with the shared smoke sprite until someone recovers its own. The grappler
+pulls Jimmy along a straight line rather than swinging. And `3HOO` has exactly
+one placement in the whole corpus, in level4b, ~10600 units from that level's
+start — so the grappler has precisely one authored thing to grab.

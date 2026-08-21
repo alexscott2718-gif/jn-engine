@@ -75,6 +75,34 @@ extern const EntityVTable vt_helmet;          /* 3HEL — C3DHelmet */
 extern const EntityVTable vt_metal_pickup;    /* 3MEP — C3DMetalPickup */
 /* Wave N4 — vehicles. */
 extern const EntityVTable vt_rocket;          /* 3ROC — C3DRocketShip (player-rideable) */
+extern const EntityVTable vt_scooter;         /* 3JEE — C3DJeep, the scooter gadget */
+extern const EntityVTable vt_shrinkray;       /* 3SHR — C3DShrinkRay, the fired ray */
+extern const EntityVTable vt_bubble;          /* 3BUB — C3DBubble */
+extern const EntityVTable vt_grapple_rope;    /* 3GRA — C3DGraplingHook rope */
+
+/* The eight gadgets (docs/picture_flag_wiring_plan.md section 18). */
+enum {
+    GADGET_NONE = 0, GADGET_JETPACK, GADGET_SHRINKRAY, GADGET_BUBBLE,
+    GADGET_GRAPPLER, GADGET_GODDARD, GADGET_ROCKET, GADGET_SCOOTER,
+    GADGET_INVISIBILITY
+};
+int  behavior_gadget_activate(const char *tag, World *w);
+void behavior_gadgets_update(World *w, float dt);
+int  behavior_gadget_fire(World *w);   /* the trigger, for input and tests */
+void behavior_gadgets_reset(void);
+int  behavior_gadget_active(void);
+int  behavior_gadget_invisible(void);
+const char *behavior_gadget_name(int gadget);
+/* Bubble draw size: width holds, height carries the sin(t*10)*30 wave, both
+   scaled by the grow/fade transition. */
+void behavior_bubble_size(const Entity *e, float *w, float *h, float *alpha);
+/* The scooter is never placed in level data: JimmySetupOrReset code-spawns it
+   hidden at Jimmy 0x970 and reveals it on demand. ensure() is that spawn. */
+Entity *behavior_scooter_ensure(World *w);
+Entity *behavior_scooter_get(void);
+int     behavior_scooter_riding(void);
+int     behavior_scooter_activate(void);   /* action-menu selection; toggles */
+void    behavior_scooter_reset(void);
 extern const EntityVTable vt_ai_vehicle;      /* 3SUV/3SBU/3SAI — self-driving C3DAI vehicles */
 /* Wave N5 — scripted cutscene cameras. */
 extern const EntityVTable vt_cutscene_camera; /* 3CAM — C3DCutSceneCamera (shot) */

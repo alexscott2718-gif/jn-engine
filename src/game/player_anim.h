@@ -23,7 +23,11 @@ typedef enum {
     PA_FENCE     = 14,  /* recovered player special-state animation */
     PA_SPLAT     = 15,  /* recovered Jimmy impact/splat reaction */
     PA_HIT       = 16,  /* recovered Jimmy hit reaction */
-    PA_COUNT     = 17
+    PA_SCOOT     = 17,  /* riding the scooter -- Jimmy alias HISCOOT */
+    PA_SCOOTSTOP = 18,  /* stopped on the scooter -- HISCOOTSTOP */
+    PA_FLY       = 19,  /* jetpack flight -- Jimmy alias HIFLY */
+    PA_SHOOT     = 20,  /* shrink-ray fire -- HISHOOT */
+    PA_COUNT     = 21
 } PlayerAnim;
 
 typedef struct {

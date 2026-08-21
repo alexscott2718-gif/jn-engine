@@ -46,6 +46,14 @@ const char *sprite_chunk_path(int chunk_id) {
     return sprite_db_path("sprites.omt", chunk_id);
 }
 
+const char *sprite_chunk_name(int chunk_id) {
+    for (int i = 0; i < SPRITE_CHUNK_MAP_N; i++)
+        if (SPRITE_CHUNK_MAP[i].chunk_id == chunk_id &&
+            strcasecmp(SPRITE_CHUNK_MAP[i].db, "sprites.omt") == 0)
+            return SPRITE_CHUNK_MAP[i].name;
+    return "";
+}
+
 /* JNBG sprites.omt chunk 106 is the canvas literally named "hidden": the
    editor's stand-in for pickups whose visible referent is something else
    (level geometry hydrant/nests/rocket pads, the 3KIT cat...). The original
@@ -250,6 +258,17 @@ static const TypeEntry TYPE_TABLE[] = {
     { "3KIT", { "assets/ase/catsit.ASE",      "assets/png/cat.png", 1.0f, 0 } },
     { "3NIC", { "assets/ase/nickstop.ASE",    NULL, 1.0f, 0 } },
     { "3GOD", { "assets/ase/godsit.ASE",      "assets/png/goddard02.png", 1.0f, 0 } },
+    /* The scooter is Goddard transformed, not a separate vehicle: scooter.omt
+       carries only `scooterwheel2` and `goddard128`, and Goddard's animation
+       table registers HISCOOT -> godscooter.ASE. So 3JEE wears the
+       Goddard-as-scooter mesh with Goddard's skin. See plan section 18.2. */
+    { "3JEE", { "assets/ase/godscooter.ASE", "assets/png/goddard02.png", 1.0f, 0 } },
+    /* C3DShrinkRay binds ray.ASE under alias HIRAY. Its texture is picked
+       per-frame from the 0..2 cycle -- see the 3SHR override in
+       entity_visual_resolve. */
+    { "3SHR", { "assets/ase/ray.ASE",        "assets/png/ray0000.png", 1.0f, 0 } },
+    /* C3DGraplingHook: rope01.ase under HIROPE, jimycarl.png, scale 10.0. */
+    { "3GRA", { "assets/ase/rope01.ASE",     "assets/png/jimycarl.png", 10.0f, 0 } },
     /* Yokian guard/soldier ASEs carry no material bitmap; the classes attach
        yokguard.png / yoksold.png in code (decomp C3DYokianGuard.md /
        C3DYokianSoldier.md). Without the explicit texture every guard and
@@ -633,7 +652,51 @@ int entity_visual_tag_override(const Entity *e, EntityVisual *out) {
     return 0;
 }
 
+/* The bubble draws from RetainedSprites.omt chunk 1 "orangebubble", which is
+   not in the generated sprites/icons chunk map, so it is named directly. */
+#define BUBBLE_SPRITE \
+    "assets/parsed/RetainedSprites/RetainedSprites_images/0009_146x146d32.png"
+
 int entity_visual_resolve(const Entity *e, EntityVisual *out) {
+    /* Gadget objects the executable creates in code. They carry per-entity
+       animation state, so they resolve here rather than from the static table
+       alone. */
+    if (strncmp(e->type, "3BUB", 4) == 0) {
+        memset(out, 0, sizeof(*out));
+        out->sprite_path = BUBBLE_SPRITE;
+        out->sprite_size = 240.0f;      /* C3DBubble ctor SpriteSize */
+        out->tint_r = out->tint_g = out->tint_b = 1.0f;
+        out->tint_a = 1.0f;             /* the draw site applies the fade */
+        return 1;
+    }
+    if (strncmp(e->type, "3JFI", 4) == 0) {
+        /* C3DJetpackFire has one owned method and no recovered assets; the
+           flame is drawn as the shared smoke/effect sprite until it is. */
+        memset(out, 0, sizeof(*out));
+        out->sprite_path =
+            "assets/parsed/RetainedSprites/RetainedSprites_images/0001_64x64d32.png";
+        out->sprite_size = 90.0f;
+        out->tint_r = 1.0f; out->tint_g = 0.75f; out->tint_b = 0.30f;
+        out->tint_a = 1.0f;
+        return 1;
+    }
+    if (strncmp(e->type, "3SHR", 4) == 0) {
+        /* Slot 241 advances texture_frame_index 0..2 on a 0.1s timer; the
+           entity carries the index and the texture follows it. */
+        static const char *RAY_FRAMES[3] = {
+            "assets/png/ray0000.png",
+            "assets/png/ray0001.png",
+            "assets/png/ray0002.png",
+        };
+        memset(out, 0, sizeof(*out));
+        out->model_path = "assets/ase/ray.ASE";
+        int f = e->user_flag;
+        if (f < 0 || f > 2) f = 0;
+        out->texture_path = RAY_FRAMES[f];
+        out->scale = 1.0f;
+        return 1;
+    }
+
     if (!e || !out) return 0;
 
     /* Sandbox: draw the rideable rocketship (C3DRocketShip) with its Strato

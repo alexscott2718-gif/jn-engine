@@ -76,7 +76,8 @@ int gamestate_has_tool(const char *tag) {
     return 0;
 }
 
-int gamestate_grant_tool(const char *tag, const char *icon_path) {
+static int inventory_add(const char *tag, const char *icon_path,
+                         int sprite_index, int kind) {
     if (!tag || !tag[0]) return 0;
     if (gamestate_has_tool(tag)) return 0;
     if (g_state.inventory_count >= INVENTORY_MAX) {
@@ -86,8 +87,53 @@ int gamestate_grant_tool(const char *tag, const char *icon_path) {
     InventorySlot *s = &g_state.inventory[g_state.inventory_count++];
     snprintf(s->tag, sizeof(s->tag), "%s", tag);
     s->icon_path = icon_path;
-    printf("[INVENTORY] +tool '%s' (slot %d)\n", s->tag, g_state.inventory_count);
+    s->sprite    = sprite_index;
+    s->kind      = kind;
+    printf("[INVENTORY] +%s '%s' (slot %d)\n",
+           (kind & (INV_KIND_GADGET | INV_KIND_PART)) ==
+               (INV_KIND_GADGET | INV_KIND_PART) ? "part+gadget" :
+           (kind & INV_KIND_GADGET) ? "gadget" : "part",
+           s->tag, g_state.inventory_count);
     return 1;
+}
+
+int gamestate_grant_tool(const char *tag, const char *icon_path) {
+    return inventory_add(tag, icon_path, -1, INV_KIND_GADGET);
+}
+
+int gamestate_grant_gadget(const char *tag, int sprite_index, int kind) {
+    return inventory_add(tag, NULL, sprite_index, kind);
+}
+
+int gamestate_gadget_count(void) {
+    int n = 0;
+    for (int i = 0; i < g_state.inventory_count; i++)
+        if (g_state.inventory[i].kind & INV_KIND_GADGET) n++;
+    return n;
+}
+
+const InventorySlot *gamestate_gadget_at(int i) {
+    if (i < 0) return NULL;
+    for (int k = 0; k < g_state.inventory_count; k++) {
+        if (!(g_state.inventory[k].kind & INV_KIND_GADGET)) continue;
+        if (i-- == 0) return &g_state.inventory[k];
+    }
+    return NULL;
+}
+
+const InventorySlot *gamestate_active_gadget(void) {
+    if (g_state.active_tool < 0 || g_state.active_tool >= g_state.inventory_count)
+        return NULL;
+    const InventorySlot *s = &g_state.inventory[g_state.active_tool];
+    return (s->kind & INV_KIND_GADGET) ? s : NULL;
+}
+
+void gamestate_set_active_gadget(int gadget_ordinal) {
+    if (gadget_ordinal < 0) return;
+    for (int k = 0; k < g_state.inventory_count; k++) {
+        if (!(g_state.inventory[k].kind & INV_KIND_GADGET)) continue;
+        if (gadget_ordinal-- == 0) { g_state.active_tool = k; return; }
+    }
 }
 
 const char *gamestate_active_tool_tag(void) {
@@ -214,7 +260,18 @@ void gamestate_new_game(void) {
     memset(g_state.pic_count, 0, sizeof g_state.pic_count);
     memset(g_state.pickup_taken, 0, sizeof g_state.pickup_taken);
     g_state.pickup_taken_count = 0;
-    printf("[PICTURE] new game: picture counts and collected pickups cleared\n");
+    /* The inventory has to go too. Everything else here was already cleared
+       and argued for; the inventory was simply never mentioned, so gadgets
+       from the previous run survived into the new one and every level looked
+       like it started with them already in hand. That is not the deliberate
+       carry-over the picture flags get -- those outlive a level on purpose,
+       because level1b gates on a picture only level2 awards. Nothing wants a
+       gadget to outlive a New Game. */
+    memset(g_state.inventory, 0, sizeof g_state.inventory);
+    g_state.inventory_count = 0;
+    g_state.active_tool = 0;
+    printf("[PICTURE] new game: picture counts, collected pickups, "
+           "and inventory cleared\n");
 }
 
 int gamestate_pregrant_pictures(const char *level) {

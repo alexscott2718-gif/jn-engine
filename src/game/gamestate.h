@@ -35,9 +35,24 @@ typedef struct {
     int  taken;                    /* the stored state; 0 once cleared */
 } PickupTakenSlot;
 
+/* What an inventory slot is for. Flags, not an enum: "does the action menu
+   offer it" and "does progression need it" are independent questions, and at
+   least one pickup answers yes to both -- level5's invisibility is a quest part
+   AND a gadget pickup (owner, 2026-08-20). An enum forced a choice that the
+   game does not.
+
+   Which pickups qualify is read off the .gam corpus, not off the names -- see
+   the GADGET_GRANTS table in behavior_item.c. */
+#define INV_KIND_PART   1
+#define INV_KIND_GADGET 2
+
 typedef struct {
-    char        tag[24];     /* tool/key identity, e.g. "watergun1" */
-    const char *icon_path;   /* HUD icon (static string), NULL = generic */
+    char        tag[24];     /* tool/key identity, e.g. "shrinkray" */
+    const char *icon_path;   /* HUD icon (static string), NULL = use sprite */
+    int         sprite;      /* the pickup's own SpriteIndex, -1 if none.
+                                Resolved to a PNG in hud.c: gamestate must not
+                                depend on entity_visual.c. */
+    int         kind;        /* INV_KIND_* */
 } InventorySlot;
 
 typedef struct {
@@ -114,6 +129,18 @@ int  gamestate_player_is_down(void);
 /* Inventory (Step 4). Grant a tool slot identified by tag (deduped); icon_path
    is a static string used by the HUD (may be NULL). Returns 1 if newly added. */
 int  gamestate_grant_tool(const char *tag, const char *icon_path);
+/* As grant_tool, but records the pickup's sprite id and its gadget/part kind.
+   grant_tool is the thin wrapper: no sprite, INV_KIND_GADGET. */
+int  gamestate_grant_gadget(const char *tag, int sprite_index, int kind);
+/* Menu-selectable gadgets only, in inventory order. count() is what the action
+   menu lists; at(i) returns the slot or NULL. */
+int  gamestate_gadget_count(void);
+const InventorySlot *gamestate_gadget_at(int i);
+/* The gadget the action menu has selected, or NULL when the active slot is a
+   part or the inventory is empty. set() takes an ordinal into the gadget list
+   (what gadget_at indexes), not an inventory index. */
+const InventorySlot *gamestate_active_gadget(void);
+void gamestate_set_active_gadget(int gadget_ordinal);
 int  gamestate_has_tool(const char *tag);
 /* Active-tool selection. tag() returns the selected slot's tag ("" if none);
    cycle() advances to the next owned slot (wraps). Exported to the web UI. */

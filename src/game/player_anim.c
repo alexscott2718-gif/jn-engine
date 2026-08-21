@@ -24,6 +24,10 @@ static const char *POSE_PATHS[PA_COUNT] = {
     "assets/ase/jimfence.ASE",
     "assets/ase/jimsplat.ASE",
     "assets/ase/jimhit.ASE",
+    "assets/ase/jimscooter.ASE",
+    "assets/ase/jimscooterstop.ASE",
+    "assets/ase/jimfly.ASE",
+    "assets/ase/jimshoot.ASE",
 };
 
 static const char *POSE_DISPATCH_NAMES[PA_COUNT] = {
@@ -44,6 +48,10 @@ static const char *POSE_DISPATCH_NAMES[PA_COUNT] = {
     "FENCE",
     "SPLAT",
     "HIT",
+    "SCOOT",
+    "SCOOTSTOP",
+    "FLY",
+    "SHOOT",
 };
 
 static unsigned int g_shared_tex = 0;
@@ -92,7 +100,8 @@ static int anim_loops(PlayerAnim a) {
     return a == PA_IDLE || a == PA_RUN || a == PA_LEFT ||
            a == PA_RIGHT || a == PA_BACKPEDAL || a == PA_FALL ||
            a == PA_SWING || a == PA_TALK ||
-           a == PA_DRIVE;
+           a == PA_DRIVE || a == PA_SCOOT || a == PA_SCOOTSTOP ||
+           a == PA_FLY;
 }
 
 int player_anim_is_special(PlayerAnim a) {

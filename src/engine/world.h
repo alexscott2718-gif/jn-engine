@@ -115,6 +115,9 @@ typedef struct Entity {
                                     and a re-armed pickup must not be counted
                                     twice. */
     float user_float;            /* per-type: phase, timer, ... */
+    float draw_scale;            /* per-entity uniform mesh scale; 0 = unset
+                                    (treated as 1.0). The shrink ray drives
+                                    this down on its targets. */
     float hp;                    /* enemy/destructible health points (0 = unset) */
     GamProp props[ENTITY_MAX_PROPS]; /* generic .gam property bag (see above) */
     int    nprops;

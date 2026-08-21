@@ -54,6 +54,10 @@ int  entity_visual_sandbox_enabled(void);
    sprites.omt shorthand used by the pickup draw path. */
 const char *sprite_db_path(const char *db, int chunk_id);
 const char *sprite_chunk_path(int chunk_id);
+/* The artist's own name for that canvas, "" if unknown. This is what the
+   player sees, and it does not always match the .gam ObjectTag -- see the
+   header of sprite_chunk_map_generated.h. */
+const char *sprite_chunk_name(int chunk_id);
 
 /* 1 when the entity's authored sprite ref is JNBG sprites.omt chunk 106 —
    the "hidden" canvas: an invisible pickup-trigger stand-in. Draw nothing. */
