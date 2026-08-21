@@ -1,6 +1,7 @@
 # Session note — 2026-08-21: CLoadLevel, and two checks that could not fail
 
-Branch `feat/loadlevel-gate-return`, seven commits on top of `chore/cleanup-2`.
+Branch `feat/loadlevel-gate-return`, ten commits on top of `chore/cleanup-2`
+(PR #28).
 `make check` and `make check-assets` green in the repo Docker image at every
 commit; `level1` and `fixture0` goldens byte-identical throughout (no golden
 was regenerated, and none moved).
@@ -185,6 +186,79 @@ entry line that does not parse — or a map that comes out empty — is now an
 error. After regeneration: map 0 → 200 rows, status `sprite` 7 → 15,
 `no_visual` 91 → 84, "would draw a box" 7 → 0, matching the runtime sweep.
 
+### 6. The race circuit the corpus authors and the checkpoint spec does not list (1132b8b)
+
+`C3DCheckPoint.md` asks in its own open questions: *"Map non-finish checkpoint
+progress (does crossing one arm the next / update a lap?)"*. All **22** shipped
+`3CHK` rows author a `Next` string the Field Map does not list, and in the two
+racing levels they form a closed ordered circuit:
+
+```
+Level2b  startline -> CHECK1 -> CHECK2 -> CHECK2_5 -> CHECK3 -> CHECK4 ->
+         CHECK5 -> CHECK6 -> CHECK7 -> FINISHLINE -> STARTLINE (= startline)
+         plus check1a -> CHECK1, which nothing points at
+level2a  STARTLINE -> CHECK2 .. CHECK9 -> FINISHLINE -> STARTLINE
+VR04     one checkpoint, Next = "none"
+```
+
+The links resolve case-insensitively, matching the class's own `__strcmpi`
+compare against `FINISHLINE`. `FINISHLINE` **closes** the loop in both levels
+rather than ending it — which fits a lap counter, and fits `UpdateCheckPoint`
+returning after the finish branch instead of advancing progress. `CheckAvail`
+is 0 on all 22 rows, so it is per-run state, which is what `Reset` re-arms.
+
+**Not established, and the note says so:** whether `InitObject` (`00414aa0`)
+registers `Next` at all. An authored property no registrar declares is
+serialized and never read, so a dead chain survives the data equally well.
+`Next` is a *per-class* registration in this engine — `C3DYokDoor::InitObject`
+registers it at dword `0x181`, `C3DLaserTrigger::InitObject` beside
+`ItemActive` and `Toggle` — which is what makes it worth asking. Falsifier:
+re-read the registrar calls at `00414aa0`.
+
+Evidence only; `behavior_checkpoint.c` is unchanged. Porting the circuit would
+be design, since the consumer of `Next` is not in the recovered body.
+
+### 7. `C3DShadow` still claims the 22 rows that turned out to be the moving target (47bafac)
+
+265c3b6 rebound `3TAR` to `C3DMovingTarget` on the shipped data. The engine was
+fixed; `C3DShadow.md` was not. It still describes itself as a placeable placed
+22 times with 25 harvested properties — all of which are the moving target's
+(16 rows in `Level3C`, 6 in `VR07`'s shooting range, every one tagged
+`C3DMOVINGTARGET`, authoring `StartPos*`/`DestPos*`/`Speed`/`HitsRequired`/
+`RespawnTime`/`NumPoints`).
+
+Nothing flags it, and the reason is worth writing down: `spec_check` fires
+`FOURCC_OWNED_BY_ANOTHER_CLASS` when a spec disagrees with the registrar scan,
+and the scan agrees with `C3DShadow` — `3TAR` is registered twice and the scan
+attributes it to the site where a name was captured. **So the class that is
+right about `3TAR` is the one that gets flagged**, the annotated baseline entry
+sits under `C3DMovingTarget`, and the wrong half of the pair was never
+corrected.
+
+The `3TAR` cell stays — this class really is one of the two registrars — but
+the page now claims none of the instances, and records that whether a
+`C3DShadow` is ever placed at all is open.
+
+### The sweep that produced 6 and 7, and why it did not become a check
+
+`spec_check` has `NOPROPS_BUT_HARVESTED` — a spec claiming *no* `.gam`
+properties when the corpus authors some. It has nothing for the partial case: a
+field map that lists five properties while the corpus authors eight. I measured
+it (spread-filtered so inherited base properties do not count as omissions):
+
+**8 specs flagged, 2 real.** `3CHK`'s `Next` (§6) and `3TAR`'s ten
+moving-target properties (§7, a mis-attribution rather than a field-map gap).
+The other six are false positives of literal name matching: `3AIT`, `3MCA` and
+`3MUS` document theirs in range notation (`ActivateObject0..4`,
+`MusicIndex0…MusicIndex4`), `3CAM`'s and `STRT`'s are inherited
+`C3DTriggerType`/base properties, and `C3DMerryGo.md` explicitly defers to
+`gam_schema.md` instead of listing any.
+
+A permanent rule would need range-notation expansion and an inheritance model
+to get that ratio down, and would then be worth roughly two findings. I fixed
+the two and did not land the check. If someone wants it later, the shape is
+right and the false-positive classes above are the work.
+
 ---
 
 ## Contradictions found and not resolved
@@ -278,10 +352,14 @@ now records exactly which. Say the word and I will write the row and its note.
    through the menu route and then fires the portal would exercise the
    promotion in `gamestate_request_level_swap` end to end, which is the part
    that is inferred rather than recovered.
-2. **`C3DCheckPoint`.** Same shape as this session's item: `UpdateCheckPoint`
-   (`00414410`) is recovered, native `vt_checkpoint` is a deliberate
-   simplification by its own comment, and the certificate says porting the
-   `FINISHLINE` / race-timer (`DAT_004eefc8`) mechanism is real behavior work.
+2. **`C3DCheckPoint`, now that §6 has mapped the circuits.** `UpdateCheckPoint`
+   (`00414410`) is recovered, `vt_checkpoint` is a deliberate simplification by
+   its own comment, and the certificate says porting the `FINISHLINE` /
+   race-timer (`DAT_004eefc8`) mechanism is real behavior work. The two things
+   that would make it portable rather than invented: the registrar calls at
+   `00414aa0` (does it read `Next`?) and `FUN_004073b0`/`DAT_004eefc8`. Both
+   need the executable. Until then a race port would be design wearing a port's
+   clothes, which is why §6 stopped at evidence.
 3. **`CTrigger`'s watched-list latch** is fully recovered (target 5) and native
    `vt_trig` is a one-shot log stub — but the corpus has one `TRIG` row and no
    static registrar, so a faithful port would be inert. Worth doing for the
