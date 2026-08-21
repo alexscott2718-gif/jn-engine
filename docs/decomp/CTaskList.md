@@ -298,7 +298,14 @@ write's return code and the final table.
 - **`task_entity_state` (getter) returns `-1` on no-match; `FUN_0045fea0` returns
   `0`.** A real behavioral difference in the *getter*, outside this row's scope
   (the setter). Flagged here since both live in the same file and share a doc
-  section — worth resolving before any future `get-task-state` linkage row.
+  section — worth resolving before any future `get-task-state` linkage row. As
+  of 2026-08-21 it also has a live consumer with a stake in the answer: the
+  ported `CLoadLevel` contact gate reads this getter, and the recovered
+  `00457ec0` body compares its result against `-1` — a value this getter is
+  documented here as unable to produce. If the getter is right, that branch is
+  dead code and an unmatched `RequiredTask` reads as state `0`, which blocks
+  the 36 gated `LOAD` rows instead of passing them. See the 2026-08-21 section
+  of `docs/decomp/evidence/cloadlevel_gate_00457ec0.md`.
 - **Empty-tag guard.** `task_set_entity_state` explicitly returns 0 for `tag==""`;
   the decompiled loop has no such guard but would no-op on an empty string anyway
   (no task-state entry is ever named `""`), so this is a defensive no-op, not an

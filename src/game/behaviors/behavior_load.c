@@ -85,9 +85,20 @@ int behavior_load_gate_allows(const Entity *e) {
 
     long state = load_task_state(task);
     if (state < 0) {
-        /* Missing task: the original logs and falls through to the
-           transition. A cold --level entry has no store, so every gated
-           portal is live -- unchanged from the previous native behavior. */
+        /* The recovered body logs ERROR: Task %s not found and falls through
+           to the transition when the getter returns -1 -- but whether the
+           original's getter can return -1 at all is contradicted in the tree:
+           _scene_sequencer.md and CTaskList.md both decompiled FUN_0045fea0
+           and say it yields 0 on no-match, which would make that branch dead
+           and an unmatched task read as state 0 (blocking, not passing). It
+           needs the executable to settle; see the 2026-08-21 section of
+           docs/decomp/evidence/cloadlevel_gate_00457ec0.md.
+
+           Native falls through, and that is a product decision, not a port:
+           task_entity_state returns -1 on no-match (CTaskList.md flags that
+           divergence itself) and a direct --level run has no store at all, so
+           blocking here would shut 11 of level1's 13 portals on a cold
+           entry. Same choice the shared gate helper already made. */
         return 1;
     }
     if (state < (long)gam_prop_i(e, "RequiredLevel", -1)) return 0;

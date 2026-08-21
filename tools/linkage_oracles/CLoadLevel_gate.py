@@ -44,6 +44,17 @@ helper does), blocking on a missing task instead of continuing, and applying
 the window when `RequiredTask` is "none". Each mutant must build, run, and be
 caught -- a mutant that fails to compile is a selftest failure, not a pass.
 
+**Scope note on the missing-task branch.** This oracle certifies the gate's
+response *to a state*. What state an unmatched `RequiredTask` produces belongs
+to the getter, `FUN_0045fea0`, and is contradicted in the tree: the recovered
+`CLoadLevel` body compares against `-1`, while `docs/decomp/_scene_sequencer.md`
+and `docs/decomp/CTaskList.md` both read the getter's own body and say it
+returns `0` on no-match -- which would make that branch dead code. Native's
+`task_entity_state` returns `-1` (a divergence `CTaskList.md` already flags),
+and both sides of this oracle model that same native getter, so the diff stays
+well-defined either way. Settling it needs the executable; see the 2026-08-21
+section of `docs/decomp/evidence/cloadlevel_gate_00457ec0.md`.
+
 **Not covered**: everything after the gate -- the `RETURN` branch, the
 `LevelName == "none"` refusal and the portal hide/handoff are behavior with
 side effects rather than a pure verdict, and the unported `SoundIndex` /
