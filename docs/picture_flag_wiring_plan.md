@@ -1337,3 +1337,106 @@ a mode API. The shrink ray is the odd one: there is no `3SHR` placement and no
 pickup that grants it, so on current evidence it is **not obtainable from the
 shipped level data at all** — it must be granted by task/story logic. Worth
 knowing before anyone builds its firing path.
+
+---
+
+## 19. All eight gadgets, running (2026-08-20)
+
+§18 mapped the eight and ported one. This ports the rest. Five of the eight are
+objects the executable creates in code and never places in level data, so each
+had to be stood up rather than loaded.
+
+### 19.1 What each one is, and what is actually recovered
+
+| Gadget | Object | Ported from | Tuned |
+|---|---|---|---|
+| Jetpack | `3JFI` `C3DJetpackFire` | the fly path's `FLY`/`HIFLY` and its 5.0s window | thrust, hover fall |
+| Shrink ray | `3SHR` `C3DShrinkRay` | `ray.ASE` under alias `HIRAY`; textures `ray0000..0002` cycled on a **0.1s** timer (fields `0x5fc`/`0x600`) | ray speed, reach, cooldown |
+| Bubble | `3BUB` `C3DBubble` | the whole `UpdateBubbleState` machine — see below | drift |
+| Grappler | `3GRA` `C3DGraplingHook` | `rope01.ASE` under `HIROPE`, `jimycarl.png`, scale **10.0**, tag `ROPE`; targets are `3HOO` | reach, pull speed |
+| Remote Goddard | `3GOD` `C3DGoddard` | the mode protocol `C3DMetalPickup` uses: **5** = fetch that object, **2** = release and follow | — |
+| Rocket | `3ROC` `C3DRocketShip` | already rideable; the menu now boards it | — |
+| Scooter | `3JEE` `C3DJeep` | §18.2 | speeds |
+| Invisibility | *no class* | nothing — no class is registered anywhere | all of it |
+
+The bubble is the one where the decomp gave us everything. `UpdateBubbleState`
+is three phases and they are ported exactly: **grow**, transition scale rises to
+1.0 then hands over; **steady pulse**, offset `sin(t * 10.0) * 30.0` applied to
+the **height only** while the width holds at `SpriteSize`; **fade**, transition
+falls `1.0 → 0.0` and the object hides. `SpriteSize` is the constructor's 240,
+and the sprite is `RetainedSprites.omt` chunk 1, `orangebubble`.
+
+Only three action modes are asserted, because only three are pinned by a
+recovered body: rocket = 1, remote Goddard = 5, shrink ray = 6. The other five
+gadgets leave `DAT_004f0588` alone rather than guess an id.
+
+### 19.2 The shrink ray's second half is design, not port
+
+`C3DShrinkRay` only animates the ray. The owner-confirmed effect — fired at
+Dino, Darwin fish, girl-eating plant or Humphrey, the target plays `HISHRINK`,
+scales down and becomes a small moving pickup — lives in a hit/contact body that
+was never decompiled. So the ray is a port and the consequence is native design:
+the target scales to 30% over 0.6s and becomes a collectable worth 100.
+
+Making that work needed one engine addition: `Entity.draw_scale`, a per-entity
+uniform mesh scale (0 = unset = 1.0). There was no way to scale a single entity
+before — only a per-type constant in the visual table.
+
+### 19.3 Nothing is shootable in a cold run, and that is correct
+
+Every shrinkable creature in the corpus authors a `RequiredLevel` between 10 and
+260 — they are story-gated, and a `--level` free-roam entry legitimately has
+none of them active. The runtime test has to un-gate one to exercise the hit
+path at all. Worth writing down before someone reads "the shrink ray does
+nothing" as a bug.
+
+### 19.4 How you get them
+
+Four of the eight — shrink ray, grappler, remote Goddard, rocket — have **no
+pickup anywhere in the 35 levels**. The original grants them through task/story
+logic nobody has recovered, so there is nothing faithful to port.
+`JN_TEST_GADGETS=1` and the sandbox toggle grant the whole set. That is a
+stand-in for testing and free play, and is labelled as one in the source; it is
+not a claim about how the game hands them over.
+
+The four that *are* obtainable come from the corpus: jetpack (level1b),
+bubble (level7), invisibility (level5), scooter (level1c's wheel).
+
+### 19.5 Evidence
+
+`JN_TEST_GADGETRUN=1` activates each gadget in turn, pulls its trigger, and
+counts the object it is supposed to have produced **by FourCC** — so a passing
+line means that specific spawn path ran, not merely that a toggle flipped:
+
+```
+jetpack       on=1 fired=0 mode=-1 3JFI=1
+shrinkray     on=1 fired=1 mode= 6 3SHR=1
+bubble        on=1 fired=1 mode=-1 3BUB=1
+grappler      on=1 fired=1 mode=-1 3GRA=1     (level4b, standing at HOOK1)
+goddard       on=1 fired=0 mode= 5 ----=0
+rocket        on=1 fired=0 mode= 1 ----=0
+scooter       on=1 fired=0 mode=-1 ----=0
+invisibility  on=1 fired=0 mode=-1 ----=0
+```
+
+and the shrink ray end to end:
+
+```
+[SHRINKRAY] hit 3HUM 'C3DHUMPHREY' -> HISHRINK
+[SHRINKRAY] 3HUM 'C3DHUMPHREY' is a pickup now
+[SHRINKTEST] fired=1 scale=0.30 pts=100
+```
+
+Two artefacts the first version of that test produced, kept here because both
+looked like gadget bugs and were not: every gadget reporting one object was the
+*previous* gadget's ray still in flight, and bubble/grappler reporting
+`fired=0` was the shared fire cooldown from the shrink ray blocking them. The
+test now settles between gadgets.
+
+### 19.6 Still open
+
+`C3DJetpackFire` has one owned method and no recovered assets, so the flame is
+drawn with the shared smoke sprite until someone recovers its own. The grappler
+pulls Jimmy along a straight line rather than swinging. And `3HOO` has exactly
+one placement in the whole corpus, in level4b, ~10600 units from that level's
+start — so the grappler has precisely one authored thing to grab.
