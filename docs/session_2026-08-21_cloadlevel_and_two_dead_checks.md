@@ -1,6 +1,6 @@
 # Session note — 2026-08-21: CLoadLevel, and two checks that could not fail
 
-Branch `feat/loadlevel-gate-return`, twenty-three commits on top of
+Branch `feat/loadlevel-gate-return`, twenty-seven commits on top of
 `chore/cleanup-2` (PR #28).
 `make check` and `make check-assets` green in the repo Docker image at every
 commit; `level1` and `fixture0` goldens byte-identical throughout (no golden
@@ -424,6 +424,68 @@ The ground-truth ledger is untouched: its own contract says a status change goes
 through a separate reviewed PR. That `GTR-20260717-3spr-defaults` is now
 partly answerable from in-repo evidence is the owner's call to record.
 
+### 14. The rest of the audit's task list (ef3e94a, d7c32ac)
+
+**C-01** — two invariant *explanations* the audit contradicted at source level.
+The observations stand and no rendering code is touched, which is what the task
+asks:
+
+* `PROJ[3][3]=1` is real and must not be repaired, but it is **not a w-buffer**:
+  `set_zbuffer_test` (`OMediaDXRenderer.cpp:400-406`) sets `ZENABLE` only to
+  `D3DZB_TRUE`/`D3DZB_FALSE`, never `D3DZB_USEW`, and the software backend
+  allocates a plain 16-bit z-buffer. Only the name for the depth mode was wrong.
+* `CULLMODE=NONE` on 3209/3235 captured draws was attributed to `OMediaPipeline`
+  software-culling every poly. That pipeline is the *software* renderer's,
+  referenced by `OMediaOMTRenderer` and nothing else, so it cannot explain a D3D7
+  capture. The DX path initialises culling **on** (`D3DCULL_CW`) and is driven by
+  `om3pf_TwoSided` plus explicit `disable_faceculling()` calls — the
+  unconditional one in `OMediaCanvasElement::render_geometry` being the likely
+  cause, since `om3pf_TwoSided` is unused in the whole level-1 corpus.
+
+Relayed from the audit's Q2.3/Q2.6 with the source lines it cites, **not
+re-verified** — `~/omt-src` is not on this machine, and the tag stays where the
+audit put it.
+
+**D-01** — three documents dated the game 2002 without distinguishing build from
+release. Every date the project can measure is a build date (`Neutron.exe` and
+`NeutronSW.exe` link **2001-09-30**, `OMT2.dll` 2001-08-27, PE TimeDateStamps via
+`tools/audit/pe.py`), and a PE header does not establish a street date. All three
+now say "retail 2002", with the distinction stated once in a note rather than
+four times — and the neighbouring years parked where they belong: 2002-08 is the
+*JNvsJN* build, 2003 the OMT 2.5.0 LGPL release.
+
+`TASKS.md` now opens with a status line. **A-01, A-02, B-01, B-02, C-01, C-02
+and D-01 are done; B-03 is the only one still genuinely blocked** (it needs
+`assets/exe/`), and D-02 is open with a reason.
+
+### 15. Two more parsers that would have reported success on an empty read (1b0f2df)
+
+The sprite-map shape, swept for across every tool that reads an engine source
+and derives a table from it. Two more had it:
+
+* **`verify_behaviors.py`** cross-checks each FourCC-to-vtable binding against
+  the class base chain and prints "all N checked mappings consistent". Its row
+  regex is the same three-field one, so a table that grows a field parses zero
+  rows and it reports **"all 0 checked mappings consistent"**, exit 0.
+* **`build_vtable_parity_report.py`** generates `docs/vtable_linkage_audit.md`
+  — where the project's own coverage numbers come from — from three unchecked
+  parses. An empty parse there does not produce a small report; it produces a
+  confident one that says zero.
+
+Both proven by drifting `entities.c` in place (with a trap restoring it):
+control exit 0 → drift, both exit 1 with a named reason → restored, exit 0,
+tree clean.
+
+The regenerated report is included and **was stale in two rows**: it still said
+`3TAR->vt_shadow`, which 265c3b6 changed, and had no entry for
+`3BUB->vt_bubble`. Nothing had regenerated it since those landed.
+
+Swept and deliberately left: `ase_to_glb.py`,
+`build_campaign_actor_catalog.py`, `export_godot_registry.py` and
+`extract_hud_layout.py` read engine sources unguarded, but they feed exports and
+docs rather than checks — a drift there yields a stale artifact someone notices,
+not a check that passes without checking.
+
 ---
 
 ## Contradictions found and not resolved
@@ -630,7 +692,7 @@ sprite chunk map was the only naive one in the file.
    `vt_trig` is a one-shot log stub — but the corpus has one `TRIG` row and no
    static registrar, so a faithful port would be inert. Worth doing for the
    record, not for the game; decide which of those the project wants.
-4. ~~Check the other generated-header parsers.~~ Done in §9 for the ones that
+4. ~~Check the other generated-header parsers.~~ Done in §9 and §15.
    gate something. Still unaudited, and none of them gates anything today:
    `extract_hud_layout.py`, `build_campaign_actor_catalog.py`,
    `export_godot_registry.py` and `build_asset_portal.py` all read engine
