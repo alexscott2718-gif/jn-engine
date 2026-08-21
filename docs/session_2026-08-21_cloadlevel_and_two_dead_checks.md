@@ -1,7 +1,7 @@
 # Session note — 2026-08-21: CLoadLevel, and two checks that could not fail
 
-Branch `feat/loadlevel-gate-return`, twelve commits on top of `chore/cleanup-2`
-(PR #28).
+Branch `feat/loadlevel-gate-return`, fourteen commits on top of
+`chore/cleanup-2` (PR #28).
 `make check` and `make check-assets` green in the repo Docker image at every
 commit; `level1` and `fixture0` goldens byte-identical throughout (no golden
 was regenerated, and none moved).
@@ -357,13 +357,51 @@ That also closes the "an oracle no gate runs will rot" exposure for this one —
 
 ---
 
-## What I would pick up next
+### 8. The RETURN round-trip, through the real menu route (0320fa5)
 
-1. **The `RETURN` departure pair deserves a runtime test of the real path.**
-   Today `JN_TEST_LOAD_RETURN` seeds it directly. A test that enters a VR level
-   through the menu route and then fires the portal would exercise the
-   promotion in `gamestate_request_level_swap` end to end, which is the part
-   that is inferred rather than recovered.
+Picked straight off this note's own next-up list. The departure pair is the
+inferred half of the port, and the only thing exercising it was
+`JN_TEST_LOAD_RETURN`, which seeds the pair directly and therefore proves only
+the read-back. The wiring it skipped is the part that crosses subsystems:
+`menu.c`'s routing table, `gamestate_request_level_swap` promoting the entry,
+that pair surviving the swap's world rebuild and
+`gamestate_reset_for_new_level`, and `behavior_load.c` reading it back a level
+later.
+
+`JN_TEST_RETURN=<level>` now does the whole trip — open the real CMainMenu,
+land the selection on that level's item, let the main loop's existing confirm
+path take it (the same `gamestate_request_level_swap` call the shipped front
+end makes), and when the swap lands, fire that level's RETURN portal and
+compare what it asks for against the level the menu left from:
+
+```
+[MAINMENU] selection='VR 01'
+[JN_TEST_RETURN] armed: menu route level1b -> vr01
+[GAMESTATE] swap requested -> 'vr01' (spawn '')
+[SWAP] loading assets/gam/VR01.gam
+[JN_TEST_RETURN] in vr01; departure recorded as 'level1b' (spawn '')
+[LOAD] RETURN portal C3DLOADLEVEL -> level1b (spawn )
+[JN_TEST_RETURN] PASS: ... asks for 'level1b', expected 'level1b'
+```
+
+`menu.c` gains `menu_select_level()` — the auto-confirm path can only ever take
+item 0 (New Game), so a probe had no way to reach a VR route. The certified
+routing table is untouched and `CMainMenu.py` still passes.
+
+`tools/check_return_roundtrip.py` runs it in `make check-assets`. Its
+`--selftest` is a **negative control of the script** — ask for a level the
+routing table cannot reach, require the failure to be reported — and says so
+rather than implying more, which after §3 felt like the only honest option.
+
+The engine-side sensitivity was demonstrated by hand, because it needs a
+rebuild and does not belong in a gate: deleting the two-line
+entry-to-departure promotion turns the round-trip red (`no recorded departure
+point`, exit 1), and restoring it returns green with a clean tree. That is the
+mutation that matters here, because it is exactly the inferred step.
+
+---
+
+## What I would pick up next
 2. **`C3DCheckPoint`, now that §6 has mapped the circuits.** `UpdateCheckPoint`
    (`00414410`) is recovered, `vt_checkpoint` is a deliberate simplification by
    its own comment, and the certificate says porting the `FINISHLINE` /
