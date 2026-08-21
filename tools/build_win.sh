@@ -77,9 +77,11 @@ HOW TO RUN
 Double-click PLAY.bat. A small window opens where you pick a level and press
 Play; closing the game brings it back so you can pick another.
 
-If Windows blocks the picker (PowerShell execution policy), PLAY.bat falls
-back to the in-game menu automatically -- nothing is lost, you just choose
-the level with the keyboard instead.
+If the picker does not come up -- PowerShell can be blocked by policy, broken,
+or absent -- PLAY.bat says so and starts the game's own menu instead. Nothing
+is lost; you pick the level with the arrow keys and Enter. You can also skip
+the picker entirely and name a level yourself (see below), which never touches
+PowerShell at all.
 
 To run a level directly:  PLAY.bat --level level3
 The engine must start with this folder as the working directory so it can
@@ -134,16 +136,41 @@ EOF
 
 cat > "$DIST/PLAY.bat" <<"EOF"
 @echo off
+setlocal EnableExtensions
 cd /d "%~dp0"
+
+if not exist "%~dp0jnengine.exe" (
+  echo [PLAY] jnengine.exe is not in this folder.
+  echo [PLAY] Extract the whole zip somewhere and keep PLAY.bat next to the game.
+  goto done
+)
+
 rem With arguments, run the engine directly: PLAY.bat --level level3
 if not "%~1"=="" (
   jnengine.exe %*
   goto done
 )
-rem Otherwise open the level picker. If PowerShell is blocked by policy,
-rem fall back to the in-game menu so the build still starts.
+
+rem The level picker is a convenience, not a requirement: if PowerShell is
+rem blocked by policy, broken, or missing entirely, start the engine's own menu
+rem instead so the build always runs.
+rem
+rem Test the exit code as a STRING. `if errorlevel 1` means ">= 1" and cmd
+rem compares it signed, so a PowerShell that throws during initialization --
+rem exiting NEGATIVE -- fails that test, silently skips the fallback, and
+rem prints "engine exited" without the game ever having started. A tester hit
+rem exactly that on 2026-08-20.
 powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0level-select.ps1"
-if errorlevel 1 jnengine.exe --menu --nodamage
+set "PICKER_RC=%ERRORLEVEL%"
+if not "%PICKER_RC%"=="0" (
+  echo.
+  echo [PLAY] The level picker could not start ^(exit code %PICKER_RC%^).
+  echo [PLAY] Opening the game's own menu instead -- nothing is lost, you just
+  echo [PLAY] pick the level with the keyboard. Arrow keys + Enter.
+  echo.
+  jnengine.exe --menu --nodamage
+)
+
 :done
 echo.
 echo (engine exited -- press any key to close)
