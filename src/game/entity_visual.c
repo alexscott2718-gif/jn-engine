@@ -258,6 +258,11 @@ static const TypeEntry TYPE_TABLE[] = {
     { "3KIT", { "assets/ase/catsit.ASE",      "assets/png/cat.png", 1.0f, 0 } },
     { "3NIC", { "assets/ase/nickstop.ASE",    NULL, 1.0f, 0 } },
     { "3GOD", { "assets/ase/godsit.ASE",      "assets/png/goddard02.png", 1.0f, 0 } },
+    /* The scooter is Goddard transformed, not a separate vehicle: scooter.omt
+       carries only `scooterwheel2` and `goddard128`, and Goddard's animation
+       table registers HISCOOT -> godscooter.ASE. So 3JEE wears the
+       Goddard-as-scooter mesh with Goddard's skin. See plan section 18.2. */
+    { "3JEE", { "assets/ase/godscooter.ASE", "assets/png/goddard02.png", 1.0f, 0 } },
     /* Yokian guard/soldier ASEs carry no material bitmap; the classes attach
        yokguard.png / yoksold.png in code (decomp C3DYokianGuard.md /
        C3DYokianSoldier.md). Without the explicit texture every guard and

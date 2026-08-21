@@ -32,6 +32,7 @@
 #include "behavior_vehicle.h"
 #include "behavior_ai.h"
 #include "../entities.h"
+#include "../../engine/world.h"
 #include "../player_anim.h"
 #include "../../engine/input.h"
 #include <SDL.h>
@@ -58,6 +59,7 @@ static int     s_riding    = 0;
 static float   s_anim_timer = 0.0f;
 static int     s_anim_moving = -1;   /* last SCOOT/SCOOTSTOP choice, -1 = unset */
 static unsigned int s_saved_player_flags = 0;
+static int     s_goddard_was_visible = 1;
 
 Entity *behavior_scooter_get(void)   { return s_scooter; }
 int     behavior_scooter_riding(void) { return s_riding; }
@@ -83,18 +85,18 @@ static void scooter_hide(Entity *e) {
 Entity *behavior_scooter_ensure(World *w) {
     if (s_scooter) return s_scooter;
     if (!w) return NULL;
-    Entity *e = world_add(w);
+    /* entity_spawn, NOT world_add: world_add allocates a bare entity and does
+       not resolve a vtable, so on_update would never be dispatched and the
+       scooter could be revealed but never driven. */
+    Entity *e = entity_spawn(w, "3JEE", "C3DJEEP", 0.0f, 0.0f, 0.0f);
     if (!e) return NULL;
-    memcpy(e->type, "3JEE", 4);
-    e->type[4] = '\0';
-    snprintf(e->tag, sizeof(e->tag), "C3DJEEP");
     e->half_extents[0] = e->half_extents[1] = e->half_extents[2] = SCOOTER_HALF;
     e->move_speed = 0.0f;
     e->user_flag = SCOOTER_DRIVE_STATE;
     scooter_hide(e);
     s_scooter = e;
-    printf("[SCOOTER] spawned hidden (3JEE, drive_state=%d)\n",
-           SCOOTER_DRIVE_STATE);
+    printf("[SCOOTER] spawned hidden (3JEE, drive_state=%d, vt=%s)\n",
+           SCOOTER_DRIVE_STATE, e->vt ? "bound" : "MISSING");
     return e;
 }
 
@@ -118,12 +120,13 @@ static void scooter_mount(void) {
     s_anim_timer = 0.0f;
     s_anim_moving = -1;
 
-    /* Goddard becomes the bodywork. He carries the scooter's own texture
-       (goddard128 in scooter.omt) and the HISCOOT clip. */
+    /* Goddard has BECOME the scooter -- the 3JEE entity wears godscooter.ASE
+       with his skin -- so a standalone companion Goddard is hidden while
+       riding, and restored on dismount. Two of him would be wrong. */
     Entity *g = behavior_goddard_get();
     if (g) {
-        g->visible = 1;
-        printf("[SCOOTER] Goddard -> HISCOOT (godscooter.ASE)\n");
+        s_goddard_was_visible = g->visible;
+        g->visible = 0;
     }
     printf("[SCOOTER] mounted\n");
 }
@@ -144,6 +147,8 @@ static void scooter_dismount(void) {
         g_player->visible = 1;
     }
     scooter_hide(e);
+    Entity *g = behavior_goddard_get();
+    if (g) g->visible = s_goddard_was_visible;
     printf("[SCOOTER] dismounted\n");
 }
 
@@ -185,14 +190,7 @@ static void scooter_sync_child(Entity *e, float dt) {
                                    moving ? PA_SCOOT : PA_SCOOTSTOP, dt);
     }
 
-    /* Goddard rides underneath as the bodywork, on the same transform. */
-    Entity *g = behavior_goddard_get();
-    if (g && g->visible) {
-        g->x  = e->x;
-        g->y  = e->y;
-        g->z  = e->z;
-        g->ry = e->ry;
-    }
+    /* Nothing to sync for Goddard: he is the scooter, drawn as this entity. */
 }
 
 static void scooter_on_spawn(Entity *e, World *w) {
