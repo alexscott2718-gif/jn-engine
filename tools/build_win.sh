@@ -178,6 +178,20 @@ pause >nul
 EOF
 sed -i "s/$/\r/" "$DIST/README_WINDOWS.txt" "$DIST/PLAY.bat" "$DIST/level-select.ps1"
 
+# The audio lives under assets/parsed/**/*_audio/, which is gitignored as
+# regenerable media. A clean tree has none of it, and nothing downstream
+# complains -- the zip just ships without sound, which is how QA3 went out
+# silent. Refuse to build one of those.
+AUDIO_CLIPS=$(find "$ROOT/assets/parsed" -path '*_audio/*.wav' 2>/dev/null | wc -l)
+if [ "$AUDIO_CLIPS" -lt 100 ]; then
+  echo "[build_win] ERROR: only $AUDIO_CLIPS audio clips on disk." >&2
+  echo "[build_win] The bundle would ship silent. Run tools/fetch_audio.sh" >&2
+  echo "[build_win] (or extract_all_omt.py --audio) and build again." >&2
+  echo "[build_win] Set JN_ALLOW_SILENT=1 to build anyway." >&2
+  [ "${JN_ALLOW_SILENT:-0}" = "1" ] || exit 1
+fi
+echo "[build_win] audio: $AUDIO_CLIPS clips"
+
 echo "[build_win] zipping standalone bundle (dist + assets/)"
 python3 - "$ROOT" "$DIST" <<"PYZIP"
 import sys, os, zipfile
