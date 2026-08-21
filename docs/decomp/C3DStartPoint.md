@@ -86,7 +86,38 @@ Open questions:
 - Confirm the exact apply order of `Viewport*` onto the camera and whether `Rz` (roll)
   is used.
 - Verify how `StartTrigger` is fired (one-shot on spawn) and how `MusicIndex` indexes
-  `MusicDatabase`.
+  `MusicDatabase`. **The corpus answers what it fires, not how** -- see below.
+
+## What `StartTrigger` names (corpus evidence, 2026-08-21)
+
+31 of the 100 shipped `STRT` rows author a `StartTrigger`; 67 author `"none"`
+and 2 omit it. Of the 31:
+
+| Target class | Rows | Reading |
+|---|---:|---|
+| `3MCA` (`C3DMultiCutSceneCamera`) | 15 | a multi-shot cutscene sequence |
+| `3CAM` (`C3DCutSceneCamera`) | 7 | a single scripted shot |
+| `3AIT` (`C3DAITrigger`) | 9 | a story/AI trigger |
+
+Every VR level's `PHONEBOOTH` start names one -- VR01 `bu`, VR02 `rs`, VR03
+`inv`, VR04 `sr1`, VR05 `scooter`, VR06 `remote`, VR07 `bb1`, VR08 `gr`: the
+bubble / ray / invisibility / shrinkray / scooter / remote / baseball /
+grappler challenge briefings. `level1e`'s four start points each name a
+different sequence and `level4b`'s two both name `pp1`, so the choice tracks
+*which entrance was used*, not just the level.
+
+Three rows name a tag their own level does not place, and are designer dangles
+rather than port gaps: `level5a`'s `starting`, `Level2`'s `school1` -> `yokian2`,
+and `level1e`'s `PHONEBOOTH` -> `ZOOM1` (`level1d` has a `ZOOM1`; `level1e` does
+not).
+
+So the *what* is settled: a start point selects the cutscene (or trigger) for
+the way the player came in. The *how* -- where in the spawn path the fire
+happens, and whether it is really one-shot -- is still unrecovered, because
+`PlacePlayer` (`00442740`) does not show it. Native fires it from `main.c` on a
+campaign / `JN_CUTSCENE` entry, ahead of the previous behavior of playing every
+registered standalone `3CAM`; that mechanism is INFERRED and labelled as such
+at the call site, and it is explicitly not part of the `spawn` certificate.
 - Tie spawn-tag matching to `CTaskList` `STARTEXP` and `C3DPlayer.StartPoint`.
 
 ## Notes

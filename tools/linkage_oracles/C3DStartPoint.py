@@ -33,9 +33,12 @@ equivalence -- the decompiled body only shows `C3DSprite::Reset()` there):
 the velocity-zero + airborne reset on return.
 
 Deliberately OUT OF SCOPE (see "Not covered" in docs/decomp/C3DStartPoint.md's
-Native Linkage section): the `ViewportP*`/`ViewportR*` initial camera pose and
-`StartTrigger` one-shot -- both unported gaps, unchanged from the
-linked-blocked investigation. Also out of scope: the `gam_prop_i`
+Native Linkage section): the `ViewportP*`/`ViewportR*` initial camera pose, and
+`StartTrigger`. As of 2026-08-21 `StartTrigger` is no longer unported --
+`place_player` records it and main.c fires it on a cutscene/campaign entry --
+but it stays out of scope here, and deliberately so: the recovered
+`PlacePlayer` body does not show the firing at all, so there is no decomp
+equivalence to certify. What it selects is corpus evidence, not L1. Also out of scope: the `gam_prop_i`
 MusicIndex fallback default (`-1`) -- no shipped STRT omits MusicIndex and no
 decompiled default is recovered, so it is unreachable by real data and
 uncertified.
