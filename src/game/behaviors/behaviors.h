@@ -79,6 +79,7 @@ extern const EntityVTable vt_scooter;         /* 3JEE — C3DJeep, the scooter g
 extern const EntityVTable vt_shrinkray;       /* 3SHR — C3DShrinkRay, the fired ray */
 extern const EntityVTable vt_bubble;          /* 3BUB — C3DBubble */
 extern const EntityVTable vt_grapple_rope;    /* 3GRA — C3DGraplingHook rope */
+extern const EntityVTable vt_rocket_fuel;     /* 3FUE — C3DRocketFuel (plutonium rods) */
 
 /* The eight gadgets (docs/picture_flag_wiring_plan.md section 18). */
 enum {

@@ -33,9 +33,6 @@
  *                         for 3SWN doors today, so the visual is deferred (resolver
  *                         gap); the vtable lands the gate.
  *   3SM1  C3DSmoke      — effect sprite; owns only a dtor. Static smoke billboard.
- *   3FUE  C3DRocketFuel — sprite pickup; the Jimmy-touch handler deactivates it and
- *                         drives SCENE state — deferred (no SCENE sequencer). Static
- *                         fuel billboard (collection deferred).
  *   3TRI  C3DTrigger    — base trigger leaf; its activate-object cascade / NextTrigger
  *                         dispatch is the project-wide deferred scripted-trigger system.
  *                         The single in-corpus row is fully "none" (inert). Marker sprite.
