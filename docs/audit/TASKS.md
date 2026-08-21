@@ -185,7 +185,13 @@ has decided which class the shipped instances should actually drive.
 
 ## P3 — facts to correct
 
-### D-01 · Say which year is meant
+### D-01 · Say which year is meant — **DONE 2026-08-21**
+> All three sites now say "retail 2002", and PROJECT_HISTORY carries one note
+> stating the distinction once rather than four times: every date the project can
+> measure is a build date (Neutron.exe and NeutronSW.exe link 2001-09-30, OMT2.dll
+> 2001-08-27, PE TimeDateStamps via tools/audit/pe.py), a PE header does not
+> establish a street date, and the neighbouring years belong elsewhere -- 2002-08
+> is the JNvsJN build, 2003 the OMT 2.5.0 LGPL release.
 Three documents say the game is from 2002 without distinguishing build from release.
 The binaries were linked **2001-09-30**; the stray "2003" elsewhere is the toolkit's
 open-source release, not the game. A PE header dates a build, not a street date — so

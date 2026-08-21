@@ -1,7 +1,8 @@
 # jn-engine — Project History
 
 *A living narrative of how this project got from "I want to unlock the resolution"
-to a faithful, asset-complete reimplementation of a 2002 Direct3D 7 game — and why
+to a faithful, asset-complete reimplementation of a Direct3D 7 game released in
+2002 — and why
 the code is shaped the way it is.*
 
 **Audience:** new contributors, QA, and modders. If you're trying to understand
@@ -13,10 +14,12 @@ fit," read [`ARCHITECTURE.md`](./ARCHITECTURE.md) alongside this.
 credentials, and the raw per-session ledger live in the private companion. Nothing
 load-bearing for understanding the code is omitted here.
 
-**The game:** *Jimmy Neutron: Boy Genius* (THQ, 2002), a licensed kids' platformer
+**The game:** *Jimmy Neutron: Boy Genius* (THQ, retail 2002), a licensed kids' platformer
 for Windows. Its sequel, *Jimmy Neutron vs. Jimmy Negatron* (a.k.a. **JNvsJN**), is
 covered in the final era. The original runs on **Open Media Toolkit 2.0 DR4**
 (`OMT2.dll`), which renders **exclusively through Direct3D 7**.
+
+> **Which year.** Every date this project can measure is a *build* date: `Neutron.exe` and `NeutronSW.exe` link **2001-09-30**, `OMT2.dll` 2001-08-27 (PE TimeDateStamps, read with `tools/audit/pe.py`; `docs/audit/06-open-questions.md` Q3). A PE header does not establish a street date, so "2002" above is the retail year and is not something the binaries confirm. The other years that turn up nearby belong elsewhere: 2002-08 is the *JNvsJN* build, and 2003 is the OMT 2.5.0 LGPL release.
 
 ---
 

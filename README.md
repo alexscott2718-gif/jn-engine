@@ -1,7 +1,8 @@
 # jn-engine
 
 A clean-room reimplementation of the **Open Media Toolkit 2.0** engine that ran
-*Jimmy Neutron: Boy Genius* (THQ, 2002), plus the instrumentation that captures the
+*Jimmy Neutron: Boy Genius* (THQ, retail 2002 — the shipped build links
+2001-09-30), plus the instrumentation that captures the
 original game's **Direct3D 7** output on real Windows XP to use as ground truth.
 
 One codebase builds a **native Linux** game, a **WebAssembly** browser demo, a

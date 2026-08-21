@@ -18,7 +18,8 @@ Legend used throughout:
 ## 1. The 10,000-foot view
 
 `jn-engine` is a clean-room C reimplementation of the **Open Media Toolkit 2.0**
-engine that ran *Jimmy Neutron: Boy Genius* (2002), plus the toolchain that
+engine that ran *Jimmy Neutron: Boy Genius* (retail 2002; the shipped build
+links 2001-09-30), plus the toolchain that
 **captures the original game's Direct3D 7 output on real Windows XP** to use as
 ground truth. One codebase produces:
 
