@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Checks That Couldn't Fail</title>
+<meta property="og:site_name" content="Jimmy Neutron — Open Reimplementation">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://exentt.com/jn/session-2026-08-21.html">
+<meta property="og:title" content="Checks That Couldn't Fail">
+<meta property="og:description" content="A day on the Jimmy Neutron reimplementation: the VR levels stop being dead ends, the start point picks the cutscene again, and three of the project's own mutation tests turn out never to have run.">
+<meta property="og:image" content="https://exentt.com/jn/og/jn-hub.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Checks That Couldn't Fail">
+<meta name="twitter:description" content="A day on the Jimmy Neutron reimplementation: the VR levels stop being dead ends, the start point picks the cutscene again, and three of the project's own mutation tests turn out never to have run.">
+<meta name="theme-color" content="#58a6ff">
+<link rel="canonical" href="https://exentt.com/jn/session-2026-08-21.html">
+<meta name="description" content="A day on the Jimmy Neutron reimplementation: the VR levels stop being dead ends, the start point picks the cutscene again, and three of the project's own mutation tests turn out never to have run.">
+<style>
+  :root{
+    --bg:#0d1117; --panel:#161b22; --panel2:#1c2230; --border:#30363d;
+    --text:#e6edf3; --muted:#8b949e; --accent:#58a6ff; --accent2:#3fb950;
+    --warn:#d29922; --bad:#f85149; --radius:14px;
+    --mono:ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,"Liberation Mono",monospace;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    background:radial-gradient(1200px 600px at 50% -10%, #18233a 0%, var(--bg) 55%) fixed;
+    color:var(--text);
+    font:16px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:820px;margin:0 auto;padding:64px 20px 80px}
+  header{margin-bottom:44px}
+  .eyebrow{color:var(--accent);font-weight:600;letter-spacing:.08em;text-transform:uppercase;font-size:12px;margin:0 0 14px}
+  h1{font-size:clamp(30px,5vw,46px);line-height:1.08;margin:0 0 18px;font-weight:700;letter-spacing:-.02em;text-wrap:balance}
+  .lede{color:var(--muted);font-size:18px;margin:0;max-width:62ch}
+  .lede strong{color:var(--text);font-weight:600}
+  section{margin:44px 0 0}
+  h2{font-size:13px;text-transform:uppercase;letter-spacing:.09em;color:var(--muted);font-weight:700;margin:0 0 18px;padding-bottom:10px;border-bottom:1px solid var(--border)}
+  h3{font-size:19px;margin:28px 0 8px;font-weight:650;letter-spacing:-.01em;text-wrap:balance}
+  h3:first-of-type{margin-top:0}
+  p{margin:0 0 14px;max-width:66ch}
+  a{color:var(--accent)}
+  strong{color:var(--text)}
+  code{font-family:var(--mono);font-size:.88em;background:var(--panel);border:1px solid var(--border);border-radius:6px;padding:1px 5px}
+  .panel{background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);padding:22px 24px}
+  .panel + .panel{margin-top:16px}
+  .panel p:last-child{margin-bottom:0}
+  .stack{display:flex;flex-direction:column;gap:16px}
+  .lead-in{color:var(--muted);font-size:14px;margin:-6px 0 18px;max-width:66ch}
+  .tag{display:inline-block;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;
+       border-radius:999px;padding:3px 10px;margin-bottom:12px;border:1px solid var(--border);color:var(--muted)}
+  .tag.fixed{color:var(--accent2);border-color:var(--accent2)}
+  .tag.open{color:var(--warn);border-color:var(--warn)}
+  .tag.was{color:var(--bad);border-color:var(--bad)}
+  pre{font-family:var(--mono);font-size:13px;line-height:1.5;background:#0b0f16;border:1px solid var(--border);
+      border-radius:10px;padding:14px 16px;overflow-x:auto;margin:0 0 14px;color:var(--text)}
+  pre .c{color:var(--muted)}
+  pre .ok{color:var(--accent2)}
+  pre .no{color:var(--bad)}
+  table{width:100%;border-collapse:collapse;font-size:14px;font-variant-numeric:tabular-nums}
+  .scroll{overflow-x:auto;border:1px solid var(--border);border-radius:var(--radius)}
+  th,td{text-align:left;padding:10px 14px;border-bottom:1px solid var(--border)}
+  th{color:var(--muted);font-weight:650;font-size:12px;text-transform:uppercase;letter-spacing:.06em}
+  tr:last-child td{border-bottom:none}
+  td.n{text-align:right;font-family:var(--mono)}
+  .grid{display:grid;gap:16px;grid-template-columns:repeat(auto-fit,minmax(220px,1fr))}
+  a.card{display:block;text-decoration:none;color:inherit;background:var(--panel);border:1px solid var(--border);
+         border-radius:var(--radius);padding:18px 20px;transition:border-color .15s ease,transform .15s ease,background .15s ease}
+  a.card:hover{border-color:var(--accent);transform:translateY(-2px);background:var(--panel2)}
+  a.card:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+  .card .t{font-weight:650;font-size:16px;margin:0 0 5px}
+  .card .d{color:var(--muted);font-size:13.5px;margin:0}
+  ul{margin:0 0 14px;padding-left:20px;max-width:66ch}
+  li{margin:0 0 7px}
+  footer{margin-top:56px;text-align:center;color:var(--muted);font-size:13px;border-top:1px solid var(--border);padding-top:24px}
+  footer a{text-decoration:none}
+  @media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <p class="eyebrow">Session notes · 21 August 2026</p>
+  <h1>Checks That Couldn't Fail</h1>
+  <p class="lede">A day's work on the <a href="/jn/">Jimmy Neutron reimplementation</a>. The VR levels stop being dead ends and the start point picks the right cutscene again — and then, looking for the next thing to port, <strong>three of the project's own mutation tests turn out never to have run the code they claimed to mutate</strong>.</p>
+</header>
+
+<section>
+  <h2>What you can play</h2>
+  <p class="lead-in">All of this is in the QA5 Windows build, linked at the bottom.</p>
+
+  <div class="stack">
+    <div class="panel">
+      <span class="tag fixed">Fixed</span>
+      <h3>The VR levels are no longer dead ends</h3>
+      <p>Every VR level has a portal that takes you back out. All ten of them, across VR01–VR08, author the destination <code>RETURN</code> — meaning <em>go back where you came from</em> — and the engine took that literally: it asked for a level named "RETURN", failed to find one, and left you stuck.</p>
+      <p>They work now. How you got in matters: enter a VR level <strong>through the in-game menu</strong> and the portal returns you to the level the menu left from. Jump straight to one from the launcher and there is nothing to go back to — so the portal says so in the console, rather than silently doing nothing.</p>
+    </div>
+
+    <div class="panel">
+      <span class="tag fixed">Fixed</span>
+      <h3>The start point picks the cutscene</h3>
+      <p>On a new game, the spot you arrive at now decides which scene plays. The engine used to play <em>every</em> standalone camera shot in the level, one after another, as a single "intro" — fourteen of them in level&nbsp;1 — and never touched the multi-shot sequences at all, which is where the real scripted scenes live.</p>
+      <p>The level data was unambiguous once we looked: of the 100 start points in the game, 31 name something, and 22 of those name a camera. Every VR level's start point names its own briefing. Level&nbsp;1e has four entrances and each one names a different scene.</p>
+    </div>
+
+    <div class="panel">
+      <span class="tag was">Was wrong</span>
+      <h3>Two portals doing the wrong thing</h3>
+      <p>One portal in level&nbsp;4 asked for a level named <code>none</code>: the designer filled the destination and spawn-point fields in the wrong order, twenty-four years ago. The original ignores it. Now so does this.</p>
+      <p>And the story gates on the other 36 portals were being applied with one condition overriding the other, instead of both applying — and applied at all to portals that carry no story gate.</p>
+    </div>
+  </div>
+</section>
+
+<section>
+  <h2>The part that wasn't the plan</h2>
+  <p>The session started on one task: port the level-transition portal faithfully and write the proof. It ended somewhere else twice, because things in the repository turned out not to be true.</p>
+
+  <div class="stack">
+    <div class="panel">
+      <span class="tag was">Found</span>
+      <h3>Three mutation tests that never ran</h3>
+      <p>The project proves its ports are faithful with <em>oracles</em>: headless programs that drive the ported C and diff it against the behaviour recovered from the original executable. Four of them carry a self-test that deliberately breaks the ported code and requires the oracle to notice. It is the check on the check.</p>
+      <p>Three of the four never executed the broken code. The mutated copy is written to a temporary directory and compiled in place of the real file — and from there, a quoted <code>#include</code> no longer resolves. Every mutant failed to <em>build</em>, and each harness counted the build failure as "the oracle rejected it".</p>
+      <p>One of them said so out loud, every run, and nobody read it closely:</p>
+      <pre><span class="ok">SELFTEST ok:</span> base update dispatch removed rejected <span class="no">(dumper failed to compile)</span></pre>
+      <p>Two of the three back certified claims whose notes cite the mutation test as the evidence. The sensitivity those notes describe is real — every mutant is genuinely caught now that they run. It simply wasn't being verified. A mutant that fails to build is now a failure, not a pass.</p>
+    </div>
+
+    <div class="panel">
+      <span class="tag was">Found</span>
+      <h3>Seven objects that "would draw a box"</h3>
+      <p>The asset catalogue's front page — the list you pick work off — reported seven object types with no resolved visual, including the tree, at 169 placements across 12 levels.</p>
+      <p>None of them draws a box. Booting all 35 levels gives <code>all entities resolved</code> 35 times over. The cause was one regular expression: a generated table had grown a fourth field the day before, the pattern stopped matching, the map parsed as <strong>zero rows</strong>, and every object whose artwork is a sprite fell through to "unresolved". The generator prints the row count in its own log — <code>sprite_chunk_map: 0</code> — and carried on.</p>
+    </div>
+
+    <div class="panel">
+      <span class="tag was">Found</span>
+      <h3>A gate that could report a clean check it never performed</h3>
+      <p>The spec checker compares 209 written class specifications against three independently generated sources. Every finding it can produce is a <em>disagreement</em> — so a source that parses empty makes it agree with everything, print <code>OK: no spec disagrees</code>, and exit successfully. It verified that its inputs existed. It never verified it could read them.</p>
+      <p>It now refuses. Proven by drifting a copy of the repository one input at a time:</p>
+      <pre><span class="c">control (no drift)                            </span> exit 0
+gam_schema: class-map heading renamed          <span class="no">exit 2</span>
+gam_schema: instances heading renamed          <span class="no">exit 2</span>
+gam_schema: property heading renamed           <span class="no">exit 2</span>
+classids: columns reflowed to single spaces    <span class="no">exit 2</span>
+entities.c: binding table gains a field        <span class="no">exit 2</span>
+specs: generated template FourCC row renamed   <span class="no">exit 2</span>
+specs: hand-written template Ctor row renamed  <span class="no">exit 2</span></pre>
+      <p>Two more tools had the same shape and were fixed with it — including the one that generates the project's own coverage numbers, which would have produced a confident report saying zero.</p>
+    </div>
+  </div>
+</section>
+
+<section>
+  <h2>What we still don't know</h2>
+  <p>The project treats "we don't know" as a deliverable. Two things surfaced that can't be settled without the original executable, and both are now written down next to the code that depends on them.</p>
+
+  <div class="stack">
+    <div class="panel">
+      <span class="tag open">Unresolved</span>
+      <h3>The task lookup can't return the value the portal checks for</h3>
+      <p>The recovered portal code asks the game's task table for a story value and branches on <code>-1</code>, logging <em>"Task not found"</em>. But two other specifications decompiled that lookup and both say it returns <code>0</code> when the name is missing, never <code>-1</code>.</p>
+      <p>If they are right, the branch is dead code and an unmatched task reads as zero — which <em>blocks</em> the 36 story-gated portals instead of passing them through. That is the opposite outcome. No other recovered caller in the game distinguishes the two. It is a five-line function; reading its return settles both questions at once, and needs a machine with the binary on it.</p>
+    </div>
+
+    <div class="panel">
+      <span class="tag open">Unresolved</span>
+      <h3>Fifteen objects that draw a question mark</h3>
+      <p>All fifteen bare sprite objects in the game author no artwork at all, so the original's fallback fires and binds an icon from the editor's own set — the canvas the artist named <code>question</code>, sitting among <code>trigger</code>, <code>load</code>, <code>camera</code>. A designer placed them and never finished them, and the engine drew a question mark over each one.</p>
+      <p>Whether the shipped game really showed editor placeholders to players is a judgement call, not a fact we can extract — and the size it drew them at is precisely the part still unrecovered. So the finding is recorded and the renderer is untouched.</p>
+    </div>
+  </div>
+</section>
+
+<section>
+  <h2>By the numbers</h2>
+  <div class="scroll">
+    <table>
+      <thead>
+        <tr><th>What</th><th>Detail</th><th class="n">Count</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Level portals in the game</td><td>across all 35 levels</td><td class="n">97</td></tr>
+        <tr><td>…that were dead ends</td><td><code>RETURN</code>, all in VR01–VR08</td><td class="n">10</td></tr>
+        <tr><td>…gated on story progress</td><td>now applying both conditions</td><td class="n">36</td></tr>
+        <tr><td>Verdicts checked by the new oracle</td><td>every portal × 54 story states</td><td class="n">5,238</td></tr>
+        <tr><td>Mutation tests that never ran</td><td>of four that claimed to</td><td class="n">3</td></tr>
+        <tr><td>Phantom entries in the work queue</td><td>objects the engine draws fine</td><td class="n">7</td></tr>
+        <tr><td>Input drifts the spec gate now catches</td><td>previously: none</td><td class="n">7</td></tr>
+        <tr><td>Certified class behaviours</td><td>oracle-verified, up one</td><td class="n">17</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section>
+  <h2>Read further</h2>
+  <div class="grid">
+    <a class="card" href="https://github.com/alexscott2718-gif/jn-engine/releases/tag/win64-qa5">
+      <p class="t">Windows QA5 build ↓</p>
+      <p class="d">Everything above, playable. 217 MB, offline, no install.</p>
+    </a>
+    <a class="card" href="https://github.com/alexscott2718-gif/jn-engine/pull/28">
+      <p class="t">The pull request</p>
+      <p class="d">Every change, with the reasoning in the commit messages.</p>
+    </a>
+    <a class="card" href="/jn/audit.html">
+      <p class="t">The audit</p>
+      <p class="d">The outside review that found the documentation problems this session closed.</p>
+    </a>
+    <a class="card" href="/jn/contribute.html">
+      <p class="t">Contribute</p>
+      <p class="d">The evidence rules, and where the open work is.</p>
+    </a>
+  </div>
+</section>
+
+<footer>
+  <p><a href="/jn/">← Jimmy Neutron — Open Reimplementation</a></p>
+</footer>
+
+</div>
+</body>
+</html>
