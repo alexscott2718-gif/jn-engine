@@ -181,6 +181,15 @@ WEB_TARGET  = $(WEB_OUT_DIR)/jnengine.html
 WEB_CFLAGS  = -O2 -Isrc/engine \
               -sUSE_SDL=2 -sUSE_SDL_MIXER=2 -sUSE_ZLIB=1
 
+# The browser bundle preloads all of assets/, and the extracted OMT audio is
+# ~93 MB of it -- 42 containers of uncompressed wav. The web build has never
+# had sound (those directories were empty until 2026-08-21), so packaging it
+# only makes an already-oversized download worse: emcc warns past ~300 MB,
+# and the copy live on exentt.com has been 406 MB since June. Excluded until
+# web audio is done properly -- a compressed format and streaming, not 93 MB
+# of wav sitting in the preload.
+WEB_EXCLUDES = --exclude-file "*_audio"
+
 WEB_LDFLAGS = -sUSE_SDL=2 -sUSE_SDL_MIXER=2 -sUSE_ZLIB=1 \
               -sFULL_ES3=1 -sMIN_WEBGL_VERSION=2 -sMAX_WEBGL_VERSION=2 \
               -sALLOW_MEMORY_GROWTH=1 -sASYNCIFY \
@@ -188,6 +197,7 @@ WEB_LDFLAGS = -sUSE_SDL=2 -sUSE_SDL_MIXER=2 -sUSE_ZLIB=1 \
               -sEXPORTED_FUNCTIONS=_main,_input_set_virtual_move,_input_set_virtual_fly,_input_press_virtual_jump,_input_press_virtual_use,_input_press_virtual_board,_input_toggle_noclip,_input_set_noclip,_input_noclip_enabled,_input_toggle_turbo,_input_set_turbo,_input_turbo_enabled,_gamestate_toggle_sandbox,_gamestate_sandbox_enabled,_gamestate_cycle_active_tool_web,_gamestate_active_tool_tag_web,_gamestate_toggle_campaign_web,_gamestate_campaign_active_web,_cutscene_request_web,_cutscene_request_catalog_web,_cutscene_count_web,_cutscene_active_web,_cutscene_stop_web,_qa_clear_selection,_qa_toggle \
               -sEXPORTED_RUNTIME_METHODS=ccall,cwrap,UTF8ToString \
               --preload-file assets \
+              $(WEB_EXCLUDES) \
               --shell-file web/shell.html
 
 web:
