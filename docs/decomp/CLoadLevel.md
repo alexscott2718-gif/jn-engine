@@ -24,6 +24,16 @@ way the game moves between the 35 `.gam` levels. (FourCC `LOAD`; see
 Registered by `InitObject` (`vfunc_01_007`) via the `vftable+0x3fc` registrar; types
 are `.gam` type ids (`1=string 3=float 6=int`). Strings resolved from `Neutron.exe`.
 
+**The Offset column is in dwords — the registrar's own units.** Multiply by 4 for
+the `this` offset the runtime bodies read: `LevelName` `0x148`→`this+0x520`,
+`StartPoint` `0x15c`→`+0x570`, `RequiredTask` `0x170`→`+0x5c0`, `RequiredLevel`
+`0x184`→`+0x610`, `SoundIndex` `0x185`→`+0x614`, `ExactLevel` `0x186`→`+0x618`,
+`FadeType` `0x187`→`+0x61c`, `FadeTime` `0x188`→`+0x620`. Five of those eight are
+read at exactly that byte offset by the recovered gate body, which is what
+establishes the rule and pins the other three — see the 2026-08-21 section of
+`docs/decomp/evidence/cloadlevel_gate_00457ec0.md`, where it also resolves three
+apparent `.rdata` globals in the sound/fade tail into these property reads.
+
 | Offset | Type | Property | Meaning |
 |---:|---|---|---|
 | `0x148` | string | `LevelName` | Target level `.gam` to load (e.g. `level1d.gam`). |
@@ -237,3 +247,29 @@ the Jimmy handoff slots, and drops the original sound/fade request semantics.
 An oracle around the current native path would certify a different design, not
 the recovered body. Returns to native-port: port the recovered `00457ec0`/`00458370`
 semantics 1:1, then write the oracle.
+
+#### 2026-08-21: the port and its oracle landed; the certificate row has not moved
+
+`behavior_load.c` is now a transcription of the `00457ec0` order — Jimmy-only
+contact (satisfied upstream by the engine's trigger dispatch), the
+`RequiredTask` gate with **both** the `RequiredLevel` minimum and the optional
+`ExactLevel` applied and neither applied when the task is `"none"`, a missing
+task falling through rather than blocking, the `RETURN` branch, the
+`LevelName == "none"` refusal, then the portal hide and the level handoff. The
+gate half is covered by `tools/linkage_oracles/CLoadLevel_gate.py`: 5238
+verdicts over all 97 shipped `LOAD` rows at 54 story states, mutation-tested
+against `ExactLevel` precedence, a blocking missing task, and a window applied
+to an ungated row.
+
+Still not ported, and still why this row is not simply `linked`: the
+`SoundIndex`/`FadeType`/`FadeTime` tail (identified but with unrecovered
+callees — `FUN_0047d390`/`FUN_0047dc80`/`FUN_00403c10`), the `DAT_004f0588`
+game-mode switch, the player slots `0x178`/`0x11c`/`0x2c4`, and `ActivateLoad`'s
+own `+0x17a` request-block handoff through global slot `0x100` (native defers
+the swap through `gamestate` instead). The `RETURN` departure pair is ported
+but its *source* is INFERRED from the handoff call shape; the writer of the
+player's `+0x88c`/`+0x8f0` is not recovered.
+
+**The certificate row is deliberately unchanged.** Whether `activate-load` (or
+a narrower `contact-gate` aspect) can now go `linked` is the owner's call, not
+this session's.
