@@ -75,6 +75,14 @@ extern const EntityVTable vt_helmet;          /* 3HEL — C3DHelmet */
 extern const EntityVTable vt_metal_pickup;    /* 3MEP — C3DMetalPickup */
 /* Wave N4 — vehicles. */
 extern const EntityVTable vt_rocket;          /* 3ROC — C3DRocketShip (player-rideable) */
+extern const EntityVTable vt_scooter;         /* 3JEE — C3DJeep, the scooter gadget */
+/* The scooter is never placed in level data: JimmySetupOrReset code-spawns it
+   hidden at Jimmy 0x970 and reveals it on demand. ensure() is that spawn. */
+Entity *behavior_scooter_ensure(World *w);
+Entity *behavior_scooter_get(void);
+int     behavior_scooter_riding(void);
+int     behavior_scooter_activate(void);   /* action-menu selection; toggles */
+void    behavior_scooter_reset(void);
 extern const EntityVTable vt_ai_vehicle;      /* 3SUV/3SBU/3SAI — self-driving C3DAI vehicles */
 /* Wave N5 — scripted cutscene cameras. */
 extern const EntityVTable vt_cutscene_camera; /* 3CAM — C3DCutSceneCamera (shot) */

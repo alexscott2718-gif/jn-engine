@@ -5,6 +5,7 @@
 #include "gamestate.h"
 #include "ui_text.h"
 #include "entity_visual.h"
+#include "behaviors/behaviors.h"
 #include "../engine/renderer.h"
 #include "../engine/input.h"
 #include "../engine/assets/asset_cache.h"
@@ -136,6 +137,12 @@ void gadget_menu_input(void) {
         gamestate_set_active_gadget(g_sel);
         const InventorySlot *s = gamestate_gadget_at(g_sel);
         if (s) printf("[AMI] Activating Item %d ('%s')\n", g_sel, s->tag);
+        /* One gadget is live so far. The original routes a selection through
+           the C2DInGameMenu controller and an AMI id; that mapping is not
+           recovered (see the header), so the selection dispatches by identity
+           until it is. */
+        if (s && strcmp(s->tag, "scooter") == 0)
+            behavior_scooter_activate();
         gadget_menu_close();
     }
 }

@@ -103,7 +103,11 @@ static const GadgetGrant GADGET_GRANTS[] = {
        the menu offers it. */
     { "invisibility", "invisibility", INV_KIND_PART |
                                       INV_KIND_GADGET },          /* level5   114 yokpart   */
-    { "scooterpart",  "scooterpart",  INV_KIND_PART   },          /* level1c  111 wheel     */
+    /* Inference, not evidence: the corpus has no scooter pickup and 3JEE is
+       never placed, so the wheel in level1c is the only thing that could grant
+       it. Both kinds, like invisibility -- it is a quest part you also ride. */
+    { "scooterpart",  "scooter",      INV_KIND_PART |
+                                      INV_KIND_GADGET },          /* level1c  111 wheel     */
     { "sewerpart",    "sewerpart",    INV_KIND_PART   },          /* level1a  134 CompPart  */
     { "foil",         "foil",         INV_KIND_PART   },          /* level1b  183 foil      */
     { "godphone",     "godphone",     INV_KIND_PART   },          /* level1   184 phone     */

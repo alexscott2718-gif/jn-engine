@@ -500,6 +500,21 @@ static void picture_sweep_if_requested(World *world) {
     printf("[PICSWEEP] level=%s done: %d collected in %d pass(es)\n",
            gamestate_level(), total, pass);
 
+    /* JN_TEST_SCOOTER=1: exercise the action-menu selection headlessly --
+       mount, drive one step, dismount -- since the menu itself needs a window. */
+    if (env_enabled("JN_TEST_SCOOTER")) {
+        Entity *sc = behavior_scooter_get();
+        printf("[SCOOTERTEST] spawned=%d visible=%d\n",
+               sc != NULL, sc ? sc->visible : -1);
+        int on = behavior_scooter_activate();
+        printf("[SCOOTERTEST] activate -> riding=%d visible=%d\n",
+               on, sc ? sc->visible : -1);
+        if (sc) entity_update(sc, world, 1.0f / 60.0f);
+        behavior_scooter_activate();
+        printf("[SCOOTERTEST] deactivate -> riding=%d visible=%d\n",
+               behavior_scooter_riding(), sc ? sc->visible : -1);
+    }
+
     /* Both names, so a mismatch between what the designer called a row and
        what the artist drew is visible instead of silent. */
     for (int i = 0; ; i++) {
@@ -1506,6 +1521,9 @@ static void sandbox_reconcile(World *w, Entity *jim) {
 }
 
 static void goddard_reconcile_after_level_load(World *w, const char *level_name) {
+    /* JimmySetupOrReset spawns Goddard at 0x95c and the scooter at 0x970,
+       one after the other, and hides the scooter immediately. Same here. */
+    behavior_scooter_ensure(w);
     Entity *g = behavior_goddard_ensure(w, level_name);
     if (!g || !env_enabled("JN_TEST_GODDARD")) return;
     if (g->visible) {
@@ -2623,6 +2641,7 @@ int main(int argc, char **argv) {
                     behavior_player_reset();
                     behavior_vehicle_reset();
                     behavior_goddard_reset();
+                    behavior_scooter_reset();
                     g_camrec_player = NULL;
                     s_sandbox_prepped_rocket = NULL;
                     world_init(&world);
@@ -2648,6 +2667,7 @@ int main(int argc, char **argv) {
                         }
                         game_flow_enter_level(swap_desc.name);
                         behavior_goddard_reset();
+                        behavior_scooter_reset();
                         goddard_reconcile_after_level_load(&world, swap_desc.name);
                         picture_sweep_if_requested(&world);
                         configure_safety_floor(&world, jim);

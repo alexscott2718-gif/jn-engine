@@ -13,6 +13,7 @@ typedef struct {
 static const EntityTypeInfo entity_types[] = {
     { "3JIM", "Player start position", &vt_player  },
     { "3ROC", "Rocketship (rideable)", &vt_rocket  },
+    { "3JEE", "Scooter (C3DJeep)",      &vt_scooter },
     { "3TRE", "Tree",                  &vt_static  },
     { "LOAD", "Level loader trigger",  &vt_load    },
     { "STRT", "Start marker",          &vt_default },
