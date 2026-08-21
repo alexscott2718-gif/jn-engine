@@ -168,10 +168,19 @@ def selftest() -> int:
             if ok:
                 print(f"SELFTEST FAIL: mutant unexpectedly passed: {name}")
                 return 1
+            # A mutant that does not build was never executed, so nothing was
+            # mutation-tested. Every mutant here reported exactly that for as
+            # long as the dumper failed to link -- see the header note.
+            if msg.startswith("dumper failed to compile"):
+                print(f"SELFTEST FAIL: the {name!r} mutant did not build, so it "
+                      f"was never executed -- a mutation test that cannot run "
+                      f"proves nothing\n{msg}")
+                return 1
             print(f"SELFTEST ok: {name} rejected ({msg.splitlines()[0]})")
             rejected += 1
 
-    print(f"SELFTEST PASS C3DAnimated/runtime-wiring: {rejected} mutants rejected")
+    print(f"SELFTEST PASS C3DAnimated/runtime-wiring: {rejected} mutants rejected "
+          f"(each built and executed)")
     return 0
 
 

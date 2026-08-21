@@ -112,6 +112,17 @@ Entity *world_add(World *w) {
 
 void behavior_ai_idle(Entity *e) { (void)e; }
 
+/* C3DMovingTarget is a different FourCC and a different aspect; the
+   projectile path is linked here only for the HIT/SPLAT dispatch it
+   drives. Returning 0 means no target claims the hit, so the enemy and
+   player reactions below it still run -- which is what this oracle
+   observes. Stubbed after 3TAR bound the moving target and the
+   projectile leaf started calling it. */
+int behavior_moving_target_take_hit(Entity *e, World *w) {
+    (void)e; (void)w;
+    return 0;
+}
+
 BehaviorAIResult behavior_ai_seek_position(Entity *e, float x, float y, float z,
                                            float speed, float arrive_radius,
                                            float dt) {
