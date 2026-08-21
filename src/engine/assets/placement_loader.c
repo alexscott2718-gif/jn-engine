@@ -36,8 +36,16 @@ int placements_load(World *w, const char *path) {
             cap = new_cap;
         }
         WorldPlacement *pl = &w->placements[n++];
-        snprintf(pl->name,     sizeof(pl->name),     "%s", name);
-        snprintf(pl->ase_path, sizeof(pl->ase_path), "%s", ase);
+        /* Same shape as gam_loader's copy: the line buffer is 512 and these
+           fields are 64/160, so copy explicitly rather than through a format
+           the compiler cannot prove fits. A truncated placement name only
+           affects debug output, and a truncated path fails to load loudly on
+           its own, so neither needs the tag-matching warning. */
+        size_t nl = strlen(name), al = strlen(ase);
+        if (nl >= sizeof(pl->name))     nl = sizeof(pl->name) - 1;
+        if (al >= sizeof(pl->ase_path)) al = sizeof(pl->ase_path) - 1;
+        memcpy(pl->name, name, nl);         pl->name[nl] = '\0';
+        memcpy(pl->ase_path, ase, al);      pl->ase_path[al] = '\0';
         pl->x = cx; pl->y = cy; pl->z = cz;
     }
     fclose(f);

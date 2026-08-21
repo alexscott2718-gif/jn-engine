@@ -22,9 +22,42 @@ static int read_f32be(FILE *f, float *out) {
     return 1;
 }
 
-static void copy_string(char *dst, size_t dst_size, const char *src) {
+/* Copy an authored .gam string into a fixed Entity field.
+ *
+ * These fields are 24..64 bytes and a .gam string can be 255, so a copy can
+ * come up short. That is not a memory problem -- it never was -- but a
+ * truncated ObjectTag is a DIFFERENT tag, and NextTrigger, ActivateObject,
+ * PatrolPoint and StartPoint are all resolved by comparing against these
+ * fields. A name too long to fit would silently stop matching and its trigger
+ * would simply never fire, with nothing in the log to say why.
+ *
+ * So truncation gets reported. Once per (field size, name) pair, so a level
+ * full of long names does not bury the message. */
+static void copy_string_named(char *dst, size_t dst_size, const char *src,
+                              const char *field) {
     if (!dst || dst_size == 0 || !src) return;
-    snprintf(dst, dst_size, "%s", src);
+    size_t len = strlen(src);
+    if (len >= dst_size) {
+        static const char *seen[16];
+        static int seen_n = 0;
+        int known = 0;
+        for (int i = 0; i < seen_n; i++)
+            if (seen[i] == field) { known = 1; break; }
+        if (!known) {
+            if (seen_n < 16) seen[seen_n++] = field;
+            fprintf(stderr,
+                    "gam_loader: '%s' truncated to %u chars (authored %u): '%s'\n"
+                    "            tag-matched properties will not resolve this name\n",
+                    field, (unsigned)(dst_size - 1), (unsigned)len, src);
+        }
+        len = dst_size - 1;
+    }
+    memcpy(dst, src, len);
+    dst[len] = '\0';
+}
+
+static void copy_string(char *dst, size_t dst_size, const char *src) {
+    copy_string_named(dst, dst_size, src, "field");
 }
 
 /* Stash an authored float/int property the named-field mapping didn't claim,
@@ -32,7 +65,7 @@ static void copy_string(char *dst, size_t dst_size, const char *src) {
 static void prop_bag_add(Entity *e, const char *name, float f, int i) {
     if (e->nprops >= ENTITY_MAX_PROPS) return;
     GamProp *p = &e->props[e->nprops++];
-    snprintf(p->name, sizeof(p->name), "%s", name);
+    copy_string_named(p->name, sizeof(p->name), name, "prop name");
     p->f = f;
     p->i = i;
 }
@@ -57,8 +90,8 @@ static void str_prop_bag_add(Entity *e, const char *name, const char *val) {
     if (!val[0] || strcasecmp(val, "none") == 0) return;
     if (e->nstrs >= ENTITY_MAX_STRS) return;
     GamStr *s = &e->strs[e->nstrs++];
-    snprintf(s->name, sizeof(s->name), "%s", name);
-    snprintf(s->val, sizeof(s->val), "%s", val);
+    copy_string_named(s->name, sizeof(s->name), name, "string prop name");
+    copy_string_named(s->val,  sizeof(s->val),  val,  "string prop value");
 }
 
 const char *gam_str(const Entity *e, const char *name, const char *def) {
