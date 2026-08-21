@@ -824,6 +824,82 @@ static void configure_safety_floor(World *world, const Entity *jim) {
 
    Returns 0 always: it is a probe, not an assertion. What it prints is the
    evidence -- compare it against the authored .gam rows. */
+/* C3DStartPoint's StartTrigger: the tag a start point names, fired once when
+   the player spawns there.
+
+   Status: the property and its meaning are CONFIRMED -- C3DStartPoint's
+   InitObject registers it and the class doc calls it "Trigger fired once on
+   spawn here" -- but the recovered PlacePlayer body (00442740) does not show
+   the firing, and the spec lists "verify how StartTrigger is fired" as an open
+   question. So the mechanism below is INFERRED, not ported.
+
+   What the corpus says it selects is much stronger than the mechanism. 31 of
+   the 100 shipped STRT rows name something, and 22 of those name a cutscene
+   camera -- 15 a 3MCA sequence, 7 a standalone 3CAM -- with the remaining 9
+   naming a 3AIT. Every VR level's PHONEBOOTH start names one (VR01 "bu", VR02
+   "rs", VR03 "inv", VR04 "sr1", VR05 "scooter", VR06 "remote", VR07 "bb1",
+   VR08 "gr"), and level1e's four start points each name a different one. That
+   is a start point choosing which cutscene plays for the way you came in.
+
+   Native had no such selection: cutscene_request_intro() plays *every*
+   standalone 3CAM the level registered, in registration order, and never
+   touches the 3MCA sequences. This narrows that to what the data authored,
+   inside the same opt-in -- a campaign entry or JN_CUTSCENE, unchanged -- and
+   falls back to the old behavior when a start point names nothing.
+
+   Returns 1 when it fired something. */
+static int start_trigger_fire(World *world) {
+    const char *tag = spawn_start_trigger();
+    if (!tag || !tag[0]) return 0;
+
+    int seq = cutscene_find_sequence_by_tag(tag);
+    if (seq >= 0) {
+        printf("[STARTTRIGGER] '%s' -> 3MCA sequence %d\n", tag, seq);
+        return cutscene_request_index(seq);
+    }
+    int shot = cutscene_find_shot_by_tag(tag);
+    if (shot >= 0) {
+        printf("[STARTTRIGGER] '%s' -> 3CAM shot %d\n", tag, shot);
+        return cutscene_request_shot_index(shot);
+    }
+    /* Anything else goes through the certified by-tag trigger dispatch, which
+       is how the port models "fire this trigger" everywhere else. */
+    Entity *t = behavior_trigger_fire_tag(world, tag, g_player);
+    if (t) {
+        printf("[STARTTRIGGER] '%s' -> fired %s\n", tag, t->type);
+        return 1;
+    }
+    printf("[STARTTRIGGER] '%s' names nothing this level places\n", tag);
+    return 0;
+}
+
+/* JN_TEST_STARTTRIGGER=1: report what this level's spawn would fire, and
+   leave. Resolution only -- it does not fire, so a sweep over all 35 levels
+   stays side-effect free. */
+static int start_trigger_probe(World *world) {
+    const char *tag = spawn_start_trigger();
+    if (!tag || !tag[0]) {
+        printf("[JN_TEST_STARTTRIGGER] %-8s (none)\n", gamestate_level());
+        return 0;
+    }
+    int seq = cutscene_find_sequence_by_tag(tag);
+    if (seq >= 0) {
+        printf("[JN_TEST_STARTTRIGGER] %-8s '%s' -> 3MCA sequence %d\n",
+               gamestate_level(), tag, seq);
+        return 0;
+    }
+    int shot = cutscene_find_shot_by_tag(tag);
+    if (shot >= 0) {
+        printf("[JN_TEST_STARTTRIGGER] %-8s '%s' -> 3CAM shot %d\n",
+               gamestate_level(), tag, shot);
+        return 0;
+    }
+    Entity *t = behavior_trigger_find_by_tag(world, tag);
+    printf("[JN_TEST_STARTTRIGGER] %-8s '%s' -> %s\n", gamestate_level(), tag,
+           t ? t->type : "UNRESOLVED (this level places no such tag)");
+    return 0;
+}
+
 /* JN_TEST_RETURN phase 2 (see the arming site): in the level the menu just
    loaded, fire the first LOAD portal whose LevelName is RETURN and check it
    asks to go back to the level the menu left from.
@@ -2409,8 +2485,12 @@ int main(int argc, char **argv) {
        launch (audit + matched-camera validators) leaves campaign mode OFF and
        JN_CUTSCENE unset, so the camera stays on the follow cam — rendering is
        unchanged from before Wave N5. */
-    if (game_flow_campaign_active() || env_enabled("JN_CUTSCENE"))
-        cutscene_request_intro();
+    if (game_flow_campaign_active() || env_enabled("JN_CUTSCENE")) {
+        /* The start point picks the shot when it names one; otherwise the old
+           play-everything intro. See start_trigger_fire(). */
+        if (!start_trigger_fire(&world))
+            cutscene_request_intro();
+    }
 
     /* CMainMenu front-end: --menu opens the title/level-select over the loaded
        level as a backdrop; the player's choice routes into the level/task
@@ -2457,6 +2537,16 @@ int main(int argc, char **argv) {
     /* Headless collision self-test seam (JN_TEST_COLLIDE=1): exercise the mesh
        CollisionWorld (ground-follow + wall clamp) and exit, mirroring the other
        JN_TEST_* hooks. */
+    if (getenv("JN_TEST_STARTTRIGGER")) {
+        int rc = start_trigger_probe(&world);
+        ground_destroy();
+        fixture_level_destroy();
+        world_destroy(&world);
+        renderer_destroy();
+        window_destroy(&w);
+        return rc;
+    }
+
     /* Headless CLoadLevel portal probe. Seed a departure point first if one
        was asked for, so a VR level's RETURN portals have somewhere to go. */
     if (getenv("JN_TEST_LOAD")) {

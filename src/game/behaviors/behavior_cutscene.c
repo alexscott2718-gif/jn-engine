@@ -53,6 +53,7 @@
 #endif
 
 typedef struct {
+    char  tag[64];           /* the 3CAM's own ObjectTag, for by-tag lookup */
     char  target[24];        /* CameraTarget tag (resolved at play time) */
     char  sound_db[64];      /* SoundDatabase for the shot/step */
     char  face_object[64];   /* FaceObject tag turned toward target */
@@ -349,6 +350,7 @@ static void cam_on_spawn(Entity *e, World *w) {
 
     CutSceneShot *s = prepend_shot();
     if (!s) return;
+    cutscene_copy(s->tag, sizeof(s->tag), e->tag[0] ? e->tag : "3CAM");
     /* CameraTarget is mapped onto activate_target by the .gam loader. */
     cutscene_copy(s->target, sizeof(s->target), e->activate_target);
     cutscene_copy(s->sound_db, sizeof(s->sound_db), e->sound_database);
@@ -559,6 +561,24 @@ void cutscene_request_intro(void) {
     for (int i = 0; i < g_cut.count; i++)
         g_cut.active[i] = g_cut.shots[i];
     cutscene_start_active(-1, "intro");
+}
+
+/* Resolve a .gam ObjectTag to a registered 3MCA sequence or standalone 3CAM
+   shot, or -1. Case-insensitive, like every other tag match in the engine.
+   Used by the C3DStartPoint StartTrigger path in main.c; neither function
+   touches placement, so the certified 3CAM/3MCA math is unaffected. */
+int cutscene_find_sequence_by_tag(const char *tag) {
+    if (!tag || !tag[0]) return -1;
+    for (int i = 0; i < g_cut.seq_count; i++)
+        if (strcasecmp(g_cut.seqs[i].tag, tag) == 0) return i;
+    return -1;
+}
+
+int cutscene_find_shot_by_tag(const char *tag) {
+    if (!tag || !tag[0]) return -1;
+    for (int i = 0; i < g_cut.count; i++)
+        if (strcasecmp(g_cut.shots[i].tag, tag) == 0) return i;
+    return -1;
 }
 
 int cutscene_sequence_count(void) { return g_cut.seq_count; }

@@ -147,6 +147,11 @@ void cutscene_request_intro(void);            /* begin playing the level's shots
 int  cutscene_request_index(int index);       /* play a registered 3MCA sequence */
 int  cutscene_request_shot_index(int index);  /* play one registered standalone 3CAM */
 int  cutscene_sequence_count(void);
+/* Resolve a .gam ObjectTag to a registered 3MCA sequence / 3CAM shot, or -1.
+   The C3DStartPoint StartTrigger path uses these to pick which cutscene a
+   spawn plays. */
+int  cutscene_find_sequence_by_tag(const char *tag);
+int  cutscene_find_shot_by_tag(const char *tag);
 int  cutscene_active(void);
 void cutscene_stop(void);
 void cutscene_update(Camera *cam, World *w, float dt);
