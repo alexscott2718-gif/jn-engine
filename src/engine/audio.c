@@ -12,6 +12,7 @@
 
 static Mix_Chunk *sounds[NUM_SOUNDS];
 static int audio_initialized = 0;
+static int audio_is_muted = 0;
 
 #define AUDIO_CACHE_MAX 128
 typedef struct {
@@ -36,6 +37,19 @@ const char *sound_names[NUM_SOUNDS] = {
     "detect"
 };
 
+void audio_set_muted(int on) {
+    audio_is_muted = on ? 1 : 0;
+    if (!audio_initialized) return;
+    if (audio_is_muted) {
+        Mix_HaltChannel(-1);
+        Mix_HaltMusic();
+    }
+    Mix_Volume(-1, audio_is_muted ? 0 : MIX_MAX_VOLUME);
+    Mix_VolumeMusic(audio_is_muted ? 0 : MIX_MAX_VOLUME);
+}
+
+int audio_muted(void) { return audio_is_muted; }
+
 int audio_init(void) {
     /* Audio is optional - if it fails, continue without it */
     if (SDL_InitSubSystem(SDL_INIT_AUDIO) < 0) {
@@ -48,6 +62,13 @@ int audio_init(void) {
         fprintf(stderr, "Mix_OpenAudio failed: %s (continuing without audio)\n", Mix_GetError());
         audio_initialized = 0;
         return 1;
+    }
+
+    /* main() may have muted us before the device existed; honour it now. */
+    if (audio_is_muted) {
+        Mix_Volume(-1, 0);
+        Mix_VolumeMusic(0);
+        fprintf(stderr, "[audio] muted (internal mute is on)\n");
     }
 
     for (int i = 0; i < NUM_SOUNDS; i++) {
@@ -153,6 +174,7 @@ static int resolve_audio_handle(const char *db, int handle, int allow_single_fal
 }
 
 int audio_play(int sound_id) {
+    if (audio_is_muted) return -1;
     if (!audio_initialized) {
         fprintf(stderr, "Audio not initialized\n");
         return -1;
@@ -180,6 +202,7 @@ int audio_sound_count(void) {
 }
 
 int audio_play_ex(int sound_id, int loops, int gain) {
+    if (audio_is_muted) return -1;
     if (!audio_initialized) return -1;
     if (sound_id < 0 || sound_id >= NUM_SOUNDS || !sounds[sound_id]) return -1;
     if (gain < 0)   gain = 0;
@@ -191,6 +214,7 @@ int audio_play_ex(int sound_id, int loops, int gain) {
 }
 
 int audio_play_db(const char *db, int handle, int loops, int gain) {
+    if (audio_is_muted) return -1;
     if (!audio_initialized) return -1;
     if (handle < 0) return -1;
     if (gain < 0)   gain = 0;
@@ -253,6 +277,7 @@ static int active_music_channel = -1;
 static char active_music_db[96] = "";
 
 int audio_set_music_db(const char *db, int handle) {
+    if (audio_is_muted) return -1;
     if (!audio_initialized) return -1;
     if (handle < 0) handle = 0;
 
@@ -286,6 +311,7 @@ int audio_set_music_db(const char *db, int handle) {
 }
 
 int audio_set_music(int track) {
+    if (audio_is_muted) return -1;
     return audio_set_music_db("sounds.omt", track);
 }
 

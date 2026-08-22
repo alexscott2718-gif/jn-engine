@@ -9,6 +9,7 @@
 #include <string.h>
 
 #include "../engine/renderer.h"
+#include "qa_card.h"
 
 #ifdef __EMSCRIPTEN__
 #include <emscripten.h>
@@ -112,8 +113,16 @@ static void qa_emit_object(const char *ev, unsigned int id,
     /* Native degraded mode (plan M5): no dialog/tag UI exists, so every pick
        lands its identity JSON on the system clipboard, ready to paste into a
        report. Web builds handle clipboard in shell.html instead. */
-    if (strcmp(ev, "pick") == 0)
+    if (strcmp(ev, "pick") == 0) {
         SDL_SetClipboardText(buf);
+        /* ...and open the in-engine card, which is the half M5 left out: the
+           clipboard carries *what* you clicked, the card carries *what is
+           wrong with it*. Web builds skip this -- shell.html owns their UI. */
+        qa_card_open(o->kind == 1 ? "placement" : "entity",
+                     o->name, o->tag, o->asset, level_name ? level_name : "",
+                     o->x, o->y, o->z, o->ax, o->ay, o->az,
+                     cx, cy, cz, yaw);
+    }
 #endif
 }
 

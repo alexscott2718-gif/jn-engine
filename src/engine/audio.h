@@ -2,6 +2,13 @@
 #define AUDIO_H
 
 int  audio_init(void);
+
+/* Internal mute. Independent of the OS mixer: when set, every play/music entry
+   point below returns without queueing anything, so an unattended run (agent,
+   CI, screenshot harness) is silent no matter what the system volume is doing.
+   audio_set_muted(1) also halts whatever is already sounding. */
+void audio_set_muted(int on);
+int  audio_muted(void);
 int  audio_play(int sound_id);
 void audio_stop_all(void);
 void audio_destroy(void);
