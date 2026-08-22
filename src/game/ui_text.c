@@ -19,6 +19,41 @@ int ui_text_glyph_index(char c) {
     if (c >= 'A' && c <= 'Z') return c - 'A';
     if (c >= 'a' && c <= 'z') return 26 + c - 'a';
     if (c >= '0' && c <= '9') return 52 + c - '0';
+    /* Cells 62..90 are punctuation. The atlas always had them; nothing mapped
+       them, so every '-', '.' and ':' in a UI string rendered as a blank of
+       the same advance -- silently turning "-824" into "824" on the QA card's
+       coordinate lines. Order below is the atlas's, verified by rendering the
+       alpha channel cell by cell (docs: the shape is in alpha, the atlas is a
+       mask texture). Cells 91..108 are accented Latin-1 forms, unmapped. */
+    switch (c) {
+    case '(':  return 62;
+    case ')':  return 63;
+    case '.':  return 64;
+    case ';':  return 65;
+    case ',':  return 66;
+    case '!':  return 67;
+    case '?':  return 68;
+    case ':':  return 69;
+    case '{':  return 70;
+    case '}':  return 71;
+    case '+':  return 72;
+    case '-':  return 73;
+    case '=':  return 74;
+    case '[':  return 75;
+    case ']':  return 76;
+    case '#':  return 77;
+    case '@':  return 78;
+    case '$':  return 81;
+    case '"':  return 82;
+    case '/':  return 83;
+    case '>':  return 84;
+    case '<':  return 85;
+    case '\'': return 86;
+    case '&':  return 87;
+    case '%':  return 88;
+    case '*':  return 89;   /* atlas carries a multiplication cross */
+    default:   break;
+    }
     return -1;
 }
 

@@ -20,7 +20,10 @@ void renderer_draw_mask_region_2d(unsigned int tex, int viewport_w, int viewport
 }
 
 int main(void) {
-    const char probes[] = { 'A', 'Z', 'a', 'z', '0', '9', ' ', '@' };
+    /* Boundaries of every mapped run, plus two characters the atlas has
+       no cell for, so both directions of a mapping mistake show up. */
+    const char probes[] = { 'A', 'Z', 'a', 'z', '0', '9', ' ',
+                            '(', '-', '.', ':', '@', '%', '~', '^' };
     for (unsigned int i = 0; i < sizeof(probes); i++)
         printf("G|%d|%d\n", (unsigned char)probes[i], ui_text_glyph_index(probes[i]));
     printf("M|%.3f|%.3f\n", ui_text_measure("New Game", 2.0f),

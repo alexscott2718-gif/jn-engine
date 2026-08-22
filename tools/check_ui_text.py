@@ -45,9 +45,15 @@ def validate(output: str) -> list[str]:
         elif parts[0] == "D":
             draws.append(parts)
 
+    # Cells 62..90 are the atlas's punctuation run; 91..108 are accented
+    # Latin-1 forms this port does not map. ' ' has no glyph by design (it is
+    # an advance, not a mark), and '~'/'^' have no cell at all -- they are the
+    # sentinels proving the map still says no to something.
     expected_glyphs = {
         ord("A"): 0, ord("Z"): 25, ord("a"): 26, ord("z"): 51,
-        ord("0"): 52, ord("9"): 61, ord(" "): -1, ord("@"): -1,
+        ord("0"): 52, ord("9"): 61, ord(" "): -1,
+        ord("("): 62, ord("-"): 73, ord("."): 64, ord(":"): 69,
+        ord("@"): 78, ord("%"): 88, ord("~"): -1, ord("^"): -1,
     }
     if glyphs != expected_glyphs:
         errors.append(f"glyph map {glyphs} != {expected_glyphs}")
@@ -106,7 +112,8 @@ def main() -> int:
                 raise SystemExit("ui_text selftest FAIL: glyph-index mutant survived")
 
     suffix = "; glyph-index mutant rejected" if args.selftest else ""
-    print("ui_text PASS: A-Z/a-z/0-9 mapping, measurement, atlas UVs, and draw layout" + suffix)
+    print("ui_text PASS: A-Z/a-z/0-9 + punctuation mapping, measurement, "
+          "atlas UVs, and draw layout" + suffix)
     return 0
 
 

@@ -43,6 +43,7 @@
 #include "animated_dispatch.h"
 #include "player_anim.h"
 #include "qa.h"
+#include "qa_card.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
@@ -847,7 +848,9 @@ static void configure_safety_floor(World *world, const Entity *jim) {
    inside the same opt-in -- a campaign entry or JN_CUTSCENE, unchanged -- and
    falls back to the old behavior when a start point names nothing.
 
-   Returns 1 when it fired something. */
+   Returns 1 only when it SELECTED A CUTSCENE (3MCA sequence or 3CAM shot) --
+   the caller falls back to the play-everything intro on 0, so a start point
+   whose trigger is a plain 3AIT still gets fired and still gets the intro. */
 static int start_trigger_fire(World *world) {
     const char *tag = spawn_start_trigger();
     if (!tag || !tag[0]) return 0;
@@ -863,11 +866,18 @@ static int start_trigger_fire(World *world) {
         return cutscene_request_shot_index(shot);
     }
     /* Anything else goes through the certified by-tag trigger dispatch, which
-       is how the port models "fire this trigger" everywhere else. */
+       is how the port models "fire this trigger" everywhere else. Firing it is
+       right; *reporting a cutscene* is not. 9 of the 31 naming rows name a
+       3AIT -- a story/AI trigger with no camera of its own -- and level1b's
+       STARTEXP is one of them ('LABEXP'). Returning 1 here made the caller
+       skip cutscene_request_intro(), so New Game lost its 13-shot lab intro
+       the moment this function landed (94de63e). Fire, then report 0 so the
+       fallback intro still plays: only a 3MCA/3CAM above is a real selection. */
     Entity *t = behavior_trigger_fire_tag(world, tag, g_player);
     if (t) {
-        printf("[STARTTRIGGER] '%s' -> fired %s\n", tag, t->type);
-        return 1;
+        printf("[STARTTRIGGER] '%s' -> fired %s (no camera; intro still plays)\n",
+               tag, t->type);
+        return 0;
     }
     printf("[STARTTRIGGER] '%s' names nothing this level places\n", tag);
     return 0;
@@ -1924,6 +1934,7 @@ int main(int argc, char **argv) {
     int want_menu = 0;
     int want_nodamage = 0;
     int want_sandbox = 0;
+    int want_mute = 0;
     int headless = 0;
     long frame_limit = -1;
     unsigned long seed = 0;
@@ -1941,6 +1952,8 @@ int main(int argc, char **argv) {
         } else if (strcmp(argv[i], "--nodamage") == 0 ||
                    strcmp(argv[i], "--invincible") == 0) {
             want_nodamage = 1;
+        } else if (strcmp(argv[i], "--mute") == 0) {
+            want_mute = 1;
         } else if (strcmp(argv[i], "--sandbox") == 0) {
             want_sandbox = 1;
         } else if (strcmp(argv[i], "--headless") == 0) {
@@ -2067,6 +2080,28 @@ int main(int argc, char **argv) {
     renderer_set_alpha_cutout(PHASE4_ALPHA_CUTOUT_ENABLED,
                               PHASE4_ALPHA_CUTOUT_THRESHOLD);
 
+    /* Internal mute, decided before the device opens.
+       An unattended run must not come out of the speakers, and the OS mute is
+       not a backstop we control -- SDL binds the default endpoint once at
+       Mix_OpenAudio and keeps feeding it. So: --mute or JN_MUTE=1 mutes, and
+       any headless/screenshot run (which is what agents and CI drive) mutes
+       itself unless JN_MUTE=0 explicitly asks for sound. `0` toggles it live. */
+    {
+        const char *envmute = getenv("JN_MUTE");
+        int muted = want_mute;
+        if (envmute && envmute[0])
+            muted = (envmute[0] != '0');
+        else if (getenv("JN_SCREENSHOT") || headless)
+            muted = 1;
+        if (muted) {
+            audio_set_muted(1);
+            fprintf(stderr, "[audio] internal mute ON%s\n",
+                    want_mute ? " (--mute)"
+                              : (envmute && envmute[0]) ? " (JN_MUTE)"
+                                                        : " (unattended run)");
+        }
+    }
+
     if (!fixture_mode && !audio_init()) {
         renderer_destroy();
         window_destroy(&w);
@@ -2111,6 +2146,16 @@ int main(int argc, char **argv) {
             SDL_Event ev;
             while (SDL_PollEvent(&ev)) {
                 if (ev.type == SDL_QUIT) w.should_quit = 1;
+            /* The card dialog owns the keyboard while it is up. It has a free
+               text field, and every global letter binding (B toggles QA mode,
+               C the coords overlay, R respawns, 1-4 fire sounds) would
+               otherwise go off mid-sentence -- typing "broken" would toggle
+               QA off on the B. Route and swallow. */
+            if (qa_card_active()) {
+                if (ev.type == SDL_KEYDOWN)   qa_card_key(ev.key.keysym.sym);
+                if (ev.type == SDL_TEXTINPUT) qa_card_text(ev.text.text);
+                continue;
+            }
                 if (ev.type == SDL_KEYDOWN && ev.key.keysym.sym == SDLK_ESCAPE)
                     w.should_quit = 1;
                 if (ev.type == SDL_WINDOWEVENT &&
@@ -2722,6 +2767,8 @@ int main(int argc, char **argv) {
        acceptance check for the annotation feature (docs/qa_annotate_plan.md):
        combine with JN_SCREENSHOT to also capture the selection highlight. */
     int qa_probe_armed = 0, qa_probe_x = 0, qa_probe_y = 0;
+    const char *qa_card_test_msg = getenv("JN_QA_CARD_TEST");
+    if (qa_card_test_msg && !qa_card_test_msg[0]) qa_card_test_msg = NULL;
     {
         const char *probe = getenv("JN_QA_PROBE");
         if (probe && sscanf(probe, "%d,%d", &qa_probe_x, &qa_probe_y) == 2)
@@ -2867,7 +2914,7 @@ int main(int argc, char **argv) {
             }
 
           if (!menu_active() && !level_select_active() &&
-              !gadget_menu_is_open()) {
+              !gadget_menu_is_open() && !qa_card_active()) {
             gamestate_tick(DT);   /* pickup-card decay */
             behavior_gadgets_update(&world, DT);
             s_arrow_clock += DT;  /* ShowArrow spin; once per frame */
@@ -3123,6 +3170,19 @@ int main(int argc, char **argv) {
                     behavior_gadgets_reset();
                     behavior_moving_target_reset();
                         goddard_reconcile_after_level_load(&world, swap_desc.name);
+                        /* Intro cutscene on a swapped-into level -- the same
+                           opt-in and the same call pair as the launch load
+                           above. The menu's New Game route lands HERE, not at
+                           launch, so without this the campaign entry that the
+                           front end actually uses played no cutscene at all
+                           while `--newgame` did. cutscene_reset() + the
+                           entity_bind_vtables() above already re-registered
+                           this level's 3CAM shots, and place_player() has just
+                           recorded the start point's StartTrigger. */
+                        if (game_flow_campaign_active() || env_enabled("JN_CUTSCENE")) {
+                            if (!start_trigger_fire(&world))
+                                cutscene_request_intro();
+                        }
                         picture_sweep_if_requested(&world);
                         configure_safety_floor(&world, jim);
                         asset_cache_purge_stale();
@@ -3220,9 +3280,24 @@ int main(int argc, char **argv) {
                build in Firefox, while letter keys are proven to arrive. */
             if (ev.type == SDL_KEYDOWN && ev.key.keysym.sym == SDLK_b && !ev.key.repeat)
                 qa_toggle();
+            /* X exports the session (markdown + JSON to files and clipboard),
+               Z drops the last card. Gated on QA mode so neither can fire
+               during ordinary play. */
+            if (ev.type == SDL_KEYDOWN && ev.key.keysym.sym == SDLK_x &&
+                !ev.key.repeat && qa_active())
+                qa_card_export();
+            if (ev.type == SDL_KEYDOWN && ev.key.keysym.sym == SDLK_z &&
+                !ev.key.repeat && qa_active())
+                qa_card_undo();
             /* V cycles the record-camera demo: OFF -> FOLLOW -> HOLD. */
             if (ev.type == SDL_KEYDOWN && ev.key.keysym.sym == SDLK_v && !ev.key.repeat)
                 camera_record_cycle_mode();
+            /* 0 = mute toggle. Deliberately not M (level select) and not a
+               function key (F-keys never reached the emscripten build). */
+            if (ev.type == SDL_KEYDOWN && ev.key.keysym.sym == SDLK_0 && !ev.key.repeat) {
+                audio_set_muted(!audio_muted());
+                printf("[audio] mute %s\n", audio_muted() ? "ON" : "OFF");
+            }
             if (ev.type == SDL_KEYDOWN && ev.key.keysym.sym == SDLK_1) audio_play(0);
             if (ev.type == SDL_KEYDOWN && ev.key.keysym.sym == SDLK_2) audio_play(1);
             if (ev.type == SDL_KEYDOWN && ev.key.keysym.sym == SDLK_3) audio_play(2);
@@ -3259,6 +3334,17 @@ int main(int argc, char **argv) {
             qa_probe_armed = 0;
         }
 
+        /* JN_QA_CARD_TEST=<message>: the card half of the same acceptance
+           check. Once the probe's pick has opened a card, type the message,
+           save it, and export -- exercising qa_card_text/save/export end to
+           end. Fires once, and only alongside a probe. */
+        if (qa_card_test_msg && qa_card_active()) {
+            qa_card_text(qa_card_test_msg);
+            qa_card_key(SDLK_RETURN);
+            qa_card_export();
+            qa_card_test_msg = NULL;
+        }
+
         /* Render phase: uncapped */
         Uint32 deterministic_now = frame_limit >= 0
             ? (Uint32)((fixed_steps * 1000UL) / 60UL)
@@ -3288,6 +3374,11 @@ int main(int argc, char **argv) {
         /* QA pick pass: re-enumerate the same scene into the offscreen ID
            buffer and resolve the object under the cursor. Throttled inside
            qa_want_pick; immediate when a click is pending. */
+        /* Cards record where the reporter was standing, not only what was
+           under the cursor -- a fallen-through floor is described by the
+           player's position. Sampled every frame so the pick payload is
+           already current when a click lands. */
+        if (jim) qa_card_note_player(jim->x, jim->y, jim->z);
         if (qa_want_pick(deterministic_now) &&
             renderer_pick_begin(w.width, w.height)) {
             qa_begin_scene(1);
@@ -3306,6 +3397,7 @@ int main(int argc, char **argv) {
         menu_draw(w.width, w.height);
         gadget_menu_draw(w.width, w.height);
         level_select_draw(w.width, w.height);
+        qa_card_draw(w.width, w.height);
         help_draw(w.width, w.height);
 
         /* Live coordinate readout (QA) — player draw-space pos + facing. */

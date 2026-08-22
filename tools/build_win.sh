@@ -98,6 +98,27 @@ a level loads.
   N            noclip               F       use the active tool
   T            talk to a friend     E       ride a vehicle
   H            show/hide controls   Esc     quit
+  0            mute / unmute
+
+REPORTING A BUG (QA CARDS)
+--------------------------
+  B            QA mode on/off. The camera stops following the mouse; the
+               cursor picks objects instead and highlights whatever it is
+               over. You can still walk around.
+  click        opens a QA card for that object: what it is, where it sits,
+               where YOU were standing, and which level.
+  Up/Down      pick a category. COL is the one for a floor or wall you can
+               walk through; the rest cover placement, orientation, scale,
+               animation, texture, missing models and other glitches.
+  type         describe the problem. Enter saves the card, Esc discards it.
+  X            export the session. Writes jn-qa-report.md and
+               jn-qa-report.json next to jnengine.exe AND copies the same
+               text to the clipboard, so you can paste it straight into an
+               email. Email it to scotty@exentt.com.
+  Z            delete the last card.
+
+  Saved cards are listed top-right while QA mode is on. They live in memory
+  for the session -- export before you close the game.
 
 FLAGS
 -----
@@ -105,6 +126,9 @@ FLAGS
   --menu         open the in-game level menu
   --nodamage     hazards and enemies cannot kill you (the picker ticks this
                  on by default; falling out of the world still respawns you)
+  --mute         start with sound off (0 toggles it in-game). Headless and
+                 screenshot runs mute themselves; JN_MUTE=1 / JN_MUTE=0 in the
+                 environment forces either way.
 
 REQUIREMENTS
 ------------
